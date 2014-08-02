@@ -16,11 +16,11 @@ class Page extends PageView {
 
         $content_locator = preg_replace('/\.html$/', '', $_GET['request']) ?: 'index';
 
-// Determine if the user can edit this page.
+        // Determine if the user can edit this page.
         $editable = $user->details['type'] >= 5;
         $template->set('editable', $editable);
 
-// Set the page template.
+        // Set the page template.
         $template->set('content', 'page');
 
         if($editable){
@@ -66,7 +66,7 @@ class Page extends PageView {
         }
 
 
-// LOAD PAGE DETAILS
+        // LOAD PAGE DETAILS
         if($full_page = Database::getInstance()->assoc1("SELECT * FROM pages WHERE url LIKE '{$content_locator}'")){
             header('HTTP/1.0 200 OK');
             if($full_page['last_update'] > 0) {
@@ -79,7 +79,7 @@ class Page extends PageView {
             $template->set('page_blank',true);
         }
 
-// PREPARE FORM DATA CONTENTS
+        // PREPARE FORM DATA CONTENTS
 
         foreach (array('title', 'keywords', 'description') as $meta_data) {
             $full_page[$meta_data] = htmlspecialchars($full_page[$meta_data], ENT_QUOTES);
@@ -93,7 +93,7 @@ class Page extends PageView {
         else
             $full_page['url'] = htmlspecialchars($full_page['url'],ENT_QUOTES);
 
-// FILL IN META INFO WITH DEFAULTS
+        // FILL IN META INFO WITH DEFAULTS
 
         $full_page['body'] = htmlspecialchars_decode($full_page['body']);
 
