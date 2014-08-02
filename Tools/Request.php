@@ -16,6 +16,22 @@ class Request {
     }
 
     /**
+     * Get a parameter from a URL.
+     *
+     * @param string $regex
+     *   The regex expression for the parameter.
+     *
+     * @return mixed
+     *   The sanitized variable.
+     */
+    public static function getFromURL($regex) {
+        $args = func_get_args();
+        preg_match($regex, $_GET['request'], $matches);
+        $args[0] = $matches[1];
+        return call_user_func_array('self::clean', $args);
+    }
+
+    /**
      * Access GET/POST inputs from request.
      *
      * @param $var
