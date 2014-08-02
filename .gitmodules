@@ -10,3 +10,6 @@
 [submodule "Vendor/recaptcha"]
 	path = Vendor/recaptcha
 	url = https://github.com/macdabby/recaptcha-php.git
+[submodule "Vendor/jquery"]
+	path = Vendor/jquery
+	url = https://github.com/jquery/jquery.git
