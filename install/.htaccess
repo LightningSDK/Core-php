@@ -1,0 +1,14 @@
+Options -Indexes
+RewriteEngine on
+
+# EXCLUSIONS
+RewriteRule ^ckeditor/.* - [L]
+RewriteRule ^ckfinder/.* - [L]
+RewriteRule ^css/ - [L]
+RewriteRule ^js/ - [L]
+RewriteRule ^images/ - [L]
+RewriteRule ^(.*)$ index.php?request=$1 [L,QSA]
+
+# ERROR DOC
+
+ErrorDocument 404 /404.html
