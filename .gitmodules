@@ -7,3 +7,6 @@
 [submodule "Vendor/foundation"]
 	path = Vendor/foundation
 	url = https://github.com/zurb/foundation.git
+[submodule "Vendor/recaptcha"]
+	path = Vendor/recaptcha
+	url = https://github.com/macdabby/recaptcha-php.git
