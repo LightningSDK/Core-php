@@ -78,7 +78,7 @@ class Configuration {
      */
     protected static function loadConfiguration() {
         if (empty(self::$configuration)) {
-            include HOME_PATH . '/config/config.inc.php';
+            include CONFIG_PATH . '/config.inc.php';
             self::$configuration = $conf;
         }
     }

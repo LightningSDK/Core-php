@@ -12,7 +12,7 @@ use Lightning\Tools\Configuration;
 class Template extends Singleton {
 
     private $template = 'template.tpl.php';
-    private $template_dir = 'Templates/';
+    private $template_dir;
     private $page;
     private $vars;
 
@@ -20,6 +20,7 @@ class Template extends Singleton {
      * Initialize the template object.
      */
     public function __construct(){
+        $this->template_dir = HOME_PATH . '/Source/Templates/';
 //    if(Configuration::get('user_mobile')){
 //      require_once HOME_PATH . '/include/class_mobile.php';
 //      $detect = new \Mobile_Detect();

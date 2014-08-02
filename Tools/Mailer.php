@@ -2,7 +2,7 @@
 
 namespace Lightning\Tools;
 
-require_once HOME_PATH . '/Lightning/vendor/class.phpmailer.php';
+require_once HOME_PATH . '/Lightning/Vendor/PHPMailer/class.phpmailer.php';
 
 class Mailer {
     protected $mailer;

@@ -7,7 +7,7 @@ class Language extends Singleton {
 
     public function __construct() {
         if (empty(self::$language)) {
-            include_once CONFIG_DIR . '/lang.' . Configuration::get('language') . '.php';
+            include_once CONFIG_PATH . '/lang.' . Configuration::get('language') . '.php';
             self::$language = $language;
         }
     }
