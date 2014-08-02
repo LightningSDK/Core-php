@@ -30,7 +30,9 @@ class Messenger {
      *   The new error.
      */
     public static function error($error) {
-        self::$errors[] = $error;
+        if (!empty($error)) {
+            self::$errors[] = $error;
+        }
     }
 
     /**
@@ -40,7 +42,9 @@ class Messenger {
      *   The new message.
      */
     public static function message($message) {
-        self::$messages[] = $message;
+        if (!empty($message)) {
+            self::$messages[] = $message;
+        }
     }
 
     /**
@@ -61,5 +65,20 @@ class Messenger {
      */
     public static function getMessages() {
         return self::$messages;
+    }
+
+    /**
+     * Load messages and errors from the query string.
+     */
+    public static function loadFromQuery() {
+        $messages = explode(',', Request::query('msg'));
+        $errors = explode(',', Request::query('err'));
+        $lang = Language::getInstance();
+        foreach ($messages as $message) {
+            self::message($lang->translate($message));
+        }
+        foreach ($errors as $error) {
+            self::error($lang->translate($error));
+        }
     }
 }

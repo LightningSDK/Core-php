@@ -56,6 +56,10 @@ if (!defined('HOME_PATH')) {
     define('HOME_PATH', empty($home_path) ? '.' : $home_path);
 }
 
+if (!defined('CONFIG_DIR')) {
+    define('CONFIG_DIR', './config');
+}
+
 //include HOME_PATH.'/include/site_detect.php';
 
 require_once HOME_PATH.'/include/lib.inc.php';

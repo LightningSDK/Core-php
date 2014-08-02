@@ -4,6 +4,7 @@ namespace Lightning\Pages;
 
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
+use Lightning\Tools\Messenger;
 use Lightning\Tools\Request;
 use Lightning\Tools\Template;
 use Lightning\Tools\ClientUser;
