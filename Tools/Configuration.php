@@ -49,6 +49,8 @@ class Configuration {
         $next = array_shift($path);
         if (!empty($content[$next])) {
             $content = $content[$next];
+        } else {
+            return null;
         }
 
         if (!empty($path)) {
