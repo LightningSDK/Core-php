@@ -158,20 +158,11 @@ class Request {
     private static function clean($data, $type = 'text'){
         // Return the value.
         switch($type) {
-            case 'hex':
-                return Scrub::hex($data);
-                break;
             case 'int':
                 return intval($data);
                 break;
             case 'float':
                 return floatval($data);
-                break;
-            case 'email':
-                return Scrub::email($data);
-                break;
-            case 'boolean':
-                return Scrub::boolean($data);
                 break;
             case 'boolean-int':
                 return intval(Scrub::boolean($data));
@@ -191,9 +182,18 @@ class Request {
                 }
                 return $output;
                 break;
+            case 'url':
+            case 'email':
+            case 'boolean':
+            case 'hex':
             case 'html':
-                call_user_func_array('Lightning\Tools\Scrub::html', array_slice(func_get_args(), 1));
-                return Scrub::html($data);
+                $args = func_get_args();
+                // Remove the second item, the type.
+                if (count($args) > 2) {
+                    unset($args[1]);
+                    array_values($args);
+                }
+                return call_user_func_array("Lightning\\Tools\\Scrub::{$type}", $args);
                 break;
             case 'text':
             default:
