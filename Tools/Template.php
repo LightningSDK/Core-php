@@ -81,6 +81,7 @@ class Template extends Singleton {
 
     public function set($name,$var){
         $this->vars[$name] = $var;
+        return $this;
     }
 
     public function copy($object, $vars){
