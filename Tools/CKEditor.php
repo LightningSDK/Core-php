@@ -3,10 +3,11 @@
 namespace Lightning\Tools;
 
 use Lightning\Tools\Singleton;
+use Lightning\View\JS;
 
 class CKEditor extends Singleton {
     public function __construct() {
-
+        JS::add('/js/ckeditor/ckeditor.js');
     }
 
     public static function editableDiv($id, $options) {
