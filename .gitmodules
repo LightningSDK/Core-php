@@ -13,3 +13,12 @@
 [submodule "Vendor/jquery"]
 	path = Vendor/jquery
 	url = https://github.com/jquery/jquery.git
+[submodule "Vendor/compass"]
+	path = Vendor/compass
+	url = https://github.com/Compass/compass
+[submodule "Vendor/ckeditor"]
+	path = Vendor/ckeditor
+	url = https://github.com/ckeditor/ckeditor-releases.git
+[submodule "Vendor/ckfinder"]
+	path = Vendor/ckfinder
+	url = https://github.com/jonlil/ckfinder.git
