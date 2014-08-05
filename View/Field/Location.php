@@ -2,9 +2,53 @@
 
 namespace Lightning\View\Field;
 
+use Lightning\Tools\Database;
 use Lightning\View\Field;
 
 class Location {
+    /**
+     * Create a query condition that will select all zipcodes within a distance of another zip code.
+     *
+     * @param string $zip
+     *   A US zip code.
+     * @param $distance
+     *   The distance to search in miles.
+     *
+     * @return string
+     *   The query condition.
+     */
+    public static function zipQuery($zip, $distance) {
+        if($start = Database::getInstance()->assoc1("select * from zipcode where zip = '$zip'")){
+
+            $lat1 = $start['lat'];
+            $lon1 = $start['long'];
+            //earth's radius in miles
+            $r = 3959;
+
+            //compute max and min latitudes / longitudes for search square
+            $latN = rad2deg(asin(sin(deg2rad($lat1)) * cos($distance / $r) + cos(deg2rad($lat1)) * sin($distance / $r) * cos(deg2rad(0))));
+            $latS = rad2deg(asin(sin(deg2rad($lat1)) * cos($distance / $r) + cos(deg2rad($lat1)) * sin($distance / $r) * cos(deg2rad(180))));
+            $lonE = rad2deg(deg2rad($lon1) + atan2(sin(deg2rad(90)) * sin($distance / $r) * cos(deg2rad($lat1)), cos($distance / $r) - sin(deg2rad($lat1)) * sin(deg2rad($latN))));
+            $lonW = rad2deg(deg2rad($lon1) + atan2(sin(deg2rad(270)) * sin($distance / $r) * cos(deg2rad($lat1)), cos($distance / $r) - sin(deg2rad($lat1)) * sin(deg2rad($latN))));
+
+            return "(lat <= $latN AND lat >= $latS AND `long` <= $lonE AND `long` >= $lonW)";
+        }
+        return "";
+    }
+
+    /**
+     * Create a popup select field for US states.
+     *
+     * @param string $name
+     *   The field name.
+     * @param string $default
+     *   The default selection.
+     * @param string $extra
+     *   Extra parameter data.
+     *
+     * @return string
+     *   The full HTML.
+     */
     public static function statePop($name, $default = '', $extra = '') {
         $output = '<select name="' . $name . '" id="' . $name . '" ' . $extra . '>';
         $output .= '<option value=""></option>';
@@ -34,7 +78,20 @@ class Location {
         return $output;
     }
 
-    public static function countryPop($id, $extra="", $default=""){
+    /**
+     * Create a country selection popup.
+     *
+     * @param string $id
+     *   The name of the field.
+     * @param string $extra
+     *   Extra parameters for the HTML.
+     * @param string $default
+     *   The default selection.
+     *
+     * @return string
+     *   The full HTML code.
+     */
+    public static function countryPop($id, $extra="", $default="US"){
         $list = array(
             "US"=>"United States","CA"=>"Canada","UK"=>"United Kingdom","AC"=>"Ascension Island",
             "AF"=>"Afghanistan","AL"=>"Albania","DZ"=>"Algeria","AD"=>"Andorra","AO"=>"Angola",
@@ -95,14 +152,15 @@ class Location {
             "WF"=>"Wallis And Futuna Islands","EH"=>"Western Sahara","YE"=>"Yemen",
             "YU"=>"Yugoslavia","ZR"=>"Zaire","ZM"=>"Zambia","ZW"=>"Zimbabwe"
         );
-        echo "<select name='{$id}' id='{$id}' {$extra}>";
-        echo "<option value=''></option>";
+        $output = "<select name='{$id}' id='{$id}' {$extra}>";
+        $output .= "<option value=''></option>";
         foreach($list as $key=>$value){
-            echo "<option value='$key'";
+            $output .= "<option value='$key'";
             if($key == $default)
-                echo " selected='selected' ";
-            echo ">$value</option>";
+                $output .= " selected='selected' ";
+            $output .= ">$value</option>";
         }
-        echo "</select>";
+        $output .= "</select>";
+        return $output;
     }
 }
