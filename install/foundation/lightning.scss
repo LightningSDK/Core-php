@@ -1,0 +1,13 @@
+.messenger {
+  border: 1px solid;
+  color: black;
+  padding: 15px 30px;
+  .error {
+    border-color: red;
+    background-color: #fcc;
+  }
+  .message {
+    border-color: green;
+    background-color: #cfc;
+  }
+}
