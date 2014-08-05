@@ -12,7 +12,16 @@ class Language extends Singleton {
         }
     }
 
-    public function translate($string) {
-        return self::$language[$string];
+    /**
+     * Translate a string from it's key to it's value.
+     *
+     * @param string $key
+     *   The name of the string.
+     *
+     * @return string
+     *   The translated value.
+     */
+    public function translate($key) {
+        return !empty(self::$language[$key]) ? self::$language[$key] : '';
     }
 }
