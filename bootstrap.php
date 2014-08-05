@@ -32,7 +32,7 @@ function classAutoloader($classname) {
         if (isset($overrides[$classname])) {
             return;
         }
-        if (in_array($classname, $overridable)) {
+        if (isset($overridable[$classname])) {
             $class_file = str_replace('Overridable\\', '', $classname);
             loadClassFile($class_file);
             class_alias($classname, $class_file);
@@ -56,39 +56,18 @@ if (!defined('HOME_PATH')) {
     define('HOME_PATH', empty($home_path) ? '.' : $home_path);
 }
 
-if (!defined('CONFIG_DIR')) {
-    define('CONFIG_DIR', './config');
+if (!defined('CONFIG_PATH')) {
+    define('CONFIG_PATH', './Source/config');
 }
-
-//include HOME_PATH.'/include/site_detect.php';
-
-require_once HOME_PATH.'/include/lib.inc.php';
-require_once HOME_PATH.'/include/lib2.inc.php';
-//require_once HOME_PATH.'/include/class.phpmailer.php';
-//require_once HOME_PATH.'/include/class_aa.php';
-
 
 // Detect which server was requested
-$server = '';
-global $site_id;
-$site_id = 0;
-if ($_SERVER['HTTP_HOST']) {
-    // HTTP host was sent by the requestor
-    $server = $_SERVER['HTTP_HOST'];
-} elseif ($_SERVER['SERVER_NAME']) {
-    // SERVER_NAME is known to the host
-    $server = $_SERVER['SERVER_NAME'];
-}
-
 $user = ClientUser::getInstance();
 
+// TODO: This should be moved.
 if($user->details['type'] >= 5){
     Database::getInstance()->verbose();
     error_reporting(E_ALL ^ E_NOTICE);
-    require_once HOME_PATH.'/include/debugging.php';
-}
 
-if($user->details['type'] >= 5){
     $cms->editable = true;
 
     // BLOG WARNING MESSAGE
