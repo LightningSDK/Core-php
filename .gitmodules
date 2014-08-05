@@ -1,6 +1,6 @@
 [submodule "Vendor/htmlpurifier"]
 	path = Vendor/htmlpurifier
-	url = git://repo.or.cz/htmlpurifier.git
+	url = https://github.com/ezyang/htmlpurifier.git
 [submodule "Vendor/PHPMailer"]
 	path = Vendor/PHPMailer
 	url = https://github.com/PHPMailer/PHPMailer.git
