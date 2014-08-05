@@ -51,8 +51,8 @@ class Page {
         $request_type = strtolower(Request::type());
 
         if ($action) {
-            if (in_array($request_type.$action, get_class_methods($this))) {
-                $this->{$request_type.$action}();
+            if (in_array($request_type . $action, get_class_methods($this))) {
+                $this->{$request_type . $action}();
                 $this->output();
             }
             else {
