@@ -1,6 +1,6 @@
 <?php
 
-namespace Overridable\Lightning\Pages;
+namespace Lightning\Pages;
 
 use Lightning\View\Page;
 
