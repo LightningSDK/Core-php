@@ -472,15 +472,22 @@ class Database extends Singleton {
     /**
      * Run a select query and return a result object.
      */
-    function select($table, $where = array(), $fields = array(), $final = ''){
+    public function select($table, $where = array(), $fields = array(), $final = ''){
         $this->_select($table, $where, $fields, null, $final);
         return $this->result;
     }
 
     /**
+     * Run a select query and return a result array.
+     */
+    public function selectAll($table, $where = array(), $fields = array(), $final = '') {
+        return $this->select($table, $where, $fields, $final)->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
      * Run a select query and return the rows indexed by a key.
      */
-    function selectIndexed($table, $key, $where = array(), $fields = array()) {
+    public function selectIndexed($table, $key, $where = array(), $fields = array()) {
         $this->_select($table, $where, $fields);
         $results = array();
         while ($row = $this->result->fetch(PDO::FETCH_ASSOC)) {
