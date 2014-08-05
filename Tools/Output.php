@@ -18,7 +18,7 @@ class Output {
      * @param array $data
      *   The data to output as JSON.
      */
-    public function json($data) {
+    public static function json($data) {
         header('Content-type: application/json');
         echo json_encode($data);
         exit;
