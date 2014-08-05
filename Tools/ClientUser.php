@@ -15,7 +15,7 @@ class ClientUser extends Singleton {
     /**
      * Create the default logged in user.
      */
-    public function createInstance() {
+    public static function createInstance() {
         return new User();
     }
 }

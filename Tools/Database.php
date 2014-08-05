@@ -111,7 +111,7 @@ class Database extends Singleton {
         }
     }
 
-    public function createInstance() {
+    public static function createInstance() {
         return new self(Configuration::get('database'));
     }
 
