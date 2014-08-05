@@ -18,22 +18,23 @@ class Blog extends Singleton {
     var $post_count;
 
     function body($body, $force_short = false){
-        if($this->shorten_body || $force_short)
+        if ($this->shorten_body || $force_short) {
             return $this->short_body($body);
-        else
+        } else {
             return $body;
+        }
     }
 
     function short_body($body, $length = 250){
         $body = strip_tags($body);
-        if(strlen($body) <= $length) return $body;
+        if (strlen($body) <= $length) return $body;
 
         $last_dot = strpos($body,". ",$length*.8);
-        if($last_dot >= 1 && $last_dot <= $length *1.2 )//go to the end of the sentence if it's less than 10% longer
+        if ($last_dot >= 1 && $last_dot <= $length *1.2 )//go to the end of the sentence if it's less than 10% longer
             return substr($body,0,$last_dot+1);
 
         $last_white = strpos($body, " ", $length);
-        if($last_white >= $length)
+        if ($last_white >= $length)
             return substr($body,0,$last_white)."...";
 
         return $body;
@@ -123,7 +124,6 @@ class Blog extends Singleton {
     }
 
     function categories_list(){
-
         $c = Database::getInstance()->assoc("SELECT COUNT(*) as count, category FROM blog_categories LEFT JOIN categories USING (cat_id) GROUP BY cat_id LIMIT 10");
         if(count($c) > 0){
             echo "<ul>";
@@ -134,38 +134,57 @@ class Blog extends Singleton {
     }
 
     function get_recent($count){
-
         $this->list = Database::getInstance()->assoc();
     }
 
-    static function get_post_url(){
-        return blog::create_url($_POST['title']);
-    }
-
+    /**
+     * Load a blog by it's URL.
+     *
+     * @param string $url
+     *   The blogs url.
+     *
+     * @return int
+     *   The blog ID.
+     */
     function fetch_blog_url($url){
         Database::getInstance();
-        $this->posts = Database::getInstance()->assoc("SELECT * FROM blog WHERE url = '{$url}'");
+        $this->posts = Database::getInstance()->selectAll('blog', array('url' => $url));
         if($this->posts){
             $this->id = $this->posts[0]['blog_id'];
-            if(!$this->show_unapproved_comments)
-                $approved = " AND approved = 1";
-            $this->posts[0]['comments'] = Database::getInstance()->assoc("SELECT * FROM blog_comment WHERE blog_id = {$this->id} {$approved}");
-        }
-        else
+            $this->loadComments();
+        } else {
             $this->id = 0;
+        }
         return $this->id;
     }
 
+    /**
+     * Load a blog by it's ID.
+     *
+     * @param int $id
+     *   The blog ID.
+     *
+     * @return int
+     *   The blog ID.
+     */
     function fetch_blog_id($id){
-
-        $this->posts = Database::getInstance()->assoc("SELECT * FROM blog WHERE blog_id = '{$id}'");
+        $this->posts = Database::getInstance()->selectAll('blog', array('blog_id' => $id));
         if($this->posts){
             $this->id = $this->posts[0]['blog_id'];
-            if(!$this->show_unapproved_comments)
-                $approved = " AND approved = 1";
-            $this->posts[0]['comments'] = Database::getInstance()->assoc("SELECT * FROM blog_comment WHERE blog_id = {$this->id} {$approved}");
-        }else
+            $this->loadComments();
+        } else {
             $this->id = 0;
-        return $this->id;
+        }
+    }
+
+    /**
+     * Load the current blog's comments.
+     */
+    protected function loadComments() {
+        $conditions = array('blog_id' => $this->id);
+        if(!$this->show_unapproved_comments) {
+            $conditions['approved'] = 1;
+        }
+        $this->posts[0]['comments'] = Database::getInstance()->selectAll('blog_comment', $conditions);
     }
 }
