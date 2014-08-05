@@ -11,10 +11,9 @@ git submodule add git@github.com:macdabby/lightning.git Lightning
 
 # Download the dependencies
 cd Lightning
-git submodule update --init
 
 # Run the main install script.
-php -f install.php
+install.sh
 
 # Install the base template package - This can be done to reset the site at any time.
 php -f install-templates.php
