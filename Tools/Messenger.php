@@ -71,14 +71,21 @@ class Messenger {
      * Load messages and errors from the query string.
      */
     public static function loadFromQuery() {
-        $messages = explode(',', Request::query('msg'));
-        $errors = explode(',', Request::query('err'));
-        $lang = Language::getInstance();
-        foreach ($messages as $message) {
-            self::message($lang->translate($message));
+        $messages = Request::query('msg');
+        $errors = Request::query('err');
+        if (!empty($messages)) {
+            $lang = Language::getInstance();
+            $messages = explode(',', $messages);
+            foreach ($messages as $message) {
+                self::message($lang->translate($message));
+            }
         }
-        foreach ($errors as $error) {
-            self::error($lang->translate($error));
+        if (!empty($errors)) {
+            $lang = Language::getInstance();
+            $errors = explode(',', $errors);
+            foreach ($errors as $error) {
+                self::error($lang->translate($error));
+            }
         }
     }
 }
