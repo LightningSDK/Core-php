@@ -1,24 +1,72 @@
 <?php
+/**
+ * @file
+ * Contains a wrapper for the CK Editor
+ */
 
 namespace Lightning\Tools;
 
 use Lightning\Tools\Singleton;
 use Lightning\View\JS;
 
+/**
+ * Class CKEditor
+ * @package Lightning\Tools
+ */
 class CKEditor extends Singleton {
+    /**
+     * Add the required JS to the page.
+     */
     public function __construct() {
         JS::add('/js/ckeditor/ckeditor.js');
     }
 
+    /**
+     * @return CKEditor
+     */
+    public static function getInstance() {
+        return parent::getInstance();
+    }
+
+    /**
+     * Create an editable div.
+     * The field should already be present on the page... Or should ther
+     *
+     * @param string $id
+     *   The field name / id.
+     * @param array $options
+     *   A list of options.
+     *
+     * @return string
+     *   The output HTML.
+     */
     public static function editableDiv($id, $options) {
         if (empty($options['content'])) {
             $options['content'] = '<p></p>';
         }
-        $spellcheck = !empty($options) ? 'spellcheck="true"' : '';
+        $spellcheck = !empty($options['spellcheck']) ? 'spellcheck="true"' : '';
         $output = '<div id="' .$id . '" ' . $spellcheck . '>';
         $output .= $options['content'];
         $output .= '</div>';
 
         return $output;
+    }
+
+    /**
+     * Build a CK editor in an iframe.
+     *
+     * @param string $id
+     *   The field name / id.
+     * @param string $value
+     *   The preset value.
+     * @param array $options
+     *   A list of options.
+     *
+     * @return string
+     *   The output HTML.
+     */
+    public static function iframe($id, $value, $options = array()) {
+        JS::startup('CKEDITOR.replace("' . $id . '", ' . json_encode($options) . ');');
+        return '<textarea name="' . $id . '" id="' . $id . '">' . Scrub::toHTML($value) . '</textarea>';
     }
 }
