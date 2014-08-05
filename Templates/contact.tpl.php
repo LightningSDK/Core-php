@@ -47,6 +47,6 @@
         <textarea name="message" cols="70" rows="20"><?=$postedmessage?></textarea><br />
         <?=\Lightning\Tools\ReCaptcha::render()?>
         <br />
-        <input type="Submit" name="Submit" value="Send Message" />
+        <input type="Submit" name="Submit" value="Send Message" class="button" />
     </form>
 <? endif; ?>
