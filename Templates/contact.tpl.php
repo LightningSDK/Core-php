@@ -10,7 +10,7 @@
         });
     </script>
 
-    <form action="contact.php<? if ($to_user_id > 0): ?>?to_user_id=<?=$to_user_id?><? endif; ?>" method="post" id="contact_form">
+    <form action="/contact<? if ($to_user_id > 0): ?>?to_user_id=<?=$to_user_id?><? endif; ?>" method="post" id="contact_form">
 
         <? if ( $to_user_id > 0): ?>
             Contact: <?=$aa->print_name($to_user['user_first'], $to_user['user_last'], $to_user['user_preferences'])?><br />
@@ -28,7 +28,7 @@
 
             <input type="hidden" name="to_user_id" value="0" />
         <? endif; ?>
-        <input type="hidden" name="action" value="send_message" />
+        <input type="hidden" name="action" value="sendMessage" />
 
         <? if ( $to_user_id > 0):?>
 
