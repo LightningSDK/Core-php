@@ -6,7 +6,7 @@ use Lightning\Tools\Router;
 
 require 'Lightning/bootstrap.php';
 
-if (!empty($_SERVER['TERM'])) {
+if (!empty($_SERVER['TERM']) || !empty($_SERVER['SHELL'])) {
     // Handle a command line request.
     $handler = Router::getInstance()->getRoute($argv[1]);
 } else {
