@@ -11,4 +11,4 @@ else
   REQUEST=$1
 fi
 
-php -f $FILE $DEBUG $REQUEST
+php -qf $FILE $DEBUG $REQUEST
