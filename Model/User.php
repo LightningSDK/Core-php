@@ -5,6 +5,8 @@ namespace Lightning\Model;
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Database;
 use Lightning\Tools\Request;
+use Lightning\Tools\Scrub;
+use Lightning\View\Field\Time;
 
 class User{
 
@@ -174,13 +176,44 @@ class User{
             return true;
         } else {
             // EMAIL IS NOT IN MAILING LIST AT ALL
-            $user_id = $this->insert_user($email, $pass);
+            $user_id = $this->insertUser($email, $pass);
             if(intval($_COOKIE['ref']) > 0)
                 $ref = ", referer = {$_COOKIE['ref']}";
             Database::getInstance()->query("UPDATE user SET confirmed = ".rand(100000,9999999).", type=1 {$ref} WHERE user_id={$user_id}");//office_id={$office_id},
             $this->send_confirmation_email($email);
             return true;
         }
+    }
+
+    /**
+     * Make sure that a user's email is listed in the database.
+     *
+     * @param string $email
+     *   The user's email.
+     * @param array $options
+     *   Additional values to insert.
+     * @param array $update
+     *   Which values to update the user if the email already exists.
+     *
+     * @return mixed
+     */
+    public static function getInsertEmailID($email, $options = array(), $update = array()){
+        // TODO: integrate with class_user
+        $user_data = array();
+        $user_data['email'] = strtolower($email);
+        if ($user = Database::getInstance()->selectRow('user', $user_data)){
+            if($update) {
+                if (!isset($update['list_date'])) {
+                    $update['list_date'] = time();
+                }
+                Database::getInstance()->update('user', $user_data, $update);
+            }
+            $user_id = $user['user_id'];
+        } else {
+            $user_data['list_date'] = time();
+            $user_id = Database::getInstance()->insert('user', $options + $user_data);
+        }
+        return $user_id;
     }
 
     function random_pass(){
@@ -202,11 +235,32 @@ class User{
         return $pass;
     }
 
-    function insert_user($email,$pass, $first_name='', $last_name=''){
-        $salt = $this->get_salt();
-        return Database::getInstance()->exec_id("INSERT INTO user SET email = '".strtolower($email)."', password = '".$this->pass_hash($pass,$salt)."', salt='".bin2hex($salt)."',  user_first = '{$first_name}', user_last = '{$last_name}'");//office_id={$office_id},
-        ///, join_date = {$today}, confirmed = ".rand(100000,9999999).", type=1 $ref
-
+    /**
+     * Insert a new user if he doesn't already exist.
+     *
+     * @param $email
+     * @param $pass
+     * @param string $first_name
+     * @param string $last_name
+     * @return mixed
+     */
+    function insertUser($email, $pass = NULL, $first_name = '', $last_name = ''){
+        $user_details = array(
+            'email' => Scrub::email(strtolower($email)),
+            'user_first' => $first_name,
+            'user_last' => $last_name,
+            'join_date' => Time::today(),
+            'confirmed' => rand(100000,9999999),
+            'type' => 0,
+            // TODO: Need to get the referer id.
+            'ref' => 0,
+        );
+        if ($pass) {
+            $salt = $this->get_salt();
+            $user_details['password'] = $this->pass_hash($pass, $salt);
+            $user_details['salt'] = bin2hex($salt);
+        }
+        return Database::getInstance()->insert('user', $user_details);
     }
 
     function set_pass($pass,$email='',$user_id=0){
@@ -240,7 +294,7 @@ class User{
             // user does not exist
             // create user with random password, send email to activate
             $random_pass = $this->random_pass();
-            $user_id = $this->insert_user($email, $random_pass, $first_name, $last_name);
+            $user_id = $this->insertUser($email, $random_pass, $first_name, $last_name);
             send_mail($email, '', "New Account", "Your account has been created with a temporary password. Your temporary password is: {$random_pass}\n\nTo reset your password, log in with your temporary password and click 'my profile'. Follow the instructions to reset your new password.");
             Database::getInstance()->query("UPDATE user SET join_date = {$today}, confirmed = ".rand(100000,9999999).", type=1 WHERE user_id = {$user_id}");
             return $user_id;
