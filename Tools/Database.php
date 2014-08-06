@@ -17,7 +17,7 @@ class Database extends Singleton {
     /**
      * Determines if queries and errors should be collected and output.
      *
-     * @var bool
+     * @var boolean
      */
     private $verbose = false;
 
@@ -38,47 +38,57 @@ class Database extends Singleton {
     /**
      * The timer start time.
      *
-     * @var
+     * @var float
      */
     private $start;
 
     /**
      * The mysql execution end time.
      *
-     * @var
+     * @var float
      */
     private $end1;
 
     /**
      * The php execution end time.
      *
-     * @var
+     * @var float
      */
     private $end2;
 
     /**
      * The total number of queries executed.
      *
-     * @var int
+     * @var integer
      */
     private $query_count = 0;
 
     /**
      * The total time to execute mysql queries.
      *
-     * @var int
+     * @var integer
      */
     private $mysql_time = 0;
 
     /**
      * The total time to execute the php post processing of mysql queries data.
      *
-     * @var int
+     * @var integer
      */
     private $php_time = 0;
 
+    /**
+     * Whether this is in read only mode.
+     *
+     * @var boolean
+     */
     private $read_only = FALSE;
 
+    /**
+     * Whether the current connection is in the transaction state.
+     *
+     * @var boolean
+     */
     private $in_transaction = FALSE;
 
 
@@ -111,14 +121,35 @@ class Database extends Singleton {
         }
     }
 
+    /**
+     * Create a database instance with the default database.
+     *
+     * @return Database
+     *   The database object.
+     */
     public static function createInstance() {
         return new self(Configuration::get('database'));
     }
 
+    /**
+     * Set the controller to only execute select queries.
+     *
+     * @param boolean $value
+     *   Whether read_only should be on or off.
+     *
+     * @notice
+     *   This has no effect on direct query functions like query() and assoc()
+     */
     function read_only($value = TRUE){
         $this->read_only = $value;
     }
 
+    /**
+     * Whether to enable verbose messages in output.
+     *
+     * @param boolean $value
+     *   Whether to switch to verbose mode.
+     */
     function verbose($value = TRUE){
         $this->verbose = $value;
     }
@@ -139,6 +170,9 @@ class Database extends Singleton {
      *   The PDO error.
      * @param string $sql
      *   The original query.
+     *
+     * @throws Exception
+     *   When a mysql error occurs.
      */
     function error_handler($error, $sql){
         $errors = array();
