@@ -6,11 +6,17 @@ use Lightning\Tools\Router;
 
 require 'Lightning/bootstrap.php';
 
-$handler = Router::getInstance()->getRoute($_GET['request']);
+if (!empty($_SERVER['TERM'])) {
+    // Handle a command line request.
+    $handler = Router::getInstance()->getRoute($argv[1]);
+} else {
+    // Handle a web page request.
+    $handler = Router::getInstance()->getRoute($_GET['request']);
+}
 
 if (empty($handler)) {
     // TODO: show 404;
-    echo 'No handler found.';
+    echo "No handler found.\n";
     exit;
 }
 
