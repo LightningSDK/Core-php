@@ -25,3 +25,6 @@
 [submodule "Vendor/plancakeEmailParser"]
 	path = Vendor/plancakeEmailParser
 	url = https://github.com/macdabby/official-library-php-email-parser.git
+[submodule "Vendor/chartjs"]
+	path = Vendor/chartjs
+	url = https://github.com/nnnick/Chart.js.git
