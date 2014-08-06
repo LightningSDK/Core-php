@@ -21,7 +21,7 @@ abstract class IncomingMail {
     }
 
     public function getFrom() {
-        return $this->email->getTo();
+        return $this->email->getFrom();
     }
 
     public function getSubject() {
