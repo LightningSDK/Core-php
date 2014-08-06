@@ -168,9 +168,9 @@ class Database extends Singleton {
             throw new Exception("***** MYSQL ERROR *****");
         } else {
             foreach ($errors as $e) {
-                Logger::log($e);
+                Logger::error($e);
             }
-            Logger::log($sql);
+            Logger::error($sql);
         }
         exit;
     }
