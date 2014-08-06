@@ -24,4 +24,4 @@
 	url = https://github.com/jonlil/ckfinder.git
 [submodule "Vendor/plancakeEmailParser"]
 	path = Vendor/plancakeEmailParser
-	url = https://github.com/plancake/official-library-php-email-parser.git
+	url = https://github.com/macdabby/official-library-php-email-parser.git
