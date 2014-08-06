@@ -6,6 +6,10 @@ use Lightning\Tools\Request;
 use Lightning\View\Field;
 
 class Time extends Field {
+    public static function today() {
+        return gregoriantojd(date('m'), date('d'), date('Y'));
+    }
+
     public static function getDate($id, $allow_blank = true) {
         $m = Request::get($id ."_m");
         $d = Request::get($id ."_d");
