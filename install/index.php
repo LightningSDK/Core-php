@@ -4,6 +4,15 @@ use Lightning\Tools\Messenger;
 use Lightning\Tools\Request;
 use Lightning\Tools\Router;
 
+// Set required global parameters.
+if (!defined('HOME_PATH')) {
+    define('HOME_PATH', empty($home_path) ? __DIR__ : $home_path);
+}
+
+if (!defined('CONFIG_PATH')) {
+    define('CONFIG_PATH', HOME_PATH . '/Source/config');
+}
+
 require 'Lightning/bootstrap.php';
 
 if (!empty($_SERVER['TERM']) || !empty($_SERVER['SHELL'])) {

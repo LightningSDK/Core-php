@@ -51,15 +51,6 @@ spl_autoload_register('classAutoloader');
 
 // REMOVE ALL THIS JUNK
 
-// Define the home path.
-if (!defined('HOME_PATH')) {
-    define('HOME_PATH', empty($home_path) ? __DIR__ : $home_path);
-}
-
-if (!defined('CONFIG_PATH')) {
-    define('CONFIG_PATH', HOME_PATH . '/Source/config');
-}
-
 // Detect which server was requested
 $user = ClientUser::getInstance();
 
