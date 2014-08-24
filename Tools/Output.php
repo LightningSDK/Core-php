@@ -13,14 +13,46 @@ namespace Lightning\Tools;
  */
 class Output {
     /**
+     * The default output for access denied errors.
+     */
+    const ACCESS_DENIED = 1;
+
+    /**
+     * The default output for successful executions.
+     */
+    const SUCCESS = 2;
+
+    /**
      * Output data as json and end the request.
      *
-     * @param array $data
+     * @param array|integer $data
      *   The data to output as JSON.
      */
     public static function json($data) {
+        // Predefined outputs.
+        if ($data == self::ACCESS_DENIED) {
+            $data = array('status' => 'access_denied');
+        }
+        elseif ($data == self::SUCCESS) {
+            $data = array('status' => 'success');
+        }
+
+        // Add errors and messages.
+        $data['errors'] = Messenger::getErrors();
+        $data['messages'] = Messenger::getErrors();
+
+        // Output the data.
         header('Content-type: application/json');
         echo json_encode($data);
+
+        // Terminate the script.
+        exit;
+    }
+
+    /**
+     * Load and render the access denied page.
+     */
+    public static function accessDenied() {
         exit;
     }
 }
