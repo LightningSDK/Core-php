@@ -527,14 +527,25 @@ function tree_node_string(name,id){
 }
 
 function tree_node_header(data){
-    buttons = '';
-    buttons+=data.actions_before;
+    var buttons = '';
+    buttons += data.actions_before;
     if(data.upload==true)
-        buttons+="<img src='/images/app/send_doc.png' title='Upload' onclick='tree_upload(this);' /> ";
+        buttons += "<img src='/images/app/send_doc.png' title='Upload' onclick='tree_upload(this);' /> ";
     if(data.add==true)
-        buttons+="<img src='/images/app/new2.png' title='New Folder' onclick='tree_add(this);' /> ";
-    if(data.edit==true)
-        buttons+="<img src='/images/app/pencil.png' title='Rename' onclick='tree_rename(this);' /> <img src='/images/app/remove2.png' title='Remove' onclick='tree_delete(this);' />";
+        buttons += "<img src='/images/app/new2.png' title='New Folder' onclick='tree_add(this);' /> ";
+    if(data.edit == true)
+        buttons += "<img src='/images/app/pencil.png' title='Rename' onclick='tree_rename(this);' /> <img src='/images/app/remove2.png' title='Remove' onclick='tree_delete(this);' />";
 
     return "<div class='tree_column_header'><span>"+data.node_name+"</span>"+buttons+"</div>";
+}
+
+function getTrackerStats(data, callback) {
+    data.action = 'trackerStats';
+    $.ajax({
+        type: 'GET',
+        url: '/admin/tracker',
+        dataType: 'JSON',
+        data: data,
+        success: callback
+    });
 }
