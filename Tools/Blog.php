@@ -104,7 +104,7 @@ class Blog extends Singleton {
         if(count($c) > 0){
             echo "<ul>";
             foreach($c as $r) {
-                echo "<li><a href='{$r['url']}.htm' {$target}>{$r['title']}</a></li>";
+                echo "<li><a href='/{$r['url']}.htm' {$target}>{$r['title']}</a></li>";
             }
             echo "</ul>";
         }
@@ -131,10 +131,6 @@ class Blog extends Singleton {
                 echo "<li><a href='/category/". Scrub::url($r['category']) . ".htm'>{$r['category']}</a> ({$r['count']})</li>";
             echo "</ul>";
         }
-    }
-
-    function get_recent($count){
-        $this->list = Database::getInstance()->assoc();
     }
 
     /**
