@@ -656,8 +656,13 @@ class Database extends Singleton {
                 }
                 // $v has more options.
                 elseif (strtoupper($v[0]) == 'IN') {
-                    $values = array_merge($v[1], array_values($v[1]));
+                    $values = array_merge($values, array_values($v[1]));
                     $a2[] = "`{$k}` IN (" . implode(array_fill(0, count($v[1]), '?'), ",") . ")";
+                }
+                elseif (strtoupper($v[0]) == 'BETWEEN') {
+                    $a2[] = "`{$k}` BETWEEN ? AND ? ";
+                    $values[] = $v[1];
+                    $values[] = $v[2];
                 }
                 elseif (in_array($v[0], array('!=', '<', '<=', '>', '>=', 'LIKE'))) {
                     $values[] = $v[1];
