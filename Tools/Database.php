@@ -31,7 +31,7 @@ class Database extends Singleton {
     /**
      * The result of the last query.
      *
-     * @var
+     * @var PDOStatement
      */
     private $result;
 
@@ -119,6 +119,13 @@ class Database extends Singleton {
                 die('Connection Failed.');
             }
         }
+    }
+
+    /**
+     * @return Database
+     */
+    public static function getInstance() {
+        return parent::getInstance();
     }
 
     /**
@@ -333,7 +340,7 @@ class Database extends Singleton {
      *   A secondary optional column to use as the array key.
      * @return array|bool
      */
-    function fields($field,$sql,$key=''){
+    function fields($field, $sql, $key=''){
         $this->_query($sql);
         $return = array();
         while($r = $this->result->fetch(PDO::FETCH_ASSOC)){
@@ -536,6 +543,33 @@ class Database extends Singleton {
     function selectRow($table, $where = array(), $fields = array(), $final = ''){
         $this->_select($table, $where, $fields, 1, $final);
         return $this->result->fetch(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Select a single column.
+     *
+     * @param string $table
+     *   The main table to select from.
+     * @param string $column
+     *   The column to select.
+     * @param array $where
+     *   Conditions.
+     * @param string $key
+     *   A field to index the column.
+     * @param string $final
+     *   Additional query data.
+     */
+    function selectColumn($table, $column, $where = array(), $key = NULL, $final = '') {
+        $fields = array($column);
+        if ($key) {
+            array_unshift($fields, $key);
+        }
+        $this->_select($table, $where, $fields, NULL, $final);
+        if ($key) {
+            return $this->result->fetchAll(PDO::FETCH_KEY_PAIR);
+        } else {
+            return $this->result->fetchAll(PDO::FETCH_COLUMN);
+        }
     }
 
     /**
