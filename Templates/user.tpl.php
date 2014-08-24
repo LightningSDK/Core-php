@@ -15,7 +15,7 @@ $(document).ready(function(){
 });
 
 </script>
-<? if ( $l_page == "" || $l_page == "join" || $l_page == "register"): ?>
+<? if (empty($l_page) || $l_page == "join" || $l_page == "register"): ?>
   <h2>Create a username and password</h2>
   <form action="user.php" method="post" id="register">
 
@@ -33,7 +33,7 @@ $(document).ready(function(){
   <br /><br />
 <? endif; ?>
 
-<? if ( $l_page == "" || $l_page == "login"): ?>
+<? if (empty($l_page) || $l_page == "login"): ?>
 
   <h2>Log In with your email and password.</h2>
 
@@ -52,7 +52,7 @@ $(document).ready(function(){
 
   <br /><br />
 <? endif; ?>
-<? if ( $l_page == "reset"): ?>
+<? if (!empty($l_page) && $l_page == "reset"): ?>
   <h2>Forgot your password?</h2>
 
   <form action="user.php" method="post">
