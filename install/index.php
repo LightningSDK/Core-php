@@ -10,7 +10,7 @@ if (!defined('HOME_PATH')) {
 }
 
 if (!defined('CONFIG_PATH')) {
-    define('CONFIG_PATH', HOME_PATH . '/Source/config');
+    define('CONFIG_PATH', HOME_PATH . '/Source/Config');
 }
 
 require 'Lightning/bootstrap.php';
