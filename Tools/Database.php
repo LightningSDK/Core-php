@@ -684,4 +684,88 @@ class Database extends Singleton {
         }
         return implode($concatenator, $a2);
     }
+
+    public function createTable($table, $columns, $indexes) {
+        $primary_added = false;
+
+        foreach ($columns as $column => $settings) {
+            $definitions[] = $this->getColumnDefinition($column, $settings, $indexes['primary'] == $column);
+            if ($indexes['primary'] == $column) {
+                $primary_added = true;
+            }
+        }
+
+        foreach ($indexes as $index => $settings) {
+            if ($primary_added && $index == 'primary') {
+                // The primary key was already added with the column.
+                continue;
+            }
+            $definitions[] = $this->getIndexDefinition($index, $settings);
+        }
+
+        $query = "CREATE TABLE {$table} (" . implode(',', $definitions) . ') ENGINE=InnoDB;';
+
+        $this->query($query);
+    }
+
+    protected function getColumnDefinition($name, $settings, $primary = false) {
+        $definition = "`{$name}` ";
+
+        $definition .= $settings['type'];
+        if (!empty($settings['size'])) {
+            $definition .= "({$settings['size']})";
+        }
+
+        if (!empty($settings['unsigned'])) {
+            $definition .= ' UNSIGNED ';
+        }
+
+        if (empty($settings['null'])) {
+            $definition .= ' NOT NULL ';
+        } else {
+            $definition .= ' NULL ';
+        }
+
+        if (!empty($settings['auto_increment']) || $primary) {
+            $definition .= ' PRIMARY KEY ';
+
+            if (!empty($settings['auto_increment'])) {
+                $definition .= 'AUTO_INCREMENT';
+            }
+        }
+
+        return $definition;
+    }
+
+    protected function getIndexDefinition($name, $settings) {
+        // Figure out the columns.
+        if (is_array($settings['columns'])) {
+            $columns = $settings['columns'];
+        }
+        elseif (is_string($settings['columns'])) {
+            $columns = array($settings['columns']);
+        }
+        else {
+            $columns = array($name);
+        }
+
+        $definition = empty($settings['unique']) ? 'INDEX ' : 'UNIQUE INDEX ';
+        $definition .= '`' . $name . '` (`' . implode('`,`', $columns) . '`)' ;
+        if (!empty($settings['size'])) {
+            $definition .= ' KEY_BLOCK_SIZE = ' . intval($settings['size']);
+        }
+        return $definition;
+    }
+
+    /**
+     * Check if a table exists.
+     *
+     * @param string $table
+     *   The name of the table.
+     *
+     * @return boolean
+     */
+    public function tableExists($table) {
+        return $this->query('SHOW TABLES LIKE ?', array($table))->rowCount() == 1;
+    }
 }
