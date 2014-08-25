@@ -14,7 +14,7 @@ class Configuration {
      *
      * @var array
      */
-    protected static $configuration;
+    protected static $configuration = array();
 
     /**
      * Get a config variable's value.
@@ -78,8 +78,11 @@ class Configuration {
      */
     protected static function loadConfiguration() {
         if (empty(self::$configuration)) {
-            include CONFIG_PATH . '/config.inc.php';
-            self::$configuration = $conf;
+            foreach (array(CONFIG_PATH . '/config.inc.php', HOME_PATH . '/Lightning/Config.php') as $config_file)
+            if (file_exists($config_file)) {
+                include $config_file;
+                self::$configuration = array_merge_recursive(self::$configuration, $conf);
+            }
         }
     }
 }
