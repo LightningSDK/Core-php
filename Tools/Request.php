@@ -167,9 +167,6 @@ class Request {
             case 'boolean-int':
                 return intval(Scrub::boolean($data));
                 break;
-            case 'array':
-                return Scrub::_array($data);
-                break;
             case 'explode':
                 $data = explode(',', $data);
             case 'array':
@@ -196,8 +193,13 @@ class Request {
                 return call_user_func_array("Lightning\\Tools\\Scrub::{$type}", $args);
                 break;
             case 'text':
-            default:
+                // This still allows some basic HTML.
                 return Scrub::text($data);
+                break;
+            case 'string':
+            default:
+                // This does nothing to the string. Assume it is not sanitized.
+                return $data;
                 break;
         }
     }

@@ -83,7 +83,7 @@ class Scrub{
         $config->set('CSS.AllowedProperties','');
         $config->set('Core.EscapeNonASCIICharacters',true);
 
-        return addslashes($purifier->purify( $text, $config ));
+        return $purifier->purify($text, $config);
     }
 
     public static function html($html, $allowed_tags="", $allowed_css="", $trusted=false){
