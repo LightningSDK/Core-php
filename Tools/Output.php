@@ -49,6 +49,21 @@ class Output {
         exit;
     }
 
+    public static function XMLSegment($items, $type = null) {
+        $output = '';
+        foreach ($items as $key => $item) {
+            if (is_numeric($key) && $type) {
+                $key = $type;
+            }
+            if (is_array($item)) {
+                $output .= "<$key>" . self::XMLSegment($item) . "</$key>";
+            } else {
+                $output .= "<$key>" . Scrub::toHTML($item) . "</$key>";
+            }
+        }
+        return $output;
+    }
+
     /**
      * Load and render the access denied page.
      */
