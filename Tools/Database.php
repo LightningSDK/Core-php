@@ -5,6 +5,7 @@ namespace Lightning\Tools;
 use Exception;
 use PDO;
 use PDOException;
+use PDOStatement;
 
 class Database extends Singleton {
     /**
@@ -377,8 +378,13 @@ class Database extends Singleton {
 
     /**
      * Simple query execution.
+     *
+     * @param $sql
+     * @param array $vars
+     *
+     * @return PDOStatement
      */
-    function query ($sql, $vars = array()){ // RETURN NOTHING
+    function query ($sql, $vars = array()){
         $this->_query($sql, $vars);
         $this->timer_end();
         return $this->result;
@@ -557,6 +563,8 @@ class Database extends Singleton {
      *   A field to index the column.
      * @param string $final
      *   Additional query data.
+     *
+     * @return array
      */
     function selectColumn($table, $column, $where = array(), $key = NULL, $final = '') {
         $fields = array($column);
