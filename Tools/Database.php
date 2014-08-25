@@ -263,12 +263,11 @@ class Database extends Singleton {
      * Output a time report
      */
     function time_report(){
-        global $messages;
-        if($this->verbose){
-            $messages[] = "Total Queries: {$this->query_count}";
-            $messages[] = "Total SQL Time: {$this->mysql_time}";
-            $messages[] = "Total PHP Time: {$this->php_time}";
-        }
+        return array(
+            "Total Queries: {$this->query_count}",
+            "Total SQL Time: {$this->mysql_time}",
+            "Total PHP Time: {$this->php_time}",
+        );
     }
 
     /**
