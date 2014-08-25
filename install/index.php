@@ -17,10 +17,10 @@ require 'Lightning/bootstrap.php';
 
 if (!empty($_SERVER['TERM']) || !empty($_SERVER['SHELL'])) {
     // Handle a command line request.
-    $handler = Router::getInstance()->getRoute($argv[1]);
+    $handler = Router::getInstance()->getRoute($argv[1], true);
 } else {
     // Handle a web page request.
-    $handler = Router::getInstance()->getRoute($_GET['request']);
+    $handler = Router::getInstance()->getRoute($_GET['request'], false);
 }
 
 if (empty($handler)) {

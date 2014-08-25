@@ -28,15 +28,23 @@ class Router extends Singleton {
      *
      * @param string $url
      *   The current URL requested.
+     * @param boolean $cli
+     *   Whether the request was made from the command line.
      *
      * @return string
      *   The namespace of the URL handler.
      */
-    public function getRoute($url) {
+    public function getRoute($url, $cli) {
         $url = rtrim($url, '/');
+        // If we are in CLI mode, and there is a command for cli only.
+        if ($cli && isset(self::$routes['cli_only'][$url])) {
+            return self::$routes['cli_only'][$url];
+        }
+        // If this is listed in the static url list.
         if (isset(self::$routes['static'][$url])) {
             return self::$routes['static'][$url];
         }
+        // If this matches one of the regex urls.
         foreach (self::$routes['dynamic'] as $expr => $route) {
             if (preg_match('|' . $expr . '|', $url)) {
                 return $route;
