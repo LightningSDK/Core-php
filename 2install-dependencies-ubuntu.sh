@@ -2,11 +2,11 @@
 
 # add repo for nodejs
 apt-get install python-software-properties
-add-apt-repository ppa:chris-lea/node.js
+add-apt-repository -y ppa:chris-lea/node.js
 apt-get update
 
 # install ruby for compass and grunt
-apt-get install ruby-full rubygems
+apt-get -y install ruby-full rubygems
 
 # install sass/compass gems
 gem install sass
