@@ -142,9 +142,11 @@ use Lightning\View\CSS;
             </div>
             <pre>
             <?
-            $database = Database::getInstance();
-            print_r($database->get_queries());
-            print_r($database->time_report());
+            if (ClientUser::getInstance()->isAdmin()) {
+                $database = Database::getInstance();
+                print_r($database->get_queries());
+                print_r($database->time_report());
+            }
             ?>
             </pre>
         </section>
