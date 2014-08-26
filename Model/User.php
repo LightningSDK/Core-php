@@ -4,141 +4,142 @@ namespace Lightning\Model;
 
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Database;
+use Lightning\Tools\Logger;
+use Lightning\Tools\Mailer;
+use Lightning\Tools\Messenger;
+use Lightning\Tools\Random;
 use Lightning\Tools\Request;
 use Lightning\Tools\Scrub;
+use Lightning\Tools\Session;
 use Lightning\View\Field\Time;
 
-class User{
+class User {
+    const TYPE_UNREGISTERED_USER = 0;
+    const TYPE_REGISTERED_USER = 1;
+    const TYPE_ADMIN = 5;
 
     var $id = 0;
     var $details;
     var $login_url = '/user.php?redirect=';
-    var $logout_url = '/';
-    var $default_page = '/';
     var $unauthorized_url = '/user.php?p=login&redirect=';
     var $activation_url = "/user.php?p=activate";
     var $first_login_url = "/user.php?p=first_login&redirect="; // THIS WILL BE CALLED AFTER THE FIRST LOGIN
     var $timeout = 10080;//60*24*7; //NUMBER OF MINUTES
     var $confirmation_required = false;
-    var $reset_url = "user.php?p=reset";
-    var $month = 0;
-    var $cookie_domain;
-    var $cookie_expire_time;// 30 days
-    var $sess_expire_time = 604800;// 7 days
-    var $sess_expire_time_mobile = 2592000;// 30 days
-    var $sess_reset_time = 86400; // 1 day
+    public static $reset_url = "user.php?p=reset";
     var $track_first_login = false;
     var $require_activation = false;
 
-    function __construct($email = ""){
-        $this->cookie_expire_time = time()+2592000;
+    protected function __construct($details){
+        $this->details = $details;
+        $this->id = $details['user_id'];
+    }
 
-        global $cookie_domain, $sess_expire_time, $allow_mobile_session;//, $office_id;
-        // check if the sess_expire_time has been set
-        if($sess_expire_time) $this->sess_expire_time = $sess_expire_time;
-        $this->cookie_domain = $cookie_domain;
-        if(isset($_GET['ref'])){
-            setcookie("ref",$_GET['ref'],$this->cookie_expire_time,"/",$this->cookie_domain);
-        }
-        if($email != ""){
-            if($row = user::find_by_email($email)){
-                $this->id = $row['user_id'];
-                $this->load_info();
-            } else {
-                $this->id = 0;
-            }
-        } else {
-            //CHECK THE COOKIE TO SEE IF A USER IS LOGGED IN
-            $this->id = 0;
-            if(isset($_COOKIE['sess'])){
-                // load browser session
-                $session = Database::getInstance()->selectRow(
-                    'session LEFT JOIN user USING (user_id)',
-                    array('session_key' => $_COOKIE['sess'], 'session_ip' => Request::server('ip_int'), 'session_type' => 0)
-                );
-                if($session['email']!=""){
-                    //if the last action has been more than 5 minutes then log them out
-                    if($session['last_active'] < (time() - $this->sess_expire_time)){
-                        // session expired
-                        Database::getInstance()->delete('session', array('session_id' => $session['session_id']));
-                        setcookie("sess", '',$this->cookie_expire_time,"/",$this->cookie_domain);
-                        $this->login_url = str_replace("?", "?expired=1&", $this->login_url);
-                    } else {
-                        // set the user
-                        $updates = array('last_active' => time());
-                        if($session['last_key'] < (time()-$this->sess_reset_time)){
-                            $new_sess_key = $this->new_session_key();
-                            setcookie("sess", $new_sess_key,$this->cookie_expire_time,"/",$this->cookie_domain);
-                            $updates ['last_key'] = time();
-                            $updates ['session_key'] = $new_sess_key;
-                        }
-                        Database::getInstance()->update('session', $updates, array('session_id' => $session['session_id']));
-                        $this->id = $session['user_id'];
-                    }
-                }
-                // CHECK IF THIS IS A MOBILE SESSION
-            } else if (isset($_REQUEST['sess']) && $allow_mobile_session) {
-                $session = Database::getInstance()->selectRow(
-                    'session LEFT JOIN user USING (user_id)',
-                    array('session_key' => $_REQUEST['sess'], 'session_type' => 1)
-                );
-                if($session['email']!=""){
-                    if($session['last_active'] < (time()-$this->sess_expire_time_mobile)){
-                        // session expired
-                        Database::getInstance()->delete('session', array('session_id' => $session['session_id']));
-                    } else {
-                        // set the user
-                        if($session['last_key'] < (time()-$this->sess_reset_time)){
-                            $key_update = ", last_key=".time().", session_key='".$this->new_session_key()."'";
-                        }
-                        Database::getInstance()->query("UPDATE session SET last_active=".time().$key_update." WHERE session_id={$session['session_id']}");
-                        $this->id = $session['user_id'];
-                    }
-                }
-            }
-
-            if($this->id > 0){
-                //LOAD THE USER INFO
-                $this->load_info();
-
-                if($this->details['type'] == 0
-                    && $this->require_activation
-                    && !preg_match("/affiliate_program\.php/",$_SERVER['REQUEST_URI'])
-                    && !preg_match("/user\.php/",$_SERVER['REQUEST_URI'])){
-
-                    header("Location: {$this->activation_url}");
-                    exit;
-                }
-                if(isset($this->details['first_login']) && $this->details['first_login'] == 0 && $this->details['type'] == 1 && $this->track_first_login && !preg_match("/user\.php/",$_SERVER['REQUEST_URI'])){
-                    header("Location: {$this->first_login_url}".urlencode($_SERVER['REQUEST_URI']));
-                    exit;
-                }
-            }
-
+    public function __get($var){
+        switch($var){
+            case 'id':
+                return $this->id;
+                break;
+            case 'details':
+                return $this->details;
+                break;
+            default:
+                if(isset($this->details[$var]))
+                    return $this->details[$var];
+                else
+                    return NULL;
+                break;
         }
     }
 
+    /**
+     * Load a user by their email.
+     *
+     * @param $email
+     * @return bool|User
+     */
+    static function loadByEmail($email){
+        if($details = Database::getInstance()->selectRow('user', array('email' => array('LIKE', $email)))){
+            return new self($details);
+        }
+        return false;
+    }
+
+    /**
+     * Load a user by their ID.
+     *
+     * @param $user_id
+     * @return bool|User
+     */
+    static function loadById($user_id){
+        if($details = Database::getInstance()->selectRow('user', array('user_id' => $user_id))){
+            return new self($details);
+        }
+        return false;
+    }
+
+    /**
+     * Load a user for the provided session.
+     *
+     * @param $session
+     * @return bool|User
+     */
+    static function loadBySession($session){
+        if($session->user_id > 0){
+            return self::loadById($session->user_id);
+        }
+        return false;
+    }
+
+    /**
+     * Create a new anonymous user.
+     *
+     * @return User
+     */
+    static function anonymous() {
+        return new self(array('user_id' => 0));
+    }
+
+    /**
+     * Check if a user is a site admin.
+     *
+     * @return boolean
+     *   Whther the user is a site admin.
+     */
     public function isAdmin(){
-        return $this->details['type'] >= 5;
+        return $this->type == self::TYPE_ADMIN;
     }
 
-    function check_pass($pass,$salt='',$hashed_pass=''){
+    /**
+     * Assign a new user type to this user.
+     *
+     * @param integer $type
+     *   The new type.
+     */
+    public function setType($type) {
+        Database::getInstance()->update('user', array('type' => $type), array('user_id' => $this->id));
+    }
+
+    function checkPass($pass,$salt='',$hashed_pass=''){
         if($salt == ''){
             $this->load_info();
             $salt = $this->details['salt'];
             $hashed_pass = $this->details['password'];
         }
-        if($hashed_pass == $this->pass_hash($pass,pack("H*",$salt)))
+        if ($hashed_pass == $this->passHash($pass, pack("H*",$salt))) {
             return true;
-        else return false;
+        }
+        else {
+            return false;
+        }
     }
 
-    function pass_hash($pass,$salt){
-        return hash("sha256",$pass.$salt);
+    protected static function passHash($pass, $salt){
+        return hash("sha256", $pass . $salt);
     }
 
-    function get_salt(){
-        return mcrypt_create_iv(32);
+    protected static function getSalt(){
+        return Random::getInstance()->get(32, Random::BIN);
     }
 
     public static function url_key($user_id = -1){
@@ -157,31 +158,39 @@ class User{
         }
     }
 
-    function create($email, $pass){
-        if(Database::getInstance()->query("SELECT * FROM user WHERE email = '".strtolower($email)."' AND password != ''")->fetch_assoc()){// AND office_id = {$office_id}
+    public static function create($email, $pass){
+        if (Database::getInstance()->check('user', array('email' => strtolower($email), 'password' => array('!=', '')))) {
             // ACCOUNT ALREADY EXISTS
-            $errors[] = "An account with that email already exists. Please try again. if you lost your password, click <a href='{$this->reset_url}'>here</a>";
+            Messenger::error('An account with that email already exists. Please try again. if you lost your password, click <a href="' . self::reset_url . '">here</a>');
             return false;
-        }elseif($user_info = Database::getInstance()->query("SELECT * FROM user WHERE email = '".strtolower($email)."' AND password = '' ")->fetch_assoc()){//AND office_id = {$office_id}
+        } elseif ($user_info = Database::getInstance()->selectRow('user', array('email' => strtolower($email), 'password' => ''))) {
             // EMAIL EXISTS IN MAILING LIST ONLY
-            if($user_info['confirmed'] != 0)
-                $confirmed = ", confirmed = ".rand(100000,9999999);
-            if($_COOKIE['ref'] > 0)
-                $ref = ", referer = {$_COOKIE['ref']}";
-            $this->set_pass($pass, '',$user_info['user_id']);
-            $today = GregorianToJD(date("m"), date("d"), date("Y"));
-            Database::getInstance()->query("UPDATE user SET join_date = {$today} $confirmed $ref WHERE user_id = {$user_info['user_id']}");
-            if($user_info['confirmed'] != 0)
-                $this->send_confirmation_email($email);
-            return true;
+            $updates = array();
+            if ($user_info['confirmed'] != 0) {
+                $updates['confirmed'] = rand(100000,9999999);
+            }
+            if ($ref = Request::cookie('ref', 'int')) {
+                $updates['referrer'] = $ref;
+            }
+            $user = new self($user_info['user_id']);
+            $user->setPass($pass, '', $user_info['user_id']);
+            $updates['register_date'] = Time::today();
+            Database::getInstance()->update('user', $updates, array('user_id' => $user_info['user_id']));
+            if($user_info['confirmed'] != 0) {
+                $user->sendConfirmationEmail($email);
+            }
         } else {
             // EMAIL IS NOT IN MAILING LIST AT ALL
-            $user_id = $this->insertUser($email, $pass);
-            if(intval($_COOKIE['ref']) > 0)
-                $ref = ", referer = {$_COOKIE['ref']}";
-            Database::getInstance()->query("UPDATE user SET confirmed = ".rand(100000,9999999).", type=1 {$ref} WHERE user_id={$user_id}");//office_id={$office_id},
-            $this->send_confirmation_email($email);
-            return true;
+            $user_id = self::insertUser($email, $pass);
+            $updates = array();
+            if ($ref = Request::cookie('ref', 'int')) {
+                $updates['referrer'] = $ref;
+            }
+            $updates['confirmed'] = rand(100000,9999999);
+            $updates['type'] = 1;
+            Database::getInstance()->update('user', $updates, array('user_id' => $user_id));
+            $user = new self($user_id);
+            $user->sendConfirmationEmail($email);
         }
     }
 
@@ -244,26 +253,26 @@ class User{
      * @param string $last_name
      * @return mixed
      */
-    function insertUser($email, $pass = NULL, $first_name = '', $last_name = ''){
+    public static function insertUser($email, $pass = NULL, $first_name = '', $last_name = ''){
         $user_details = array(
             'email' => Scrub::email(strtolower($email)),
-            'user_first' => $first_name,
-            'user_last' => $last_name,
-            'join_date' => Time::today(),
+            'first' => $first_name,
+            'last' => $last_name,
+            'register_date' => Time::today(),
             'confirmed' => rand(100000,9999999),
             'type' => 0,
-            // TODO: Need to get the referer id.
-            'ref' => 0,
+            // TODO: Need to get the referrer id.
+            'referrer' => 0,
         );
         if ($pass) {
-            $salt = $this->get_salt();
-            $user_details['password'] = $this->pass_hash($pass, $salt);
+            $salt = self::getSalt();
+            $user_details['password'] = self::passHash($pass, $salt);
             $user_details['salt'] = bin2hex($salt);
         }
         return Database::getInstance()->insert('user', $user_details);
     }
 
-    function set_pass($pass,$email='',$user_id=0){
+    function setPass($pass,$email='',$user_id=0){
         if($email != '')
             $where = "email='".strtolower($email)."'";
         elseif($user_id>0)
@@ -271,8 +280,8 @@ class User{
         else
             $where = "user_id=".$this->id;
 
-        $salt = $this->get_salt();
-        Database::getInstance()->query("UPDATE user SET password = '".$this->pass_hash($pass,$salt)."', salt='".bin2hex($salt)."' WHERE {$where}");// AND office_id={$office_id}
+        $salt = $this->getSalt();
+        Database::getInstance()->query("UPDATE user SET password = '".$this->passHash($pass,$salt)."', salt='".bin2hex($salt)."' WHERE {$where}");// AND office_id={$office_id}
     }
 
     function admin_create($email, $office_id, $first_name='', $last_name=''){
@@ -286,9 +295,9 @@ class User{
             // user exists without password
             // set password, send email
             $random_pass = $this->random_pass();
-            $this->set_pass($random_pass, $email, $office_id);
+            $this->setPass($random_pass, $email, $office_id);
             send_mail($email, '', "New Account", "Your account has been created with a temporary password. Your temporary password is: {$random_pass}\n\nTo reset your password, log in with your temporary password and click 'my profile'. Follow the instructions to reset your new password.");
-            Database::getInstance()->query("UPDATE user SET join_date = {$today}, confirmed = ".rand(100000,9999999).", type=1 WHERE user_id = {$user_info['user_id']}");
+            Database::getInstance()->query("UPDATE user SET register_date = {$today}, confirmed = ".rand(100000,9999999).", type=1 WHERE user_id = {$user_info['user_id']}");
             return $user_info['user_id'];
         } else {
             // user does not exist
@@ -296,7 +305,7 @@ class User{
             $random_pass = $this->random_pass();
             $user_id = $this->insertUser($email, $random_pass, $first_name, $last_name);
             send_mail($email, '', "New Account", "Your account has been created with a temporary password. Your temporary password is: {$random_pass}\n\nTo reset your password, log in with your temporary password and click 'my profile'. Follow the instructions to reset your new password.");
-            Database::getInstance()->query("UPDATE user SET join_date = {$today}, confirmed = ".rand(100000,9999999).", type=1 WHERE user_id = {$user_id}");
+            Database::getInstance()->query("UPDATE user SET register_date = {$today}, confirmed = ".rand(100000,9999999).", type=1 WHERE user_id = {$user_id}");
             return $user_id;
         }
 
@@ -309,7 +318,7 @@ class User{
             Database::getInstance()->query("UPDATE user SET active = 1, list_date = $today WHERE user_id = {$user_id}");
         }else{
             if(intval($_COOKIE['ref']) > 0)
-                $ref = ", referer = {$_COOKIE['ref']}";
+                $ref = ", referrer = {$_COOKIE['ref']}";
             $user_id = Database::getInstance()->exec_id("INSERT IGNORE INTO user SET email = '".strtolower($email)."', `list_date` = {$today}, active = 1 $ref");
         }
         return $user_id;
@@ -317,8 +326,8 @@ class User{
 
     function reset_password($email){
         $pass = $this->random_pass();
-        $salt = $this->get_salt();
-        Database::getInstance()->query("UPDATE user SET password = '".$this->pass_hash($pass,$salt)."', salt='".bin2hex($salt)."' WHERE email = '".strtolower($email)."'");
+        $salt = $this->getSalt();
+        Database::getInstance()->query("UPDATE user SET password = '".$this->passHash($pass,$salt)."', salt='".bin2hex($salt)."' WHERE email = '".strtolower($email)."'");
         if(send_mail($email, $name, "Password reset", "Your password has been reset. Your temporary password is: $pass\n\nTo reset your password, log in with your temporary password and click 'my profile' in the top right corner of the web page. Follow the instructions to reset your new password.")){
             $messages[] = 'Your password has been reset. A temporary password has been sent to your email.';
             // this mneed to go somewhere else
@@ -328,91 +337,77 @@ class User{
         }
     }
 
-    function login_app($email, $pass){
-        $session_type = 1;
-        if($row = user::find_by_email($email)){
-            //the user exists
-            if(!$this->check_pass($pass,$row['salt'],$row['password'])){
-                return Array("error"=>"That is an incorrect email/password combination.");
-            }
-            if($row['confirmed'] != 0 && $this->confirmation_required){
-                //the user is not confirmed
-                $this->load_info();
-                return Array("error"=>"Confirmation Required.");
-            } else{
-                //user is confirmed
-                $new_sess = $this->new_session_key();
-
-                // delete old sessions -- how?? cron job to remove sessions that have not been renewed in 5 days?
-                /* 				$db->query("DELETE FROM session WHERE user_id={$row['user_id']} AND session_type={$session_type}"); */
-                // insert new session
-                Database::getInstance()->query("INSERT INTO session SET user_id={$row['user_id']}, session_type={$session_type}, session_key='{$new_sess}', last_key=".time().", last_active=".time());
-                /* 				$db->query("UPDATE user SET session_id = '$new_sess', session_ip = '$ip', last_active = ".time().", last_login = ".time()." WHERE user_id = {$row['user_id']}"); */
-                $this->id = $row['user_id'];
-                $this->load_info();
-                return Array("session_key"=>$new_sess);
-            }
-        } else {
-            return Array("error"=>"That is an incorrect email/password combination.");
-        }
-    }
-
     public static function find_by_email($email){
         return Database::getInstance()->assoc1("SELECT * FROM user WHERE email = '".strtolower($email)."'");
     }
 
-    function login($email, $pass){
-        $session_type = 0;
-        if($row = user::find_by_email($email)){
-            //the user exists
-            if(!$this->check_pass($pass,$row['salt'],$row['password'])){
-                setcookie("sess", 0,$this->cookie_expire_time,"/",$this->cookie_domain);
-                $errors[] = "That is an incorrect email/password combination.";
-                return -1;
-            }
-            if($row['confirmed'] != 0 && $this->confirmation_required){
-                //the user is not confirmed
-                $this->load_info();
-                return -2;
-            } else{
-                //user is confirmed
-                $new_sess = $this->new_session_key();
-                setcookie("sess", $new_sess,$this->cookie_expire_time,"/",$this->cookie_domain);
+    /**
+     * Makes sure there is a session, and checks the user password.
+     * If everything checks out, the global user is created.
+     *
+     * @param $email
+     * @param $password
+     * @param bool $remember
+     *   If true, the cookie will be permanent, but the password and pin state will still be on a timeout.
+     * @param boolean $auth_only
+     *   If true, the user will be authenticated but will not have the password state set.
+     *
+     * @return bool
+     */
+    static function login($email, $password, $remember = FALSE, $auth_only = FALSE){
+        // If $auth_only is set, it has to be remembered.
+        if ($auth_only) {
+            $remember = TRUE;
+        }
 
-                // delete old sessions
-                Database::getInstance()->query("DELETE FROM session WHERE user_id={$row['user_id']} AND session_type={$session_type}");
-                // insert new session
-                Database::getInstance()->query("INSERT INTO session SET user_id={$row['user_id']}, session_type={$session_type}, session_ip = INET_ATON('{$_SERVER['REMOTE_ADDR']}'), session_key='{$new_sess}', last_key=".time().", last_active=".time());
-                /* 				$db->query("UPDATE user SET session_id = '$new_sess', session_ip = '$ip', last_active = ".time().", last_login = ".time()." WHERE user_id = {$row['user_id']}"); */
-                $this->id = $row['user_id'];
-                $this->load_info();
-                return $row['user_id'];
+        $user = ClientUser::getInstance();
+
+        // If a user is already logged in, cancel that user.
+        if($user->id > 0) {
+            $user->destroy();
+        }
+
+        if($temp_user = self::loadByEmail($email)){
+            // user found
+            if($temp_user->checkPass($password)){
+                // We need to create a new session if:
+                //  There is no session
+                //  The session is blank
+                //  The session user is not set to this user
+                $session = Session::getInstance();
+                if((!is_object($session)) || ($session->id == 0) || ($session->user_id != $temp_user->id)){
+                    if(is_object($session)){
+                        // If there is some other session here, we can destroy it.
+                        $session->destroy();
+                    }
+                    $session = Session::create($temp_user->id, $remember);
+                }
+                if (!$auth_only) {
+                    $session->setState(Session::STATE_PASSWORD);
+                }
+                ClientUser::setInstance($temp_user);
+                return true;
+            } else {
+                Logger::logIP('Bad Password', Logger::SEVERITY_HIGH);
             }
         } else {
-            setcookie("sess", 0,$this->cookie_expire_time,"/",$this->cookie_domain);
-            $errors[] = "That is an incorrect email/password combination.";
-            return -1;
+            Logger::logIP('Bad Username', Logger::SEVERITY_MED);
         }
+        $errors[] = "Invalid Login"; // Could not log in.
+        return false;
     }
 
-    function new_session_key(){
-        return hash('sha256',microtime().rand(0,29384723));
-    }
-
-    function logout(){
+    /**
+     * Destroy a user object and end the session.
+     */
+    function destroy(){
+        global $session;
         if($this->id > 0){
-            Database::getInstance()->query("DELETE FROM session WHERE user_id = {$this->id} AND session_type=0");
-            $this->details = array();
+            $this->details = NULL;
             $this->id = 0;
+            if(is_object($session))
+                $session->destroy();
         }
-    }
-
-    function logout_mobile(){
-        Database::getInstance()->delete('session', array('session_key' => Scrub::hex($_REQUEST['sess'])));
-    }
-
-    function create_new_key(){
-        return hash('sha256',$this->details['email'].microtime());
     }
 
     function reset_code($email){
@@ -436,35 +431,20 @@ class User{
         }
     }
 
-    // CREATES A TEMPORARY USER IF THIS USER IS NOT LOGGED IN - USED FOR SESSION TRACKING
-    /* NEEDS TO BE UPDATED TO SESSION BASED
-        function user_id_required(){
-            global $db;
-            if($this->id == 0){
-                $not_unique = true;
-                while($not_unique){
-                    $new_sess = hash('sha256',microtime());
-                    if(!$db->check("SELECT * FROM user WHERE session_id='{$new_sess}'"))
-                        $not_unique = false;
-                }
-                setcookie("sess", $new_sess,$this->cookie_expire_time,"/",$this->cookie_domain);
-                $this->id = $db->exec_id("INSERT INTO user SET session_id = '$new_sess', session_ip = '{$_SERVER['REMOTE_ADDR']}', last_active = ".time().", last_login = ".time());
-                $this->load_info();
-            }
-        }
-    */
-
-
-    function send_confirmation_email($email){
+    function sendConfirmationEmail($email){
         $acct_details = user::find_by_email($email);
         if($acct_details['confirmed'] == "" || $acct_details['confirmed'] == "confirmed"){
             $acct_details['confirmed'] = hash('sha256',microtime());
             Database::getInstance()->query("UPDATE user SET confirmed = '{$acct_details['confirmed']}' WHERE user_id = {$acct_details['user_id']}");
         }
         global $mail_from_name,$mail_site_name,$email_domain_name,$site_contact_page;
-        send_mail($email, $acct_details['user_first']." ".$acct_details['user_last'], $mail_from_name, "You new account has been created. To activate your account, <a href='http://{$email_domain_name}/user.php?confirm={$acct_details['user_id']}.{$acct_details['confirmed']}'>click here</a> or copy and paste this link into your browser:<br /><br />
+        $mailer = new Mailer();
+        $mailer->to($email, $acct_details['first']." ".$acct_details['last'])
+            ->subject('Activate your account')
+            ->message("You new account has been created. To activate your account, <a href='http://{$email_domain_name}/user.php?confirm={$acct_details['user_id']}.{$acct_details['confirmed']}'>click here</a> or copy and paste this link into your browser:<br /><br />
 	http://{$email_domain_name}/user.php?confirm={$acct_details['user_id']}.{$acct_details['confirmed']}
-	<br /><br /> If you did not open an account with {$mail_site_name}, please let us know by contacting us at http://{$email_domain_name}/{$site_contact_page}");
+	<br /><br /> If you did not open an account with {$mail_site_name}, please let us know by contacting us at http://{$email_domain_name}/{$site_contact_page}")
+            ->send();
     }
 
     // WHEN A USER LOGS IN TO AN EXISTING ACCOUNT, THIS IS CALLED TO MOVE OVER ANY INFORMATION FROM AN ANONYMOUS SESSION

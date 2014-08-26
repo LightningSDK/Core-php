@@ -2,7 +2,6 @@
 
 namespace Lightning\Tools;
 
-use Lightning\Tools\Singleton;
 use Lightning\Model\User;
 
 /**
@@ -13,9 +12,22 @@ use Lightning\Model\User;
 class ClientUser extends Singleton {
 
     /**
+     * @return User;
+     */
+    public static function getInstance() {
+        return parent::getInstance();
+    }
+
+    /**
      * Create the default logged in user.
      */
     public static function createInstance() {
-        return new User();
+        $session_id = Request::cookie(Configuration::get('session.cookie'), 'hex');
+        $session_ip = Request::server('ip_int');
+        if ($session_id && $session_ip && $session = Session::load($session_id, $session_ip)) {
+            return User::loadBySession($session);
+        } else {
+            return User::anonymous();
+        }
     }
 }

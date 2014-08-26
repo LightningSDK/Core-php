@@ -16,8 +16,7 @@ class User extends Page {
         $user = ClientUser::getInstance();
         if($user->id > 0){
             // USER IS LOGGED IN, REDIRECT TO THE DEFAULT PAGE
-            $logout_url = Configuration::get('loged_in_redirect') ?: '/';
-            Navigation::redirect($logout_url);
+            $this->loginRedirect();
         }
 
         Template::getInstance()->set('content', 'user');
@@ -45,11 +44,12 @@ class User extends Page {
     public function postLogin() {
         $user = ClientUser::getInstance();
         $login_result = $user->login($_POST['email'], $_POST['password']);
-        if ($login_result == -1){
+        $user = ClientUser::getInstance();
+        if ($login_result === -1) {
             // BAD PASSWORD COMBO
             Database::getInstance()->query("INSERT INTO ban_log (time, ip, type) VALUE (".time().", '{$_SERVER['REMOTE_ADDR']}', 'L')");
             Messenger::error("You entered the wrong password. If you are having problems and would like to reset your password, <a href='{$user->reset_url}'>click here</a>");
-        }else if ($login_result == -2){
+        } else if ($login_result === -2) {
             // ACCOUNT UNCONFIRMED
             Messenger::error('Your email address has not been confirmed. Please look for the confirmation email and click the link to activate your account.');
         } else {
@@ -102,8 +102,7 @@ class User extends Page {
             Navigation::redirect($redirect);
         }
         else {
-            $user = ClientUser::getInstance();
-            Navigation::redirect($user->default_page);
+            Navigation::redirect(Configuration::get('user.login_url'));
         }
     }
 }

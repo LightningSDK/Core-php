@@ -22,6 +22,8 @@ class Output {
      */
     const SUCCESS = 2;
 
+    protected static $cookies = array();
+
     /**
      * Output data as json and end the request.
      *
@@ -69,5 +71,31 @@ class Output {
      */
     public static function accessDenied() {
         exit;
+    }
+
+    public static function clearCookie($cookie) {
+        self::setCookie($cookie, '');
+    }
+
+    public static function setCookie($cookie, $value, $ttl = null, $path = '/', $domain = null, $secure = null, $httponly = true) {
+        $settings = array(
+            'value' => $value,
+            'ttl' => $ttl ? $ttl + time() : 0,
+            'path' => $path,
+            'domain' => $domain ?: Configuration::get('cookie_domain'),
+            'secure' => $secure !== null ? $secure : (!empty($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] == 1 || strtolower($_SERVER['HTTPS']) == 'on')),
+            'httponly' => $httponly,
+        );
+        if (isset(self::$cookies[$cookie])) {
+            self::$cookies[$cookie] = $settings + self::$cookies[$cookie];
+        } else {
+            self::$cookies[$cookie] = $settings;
+        }
+    }
+
+    public static function sendCookies() {
+        foreach (self::$cookies as $cookie => $settings) {
+            setcookie($cookie, $settings['value'], $settings['ttl'], $settings['path'], $settings['domain'], $settings['secure'], $settings['httponly']);
+        }
     }
 }
