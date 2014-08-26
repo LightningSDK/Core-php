@@ -188,7 +188,7 @@ class Request {
                 // Remove the second item, the type.
                 if (count($args) > 2) {
                     unset($args[1]);
-                    array_values($args);
+                    $args = array_values($args);
                 }
                 return call_user_func_array("Lightning\\Tools\\Scrub::{$type}", $args);
                 break;

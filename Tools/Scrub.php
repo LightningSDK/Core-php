@@ -90,7 +90,7 @@ class Scrub{
         $purifier = HTMLPurifierWrapper::getInstance();
         $config = HTMLPurifierConfig::createDefault();
 
-        if ($allowed_tags[0] == '.') {
+        if (empty($allowed_tags) || $allowed_tags[0] == '.') {
             $allowed_tags = self::SCRUB_BASIC_HTML . ',' . substr($allowed_tags, 1);
         }
         elseif ($allowed_tags == '') {
@@ -101,7 +101,7 @@ class Scrub{
             }
         }
 
-        if ($allowed_css[0] == '.') {
+        if (empty($allowed_css) || $allowed_css[0] == '.') {
             $allowed_css = self::SCRUB_BASIC_CSS . ',' . substr($allowed_css, 1);
         }
         elseif ($allowed_css == '') {
