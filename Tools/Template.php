@@ -20,17 +20,18 @@ class Template extends Singleton {
      * Initialize the template object.
      */
     public function __construct(){
-        $this->template_dir = HOME_PATH . '/Source/Templates/';
-//    if(Configuration::get('user_mobile')){
-//      require_once HOME_PATH . '/include/class_mobile.php';
-//      $detect = new \Mobile_Detect();
-//      if ($detect->isMobile()){
-//        $this->template = 'template_mobile.tpl.php';
-//        $this->assign("mobile",true);
-//      }
-//    }
+        $this->template_dir = HOME_PATH . '/' . Configuration::get('template_dir') . '/';
     }
 
+    /**
+     * Get a variable stored in the template.
+     *
+     * @param string $var
+     *   The name of the variable.
+     *
+     * @return mixed
+     *   The variable's value.
+     */
     public function __get($var){
         if(isset($this->vars[$var]))
             return $this->vars[$var];
@@ -50,6 +51,10 @@ class Template extends Singleton {
      *   The rendered content.
      */
     public function render($page = "", $return_as_string = FALSE){
+        if (!$return_as_string) {
+            Output::sendCookies();
+        }
+
         extract($this->vars);
         if(!empty($page)) {
             $this->page = $page;
