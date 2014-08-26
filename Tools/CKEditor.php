@@ -41,6 +41,7 @@ class CKEditor extends Singleton {
      *   The output HTML.
      */
     public static function editableDiv($id, $options) {
+        JS::add('/js/ckeditor/ckeditor.js');
         if (empty($options['content'])) {
             $options['content'] = '<p></p>';
         }
