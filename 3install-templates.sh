@@ -1,5 +1,5 @@
 #!/bin/bash
-cd "$( dirname "${BASH_SOURCE[0]}" )"
+DIR="$( dirname "${BASH_SOURCE[0]}" )"
 
 # Install main templates.
-cp -r Templates ../Source/
+cp -r $DIR/Templates $DIR/../Source/

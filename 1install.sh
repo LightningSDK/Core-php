@@ -48,7 +48,7 @@ if [ ! -f $DIR/../Source/Config/config.inc.php ]; then
   echo -n "Password: "; read -s PASS
 
   echo "Copying sample config file to Source/Config with DB configuration"
-  sed "s|'database.*,|'database' => 'mysql:user=${USER};password=${PASS};host=${DBHOST};dbanme=${DBNAME}'|"\
+  sed "s|'database.*,|'database' => 'mysql:user=${USER};password=${PASS};host=${DBHOST};dbname=${DBNAME}',|"\
     <$DIR/install/config.inc.php >$DIR/../Source/Config/config.inc.php
 
   # Conform the databases
