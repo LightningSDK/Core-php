@@ -62,11 +62,7 @@ use Lightning\View\CSS;
                         <ul class="right">
                             <li class="active"><a href="/">Home</a></li>
                             <li><a href="/blog">Blog</a></li>
-                            <li><a href="/search_reports">Search Reports</a></li>
                             <li><a href="/contact">Contact</a></li>
-                            <li><a href="/report">File A Report</a></li>
-                            <li><a href="/lawyers">Find a Lawyer</a></li>
-                            <li><a href="/organizations">Other Organizations</a></li>
                         </ul>
                     </section>
                 </section>
@@ -92,11 +88,6 @@ use Lightning\View\CSS;
                 </nav>
             <? endif; ?>
         </div>
-        <div class="row" style="background-color: #79bdfd; padding: 10px;">
-            <h2>We are updating our site!</h2>
-            <p>We have been working diligently on updating the site to give everyone a better user experience. We want your feedback! If you have any comments or suggestions that would make the site easier to use, please <a href="/contact">contact us here</a>.</p>
-        </div>
-
         <section role="main" class="scroll-container">
             <div class="row">
                 <? if (empty($full_width)): ?>
