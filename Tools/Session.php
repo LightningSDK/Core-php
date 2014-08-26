@@ -125,7 +125,7 @@ class Session extends Singleton {
         } else {
             Logger::logIP('Bad session', Logger::SEVERITY_MED);
             // Send a cookie to erase the users cookie, in case this is really a minor error.
-            self::clear_cookie();
+            self::clearCookie();
         }
     }
 
