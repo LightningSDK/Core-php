@@ -82,6 +82,8 @@ class Configuration {
             if (file_exists($config_file)) {
                 include $config_file;
                 self::$configuration = array_merge_recursive(self::$configuration, $conf);
+            } else {
+                echo "not found $config_file";
             }
         }
     }
