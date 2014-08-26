@@ -4,7 +4,7 @@
 
         if ($editable): ?>
             <div class="page_edit_links">
-                <a href='page.php?action=new'>New Page</a> | <a href='#' onclick='edit_page();return false;'>Edit This Page</a>
+                <a href='/page?action=new'>New Page</a> | <a href='#' onclick='edit_page();return false;'>Edit This Page</a>
             </div>
         <? endif; ?>
 

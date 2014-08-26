@@ -4,7 +4,7 @@ namespace Lightning\Tools;
 
 class Scrub{
 
-    const SCRUB_BASIC_HTML = 'p,b,a[href|name|target|title],i,strong,em,img[src|width|height],table[cellpadding|cellspacing|border],tr,td,tbody,hr,h1,h2,h3,h4,h5,h6,*[id|name|align|style|alt|class],sup,sub,ul,ol,li,span,font[color|size],div,br,blockquote';
+    const SCRUB_BASIC_HTML = 'p,b,a[href|name|target|title],i,strong,em,img[src|width|height],table[cellpadding|cellspacing|border],tr,td,tbody,hr,h1,h2,h3,h4,h5,h6,*[id|name|align|style|alt|class],sup,sub,ul,ol,li,span,font[color|size],div,br,blockquote,code,pre';
     const SCRUB_ADVANCED_HTML = 'input[type|value|checked|src],select,option[value],form[target|action|method],textarea,iframe[frameborder|src|height|width|align|allowfullscreen]';
     const SCRUB_BASIC_CSS = 'height,width,color,background-color,vertical-align,text-align,margin,margin-left,margin-right,margin-top,margin-bottom,padding,padding-left,margin-right,margin-top,margin-bottom,border,border-left,border-right,border-top,border-bottom,float,font-size';
 

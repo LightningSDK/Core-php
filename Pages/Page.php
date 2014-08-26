@@ -13,9 +13,13 @@ use Lightning\Tools\Scrub;
 use Lightning\Tools\Template;
 use Lightning\Tools\ClientUser;
 use Lightning\View\Field\BasicHTML;
+use Lightning\View\JS;
 use Lightning\View\Page as PageView;
 
 class Page extends PageView {
+
+    protected $new = false;
+
     public function get() {
         $user = ClientUser::getInstance();
         $template = Template::getInstance();
@@ -34,9 +38,18 @@ class Page extends PageView {
             if($full_page['last_update'] > 0) {
                 header("Last-Modified: ".gmdate("D, d M Y H:i:s", $full_page['last_update'])." GMT");
             }
+        } elseif ($this->new) {
+            $full_page['title'] = '';
+            $full_page['keywords'] = '';
+            $full_page['description'] = '';
+            $full_page['url'] = '';
+            $full_page['body'] = 'This is your new page.';
+            $full_page['layout'] = 0;
+            $full_page['site_map'] = 1;
+            JS::startup('edit_page();');
         } elseif ($full_page = Database::getInstance()->selectRow('page', array('url' => '404'))) {
             header('HTTP/1.0 404 NOT FOUND');
-            $full_page['url'] = $_GET['page'];
+            $full_page['url'] = Request::get('page');
             $template->set('page_blank',true);
         } else {
             header('HTTP/1.0 404 NOT FOUND');
@@ -52,8 +65,8 @@ class Page extends PageView {
 
         // PREPARE FORM DATA CONTENTS
         foreach (array('title', 'keywords', 'description') as $meta_data) {
-            $full_page[$meta_data] = htmlspecialchars($full_page[$meta_data], ENT_QUOTES);
-            if(!empty($full_page[$meta_data])) {
+            $full_page[$meta_data] = Scrub::toHTML($full_page[$meta_data]);
+            if (!empty($full_page[$meta_data])) {
                 Configuration::set('page_' . $meta_data, str_replace("*", Configuration::get('page_' . $meta_data), $full_page[$meta_data]));
             }
         }
@@ -62,13 +75,8 @@ class Page extends PageView {
             $full_page['url'] = $_GET['page'];
         }
         else {
-            $full_page['url'] = htmlspecialchars($full_page['url'],ENT_QUOTES);
+            $full_page['url'] = Scrub::toHTML($full_page['url'],ENT_QUOTES);
         }
-
-        // FILL IN META INFO WITH DEFAULTS
-
-        $full_page['body'] = htmlspecialchars_decode($full_page['body']);
-
 
         $template->set('page_header', $full_page['title']);
         $template->set('full_page', $full_page);
@@ -78,6 +86,7 @@ class Page extends PageView {
         // Prepare the template for a new page.
         $template = Template::getInstance();
         $template->set('action','new');
+        $this->new = true;
 
         // Prepare the form.
         $this->get();

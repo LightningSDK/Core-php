@@ -21,7 +21,7 @@ class PageContent extends Content {
             // 404 Error page.
             array(
                 'url' => '404',
-                'title' => 'Welcome to Lightning',
+                'title' => 'Lightning',
                 'site_map' => 0,
                 'body' => '<h1>Not Found</h1>
                 <p>You are trying to access a page that does not exist.</p>',

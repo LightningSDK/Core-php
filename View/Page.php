@@ -11,6 +11,9 @@ use Lightning\View\CSS;
 use Lightning\View\JS;
 
 class Page {
+
+    public $template = 'template';
+
     /**
      * Run any global initialization functions.
      */
@@ -46,7 +49,7 @@ class Page {
 
         $template->set('site_name', Configuration::get('site.name'));
         $template->set('blog', Blog::getInstance());
-        $template->render($template);
+        $template->render($this->template);
     }
 
     /**
