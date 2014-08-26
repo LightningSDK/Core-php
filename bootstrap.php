@@ -1,9 +1,6 @@
 <?php
 
-use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
-use Lightning\Tools\Database;
-use Lightning\Tools\Messenger;
 
 /**
  * A custom class loader.
@@ -48,21 +45,3 @@ function loadClassFile($classname) {
 }
 
 spl_autoload_register('classAutoloader');
-
-// REMOVE ALL THIS JUNK
-
-// Detect which server was requested
-$user = ClientUser::getInstance();
-
-// TODO: This should be moved.
-if($user->details['type'] >= 5){
-    Database::getInstance()->verbose();
-    error_reporting(E_ALL ^ E_NOTICE);
-
-    $cms->editable = true;
-
-    // BLOG WARNING MESSAGE
-    if(Database::getInstance()->check('blog_comment', array('approved' => 0))){
-        Messenger::error('You have comments on your blog that need to be approved. <a href="/Lightning/Pages/blog_comments.php">click here</a>');
-    }
-}
