@@ -534,8 +534,8 @@ class Database extends Singleton {
     /**
      * Run a select query and return the rows indexed by a key.
      */
-    public function selectIndexed($table, $key, $where = array(), $fields = array()) {
-        $this->_select($table, $where, $fields);
+    public function selectIndexed($table, $key, $where = array(), $fields = array(), $final = '') {
+        $this->_select($table, $where, $fields, NULL, $final);
         $results = array();
         while ($row = $this->result->fetch(PDO::FETCH_ASSOC)) {
             $results[$row[$key]] = $row;
