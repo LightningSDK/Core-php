@@ -51,8 +51,8 @@ class Blog extends Singleton {
             else
                 $archive = "AND time >= ".mktime(0,0,0,1,1,$this->y)." AND time < ".mktime(0,0,0,1,1,$this->y+1);
         } else if($this->category != ''){
-            $cat_id = Database::getInstance()->field('cat_id',"SELECT * FROM categories WHERE cat_url LIKE '{$this->category}'");
-            $join = "JOIN blog_categories USING (blog_id)";
+            $cat_id = Database::getInstance()->selectField('cat_id', 'blog_category', array('cat_url' => array('LIKE', $this->category)));
+            $join = "JOIN blog_blog_category USING (blog_id)";
             $cat_limit = "AND cat_id = '{$cat_id}'";
         }
         if($this->list_per_page > 0)
@@ -124,7 +124,7 @@ class Blog extends Singleton {
     }
 
     function categories_list(){
-        $c = Database::getInstance()->assoc("SELECT COUNT(*) as count, category FROM blog_categories LEFT JOIN categories USING (cat_id) GROUP BY cat_id LIMIT 10");
+        $c = Database::getInstance()->assoc("SELECT COUNT(*) as count, category FROM blog_blog_category LEFT JOIN blog_category USING (cat_id) GROUP BY cat_id LIMIT 10");
         if(count($c) > 0){
             echo "<ul>";
             foreach($c as $r)
