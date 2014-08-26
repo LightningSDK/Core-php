@@ -7,12 +7,12 @@ namespace Lightning\Pages;
 
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
-use Lightning\Tools\Messenger;
 use Lightning\Tools\Output;
 use Lightning\Tools\Request;
 use Lightning\Tools\Scrub;
 use Lightning\Tools\Template;
 use Lightning\Tools\ClientUser;
+use Lightning\View\Field\BasicHTML;
 use Lightning\View\Page as PageView;
 
 class Page extends PageView {
@@ -23,21 +23,30 @@ class Page extends PageView {
         $content_locator = preg_replace('/\.html$/', '', $_GET['request']) ?: 'index';
 
         // Determine if the user can edit this page.
-        $template->set('editable', $user->details['type'] >= 5);
+        $template->set('editable', $user->isAdmin());
 
         // Set the page template.
         $template->set('content', 'page');
 
         // LOAD PAGE DETAILS
-        if($full_page = Database::getInstance()->selectRow('pages', array('url' => array('LIKE', $content_locator)))){
+        if($full_page = Database::getInstance()->selectRow('page', array('url' => array('LIKE', $content_locator)))){
             header('HTTP/1.0 200 OK');
             if($full_page['last_update'] > 0) {
                 header("Last-Modified: ".gmdate("D, d M Y H:i:s", $full_page['last_update'])." GMT");
             }
-        } else {
-            $full_page = Database::getInstance()->selectRow('pages', array('url' => '404'));
+        } elseif ($full_page = Database::getInstance()->selectRow('page', array('url' => '404'))) {
             header('HTTP/1.0 404 NOT FOUND');
             $full_page['url'] = $_GET['page'];
+            $template->set('page_blank',true);
+        } else {
+            header('HTTP/1.0 404 NOT FOUND');
+            $full_page['title'] = 'Lightning';
+            $full_page['keywords'] = 'Lightning';
+            $full_page['description'] = 'Lightning';
+            $full_page['url'] = '';
+            $full_page['body'] = 'Your site has not been set up.';
+            $full_page['layout'] = 0;
+            $full_page['site_map'] = 1;
             $template->set('page_blank',true);
         }
 
@@ -94,13 +103,14 @@ class Page extends PageView {
             'site_map' => Request::post('sitemap', 'int'),
             'body' => Request::post('page_body', 'html', '', '', true),
             'last_update' => time(),
+            'layout' => Request::post('layout', 'int'),
         );
 
         // Save the page.
         if ($page_id != 0) {
-            Database::getInstance()->update('pages', $new_values, array('page_id' => $page_id));
+            Database::getInstance()->update('page', $new_values, array('page_id' => $page_id));
         } else {
-            $page_id = Database::getInstance()->insert('pages', $new_values);
+            $page_id = Database::getInstance()->insert('page', $new_values);
         }
 
         $output = array();
@@ -108,5 +118,13 @@ class Page extends PageView {
         $output['url'] = $new_values['url'];
         $output['page_id'] = $page_id;
         Output::json($output);
+    }
+
+    public static function layoutOptions($default) {
+        $options = array(
+            0 => 'Right Column',
+            1 => 'Full Width',
+        );
+        return BasicHTML::select('layout', $options, $default);
     }
 }
