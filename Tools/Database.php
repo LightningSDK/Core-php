@@ -92,7 +92,6 @@ class Database extends Singleton {
      */
     private $in_transaction = FALSE;
 
-
     /**
      * Construct this object.
      *
@@ -100,6 +99,8 @@ class Database extends Singleton {
      *   Database URL.
      */
     function __construct($url=''){
+        $this->verbose = Configuration::get('debug');
+
         try {
             // Extract user data.
             $results = NULL;
@@ -113,7 +114,7 @@ class Database extends Singleton {
         } catch (PDOException $e) {
             // Error handling.
             syslog(LOG_EMERG, 'Connection failed: ' . $e->getMessage());
-            if (TEST_ENVIRONMENT) {
+            if (Configuration::get('debug')) {
                 die('Connection failed: ' . $e->getMessage());
             }
             else {
@@ -428,7 +429,7 @@ class Database extends Singleton {
         $fields = empty($fields) ? '*' : implode($fields);
         $values = array();
         if (!empty($where)) {
-            $where = ' WHERE ' . $this->sql_implode($where, $values);
+            $where = ' WHERE ' . $this->sql_implode($where, $values, 'AND');
         }
         $this->_query('SELECT ' . $fields . ' FROM ' . $table . $where . ' LIMIT 1', $values);
         return $this->result->rowCount() > 0;
@@ -688,9 +689,23 @@ class Database extends Singleton {
     public function createTable($table, $columns, $indexes) {
         $primary_added = false;
 
+        // Find the primary column if there is only 1.
+        $primary_column = null;
+        if (empty($indexes['primary'])) {
+            $primary_column = null;
+        }
+        if (is_string($indexes['primary'])) {
+            $primary_column = $indexes['primary'];
+        }
+        elseif (!empty($indexes['primary']['columns'])) {
+            if (count($indexes['primary']['columns']) == 1) {
+                $primary_column = $indexes['primary']['columns'][0];
+            }
+        }
+
         foreach ($columns as $column => $settings) {
-            $definitions[] = $this->getColumnDefinition($column, $settings, $indexes['primary'] == $column);
-            if ($indexes['primary'] == $column) {
+            $definitions[] = $this->getColumnDefinition($column, $settings, $primary_column == $column);
+            if ($primary_column == $column) {
                 $primary_added = true;
             }
         }
