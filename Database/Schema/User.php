@@ -1,10 +1,10 @@
 <?php
 
-namespace Lightning\Schema;
+namespace Lightning\Database\Schema;
 
-use Lightning\Tools\DatabaseSchema;
+use Lightning\Database\Schema;
 
-class UserSchema extends DatabaseSchema {
+class User extends Schema {
 
     protected $table = 'user';
 
@@ -20,7 +20,9 @@ class UserSchema extends DatabaseSchema {
             'register_date' => $this->int(true),
             'last_login' => $this->int(true),
             'last_active' => $this->int(true),
-            'type' => $this->int(true, DatabaseSchema::TINYINT),
+            'type' => $this->int(true, Schema::TINYINT),
+            'referrer' => $this->int(true),
+            'confirmed' => $this->int(true),
         );
     }
 

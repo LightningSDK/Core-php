@@ -9,7 +9,8 @@ $conf = array(
     ),
     'routes' => array(
         'cli_only' => array(
-            'conform-schema' => 'Lightning\\Tools\\DatabaseSchemaManager',
+            'database' => 'Lightning\\CLI\\Database',
+            'user' => 'Lightning\\CLI\\User',
         ),
     ),
     'language' => 'en_us',

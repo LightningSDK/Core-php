@@ -15,6 +15,7 @@ class SessionSchema extends DatabaseSchema {
             'session_ip' => $this->int(true),
             'last_ping' =>  $this->int(true),
             'user_id' => $this->int(true),
+            'state' => $this->int(true, DatabaseSchema::TINYINT),
             'form_token' => $this->char(128),
         );
     }

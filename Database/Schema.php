@@ -1,8 +1,10 @@
 <?php
 
-namespace Lightning\Tools;
+namespace Lightning\Database;
 
-class DatabaseSchema {
+use Lightning\Tools\Database;
+
+class Schema {
 
     const INT = 'int';
     const TINYINT = 'tinyint';
