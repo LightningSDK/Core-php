@@ -18,6 +18,7 @@ class Page extends Schema {
             'body' => $this->text(Schema::MEDIUMTEXT),
             'site_map' => $this->int(true, Schema::TINYINT),
             'frequency' => $this->int(true, Schema::TINYINT),
+            'layout' => $this->int(true, Schema::TINYINT),
             'priority' => $this->int(true),
             'last_update' => $this->int(true),
         );

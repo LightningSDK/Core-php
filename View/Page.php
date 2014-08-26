@@ -7,6 +7,8 @@ use Lightning\Tools\Configuration;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Request;
 use Lightning\Tools\Template;
+use Lightning\View\CSS;
+use Lightning\View\JS;
 
 class Page {
     /**
@@ -15,6 +17,16 @@ class Page {
     public function __construct() {
         // Load messages and errors from the query string.
         Messenger::loadFromQuery();
+        JS::add('/js/fastclick.js');
+        JS::add('/js/jquery.js');
+        JS::add('/js/jquery.cookie.js');
+        JS::add('/js/modernizr.js');
+        JS::add('/js/placeholder.js');
+        JS::add('/js/foundation.min.js');
+        JS::add('/js/lightning.js');
+        CSS::add('/css/foundation.css');
+        CSS::add('/css/normalize.css');
+        CSS::add('/css/lightning.css');
     }
 
     /**

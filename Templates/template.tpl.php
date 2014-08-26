@@ -39,14 +39,6 @@ use Lightning\View\CSS;
             <div class="small-12">
                 <h1>Welcome!</h1>
             </div>
-            <div id="nav_wrapper" class="small-12">
-                <div class="slider single-item">
-                    <div><img src="/images/your_voice.jpg" width="1000" height="268" alt="slide1" /></div>
-                    <div><img src="/images/slide1.jpg" width="1000" height="268" alt="slide1" /></div>
-                    <div><a href="/report"><img src="/images/report_it_now.jpg" width="1000" height="268" alt="slide1" /></a></div>
-                    <div><img src="/images/slide2.jpg"  width="1000" height="268" alt="slide2" /></div>
-                </div>
-            </div>
         </div>
         <div class="row">
             <nav class="top-bar" data-topbar>
@@ -63,6 +55,13 @@ use Lightning\View\CSS;
                             <li class="active"><a href="/">Home</a></li>
                             <li><a href="/blog">Blog</a></li>
                             <li><a href="/contact">Contact</a></li>
+                            <li>
+                                <?if (ClientUser::getInstance()->id > 0): ?>
+                                    <a href="/user/logout">Log Out</a>
+                                <? else: ?>
+                                    <a href="/user">Log In</a>
+                                <? endif; ?>
+                            </li>
                         </ul>
                     </section>
                 </section>
@@ -143,9 +142,9 @@ use Lightning\View\CSS;
             </div>
             <pre>
             <?
-                $database = Database::getInstance();
-                print_r($database->get_queries());
-                print_r($database->time_report());
+            $database = Database::getInstance();
+            print_r($database->get_queries());
+            print_r($database->time_report());
             ?>
             </pre>
         </section>
