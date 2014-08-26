@@ -68,15 +68,4 @@ if [ ! -d $DIR/../js/ckeditor ]; then
   cp -r Vendor/ckeditor/skins ../js/ckeditor/
   cp -r Vendor/ckeditor/plugins ../js/ckeditor/
   cp -r Vendor/ckeditor/lang ../js/ckeditor/
-
-
-  # Install ckeditor config.
-  if [ ! -f $DIR/../Source/foundation/js/ckeditor_config.js ]; then
-    echo "Copying Lightning CKEditor config to foundation"
-    cp $DIR/install/ckeditor_config.js $DIR/../Source/foundation/js/
-  fi
-  if [ ! -f $DIR/../Source/foundation/scss/ckeditor_contents.scss ]; then
-    echo "Copy CKEditor css to foundation"
-    cp $DIR/Vendor/ckeditor/contents.css $DIR/../Source/foundation/scss/ckeditor_contents.scss
-  fi
 fi
