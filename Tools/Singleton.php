@@ -25,11 +25,22 @@ class Singleton {
         if (empty(static::$instances[$class])) {
             classAutoloader($class);
             if (in_array('createInstance', get_class_methods($class))) {
-                static::$instances[$class] = $class::createInstance();
+                self::$instances[$class] = $class::createInstance();
             } else {
-                static::$instances[$class] = new $class();
+                self::$instances[$class] = new $class();
             }
         }
-        return static::$instances[$class];
+        return self::$instances[$class];
+    }
+
+    /**
+     * Set the singleton instance.
+     *
+     * @param $object
+     *   The new instance.
+     */
+    public static function setInstance($object) {
+        $class = get_called_class();
+        self::$instances[$class] = $object;
     }
 }
