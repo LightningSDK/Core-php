@@ -27,7 +27,7 @@ class Request {
      *   A proper camelcase function name with the prefix.
      */
     public static function convertFunctionName($prefix, $action) {
-        return $prefix . str_replace(' ', '', ucfirst(str_replace('-', ' ', $action)));
+        return $prefix . str_replace(' ', '', ucwords(str_replace('-', ' ', $action)));
     }
 
     /**
