@@ -142,10 +142,16 @@ class User {
         return Random::getInstance()->get(32, Random::BIN);
     }
 
-    public static function url_key($user_id = -1){
-        if($user_id == -1)
+    public static function urlKey($user_id = -1, $salt = null){
+        if($user_id == -1) {
             $user_id = ClientUser::getInstance()->id;
-        return $user_id . "." . user::salt_crypt($user_id);
+            $salt = ClientUser::getInstance()->details['salt'];
+        } elseif (!$salt) {
+            $user = Database::getInstance()->selectRow('user', array('user_id' => $user_id));
+            $salt = $user['salt'];
+        }
+        // TODO: This should be stronger.
+        return $user_id . "." . self::passHash($user_id . $salt, $salt);
     }
 
     function update(){
@@ -422,8 +428,8 @@ class User {
         return hash('sha256',($acct_details['email']."*".$acct_details['password']."%".$acct_details['user_id']));
     }
 
-    public static function unsubscribe_key($user_id, $email){
-        return hash('sha256',($user_id.$email."8347fgsoidug".hash('sha256',$email)."8437fwehdsu"));
+    public static function unsubscribeKey($user_id, $email){
+        return hash('sha256',($user_id . $email . hash('sha256',$email)));
     }
 
     // REDIRECTS THE USER IF THEY ARE NOT LOGGED IN
