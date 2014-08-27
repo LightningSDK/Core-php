@@ -16,6 +16,21 @@ class Request {
     }
 
     /**
+     * Convert a reuqested action to a controller method name.
+     *
+     * @param string $prefix
+     *   The prefix to add. 'execute' for CLI or 'post' or 'get' for Page requests.
+     * @param string $action
+     *   The requested action. May be hyphen-ated or camelCase.
+     *
+     * @return string
+     *   A proper camelcase function name with the prefix.
+     */
+    public static function convertFunctionName($prefix, $action) {
+        return $prefix . str_replace(' ', '', ucfirst(str_replace('-', ' ', $action)));
+    }
+
+    /**
      * Get a parameter from a URL.
      *
      * @param string $regex

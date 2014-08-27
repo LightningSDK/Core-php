@@ -63,8 +63,9 @@ class Page {
         $request_type = strtolower(Request::type());
 
         if ($action) {
-            if (method_exists($this, $request_type . $action)) {
-                $this->{$request_type . $action}();
+            $method = Request::convertFunctionName($request_type, $action);
+            if (method_exists($this, $method)) {
+                $this->{$method}();
                 $this->output();
             }
             else {
