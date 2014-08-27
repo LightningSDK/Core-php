@@ -98,4 +98,13 @@ class Output {
             setcookie($cookie, $settings['value'], $settings['ttl'], $settings['path'], $settings['domain'], $settings['secure'], $settings['httponly']);
         }
     }
+
+    public static function disableBuffering() {
+        @ini_set('zlib.output_compression', "Off");
+        @ini_set('implicit_flush', 1);
+
+        ob_end_flush();
+        ob_implicit_flush(true);
+        echo str_repeat(' ', 9000);
+    }
 }
