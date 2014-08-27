@@ -41,15 +41,13 @@ class Blog extends Singleton {
     }
 
     function list_post(){
-
         $join = array();
-        $cat_limit = '';
         $where = array();
         if($this->y != 0){
             if($this->m > 0) // SELECT A MONTH
-                $where['time'] = array('BETWEEN', mktime(0,0,0,$this->m,1,$this->y) -1, mktime(0,0,0,$this->m+1,1,$this->y) + 1);
+                $where['time'] = array('BETWEEN', mktime(0,0,0,$this->m,1,$this->y), mktime(0,0,0,$this->m+1,1,$this->y));
             else
-                $where['time'] = array('BETWEEN', mktime(0,0,0,1,1,$this->y) -1, mktime(0,0,0,1,1,$this->y+1) + 1);
+                $where['time'] = array('BETWEEN', mktime(0,0,0,1,1,$this->y), mktime(0,0,0,1,1,$this->y+1));
         } else if($this->category != ''){
             $cat_id = Database::getInstance()->selectField('cat_id', 'blog_category', array('cat_url' => array('LIKE', $this->category)));
             $join[] = array('JOIN', 'blog_blog_category', 'USING (blog_id)');
@@ -71,8 +69,8 @@ class Blog extends Singleton {
                 'from' => 'blog',
                 'join' => $join,
             ),
-            $where)
-        ;
+            $where
+        );
     }
 
     function pagination(){
