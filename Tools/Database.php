@@ -470,7 +470,8 @@ class Database extends Singleton {
      * Run a select query and return a result array.
      */
     public function selectAll($table, $where = array(), $fields = array(), $final = '') {
-        $result = $this->_select($table, $where, $fields, $final)->fetchAll(PDO::FETCH_ASSOC);
+        $this->_select($table, $where, $fields, $final);
+        $result = $this->result->fetchAll(PDO::FETCH_ASSOC);
         $this->timerEnd();
         return $result;
     }
