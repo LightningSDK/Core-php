@@ -426,7 +426,7 @@ class Database extends Singleton {
         }
         else {
             $output = $this->parseTable($table['from'], $values);
-            if (isset($table['join'])) {
+            if (!empty($table['join'])) {
                 // If the first element of join is not an array, it's an actual join.
                 if (!is_array($table['join'][0])) {
                     // Wrap it in an array so we can loop over it.
