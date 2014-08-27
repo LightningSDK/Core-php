@@ -69,7 +69,7 @@ class Schema {
         );
     }
 
-    protected function text($size) {
+    protected function text($size = self::TEXT) {
         return array(
             'type' => $size,
         );
