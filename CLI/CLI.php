@@ -1,10 +1,22 @@
 <?php
+/**
+ * @file
+ * Contains Lightning\Tools\Request\CLI
+ */
 
 namespace Lightning\CLI;
 
 use Lightning\Tools\Request;
 
+/**
+ * A base controller for CLI handlers.
+ *
+ * @package Lightning\CLI
+ */
 class CLI {
+    /**
+     * The main execute method called from index.php
+     */
     public function execute() {
         global $argv;
         $func = 'execute' . Request::convertFunctionName('execute', $argv[2]);

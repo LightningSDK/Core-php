@@ -1,10 +1,19 @@
 <?php
+/**
+ * @file
+ * Contains Lightning\CLI\Database
+ */
 
 namespace Lightning\CLI;
 
+/**
+ * CLI controller for database functions.
+ *
+ * @package Lightning\CLI
+ */
 class Database extends CLI {
     /**
-     * Conform the schemas.
+     * Conform the schemas by importing or updating from Database\Schema
      */
     public function executeConformSchema() {
         foreach ($this->getList('Schema') as $class) {
@@ -13,6 +22,9 @@ class Database extends CLI {
         }
     }
 
+    /**
+     * Imports default data in Database\Content
+     */
     public function executeImportDefaults() {
         foreach ($this->getList('Content') as $class) {
             $schema = new $class();
@@ -20,6 +32,15 @@ class Database extends CLI {
         }
     }
 
+    /**
+     * Gets a list of schemas from the Schema or Content directory.
+     *
+     * @param string $type
+     *   The type to load.
+     *
+     * @return array
+     *   A list of classes in the directory.
+     */
     public function getList($type) {
         $list = array();
         $directories = array(
