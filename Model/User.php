@@ -281,12 +281,12 @@ class User {
             $where = "user_id=".$this->id;
 
         $salt = $this->getSalt();
-        Database::getInstance()->query("UPDATE user SET password = '".$this->passHash($pass,$salt)."', salt='".bin2hex($salt)."' WHERE {$where}");// AND office_id={$office_id}
+        Database::getInstance()->query("UPDATE user SET password = '".$this->passHash($pass,$salt)."', salt='".bin2hex($salt)."' WHERE {$where}");
     }
 
-    function admin_create($email, $office_id, $first_name='', $last_name=''){
+    function admin_create($email, $first_name='', $last_name=''){
         $today = gregoriantojd(date('m'), date('d'), date('Y'));
-        $user_info = Database::getInstance()->assoc1("SELECT * FROM user WHERE email = '".strtolower($email)."'");// AND office_id = {$office_id}
+        $user_info = Database::getInstance()->selectRow('user', array('email' => strtolower($email)));
         if($user_info['password'] != ''){
             // user exists with password
             // return user_id
@@ -295,7 +295,7 @@ class User {
             // user exists without password
             // set password, send email
             $random_pass = $this->random_pass();
-            $this->setPass($random_pass, $email, $office_id);
+            $this->setPass($random_pass, $email);
             send_mail($email, '', "New Account", "Your account has been created with a temporary password. Your temporary password is: {$random_pass}\n\nTo reset your password, log in with your temporary password and click 'my profile'. Follow the instructions to reset your new password.");
             Database::getInstance()->query("UPDATE user SET register_date = {$today}, confirmed = ".rand(100000,9999999).", type=1 WHERE user_id = {$user_info['user_id']}");
             return $user_info['user_id'];
@@ -312,15 +312,22 @@ class User {
     }
 
     public static function add_to_mailing_list($email){
-        $today = gregoriantojd(date('m'), date('d'), date('Y'));
-        if($user = user::find_by_email($email)){
-            $user_id = $user['user_id'];
-            Database::getInstance()->query("UPDATE user SET active = 1, list_date = $today WHERE user_id = {$user_id}");
-        }else{
-            if(intval($_COOKIE['ref']) > 0)
-                $ref = ", referrer = {$_COOKIE['ref']}";
-            $user_id = Database::getInstance()->exec_id("INSERT IGNORE INTO user SET email = '".strtolower($email)."', `list_date` = {$today}, active = 1 $ref");
-        }
+        // These will be set on either insert or update.
+        $user_values = array(
+            'list_date' => Time::today(),
+            'active' => 1,
+        );
+        $user_id = Database::getInstance()->insert(
+            'user',
+            array_merge($user_values,
+                array(
+                    'email' => strtolower($email),
+                    // Ref should only be added for new users.
+                    'ref' => Request::cookie('ref'),
+                )
+            ),
+            $user_values
+        );
         return $user_id;
     }
 
@@ -338,7 +345,7 @@ class User {
     }
 
     public static function find_by_email($email){
-        return Database::getInstance()->assoc1("SELECT * FROM user WHERE email = '".strtolower($email)."'");
+        return Database::getInstance()->selectRow('user', array('email' => strtolower($email)));
     }
 
     /**

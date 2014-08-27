@@ -18,7 +18,7 @@ class Sitemap extends Page {
         $urls = array();
 
         // Load the pages.
-        $pages = $db->select('pages', array('site_map' => 1));
+        $pages = $db->select('page', array('site_map' => 1));
 
         foreach($pages as $p){
             if($p['last_update'] == 0) {
@@ -45,11 +45,21 @@ class Sitemap extends Page {
             'changefreq' => 'weekly'
         );
 
-        $blogs = $db->assoc('
-        SELECT blog.time AS blog_time, blog_comment.time AS blog_comment_time, url
-        FROM blog
-        LEFT JOIN ( SELECT time, blog_id FROM blog_comment ORDER BY TIME DESC) AS blog_comment USING ( blog_id )
-        GROUP BY blog_id');
+        $blogs = $db->select(
+            array(
+                'from' => 'blog',
+                'join' => array(
+                    'LEFT JOIN', '( SELECT time, blog_id FROM blog_comment ORDER BY TIME DESC) AS blog_comment', 'USING ( blog_id )'
+                ),
+            ),
+            array(),
+            array(
+                array('blog_time' => array('expression' => 'blog.time')),
+                array('blog_comment_time' => array('expression' => 'blog_comment.time')),
+                'url',
+            ),
+            'GROUP BY blog_id'
+        );
 
         foreach($blogs as $b){
             $urls[] = array(

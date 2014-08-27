@@ -144,8 +144,8 @@ use Lightning\View\CSS;
             <?
             if (ClientUser::getInstance()->isAdmin()) {
                 $database = Database::getInstance();
-                print_r($database->get_queries());
-                print_r($database->time_report());
+                print_r($database->getQueries());
+                print_r($database->timeReport());
             }
             ?>
             </pre>

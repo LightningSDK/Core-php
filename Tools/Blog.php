@@ -42,23 +42,37 @@ class Blog extends Singleton {
 
     function list_post(){
 
-        $join = '';
+        $join = array();
         $cat_limit = '';
-        $archive = '';
+        $where = array();
         if($this->y != 0){
             if($this->m > 0) // SELECT A MONTH
-                $archive = "AND time >= ".mktime(0,0,0,$this->m,1,$this->y)." AND time < ".mktime(0,0,0,$this->m+1,1,$this->y);
+                $where['time'] = array('BETWEEN', mktime(0,0,0,$this->m,1,$this->y) -1, mktime(0,0,0,$this->m+1,1,$this->y) + 1);
             else
-                $archive = "AND time >= ".mktime(0,0,0,1,1,$this->y)." AND time < ".mktime(0,0,0,1,1,$this->y+1);
+                $where['time'] = array('BETWEEN', mktime(0,0,0,1,1,$this->y) -1, mktime(0,0,0,1,1,$this->y+1) + 1);
         } else if($this->category != ''){
             $cat_id = Database::getInstance()->selectField('cat_id', 'blog_category', array('cat_url' => array('LIKE', $this->category)));
-            $join = "JOIN blog_blog_category USING (blog_id)";
-            $cat_limit = "AND cat_id = '{$cat_id}'";
+            $join[] = array('JOIN', 'blog_blog_category', 'USING (blog_id)');
+            $where['cat_id'] = $cat_id;
         }
         if($this->list_per_page > 0)
             $limit = " LIMIT ".intval(($this->page -1) * $this->list_per_page).", {$this->list_per_page}";
-        $this->posts = Database::getInstance()->assoc("SELECT * FROM blog {$join} WHERE 1 {$cat_limit} {$archive} ORDER BY time DESC {$limit}");
-        $this->post_count = Database::getInstance()->field('count',"SELECT COUNT(*) as count FROM blog {$join} WHERE 1 {$cat_limit} {$archive} ORDER BY time DESC");
+        $this->posts = Database::getInstance()->selectAll(
+            array(
+                'from' => 'blog',
+                'join' => $join,
+            ),
+            $where,
+            array(),
+            'ORDER BY time DESC ' . $limit
+        );
+        $this->post_count = Database::getInstance()->count(
+            array(
+                'from' => 'blog',
+                'join' => $join,
+            ),
+            $where)
+        ;
     }
 
     function pagination(){
@@ -99,11 +113,11 @@ class Blog extends Singleton {
     }
 
     function recent_list($remote=false){
-        $c = Database::getInstance()->assoc("SELECT * FROM blog ORDER BY time DESC LIMIT 5");
+        $list = Database::getInstance()->select('blog', array(), array(), 'ORDER BY time DESC LIMIT 5');
         $target = $remote ? "target='_blank'" : '';
-        if(count($c) > 0){
+        if($list->rowCount() > 0){
             echo "<ul>";
-            foreach($c as $r) {
+            foreach($list as $r) {
                 echo "<li><a href='/{$r['url']}.htm' {$target}>{$r['title']}</a></li>";
             }
             echo "</ul>";
@@ -111,23 +125,46 @@ class Blog extends Singleton {
     }
 
     function recent_comment_list($remote=false){
-
-        $c = Database::getInstance()->assoc("SELECT url,title,blog_comment.time,comment FROM blog_comment LEFT JOIN blog USING (blog_id) WHERE approved > 0 ORDER BY time DESC LIMIT 5");
-        if($remote)
-            $target = "target='_blank'";
-        if(count($c) > 0){
+        $list = Database::getInstance()->select(
+            array(
+                'from' => 'blog_comment',
+                'join' => array('LEFT JOIN', 'blog', 'USING (blog_id)'),
+            ),
+            array(
+                'approved' => array('>', 0),
+            ),
+            array(
+                'url',
+                'title',
+                array('time' => array('expression' => 'blog_comment.time')),
+                'comment',
+            )
+        );
+        $target = $remote ? "target='_blank'" : '';
+        if($list->rowCount() > 0){
             echo "<ul>";
-            foreach($c as $r)
+            foreach($list as $r)
                 echo "<li><a href='/{$r['url']}.htm' {$target}>".$this->short_body($r['comment'],50)."...</a> in <a href='/{$r['url']}.htm'>{$r['title']}</a></li>";
             echo "</ul>";
         }
     }
 
     function categories_list(){
-        $c = Database::getInstance()->assoc("SELECT COUNT(*) as count, category FROM blog_blog_category LEFT JOIN blog_category USING (cat_id) GROUP BY cat_id LIMIT 10");
-        if(count($c) > 0){
+        $list = Database::getInstance()->select(
+            array(
+                'from' => 'blog_blog_category',
+                'join' => array('LEFT JOIN', 'blog_category', 'USING (cat_id)'),
+            ),
+            array(),
+            array(
+                array('count' => 'COUNT(*)'),
+                'category',
+            ),
+            'GROUP BY cat_id LIMIT 10'
+        );
+        if($list->rowCount() > 0){
             echo "<ul>";
-            foreach($c as $r)
+            foreach($list as $r)
                 echo "<li><a href='/category/". Scrub::url($r['category']) . ".htm'>{$r['category']}</a> ({$r['count']})</li>";
             echo "</ul>";
         }

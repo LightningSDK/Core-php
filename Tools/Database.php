@@ -83,14 +83,14 @@ class Database extends Singleton {
      *
      * @var boolean
      */
-    private $read_only = FALSE;
+    private $readOnly = FALSE;
 
     /**
      * Whether the current connection is in the transaction state.
      *
      * @var boolean
      */
-    private $in_transaction = FALSE;
+    private $inTransaction = FALSE;
 
     /**
      * Construct this object.
@@ -98,7 +98,7 @@ class Database extends Singleton {
      * @param string $url
      *   Database URL.
      */
-    function __construct($url=''){
+    public function __construct($url=''){
         $this->verbose = Configuration::get('debug');
 
         try {
@@ -114,7 +114,7 @@ class Database extends Singleton {
         } catch (PDOException $e) {
             // Error handling.
             syslog(LOG_EMERG, 'Connection failed: ' . $e->getMessage());
-            if (Configuration::get('debug')) {
+            if ($this->verbose) {
                 die('Connection failed: ' . $e->getMessage());
             }
             else {
@@ -144,13 +144,13 @@ class Database extends Singleton {
      * Set the controller to only execute select queries.
      *
      * @param boolean $value
-     *   Whether read_only should be on or off.
+     *   Whether readOnly should be on or off.
      *
      * @notice
      *   This has no effect on direct query functions like query() and assoc()
      */
-    function read_only($value = TRUE){
-        $this->read_only = $value;
+    public function readOnly($value = TRUE){
+        $this->readOnly = $value;
     }
 
     /**
@@ -159,7 +159,7 @@ class Database extends Singleton {
      * @param boolean $value
      *   Whether to switch to verbose mode.
      */
-    function verbose($value = TRUE){
+    public function verbose($value = TRUE){
         $this->verbose = $value;
     }
 
@@ -168,7 +168,7 @@ class Database extends Singleton {
      *
      * @return array
      */
-    function get_queries(){
+    public function getQueries(){
         return $this->history;
     }
 
@@ -183,7 +183,7 @@ class Database extends Singleton {
      * @throws Exception
      *   When a mysql error occurs.
      */
-    function error_handler($error, $sql){
+    public function errorHandler($error, $sql){
         $errors = array();
 
         // Add a header.
@@ -223,39 +223,37 @@ class Database extends Singleton {
      *
      * @param $sql
      */
-    function log($sql){
+    public function log($sql){
         $this->history[] = $sql;
     }
 
     /**
      * Start a query.
      */
-    function timer_start(){
+    public function timerStart(){
         $this->start = microtime(TRUE);
     }
 
     /**
      * A query is done, add up the times.
      */
-    function timer_query_end(){
+    public function timerQueryEnd(){
         $this->end1 = microtime(TRUE);
     }
 
     /**
      * Stop the timer and add up the times.
      */
-    function timer_end(){
-        if(!$this->verbose){
-            $this->end2 = microtime(TRUE);
-            $this->mysql_time += $this->end1-$this->start;
-            $this->php_time += $this->end2-$this->start;
-        }
+    public function timerEnd(){
+        $this->end2 = microtime(TRUE);
+        $this->mysql_time += $this->end1-$this->start;
+        $this->php_time += $this->end2-$this->start;
     }
 
     /**
      * Reset the clock.
      */
-    function timer_reset(){
+    public function timerReset(){
         $this->query_count = 0;
         $this->mysql_time = 0;
         $this->php_time = 0;
@@ -264,7 +262,7 @@ class Database extends Singleton {
     /**
      * Output a time report
      */
-    function time_report(){
+    public function timeReport(){
         return array(
             "Total Queries: {$this->query_count}",
             "Total SQL Time: {$this->mysql_time}",
@@ -276,7 +274,7 @@ class Database extends Singleton {
      * Raw query handler.
      */
     private function _query($query, $vars = array()){
-        if ($this->read_only) {
+        if ($this->readOnly) {
             if (!preg_match("/^SELECT /i", $query)) {
                 return;
             }
@@ -284,18 +282,18 @@ class Database extends Singleton {
         $this->query_count ++;
         if ($this->verbose) {
             $this->log($query);
-            $this->timer_start();
+            $this->timerStart();
             $this->__query_execute($query, $vars);
-            $this->timer_query_end();
+            $this->timerQueryEnd();
         }
         else {
             $this->__query_execute($query, $vars);
         }
         if (!$this->result) {
-            $this->error_handler($this->connection->errorInfo(), $query);
+            $this->errorHandler($this->connection->errorInfo(), $query);
         }
         elseif ($this->result->errorCode() != "00000") {
-            $this->error_handler($this->result->errorInfo(), $query);
+            $this->errorHandler($this->result->errorInfo(), $query);
         }
     }
 
@@ -316,68 +314,6 @@ class Database extends Singleton {
     }
 
     /**
-     * Returns a single cell of the first row and first column of a query.
-     * For long queries, this should include a LIMIT 1
-     *
-     * @param $field
-     * @param $sql
-     * @return mixed
-     */
-    function field($field, $sql){
-        $this->_query($sql);
-        $r = $this->result->fetch(PDO::FETCH_ASSOC);
-        $this->timer_end();
-        return $r[$field];
-    }
-
-    /**
-     * Returns a single column as an array from a query.
-     *
-     * @param $field
-     *   The name of the column to extract as values.
-     * @param $sql
-     *   The query.
-     * @param string $key
-     *   A secondary optional column to use as the array key.
-     * @return array|bool
-     */
-    function fields($field, $sql, $key=''){
-        $this->_query($sql);
-        $return = array();
-        while($r = $this->result->fetch(PDO::FETCH_ASSOC)){
-            if($key != '')
-                $return[$r[$key]] = $r[$field];
-            else
-                $return[] = $r[$field];
-        }
-        $this->timer_end();
-        if(count($return) > 0)
-            return $return;
-        else
-            return false;
-    }
-
-    /**
-     * When calling an INSERT query, this will return the last inserted auto_increment.
-     *
-     * @param string $sql
-     *   The query with ? placeholders.
-     * @param array $vars
-     *   The variables to replace ?
-     *
-     * @return int|boolean
-     *   The last insert id or FALSE.
-     */
-    function exec_id ($sql, $vars=array()){
-        $this->_query($sql, $vars);
-        $this->timer_end();
-        if($this->result->rowCount() == 0)
-            return false;
-        else
-            return $this->connection->lastInsertId();
-    }
-
-    /**
      * Simple query execution.
      *
      * @param $sql
@@ -385,67 +321,31 @@ class Database extends Singleton {
      *
      * @return PDOStatement
      */
-    function query ($sql, $vars = array()){
+    public function query($sql, $vars = array()){
         $this->_query($sql, $vars);
-        $this->timer_end();
+        $this->timerEnd();
         return $this->result;
-    }
-
-    /**
-     * Returns an array of arrays containing all results.
-     *
-     * @param $sql
-     * @param string $key
-     * @return array
-     */
-    function assoc ($sql, $key=NULL){ // RETURN ARRAY OF ALL ROWS
-        $this->_query($sql);
-        $array = array();
-        if($this->result->rowCount() > 0){
-            while($line = $this->result->fetch(PDO::FETCH_ASSOC)){
-                if(!empty($key))
-                    $array[$line[$key]] = $line;
-                else
-                    $array[] = $line;
-            }
-        }
-        $this->timer_end();
-        return $array;
-    }
-
-    /**
-     * Returns an array of the first result row.
-     */
-    function assoc1($sql, $vars = array()){ // RETURN ONE ROW
-        $this->_query($sql, $vars);
-        $this->timer_end();
-        return $this->result->fetch(PDO::FETCH_ASSOC);
     }
 
     /**
      * Checks if at least one entry exists.
      */
-    function check($table, $where = array()){
+    public function check($table, $where = array()){
         $fields = empty($fields) ? '*' : implode($fields);
         $values = array();
         if (!empty($where)) {
-            $where = ' WHERE ' . $this->sql_implode($where, $values, 'AND');
+            $where = ' WHERE ' . $this->sqlImplode($where, $values, 'AND');
         }
         $this->_query('SELECT ' . $fields . ' FROM ' . $table . $where . ' LIMIT 1', $values);
+        $this->timerEnd();
         return $this->result->rowCount() > 0;
     }
 
     /**
      * Counts total number of matching rows.
      */
-    function count($table, $where = array()){
-        $fields = empty($fields) ? '*' : implode($fields);
-        $values = array();
-        if (!empty($where)) {
-            $where = $this->sql_implode($where, $values);
-        }
-        $this->_query('SELECT ' . $fields . ' FROM ' . $table . $where . ' LIMIT 1', $values);
-        return $this->result->rowCount();
+    public function count($table, $where = array()){
+        return $this->selectField(array('count' => 'COUNT(*)'), $table, $where);
     }
 
     /**
@@ -456,12 +356,13 @@ class Database extends Singleton {
      * @param $where
      * @return db_query
      */
-    function update($table, $data, $where){
+    public function update($table, $data, $where){
         $vars = array();
-        $query = 'UPDATE ' . $table . ' SET ' . $this->sql_implode($data, $vars) . ' WHERE ';
+        $query = 'UPDATE ' . $table . ' SET ' . $this->sqlImplode($data, $vars) . ' WHERE ';
         if (is_array($where)) {
-            $query .= $this->sql_implode($where, $vars);
+            $query .= $this->sqlImplode($where, $vars);
         }
+        $this->timerEnd();
         $this->query($query, $vars);
     }
 
@@ -478,18 +379,20 @@ class Database extends Singleton {
      * @return int
      *   The last inserted id.
      */
-    function insert($table, $data, $existing = FALSE) {
+    public function insert($table, $data, $existing = FALSE) {
         $vars = array();
         $ignore = $existing === TRUE ? 'IGNORE' : '';
-        $set = $this->sql_implode($data, $vars);
-        $duplicate = is_array($existing) ? ' ON DUPLICATE KEY UPDATE ' . $this->sql_implode($existing, $vars) : '';
-        return $this->exec_id('INSERT ' . $ignore . ' INTO `' . $table . '` SET ' . $set . $duplicate, $vars);
+        $set = $this->sqlImplode($data, $vars);
+        $duplicate = is_array($existing) ? ' ON DUPLICATE KEY UPDATE ' . $this->sqlImplode($existing, $vars) : '';
+        $this->query('INSERT ' . $ignore . ' INTO `' . $table . '` SET ' . $set . $duplicate, $vars);
+        $this->timerEnd();
+        return $this->result->rowCount() == 0 ? false : $this->connection->lastInsertId();
     }
 
-    function delete($table, $where) {
+    public function delete($table, $where) {
         $values = array();
         if (is_array($where)) {
-            $where = $this->sql_implode($where, $values);
+            $where = $this->sqlImplode($where, $values);
         }
         $this->query('DELETE FROM `' . $table . '` WHERE ' . $where, $values);
     }
@@ -497,30 +400,69 @@ class Database extends Singleton {
     /**
      * Universal select function.
      */
-    function _select($table, $where = array(), $fields = array(), $limit = NULL, $final = '') {
-        if (empty($fields)) {
-            $fields = '*';
-        } else {
-            foreach ($fields as &$field) {
-                if (is_array($field)) {
-                    $field = current($field) . ' AS `' . key($field) . '`';
-                }
-            }
-            $fields = empty($fields) ? '*' : implode(', ', $fields);
-        }
+    protected function _select($table, $where = array(), $fields = array(), $limit = NULL, $final = '') {
+        $fields = $this->implodeFields($fields);
         $values = array();
-        $where = !empty($where) ? ' WHERE ' . $this->sql_implode($where, $values, ' AND ') : '';
+        $where = !empty($where) ? ' WHERE ' . $this->sqlImplode($where, $values, ' AND ') : '';
         $limit = is_array($limit) ? ' LIMIT ' . $limit[0] . ', ' . $limit[1] . ' '
             : !empty($limit) ? ' LIMIT ' . intval($limit) : '';
-        $this->query('SELECT ' . $fields . ' FROM ' . $table . $where . ' ' . $final . $limit, $values);
+        $this->query('SELECT ' . $fields . ' FROM ' . $this->parseTable($table, $values) . $where . ' ' . $final . $limit, $values);
     }
 
+    /**
+     * Create a query-ready string for a table and it's joins.
+     *
+     * @param string|array $table
+     *   The table name or table with join data.
+     * @param array $values
+     *   The PDO replacement variables.
+     *
+     * @return string
+     *   The query-ready string for the table and it's joins.
+     */
+    protected function parseTable($table, &$values) {
+        if (is_string($table)) {
+            return '`' . $table . '`';
+        }
+        else {
+            $output = $this->parseTable($table['from'], $values);
+            if (isset($table['join'])) {
+                // If the first element of join is not an array, it's an actual join.
+                if (!is_array($table['join'][0])) {
+                    // Wrap it in an array so we can loop over it.
+                    $table['join'] = array($table['join']);
+                }
+                // Foreach join.
+                foreach ($table['join'] as $join) {
+                    $output .= $this->implodeJoin($join[0], $join[1], !empty($join[2]) ? $join[2] : '', $values);
+                    // Add any extra replacement variables.
+                    if (isset($join[3])) {
+                        $values = array_merge($values, $join[3]);
+                    }
+                }
+            }
+            // If this join is a subquery, wrap it.
+            if (is_array($table) && isset($table['as'])) {
+                if (!empty($table['fields'])) {
+                    $output = $this->implodeFields($table['fields']) . ' FROM ' . $output;
+                } else {
+                    $output = ' * FROM ' . $output;
+                }
+                if (!empty($table['order'])) {
+                    $output .= $this->implodeOrder($table['order'], $values);
+                }
+                $output = '( SELECT ' . $output . ') AS ' . $table['as'];
+            }
+            return $output;
+        }
+    }
 
     /**
      * Run a select query and return a result object.
      */
     public function select($table, $where = array(), $fields = array(), $final = ''){
         $this->_select($table, $where, $fields, null, $final);
+        $this->timerEnd();
         return $this->result;
     }
 
@@ -528,7 +470,9 @@ class Database extends Singleton {
      * Run a select query and return a result array.
      */
     public function selectAll($table, $where = array(), $fields = array(), $final = '') {
-        return $this->select($table, $where, $fields, $final)->fetchAll(PDO::FETCH_ASSOC);
+        $result = $this->_select($table, $where, $fields, $final)->fetchAll(PDO::FETCH_ASSOC);
+        $this->timerEnd();
+        return $result;
     }
 
     /**
@@ -537,17 +481,20 @@ class Database extends Singleton {
     public function selectIndexed($table, $key, $where = array(), $fields = array(), $final = '') {
         $this->_select($table, $where, $fields, NULL, $final);
         $results = array();
+        // TODO: This is built in to PDO.
         while ($row = $this->result->fetch(PDO::FETCH_ASSOC)) {
             $results[$row[$key]] = $row;
         }
+        $this->timerEnd();
         return $results;
     }
 
     /**
      * Select just a single row.
      */
-    function selectRow($table, $where = array(), $fields = array(), $final = ''){
+    public function selectRow($table, $where = array(), $fields = array(), $final = ''){
         $this->_select($table, $where, $fields, 1, $final);
+        $this->timerEnd();
         return $this->result->fetch(PDO::FETCH_ASSOC);
     }
 
@@ -567,23 +514,25 @@ class Database extends Singleton {
      *
      * @return array
      */
-    function selectColumn($table, $column, $where = array(), $key = NULL, $final = '') {
+    public function selectColumn($table, $column, $where = array(), $key = NULL, $final = '') {
         $fields = array($column);
         if ($key) {
             array_unshift($fields, $key);
         }
         $this->_select($table, $where, $fields, NULL, $final);
         if ($key) {
-            return $this->result->fetchAll(PDO::FETCH_KEY_PAIR);
+            $output = $this->result->fetchAll(PDO::FETCH_KEY_PAIR);
         } else {
-            return $this->result->fetchAll(PDO::FETCH_COLUMN);
+            $output = $this->result->fetchAll(PDO::FETCH_COLUMN);
         }
+        $this->timerEnd();
+        return $output;
     }
 
     /**
      * Select a single column from the first row.
      */
-    function selectField($field, $table, $where = array(), $final = ''){
+    public function selectField($field, $table, $where = array(), $final = ''){
         $row = $this->selectRow($table, $where, array($field), $final);
         if (is_array($field)) {
             // This is an expression.
@@ -599,35 +548,35 @@ class Database extends Singleton {
      *
      * @return int
      */
-    function affected_rows(){
-        return $this->connection->affected_rows;
+    public function affectedRows(){
+        return $this->connection->affectedRows;
     }
 
     /**
      * Stars a db transaction.
      */
-    function start_transaction(){
+    public function startTransaction(){
         $this->query("BEGIN");
         $this->query("SET autocommit=0");
-        $this->in_transaction = true;
+        $this->inTransaction = true;
     }
 
     /**
      * Ends a db transaction.
      */
-    function commit_transaction(){
+    public function commitTransaction(){
         $this->query("COMMIT");
         $this->query("SET autocommit=1");
-        $this->in_transaction = false;
+        $this->inTransaction = false;
     }
 
     /**
      * Terminates a transaction and rolls back to the previous state.
      */
-    function kill_transaction(){
+    public function killTransaction(){
         $this->query("ROLLBACK");
         $this->query("SET autocommit=1");
-        $this->in_transaction = false;
+        $this->inTransaction = false;
     }
 
     /**
@@ -635,8 +584,65 @@ class Database extends Singleton {
      *
      * @return boolean
      */
-    function in_transaction(){
-        return $this->in_transaction;
+    public function inTransaction(){
+        return $this->inTransaction;
+    }
+
+    /**
+     * Convert an order array into a query string.
+     *
+     * @param array $order
+     *   A list of fields and their order.
+     *
+     * @return string
+     *   SQL ready string.
+     */
+    protected function implodeOrder($order) {
+        $output = ' ORDER BY ';
+        foreach ($order as $field => $direction) {
+            $output .= '`' . $field . '` ' . $direction;
+        }
+        return $output;
+    }
+
+    /**
+     * Implode a join from the name, table, condition, etc.
+     *
+     * @param string $joinType
+     *   LEFT JOIN, JOIN, RIGHT JOIN, INNER JOIN
+     * @param string|array $table
+     *   The table criteria
+     * @param string $condition
+     *   Including USING or ON
+     * @param array $values
+     *   The PDO replacement variables.
+     *
+     * @return string
+     *   The SQL query segment.
+     */
+    protected function implodeJoin($joinType, $table, $condition, &$values) {
+        return ' ' . $joinType . ' ' . $this->parseTable($table, $values) . ' ' . $condition;
+    }
+
+    /**
+     * Convert a list of fields into a string.
+     *
+     * @param array $fields
+     *   A list of fields and their aliases to retrieve.
+     *
+     * @return string
+     *   The SQL query segment.
+     */
+    protected function implodeFields($fields) {
+        foreach ($fields as &$field) {
+            if (is_array($field)) {
+                // This field is an expression.
+                $field = current($field) . ' AS `' . key($field) . '`';
+            } else {
+                $field = '`' . $field . '`';
+            }
+        }
+        return empty($fields) ? '*' : implode(', ', $fields);
     }
 
     /**
@@ -652,33 +658,42 @@ class Database extends Singleton {
      * @return string
      *   The query string segment.
      */
-    public function sql_implode($array, &$values, $concatenator=', '){
+    public function sqlImplode($array, &$values, $concatenator=', '){
         $a2 = array();
         foreach ($array as $k=>$v) {
+            // This might change from an and to an or.
+            if ($k == '#operator') {
+                $concatenator = $v;
+                continue;
+            }
+            // If the value is an array.
             if (is_array($v)) {
+                // Value is an expression.
                 if (!empty($v['expression'])) {
                     $a2[] = "`{$k}` = {$v['value']}";
                     if (!empty($v['vars']) && is_array($v['vars'])) {
                         $values = array_merge($values, $v['vars']);
                     }
                 }
-                // $v has more options.
+                // IN operator.
                 elseif (strtoupper($v[0]) == 'IN') {
                     $values = array_merge($values, array_values($v[1]));
                     $a2[] = "`{$k}` IN (" . implode(array_fill(0, count($v[1]), '?'), ",") . ")";
                 }
+                // Between operator.
                 elseif (strtoupper($v[0]) == 'BETWEEN') {
                     $a2[] = "`{$k}` BETWEEN ? AND ? ";
                     $values[] = $v[1];
                     $values[] = $v[2];
                 }
+                // Single comparison operators.
                 elseif (in_array($v[0], array('!=', '<', '<=', '>', '>=', 'LIKE'))) {
                     $values[] = $v[1];
                     $a2[] = " `{$k}` {$v[0]} ? ";
                 }
             }
             else {
-                // String or numeric simple.
+                // Standard key/value column = value.
                 $values[] = $v;
                 $a2[] = " `{$k}` = ? ";
             }
@@ -686,6 +701,16 @@ class Database extends Singleton {
         return implode($concatenator, $a2);
     }
 
+    /**
+     * Create a new table.
+     *
+     * @param string $table
+     *   The table name.
+     * @param array $columns
+     *   The columns to add.
+     * @param array $indexes
+     *   The indexes to add.
+     */
     public function createTable($table, $columns, $indexes) {
         $primary_added = false;
 
@@ -723,6 +748,19 @@ class Database extends Singleton {
         $this->query($query);
     }
 
+    /**
+     * Create a column definition for adding to a table.
+     *
+     * @param string $name
+     *   The name of the column.
+     * @param array $settings
+     *   The definition of the column.
+     * @param boolean $primary
+     *   Whether this column should be the primary key.
+     *
+     * @return string
+     *   The column definition.
+     */
     protected function getColumnDefinition($name, $settings, $primary = false) {
         $definition = "`{$name}` ";
 
@@ -752,6 +790,17 @@ class Database extends Singleton {
         return $definition;
     }
 
+    /**
+     * Create an index definition to add to a table.
+     *
+     * @param string $name
+     *   The index name.
+     * @param array $settings
+     *   The index definition.
+     *
+     * @return string
+     *   The index definition.
+     */
     protected function getIndexDefinition($name, $settings) {
         // Figure out the columns.
         if (is_array($settings['columns'])) {

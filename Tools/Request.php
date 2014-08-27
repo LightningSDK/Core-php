@@ -42,20 +42,25 @@ class Request {
     public static function getFromURL($regex) {
         $args = func_get_args();
         preg_match($regex, $_GET['request'], $matches);
-        $args[0] = $matches[1];
-        return call_user_func_array('self::clean', $args);
+        if (isset($matches[1])) {
+            $args[0] = $matches[1];
+            return call_user_func_array('self::clean', $args);
+        } else {
+            return null;
+        }
     }
 
     /**
      * Access GET/POST inputs from request.
      *
      * @param $var
-     *  The name of the variable from $_REQUEST
+     *   The name of the variable from $_REQUEST
      * @param string $type
-     *  The type of data to allow. This will default to plain text.
+     *   The type of data to allow. This will default to plain text.
      * @param $subtype
      *
-     * @return value or false if none.
+     * @return mixed
+     *   value or false if none.
      */
     public static function get($var, $type='', $subtype=''){
         if(!isset($_REQUEST[$var]))

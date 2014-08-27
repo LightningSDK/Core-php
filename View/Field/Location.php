@@ -18,8 +18,7 @@ class Location {
      *   The query condition.
      */
     public static function zipQuery($zip, $distance) {
-        if($start = Database::getInstance()->assoc1("select * from zipcode where zip = '$zip'")){
-
+        if($start = Database::getInstance()->selectRow('zipcode', array('zip' => $zip))){
             $lat1 = $start['lat'];
             $lon1 = $start['long'];
             //earth's radius in miles
@@ -31,7 +30,10 @@ class Location {
             $lonE = rad2deg(deg2rad($lon1) + atan2(sin(deg2rad(90)) * sin($distance / $r) * cos(deg2rad($lat1)), cos($distance / $r) - sin(deg2rad($lat1)) * sin(deg2rad($latN))));
             $lonW = rad2deg(deg2rad($lon1) + atan2(sin(deg2rad(270)) * sin($distance / $r) * cos(deg2rad($lat1)), cos($distance / $r) - sin(deg2rad($lat1)) * sin(deg2rad($latN))));
 
-            return "(lat <= $latN AND lat >= $latS AND `long` <= $lonE AND `long` >= $lonW)";
+            return array(
+                'lat' => array('BETWEEN', $latS, $latN),
+                'long' => array('BETWEEN', $lonW, $lonE),
+            );
         }
         return "";
     }
