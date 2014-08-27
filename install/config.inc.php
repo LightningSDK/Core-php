@@ -18,6 +18,13 @@ $conf = array(
         'cc' => array(),
         'bcc' => array(),
     ),
+    'mailer' => array(
+        'test' => array(),
+        'spam_test' => array(),
+        'spam_test_from' => null,
+        'mail_from' => null,
+        'mail_from_name' => null,
+    ),
     'meta_data' => array(
         'title' => '',
         'keywords' => '',
