@@ -81,7 +81,7 @@ class Configuration {
             foreach (array(CONFIG_PATH . '/config.inc.php', HOME_PATH . '/Lightning/Config.php') as $config_file)
             if (file_exists($config_file)) {
                 include $config_file;
-                self::$configuration = array_merge_recursive(self::$configuration, $conf);
+                self::$configuration = array_replace_recursive(self::$configuration, $conf);
             } else {
                 echo "not found $config_file";
             }
