@@ -2,7 +2,9 @@
 
 namespace Lightning\Controller;
 
-abstract class IncomingMail {
+use Lightning\CLI\CLI;
+
+abstract class IncomingMail extends CLI {
     /**
      * An email parser.
      *
