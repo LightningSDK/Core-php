@@ -7,7 +7,7 @@ use Lightning\Tools\Output;
 use Lightning\Tools\Template;
 use Lightning\View\TrackerHistory;
 
-class AdminMailingStats extends Page {
+class Stats extends Page {
     public function __construct() {
         if (ClientUser::getInstance()->details['type'] < 5) {
             Output::accessDenied();

@@ -23,6 +23,8 @@ class Messenger {
      */
     protected static $errors = array();
 
+    protected static $verbose = false;
+
     /**
      * Add an error to the queue.
      *
@@ -32,6 +34,9 @@ class Messenger {
     public static function error($error) {
         if (!empty($error)) {
             self::$errors[] = $error;
+        }
+        if (self::$verbose) {
+            echo "Error: $error \n";
         }
     }
 
@@ -44,6 +49,9 @@ class Messenger {
     public static function message($message) {
         if (!empty($message)) {
             self::$messages[] = $message;
+        }
+        if (self::$verbose) {
+            echo "Message: $message \n";
         }
     }
 
@@ -87,5 +95,9 @@ class Messenger {
                 self::error($lang->translate($error));
             }
         }
+    }
+
+    public static function setVerbose($verbose = true) {
+        self::$verbose = $verbose;
     }
 }
