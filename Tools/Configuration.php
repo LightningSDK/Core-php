@@ -1,12 +1,15 @@
 <?php
+/**
+ * @file
+ * Lightning\Tools\Configuration
+ */
 
 namespace Lightning\Tools;
 
 /**
- * Class Configuration
- * @package Lightning\Tools
- *
  * A helper to load variables from the configuration.
+ *
+ * @package Lightning\Tools
  */
 class Configuration {
     /**

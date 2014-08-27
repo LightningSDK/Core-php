@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains a wrapper for the CK Editor
+ * Lightning\Tools\CKEditor
  */
 
 namespace Lightning\Tools;
@@ -10,7 +10,8 @@ use Lightning\Tools\Singleton;
 use Lightning\View\JS;
 
 /**
- * Class CKEditor
+ * Contains a wrapper for the CK Editor
+ *
  * @package Lightning\Tools
  */
 class CKEditor extends Singleton {

@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Lightning\Pages\Blog
+ */
 
 namespace Lightning\Pages;
 
@@ -13,6 +17,11 @@ use Lightning\Tools\Table;
 use Lightning\Tools\Template;
 use Lightning\View\Page;
 
+/**
+ * A page handler for viewing and editing the blog.
+ *
+ * @package Lightning\Pages
+ */
 class Blog extends Page {
     public function get() {
         $blog_id = Request::get('id', 'int') | Request::get('blog_id', 'int');

@@ -1,13 +1,17 @@
 <?php
+/**
+ * @file
+ * Lightning\Tools\ClientUser
+ */
 
 namespace Lightning\Tools;
 
 use Lightning\Model\User;
 
 /**
- * Class User
- *
  * A singleton for the global user.
+ *
+ * @package Lightning\Tools.
  */
 class ClientUser extends Singleton {
 

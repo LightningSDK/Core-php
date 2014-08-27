@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Lightning\Tools\Database
+ */
 
 namespace Lightning\Tools;
 
@@ -7,6 +11,11 @@ use PDO;
 use PDOException;
 use PDOStatement;
 
+/**
+ * A database abstraction layer.
+ *
+ * @package Lightning\Tools
+ */
 class Database extends Singleton {
     /**
      * The mysql connection.
@@ -124,7 +133,10 @@ class Database extends Singleton {
     }
 
     /**
+     * Get the default database instance.
+     *
      * @return Database
+     *   The singleton Database object.
      */
     public static function getInstance() {
         return parent::getInstance();
@@ -167,6 +179,7 @@ class Database extends Singleton {
      * Outputs a list of queries that have been called during this page request.
      *
      * @return array
+     *   A list of executed queries.
      */
     public function getQueries(){
         return $this->history;
@@ -222,6 +235,7 @@ class Database extends Singleton {
      * Saves a query to the history and should be called on each query.
      *
      * @param $sql
+     *   Add a query to the sql log.
      */
     public function log($sql){
         $this->history[] = $sql;
@@ -272,6 +286,11 @@ class Database extends Singleton {
 
     /**
      * Raw query handler.
+     *
+     * @param string $query
+     *   The rendered query.
+     * @param array $vars
+     *   A list of replacement variables.
      */
     private function _query($query, $vars = array()){
         if ($this->readOnly) {
@@ -300,8 +319,10 @@ class Database extends Singleton {
     /**
      * Execute query and pull results object.
      *
-     * @param $query
-     * @param $vars
+     * @param string $query
+     *   The rendered query.
+     * @param array $vars
+     *   A list of replacement variables.
      */
     private function __query_execute($query, $vars) {
         if (!empty($vars)) {
@@ -316,19 +337,29 @@ class Database extends Singleton {
     /**
      * Simple query execution.
      *
-     * @param $sql
+     * @param string $query
+     *   The rendered query.
      * @param array $vars
+     *   A list of replacement variables.
      *
      * @return PDOStatement
      */
-    public function query($sql, $vars = array()){
-        $this->_query($sql, $vars);
+    public function query($query, $vars = array()){
+        $this->_query($query, $vars);
         $this->timerEnd();
         return $this->result;
     }
 
     /**
      * Checks if at least one entry exists.
+     *
+     * @param array|string $table
+     *   The table and optionally joins.
+     * @param array $where
+     *   A list of conditions for the query.
+     *
+     * @return boolean
+     *   Whether there is at least one matching entry.
      */
     public function check($table, $where = array()){
         $fields = empty($fields) ? '*' : implode($fields);
@@ -343,6 +374,14 @@ class Database extends Singleton {
 
     /**
      * Counts total number of matching rows.
+     *
+     * @param array|string $table
+     *   The table and optionally joins.
+     * @param array $where
+     *   A list of conditions for the query.
+     *
+     * @return integer
+     *   How many matching rows were found.
      */
     public function count($table, $where = array()){
         return $this->selectField(array('count' => 'COUNT(*)'), $table, $where);
@@ -351,10 +390,12 @@ class Database extends Singleton {
     /**
      * Update a row.
      *
-     * @param $table
-     * @param $data
-     * @param $where
-     * @return db_query
+     * @param string $table
+     *   The table to update.
+     * @param array $data
+     *   A list of new values keyed by the column.
+     * @param array $where
+     *   A list of conditions on which rows to update.
      */
     public function update($table, $data, $where){
         $vars = array();
@@ -376,7 +417,7 @@ class Database extends Singleton {
      * @param boolean|array $existing
      *   TRUE to ignore, an array to update.
      *
-     * @return int
+     * @return integer
      *   The last inserted id.
      */
     public function insert($table, $data, $existing = FALSE) {
@@ -399,6 +440,17 @@ class Database extends Singleton {
 
     /**
      * Universal select function.
+     *
+     * @param array|string $table
+     *   The table and optionally joins.
+     * @param array $where
+     *   A list of conditions for the query.
+     * @param array $fields
+     *   A list of fields to select.
+     * @param array|integer $limit
+     *   A limited number of rows.
+     * @param string $final
+     *   A final string to append to the query, such as limit and sort.
      */
     protected function _select($table, $where = array(), $fields = array(), $limit = NULL, $final = '') {
         $fields = $this->implodeFields($fields);
@@ -459,6 +511,18 @@ class Database extends Singleton {
 
     /**
      * Run a select query and return a result object.
+     *
+     * @param array|string $table
+     *   The table and optionally joins.
+     * @param array $where
+     *   A list of conditions for the query.
+     * @param array $fields
+     *   A list of fields to select.
+     * @param string $final
+     *   A final string to append to the query, such as limit and sort.
+     *
+     * @return PDOStatement
+     *   The query results.
      */
     public function select($table, $where = array(), $fields = array(), $final = ''){
         $this->_select($table, $where, $fields, null, $final);
@@ -468,6 +532,18 @@ class Database extends Singleton {
 
     /**
      * Run a select query and return a result array.
+     *
+     * @param array|string $table
+     *   The table and optionally joins.
+     * @param array $where
+     *   A list of conditions for the query.
+     * @param array $fields
+     *   A list of fields to select.
+     * @param string $final
+     *   A final string to append to the query, such as limit and sort.
+     *
+     * @return PDOStatement
+     *   The query results.
      */
     public function selectAll($table, $where = array(), $fields = array(), $final = '') {
         $this->_select($table, $where, $fields, $final);
@@ -478,6 +554,20 @@ class Database extends Singleton {
 
     /**
      * Run a select query and return the rows indexed by a key.
+     *
+     * @param array|string $table
+     *   The table and optionally joins.
+     * @param string $key
+     *   The column to use as the array index.
+     * @param array $where
+     *   A list of conditions for the query.
+     * @param array $fields
+     *   A list of fields to select.
+     * @param string $final
+     *   A final string to append to the query, such as limit and sort.
+     *
+     * @return array
+     *   The query results keyed by $key.
      */
     public function selectIndexed($table, $key, $where = array(), $fields = array(), $final = '') {
         $this->_select($table, $where, $fields, NULL, $final);
@@ -492,6 +582,18 @@ class Database extends Singleton {
 
     /**
      * Select just a single row.
+     *
+     * @param array|string $table
+     *   The table and optionally joins.
+     * @param array $where
+     *   A list of conditions for the query.
+     * @param array $fields
+     *   A list of fields to select.
+     * @param string $final
+     *   A final string to append to the query, such as limit and sort.
+     *
+     * @return array
+     *   A single row from the database.
      */
     public function selectRow($table, $where = array(), $fields = array(), $final = ''){
         $this->_select($table, $where, $fields, 1, $final);
@@ -514,6 +616,7 @@ class Database extends Singleton {
      *   Additional query data.
      *
      * @return array
+     *   All values from the column.
      */
     public function selectColumn($table, $column, $where = array(), $key = NULL, $final = '') {
         $fields = array($column);
@@ -532,6 +635,18 @@ class Database extends Singleton {
 
     /**
      * Select a single column from the first row.
+     *
+     * @param string $field
+     *   The column to select from.
+     * @param array|string $table
+     *   The table and optionally joins.
+     * @param array $where
+     *   A list of conditions for the query.
+     * @param string $final
+     *   A final string to append to the query, such as limit and sort.
+     *
+     * @return mixed
+     *   A single field value.
      */
     public function selectField($field, $table, $where = array(), $final = ''){
         $row = $this->selectRow($table, $where, array($field), $final);
@@ -547,10 +662,11 @@ class Database extends Singleton {
     /**
      * Gets the number of affected rows from the last query.
      *
-     * @return int
+     * @return integer
+     *   The number of rows that were affected.
      */
     public function affectedRows(){
-        return $this->connection->affectedRows;
+        return $this->result->rowCount();
     }
 
     /**
@@ -584,6 +700,7 @@ class Database extends Singleton {
      * Determine if the connection is currently in a transactional state.
      *
      * @return boolean
+     *   Whther the current connection is in a transaction.
      */
     public function inTransaction(){
         return $this->inTransaction;

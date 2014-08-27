@@ -1,8 +1,13 @@
 <?php
+/**
+ * @file
+ * Lightning\Pages\Mailing\Send
+ */
 
 namespace Lightning\Pages\Mailing;
 
 use Lightning\Model\Message;
+use Lightning\Tools\ClientUser;
 use Lightning\Tools\Database;
 use Lightning\Tools\Mailer;
 use Lightning\Tools\Messenger;
@@ -11,7 +16,24 @@ use Lightning\Tools\Request;
 use Lightning\Tools\Template;
 use Lightning\View\Page;
 
+/**
+ * A page handler for the send message controls and callbacks.
+ *
+ * @package Lightning\Pages\Mailing
+ */
 class Send extends Page {
+    /**
+     * Require admin privileges.
+     */
+    public function __construct() {
+        if (ClientUser::getInstance()->details['type'] < 5) {
+            Output::accessDenied();
+        }
+    }
+
+    /**
+     * The main page with options to send emails or tests.
+     */
     public function get() {
         $message_id = Request::get('id', 'int');
         if (!$message_id || !$message = Database::getInstance()->selectRow('message', array('message_id' => $message_id))) {
@@ -24,6 +46,9 @@ class Send extends Page {
         $template->set('message', $message);
     }
 
+    /**
+     * Send all the messages with streaming output for XHR monitoring.
+     */
     public function postSendAll() {
         Output::disableBuffering();
         $mailer = new Mailer(true);
@@ -31,12 +56,18 @@ class Send extends Page {
         exit;
     }
 
+    /**
+     * Get a count of how many emails to be sent with output for XHR monitoring.
+     */
     public function postSendCount() {
         $message = new Message(Request::get('id', 'int'));
         echo 'Sending now will go to ' . $message->getUsersCount() . ' users.';
         exit;
     }
 
+    /**
+     * Send a test email.
+     */
     public function postSendTest() {
         Output::disableBuffering();
         $mailer = new Mailer(true);
