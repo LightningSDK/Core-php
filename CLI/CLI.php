@@ -19,7 +19,7 @@ class CLI {
      */
     public function execute() {
         global $argv;
-        $func = 'execute' . Request::convertFunctionName('execute', $argv[2]);
+        $func = Request::convertFunctionName('execute', $argv[2]);
         if (method_exists($this, $func)) {
             $this->$func();
         }
