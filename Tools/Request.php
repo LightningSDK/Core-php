@@ -203,6 +203,7 @@ class Request {
             case 'email':
             case 'boolean':
             case 'hex':
+            case 'base64':
             case 'html':
                 $args = func_get_args();
                 // Remove the second item, the type.
