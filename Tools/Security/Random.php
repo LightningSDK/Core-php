@@ -1,12 +1,16 @@
 <?php
 
-namespace Lightning\Tools;
+namespace Lightning\Tools\Security;
+
+use Lightning\Tools\Configuration;
+use Lightning\Tools\Singleton;
 
 class Random extends Singleton {
 
     const INT = 1;
     const HEX = 2;
     const BIN = 3;
+    const BASE64 = 4;
 
     protected $engine;
 
@@ -42,12 +46,14 @@ class Random extends Singleton {
 
         // Format the random data.
         switch ($format) {
-            case self::INT;
+            case self::INT:
                 return bindec($random);
-            case self::BIN;
+            case self::BIN:
                 return $random;
-            case self::HEX;
+            case self::HEX:
                 return bin2hex($random);
+            case self::BASE64:
+                return base64_encode($random);
         }
     }
 }
