@@ -2,6 +2,8 @@
 
 namespace Lightning\Tools;
 
+use Lightning\Tools\Security\Random;
+
 class Session extends Singleton {
     // @todo these vars can probably be removed?
     var $id = 0;								// ROW ID in DB
