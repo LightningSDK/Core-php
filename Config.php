@@ -8,6 +8,7 @@ $conf = array(
         'cli_only' => array(
             'database' => 'Lightning\\CLI\\Database',
             'user' => 'Lightning\\CLI\\User',
+            'security' => 'Lightning\\CLI\\Security',
         ),
     ),
     'session' => array(
