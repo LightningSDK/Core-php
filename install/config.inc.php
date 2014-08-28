@@ -25,6 +25,13 @@ $conf = array(
         'mail_from' => null,
         'mail_from_name' => null,
     ),
+    'tracker' => array(
+        'allow_unencrypted' => true,
+        // Generate a new key by going to the Lightning directory and running
+        // ./lightning security generate-aes-key
+        // **** THIS KEY IS INCLUDED WITH THE DISTRIBUTION AND IS NOT SECURE ****
+        'key' => '0Xx+v7xGDanBpTgDoIqwlA==:JPJdzm5ifvePYztVj1ICrQ==',
+    ),
     'meta_data' => array(
         'title' => '',
         'keywords' => '',
@@ -56,6 +63,7 @@ $conf = array(
             'admin/mailing/stats' => 'Lightning\\Pages\\AdminMailingStats',
             'admin/tracker' => 'Lightning\\Pages\\AdminTracker',
             'sitemap' => 'Lightning\\Pages\\Sitemap',
+            'track' => 'Lightning\\Pages\\Track',
         ),
     ),
     'language' => 'en_us',
