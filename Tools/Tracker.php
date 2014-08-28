@@ -2,6 +2,7 @@
 
 namespace Lightning\Tools;
 
+use Lightning\Tools\Security\Encryption;
 use Lightning\View\Field\Time;
 
 class Tracker extends Singleton {
@@ -52,12 +53,27 @@ class Tracker extends Singleton {
      * @param integer $user_id
      *   The user committing the action.
      */
-    public static function trackEvent($tracker_name = '', $sub_id = 0, $user_id = -1){
+    public static function trackEvent($tracker_name, $sub_id = 0, $user_id = -1){
+        $tracker_id = self::getTrackerId($tracker_name);
+        self::trackEventID($tracker_id, $sub_id, $user_id);
+    }
+
+    /**
+     * Track an event with a known tracker ID.
+     *
+     * @param integer $tracker_id
+     *   The ID of the tracker.
+     * @param integer $sub_id
+     *   The tracker sub id.
+     * @param $user_id
+     *   The user id.
+     */
+    public static function trackEventID($tracker_id, $sub_id = 0, $user_id = -1) {
         if($user_id == -1){
             $user_id = ClientUser::getInstance()->id;
         }
-        $tracker_id = self::getTrackerId($tracker_name);
-        $today = Time::today(); gregoriantojd(date('m'),date('d'),date('Y'));
+
+        $today = Time::today();
 
         // Insert the event.
         Database::getInstance()->insert(
@@ -69,6 +85,46 @@ class Tracker extends Singleton {
                 'date' => $today
             )
         );
+    }
+
+    /**
+     * Generate an encrypted tracker string.
+     *
+     * @param string $tracker_name
+     *   The tracker name.
+     * @param integer $sub_id
+     *   The tracker sub id.
+     * @param $user_id
+     *   The user id.
+     *
+     * @return string
+     *   Then encrypted data.
+     */
+    public static function getTrackerLink($tracker_name, $sub_id = 0, $user_id = -1) {
+        // Generate a json encoded string with the tracking data.
+        $string = json_encode(array(
+            'tracker' => self::getTrackerId($tracker_name),
+            'sub' => $sub_id,
+            'user' => $user_id > -1 ? $user_id : ClientUser::getInstance()->id,
+        ));
+
+        // Encrypt the string with the public key.
+        return Encryption::aesEncrypt(Configuration::get('tracker.key'), $string);
+    }
+
+    /**
+     * Add a tracker hit from an encrypted link.
+     *
+     * @param string $tracker_string
+     *   Encrypted data.
+     */
+    public static function trackLink($tracker_string) {
+        // Decrypt and decode the string with the private key.
+        $string = Encryption::aesDecrypt(Configuration::get('tracker.key'), $tracker_string);
+        $data = json_decode($string);
+
+        // Track the data.
+        self::trackEventID($data['tracker'], $data['sub'], $data['user']);
     }
 
     /**
