@@ -7,7 +7,7 @@ use Lightning\Tools\Database;
 use Lightning\Tools\Logger;
 use Lightning\Tools\Mailer;
 use Lightning\Tools\Messenger;
-use Lightning\Tools\Random;
+use Lightning\Tools\Security\Random;
 use Lightning\Tools\Request;
 use Lightning\Tools\Scrub;
 use Lightning\Tools\Session;
@@ -231,7 +231,7 @@ class User {
         return $user_id;
     }
 
-    function random_pass(){
+    function randomPass(){
         $alphabet = "abcdefghijkmnpqrstuvwxyz";
         $arrangement = "aaaaaaaAAAAnnnnn";
         $pass = "";
@@ -300,17 +300,17 @@ class User {
         } else if(isset($user_info['password'])){
             // user exists without password
             // set password, send email
-            $random_pass = $this->random_pass();
-            $this->setPass($random_pass, $email);
-            send_mail($email, '', "New Account", "Your account has been created with a temporary password. Your temporary password is: {$random_pass}\n\nTo reset your password, log in with your temporary password and click 'my profile'. Follow the instructions to reset your new password.");
+            $randomPass = $this->randomPass();
+            $this->setPass($randomPass, $email);
+            send_mail($email, '', "New Account", "Your account has been created with a temporary password. Your temporary password is: {$randomPass}\n\nTo reset your password, log in with your temporary password and click 'my profile'. Follow the instructions to reset your new password.");
             Database::getInstance()->query("UPDATE user SET register_date = {$today}, confirmed = ".rand(100000,9999999).", type=1 WHERE user_id = {$user_info['user_id']}");
             return $user_info['user_id'];
         } else {
             // user does not exist
             // create user with random password, send email to activate
-            $random_pass = $this->random_pass();
-            $user_id = $this->insertUser($email, $random_pass, $first_name, $last_name);
-            send_mail($email, '', "New Account", "Your account has been created with a temporary password. Your temporary password is: {$random_pass}\n\nTo reset your password, log in with your temporary password and click 'my profile'. Follow the instructions to reset your new password.");
+            $randomPass = $this->randomPass();
+            $user_id = $this->insertUser($email, $randomPass, $first_name, $last_name);
+            send_mail($email, '', "New Account", "Your account has been created with a temporary password. Your temporary password is: {$randomPass}\n\nTo reset your password, log in with your temporary password and click 'my profile'. Follow the instructions to reset your new password.");
             Database::getInstance()->query("UPDATE user SET register_date = {$today}, confirmed = ".rand(100000,9999999).", type=1 WHERE user_id = {$user_id}");
             return $user_id;
         }
@@ -337,17 +337,31 @@ class User {
         return $user_id;
     }
 
-    function reset_password($email){
-        $pass = $this->random_pass();
+    function fullName() {
+        return $this->details['first'] . ' ' . $this->details['last'];
+    }
+
+    /**
+     * Send a new random password via email.
+     */
+    function sendTempPass(){
+        $pass = $this->randomPass();
         $salt = $this->getSalt();
-        Database::getInstance()->query("UPDATE user SET password = '".$this->passHash($pass,$salt)."', salt='".bin2hex($salt)."' WHERE email = '".strtolower($email)."'");
-        if(send_mail($email, $name, "Password reset", "Your password has been reset. Your temporary password is: $pass\n\nTo reset your password, log in with your temporary password and click 'my profile' in the top right corner of the web page. Follow the instructions to reset your new password.")){
-            $messages[] = 'Your password has been reset. A temporary password has been sent to your email.';
-            // this mneed to go somewhere else
-//			$template::get->assign("redirect", "/profile.php");
-        } else {
-            $errors[] = 'There was an error sending the email. Please try again later.';
-        }
+        Database::getInstance()->update(
+            'user',
+            array(
+                'password' => $this->passHash($pass,$salt),
+                'sald' => bin2hex($salt),
+            ),
+            array(
+                'email' => strtolower($this->details['email']),
+            )
+        );
+        $mailer = new Mailer();
+        $mailer->to($this->details['email'], $this->fullName())
+            ->subject('Password reset')
+            ->message("Your password has been reset. Your temporary password is: $pass\n\nTo reset your password, log in with your temporary password and click 'my profile' in the top right corner of the web page. Follow the instructions to reset your new password.");
+        return $mailer->send();
     }
 
     public static function find_by_email($email){

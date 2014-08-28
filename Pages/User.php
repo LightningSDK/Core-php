@@ -10,6 +10,7 @@ use Lightning\Tools\Navigation;
 use Lightning\Tools\Request;
 use Lightning\Tools\Template;
 use Lightning\View\Page;
+use Lightning\Model\User as UserObj;
 
 class User extends Page {
     public function get() {
@@ -23,14 +24,17 @@ class User extends Page {
     }
 
     public function postRegister() {
-        if (!empty($_POST['email']) && $_POST['password'] == $_POST['password2']){
+        $email = Request::post('email');
+        $pass = Request::post('password');
+        $pass2 = Request::post('password2');
+        if ($email && $pass == $pass2){
             $user = ClientUser::getInstance();
             $previous_user = $user->id;
-            if($user->create($_POST['email'], $_POST['password'])){
-                $user->login($_POST['email'], $_POST['password']);
+            if($user->create($email, $pass)){
+                $user->login($email, $pass2);
                 if($previous_user != 0)
                     $user->merge_users($previous_user);
-                if($_POST['redirect'] != "" && !strstr($_POST['redirect'],"user.php"))
+                if($_POST['redirect'] != '' && !preg_match('|/?user[/$?]|', $_POST['redirect']))
                     Navigation::redirect($_POST['redirect']);
                 else
                     Navigation::redirect($user->login_url);
@@ -64,12 +68,22 @@ class User extends Page {
         exit;
     }
 
+    /**
+     * Send a temporary password.
+     *
+     * @todo This is not secure. There should be a security question and email should just be a link.
+     */
     public function postReset() {
-        if($email = Request::get('email', 'email')){
-            if (ClientUser::getInstance()->reset_password($email)) {
-                Messenger::message('Your password has been reset. Please check your email for a temporary password.');
-                return Message::end();
-            }
+        if (!$email = Request::get('email', 'email')) {
+            Messenger::error('Invalid email');
+            return;
+        }
+        elseif (!$user = UserObj::loadByEmail($email)) {
+            Messenger::error('User does not exist.');
+            return;
+        }
+        if ($user->sendTempPass()) {
+            Messenger::message('Your password has been reset. Please check your email for a temporary password.');
         }
     }
 
