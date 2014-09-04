@@ -62,10 +62,26 @@ class User extends Page {
         }
     }
 
+    /**
+     * Log the user out and redirect them to the exit page.
+     */
     public function getLogout() {
         ClientUser::getInstance()->logout();
         Navigation::redirect('Location: ' . Configuration::get('logout_url') ?: '/');
         exit;
+    }
+
+    /**
+     * Unsubscribe the user from all mailing lists.
+     */
+    public function getUnsubscribe() {
+        if ($cyphserstring = Request::get('u', 'encrypted')) {
+            $user = UserObj::loadByEncryptedUserReference($cyphserstring);
+            $user->setActive(0);
+            Messenger::message('Your email ' . $user->details['email'] . ' has been removed from all mailing lists.');
+        } else {
+            Messenger::error('Invalid request');
+        }
     }
 
     /**
@@ -91,6 +107,9 @@ class User extends Page {
 
     }
 
+    /**
+     * @todo this method needs to be updated.
+     */
     public function postChangePass() {
         $template = Template::getInstance();
         $user = ClientUser::getInstance();
@@ -103,11 +122,9 @@ class User extends Page {
                 $template->set("change_password", true);
             }
         } else {
-            $errors[] = "Your password is not secure. Please pick a more secure password.";
+            Messenger::error('Your password is not secure. Please pick a more secure password.');
             $template->set("change_password", true);
         }
-        $template->set("code",$_GET['code'].$_POST['code']);
-        $template->set("email",$_GET['email'].$_POST['email']);
     }
 
     public function loginRedirect() {
@@ -120,25 +137,3 @@ class User extends Page {
         }
     }
 }
-
-//// SET DEFAULT PAGE
-//$sub_page = Request::get('p');
-//$action = Request::get('action');
-//$user = ClientUser::getInstance();
-//$template = Template::getInstance();
-//
-//$page = "user";
-//
-//if(isset($_GET['redirect'])) {
-//  $template->set('redirect',$_GET['redirect']);
-//}
-//elseif(isset($_POST['redirect'])) {
-//  $template->set('redirect',$_POST['redirect']);
-//}
-//// else if cookie
-//// else if referer
-//
-//
-//$template->set("l_page", $sub_page);
-//
-//Template::getInstance()->set('content', $page);

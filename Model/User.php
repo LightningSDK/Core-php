@@ -3,10 +3,12 @@
 namespace Lightning\Model;
 
 use Lightning\Tools\ClientUser;
+use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
 use Lightning\Tools\Logger;
 use Lightning\Tools\Mailer;
 use Lightning\Tools\Messenger;
+use Lightning\Tools\Security\Encryption;
 use Lightning\Tools\Security\Random;
 use Lightning\Tools\Request;
 use Lightning\Tools\Scrub;
@@ -14,31 +16,56 @@ use Lightning\Tools\Session;
 use Lightning\View\Field\Time;
 
 class User {
+    /**
+     * A default user with no priviliges.
+     */
     const TYPE_UNREGISTERED_USER = 0;
+
+    /**
+     * A registered user with a confirmed status.
+     */
     const TYPE_REGISTERED_USER = 1;
+
+    /**
+     * An admin user with all access.
+     */
     const TYPE_ADMIN = 5;
 
-    var $id = 0;
-    var $details;
-    var $login_url = '/user.php?redirect=';
-    var $unauthorized_url = '/user.php?p=login&redirect=';
-    var $activation_url = "/user.php?p=activate";
-    var $first_login_url = "/user.php?p=first_login&redirect="; // THIS WILL BE CALLED AFTER THE FIRST LOGIN
-    var $timeout = 10080;//60*24*7; //NUMBER OF MINUTES
-    var $confirmation_required = false;
-    public static $reset_url = "user.php?p=reset";
-    var $track_first_login = false;
-    var $require_activation = false;
+    /**
+     * The row from the database.
+     *
+     * @var array
+     */
+    protected $details;
 
-    protected function __construct($details){
+    /**
+     * Instantiate a user object with it's data row.
+     *
+     * @param array $details
+     *   The user's data row from the database.
+     */
+    protected function __construct($details) {
         $this->details = $details;
-        $this->id = $details['user_id'];
     }
 
-    public function __get($var){
-        switch($var){
+    /**
+     * A magic getter function.
+     *
+     * This word for:
+     *   ->id
+     *   ->details
+     *   ->user_id (item inside ->details)
+     *
+     * @param string $var
+     *   The name of the requested variable.
+     *
+     * @return mixed
+     *   The variable value.
+     */
+    public function __get($var) {
+        switch($var) {
             case 'id':
-                return $this->id;
+                return $this->details['user_id'];
                 break;
             case 'details':
                 return $this->details;
@@ -58,8 +85,8 @@ class User {
      * @param $email
      * @return bool|User
      */
-    static function loadByEmail($email){
-        if($details = Database::getInstance()->selectRow('user', array('email' => array('LIKE', $email)))){
+    public static function loadByEmail($email) {
+        if($details = Database::getInstance()->selectRow('user', array('email' => array('LIKE', $email)))) {
             return new self($details);
         }
         return false;
@@ -71,8 +98,8 @@ class User {
      * @param $user_id
      * @return bool|User
      */
-    static function loadById($user_id){
-        if($details = Database::getInstance()->selectRow('user', array('user_id' => $user_id))){
+    public static function loadById($user_id) {
+        if($details = Database::getInstance()->selectRow('user', array('user_id' => $user_id))) {
             return new self($details);
         }
         return false;
@@ -84,8 +111,8 @@ class User {
      * @param $session
      * @return bool|User
      */
-    static function loadBySession($session){
-        if($session->user_id > 0){
+    public static function loadBySession($session) {
+        if($session->user_id > 0) {
             return self::loadById($session->user_id);
         }
         return false;
@@ -96,7 +123,7 @@ class User {
      *
      * @return User
      */
-    static function anonymous() {
+    public static function anonymous() {
         return new self(array('user_id' => 0));
     }
 
@@ -106,7 +133,7 @@ class User {
      * @return boolean
      *   Whther the user is a site admin.
      */
-    public function isAdmin(){
+    public function isAdmin() {
         return $this->type == self::TYPE_ADMIN;
     }
 
@@ -117,11 +144,36 @@ class User {
      *   The new type.
      */
     public function setType($type) {
+        $this->details['type'] = $type;
         Database::getInstance()->update('user', array('type' => $type), array('user_id' => $this->id));
     }
 
-    function checkPass($pass,$salt='',$hashed_pass=''){
-        if($salt == ''){
+    /**
+     * Change the user's active status.
+     *
+     * @param integer $enw_value
+     *   The new active status.
+     */
+    public function setActive($enw_value) {
+        $this->details['active'] = $enw_value;
+        Database::getInstance()->update('user', array('active' => $enw_value), array('user_id' => $this->id));
+    }
+
+    /**
+     * Check if the supplied password is correct.
+     *
+     * @param string $pass
+     *   The supplied password.
+     * @param string $salt
+     *   The salt from the database.
+     * @param string $hashed_pass
+     *   The hashed password from the database.
+     *
+     * @return boolean
+     *   Whether the correct password was supplied.
+     */
+    public function checkPass($pass, $salt = '', $hashed_pass = '') {
+        if($salt == '') {
             $this->load_info();
             $salt = $this->details['salt'];
             $hashed_pass = $this->details['password'];
@@ -134,15 +186,32 @@ class User {
         }
     }
 
-    protected static function passHash($pass, $salt){
+    /**
+     * Create a password hash from a password and salt.
+     *
+     * @param string $pass
+     *   The password.
+     * @param string $salt
+     *   The salt.
+     *
+     * @return string
+     *   The hashed password.
+     */
+    protected static function passHash($pass, $salt) {
         return hash("sha256", $pass . $salt);
     }
 
-    protected static function getSalt(){
+    /**
+     * Get a new salt string.
+     *
+     * @return string
+     *   A binary string of salt.
+     */
+    protected static function getSalt() {
         return Random::getInstance()->get(32, Random::BIN);
     }
 
-    public static function urlKey($user_id = -1, $salt = null){
+    public static function urlKey($user_id = -1, $salt = null) {
         if($user_id == -1) {
             $user_id = ClientUser::getInstance()->id;
             $salt = ClientUser::getInstance()->details['salt'];
@@ -154,20 +223,42 @@ class User {
         return $user_id . "." . self::passHash($user_id . $salt, $salt);
     }
 
-    function update(){
+    /**
+     * Update the user's last active time.
+     *
+     * This should happen on each page load.
+     */
+    public function update() {
         Database::getInstance()->query("UPDATE user SET last_active = ".time()." WHERE user_id = {$this->id}");
     }
 
-    function load_info($force = false){
-        if(!isset($this->details) || $force){
+    /**
+     * Reload the user's info from the database.
+     *
+     * @param boolean $force
+     *   Whether to force the data to load and overwrite current data.
+     */
+    public function load_info($force = false) {
+        if(!isset($this->details) || $force) {
             $this->details = Database::getInstance()->selectRow('user', array('user_id' => $this->id));
         }
     }
 
-    public static function create($email, $pass){
+    /**
+     * Create a new user.
+     *
+     * @param string $email
+     *   The user's email address.
+     * @param string $pass
+     *   The new password.
+     *
+     * @return boolean
+     *   Whether the user could be created.
+     */
+    public static function create($email, $pass) {
         if (Database::getInstance()->check('user', array('email' => strtolower($email), 'password' => array('!=', '')))) {
             // ACCOUNT ALREADY EXISTS
-            Messenger::error('An account with that email already exists. Please try again. if you lost your password, click <a href="' . self::reset_url . '">here</a>');
+            Messenger::error('An account with that email already exists. Please try again. if you lost your password, click <a href="/user?action=reset&email=' . urlencode($email) . '">here</a>');
             return false;
         } elseif ($user_info = Database::getInstance()->selectRow('user', array('email' => strtolower($email), 'password' => ''))) {
             // EMAIL EXISTS IN MAILING LIST ONLY
@@ -212,11 +303,11 @@ class User {
      *
      * @return mixed
      */
-    public static function getInsertEmailID($email, $options = array(), $update = array()){
+    public static function getInsertEmailID($email, $options = array(), $update = array()) {
         // TODO: integrate with class_user
         $user_data = array();
         $user_data['email'] = strtolower($email);
-        if ($user = Database::getInstance()->selectRow('user', $user_data)){
+        if ($user = Database::getInstance()->selectRow('user', $user_data)) {
             if($update) {
                 if (!isset($update['list_date'])) {
                     $update['list_date'] = time();
@@ -231,11 +322,17 @@ class User {
         return $user_id;
     }
 
-    function randomPass(){
+    /**
+     * Create a new random password.
+     *
+     * @return string
+     *   A random password.
+     */
+    public function randomPass() {
         $alphabet = "abcdefghijkmnpqrstuvwxyz";
         $arrangement = "aaaaaaaAAAAnnnnn";
         $pass = "";
-        for($i = 0; $i < strlen($arrangement); $i++){
+        for($i = 0; $i < strlen($arrangement); $i++) {
             if($arrangement[$i] == "a")
                 $char = $alphabet[rand(0,25)];
             else if($arrangement[$i] == "A")
@@ -253,13 +350,19 @@ class User {
     /**
      * Insert a new user if he doesn't already exist.
      *
-     * @param $email
-     * @param $pass
+     * @param string $email
+     *   The new email
+     * @param string $pass
+     *   The new password
      * @param string $first_name
+     *   The first name
      * @param string $last_name
-     * @return mixed
+     *   The last name.
+     *
+     * @return integer
+     *   The new user's ID.
      */
-    public static function insertUser($email, $pass = NULL, $first_name = '', $last_name = ''){
+    public static function insertUser($email, $pass = NULL, $first_name = '', $last_name = '') {
         $user_details = array(
             'email' => Scrub::email(strtolower($email)),
             'first' => $first_name,
@@ -278,7 +381,7 @@ class User {
         return Database::getInstance()->insert('user', $user_details);
     }
 
-    function setPass($pass,$email='',$user_id=0){
+    public function setPass($pass,$email='',$user_id=0) {
         if($email != '')
             $where = "email='".strtolower($email)."'";
         elseif($user_id>0)
@@ -290,14 +393,14 @@ class User {
         Database::getInstance()->query("UPDATE user SET password = '".$this->passHash($pass,$salt)."', salt='".bin2hex($salt)."' WHERE {$where}");
     }
 
-    function admin_create($email, $first_name='', $last_name=''){
+    public function admin_create($email, $first_name='', $last_name='') {
         $today = gregoriantojd(date('m'), date('d'), date('Y'));
         $user_info = Database::getInstance()->selectRow('user', array('email' => strtolower($email)));
-        if($user_info['password'] != ''){
+        if($user_info['password'] != '') {
             // user exists with password
             // return user_id
             return $user_info['user_id'];
-        } else if(isset($user_info['password'])){
+        } else if(isset($user_info['password'])) {
             // user exists without password
             // set password, send email
             $randomPass = $this->randomPass();
@@ -317,7 +420,7 @@ class User {
 
     }
 
-    public static function add_to_mailing_list($email){
+    public static function add_to_mailing_list($email) {
         // These will be set on either insert or update.
         $user_values = array(
             'list_date' => Time::today(),
@@ -337,14 +440,14 @@ class User {
         return $user_id;
     }
 
-    function fullName() {
+    public function fullName() {
         return $this->details['first'] . ' ' . $this->details['last'];
     }
 
     /**
      * Send a new random password via email.
      */
-    function sendTempPass(){
+    public function sendTempPass() {
         $pass = $this->randomPass();
         $salt = $this->getSalt();
         Database::getInstance()->update(
@@ -364,7 +467,7 @@ class User {
         return $mailer->send();
     }
 
-    public static function find_by_email($email){
+    public static function find_by_email($email) {
         return Database::getInstance()->selectRow('user', array('email' => strtolower($email)));
     }
 
@@ -381,7 +484,7 @@ class User {
      *
      * @return bool
      */
-    static function login($email, $password, $remember = FALSE, $auth_only = FALSE){
+    public static function login($email, $password, $remember = FALSE, $auth_only = FALSE) {
         // If $auth_only is set, it has to be remembered.
         if ($auth_only) {
             $remember = TRUE;
@@ -394,16 +497,16 @@ class User {
             $user->destroy();
         }
 
-        if($temp_user = self::loadByEmail($email)){
+        if($temp_user = self::loadByEmail($email)) {
             // user found
-            if($temp_user->checkPass($password)){
+            if($temp_user->checkPass($password)) {
                 // We need to create a new session if:
                 //  There is no session
                 //  The session is blank
                 //  The session user is not set to this user
                 $session = Session::getInstance();
-                if((!is_object($session)) || ($session->id == 0) || ($session->user_id != $temp_user->id)){
-                    if(is_object($session)){
+                if((!is_object($session)) || ($session->id == 0) || ($session->user_id != $temp_user->id)) {
+                    if(is_object($session)) {
                         // If there is some other session here, we can destroy it.
                         $session->destroy();
                     }
@@ -427,9 +530,9 @@ class User {
     /**
      * Destroy a user object and end the session.
      */
-    function destroy(){
+    public function destroy() {
         global $session;
-        if($this->id > 0){
+        if($this->id > 0) {
             $this->details = NULL;
             $this->id = 0;
             if(is_object($session))
@@ -437,30 +540,61 @@ class User {
         }
     }
 
-    function reset_code($email){
+    public function reset_code($email) {
         $acct_details = user::find_by_email($email);
         return hash('sha256',($acct_details['email']."*".$acct_details['password']."%".$acct_details['user_id']));
     }
 
-    public static function unsubscribeKey($user_id, $email){
-        return hash('sha256',($user_id . $email . hash('sha256',$email)));
+    /**
+     * Get a link to unsubscribe this user.
+     *
+     * @return string
+     *   The absolute web url.
+     */
+    public function getUnsubscribeLink() {
+        return Configuration::get('web_root')
+            . '/user?action=unsubscribe&u=' . $this->getEncryptedUserReference();
+    }
+
+    /**
+     * Get this users encrypted email.
+     *
+     * @return string
+     *   The encrypted email reference.
+     */
+    public function getEncryptedUserReference() {
+        return Encryption::aesEncrypt($this->details['email'], Configuration::get('user.key'));
+    }
+
+    /**
+     * Load a user by an encrypted reference.
+     *
+     * @param string $cypher_string
+     *   The encrypted email address.
+     *
+     * @return bool|User
+     *   The user if loading was successful.
+     */
+    public static function loadByEncryptedUserReference($cypher_string) {
+        $email = Encryption::aesDecrypt($cypher_string, Configuration::get('user.key'));
+        return self::loadByEmail($email);
     }
 
     // REDIRECTS THE USER IF THEY ARE NOT LOGGED IN
-    function login_required($auth = 0){
-        if($this->id == 0){
+    public function login_required($auth = 0) {
+        if($this->id == 0) {
             header("Location: ".$this->login_url.urlencode($_SERVER['REQUEST_URI']));
             exit;
         }
-        if($this->authority < $auth){
+        if($this->authority < $auth) {
             header("Location: ".$this->unauthorized_url.urlencode($_SERVER['REQUEST_URI']));
             exit;
         }
     }
 
-    function sendConfirmationEmail($email){
+    public function sendConfirmationEmail($email) {
         $acct_details = user::find_by_email($email);
-        if($acct_details['confirmed'] == "" || $acct_details['confirmed'] == "confirmed"){
+        if($acct_details['confirmed'] == "" || $acct_details['confirmed'] == "confirmed") {
             $acct_details['confirmed'] = hash('sha256',microtime());
             Database::getInstance()->query("UPDATE user SET confirmed = '{$acct_details['confirmed']}' WHERE user_id = {$acct_details['user_id']}");
         }
@@ -476,9 +610,9 @@ class User {
 
     // WHEN A USER LOGS IN TO AN EXISTING ACCOUNT, THIS IS CALLED TO MOVE OVER ANY INFORMATION FROM AN ANONYMOUS SESSION
     // CUSTOMIZE THIS ACCORDING TO THE SITES REQUIREMENTS
-    function merge_users($anon_user){
+    public function merge_users($anon_user) {
         // FIRST MAKE SURE THIS USER IS ANONYMOUS
-        if(Database::getInstance()->check("SELECT * FROM user WHERE user_id = {$anon_user} AND email = ''")){// AND office_id = {$office_id}")){
+        if(Database::getInstance()->check("SELECT * FROM user WHERE user_id = {$anon_user} AND email = ''")) {// AND office_id = {$office_id}")) {
             // $db->query("UPDATE {$table} SET user_id = {$this->id} WHERE user_id = {$anon_user}");
 
             // MOVE UPLOADS FROM OLD USER
