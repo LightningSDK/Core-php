@@ -85,9 +85,9 @@ class Message {
             && !strstr($this->message['body'], '{UNSUBSCRIBE}')
             && !strstr($this->template['body'], '{UNSUBSCRIBE}')
         ) {
-            $this->combinedMessageTemplate = str_replace('{CONTENT_BODY}', $this->message['body'] . '{UNSUBSCRIBE}', $this->template['body']);
+            $this->combinedMessageTemplate = str_replace('{CONTENT_BODY}', $this->message['body'] . '{UNSUBSCRIBE}', $this->template['body']) . '{TRACKING_IMAGE}';
         } else {
-            $this->combinedMessageTemplate = str_replace('{CONTENT_BODY}', $this->message['body'], $this->template['body']);
+            $this->combinedMessageTemplate = str_replace('{CONTENT_BODY}', $this->message['body'], $this->template['body']) . '{TRACKING_IMAGE}';
         }
     }
 
@@ -175,8 +175,8 @@ class Message {
         $source = str_replace('{UNSUBSCRIBE}', $this->unsubscribe ? $this->getUnsubscribeString() : '', $source);
 
         // Add the tracking image to the bottom of the email.
-        // TODO: This needs to be moved., it shows up in the subject.
-        $source .= Tracker::getTrackerImage('Message Opened', $this->message['message_id'], $this->user->details['user_id']);
+        $tracking_image = Tracker::getTrackerImage('Message Opened', $this->message['message_id'], $this->user->details['user_id']);
+        $source = str_replace('{TRACKING_IMAGE}', $tracking_image, $source);
 
         return $source;
     }
