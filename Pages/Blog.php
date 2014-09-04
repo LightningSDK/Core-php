@@ -1,12 +1,11 @@
 <?php
 /**
  * @file
- * Lightning\Pages\Blog
+ * Contains Lightning\Pages\Blog
  */
 
 namespace Lightning\Pages;
 
-use Lightning\Model\User;
 use Lightning\Tools\Blog as blogTool;
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;

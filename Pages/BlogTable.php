@@ -2,8 +2,6 @@
 
 namespace Lightning\Pages;
 
-use Lightning\Tools\Scrub;
-
 class BlogTable extends Table {
     protected $trusted = true;
 
@@ -14,7 +12,12 @@ class BlogTable extends Table {
     protected $sort = 'time DESC';
 
     protected $links = array(
-        'categories' => array('index'=>'blog_categories','key'=>'cat_id',"display_column"=>"category","list"=>"true")
+        'categories' => array(
+            'index' => 'blog_blog_category',
+            'key' => 'cat_id',
+            'display_column' => 'category',
+            'list' => true
+        )
     );
 
     protected $preset = array(
