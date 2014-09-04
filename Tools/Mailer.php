@@ -119,14 +119,14 @@ class Mailer {
         if ($this->verbose) {
             echo 'Sending' . ($test ? 'Test' : 'Real') . " Email<br>\n";
         }
-        $this->_sendToList();
+        $this->sendToList();
 
         if ($this->verbose) {
             echo "Test complete";
         }
     }
 
-    protected function _sendToList() {
+    protected function sendToList() {
         foreach($this->users as $user){
             if ($this->verbose) {
                 echo $user['email'] . "<br>\n";

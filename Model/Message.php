@@ -8,6 +8,8 @@ namespace Lightning\Model;
 
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
+use Lightning\Tools\Language;
+use Lightning\Tools\Tracker;
 
 /**
  * A model of the mailing system message.
@@ -17,11 +19,18 @@ use Lightning\Tools\Database;
 class Message {
 
     /**
+     * Custom variables to replace in the message.
+     *
+     * @var array
+     */
+    protected $customVariables = array();
+
+    /**
      * The formatted message contents.
      *
      * @var array
      */
-    protected $formatted_message = array();
+    protected $formattedMessage = array();
 
     /**
      * The message data from the database.
@@ -52,11 +61,11 @@ class Message {
     protected $unsubscribe = true;
 
     /**
-     * Custom variables to replace in the message.
+     * The user currently being sent to.
      *
-     * @var array
+     * @var User
      */
-    protected $custom_variables = array();
+    protected $user;
 
     /**
      * Load a message from the database.
@@ -71,6 +80,15 @@ class Message {
         $this->loadTemplate();
         $this->loadCriteria();
         $this->unsubscribe = $unsubscribe;
+        if (
+            $this->unsubscribe
+            && !strstr($this->message['body'], '{UNSUBSCRIBE}')
+            && !strstr($this->template['body'], '{UNSUBSCRIBE}')
+        ) {
+            $this->combinedMessageTemplate = str_replace('{CONTENT_BODY}', $this->message['body'] . '{UNSUBSCRIBE}', $this->template['body']);
+        } else {
+            $this->combinedMessageTemplate = str_replace('{CONTENT_BODY}', $this->message['body'], $this->template['body']);
+        }
     }
 
     /**
@@ -125,10 +143,10 @@ class Message {
      *   Outputs the unsubscribe string.
      */
     protected function getUnsubscribeString() {
-        return 'You&rsquo;re receiving this as you previously enquired with us about a product or business or you&rsquo;re a friend through social media. To stop receiving these emails, '
-            ."<a href='http://" . Configuration::get('site.domain') . "/user.php?action=unsubscribe&email=" . urlencode($this->user['email']) . "&code=".User::unsubscribeKey($this->user['user_id'], $this->user['email'])
-            ."'>click here</a>";
-
+        return Language::getInstance()->translate('unsubscribe', array(
+                '{UNSUBSCRIBE}' => $this->user->getUnsubscribeLink()
+            )
+        );
     }
 
     /**
@@ -141,17 +159,23 @@ class Message {
      *   The content with replaced variables.
      */
     public function replaceVariables($source) {
-        // REPLACE CUSTOM VARIABLES
-        foreach($this->custom_variables as $cv => $cvv){
+        // Replace custom variables.
+        foreach($this->customVariables as $cv => $cvv){
             $source = str_replace("{".$cv."}", $cvv, $source);
         }
 
-        // STANDARD VARIABLES
+        // Replace standard variables.
         $source = str_replace("{USER_ID}", $this->user['user_id'], $source);
         $source = str_replace("{MESSAGE_ID}", $this->message['message_id'], $source);
         $source = str_replace("{FULL_NAME}", (!empty($this->user['first']) ? $this->user['first'] . ' ' . $this->user['last'] : "friend"), $source);
         $source = str_replace("{URL_KEY}", User::urlKey($this->user['user_id'], $this->user['salt']), $source);
         $source = str_replace("{EMAIL}", $this->user['email'], $source);
+
+        // Add the unsubscribe link.
+        $source = str_replace('{UNSUBSCRIBE}', $this->unsubscribe ? $this->getUnsubscribeString() : '', $source);
+
+        // Add the tracking image to the bottom of the email.
+        $source .= Tracker::getTrackerImage('Message Opened', $this->message->message_id, $this->user['user_id']);
 
         return $source;
     }
@@ -178,13 +202,7 @@ class Message {
      */
     public function getMessage() {
         // Start by combining message and template.
-        // TODO: this can be computed once instead of in this loop.
-        $message = str_replace('{CONTENT_BODY}', $this->message['body'], $this->template['body']);
-        $message = $this->replaceVariables($message);
-
-        // Is the unsubscribe location specified?
-        // TODO: This should be inserted by default after the message and before the template.
-        $message = str_replace('{UNSUBSCRIBE}', $this->unsubscribe ? $this->getUnsubscribeString() : '', $message);
+        $message = $this->replaceVariables($this->combinedMessageTemplate);
 
         return $message;
     }
