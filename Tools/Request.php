@@ -64,7 +64,7 @@ class Request {
      */
     public static function get($var, $type='', $subtype=''){
         if(!isset($_REQUEST[$var]))
-            return false;
+            return null;
 
         $args = func_get_args();
         $args[0] = $_REQUEST[$var];
@@ -82,7 +82,7 @@ class Request {
      */
     public static function cookie($var, $type='', $subtype=''){
         if(!isset($_COOKIE[$var]))
-            return false;
+            return null;
 
         $args = func_get_args();
         $args[0] = $_COOKIE[$var];
@@ -100,7 +100,7 @@ class Request {
      */
     public static function post($var, $type='', $subtype=''){
         if(!isset($_POST[$var]))
-            return false;
+            return null;
 
         $args = func_get_args();
         $args[0] = $_POST[$var];
@@ -118,7 +118,7 @@ class Request {
      */
     public static function query($var, $type='', $subtype=''){
         if(!isset($_GET[$var]))
-            return false;
+            return null;
 
         $args = func_get_args();
         $args[0] = $_GET[$var];
@@ -204,6 +204,7 @@ class Request {
             case 'boolean':
             case 'hex':
             case 'base64':
+            case 'encrypted':
             case 'html':
                 $args = func_get_args();
                 // Remove the second item, the type.
