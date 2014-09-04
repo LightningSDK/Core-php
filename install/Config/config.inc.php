@@ -4,6 +4,10 @@ $conf = array(
     'database' => 'mysql:user=user;password=pass;host=localhost;dbname=db',
     'user' => array(
         'cookie_domain' => '',
+        // Generate a new key by going to the Lightning directory and running
+        // ./lightning security generate-aes-key
+        // **** THIS KEY IS INCLUDED WITH THE DISTRIBUTION AND IS NOT SECURE ****
+        'key' => 'o2sdxfGwHn2YGcQ3Xh2Z8p5y/BP0dHdbtdmU3ATdMwE=',
     ),
     'site' => array(
         'mail_from' => 'donotreply@Website.com',
@@ -43,7 +47,7 @@ $conf = array(
         'public' => '',
         'private' => '',
     ),
-    'web_root' => '',
+    'web_root' => 'http://www.Website.com',
     'routes' => array(
         'dynamic' => array(
             '^agency/.*' => 'Source\\Pages\\Agency',
@@ -67,6 +71,9 @@ $conf = array(
             'sitemap' => 'Lightning\\Pages\\Sitemap',
             'track' => 'Lightning\\Pages\\Track',
         ),
+        'cli_only' => array(
+            'test' => 'Source\\CLI\\Test',
+        )
     ),
     'language' => 'en_us',
 );
