@@ -1,19 +1,47 @@
 <?php
+/**
+ * @file
+ * Contains Lightning\Tools\Template
+ */
 
 namespace Lightning\Tools;
 
 use Lightning\Tools\Configuration;
+use stdClass;
 
 /**
- * Class Template
- *
  * The HTML template controller.
+ *
+ * @package Lightning\Tools
  */
 class Template extends Singleton {
 
+    /**
+     * The main template file.
+     *
+     * @var string
+     */
     private $template = 'template.tpl.php';
+
+    /**
+     * The directory where the templates are located.
+     *
+     * @var string
+     */
     private $template_dir;
+
+    /**
+     * The page to render.
+     *
+     * @var string
+     */
     private $page;
+
+    /**
+     * The variables accessible within the template.
+     *
+     * @var array
+     */
     private $vars;
 
     /**
@@ -33,10 +61,11 @@ class Template extends Singleton {
      *   The variable's value.
      */
     public function __get($var){
-        if(isset($this->vars[$var]))
+        if(isset($this->vars[$var])) {
             return $this->vars[$var];
-        else
-            return NULL;
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -50,7 +79,7 @@ class Template extends Singleton {
      * @return string
      *   The rendered content.
      */
-    public function render($page = "", $return_as_string = FALSE){
+    public function render($page = '', $return_as_string = false){
         if (!$return_as_string) {
             Output::sendCookies();
         }
@@ -74,42 +103,102 @@ class Template extends Singleton {
         exit;
     }
 
+    /**
+     * Set the included page.
+     *
+     * @param string $page
+     *   The page.
+     */
     public function set_page($page = ""){
         $this->page = $page;
     }
 
+    /**
+     * Set the default included page if not already set.
+     *
+     * @param string $page
+     *   The default included page.
+     */
     public function set_default_page($page) {
         if (empty($this->page)) {
             $this->page = $page;
         }
     }
 
-    public function set($name,$var){
-        $this->vars[$name] = $var;
+    /**
+     * Set a variable so it's accessible within the template.
+     *
+     * @param string $name
+     *   The variable name.
+     * @param $value
+     *   The variable value.
+     *
+     * @return Template
+     *   Return self for function chaining.
+     */
+    public function set($name, $value){
+        $this->vars[$name] = $value;
         return $this;
     }
 
+    /**
+     * Copy a list of variables from one object to the template.
+     *
+     * @param stdClass $object
+     *   An object.
+     * @param array $vars
+     *   A list of variable names to copy.
+     */
     public function copy($object, $vars){
         foreach($vars as $v){
             $this->set($v, $object->get($v));
         }
     }
 
+    /**
+     * Add a variable by reference.
+     *
+     * @param string $name
+     *   The variable name.
+     * @param mixed $var
+     *   The variable value.
+     */
     public function setReference($name,&$var){
         $this->vars[$name] =& $var;
     }
 
+    /**
+     * Set the main template to use when rendering.
+     *
+     * @param string $template
+     *   The main template name excluding .tpl.php.
+     */
     public function setTemplate($template){
         $this->template = $template.".tpl.php";
     }
 
+    /**
+     * Include a template from within another template.
+     *
+     * @param string $page
+     *   The name of the template excluding .tpl.php.
+     */
     public function _include($page){
         extract($this->vars);
         include $this->template_dir.$page.".tpl.php";
     }
 
-    // THIS FUNCTION WILL PRINT A QUESTION MARK WITH A TOOL TIP
-
+    /**
+     * Print a question mark with a tool tip.
+     *
+     * @param $help_string
+     * @param string $image
+     * @param string $id
+     * @param string $class
+     * @param null $url
+     *
+     * @todo this needs JS injection and should be moved to a view.
+     */
     public function help($help_string, $image='/images/qmark.png', $id='', $class='', $url=NULL){
         if($url){
             echo "<a href='{$url}'>";
@@ -119,28 +208,5 @@ class Template extends Singleton {
         if($url){
             echo "</a>";
         }
-    }
-
-
-    // SPECIAL FORM FIELDS
-
-    function get_date($field){
-        if($_POST[$field.'_m'] != '' && $_POST[$field.'_d'] != '' && $_POST[$field.'_y'] != '')
-            return gregoriantojd($_POST[$field.'_m'], $_POST[$field.'_d'], $_POST[$field.'_y']);
-        else
-            return 0;
-    }
-
-    function get_time($field){
-        if($_POST[$field.'_h'] != '')
-            $time = ($_POST[$field.'_h']*60)+$_POST[$field.'_m']+(($_POST[$field.'_a']=="PM") ? 720 : 0);
-        else
-            $time = -1;
-        if($time > 1440) $time -= 1440;
-        return $time;
-    }
-
-    function today(){
-        return gregoriantojd (date("m"),date("d"),date("Y"));
     }
 }
