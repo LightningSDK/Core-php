@@ -753,10 +753,29 @@ class Database extends Singleton {
      */
     protected function implodeFields($fields) {
         foreach ($fields as &$field) {
-            if (is_array($field)) {
-                // This field is an expression.
+            if(is_array($field) && is_array($table_fields = current($field))) {
+                // Format of array('table' => array('column'))
+                // Or array('table' => array('alias' => 'column'))
+                $table = key($field);
+                foreach ($table_fields as $alias => $column) {
+                    if (is_numeric($alias)) {
+                        // Format of array('table' => array('column'))
+                        if ($column == '*') {
+                            $table_field_list[] = "`{$table}`.*";
+                        } else {
+                            $table_field_list[] = "`{$table}`.`{$column}`";
+                        }
+                    } else {
+                        // Format of array('table' => array('alias' => 'column'))
+                        $table_field_list[] = "`{$table}`.`{$column}` AS `{$alias}`";
+                    }
+                }
+                $field = implode(', ', $table_field_list);
+            } elseif (is_array($field)) {
+                // Format of array('alias' => 'column') to column as `alias`.
                 $field = current($field) . ' AS `' . key($field) . '`';
             } else {
+                // Format of array('field')
                 $field = '`' . $field . '`';
             }
         }
@@ -809,6 +828,12 @@ class Database extends Singleton {
                     $values[] = $v[1];
                     $a2[] = " `{$k}` {$v[0]} ? ";
                 }
+                elseif (in_array($v[0], array('IS NULL', 'IS NOT NULL'))) {
+                    $a2[] = " `{$k}` {$v[0]} ";
+                }
+            }
+            elseif ($v === null) {
+                $a2[] = " `{$k}` IS NULL `";
             }
             else {
                 // Standard key/value column = value.
@@ -931,8 +956,12 @@ class Database extends Singleton {
             $columns = array($name);
         }
 
-        $definition = empty($settings['unique']) ? 'INDEX ' : 'UNIQUE INDEX ';
-        $definition .= '`' . $name . '` (`' . implode('`,`', $columns) . '`)' ;
+        if ($name == 'primary') {
+            $definition = 'PRIMARY KEY ';
+        } else {
+            $definition = (empty($settings['unique']) ? 'INDEX ' : 'UNIQUE INDEX ') . '`' . $name . '`';
+        }
+        $definition .= ' (`' . implode('`,`', $columns) . '`)' ;
         if (!empty($settings['size'])) {
             $definition .= ' KEY_BLOCK_SIZE = ' . intval($settings['size']);
         }

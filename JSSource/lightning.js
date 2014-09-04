@@ -232,34 +232,55 @@ function json_on_id (jsonreq, target) {
 }
 
 
-/* TABLE FUNCTIONS  */
-function table_click(id){
-    if(table_data.row_click != undefined){
-        switch(table_data.row_click.type){
-            case 'url':
-                document.location = table_data.row_click.url + id;
-                break;
-            case 'action':
-                document.location = create_url(table_data.row_click.action,id);
-                break;
+var table = {
+    /**
+     * Click handler for the list row.
+     *
+     * @param event
+     *   The click event.
+     */
+    click: function(event) {
+        var id = event.currentTarget.id;
+        if(event.target.tagName != "INPUT" && table_data.rowClick != undefined){
+            switch(table_data.rowClick.type){
+                case 'url':
+                    document.location = table_data.rowClick.url + id;
+                    break;
+                case 'action':
+                    document.location = table.createUrl(table_data.rowClick.action, id);
+                    break;
+            }
         }
-    }
-}
+    },
 
-function create_url(action,id){
-    var vars = {};
-    vars.action = action;
-    vars.id = id;
-    if(table_data.table != "" && table_data.table != undefined) vars.table = table_data.table;
-    if(table_data.parent_link != "" && table_data.parent_link != undefined) vars[table_data.parent_link] = table_data.parent_id;
-    if(table_data.vars != undefined)
-        for(var i in table_data.vars)
-            vars[i] = table_data.vars[i];
-    var url = table_data.action_file+"?";
-    for(i in vars)
-        url += i+"="+vars[i]+"&";
-    return url;
-}
+    createUrl: function(action, id) {
+        var vars = [];
+        vars.push('action='+encodeURIComponent(action));
+        vars.push('id='+encodeURIComponent(id));
+        if (table_data.table){
+            vars.push('table='+encodeURIComponent(table_data.table));
+        }
+        if (table_data.parent_link){
+            vars.push(table_data.parent_link + '=' + encodeURIComponent(table_data.parent_id));
+        }
+        if (table_data.vars) {
+            for (var i in table_data.vars) {
+                vars.push(i + '=' + encodeURIComponent(table_data.vars[i]));
+            }
+        }
+        return url = "?" + vars.join("&");
+    },
+
+    /**
+     * Handles the checkall box at the top of the list view.
+     *
+     * @param name
+     *   The name of the select column.
+     */
+    selectAll: function(name) {
+        $('.taf_' + name).prop('checked', ($('#taf_all_' + name).is(':checked')));
+    }
+};
 
 function table_autocomplete(){
     ac_field = $(this).attr("id");
