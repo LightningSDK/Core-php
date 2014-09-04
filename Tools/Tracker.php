@@ -92,8 +92,8 @@ class Tracker extends Singleton {
      *
      * @param string $tracker_name
      *   The tracker name.
-     * @param integer $sub_id
-     *   The tracker sub id.
+     * @param integer|string $sub_id
+     *   The tracker sub id or * if any is permitted.
      * @param $user_id
      *   The user id.
      *
@@ -110,6 +110,11 @@ class Tracker extends Singleton {
 
         // Encrypt the string with the public key.
         return Encryption::aesEncrypt(Configuration::get('tracker.key'), $string);
+    }
+
+    public static function getTrackerImage($tracker_name, $sub_id = 0, $user_id = -1) {
+        $url = Configuration::get('web_root') . '/track?t=' . self::getTrackerLink($tracker_name, $sub_id, $user_id);
+        return '<img src="' . $url . '" border="0" height="0" width="0" />';
     }
 
     /**
