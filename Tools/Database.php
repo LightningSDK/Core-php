@@ -862,7 +862,7 @@ class Database extends Singleton {
         if (empty($indexes['primary'])) {
             $primary_column = null;
         }
-        if (is_string($indexes['primary'])) {
+        if (!empty($indexes['primary']) && is_string($indexes['primary'])) {
             $primary_column = $indexes['primary'];
         }
         elseif (!empty($indexes['primary']['columns'])) {
