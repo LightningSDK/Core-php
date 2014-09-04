@@ -81,13 +81,42 @@ class Configuration {
      */
     protected static function loadConfiguration() {
         if (empty(self::$configuration)) {
-            foreach (array(CONFIG_PATH . '/config.inc.php', HOME_PATH . '/Lightning/Config.php') as $config_file)
+            foreach (self::getConfigurations() as $config_file)
             if (file_exists($config_file)) {
-                include $config_file;
-                self::$configuration = array_replace_recursive(self::$configuration, $conf);
+                self::$configuration = array_replace_recursive(
+                    self::$configuration,
+                    self::getConfigurationData($config_file)
+                );
             } else {
                 echo "not found $config_file";
             }
         }
+    }
+
+    /**
+     * Get a list of configuration files.
+     *
+     * @return array
+     *   A list of files.
+     */
+    public static function getConfigurations() {
+        return array(
+            'source' => CONFIG_PATH . '/config.inc.php',
+            'internal' => HOME_PATH . '/Lightning/Config.php'
+        );
+    }
+
+    /**
+     * Load a configuration form a file.
+     *
+     * @param string $file
+     *   The absolute file path.
+     *
+     * @return array
+     *   The config data.
+     */
+    public static function getConfigurationData($file) {
+        include $file;
+        return $conf;
     }
 }
