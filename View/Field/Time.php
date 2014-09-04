@@ -124,10 +124,11 @@ class Time extends Field {
         if(!$allow_zero && empty($value)) {
             $value = time();
         }
-        $time = explode("/",date("m/d/Y/h/i/s/a",$value));
-        $output = self::monthPop($field."_m",$time[0],$allow_zero, '', 'dateTimePop') . ' / ';
-        $output .= self::dayPop($field."_d",$time[1],$allow_zero, 'dateTimePop') . ' / ';
-        $output .= self::yearPop($field."_y",$time[2],$allow_zero, $first_year, '', 'dateTimePop') . ' at ';
+
+        $time = ($value == 0) ? array(0,0,0,0,0,0,0) : explode("/",date("m/d/Y/h/i/s/a",$value));
+        $output = self::monthPop($field."_m",$time[0], $allow_zero, '', 'dateTimePop') . ' / ';
+        $output .= self::dayPop($field."_d",$time[1], $allow_zero, 'dateTimePop') . ' / ';
+        $output .= self::yearPop($field."_y",$time[2], $allow_zero, $first_year, '', 'dateTimePop') . ' at ';
         $output .= self::hourPop($field."_h", $time[3], $allow_zero, 'dateTimePop') . ':';
         $output .= self::minutePop($field."_i", $time[4], $allow_zero, 'dateTimePop') . ' ';
         $output .= self::APPop($field."_a", $time[6], $allow_zero, 'dateTimePop');
