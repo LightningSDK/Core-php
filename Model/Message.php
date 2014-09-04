@@ -165,17 +165,18 @@ class Message {
         }
 
         // Replace standard variables.
-        $source = str_replace("{USER_ID}", $this->user['user_id'], $source);
+        $source = str_replace("{USER_ID}", $this->user->details['user_id'], $source);
         $source = str_replace("{MESSAGE_ID}", $this->message['message_id'], $source);
-        $source = str_replace("{FULL_NAME}", (!empty($this->user['first']) ? $this->user['first'] . ' ' . $this->user['last'] : "friend"), $source);
-        $source = str_replace("{URL_KEY}", User::urlKey($this->user['user_id'], $this->user['salt']), $source);
-        $source = str_replace("{EMAIL}", $this->user['email'], $source);
+        $source = str_replace("{FULL_NAME}", (!empty($this->user->details['first']) ? $this->user->details['first'] . ' ' . $this->user->details['last'] : "friend"), $source);
+        $source = str_replace("{URL_KEY}", User::urlKey($this->user->details['user_id'], $this->user->details['salt']), $source);
+        $source = str_replace("{EMAIL}", $this->user->details['email'], $source);
 
         // Add the unsubscribe link.
         $source = str_replace('{UNSUBSCRIBE}', $this->unsubscribe ? $this->getUnsubscribeString() : '', $source);
 
         // Add the tracking image to the bottom of the email.
-        $source .= Tracker::getTrackerImage('Message Opened', $this->message->message_id, $this->user['user_id']);
+        // TODO: This needs to be moved., it shows up in the subject.
+        $source .= Tracker::getTrackerImage('Message Opened', $this->message['message_id'], $this->user->details['user_id']);
 
         return $source;
     }

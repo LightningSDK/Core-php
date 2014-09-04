@@ -3,6 +3,7 @@
 namespace Lightning\Tools;
 
 use Lightning\Model\Message;
+use Lightning\Model\User;
 
 require_once HOME_PATH . '/Lightning/Vendor/PHPMailer/class.phpmailer.php';
 
@@ -136,7 +137,7 @@ class Mailer {
             $from = !empty($user['from']) ? $user['from'] : $this->from;
             $from_name = !empty($user['from_name']) ? $user['from_name'] : $this->fromName;
             $this->from($from, $from_name);
-            $this->message->setUser($user);
+            $this->message->setUser(new User($user));
             $this->subject($this->message->getSubject());
             $this->message($this->message->getMessage());
             $this->send();

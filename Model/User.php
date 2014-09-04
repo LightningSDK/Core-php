@@ -44,7 +44,7 @@ class User {
      * @param array $details
      *   The user's data row from the database.
      */
-    protected function __construct($details) {
+    public function __construct($details) {
         $this->details = $details;
     }
 

@@ -109,7 +109,7 @@ class Tracker extends Singleton {
         ));
 
         // Encrypt the string with the public key.
-        return Encryption::aesEncrypt(Configuration::get('tracker.key'), $string);
+        return urlencode(Encryption::aesEncrypt($string, Configuration::get('tracker.key')));
     }
 
     public static function getTrackerImage($tracker_name, $sub_id = 0, $user_id = -1) {
@@ -125,8 +125,8 @@ class Tracker extends Singleton {
      */
     public static function trackLink($tracker_string) {
         // Decrypt and decode the string with the private key.
-        $string = Encryption::aesDecrypt(Configuration::get('tracker.key'), $tracker_string);
-        $data = json_decode($string);
+        $string = Encryption::aesDecrypt($tracker_string, Configuration::get('tracker.key'));
+        $data = json_decode($string, true);
 
         // Track the data.
         self::trackEventID($data['tracker'], $data['sub'], $data['user']);

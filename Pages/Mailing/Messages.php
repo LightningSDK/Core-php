@@ -20,6 +20,7 @@ class Messages extends Table {
      * Require admin privileges.
      */
     public function __construct() {
+        parent::__construct();
         if (ClientUser::getInstance()->details['type'] < 5) {
             Output::accessDenied();
         }

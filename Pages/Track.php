@@ -21,7 +21,7 @@ class Track extends Page {
      * The main page handler, outputs a 1x1 pixel image.
      */
     public function get() {
-        if ($t = Request::get('t', 'base64')) {
+        if ($t = Request::get('t', 'encrypted')) {
             // Track an encrypted link.
             Tracker::trackLink($t);
         }
