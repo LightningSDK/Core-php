@@ -13,6 +13,13 @@ class Language extends Singleton {
     }
 
     /**
+     * @return Language
+     */
+    public static function getInstance() {
+        return parent::getInstance();
+    }
+
+    /**
      * Translate a string from it's key to it's value.
      *
      * @param string $key
