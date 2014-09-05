@@ -4,20 +4,20 @@
 
         if ($editable): ?>
             <div class="page_edit_links">
-                <a href='/page?action=new'>New Page</a> | <a href='#' onclick='edit_page();return false;'>Edit This Page</a>
+                <a href='/page?action=new'>New Page</a> | <a href='#' onclick='lightning.page.edit();return false;'>Edit This Page</a>
             </div>
         <? endif; ?>
 
         <? if ($editable): ?>
             <div class='page_edit' <? if (empty($action) || $action != 'new'): ?>style="display:none;"<? endif; ?>>
-                <input type="button" name="submit" class='save_button' onclick="save_page()" value="Save" /><br />
+                <input type="button" name="submit" class='button' onclick="lightning.page.save()" value="Save" /><br />
                 <? if (!empty($action) && $action == 'new'): ?>
-                    <input type="hidden" name="action" id='page_action' value="submit_new" />
+                    <input type="hidden" name="action" id='page_action' value="submit_new" class="button" />
                 <? else: ?>
-                    <input type="hidden" name="action" id='page_action' value="update_page" />
+                    <input type="hidden" name="action" id='page_action' value="update_page" class="button" />
                 <? endif; ?>
                 <input type="hidden" name="page_id" id='page_id' value="<?= !empty($full_page['page_id']) ? $full_page['page_id'] : 0 ?>" />
-                <table border='0'>
+                <table border='0' width="100%">
                     <tr><td>Title:</td><td><input type="text" name="title" id='page_title' value="<?=$full_page['title']?>" /></td></tr>
                     <tr><td>URL:</td><td><input type="text" name="url" id='page_url' value="<?=$full_page['url']?>" /></td></tr>
                     <tr><td>Description:</td><td><input type="text" name="description" id='page_description' value="<?=$full_page['description']?>" /></td></tr>
@@ -27,9 +27,11 @@
                 </table>
             </div>
         <? endif; ?>
-        <?= \Lightning\Tools\CKEditor::editableDiv('page_display', array('spellcheck' => true, 'content' => $full_page['body'])); ?>
+        <?= \Lightning\Tools\CKEditor::editableDiv('page_display',
+            array('spellcheck' => true, 'content' => $full_page['body'], 'finder' => true)
+        ); ?>
         <? if ($editable):?>
-            <input type="button" name="submit" class='save_button page_edit' onclick="save_page();" value="Save" <? if (empty($action) || $action != 'new'):?>style="display:none;"<? endif; ?> /><br />
+            <input type="button" name="submit" class='button page_edit' onclick="lightning.page.save();" value="Save" <? if (empty($action) || $action != 'new'):?>style="display:none;"<? endif; ?> /><br />
         <? endif; ?>
 
         <?= $this->_include('social_links'); ?>

@@ -80,6 +80,7 @@ class Page extends PageView {
 
         $template->set('page_header', $full_page['title']);
         $template->set('full_page', $full_page);
+        $template->set('full_width', $full_page['layout'] == 1);
     }
 
     public function getNew() {
@@ -129,11 +130,20 @@ class Page extends PageView {
         Output::json($output);
     }
 
+    /**
+     * Create a dropdown selection of page layouts.
+     *
+     * @param integer $default
+     *   The current selected layout.
+     *
+     * @return string
+     *   The rendered HTML.
+     */
     public static function layoutOptions($default) {
         $options = array(
             0 => 'Right Column',
             1 => 'Full Width',
         );
-        return BasicHTML::select('layout', $options, $default);
+        return BasicHTML::select('page_layout', $options, $default);
     }
 }

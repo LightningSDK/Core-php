@@ -37,56 +37,6 @@ function get_form_data(form_id){
 
 }
 
-function edit_page(){
-    $(".page_edit").fadeIn();
-    $('.page_edit_links').fadeOut();
-    $('#page_display').attr('contentEditable', 'true');
-    page_editor = CKEDITOR.inline("page_display", {
-//            extraPlugins: 'tableresize,inserthtml',
-            toolbar:CKEDITOR.config.toolbar_Full
-        }
-    );
-}
-
-function save_page(){
-    $('#save_button').fadeOut();
-    page_editor.destroy();
-    var send = {
-        page_id:$('#page_id').val(),
-        action:"save",
-        title:$("#page_title").val(),
-        url:$("#page_url").val(),
-        description:$("#page_description").val(),
-        keywords:$('#page_keywords').val(),
-        sitemap:$('#page_sitemap').is(":checked")?1:0,
-        page_body:$('#page_display').html()
-    };
-    $.ajax({
-        url:'/page',
-        type:'POST',
-        dataType:'json',
-        data:send,
-        success:function(data){
-            if(data.status == 'OK'){
-                $(".page_edit").fadeOut();
-                $('.page_edit_links').fadeIn();
-                $('#page_display').attr('contentEditable', 'false');
-                $('#page_id').val(data.page_id);
-                $('#page_url').val(data.url);
-                document.title = data.title;
-                $("#page_title").val(data.title);
-            } else {
-                alert(data.error);
-                edit_page();
-            }
-        },
-        error:function(){
-            alert('The page could not be saved, please try again later.');
-            edit_page();
-        }
-    });
-}
-
 
 /* BLOG FUNCTIONS */
 
