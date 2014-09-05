@@ -399,12 +399,12 @@ class Database extends Singleton {
      */
     public function update($table, $data, $where){
         $vars = array();
-        $query = 'UPDATE ' . $table . ' SET ' . $this->sqlImplode($data, $vars) . ' WHERE ';
+        $query = 'UPDATE ' . $table . ' SET ' . $this->sqlImplode($data, $vars, ', ', true) . ' WHERE ';
         if (is_array($where)) {
             $query .= $this->sqlImplode($where, $vars);
         }
-        $this->timerEnd();
         $this->query($query, $vars);
+        $this->timerEnd();
     }
 
     /**
@@ -423,7 +423,7 @@ class Database extends Singleton {
     public function insert($table, $data, $existing = FALSE) {
         $vars = array();
         $ignore = $existing === TRUE ? 'IGNORE' : '';
-        $set = $this->sqlImplode($data, $vars);
+        $set = $this->sqlImplode($data, $vars, ', ', true);
         $duplicate = is_array($existing) ? ' ON DUPLICATE KEY UPDATE ' . $this->sqlImplode($existing, $vars) : '';
         $this->query('INSERT ' . $ignore . ' INTO `' . $table . '` SET ' . $set . $duplicate, $vars);
         $this->timerEnd();
@@ -793,11 +793,13 @@ class Database extends Singleton {
      *   The current list of replacement values.
      * @param string $concatenator
      *   The string used to concatenate (usually , or AND or OR)
+     * @param boolean $setting
+     *   If we are setting variables. (Helps in determining what to do with null values)
      *
      * @return string
      *   The query string segment.
      */
-    public function sqlImplode($array, &$values, $concatenator=', '){
+    public function sqlImplode($array, &$values, $concatenator=', ', $setting = false){
         $a2 = array();
         foreach ($array as $k=>$v) {
             // This might change from an and to an or.
@@ -835,7 +837,11 @@ class Database extends Singleton {
                 }
             }
             elseif ($v === null) {
-                $a2[] = " `{$k}` IS NULL `";
+                if ($setting) {
+                    $a2[] = " `{$k}` = NULL ";
+                } else {
+                    $a2[] = " `{$k}` IS NULL ";
+                }
             }
             else {
                 // Standard key/value column = value.
