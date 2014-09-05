@@ -20,6 +20,9 @@ $conf = array(
         'login_url' => '/',
         'logout_url' => '/',
     ),
+    'ckfinder' => array(
+        'content' => '/content/',
+    ),
     'language' => 'en_us',
     'template_dir' => 'Source/Templates',
     'random_engine' => MCRYPT_DEV_URANDOM,

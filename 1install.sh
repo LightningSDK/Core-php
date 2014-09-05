@@ -69,3 +69,13 @@ if [ ! -d $DIR/../js/ckeditor ]; then
   cp -r Vendor/ckeditor/plugins ../js/ckeditor/
   cp -r Vendor/ckeditor/lang ../js/ckeditor/
 fi
+
+# Install CKFinder
+if [ ! -d $DIR/../content ]; then
+  mkdir $DIR/../content
+  OWNER=`stat -c '%U' $DIR`
+  GROUP=`stat -c '%G' $DIR`
+  # This might not work if web runs as nobody.
+  chown $OWNER:$GROUP $DIR/../content
+  chmod 775 $DIR/../content
+fi
