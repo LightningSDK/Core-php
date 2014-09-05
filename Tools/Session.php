@@ -106,13 +106,17 @@ class Session extends Singleton {
      * @return bool|session
      */
     static function load($session_key, $ip_address){
-        if($session_details = Database::getInstance()->selectRow('session', array('session_key' => $session_key, 'session_ip' => $ip_address))) {
+        $filter = array('session_key' => $session_key);
+        if (Configuration::get('session.single_ip')) {
+            $filter['session_ip'] = $ip_address;
+        }
+        if ($session_details = Database::getInstance()->selectRow('session', $filter)) {
             $session = new session($session_details);
 
             // If the password time has lapsed, remove password status.
-            if($session->getState(Session::STATE_PASSWORD)){
-                if($session_details['last_ping'] < time() - Configuration::get('session.password_ttl')){
-                    if(!$session->unsetState(Session::STATE_PASSWORD)){
+            if ($session->getState(Session::STATE_PASSWORD)) {
+                if ($session_details['last_ping'] < time() - Configuration::get('session.password_ttl')) {
+                    if (!$session->unsetState(Session::STATE_PASSWORD)) {
                         // The session does not want to be remembered and has been destroyed.
                         return false;
                     }

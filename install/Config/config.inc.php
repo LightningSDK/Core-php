@@ -8,6 +8,10 @@ $conf = array(
         // ./lightning security generate-aes-key
         // **** THIS KEY IS INCLUDED WITH THE DISTRIBUTION AND IS NOT SECURE ****
         'key' => 'o2sdxfGwHn2YGcQ3Xh2Z8p5y/BP0dHdbtdmU3ATdMwE=',
+        'multiple_devices' => false,
+    ),
+    'session' => array(
+        'single_ip' => true,
     ),
     'site' => array(
         'mail_from' => 'donotreply@Website.com',
