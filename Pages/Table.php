@@ -107,7 +107,13 @@ abstract class Table extends Page {
     protected $addable = true;
     protected $cancel = false;
     protected $searchable = false;
-    protected $sortable = false;
+
+    /**
+     * Whether the table is sortable.
+     *
+     * @var boolean
+     */
+    protected $sortable = true;
 
     /**
      * when generating a table (i.e. calendar table)
@@ -184,7 +190,7 @@ abstract class Table extends Page {
             $sort_strings = array();
             foreach($field as $f) {
                 $f = explode(":", $f);
-                if ($f[1] == "D") {
+                if (!empty($f[1]) && $f[1] == "D") {
                     $this->sort_fields[$f[0]] = "D";
                     $sort_strings[] = "`{$f[0]}` DESC";
                 } else {
@@ -281,7 +287,7 @@ abstract class Table extends Page {
             }
         }
         Database::getInstance()->delete($this->table, array($this->getKey() => $this->id));
-        Navigation::redirect();
+        Navigation::redirect(Request::get('redirect'));
     }
 
     public function postInsert() {
@@ -377,7 +383,7 @@ abstract class Table extends Page {
     /**
      * Set this table to readonly mode.
      *
-     * @param bool $read_only
+     * @param boolean $read_only
      *   Whether this should be read only.
      */
     public function setReadOnly ($read_only = true) {
@@ -420,11 +426,6 @@ abstract class Table extends Page {
         return $this->key;
     }
 
-    function load_table_description($table) {
-        $this->table = $table;
-        include $this->table_descriptions.$table.'.php';
-    }
-
     function render() {
         $this->get_fields();
         $this->check_default_rowClick();
@@ -452,8 +453,8 @@ abstract class Table extends Page {
             // DELETE CONFIRMATION
             case 'delete':
                 if (!$this->deleteable) {
-                    $errors[] = "Access Denied";
-                    break; // FAILSAFE
+                    Messenger::error('Access Denied');
+                    break;
                 }
                 echo $this->render_del_conf();
                 break;
@@ -467,8 +468,8 @@ abstract class Table extends Page {
                 break;
 
         }
-        // we have to call this last because certain information is learned
-        // during the render process
+        // TODO: update to use the JS class.
+        // we shouldn't need to call this as long as we use the JS class.
         $this->js_init_data();
     }
 
@@ -609,14 +610,22 @@ abstract class Table extends Page {
 
     function render_del_conf() {
         // get delete confirmation
-        $output = "<br /><br />Are you sure you want to delete this?<br /><br /><form action='".$this->createUrl()."' method='POST'>";
-        $output .= "<input type='hidden' name='id' value='{$this->id}' /><input type='hidden' name='action' value='delconf' />";
-        $output .= "<input type='submit' name='delconf' value='Yes' class='button'/><input type='submit' name='delconf' value='No' class='button' />";
+        $output = "<br /><br />Are you sure you want to delete this?<br /><br /><form action='' method='POST'>";
+        $output .= "<input type='hidden' name='id' value='{$this->id}' />
+            <input type='hidden' name='action' value='delconf' />
+            <input type='submit' name='delconf' value='Yes' class='button'/>
+            <input type='submit' name='delconf' value='No' class='button' />";
         if ($this->refer_return) {
             $output .= '<input type="hidden" name="refer_return" value="'.$this->refer_return.'" />';
+        } else {
+            $output .= "<input type='hidden' name='redirect' value='" . $this->getRedirectURL() . "' />";
         }
         $output .= "</form>";
         return $output;
+    }
+
+    public function getRedirectURL() {
+        return preg_replace('|\?.*|', '', $_SERVER['REQUEST_URI']);
     }
 
     function render_header() {
@@ -821,10 +830,18 @@ abstract class Table extends Page {
         $output="";
         foreach($this->links as $link => $link_settings) {
             if ($link_settings['list'] === true) {
-                if ($link_settings['index']!="")
-                    $links = Database::getInstance()->assoc("SELECT * FROM `{$link_settings['index']}` JOIN `{$link}` USING (`{$link_settings['key']}`) WHERE `{$this->getKey()}` = '{$row[$this->getKey()]}'");
-                else
-                    $links = Database::getInstance()->assoc("SELECT * FROM `{$link}` WHERE `{$this->getKey()}` = '{$row[$this->getKey()]}'");
+                if ($link_settings['index']!="") {
+                    $links = Database::getInstance()->select(
+                        array(
+                            'from' => $link_settings['index'],
+                            'join' => array('JOIN', $link, "USING (`{$link_settings['key']}`)")
+                        ),
+                        array($this->getKey() => $row[$this->getKey()])
+                    );
+                }
+                else {
+                    $links = Database::getInstance()->select($link, array($this->getKey() => $row[$this->getKey()]));
+                }
 
                 $output.= "<td>";
                 $displays = array();
@@ -1346,14 +1363,14 @@ abstract class Table extends Page {
         // Search.
         $sort = array();
         if (is_array($this->sort_fields) && count($this->sort_fields) > 0) {
-            $sort_fields = $this->search_fields;
-            if ($other['sort']) {
+            $sort_fields = $this->sort_fields;
+            if (!empty($other['sort'])) {
                 foreach($other['sort'] as $f=>$d) {
                     switch($d) {
                         case "A": $sort_fields[$f] = "A"; break;
                         case "D": $sort_fields[$f] = "D"; break;
                         case "X":
-                            if ($this->sort_fields[$f] == "A")
+                            if (!empty($this->sort_fields[$f]) && $this->sort_fields[$f] == "A")
                                 $sort_fields[$f] = "D";
                             else
                                 $sort_fields[$f] = "A";

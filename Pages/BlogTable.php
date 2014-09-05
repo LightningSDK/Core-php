@@ -12,7 +12,7 @@ class BlogTable extends Table {
     protected $sort = 'time DESC';
 
     protected $links = array(
-        'categories' => array(
+        'blog_category' => array(
             'index' => 'blog_blog_category',
             'key' => 'cat_id',
             'display_column' => 'category',
