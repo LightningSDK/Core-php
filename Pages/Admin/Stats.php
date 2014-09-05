@@ -1,13 +1,12 @@
 <?php
-/**
- * Lightning\Pages\Stats
- */
 
-namespace Lightning\Pages;
+namespace Lightning\Pages\Admin;
 
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Output;
 use Lightning\Tools\Template;
+use Lightning\View\JS;
+use Lightning\View\Page;
 use Lightning\View\TrackerHistory;
 
 /**
@@ -20,6 +19,7 @@ class Stats extends Page {
      * Require admin privileges.
      */
     public function __construct() {
+        parent::__construct();
         if (ClientUser::getInstance()->details['type'] < 5) {
             Output::accessDenied();
         }
@@ -30,9 +30,11 @@ class Stats extends Page {
      */
     public function get() {
         $template = Template::getInstance();
-        $template->set('content', 'admin_mailing_stats');
+        $template->set('content', 'stats');
+        $template->set('full_width', true);
         $tracker = new TrackerHistory('Mailing List');
         $tracker->render();
+        JS::startup('lightning.multiplier.init();');
     }
 
     /**

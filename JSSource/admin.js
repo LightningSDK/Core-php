@@ -1,3 +1,81 @@
+if (!lightning) {
+    var lightning = {};
+}
+
+lightning.multiplier = {
+    init: function() {
+        var self = this;
+        $('.multiplier').each(function(){
+            $(this).on('click', '.multiplier_add', null, function(e){self.addOption(e.target)});
+            $(this).on('click', '.multiplier_remove', null, function(e){self.removeOption(e.target)});
+            $(this).append('<input class="multiplier_count" value="0" type="hidden" />');
+            $(this).find('.template').hide();
+            self.addOption(this);
+        });
+    },
+
+    addOption: function(target) {
+        var container = $(target).closest('.multiplier');
+        var template = container.find('.template').html();
+        var count = container.find('.multiplier_count').val();
+        var newElement = $('<div class="item"></div>').append(template.replace(/%/g, count + 1));
+        container.find('.multiplier_count').val(count + 1);
+        container.append(newElement);
+        this.adjustControls(container);
+    },
+
+    removeOption: function(target) {
+        $(target).closest('.item').remove();
+        this.adjustControls($(target).closest('.multiplier'));
+    },
+
+    adjustControls: function(container) {
+        container.find('.multiplier_add').hide();
+        container.find('.multiplier_add').last().show();
+        container.find('.multiplier_remove').show();
+    }
+};
+
+lightning.stats = {
+    loadData: function() {
+        var ctx = document.getElementById("canvas").getContext("2d");
+
+        var requestData = {
+            sets: []
+        };
+        $('#stats_controls select').not('#tracker_\\%').each(function(){
+            var id = $(this).attr('id').replace('tracker_', '');
+            requestData.sets.push(
+                {
+                    tracker: $('#tracker_' + id).val(),
+                    sub_id: $('#sub_id_' + id).val(),
+                }
+            );
+        });
+
+        this.getTrackerStats(
+            requestData,
+            function(data) {
+                window.myLine = new Chart(ctx).Line(data, {
+                    responsive: true,
+                    datasetFill: false,
+                });
+            }
+        )
+    },
+
+    getTrackerStats: function(data, callback) {
+        data.action = 'trackerStats';
+        $.ajax({
+            type: 'GET',
+            url: '/admin/tracker',
+            dataType: 'JSON',
+            data: data,
+            success: callback
+        });
+    }
+};
+
 function submit_request_form(form){
     $.ajax({
         url: $('#'+form).attr("action"),
@@ -537,15 +615,4 @@ function tree_node_header(data){
         buttons += "<img src='/images/app/pencil.png' title='Rename' onclick='tree_rename(this);' /> <img src='/images/app/remove2.png' title='Remove' onclick='tree_delete(this);' />";
 
     return "<div class='tree_column_header'><span>"+data.node_name+"</span>"+buttons+"</div>";
-}
-
-function getTrackerStats(data, callback) {
-    data.action = 'trackerStats';
-    $.ajax({
-        type: 'GET',
-        url: '/admin/tracker',
-        dataType: 'JSON',
-        data: data,
-        success: callback
-    });
 }

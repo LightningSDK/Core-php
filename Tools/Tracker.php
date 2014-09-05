@@ -15,6 +15,13 @@ class Tracker extends Singleton {
     protected static $trackers;
 
     /**
+     * A reverse index to convert IDs to names.
+     *
+     * @var array
+     */
+    protected static $reverse;
+
+    /**
      * Load the trackers from the DB.
      */
     protected static function loadTrackers(){
@@ -24,13 +31,36 @@ class Tracker extends Singleton {
     }
 
     /**
+     * Create a select field with tracker options.
+     *
+     * @param string $name
+     *   The name and ID of the field.
+     * @param string $default
+     *   The default selected value.
+     * @param string $other
+     *   Additional HTML to add to the outer select tag.
+     *
+     * @return string
+     *   The rendered HTML.
+     */
+    public static function options($name, $default = '', $other = ''){
+        self::loadTrackers();
+        $output = '<select name="' . $name . '" id="' . $name . '" ' . $other . '>';
+        foreach (self::$trackers as $name => $id) {
+            $output .= '<option value="' . $id . '">' . $name . '</option>';
+        }
+        $output .= '</select>';
+        return $output;
+    }
+
+    /**
      * @param string $tracker_name
      *   The name of the tracker.
      *
      * @return integer
      *   The numeric tracker ID.
      */
-    public static function getTrackerId($tracker_name = ''){
+    public static function getTrackerId($tracker_name){
         // Make sure the trackers are loaded.
         self::loadTrackers();
 
@@ -41,6 +71,26 @@ class Tracker extends Singleton {
         }
 
         return self::$trackers[$tracker_name];
+    }
+
+    /**
+     * Convert a tracker ID into it's name.
+     *
+     * @param integer $tracker_id
+     *   The tracker ID.
+     *
+     * @return string
+     *   The tracker name.
+     */
+    public static function getName($tracker_id) {
+        // Make sure the trackers are loaded.
+        self::loadTrackers();
+
+        if (empty(self::$reverse)) {
+            self::$reverse = array_flip(self::$trackers);
+        }
+
+        return self::$reverse[$tracker_id];
     }
 
     /**
@@ -112,6 +162,19 @@ class Tracker extends Singleton {
         return urlencode(Encryption::aesEncrypt($string, Configuration::get('tracker.key')));
     }
 
+    /**
+     * Create the HTML for an image that will hit a tracker.
+     *
+     * @param string $tracker_name
+     *   The name of a tracker.
+     * @param int $sub_id
+     *   The subtracker id.
+     * @param $user_id
+     *   The user id.
+     *
+     * @return string
+     *   The rendered HTML.
+     */
     public static function getTrackerImage($tracker_name, $sub_id = 0, $user_id = -1) {
         $url = Configuration::get('web_root') . '/track?t=' . self::getTrackerLink($tracker_name, $sub_id, $user_id);
         return '<img src="' . $url . '" border="0" height="0" width="0" />';
@@ -151,7 +214,7 @@ class Tracker extends Singleton {
      */
     public static function getHistory($tracker, $start = -30, $end = 0, $sub_id = -1, $user_id = -1) {
         // Start the criteria with tracker id.
-        $criteria = array('tracker_id' => self::getTrackerId($tracker));
+        $criteria = array('tracker_id' => $tracker);
 
         // Filter by date range.
         $start = Time::today() + $start;
