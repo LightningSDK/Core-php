@@ -73,7 +73,7 @@ $conf = array(
             'track' => 'Lightning\\Pages\\Track',
         ),
         'cli_only' => array(
-            'bounce' => 'Lightning\\CLI\\Bounce',
+            'bounce' => 'Lightning\\CLI\\BouncedEmail',
             'test' => 'Source\\CLI\\Test',
         )
     ),
