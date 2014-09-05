@@ -458,7 +458,9 @@ class Database extends Singleton {
         $where = !empty($where) ? ' WHERE ' . $this->sqlImplode($where, $values, ' AND ') : '';
         $limit = is_array($limit) ? ' LIMIT ' . $limit[0] . ', ' . $limit[1] . ' '
             : !empty($limit) ? ' LIMIT ' . intval($limit) : '';
-        $this->query('SELECT ' . $fields . ' FROM ' . $this->parseTable($table, $values) . $where . ' ' . $final . $limit, $values);
+        $table_values = array();
+        $table = $this->parseTable($table, $table_values);
+        $this->query('SELECT ' . $fields . ' FROM ' . $table . $where . ' ' . $final . $limit, array_merge($table_values, $values));
     }
 
     /**
