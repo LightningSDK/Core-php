@@ -6,7 +6,8 @@ class BasicHTML {
     public static function select($name, $values, $default) {
         $return = '<select name="' . $name . '" id="' . $name . '" >';
         foreach ($values as $value => $label) {
-            $return .= '<option value="' . $value . '">' . $label . '</option>';
+            $selected = $value == $default ? 'SELECTED="selected"' : '';
+            $return .= '<option value="' . $value . '" ' . $selected . '>' . $label . '</option>';
         }
         $return .= '</select>';
         return $return;
