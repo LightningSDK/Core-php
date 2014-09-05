@@ -27,6 +27,7 @@ class Page {
         JS::add('/js/placeholder.js');
         JS::add('/js/foundation.min.js');
         JS::add('/js/lightning.js');
+        JS::startup('$(document).foundation();');
         CSS::add('/css/foundation.css');
         CSS::add('/css/normalize.css');
         CSS::add('/css/lightning.css');
