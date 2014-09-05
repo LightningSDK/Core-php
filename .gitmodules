@@ -3,7 +3,7 @@
 	url = https://github.com/ezyang/htmlpurifier.git
 [submodule "Vendor/PHPMailer"]
 	path = Vendor/PHPMailer
-	url = https://github.com/PHPMailer/PHPMailer.git
+	url = https://github.com/macdabby/PHPMailer.git
 [submodule "Vendor/foundation"]
 	path = Vendor/foundation
 	url = https://github.com/zurb/foundation.git
