@@ -2456,7 +2456,7 @@ abstract class Table extends Page {
                 if (!empty($field['height'])) {
                     $config['height'] = $field['height'];
                 }
-                return CKEditor::getInstance()->iframe($field['form_field'], $field['Value'], $config);
+                return CKEditor::iframe($field['form_field'], $field['Value'], $config);
                 break;
             case 'div':
                 if ($field['Value'] == "")

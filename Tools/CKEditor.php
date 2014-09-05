@@ -14,19 +14,19 @@ use Lightning\View\JS;
  *
  * @package Lightning\Tools
  */
-class CKEditor extends Singleton {
+class CKEditor {
+
+    protected static $inited = false;
+
     /**
      * Add the required JS to the page.
      */
-    public function __construct() {
-        JS::add('/js/ckeditor/ckeditor.js');
-    }
-
-    /**
-     * @return CKEditor
-     */
-    public static function getInstance() {
-        return parent::getInstance();
+    public static function init() {
+        if (!self::$inited) {
+            JS::add('/js/ckeditor/ckeditor.js');
+            JS::startup('lightning.ckeditors = {}');
+            self::$inited = true;
+        }
     }
 
     /**
@@ -42,7 +42,12 @@ class CKEditor extends Singleton {
      *   The output HTML.
      */
     public static function editableDiv($id, $options) {
-        JS::add('/js/ckeditor/ckeditor.js');
+        self::init();
+
+        if (!empty($options['finder'])) {
+            JS::add('/js/ckfinder/ckfinder.js');
+        }
+
         if (empty($options['content'])) {
             $options['content'] = '<p></p>';
         }
@@ -68,7 +73,13 @@ class CKEditor extends Singleton {
      *   The output HTML.
      */
     public static function iframe($id, $value, $options = array()) {
-        JS::startup('CKEDITOR.replace("' . $id . '", ' . json_encode($options) . ');');
+        self::init();
+
+        if (!empty($options['finder'])) {
+            JS::add('/js/ckfinder/ckfinder.js');
+        }
+
+        JS::startup('lightning.ckeditors["' . $id . '"].push(CKEDITOR.replace("' . $id . '", ' . json_encode($options) . '));');
         return '<textarea name="' . $id . '" id="' . $id . '">' . Scrub::toHTML($value) . '</textarea>';
     }
 }

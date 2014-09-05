@@ -30,7 +30,12 @@ class JS {
      *
      * A list of scripts to run when the page is ready.
      */
-    protected static $startup_scripts = array();
+    protected static $startup_scripts = array(
+        'core' => array(
+            'script' => 'if(!lightning) var lightning = {};',
+            'rendered' => false,
+        ),
+    );
 
     /**
      * Add a JS file to be included in the HTML.
