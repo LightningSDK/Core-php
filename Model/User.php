@@ -151,12 +151,12 @@ class User {
     /**
      * Change the user's active status.
      *
-     * @param integer $enw_value
+     * @param integer $new_value
      *   The new active status.
      */
-    public function setActive($enw_value) {
-        $this->details['active'] = $enw_value;
-        Database::getInstance()->update('user', array('active' => $enw_value), array('user_id' => $this->id));
+    public function setActive($new_value) {
+        $this->details['active'] = $new_value;
+        Database::getInstance()->update('user', array('active' => $new_value), array('user_id' => $this->id));
     }
 
     /**

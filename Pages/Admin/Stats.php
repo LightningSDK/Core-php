@@ -32,7 +32,7 @@ class Stats extends Page {
         $template = Template::getInstance();
         $template->set('content', 'stats');
         $template->set('full_width', true);
-        $tracker = new TrackerHistory('Mailing List');
+        $tracker = new TrackerHistory('Message Sent');
         $tracker->render();
         JS::startup('lightning.multiplier.init();');
     }
