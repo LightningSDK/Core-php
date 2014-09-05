@@ -2,6 +2,15 @@
 
 use Lightning\Tools\Configuration;
 
+// Set required global parameters.
+if (!defined('HOME_PATH')) {
+    define('HOME_PATH', __DIR__ . '/..');
+}
+
+if (!defined('CONFIG_PATH')) {
+    define('CONFIG_PATH', HOME_PATH . '/Source/Config');
+}
+
 /**
  * A custom class loader.
  *

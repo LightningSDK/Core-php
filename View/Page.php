@@ -3,6 +3,7 @@
 namespace Overridable\Lightning\View;
 
 use Lightning\Tools\Blog;
+use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Request;
