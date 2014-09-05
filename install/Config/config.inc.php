@@ -28,6 +28,7 @@ $conf = array(
         'spam_test_from' => null,
         'mail_from' => null,
         'mail_from_name' => null,
+        'bounce_address' => null,
     ),
     'tracker' => array(
         'allow_unencrypted' => true,
@@ -72,6 +73,7 @@ $conf = array(
             'track' => 'Lightning\\Pages\\Track',
         ),
         'cli_only' => array(
+            'bounce' => 'Lightning\\CLI\\Bounce',
             'test' => 'Source\\CLI\\Test',
         )
     ),

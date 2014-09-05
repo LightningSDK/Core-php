@@ -22,6 +22,7 @@ class Mailer {
 
     public function __construct($verbose = false) {
         $this->mail = new \PHPMailer(true);
+        $this->mail->ReturnPath = Configuration::get('mailer.bounce_address');
         $this->verbose = $verbose;
         Messenger::setVerbose(true);
     }
