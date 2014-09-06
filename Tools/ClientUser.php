@@ -16,7 +16,10 @@ use Lightning\Model\User;
 class ClientUser extends Singleton {
 
     /**
-     * @return User;
+     * Get the currently logged in user.
+     *
+     * @return User
+     *   The currently logged in user.
      */
     public static function getInstance() {
         return parent::getInstance();
@@ -24,6 +27,9 @@ class ClientUser extends Singleton {
 
     /**
      * Create the default logged in user.
+     *
+     * @return User
+     *   The currently logged in user.
      */
     public static function createInstance() {
         $session_id = Request::cookie(Configuration::get('session.cookie'), 'hex');

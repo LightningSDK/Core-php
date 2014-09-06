@@ -30,6 +30,22 @@ class Session extends Singleton {
         $this->details = $session_details;
     }
 
+    /**
+     * Get the current session.
+     *
+     * @return Session
+     *   The current session.
+     */
+    public static function getInstance() {
+        return parent::getInstance();
+    }
+
+    /**
+     * Create the session object.
+     *
+     * @return Session
+     *   The current session.
+     */
     public function createInstance() {
         if ($session_key = Request::cookie('session', 'hex')) {
             $session_details = Database::getInstance()->selectRow('session', array('session_key' => array('LIKE', $session_key)));
@@ -136,19 +152,29 @@ class Session extends Singleton {
     }
 
     /**
+     * Get the session token.
+     *
+     * @return string
+     *   The token.
+     */
+    public function getToken() {
+        return $this->details['form_token'];
+    }
+
+    /**
      * Checks for password access.
      *
      * @param int $state
      * @return bool
      */
-    function getState($state){
+    public function getState($state){
         return (($state & $this->details['state']) == $state);
     }
 
     /**
      * This is called when the user enters their password and password access is now allowed.
      */
-    function setState($state){
+    public function setState($state){
         $this->details['state'] = $this->details['state'] | $state;
         Database::getInstance()->query("UPDATE session SET state = (state | " . $state . ") WHERE session_id={$this->id}");
     }
@@ -156,7 +182,7 @@ class Session extends Singleton {
     /**
      * Drops the user out of the PIN approved state. This may still leave them with password access.
      */
-    function unsetState($state){
+    public function unsetState($state){
         $this->details['state'] = $this->details['state'] & ~$state;
         Database::getInstance()->query("UPDATE session SET state = (state & ~".$state.") WHERE session_id={$this->id}");
     }
@@ -164,7 +190,7 @@ class Session extends Singleton {
     /**
      * Destroy the current session and remove it from the database.
      */
-    function destroy (){
+    public function destroy (){
         if($this->id) {
             Database::getInstance()->delete('session', array('session_id' => $this->id));
         }
@@ -174,14 +200,14 @@ class Session extends Singleton {
     /**
      * Update the last active time on the session.
      */
-    function ping(){
+    public function ping(){
         Database::getInstance()->update('session', array('last_ping' => time()), array('session_id' => $this->id));
     }
 
     /**
      * Output the cookie to the requesting web server (for relay to the client).
      */
-    function setCookie(){
+    public function setCookie(){
         Output::setCookie(Configuration::get('session.cookie'), $this->key, Configuration::get('session.remember_ttl'));
     }
 
@@ -213,7 +239,7 @@ class Session extends Singleton {
      * @param int $exception
      *   A session ID that can be left as active.
      */
-    function dump_sessions($exception=0){
+    public function dump_sessions($exception=0){
         // Delete this session.
         Database::getInstance()->delete('session',
             array(
@@ -237,7 +263,7 @@ class Session extends Singleton {
     /**
      * Issue a new random key to the session. Everything else stays the same.
      */
-    function scramble(){
+    public function scramble(){
         $new_sess_id = self::getNewSessionId();
         if(empty($new_sess_id)) {
             _die('Session error.');
@@ -249,18 +275,18 @@ class Session extends Singleton {
     }
 
 
-    function destroy_all($user_id){
+    public function destroy_all($user_id){
         Database::getInstance()->delete('session', array('user_id'=>$user_id));
     }
 
     // Blank out the session cookie
     // No return value
-    function blank_session () {
+    public function blank_session () {
         Output::clearCookie(Configuration::get('session.cookie'));
     }
 
     // Return the session content
-    function getData () {
+    public function getData () {
         if ($field = Database::getInstance()->selectField('content', 'session', array('session_id'=>request::cookie(Configuration::get('session.cookie'))))) {
             return $field;
         } else {
@@ -269,7 +295,7 @@ class Session extends Singleton {
     }
 
     // Set session content
-    function setData ($content) {
+    public function setData ($content) {
         Database::getInstance()->update('session', (array('content'=>$content)), array('session_id'=>request::cookie(Configuration::get('session.cookie'))));
     }
 }

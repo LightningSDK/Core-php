@@ -38,6 +38,7 @@ namespace Lightning\Pages;
 
 use Lightning\Tools\CKEditor;
 use Lightning\Tools\Database;
+use Lightning\Tools\Form;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Request;
@@ -611,6 +612,7 @@ abstract class Table extends Page {
     function render_del_conf() {
         // get delete confirmation
         $output = "<br /><br />Are you sure you want to delete this?<br /><br /><form action='' method='POST'>";
+        $output .= Form::renderTokenInput();
         $output .= "<input type='hidden' name='id' value='{$this->id}' />
             <input type='hidden' name='action' value='delconf' />
             <input type='submit' name='delconf' value='Yes' class='button'/>
@@ -689,8 +691,10 @@ abstract class Table extends Page {
             if (count($this->list) > 0 || !empty($this->prefixRows)) {
 
                 // add form if required
-                if ($this->action_fields_requires_submit())
-                    $output.= "<form action='".$this->createUrl()."' method='POST'>";
+                if ($this->action_fields_requires_submit()) {
+                    $output .= "<form action='".$this->createUrl()."' method='POST'>";
+                    $output .= Form::renderTokenInput();
+                }
                 $output.= "<div id='list_table_container'>";
                 $output.= '<table cellspacing="0" cellpadding="3" border="0" width="100%">';
                 // SHOW HEADER
@@ -970,6 +974,15 @@ abstract class Table extends Page {
         return $output;
     }
 
+    /**
+     * Render the entire edit/create form.
+     *
+     * @param boolean $return
+     *   Whether to return the ouptut or send it to the user.
+     *
+     * @return null|string
+     *   The fully rendered HTML content.
+     */
     function render_form($return = false) {
         if (isset($this->custom_templates[$this->action.'_item'])) {
             $template = $this->load_template($this->custom_template_directory.$this->custom_templates[$this->action.'_item']);
@@ -1002,6 +1015,7 @@ abstract class Table extends Page {
             if ($this->action != "view") {
                 $multipart_header = $this->has_upload_field() ? "enctype='multipart/form-data'" : '';
                 echo "<form action='".$this->createUrl()."' id='form_{$this->table}' method='POST' {$multipart_header}><input type='hidden' name='action' id='action' value='{$new_action}' />";
+                echo Form::renderTokenInput();
             }
             // use the ID if we are editing a current one
             if ($this->action == "edit")
@@ -1578,7 +1592,7 @@ abstract class Table extends Page {
     function user_display_new(&$field) {
         if (!empty($field['list_only']))
             return false;
-        // TODO: This should be replaced by an overriding method in teh child class.
+        // TODO: This should be replaced by an overriding method in the child class.
         if (
             (!empty($field['display_function']) && is_callable($field['display_function']))
             || (!empty($field['display_new_function']) && is_callable($field['display_new_function']))
@@ -1596,7 +1610,7 @@ abstract class Table extends Page {
             return false;
         if ((!empty($field['type']) && $field['type'] == 'hidden') || !empty($field['hidden']))
             return false;
-        // TODO: This should be replaced by an overriding method in teh child class.
+        // TODO: This should be replaced by an overriding method in the child class.
         if (
             (!empty($field['display_function']) && is_callable($field['display_function']))
             || (!empty($field['display_edit_function']) && is_callable($field['display_edit_function']))
@@ -1608,7 +1622,7 @@ abstract class Table extends Page {
     }
 
     function display_list(&$field) {
-        // TODO: This should be replaced by an overriding method in teh child class.
+        // TODO: This should be replaced by an overriding method in the child class.
         if (
             (!empty($field['display_function']) && is_callable($field['display_function']))
             || (!empty($field['display_list_function']) && is_callable($field['display_list_function']))

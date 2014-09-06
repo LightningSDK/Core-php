@@ -24,7 +24,7 @@ class Singleton {
         $class = get_called_class();
         if (empty(static::$instances[$class])) {
             classAutoloader($class);
-            if (in_array('createInstance', get_class_methods($class))) {
+            if (is_callable($class . '::createInstance')) {
                 self::$instances[$class] = $class::createInstance();
             } else {
                 self::$instances[$class] = new $class();

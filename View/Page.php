@@ -6,11 +6,18 @@ use Lightning\Tools\Blog;
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Messenger;
+use Lightning\Tools\Navigation;
 use Lightning\Tools\Request;
+use Lightning\Tools\Session;
 use Lightning\Tools\Template;
 use Lightning\View\CSS;
 use Lightning\View\JS;
 
+/**
+ * The basic html page handler.
+ *
+ * @package Overridable\Lightning\View
+ */
 class Page {
 
     public $template = 'template';
@@ -64,6 +71,15 @@ class Page {
         $action = ucfirst(Request::get('action'));
         $request_type = strtolower(Request::type());
 
+        // If this is a post request, there must be a valid token.
+        if ($request_type == 'post') {
+            $token = Request::post('token', 'hex');
+            if (empty($token) || $token != Session::getInstance()->getToken()) {
+                Navigation::redirect('/message?err=invalid_token');
+            }
+        }
+
+        // If there is a requested action.
         if ($action) {
             $method = Request::convertFunctionName($request_type, $action);
             if (method_exists($this, $method)) {

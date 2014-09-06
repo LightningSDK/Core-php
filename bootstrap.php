@@ -48,9 +48,16 @@ function classAutoloader($classname) {
     loadClassFile($classname);
 }
 
+/**
+ * Require the requested class file.
+ *
+ * @param $classname
+ *   The name of the class.
+ */
 function loadClassFile($classname) {
     $class_path = str_replace('\\', DIRECTORY_SEPARATOR, $classname);
     require_once HOME_PATH . DIRECTORY_SEPARATOR . $class_path . '.php';
 }
 
+// Set the autoloader to the Lightning autoloader.
 spl_autoload_register('classAutoloader');

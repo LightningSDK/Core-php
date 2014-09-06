@@ -1,8 +1,6 @@
 <? if ( $user->details['type'] >= 5): ?><a href='/admin/blog/comments'>Approve Comments</a><br /><a href='/table.php?table=categories' target="_blank">Edit categories</a><br /><br /><? endif; ?>
 
-<? if (!empty($blog_table)): ?>
-    <?=$blog_table->render_table();?>
-<? elseif ( count($blog->posts) > 0): ?>
+<? if ( count($blog->posts) > 0): ?>
     <?=$blog->pagination()?>
     <? foreach ($blog->posts as $post): ?>
         <? if ( count($blog->posts) == 1): ?>
@@ -12,17 +10,6 @@
             <h2><a href='/<?=$post['url'];?>.htm'><?=$post['title'];?></a></h2>
         <? endif; ?>
         <h4 class="blog_header_date">Posted on: <?=date('F j, Y \a\t g:iA',$post['time']);?></h4>
-        <? if ( count($blog->posts) == 1 && $user->details['type'] >= 5): ?>
-            <div style="display:none;" id='blog_edit'>
-                <form action="/blog/edit" method="post">
-                    <input type="hidden" name="blog_id" value="<?=$post['blog_id']?>" />
-                    <input type="hidden" name="action" value="update_blog" />
-                    Title: <input type="text" name="title" value="<?=$post['title']?>" /><br />
-                    <?=$blog_table->render_table()?>
-                    <input type="submit" name="submit" value="Save Changes" />
-                </form>
-            </div>
-        <? endif; ?>
         <div class="blog_body" <? if ( count($blog->posts) == 1):?>id='blog_body'<? endif; ?>>
             <? if ( $user->details['type'] >= 5): ?><a href='/blog/edit?id=<?=$post['blog_id'];?>'>Edit this Post</a><br /><? endif; ?>
             <?=$blog->body($post['body'])?><? if ( count($blog->posts) > 1):?> <a href='/<?=$post['url']?>.htm'>read more...</a><? endif; ?>

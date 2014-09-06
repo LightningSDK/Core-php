@@ -1,3 +1,9 @@
+<?
+
+use Lightning\Tools\Form;
+
+?>
+
 <script language="javascript">
 
     $(document).ready(function(){
@@ -15,9 +21,11 @@
     });
 
 </script>
-<? if (empty($l_page) || $l_page == "join" || $l_page == "register"): ?>
+<?
+if (empty($l_page) || $l_page == "join" || $l_page == "register"): ?>
     <h2>Create a username and password</h2>
     <form action="/user" method="post" id="register">
+        <?= Form::renderTokenInput(); ?>
         <table>
             <tr><td>Email:</td><td><input type='text' name='email' class="required email" /></td></tr>
             <tr><td>Password:</td><td><input type='password' name='password' id='password' class="required" /></td></tr>
@@ -36,7 +44,7 @@
     <h2>Log In with your email and password.</h2>
 
     <form action="/user" method="post" id="register">
-
+        <?= Form::renderTokenInput(); ?>
         <table>
             <tr><td>Email:</td><td><input type='text' name='email' /></td></tr>
             <tr><td>Password:</td><td><input type='password' name='password' /></td></tr>
@@ -54,6 +62,7 @@
     <h2>Forgot your password?</h2>
 
     <form action="/user" method="post">
+        <?= Form::renderTokenInput(); ?>
         <table>
             <tr><td>Enter your email address:</td><td><input type='text' name='email' /></td></tr>
         </table>
