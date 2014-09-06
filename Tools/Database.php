@@ -754,7 +754,7 @@ class Database extends Singleton {
      *   The SQL query segment.
      */
     protected function implodeFields($fields) {
-        foreach ($fields as &$field) {
+        foreach ($fields as $alias => &$field) {
             if(is_array($field) && is_array($table_fields = current($field))) {
                 // Format of array('table' => array('column'))
                 // Or array('table' => array('alias' => 'column'))
@@ -773,12 +773,23 @@ class Database extends Singleton {
                     }
                 }
                 $field = implode(', ', $table_field_list);
-            } elseif (is_array($field)) {
-                // Format of array('alias' => 'column') to column as `alias`.
-                $field = current($field) . ' AS `' . key($field) . '`';
             } else {
+                if (is_array($field)) {
+                    $alias = key($field);
+                    $field = current($field);
+                }
                 // Format of array('field')
-                $field = '`' . $field . '`';
+                $field = explode('.', $field);
+                if (count($field) == 1) {
+                    $field = '`' . $field[0] . '`';
+                } elseif (count($field == 1)) {
+                    $field = '`' . $field[0] . '`.`' . $field[1] . '`';
+                }
+
+                if (!empty($alias) && !is_numeric($alias)) {
+                    // Format of array('alias' => 'column') to column as `alias`.
+                    $field = $field . ' AS `' . $alias . '`';
+                }
             }
         }
         return empty($fields) ? '*' : implode(', ', $fields);
