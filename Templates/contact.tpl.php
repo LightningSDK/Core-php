@@ -1,6 +1,8 @@
 <?php
 
 use Lightning\Tools\Form;
+use Lightning\View\Field;
+use Lightning\Tools\ReCaptcha;
 
 ?>
 <h1>Contact</h1>
@@ -19,14 +21,14 @@ use Lightning\Tools\Form;
     <input type="hidden" name="action" value="sendMessage" />
 
     Your Name:<br />
-    <input type="text" name="name" id='name' value="<?=$postedname?>" class="required" /><br />
+    <input type="text" name="name" id='name' value="<?=Field::defaultValue('name');?>" class="required" /><br />
 
     Your Email:<br />
-    <input type="text" name="email" id='my_email' value="<?=$postedemail?>" class="required email" /><br />
+    <input type="text" name="email" id='my_email' value="<?=Field::defaultValue('email');?>" class="required email" /><br />
 
     Your message:<br />
-    <textarea name="message" cols="70" rows="20"><?=$postedmessage?></textarea><br />
-    <?=\Lightning\Tools\ReCaptcha::render()?>
+    <textarea name="message" cols="70" rows="20"><?=Field::defaultValue('name', null, 'text');?></textarea><br />
+    <?=ReCaptcha::render()?>
     <br />
     <input type="Submit" name="Submit" value="Send Message" class="button" />
 </form>
