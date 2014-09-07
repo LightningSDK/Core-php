@@ -53,7 +53,7 @@ class Session extends Singleton {
         }
 
         // No session exists, create a new one.
-        self::create();
+        return self::create();
     }
 
     /**
