@@ -1,7 +1,7 @@
 #!/bin/bash
 
-DIR="$( dirname "${BASH_SOURCE[0]}" )"
-cd $DIR
+cd "$( dirname "${BASH_SOURCE[0]}" )"
+DIR=$PWD
 
 # Updating git submodules
 echo "Updating git submodules"
@@ -42,18 +42,24 @@ if [ ! -f $DIR/../Source/Config/config.inc.php ]; then
     echo "Creating Source/Config directory"
     mkdir $DIR/../Source/Config
   fi
+
+  echo "Copying initial config files"
+  cp -r $DIR/install/Config $DIR/../Source/Config
+
+  #Collect database information.
   echo -n "Database host: "; read DBHOST
   echo -n "Database name: "; read DBNAME
-  echo -n "Username: "; read USER
-  echo -n "Password: "; read -s PASS
+  echo -n "Database user: "; read USER
+  echo -n "Database password: "; read -s PASS
 
   echo "Copying sample config file to Source/Config with DB configuration"
+  # TODO: This needs to be escaped to prevent sed from using the original line.
   sed "s|'database.*,|'database' => 'mysql:user=${USER};password=${PASS};host=${DBHOST};dbname=${DBNAME}',|"\
-    <$DIR/install/config.inc.php >$DIR/../Source/Config/config.inc.php
+    <$DIR/install/Config/config.inc.php >$DIR/../Source/Config/config.inc.php
 
   # Conform the databases
   echo "Conforming the database"
-  $DIR/lightning conform-database
+  $DIR/lightning database conform-schema
 fi
 
 # Install CKEditor

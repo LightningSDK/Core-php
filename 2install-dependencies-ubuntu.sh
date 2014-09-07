@@ -1,5 +1,8 @@
 #!/bin/bash
 
+cd "$( dirname "${BASH_SOURCE[0]}" )"
+DIR=$PWD
+
 # add repo for nodejs
 apt-get install python-software-properties
 add-apt-repository -y ppa:chris-lea/node.js
@@ -17,7 +20,6 @@ apt-get install python-software-properties python g++ make nodejs
 npm install -g bower grunt-cli
 gem install foundation
 
-DIR="$( dirname "${BASH_SOURCE[0]}" )"
 cd $DIR/../Source/foundation
 npm install -g bower grunt-cli
 npm install
