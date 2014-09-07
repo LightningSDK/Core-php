@@ -40,6 +40,13 @@ class Form {
     }
 
     /**
+     * Make sure a session is started so there can be a token.
+     */
+    public static function requiresToken() {
+        Session::getInstance();
+    }
+
+    /**
      * Render a hidden token field.
      *
      * @return string

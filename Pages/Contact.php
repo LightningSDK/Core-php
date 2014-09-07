@@ -6,6 +6,7 @@
 
 namespace Lightning\Pages;
 
+use Lightning\Tools\Form;
 use Lightning\Tools\Mailer;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
@@ -24,6 +25,7 @@ class Contact extends Page {
      * Build the contact form.
      */
     public function get() {
+        Form::requiresToken();
         Template::getInstance()->set('content', 'contact');
     }
 

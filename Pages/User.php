@@ -5,6 +5,7 @@ namespace Lightning\Pages;
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
+use Lightning\Tools\Form;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Request;
@@ -14,6 +15,7 @@ use Lightning\Model\User as UserObj;
 
 class User extends Page {
     public function get() {
+        Form::requiresToken();
         $user = ClientUser::getInstance();
         if($user->id > 0){
             // USER IS LOGGED IN, REDIRECT TO THE DEFAULT PAGE
