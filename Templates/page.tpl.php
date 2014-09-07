@@ -17,6 +17,7 @@
                     <input type="hidden" name="action" id='page_action' value="update_page" class="button" />
                 <? endif; ?>
                 <input type="hidden" name="page_id" id='page_id' value="<?= !empty($full_page['page_id']) ? $full_page['page_id'] : 0 ?>" />
+                <?= \Lightning\Tools\Form::renderTokenInput(); ?>
                 <table border='0' width="100%">
                     <tr><td>Title:</td><td><input type="text" name="title" id='page_title' value="<?=$full_page['title']?>" /></td></tr>
                     <tr><td>URL:</td><td><input type="text" name="url" id='page_url' value="<?=$full_page['url']?>" /></td></tr>
