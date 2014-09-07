@@ -66,8 +66,8 @@ class User extends Page {
      * Log the user out and redirect them to the exit page.
      */
     public function getLogout() {
-        ClientUser::getInstance()->logout();
-        Navigation::redirect('Location: ' . Configuration::get('logout_url') ?: '/');
+        ClientUser::getInstance()->logOut();
+        Navigation::redirect(Configuration::get('logout_url') ?: '/');
         exit;
     }
 

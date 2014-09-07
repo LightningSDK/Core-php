@@ -530,8 +530,8 @@ class User {
     /**
      * Destroy a user object and end the session.
      */
-    public function destroy() {
-        global $session;
+    public function logOut() {
+        $session = Session::getInstance();
         if($this->id > 0) {
             $this->details = NULL;
             $this->id = 0;

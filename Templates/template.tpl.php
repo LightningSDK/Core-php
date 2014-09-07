@@ -57,7 +57,7 @@ use Lightning\View\CSS;
                             <li><a href="/contact">Contact</a></li>
                             <li>
                                 <?if (ClientUser::getInstance()->id > 0): ?>
-                                    <a href="/user/logout">Log Out</a>
+                                    <a href="/user?action=logout">Log Out</a>
                                 <? else: ?>
                                     <a href="/user">Log In</a>
                                 <? endif; ?>
