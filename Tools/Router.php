@@ -45,9 +45,11 @@ class Router extends Singleton {
             return self::$routes['static'][$url];
         }
         // If this matches one of the regex urls.
-        foreach (self::$routes['dynamic'] as $expr => $route) {
-            if (preg_match('|' . $expr . '|', $url)) {
-                return $route;
+        if (!empty(self::$routes['dynamic'])) {
+            foreach (self::$routes['dynamic'] as $expr => $route) {
+                if (preg_match('|' . $expr . '|', $url)) {
+                    return $route;
+                }
             }
         }
     }
