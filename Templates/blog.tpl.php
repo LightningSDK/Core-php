@@ -1,6 +1,13 @@
-<? if ( $user->details['type'] >= 5): ?><a href='/admin/blog/comments'>Approve Comments</a><br /><a href='/table.php?table=categories' target="_blank">Edit categories</a><br /><br /><? endif; ?>
+<?
+use Lightning\Tools\ClientUser;
+$user = ClientUser::getInstance();
 
-<? if ( count($blog->posts) > 0): ?>
+if ($user->isAdmin()): ?>
+    <a href='/admin/blog/comments'>Approve Comments</a><br />
+    <a href='/table.php?table=categories' target="_blank">Edit categories</a><br /><br />
+<? endif; ?>
+
+<? if (count($blog->posts) > 0): ?>
     <?=$blog->pagination()?>
     <? foreach ($blog->posts as $post): ?>
         <? if ( count($blog->posts) == 1): ?>
@@ -11,7 +18,7 @@
         <? endif; ?>
         <h4 class="blog_header_date">Posted on: <?=date('F j, Y \a\t g:iA',$post['time']);?></h4>
         <div class="blog_body" <? if ( count($blog->posts) == 1):?>id='blog_body'<? endif; ?>>
-            <? if ( $user->details['type'] >= 5): ?><a href='/blog/edit?id=<?=$post['blog_id'];?>'>Edit this Post</a><br /><? endif; ?>
+            <? if ($user->isAdmin()): ?><a href='/blog/edit?id=<?=$post['blog_id'];?>'>Edit this Post</a><br /><? endif; ?>
             <?=$blog->body($post['body'])?><? if ( count($blog->posts) > 1):?> <a href='/<?=$post['url']?>.htm'>read more...</a><? endif; ?>
         </div>
         <br />
@@ -55,7 +62,7 @@
             <div class="blog_comment_container" id='blog_comment_container'>
                 <? foreach ($post['comments'] as $comment): ?>
                     <div class="blog_comment" id='blog_comment_<?=$comment['blog_comment_id']?>'>
-                        <? if ( $user->details['type'] >= 5): ?>
+                        <? if ($user->isAdmin()): ?>
                             <span class="delete_comment" onclick="delete_blog_comment(<?=$$comment['blog_comment_id']?>);">X</span>
                             <? if ( $comment['approved'] == 0): ?>
                                 <span class="approve_comment" onclick="approve_blog_comment(<?=$comment['blog_comment_id']?>);">Approve</span>

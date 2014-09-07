@@ -75,10 +75,12 @@ class Blog extends Singleton {
 
     function pagination(){
         // do noting if we dont have more than one page
-        if($this->post_count < $this->list_per_page) return false;
+        if($this->post_count <= $this->list_per_page) {
+            return false;
+        }
 
         // set up some variables
-        $pages = floor($this->post_count / $this->list_per_page);
+        $pages = ceil($this->post_count / $this->list_per_page);
 
         if($this->m > 0)
             $base_link = "/archive/{$this->y}/{$this->m}-%%.htm";
@@ -89,25 +91,27 @@ class Blog extends Singleton {
         else
             $base_link = '/blog/page/%%';
 
-        echo "<div class='pagination'>";
+        $output = '<ul class="pagination">';
 
-        // previous link
-        if($this->page != 1)
-            echo "<a href='".str_replace('%%', $this->page - 1, $base_link)."'>&lt; &lt; Previous Page</a> ";
+        // Previous page link.
+        $output .= '<li class="arrow' . ($this->page != 1 ? ' unavailable' : '') . '">
+            <a href="' . str_replace('%%', $this->page - 1, $base_link) . '">&laquo;</a>';
 
-        // page numbers
-        for($i = 1; $i <= $pages; $i++){
-            if($i == $this->page)
-                echo $i;
-            else
-                echo " <a href='".str_replace('%%', $i, $base_link)."'>{$i}</a> ";
+        // Page numbers.
+        for ($i = 1; $i <= $pages; $i++){
+            if ($i == $this->page) {
+                $output .= '<li class="current"><a href="">' . $i . '</a></li>';
+            } else {
+                $output .= '<li><a href="' . str_replace('%%', $i, $base_link) .'">' . $i . '</a></li>';
+            }
         }
 
-        // next page
-        if($pages > $this->page)
-            echo "<a href='".str_replace('%%', $this->page + 1, $base_link)."'>Next Page &gt; &gt;";
+        // Next page.
+        $output .= '<li class="arrow' . ($pages <= $this->page ? ' unavailable' : '') . '">
+            <a href="' . str_replace('%%', $this->page + 1, $base_link) . '">&raquo;</a>';
 
-        echo "</div>";
+        $output .= '</ul>';
+        return $output;
     }
 
     function recent_list($remote=false){
@@ -155,7 +159,7 @@ class Blog extends Singleton {
             ),
             array(),
             array(
-                array('count' => 'COUNT(*)'),
+                'count' => array('expression' => 'COUNT(*)'),
                 'category',
             ),
             'GROUP BY cat_id LIMIT 10'

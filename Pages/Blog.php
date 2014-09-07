@@ -33,15 +33,11 @@ class Blog extends Page {
         }
         elseif (!empty($blog_url)) {
             $blogroll = explode("/",$blog_url);
-            if($blogroll[0] == "blog" && $blogroll[1] == 'page'){
+            if($blogroll[0] == "blog" && !empty($blogroll[1]) && $blogroll[1] == 'page'){
                 $blog->page = intval($blogroll[2]);
             } else {
                 $blog->fetch_blog_url(preg_replace('/\.htm$/', '', $blog_url));
             }
-        }
-        if($blog->id > 0) {
-            // TODO: Set the cache time.
-            $page_time = max($blog->post['time'], $blog->post['comments'][count($blog->post['comments'])-1]['time']);
         }
 
         // SEE IF A SPECIFIC CATEGORY IS BEING REQUESTED.
@@ -70,7 +66,7 @@ class Blog extends Page {
             $blog->list_post();
             if(count($blog->posts) > 1)
                 $blog->shorten_body = true;
-            $template->set('page_section','blog_list');
+            $template->set('page_section', 'blog_list');
         }
         if(count($blog->posts) == 1){
             foreach (array('title', 'keywords', 'description') as $meta_data) {

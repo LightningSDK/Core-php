@@ -94,6 +94,7 @@ lightning.page = {
         delete lightning.ckeditors['page_editor'];
         var send = {
             page_id: $('#page_id').val(),
+            token: $('#token').val(),
             action: "save",
             title: $("#page_title").val(),
             url: $("#page_url").val(),

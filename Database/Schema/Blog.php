@@ -15,6 +15,7 @@ class Blog extends Schema {
             'time' => $this->int(true),
             'title' => $this->varchar(255),
             'url' => $this->varchar(128),
+            'keywords' => $this->varchar(255),
             'body' => $this->text(Schema::MEDIUMTEXT),
         );
     }
