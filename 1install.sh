@@ -44,7 +44,7 @@ if [ ! -f $DIR/../Source/Config/config.inc.php ]; then
   fi
 
   echo "Copying initial config files"
-  cp -r $DIR/install/Config $DIR/../Source/Config
+  cp -r $DIR/install/Config/* $DIR/../Source/Config/
 
   #Collect database information.
   echo -n "Database host: "; read DBHOST
@@ -77,6 +77,21 @@ if [ ! -d $DIR/../js/ckeditor ]; then
 fi
 
 # Install CKFinder
+if [ ! -d $DIR/../js/ckfinder ]; then
+  mkdir $DIR/../js/ckfinder
+  cp -r $DIR/Vendor/ckfinder/core ../js/ckfinder/
+  cp -r $DIR/Vendor/ckfinder/help ../js/ckfinder/
+  cp -r $DIR/Vendor/ckfinder/lang ../js/ckfinder/
+  cp -r $DIR/Vendor/ckfinder/plugins ../js/ckfinder/
+  cp -r $DIR/Vendor/ckfinder/skins ../js/ckfinder/
+  cp -r $DIR/Vendor/ckfinder/ckfinder.js ../js/ckfinder/
+  cp -r $DIR/Vendor/ckfinder/ckfinder.php ../js/ckfinder/
+  cp -r $DIR/Vendor/ckfinder/ckfinder.html ../js/ckfinder/
+
+  cp -r $DIR/install/ckfinder_config_ref.php ../js/ckfinder/config.php
+fi
+
+# Setup CKFinder content directory.
 if [ ! -d $DIR/../content ]; then
   mkdir $DIR/../content
   OWNER=`stat -c '%U' $DIR`
