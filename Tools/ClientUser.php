@@ -34,10 +34,15 @@ class ClientUser extends Singleton {
     public static function createInstance() {
         $session_id = Request::cookie(Configuration::get('session.cookie'), 'hex');
         $session_ip = Request::server('ip_int');
+        // If a session is found.
         if ($session_id && $session_ip && $session = Session::load($session_id, $session_ip)) {
-            return User::loadBySession($session);
-        } else {
-            return User::anonymous();
+            // Try to load the user on this session.
+            if ($user = User::loadBySession($session)) {
+                return $user;
+            }
         }
+
+        // No user was found.
+        return User::anonymous();
     }
 }
