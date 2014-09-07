@@ -384,7 +384,7 @@ class Database extends Singleton {
      *   How many matching rows were found.
      */
     public function count($table, $where = array()){
-        return $this->selectField(array('count' => 'COUNT(*)'), $table, $where);
+        return (integer) $this->selectField(array('count' => array('expression' => 'COUNT(*)')), $table, $where);
     }
 
     /**
@@ -548,7 +548,7 @@ class Database extends Singleton {
      *   The query results.
      */
     public function selectAll($table, $where = array(), $fields = array(), $final = '') {
-        $this->_select($table, $where, $fields, $final);
+        $this->_select($table, $where, $fields, null, $final);
         $result = $this->result->fetchAll(PDO::FETCH_ASSOC);
         $this->timerEnd();
         return $result;
@@ -651,14 +651,13 @@ class Database extends Singleton {
      *   A single field value.
      */
     public function selectField($field, $table, $where = array(), $final = ''){
-        $row = $this->selectRow($table, $where, array($field), $final);
-        if (is_array($field)) {
-            // This is an expression.
-            reset($field);
-            return $row[key($field)];
-        } else {
-            return $row[$field];
+        if (!is_array($field)) {
+            $field = array($field => $field);
         }
+        $row = $this->selectRow($table, $where, $field, $final);
+
+        reset($field);
+        return $row[key($field)];
     }
 
     /**
@@ -755,11 +754,19 @@ class Database extends Singleton {
      */
     protected function implodeFields($fields) {
         foreach ($fields as $alias => &$field) {
-            if(is_array($field) && is_array($table_fields = current($field))) {
-                // Format of array('table' => array('column'))
+            $current = null;
+            if (is_array($field)) {
+                $current = current($field);
+            }
+            if (!empty($current) && !empty($field['expression'])) {
+                // Format of array('count' => array('expression' => 'COUNT(*)'))
+                $field = $field['expression'] . ' AS ' . $alias;
+            }
+            elseif (!empty($current) && is_array($current)) {
+                // Format of array('table' => array('column1', 'column2'))
                 // Or array('table' => array('alias' => 'column'))
                 $table = key($field);
-                foreach ($table_fields as $alias => $column) {
+                foreach ($current as $alias => $column) {
                     if (is_numeric($alias)) {
                         // Format of array('table' => array('column'))
                         if ($column == '*') {
@@ -773,12 +780,12 @@ class Database extends Singleton {
                     }
                 }
                 $field = implode(', ', $table_field_list);
-            } else {
-                if (is_array($field)) {
+            }
+            else {
+                if (!empty($current)) {
                     $alias = key($field);
-                    $field = current($field);
+                    $field = $current;
                 }
-                // Format of array('field')
                 $field = explode('.', $field);
                 if (count($field) == 1) {
                     $field = '`' . $field[0] . '`';
