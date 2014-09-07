@@ -19,8 +19,10 @@ class Scrub {
     const SCRUB_BASIC_HTML = 'p,b,a[href|name|target|title],i,strong,em,img[src|width|height],table[cellpadding|cellspacing|border],tr,td,tbody,hr,h1,h2,h3,h4,h5,h6,*[id|name|align|style|alt|class],sup,sub,ul,ol,li,span,font[color|size],div,br,blockquote,code,pre';
     /**
      * Advanced html elements allowed in HTML primarily by admins.
+     *
+     * @todo enable align|allowfullscreen for iframe
      */
-    const SCRUB_ADVANCED_HTML = 'input[type|value|checked|src],select,option[value],form[target|action|method],textarea,iframe[frameborder|src|height|width|align|allowfullscreen]';
+    const SCRUB_ADVANCED_HTML = 'input[type|value|checked|src],select,option[value],form[target|action|method],textarea,iframe[frameborder|src|height|width]';
 
     /**
      * Allowed CSS rules.
@@ -165,12 +167,17 @@ class Scrub {
         $purifier = HTMLPurifierWrapper::getInstance();
         $config = HTMLPurifierConfig::createDefault();
 
-        if (empty($allowed_tags) || $allowed_tags[0] == '.') {
-            $allowed_tags = self::SCRUB_BASIC_HTML . ',' . substr($allowed_tags, 1);
-        }
-        elseif ($allowed_tags == '') {
-            if ($trusted) {
-                $allowed_tags = self::SCRUB_BASIC_HTML . ',' . self::SCRUB_ADVANCED_HTML;
+        if ($trusted) {
+            $config->set('CSS.Trusted', true);
+            $config->set('HTML.Trusted', true);
+            $config->set('Attr.EnableID', true);
+            $allowed_tags = self::SCRUB_BASIC_HTML . ',' . self::SCRUB_ADVANCED_HTML;
+        } else {
+            $config->set('CSS.Trusted', false);
+            $config->set('HTML.Trusted', false);
+            $config->set('Attr.EnableID', false);
+            if (!empty($allowed_tags) && $allowed_tags == '.') {
+                $allowed_tags = self::SCRUB_BASIC_HTML . ',' . substr($allowed_tags, 1);
             } else {
                 $allowed_tags = self::SCRUB_BASIC_HTML;
             }
@@ -181,16 +188,6 @@ class Scrub {
         }
         elseif ($allowed_css == '') {
             $allowed_css = self::SCRUB_BASIC_CSS;
-        }
-
-        if ($trusted) {
-            $config->set('CSS.Trusted', true);
-            $config->set('HTML.Trusted', true);
-            $config->set('Attr.EnableID', true);
-        } else {
-            $config->set('CSS.Trusted', false);
-            $config->set('HTML.Trusted', false);
-            $config->set('Attr.EnableID', false);
         }
 
         $config->set('HTML.Allowed', $allowed_tags);
