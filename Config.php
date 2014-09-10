@@ -2,7 +2,7 @@
 
 $conf = array(
     'overridable' => array(
-        'Lightning\\View\\Page' => 'Overridable\\Lightning\\View\\Page',
+        'Overridable\\Lightning\\View\\Page' => 'Overridable\\Lightning\\View\\Page',
     ),
     'routes' => array(
         'cli_only' => array(
