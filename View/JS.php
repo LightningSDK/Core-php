@@ -105,7 +105,7 @@ class JS {
                 $output .= '$(function(){';
                 foreach (self::$startup_scripts as &$script) {
                     if (empty($script['rendered'])) {
-                        $output .= $script['script'];
+                        $output .= $script['script'] . ';';
                         $script['rendered'] = true;
                     }
                 }

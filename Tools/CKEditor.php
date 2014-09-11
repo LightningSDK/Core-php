@@ -31,7 +31,7 @@ class CKEditor {
 
     /**
      * Create an editable div.
-     * The field should already be present on the page... Or should ther
+     * The field should already be present on the page.
      *
      * @param string $id
      *   The field name / id.
@@ -79,7 +79,7 @@ class CKEditor {
             JS::add('/js/ckfinder/ckfinder.js');
         }
 
-        JS::startup('lightning.ckeditors["' . $id . '"].push(CKEDITOR.replace("' . $id . '", ' . json_encode($options) . '));');
+        JS::startup('lightning.ckeditors["' . $id . '"] = CKEDITOR.replace("' . $id . '", ' . json_encode($options) . ');');
         return '<textarea name="' . $id . '" id="' . $id . '">' . Scrub::toHTML($value) . '</textarea>';
     }
 }

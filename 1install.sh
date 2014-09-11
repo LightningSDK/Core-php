@@ -80,6 +80,7 @@ if [ ! -d $DIR/../js/ckeditor ]; then
   cp -r Vendor/ckeditor/skins ../js/ckeditor/
   cp -r Vendor/ckeditor/plugins ../js/ckeditor/
   cp -r Vendor/ckeditor/lang ../js/ckeditor/
+  cp -r Vendor/ckeditor/contents.css ../js/ckeditor/
 fi
 
 # Install CKFinder
