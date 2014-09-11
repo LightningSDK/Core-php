@@ -41,8 +41,6 @@ class User extends Page {
                 else
                     Navigation::redirect($user->login_url);
                 exit;
-            } else {
-                Messenger::error($user->error);
             }
         }
     }

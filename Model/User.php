@@ -257,7 +257,7 @@ class User {
      */
     public static function create($email, $pass) {
         if (Database::getInstance()->check('user', array('email' => strtolower($email), 'password' => array('!=', '')))) {
-            // ACCOUNT ALREADY EXISTS
+            // An account already exists with that email.
             Messenger::error('An account with that email already exists. Please try again. if you lost your password, click <a href="/user?action=reset&email=' . urlencode($email) . '">here</a>');
             return false;
         } elseif ($user_info = Database::getInstance()->selectRow('user', array('email' => strtolower($email), 'password' => ''))) {
@@ -276,6 +276,7 @@ class User {
             if($user_info['confirmed'] != 0) {
                 $user->sendConfirmationEmail($email);
             }
+            return $user_info['user_id'];
         } else {
             // EMAIL IS NOT IN MAILING LIST AT ALL
             $user_id = self::insertUser($email, $pass);
@@ -288,6 +289,7 @@ class User {
             Database::getInstance()->update('user', $updates, array('user_id' => $user_id));
             $user = new self($user_id);
             $user->sendConfirmationEmail($email);
+            return $user_id;
         }
     }
 
@@ -523,7 +525,8 @@ class User {
         } else {
             Logger::logIP('Bad Username', Logger::SEVERITY_MED);
         }
-        $errors[] = "Invalid Login"; // Could not log in.
+        // Could not log in.
+        Messenger::error('Invalid Login');
         return false;
     }
 
