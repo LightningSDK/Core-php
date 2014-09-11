@@ -33,7 +33,7 @@ if (empty($l_page) || $l_page == "join" || $l_page == "register"): ?>
         </table>
         <input type="hidden" name="action" value="register" />
         <input type="hidden" name="redirect" value="<?=!empty($redirect) ? $redirect : '';?>" />
-        <input type="submit" name="submit" value="Register" />
+        <input type="submit" name="submit" value="Register" class="button" />
     </form>
 
     <br /><br />
@@ -51,7 +51,7 @@ if (empty($l_page) || $l_page == "join" || $l_page == "register"): ?>
         </table>
         <input type="hidden" name="action" value="login" />
         <input type="hidden" name="redirect" value="<?=!empty($redirect) ? $redirect : '';?>" />
-        <input type="submit" name="submit" value="Log In" />
+        <input type="submit" name="submit" value="Log In" class="button" />
         <a href='/user?action=reset'>Forgot your password?</a>
     </form>
 
@@ -68,6 +68,6 @@ if (empty($l_page) || $l_page == "join" || $l_page == "register"): ?>
         </table>
         <input type="hidden" name="action" value="reset" />
         <input type="hidden" name="redirect" value="<?=!empty($redirect) ? $redirect : '';?>" />
-        <input type="submit" name="submit" value="Log In" />
+        <input type="submit" name="submit" value="Log In" class="button" />
     </form>
 <? endif; ?>
