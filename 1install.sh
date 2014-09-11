@@ -36,6 +36,10 @@ if [ ! -d $DIR/../Source/foundation ]; then
   rm -rf $DIR/../Source/.git
   echo "Copying lightning default foundation configs"
   cp -R $DIR/install/foundation/* $DIR/../Source/foundation/
+  echo "Linking compass files"
+  ln -s $DIR/Lightning/Vendor/compass/frameworks/compass/stylesheets/compass $DIR/Source/foundation/scss/compass
+  ln -s $DIR/Lightning/Vendor/compass/frameworks/compass/stylesheets/_compass.scss $DIR/Source/foundation/scss/_compass.scss
+  ln -s $DIR/Lightning/Vendor/compass/frameworks/compass/stylesheets/_lemonade.scss $DIR/Source/foundation/scss/_lemonade.scss
 fi
 
 # Install the sample config file as active.
