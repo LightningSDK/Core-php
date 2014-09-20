@@ -46,7 +46,7 @@ class Session extends Singleton {
      * @return Session
      *   The current session.
      */
-    public function createInstance() {
+    public static function createInstance() {
         if ($session_key = Request::cookie('session', 'hex')) {
             $session_details = Database::getInstance()->selectRow('session', array('session_key' => array('LIKE', $session_key)));
             return new self($session_details);
