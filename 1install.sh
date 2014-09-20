@@ -65,7 +65,7 @@ fi
 # Install CKEditor
 if [ ! -d $DIR/../js/ckeditor ]; then
   if [ ! -d $DIR/../js ]; then
-    "Making /js directory"
+    echo "Making /js directory"
     mkdir $DIR/../js
   fi
   echo "Copying ckeditor files to web directory"
