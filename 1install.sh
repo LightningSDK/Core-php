@@ -32,6 +32,8 @@ fi
 if [ ! -d $DIR/../Source/foundation ]; then
   echo "Copying foundation files"
   cp -r $DIR/Vendor/foundation $DIR/../Source/
+  # It should not be a git repo.
+  rm -rf $DIR/../Source/.git
   echo "Copying lightning default foundation configs"
   cp -R $DIR/install/foundation/* $DIR/../Source/foundation/
 fi
