@@ -35,6 +35,7 @@ class Page {
         JS::add('/js/placeholder.min.js');
         JS::add('/js/foundation.min.js');
         JS::add('/js/lightning.min.js');
+        JS::add('/js/jquery.validate.min.js');
         JS::startup('$(document).foundation();');
         CSS::add('/css/foundation.css');
         CSS::add('/css/normalize.css');

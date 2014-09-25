@@ -28,6 +28,12 @@ sudo npm install -g bower grunt-cli
 # is this one needed?
 sudo npm install
 bower install --allow-root
+grunt
+
+cd ${DIR}/Vendor/jquery-validation
+sudo npm install
+bower install --allow-root
+grunt
 
 # Install lightning dependencies with grunt
 cd ${DIR}/../Source/Resources

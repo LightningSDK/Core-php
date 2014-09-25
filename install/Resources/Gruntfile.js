@@ -39,7 +39,8 @@ module.exports = function(grunt) {
                     '../../js/placeholder.min.js': '../../Lightning/Vendor/foundation/vendor/jquery-placeholder/jquery.placeholder.js',
                     '../../js/fastclick.min.js': '../../Lightning/Vendor/foundation/vendor/fastclick/lib/fastclick.js',
                     '../../js/jquery.cookie.min.js': '../../Lightning/Vendor/foundation/vendor/jquery.cookie/jquery.cookie.js',
-                    '../../js/jquery.min.js': '../../Lightning/Vendor/foundation/vendor/jquery/dist/jquery.js'
+                    '../../js/jquery.min.js': '../../Lightning/Vendor/foundation/vendor/jquery/dist/jquery.js',
+                    '../../js/jquery.validate.min.js': '../../Lightning/Vendor/jquery-validation/dist/jquery.validate.js'
                 }
             }
         },

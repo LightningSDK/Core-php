@@ -31,8 +31,7 @@ fi
 # Copy the core foundation files.
 if [ ! -d $DIR/../Source/Resources ]; then
   echo "Linking compass files"
-  mkdir -r $DIR/../Source/Resources/sass
-  cp ${DIR}/install/site.scss ${DIR}/../Source/Resources/sass/
+  cp ${DIR}/install/Resources ${DIR}/../Source/
   ln -s ${DIR}/Vendor/foundation/scss/foundation.scss ${DIR}/../Source/Resources/sass/
   ln -s ${DIR}/Vendor/foundation/scss/normalize.scss ${DIR}/../Source/Resources/sass/
 fi
