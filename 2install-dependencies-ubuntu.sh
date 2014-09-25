@@ -33,12 +33,12 @@ grunt
 cd ${DIR}/Vendor/jquery-validation
 sudo npm install
 bower install --allow-root
-grunt
+grunt build:assets
 
 # Install lightning dependencies with grunt
 cd ${DIR}/../Source/Resources
 sudo npm install
-grunt
+grunt build
 
 # Install ckeditor config.
 if [[ ! -f "${DIR}/../Source/foundation/js/ckeditor_config.js" ]]; then

@@ -75,5 +75,6 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-compass');
 
-    grunt.registerTask('default', ['compass', 'uglify', 'copy', 'watch']);
+    grunt.registerTask('build', ['compass', 'uglify', 'copy']);
+    grunt.registerTask('default', ['build', 'watch']);
 };
