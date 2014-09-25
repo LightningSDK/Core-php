@@ -62,9 +62,9 @@ class Request {
      * @return mixed
      *   value or false if none.
      */
-    public static function get($var, $type='', $subtype=''){
+    public static function get($var, $type='', $subtype='', $default=null){
         if(!isset($_REQUEST[$var]))
-            return null;
+            return $default;
 
         $args = func_get_args();
         $args[0] = $_REQUEST[$var];
@@ -80,9 +80,9 @@ class Request {
      *
      * @return bool|float|int|string
      */
-    public static function cookie($var, $type='', $subtype=''){
+    public static function cookie($var, $type='', $subtype='', $default=null){
         if(!isset($_COOKIE[$var]))
-            return null;
+            return $default;
 
         $args = func_get_args();
         $args[0] = $_COOKIE[$var];
@@ -98,9 +98,9 @@ class Request {
      *
      * @return bool|float|int|string
      */
-    public static function post($var, $type='', $subtype=''){
+    public static function post($var, $type='', $subtype='', $default=null){
         if(!isset($_POST[$var]))
-            return null;
+            return $default;
 
         $args = func_get_args();
         $args[0] = $_POST[$var];
@@ -116,9 +116,9 @@ class Request {
      *
      * @return bool|float|int|string
      */
-    public static function query($var, $type='', $subtype=''){
+    public static function query($var, $type='', $subtype='', $default=null){
         if(!isset($_GET[$var]))
-            return null;
+            return $default;
 
         $args = func_get_args();
         $args[0] = $_GET[$var];
