@@ -29,17 +29,12 @@ if [ ! -d $DIR/../Source ]; then
 fi
 
 # Copy the core foundation files.
-if [ ! -d $DIR/../Source/foundation ]; then
-  echo "Copying foundation files"
-  cp -r $DIR/Vendor/foundation $DIR/../Source/
-  # It should not be a git repo.
-  rm -rf $DIR/../Source/.git
-  echo "Copying lightning default foundation configs"
-  cp -R $DIR/install/foundation/* $DIR/../Source/foundation/
+if [ ! -d $DIR/../Source/Resources ]; then
   echo "Linking compass files"
-  ln -s $DIR/Lightning/Vendor/compass/frameworks/compass/stylesheets/compass $DIR/Source/foundation/scss/compass
-  ln -s $DIR/Lightning/Vendor/compass/frameworks/compass/stylesheets/_compass.scss $DIR/Source/foundation/scss/_compass.scss
-  ln -s $DIR/Lightning/Vendor/compass/frameworks/compass/stylesheets/_lemonade.scss $DIR/Source/foundation/scss/_lemonade.scss
+  mkdir -r $DIR/../Source/Resources/sass
+  cp ${DIR}/install/site.scss ${DIR}/../Source/Resources/sass/
+  ln -s ${DIR}/Vendor/foundation/scss/foundation.scss ${DIR}/../Source/Resources/sass/
+  ln -s ${DIR}/Vendor/foundation/scss/normalize.scss ${DIR}/../Source/Resources/sass/
 fi
 
 # Install the sample config file as active.

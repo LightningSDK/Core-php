@@ -1,0 +1,119 @@
+@import 'foundation';
+@import '_compass';
+
+$red-high: rgb(255,55,52);
+$red-med: rgb(242,84,72);
+$red-low: rgb(187,73,59);
+$green-high: rgb(153,227,147);
+$green-med: rgb(136,193,133);
+$green-low: rgb(103,215,103);
+$amber-high: rgb(255,228,0);
+$amber-med: rgb(213,191,0);
+$amber-low: rgb(255,205,1);
+
+.foundicon-plus:before {
+  content: "\f003";
+}
+
+.foundicon-minus:before {
+  content: "\f004";
+}
+
+@font-face {
+  font-family: 'generalEnclosedFoundicons';
+  src: url('/fonts/general_enclosed_foundicons.eot');
+  src: url('/fonts/general_enclosed_foundicons.eot?#iefix') format('embedded-opentype'),
+  url('/fonts/general_enclosed_foundicons.woff') format('woff'),
+  url('/fonts/general_enclosed_foundicons.ttf') format('truetype'),
+  url('/fonts/general_enclosed_foundicons.svg#generalEnclosedFoundicons') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+[class*="foundicon-"] {
+  display: inline;
+  width: auto;
+  height: auto;
+  line-height: inherit;
+  vertical-align: baseline;
+  background-image: none;
+  background-position: 0 0;
+  background-repeat: repeat;
+}
+
+[class*="foundicon-"]:before {
+  font-family: "generalEnclosedFoundicons";
+  font-weight: normal;
+  font-style: normal;
+  text-decoration: inherit;
+}
+
+.messenger {
+  border: 1px solid;
+  color: black;
+  padding: 15px 30px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  font-weight: 200;
+  clear: both;
+  &.error {
+    color: white;
+    border-color: $red-med;
+    background-color: $red-low;
+    @include background(linear-gradient($red-high, $red-low));
+  }
+  &.message {
+    color: black;
+    border-color: $green-med;
+    background-color: $green-low;
+    @include background(linear-gradient($green-high, $green-low));
+  }
+  &.warning {
+    color: black;
+    border-color: $amber-med;
+    background-color: $amber-low;
+    @include background(linear-gradient($amber-high, $amber-low));
+  }
+  ul {
+    margin: 0px;
+  }
+}
+
+// Main table.
+.table_form_table, #new_comment_box table{
+  @include grid-column(12);
+  td{
+    vertical-align: middle;
+  }
+}
+
+// Table container.
+#list_table_container {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+// Table linked options selection.
+.categories_box {
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  width: auto;
+  display: inline-block;
+  padding: 5px;
+  margin: 5px 10px 5px 0;
+}
+.message_list_box {
+  border: 1px solid lightgrey;
+  border-radius: 4px;
+  display: inline-block;
+  width: auto;
+  margin: 5px 5px 5px 0;
+  padding: 5px;
+}
+
+// Form date time selection.
+.datePop, .timePop, .dateTimePop {
+  display: inline;
+  width: auto;
+  padding-right: 20px;
+}

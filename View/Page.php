@@ -28,17 +28,17 @@ class Page {
     public function __construct() {
         // Load messages and errors from the query string.
         Messenger::loadFromQuery();
-        JS::add('/js/fastclick.js');
-        JS::add('/js/jquery.js');
-        JS::add('/js/jquery.cookie.js');
-        JS::add('/js/modernizr.js');
-        JS::add('/js/placeholder.js');
+        JS::add('/js/fastclick.min.js');
+        JS::add('/js/jquery.min.js');
+        JS::add('/js/jquery.cookie.min.js');
+        JS::add('/js/modernizr.min.js');
+        JS::add('/js/placeholder.min.js');
         JS::add('/js/foundation.min.js');
-        JS::add('/js/lightning.js');
+        JS::add('/js/lightning.min.js');
         JS::startup('$(document).foundation();');
         CSS::add('/css/foundation.css');
         CSS::add('/css/normalize.css');
-        CSS::add('/css/lightning.css');
+        CSS::add('/css/site.css');
     }
 
     /**
