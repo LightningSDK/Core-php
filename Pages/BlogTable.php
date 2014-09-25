@@ -2,6 +2,9 @@
 
 namespace Lightning\Pages;
 
+use Lightning\Tools\Navigation;
+use Lightning\Tools\Request;
+
 class BlogTable extends Table {
     protected $trusted = true;
 
@@ -27,6 +30,11 @@ class BlogTable extends Table {
     );
 
     protected function initSettings() {
+        if (Request::get('return') == 'view') {
+            $this->post_actions['after_post'] = function($row) {
+                Navigation::redirect('/' . $row['url'] . '.htm');
+            };
+        }
     }
 
 //    protected $settings = array(

@@ -370,14 +370,14 @@ abstract class Table extends Page {
         parent::execute();
 
         // Run any scripts after execution.
+        // TODO: parent::execute() halts execution, so this will never run.
         if (isset($this->function_after[$this->action])) {
             $this->function_after[$this->action]();
         }
 
         // Redirect to the next page.
         if ($this->submit_redirect && isset($this->action_after[$this->action])) {
-            header("Location: ".$this->createUrl($this->action_after[$this->action],$this->id));
-            exit;
+            Navigation::redirect($this->createUrl($this->action_after[$this->action], $this->id));
         }
     }
 
@@ -569,7 +569,7 @@ abstract class Table extends Page {
                 echo "\n<td class='actv {$today_class}'><p class='date'>$i";
                 if ($this->editable)
                     echo "<a href='".$this->createUrl("new",0,'',array("date"=>gregoriantojd($calendar_month, $i, $calendar_year))).
-                        "' /><img src='/images/main/new.png' border='0' /></a>";
+                        "' /><img src='/images/lightning/new.png' border='0' /></a>";
                 echo "</p><div class='events'>"
                     . $this->render_calendar_items($date_index[GregorianToJD($calendar_month, $i, $calendar_year)])
                     . "</div></td>";
@@ -657,7 +657,7 @@ abstract class Table extends Page {
             if ($this->custom_templates[$this->action.'_action_header'] != "")
                 echo $this->load_template($this->custom_template_directory.$this->custom_templates[$this->action.'_action_header']);
         } elseif ($this->addable)
-            echo "<a href='".$this->createUrl("new")."'><img src='/images/main/new.png' border='0' /></a><br />";
+            echo "<a href='".$this->createUrl("new")."'><img src='/images/lightning/new.png' border='0' /></a><br />";
     }
 
     function renderList() {
@@ -896,10 +896,10 @@ abstract class Table extends Page {
                         $output.= "<td>{$v}</td>";
                     }
                     if ($link_settings['edit_link'] != '') {
-                        $output.= "<td><a href='{$link_settings['edit_link']}{$joinchar}action=edit&id={$links[$i][$link_settings['key']]}'>Edit</a> <a href='{$link_settings['edit_link']}{$joinchar}action=delete&id={$links[$i][$link_settings['key']]}'><img src='/images/main/remove.png' border='0' /></a></td>";
+                        $output.= "<td><a href='{$link_settings['edit_link']}{$joinchar}action=edit&id={$links[$i][$link_settings['key']]}'>Edit</a> <a href='{$link_settings['edit_link']}{$joinchar}action=delete&id={$links[$i][$link_settings['key']]}'><img src='/images/lightning/remove.png' border='0' /></a></td>";
                     }
                     if ($link_settings['edit_js'] != '') {
-                        $output.= "<td><a href='' onclick='{$link_settings['edit_js']}.editLink({$links[$i][$link_settings['key']]})'>Edit</a> <a href='' onclick='{$link_settings['edit_js']}.deleteLink({$links[$i][$link_settings['key']]})'><img src='/images/main/remove.png' border='0' /></a></td>";
+                        $output.= "<td><a href='' onclick='{$link_settings['edit_js']}.editLink({$links[$i][$link_settings['key']]})'>Edit</a> <a href='' onclick='{$link_settings['edit_js']}.deleteLink({$links[$i][$link_settings['key']]})'><img src='/images/lightning/remove.png' border='0' /></a></td>";
                     }
                     $output.= "</tr>";
                 }
@@ -960,14 +960,14 @@ abstract class Table extends Page {
         if ($this->editable !== false) {
             $output .= "<td>";
             if ($editable) {
-                $output .= "<a href='" . $this->createUrl("edit",$row[$this->getKey()]) . "'><img src='/images/main/edit.png' border='0' /></a>";
+                $output .= "<a href='" . $this->createUrl("edit",$row[$this->getKey()]) . "'><img src='/images/lightning/edit.png' border='0' /></a>";
             }
             $output .= "</td>";
         }
         if ($this->deleteable !== false) {
             $output .= "<td>";
             if ($editable) {
-                $output .= "<a href='" . $this->createUrl("delete",$row[$this->getKey()]) . "'><img src='/images/main/remove.png' border='0' /></a>";
+                $output .= "<a href='" . $this->createUrl("delete",$row[$this->getKey()]) . "'><img src='/images/lightning/remove.png' border='0' /></a>";
             }
             $output .= "</td>";
         }
@@ -1022,10 +1022,10 @@ abstract class Table extends Page {
                 echo "<input type='hidden' name='id' value='{$this->id}' />";
             if ($this->action == "view" && !$this->read_only) {
                 if ($this->editable !== false) {
-                    echo "<a href='".$this->createUrl('edit',$this->id)."'><img src='/images/main/edit.png' border='0' /></a>";
+                    echo "<a href='".$this->createUrl('edit',$this->id)."'><img src='/images/lightning/edit.png' border='0' /></a>";
                 }
                 if ($this->deleteable !== false) {
-                    echo "<a href='".$this->createUrl('delete',$this->id)."'><img src='/images/main/remove.png' border='0' /></a>";
+                    echo "<a href='".$this->createUrl('delete',$this->id)."'><img src='/images/lightning/remove.png' border='0' /></a>";
                 }
             }
             $style = !empty($this->styles['form_table']) ? "style='{$this->styles['form_table']}'" : '';
@@ -1061,9 +1061,9 @@ abstract class Table extends Page {
             if ($this->action != "view") echo "</form>";
             if ($this->action == "view" && !$this->read_only) {
                 if ($this->editable !== false)
-                    echo "<a href='".$this->createUrl('edit',$this->id)."'><img src='/images/main/edit.png' border='0' /></a>";
+                    echo "<a href='".$this->createUrl('edit',$this->id)."'><img src='/images/lightning/edit.png' border='0' /></a>";
                 if ($this->deleteable !== false)
-                    echo "<a href='".$this->createUrl('delete',$this->id)."'><img src='/images/main/remove.png' border='0' /></a>";
+                    echo "<a href='".$this->createUrl('delete',$this->id)."'><img src='/images/lightning/remove.png' border='0' /></a>";
             }
         }
     }
@@ -1127,17 +1127,17 @@ abstract class Table extends Page {
                                 $joinchar = (strpos($link_settings['edit_link'], $joinchar) !== false) ? ":" : '?';
 
                                 if ($link_settings['display_name'])
-                                    echo "<tr {$style}><td>{$link_settings['display_name']}".($link_settings['edit_link'] ? " <a href='{$link_settings['edit_link']}{$joinchar}action=new&backlinkname={$this->getKey()}&backlinkvalue={$this->id}'><img src='/images/main/new.png' border='0' /></a>" : '').($link_settings['edit_js'] ? " <a href='' onclick='{$link_settings['edit_js']}.newLink({$this->id})'>New</a>" : '')."</td></tr>"; // TODO changed from below: $row[$this->getKey()] to $this->id
+                                    echo "<tr {$style}><td>{$link_settings['display_name']}".($link_settings['edit_link'] ? " <a href='{$link_settings['edit_link']}{$joinchar}action=new&backlinkname={$this->getKey()}&backlinkvalue={$this->id}'><img src='/images/lightning/new.png' border='0' /></a>" : '').($link_settings['edit_js'] ? " <a href='' onclick='{$link_settings['edit_js']}.newLink({$this->id})'>New</a>" : '')."</td></tr>"; // TODO changed from below: $row[$this->getKey()] to $this->id
                                 for($i = 0; $i < count($link_settings['active_list']); $i++) {
                                     echo "<tr id='link_{$link}_{$link_settings['active_list'][$i][$link_settings['key']]}' {$style}>";
                                     foreach($link_settings['active_list'][$i] as $v) {
                                         echo "<td>{$v}</td>";
                                     }
                                     if ($link_settings['edit_link'] != '') {
-                                        echo "<td><a href='{$link_settings['edit_link']}{$joinchar}action=edit&id={$link_settings['active_list'][$i][$link_settings['key']]}'>Edit</a> <a href='{$link_settings['edit_link']}{$joinchar}action=delete&id={$link_settings['active_list'][$i][$link_settings['key']]}'><img src='/images/main/remove.png' border='0' /></a></td>";
+                                        echo "<td><a href='{$link_settings['edit_link']}{$joinchar}action=edit&id={$link_settings['active_list'][$i][$link_settings['key']]}'>Edit</a> <a href='{$link_settings['edit_link']}{$joinchar}action=delete&id={$link_settings['active_list'][$i][$link_settings['key']]}'><img src='/images/lightning/remove.png' border='0' /></a></td>";
                                     }
                                     if ($link_settings['edit_js'] != '') {
-                                        echo "<td><a href='' onclick='{$link_settings['edit_js']}.editLink({$link_settings['active_list'][$i][$link_settings['key']]})'><img src='/images/main/edit.png' border='0' /></a> <a href='' onclick='{$link_settings['edit_js']}.deleteLink({$link_settings['active_list'][$i][$link_settings['key']]})'><img src='/images/main/remove.png' border='0' /></a></td>";
+                                        echo "<td><a href='' onclick='{$link_settings['edit_js']}.editLink({$link_settings['active_list'][$i][$link_settings['key']]})'><img src='/images/lightning/edit.png' border='0' /></a> <a href='' onclick='{$link_settings['edit_js']}.deleteLink({$link_settings['active_list'][$i][$link_settings['key']]})'><img src='/images/lightning/remove.png' border='0' /></a></td>";
                                     }
                                     echo "</tr>";
                                 }
@@ -1780,13 +1780,13 @@ abstract class Table extends Page {
                         }
                         break;
                     case 'date':
-                        $val = Time::getDate($field['form_field'], $field['allow_blank']);
+                        $val = Time::getDate($field['form_field'], !empty($field['allow_blank']));
                         break;
                     case 'time':
-                        $val = Time::getTime($field['form_field'], $field['allow_blank']);
+                        $val = Time::getTime($field['form_field'], !empty($field['allow_blank']));
                         break;
                     case 'datetime':
-                        $val = Time::getDateTime($field['form_field'], $field['allow_blank']);
+                        $val = Time::getDateTime($field['form_field'], !empty($field['allow_blank']));
                         break;
                     case 'checklist':
                         $vals = "";

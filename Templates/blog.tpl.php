@@ -18,7 +18,7 @@ if ($user->isAdmin()): ?>
         <? endif; ?>
         <h4 class="blog_header_date">Posted on: <?=date('F j, Y \a\t g:iA',$post['time']);?></h4>
         <div class="blog_body" <? if ( count($blog->posts) == 1):?>id='blog_body'<? endif; ?>>
-            <? if ($user->isAdmin()): ?><a href='/blog/edit?id=<?=$post['blog_id'];?>'>Edit this Post</a><br /><? endif; ?>
+            <? if ($user->isAdmin()): ?><a href='/blog/edit?return=view&id=<?=$post['blog_id'];?>'>Edit this Post</a><br /><? endif; ?>
             <?=$blog->body($post['body'])?><? if ( count($blog->posts) > 1):?> <a href='/<?=$post['url']?>.htm'>read more...</a><? endif; ?>
         </div>
         <br />
