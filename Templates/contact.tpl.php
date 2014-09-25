@@ -7,13 +7,7 @@ use Lightning\Tools\ReCaptcha;
 ?>
 <h1>Contact</h1>
 
-<script language="javascript">
-    $(document).ready(function(){
-        $('#contact_form').validate();
-    });
-</script>
-
-<form action="contact" method="post" id="contact_form">
+<form action="contact" method="post" id="contact_form" class="validate">
     <?= Form::renderTokenInput(); ?>
 
     <p>Contact Us:</p>

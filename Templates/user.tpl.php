@@ -42,8 +42,8 @@ if (empty($l_page) || $l_page == "join" || $l_page == "register"): ?>
     <form action="/user" method="post" id="register" class="validate">
         <?= Form::renderTokenInput(); ?>
         <table>
-            <tr><td>Email:</td><td><input type='text' name='email' /></td></tr>
-            <tr><td>Password:</td><td><input type='password' name='password' /></td></tr>
+            <tr><td>Email:</td><td><input type='text' name='email' class="email required" /></td></tr>
+            <tr><td>Password:</td><td><input type='password' name='password' class="required" /></td></tr>
         </table>
         <input type="hidden" name="action" value="login" />
         <input type="hidden" name="redirect" value="<?=!empty($redirect) ? $redirect : '';?>" />
@@ -60,7 +60,10 @@ if (empty($l_page) || $l_page == "join" || $l_page == "register"): ?>
     <form action="/user" method="post" class="validate">
         <?= Form::renderTokenInput(); ?>
         <table>
-            <tr><td>Enter your email address:</td><td><input type='text' name='email' /></td></tr>
+            <tr>
+                <td>Enter your email address:</td>
+                <td><input type='text' name='email' class="email required" /></td>
+            </tr>
         </table>
         <input type="hidden" name="action" value="reset" />
         <input type="hidden" name="redirect" value="<?=!empty($redirect) ? $redirect : '';?>" />
