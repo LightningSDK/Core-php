@@ -31,8 +31,8 @@ class JS {
      * A list of scripts to run when the page is ready.
      */
     protected static $startup_scripts = array(
-        'core' => array(
-            'script' => 'if(!lightning) var lightning = {};',
+        'coreInit' => array(
+            'script' => 'lightning.startup.init();',
             'rendered' => false,
         ),
     );
@@ -102,7 +102,7 @@ class JS {
 
             // Include ready scripts.
             if (!empty(self::$startup_scripts)) {
-                $output .= '$(function(){';
+                $output .= '$(document).ready(function(){';
                 foreach (self::$startup_scripts as &$script) {
                     if (empty($script['rendered'])) {
                         $output .= $script['script'] . ';';

@@ -6,25 +6,21 @@ use Lightning\Tools\Form;
 
 <script language="javascript">
 
-    $(document).ready(function(){
-        $("#register").validate({
+    lightning.formValidation = {
+        register: {
             rules: {
-                password:
-                {
-                    required: true
-                },
                 password2: {
                     equalTo: "#password"
                 }
             }
-        });
-    });
+        }
+    };
 
 </script>
 <?
 if (empty($l_page) || $l_page == "join" || $l_page == "register"): ?>
     <h2>Create a username and password</h2>
-    <form action="/user" method="post" id="register">
+    <form action="/user" method="post" id="register" class="validate">
         <?= Form::renderTokenInput(); ?>
         <table>
             <tr><td>Email:</td><td><input type='text' name='email' class="required email" /></td></tr>
@@ -43,7 +39,7 @@ if (empty($l_page) || $l_page == "join" || $l_page == "register"): ?>
 
     <h2>Log In with your email and password.</h2>
 
-    <form action="/user" method="post" id="register">
+    <form action="/user" method="post" id="register" class="validate">
         <?= Form::renderTokenInput(); ?>
         <table>
             <tr><td>Email:</td><td><input type='text' name='email' /></td></tr>
@@ -61,7 +57,7 @@ if (empty($l_page) || $l_page == "join" || $l_page == "register"): ?>
 <? if (!empty($l_page) && $l_page == "reset"): ?>
     <h2>Forgot your password?</h2>
 
-    <form action="/user" method="post">
+    <form action="/user" method="post" class="validate">
         <?= Form::renderTokenInput(); ?>
         <table>
             <tr><td>Enter your email address:</td><td><input type='text' name='email' /></td></tr>
