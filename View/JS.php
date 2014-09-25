@@ -19,6 +19,13 @@ class JS {
     protected static $included_scripts = array();
 
     /**
+     * Whether the initial JS has been run.
+     *
+     * @var boolean
+     */
+    protected static $inited = false;
+
+    /**
      * @var array
      *
      * A list of scripts to add into a script tag.
@@ -80,7 +87,8 @@ class JS {
      *   The rendered output.
      */
     public static function render() {
-        $output = '';
+        $output = self::$inited ? '' : '<script language="javascript">lightning={};</script>';
+        self::$inited = true;
 
         // Include JS files.
         foreach (self::$included_scripts as &$file) {
