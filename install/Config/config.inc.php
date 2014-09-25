@@ -75,6 +75,8 @@ $conf = array(
             'admin/tracker' => 'Lightning\\Pages\\AdminTracker',
             'sitemap' => 'Lightning\\Pages\\Sitemap',
             'track' => 'Lightning\\Pages\\Track',
+            'landing' => 'Lightning\\Pages\\OptIn',
+            'optin' => 'Lightning\\Pages\\OptIn',
         ),
         'cli_only' => array(
             'bounce' => 'Lightning\\CLI\\BouncedEmail',
