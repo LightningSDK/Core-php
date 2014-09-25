@@ -78,9 +78,23 @@ use Lightning\View\CSS;
                         </ul>
                         <section class="top-bar-section">
                             <ul class="right">
-                                <li><a href="/blog/edit">Blog</a></li>
-                                <li><a href="/blog/comments">Blog Comments</a></li>
-                                <li><a href="/users">Users</a></li>
+                                <li class="has-dropdown not-click">
+                                    <a href="/blog/edit">Blog</a>
+                                    <ul class="dropdown">
+                                        <li><a href="/blog/edit">Blog Posts</a></li>
+                                        <li><a href="/blog/comments">Blog Comments</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="/admin/pages">Pages</a></li>
+                                <li><a href="/admin/users">Users</a></li>
+                                <li class="has-dropdown not-click">
+                                    <a href="/admin/mailing/lists">Mailing</a>
+                                    <ul class="dropdown">
+                                        <li><a href="/admin/mailing/lists">Mailing Lists</a></li>
+                                        <li><a href="/admin/mailing/messages">Messages</a></li>
+                                        <li><a href="/admin/mailing/stats">Stats</a></li>
+                                    </ul>
+                                </li>
                             </ul>
                         </section>
                     </section>
