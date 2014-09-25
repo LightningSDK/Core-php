@@ -13,6 +13,7 @@ use Lightning\Tools\Security\Random;
 use Lightning\Tools\Request;
 use Lightning\Tools\Scrub;
 use Lightning\Tools\Session;
+use Lightning\Tools\Tracker;
 use Lightning\View\Field\Time;
 
 class User {
@@ -303,25 +304,36 @@ class User {
      * @param array $update
      *   Which values to update the user if the email already exists.
      *
-     * @return mixed
+     * @return User
      */
-    public static function getInsertEmailID($email, $options = array(), $update = array()) {
-        // TODO: integrate with class_user
+    public static function addUser($email, $options = array(), $update = array()) {
         $user_data = array();
         $user_data['email'] = strtolower($email);
-        if ($user = Database::getInstance()->selectRow('user', $user_data)) {
+        $db = Database::getInstance();
+        if ($user = $db->selectRow('user', $user_data)) {
             if($update) {
                 if (!isset($update['list_date'])) {
                     $update['list_date'] = time();
                 }
-                Database::getInstance()->update('user', $user_data, $update);
+                $db->update('user', $user_data, $update);
             }
             $user_id = $user['user_id'];
         } else {
             $user_data['list_date'] = time();
-            $user_id = Database::getInstance()->insert('user', $options + $user_data);
+            $user_id = $db->insert('user', $options + $user_data);
         }
-        return $user_id;
+        return self::loadById($user_id);
+    }
+
+    /**
+     * Add the user to the mailing list.
+     *
+     * @param $list_id
+     *   The ID of the mailing list.
+     */
+    public function subscribe($list_id = 0) {
+        Database::getInstance()->insert('message_list_user', array('message_list_id' => $list_id, 'user_id' => $this->id), true);
+        Tracker::trackEvent('Subscribe', $list_id, $this->id);
     }
 
     /**
