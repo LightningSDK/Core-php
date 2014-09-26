@@ -697,16 +697,14 @@ abstract class Table extends Page {
                 }
                 $output.= "<div id='list_table_container'>";
                 $output.= '<table cellspacing="0" cellpadding="3" border="0" width="100%">';
+
                 // SHOW HEADER
                 $output.= "<thead><tr>";
-
                 $output .= $this->renderListHeader();
 
                 // SHOW ACTION HEADER
-
                 $output.= $this->render_action_fields_headers();
                 $output.= "</tr></thead>";
-
 
                 // Initialize the click handler.
                 if (!empty($this->rowClick)) {
@@ -752,7 +750,7 @@ abstract class Table extends Page {
                             $output.= "<td>{$this->fields[$f]['display_name']}</td>";
                     }
                 } elseif (isset($this->links[$f])) {
-                    if ($this->links[$f]['list'] === true) {
+                    if (!empty($this->links[$f]['list']) && $this->links[$f]['list'] == 'compact') {
                         if ($this->links[$f]['display_name']) {
                             $output.= "<td>{$this->links[$f]['display_name']}</td>";
                         } else {
@@ -774,7 +772,7 @@ abstract class Table extends Page {
             }
             // Add the linked tables.
             foreach($this->links as $l => $v) {
-                if ($v['list']===true) {
+                if (!empty($v['list']) && $v['list'] == 'compact') {
                     if ($v['display_name']) {
                         $output.= "<td>{$v['display_name']}</td>";
                     } else {
@@ -798,27 +796,26 @@ abstract class Table extends Page {
                     if (!empty($field['align'])) {
                         $output.= "<td align='{$field['align']}'>";
                     } else {
-                        $output.= "<td>";
+                        $output.= '<td>';
                     }
                     if (!empty($field['list_html']))
                         $output.= $this->print_field_value($field,$row);
                     else
                         $output.= strip_tags($this->print_field_value($field,$row));
-                    $output.= "</td>";
+                    $output.= '</td>';
                 }
             }
             // LINKS w ALL ITEMS LISTED IN ONE BOX
-            $output.= $this->render_linked_list($row);
+            $output .= $this->render_linked_list($row);
 
             // EDIT, DELETE, AND OTHER ACTIONS
-            $output.= $this->render_action_fields_list($row, $editable);
+            $output .= $this->render_action_fields_list($row, $editable);
 
             // CLOSE MAIN DATA ROW
-            $output.= "</tr>";
-
+            $output .= "</tr>";
 
             // LINKS EACH ITEM GETS ITS OWN ROW
-            $output.= $this->render_linked_table($row);
+            $output .= $this->render_linked_table($row);
         }
         return $output;
     }
@@ -831,9 +828,9 @@ abstract class Table extends Page {
 
     // caled when rendering lists
     function render_linked_list(&$row) {
-        $output="";
+        $output = '';
         foreach($this->links as $link => $link_settings) {
-            if ($link_settings['list'] === true) {
+            if (!empty($link_settings['list']) && $link_settings['list'] == 'compact') {
                 if ($link_settings['index']!="") {
                     $links = Database::getInstance()->select(
                         array(
@@ -847,26 +844,26 @@ abstract class Table extends Page {
                     $links = Database::getInstance()->select($link, array($this->getKey() => $row[$this->getKey()]));
                 }
 
-                $output.= "<td>";
+                $output .= '<td>';
                 $displays = array();
-                if (isset($link_settings["display"])) {
+                if (isset($link_settings['list']) == 'compact') {
                     foreach($links as $l)
-                        if (is_array($link_settings['fields'])) {
+                        if (!empty($link_settings['fields']) && is_array($link_settings['fields'])) {
                             $display = $link_settings["display"];
                             foreach($link_settings['fields'] as $f=>$a) {
                                 if (!isset($a['Field'])) $a['Field'] = $f;
                                 $display = str_replace('{'.$f.'}', $this->print_field_value($a,$l), $display);
                             }
                             $displays[] = $display;
-                        } else
+                        } else {
                             $displays[] = $l[$link_settings['display_column']];
-                    if (!isset($link_settings['seperator']))
-                        $link_settings['seperator'] = ", ";
-                    $output.= implode($link_settings['seperator'], $displays);
-                } else {
-                    $output .= "table";
+                        }
+                    if (!isset($link_settings['seperator'])) {
+                        $link_settings['seperator'] = ', ';
+                    }
+                    $output .= implode($link_settings['seperator'], $displays);
                 }
-                $output.= "</td>";
+                $output .= '</td>';
             }
         }
         return $output;
@@ -2315,9 +2312,12 @@ abstract class Table extends Page {
     }
 
     // print field or print editable field
-    function print_field_value($field,&$row='') {
-        if ($row == "") $v = $field['Value'];
-        else $v = $row[$field['Field']];
+    function print_field_value($field, &$row = null) {
+        if (empty($row)) {
+            $v = !empty($field['Value']) ? $field['Value'] : '';
+        } else {
+            $v = $row[$field['Field']];
+        }
 
         if (!empty($field['encrypted'])) {
             $v = table::decrypt($v);
@@ -2332,15 +2332,23 @@ abstract class Table extends Page {
         } elseif (!empty($field['display_function']) && is_callable($field['display_function'])) {
             return $field['display_function']($row);
         } else {
-            switch(preg_replace("/\([0-9]+\)/","",$field['type'])) {
+            switch(preg_replace('/\([0-9]+\)/', '', $field['type'])) {
                 case 'lookup':
                     // a lookup will translate to a value drawn from the lookup table based on the key value
                     if ($field['lookuptable'] && $field['display_column']) {
                         if ($v) {
                             $fk = isset($field['lookupkey']) ? $field['lookupkey'] : $field['Field'];
-                            if ($field['filter'])
-                                $filter = "AND {$field['filter']}";
-                            $value = Database::getInstance()->assoc1("SELECT `{$field['display_column']}`, `{$fk}` FROM `{$field['lookuptable']}` WHERE `{$fk}` = '{$v}' {$filter}");
+                            $filter = array($fk => $v);
+                            if ($field['filter']) {
+                                $filter += $field['filter'];
+                            }
+                            $value = Database::getInstance()->selectRow(
+                                $field['lookuptable'],
+                                $filter,
+                                array(
+                                    $field['display_column'], $fk
+                                )
+                            );
                             return $value[$field['display_column']];
                         }
                     } else {
@@ -2351,6 +2359,7 @@ abstract class Table extends Page {
                     $field['options'] = Array(1=>'No',2=>'Yes');
                 case 'state':
                     if ($field['type'] == "state")
+                        // TODO: Needs to implement Time field.
                         $field['options'] = $this->state_options();
                 case 'select':
                     if (is_array($field['options'][$v]))
@@ -2359,13 +2368,13 @@ abstract class Table extends Page {
                         return $field['options'][$v];
                     break;
                 case 'file':
-                    // display thumbmail
+                    // TODO: Display thumbmail.
                     break;
                 case 'text':
                 case 'mediumtext':
                 case 'longtext':
                 case 'div':
-                    if ($this->action == "list" || $this->action == "search") {//$this->action == "view"
+                    if ($this->action == "list" || $this->action == "search") {
                         $v = strip_tags($v);
                         if (strlen($v) > 64)
                             return substr($v,0,64)."...";
@@ -2513,8 +2522,9 @@ abstract class Table extends Page {
                     $options = Database::getInstance()->assoc("SELECT {$field['display_column']} as V, {$field['Field']} FROM {$field['lookuptable']} {$filter}",$field['Field']);
                 }
                 elseif ($field['type'] == "yesno")
-                    $options = Array(1=>'No',2=>'Yes');
+                    $options = Array(1=>'No', 2=>'Yes');
                 elseif ($field['type'] == "state")
+                    // TODO: Needs to implement Time field.
                     $options = $this->state_options();
                 else
                     $options = $field['options'];
@@ -2554,7 +2564,7 @@ abstract class Table extends Page {
                 break;
             case 'checklist':
                 $vals = $this->decode_bool_group($field['Value']);
-                $output = "";
+                $output = '';
                 foreach($field['options'] as $i => $opt) {
                     if (is_array($opt)) {
                         $id = $opt[0];
@@ -2569,12 +2579,11 @@ abstract class Table extends Page {
                 break;
             case 'varchar':
             case 'char':
-                preg_match("/(.+)\(([0-9]+)\)/i",$field['type'], $array);
+                preg_match('/(.+)\(([0-9]+)\)/i', $field['type'], $array);
                 $options['size'] = $array[2];
             default:
                 return Text::textField($field['form_field'], $field['Value'], $options);
                 break;
-
         }
     }
 }

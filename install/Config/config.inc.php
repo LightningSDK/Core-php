@@ -69,6 +69,7 @@ $conf = array(
             'page' => 'Lightning\\Pages\\Page',
             'message' => 'Lightning\\Pages\\Message',
             'blog/edit' => 'Lightning\\Pages\\BlogTable',
+            'blog/categories' => 'Lightning\\Pages\\BlagCategories',
             'admin/mailing/messages' => 'Lightning\\Pages\\Mailing\\Messages',
             'admin/mailing/send' => 'Lightning\\Pages\\Mailing\\Send',
             'admin/mailing/stats' => 'Lightning\\Pages\\Mailing\\Stats',

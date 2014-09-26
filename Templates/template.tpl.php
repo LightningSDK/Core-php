@@ -83,6 +83,7 @@ use Lightning\View\CSS;
                                     <ul class="dropdown">
                                         <li><a href="/blog/edit">Blog Posts</a></li>
                                         <li><a href="/blog/comments">Blog Comments</a></li>
+                                        <li><a href="/blog/categories">Blog Categories</a></li>
                                     </ul>
                                 </li>
                                 <li><a href="/admin/pages">Pages</a></li>

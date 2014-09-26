@@ -19,13 +19,14 @@ class BlogTable extends Table {
             'index' => 'blog_blog_category',
             'key' => 'cat_id',
             'display_column' => 'category',
-            'list' => true
+            'list' => 'compact'
         )
     );
 
     protected $preset = array(
-        'time' => array('type' => 'datetime'),
-        'url' => array('type' => 'url'),
+        'user_id' => array('type' => 'hidden'),
+        'time' => array('type' => 'datetime', 'unlisted' => true),
+        'url' => array('type' => 'url', 'unlisted' => true),
         'body' => array('editor' => 'full'),
     );
 
