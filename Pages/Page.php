@@ -35,7 +35,7 @@ class Page extends PageView {
         // LOAD PAGE DETAILS
         if($full_page = Database::getInstance()->selectRow('page', array('url' => array('LIKE', $content_locator)))){
             header('HTTP/1.0 200 OK');
-            if($full_page['last_update'] > 0 && !$user->isAdmin()) {
+            if(Configuration::get('page.modification_date') && $full_page['last_update'] > 0) {
                 header("Last-Modified: ".gmdate("D, d M Y H:i:s", $full_page['last_update'])." GMT");
             }
         } elseif ($this->new) {

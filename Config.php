@@ -23,6 +23,9 @@ $conf = array(
     'ckfinder' => array(
         'content' => '/content/',
     ),
+    'page' => array(
+        'modification_date' => true,
+    ),
     'language' => 'en_us',
     'template_dir' => 'Source/Templates',
     'random_engine' => MCRYPT_DEV_URANDOM,
