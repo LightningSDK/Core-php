@@ -1,6 +1,6 @@
 <?php
 
-namespace Lightning\Model;
+namespace Overridable\Lightning\Model;
 
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
