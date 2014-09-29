@@ -60,13 +60,9 @@ bower install --allow-root
 grunt
 
 # Install ckeditor config.
-if [[ ! -f "${DIR}/../Source/foundation/js/ckeditor_config.js" ]]; then
-  echo "Copying Lightning CKEditor config to foundation"
-  cp ${DIR}/install/ckeditor_config.js ${DIR}/../Source/Resources/js/
+if [[ ! -f "${DIR}/../Source/Resources/sass/ckeditor_contents.scss" ]]; then
   echo "Copy CKEditor css to foundation"
-  cp ${DIR}/Vendor/ckeditor/contents.css ${DIR}/../Source/foundation/scss/ckeditor_contents.scss
-  echo "Copy lightning Gruntfile to foundation"
-  cp ${DIR}/install/Gruntfile.js ${DIR}/../Source/Resources/
+  cp ${DIR}/Vendor/ckeditor/contents.css ${DIR}/../Source/Resources/sass/ckeditor_contents.scss
 fi
 
 # Install lightning dependencies with grunt
