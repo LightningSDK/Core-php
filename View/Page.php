@@ -48,6 +48,11 @@ class Page {
     public function output() {
         // Send globals to the template.
         $template = Template::getInstance();
+
+        if (!empty($this->page)) {
+            $template->set('content', $this->page);
+        }
+
         foreach (array('title', 'keywords', 'description') as $meta_data) {
             $template->set('page_' . $meta_data, Configuration::get('meta_data.' . $meta_data));
         }
