@@ -36,11 +36,4 @@ class Stats extends Page {
         $tracker->render();
         JS::startup('lightning.multiplier.init();');
     }
-
-    /**
-     * Load requested data.
-     */
-    public function getData() {
-
-    }
 }

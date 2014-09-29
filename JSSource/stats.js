@@ -1,7 +1,5 @@
 lightning.stats = {
     loadData: function() {
-        var ctx = document.getElementById("canvas").getContext("2d");
-
         var requestData = {
             sets: []
         };
@@ -15,15 +13,15 @@ lightning.stats = {
             );
         });
 
-        this.getTrackerStats(
-            requestData,
-            function(data) {
-                window.myLine = new Chart(ctx).Line(data, {
-                    responsive: true,
-                    datasetFill: false,
-                });
-            }
-        )
+        this.getTrackerStats(requestData, this.updateeStats)
+    },
+
+    updateStats: function(data) {
+        var ctx = document.getElementById("canvas").getContext("2d");
+        window.myLine = new Chart(ctx).Line(data, {
+            responsive: true,
+            datasetFill: false
+        });
     },
 
     getTrackerStats: function(data, callback) {
@@ -34,6 +32,17 @@ lightning.stats = {
             dataType: 'JSON',
             data: data,
             success: callback
+        });
+    },
+
+    getCustomStats: function(url, data) {
+        var self = this;
+        $.ajax({
+            type: 'GET',
+            url: url,
+            dataType: 'JSON',
+            data: data,
+            success: self.updateStats
         });
     }
 };

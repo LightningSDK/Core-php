@@ -22,7 +22,7 @@ class TrackerHistory {
 
     public function render() {
         // Add the JS.
-        JS::add('/js/chart.min.js');
+        JS::add('/js/Chart.min.js');
 
         // Build the required HTML elements.
 

@@ -227,7 +227,7 @@ class Tracker extends Singleton {
         }
 
         // Add the user ID if required.
-        if ($sub_id != -1) {
+        if ($user_id != -1) {
             $criteria['user_id'] = $user_id;
         }
 
@@ -247,5 +247,41 @@ class Tracker extends Singleton {
         }
 
         return $return;
+    }
+
+    public static function getHistoryAllSubIDs($tracker, $start = -30, $end = 0, $user_id = -1) {
+        // Start the criteria with tracker id.
+        $criteria = array('tracker_id' => $tracker);
+
+        // Filter by date range.
+        $start = Time::today() + $start;
+        $end = Time::today() + $end;
+        $criteria['date'] = array('BETWEEN', $start, $end);
+
+        // Add the user ID if required.
+        if ($user_id != -1) {
+            $criteria['user_id'] = $user_id;
+        }
+
+        // Run the query.
+        $results = Database::getInstance()->select(
+            'tracker_event',
+            $criteria,
+            array(
+                'count' => array('expression' => 'COUNT(*)'),
+                'date', 'sub_id'
+            ),
+            'GROUP BY date, sub_id'
+        );
+
+        $output = array();
+        foreach ($results as $row) {
+            if (!isset($output[$row['sub_id']])) {
+                $output[$row['sub_id']] = array_fill($start, $end - $start + 1, 0);
+            }
+            $output[$row['sub_id']][$row['date']] = $row['count'];
+        }
+
+        return $output;
     }
 }
