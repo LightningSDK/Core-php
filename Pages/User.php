@@ -26,7 +26,7 @@ class User extends Page {
     }
 
     public function postRegister() {
-        $email = Request::post('email');
+        $email = Request::post('email', 'email');
         $pass = Request::post('password');
         $pass2 = Request::post('password2');
         if ($email && $pass == $pass2){
@@ -46,8 +46,9 @@ class User extends Page {
     }
 
     public function postLogin() {
-        $user = ClientUser::getInstance();
-        $login_result = $user->login($_POST['email'], $_POST['password']);
+        $email = Request::post('email', 'email');
+        $pass = Request::post('password');
+        $login_result = UserObj::login($email, $pass);
         $user = ClientUser::getInstance();
         if ($login_result === -1) {
             // BAD PASSWORD COMBO
