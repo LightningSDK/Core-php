@@ -48,6 +48,15 @@ module.exports = function(grunt) {
         copy: {
             dist: {
                 files: [
+                    {
+                        src: [
+                            '../../Lightning/Vendor/chartjs/Chart.min.js'
+                        ],
+                        dest: '../../js',
+                        expand: true,
+                        flatten: true,
+                        filter:'isFile'
+                    }
                 ]
             }
         },
