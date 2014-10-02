@@ -39,7 +39,7 @@ class Messages extends Table {
         'send' => array(
             'type' => 'link',
             'url' => '/admin/mailing/send?id=',
-            'display_value' => '<img src="/images/main/new_message.png" border="0">',
+            'display_value' => '<img src="/images/lightning/new_message.png" border="0">',
         ),
     );
 }

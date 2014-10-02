@@ -898,20 +898,9 @@ class Database extends Singleton {
             elseif (!empty($field) && is_array($field)) {
                 // Format of array('table' => array('column1', 'column2'))
                 // Or array('table' => array('alias' => 'column'))
+                // Or array(0 => array('table' => array('column1', 'alias' => 'column2')))
                 $table = $alias;
-                foreach ($field as $alias => $column) {
-                    if (is_numeric($alias)) {
-                        // Format of array('table' => array('column'))
-                        if ($column == '*') {
-                            $table_field_list[] = "`{$table}`.*";
-                        } else {
-                            $table_field_list[] = "`{$table}`.`{$column}`";
-                        }
-                    } else {
-                        // Format of array('table' => array('alias' => 'column'))
-                        $table_field_list[] = "`{$table}`.`{$column}` AS `{$alias}`";
-                    }
-                }
+                $table_field_list = $this->implodeTableFields($table, $field);
                 $field = implode(', ', $table_field_list);
             }
             else {
@@ -928,6 +917,38 @@ class Database extends Singleton {
             }
         }
         return empty($fields) ? '*' : implode(', ', $fields);
+    }
+
+    /**
+     * Implode tables and fields wrapped in an array.
+     *
+     * @param string $first
+     *   The first param, either the table name or an unused index.
+     * @param array $seconds
+     *   The sub fields of the table.
+     *
+     * @return array
+     *   A list of formatted fields.
+     */
+    protected function implodeTableFields($first, $seconds) {
+        $output = array();
+        foreach ($seconds as $second => $third) {
+            if (is_array($third)) {
+                // array(0 => array('table' => array('column1', 'alias' => 'column2')))
+                $output = array_merge($output, $this->implodeTableFields($second, $third));
+            } elseif (is_numeric($second)) {
+                // Format of array('table' => array('column'))
+                if ($third == '*') {
+                    $output[] = "`{$first}`.*";
+                } else {
+                    $output[] = "`{$first}`.`{$third}`";
+                }
+            } else {
+                // Format of array('table' => array('alias' => 'column'))
+                $output[] = "`{$first}`.`{$third}` AS `{$second}`";
+            }
+        }
+        return $output;
     }
 
     /**

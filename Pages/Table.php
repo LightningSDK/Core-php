@@ -800,10 +800,7 @@ abstract class Table extends Page {
                     } else {
                         $output.= '<td>';
                     }
-                    if (!empty($field['list_html']))
-                        $output.= $this->print_field_value($field, $row);
-                    else
-                        $output.= strip_tags($this->print_field_value($field, $row));
+                    $output.= $this->print_field_value($field, $row);
                     $output.= '</td>';
                 }
             }
@@ -1701,9 +1698,7 @@ abstract class Table extends Page {
     }
 
     function getfieldValues(&$field_list, $accessTable=false) {
-        $string = '';
-
-        foreach($field_list as $f=>$field) {
+        foreach($field_list as $f => $field) {
             // check for settings that override user input
             if ($this->action == "insert") {
                 if (!$this->get_value_on_new($field))
@@ -1792,6 +1787,9 @@ abstract class Table extends Page {
                         break;
                     case 'datetime':
                         $val = Time::getDateTime($field['form_field'], !empty($field['allow_blank']));
+                        break;
+                    case 'checkbox':
+                        $val = (integer) Request::get($field['form_field'], 'boolean');
                         break;
                     case 'checklist':
                         $vals = '';
@@ -1997,16 +1995,16 @@ abstract class Table extends Page {
     }
 
     /**
-    * get_row() gets a single entry from the table based on $this->id
+     * get_row() gets a single entry from the table based on $this->id
 
-    * Constructs a database query based on the following class variables:
-    * @param string $table->table			the table to query
-    * @param string $table->key		the table name of the parent link (foreign key table)
-    * @param string $table->id		the id (foreign key) of the parentLink with which to link
+     * Constructs a database query based on the following class variables:
+     * @param string $table->table			the table to query
+     * @param string $table->key		the table name of the parent link (foreign key table)
+     * @param string $table->id		the id (foreign key) of the parentLink with which to link
 
-    * @return stores result in $list class variable (no actual return result from the method)
+     * @return stores result in $list class variable (no actual return result from the method)
 
-    */
+     */
     function get_row($force=true) {
         if (!empty($this->prefixRows[$this->id])) {
             // If it's a fixed value.
@@ -2058,19 +2056,19 @@ abstract class Table extends Page {
 
 
     /**
-    * loadList() obtains all the rows from the table
+     * loadList() obtains all the rows from the table
 
-    * Constructs a database query based on the following class variables:
-    * @param string $table->table			the table to query
-    * @param string $table->parentLink		the table name of the parent link (foreign key table)
-    * @param string $table->parentId		the id (foreign key) of the parentLink with which to link
-    * @param string $table->list_where		?
-    * @param string $table->accessControl	?
-    * @param string $table->sort			names of columns, separated by commas to sort by.
+     * Constructs a database query based on the following class variables:
+     * @param string $table->table			the table to query
+     * @param string $table->parentLink		the table name of the parent link (foreign key table)
+     * @param string $table->parentId		the id (foreign key) of the parentLink with which to link
+     * @param string $table->list_where		?
+     * @param string $table->accessControl	?
+     * @param string $table->sort			names of columns, separated by commas to sort by.
 
-    * @return stores result in $list class variable (no actual return result from the method)
+     * @return stores result in $list class variable (no actual return result from the method)
 
-    */
+     */
     function loadList() {
 
         // check for required variables
@@ -2142,7 +2140,7 @@ abstract class Table extends Page {
             $fields[] = array($this->getKey() => "`{$_POST['field']}`,`{$this->getKey()}`");
             $sort = "ORDER BY `{$_POST['field']}` ASC";
         } else {
-            $fields[] = array($this->table =>array('*'));
+            $fields[] = array($this->table => array('*'));
         }
 
         $this->list = Database::getInstance()->selectIndexed(
