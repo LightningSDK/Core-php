@@ -198,8 +198,8 @@ class Tracker extends Singleton {
     /**
      * Get an array of data sets.
      *
-     * @param string $tracker
-     *   The name of the tracker.
+     * @param integer $tracker
+     *   The tracker id.
      * @param integer $start
      *   How many days back to start.
      * @param integer $end
@@ -212,9 +212,9 @@ class Tracker extends Singleton {
      * @return array
      *   The result set.
      */
-    public static function getHistory($tracker, $start = -30, $end = 0, $sub_id = -1, $user_id = -1) {
+    public static function getHistory($tracker_id, $start = -30, $end = 0, $sub_id = -1, $user_id = -1) {
         // Start the criteria with tracker id.
-        $criteria = array('tracker_id' => $tracker);
+        $criteria = array('tracker_id' => $tracker_id);
 
         // Filter by date range.
         $start = Time::today() + $start;
@@ -232,12 +232,10 @@ class Tracker extends Singleton {
         }
 
         // Run the query.
-        $results = Database::getInstance()->selectColumn(
+        $results = Database::getInstance()->countKeyed(
             'tracker_event',
-            array('count' => 'COUNT(*)'),
-            $criteria,
             'date',
-            'GROUP BY date'
+            $criteria
         );
 
         // Make sure all entries are present.
