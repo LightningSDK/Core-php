@@ -819,12 +819,7 @@ class Database extends Singleton {
                     $alias = key($field);
                     $field = $current;
                 }
-                $field = explode('.', $field);
-                if (count($field) == 1) {
-                    $field = '`' . $field[0] . '`';
-                } elseif (count($field == 1)) {
-                    $field = '`' . $field[0] . '`.`' . $field[1] . '`';
-                }
+                $field = $this->formatField($field);
 
                 if (!empty($alias) && !is_numeric($alias)) {
                     // Format of array('alias' => 'column') to column as `alias`.
@@ -833,6 +828,28 @@ class Database extends Singleton {
             }
         }
         return empty($fields) ? '*' : implode(', ', $fields);
+    }
+
+    /**
+     * Convert a field to a valid SQL reference.
+     *
+     * @param string $field
+     *   The field as submitted in the query.
+     *
+     * @return string
+     *   The field ready for SQL.
+     */
+    protected function formatField($field) {
+        $field = explode('.', $field);
+        if (count($field) == 1) {
+            return '`' . $field[0] . '`';
+        } elseif (count($field == 1)) {
+            if ($field[1] == '*') {
+                return '`' . $field[0] . '`.*';
+            } else{
+                return '`' . $field[0] . '`.`' . $field[1] . '`';
+            }
+        }
     }
 
     /**
