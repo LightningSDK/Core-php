@@ -867,54 +867,66 @@ class Database extends Singleton {
      * @return string
      *   The query string segment.
      */
-    public function sqlImplode($array, &$values, $concatenator=', ', $setting = false){
+    public function sqlImplode($array, &$values, $concatenator = ', ', $setting = false){
         $a2 = array();
-        foreach ($array as $k=>$v) {
+        foreach ($array as $field => $v) {
             // This might change from an and to an or.
-            if ($k == '#operator') {
+            if ($field === '#operator') {
                 $concatenator = $v;
                 continue;
             }
+            // This is if and AND/OR is explicitly grouped.
+            elseif ($field == '#OR' || $field == '#AND') {
+                $a2[] = '(' . $this->sqlImplode($v, $values, str_replace('#', '', $field)) . ')';
+                continue;
+            }
+            elseif (is_numeric($field)) {
+                // This can be done if there are more than one condition for the same field.
+                $a2[] = '(' . $this->sqlImplode($v, $values, 'AND') . ')';
+                continue;
+            }
+            $field = $this->formatField($field);
+
             // If the value is an array.
             if (is_array($v)) {
                 // Value is an expression.
                 if (!empty($v['expression'])) {
-                    $a2[] = "`{$k}` = {$v['value']}";
+                    $a2[] = "{$field} = {$v['expression']}";
                     if (!empty($v['vars']) && is_array($v['vars'])) {
                         $values = array_merge($values, $v['vars']);
                     }
                 }
                 // IN operator.
-                elseif (strtoupper($v[0]) == 'IN') {
+                elseif (strtoupper($v[0]) == 'IN' || strtoupper($v[0]) == 'NOT IN') {
                     $values = array_merge($values, array_values($v[1]));
-                    $a2[] = "`{$k}` IN (" . implode(array_fill(0, count($v[1]), '?'), ",") . ")";
+                    $a2[] = "{$field} {$v[0]} (" . implode(array_fill(0, count($v[1]), '?'), ",") . ")";
                 }
                 // Between operator.
                 elseif (strtoupper($v[0]) == 'BETWEEN') {
-                    $a2[] = "`{$k}` BETWEEN ? AND ? ";
+                    $a2[] = "{$field} BETWEEN ? AND ? ";
                     $values[] = $v[1];
                     $values[] = $v[2];
                 }
                 // Single comparison operators.
                 elseif (in_array($v[0], array('!=', '<', '<=', '>', '>=', 'LIKE'))) {
                     $values[] = $v[1];
-                    $a2[] = " `{$k}` {$v[0]} ? ";
+                    $a2[] = "{$field} {$v[0]} ? ";
                 }
                 elseif (in_array($v[0], array('IS NULL', 'IS NOT NULL'))) {
-                    $a2[] = " `{$k}` {$v[0]} ";
+                    $a2[] = "{$field} {$v[0]} ";
                 }
             }
             elseif ($v === null) {
                 if ($setting) {
-                    $a2[] = " `{$k}` = NULL ";
+                    $a2[] = "{$field} = NULL ";
                 } else {
-                    $a2[] = " `{$k}` IS NULL ";
+                    $a2[] = "{$field} IS NULL ";
                 }
             }
             else {
                 // Standard key/value column = value.
                 $values[] = $v;
-                $a2[] = " `{$k}` = ? ";
+                $a2[] = "{$field} = ? ";
             }
         }
         return implode($concatenator, $a2);
