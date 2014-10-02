@@ -500,21 +500,28 @@ class Database extends Singleton {
      * @return string
      *   The query-ready string for the table and it's joins.
      */
-    protected function parseTable($table, &$values) {
+    protected function parseTable($table, &$values, $alias = null) {
         if (is_string($table)) {
-            return '`' . $table . '`';
+            // A simple table as alias.
+            $output = '`' . $table . '`';
+            if (!empty($alias)) {
+                $output .= 'AS `' . $alias . '`';
+            }
+            return $output;
         }
         else {
-            $output = $this->parseTable($table['from'], $values);
+            if (!empty($table['from'])) {
+                $output = $this->parseTable($table['from'], $values);
+            }
             if (!empty($table['join'])) {
                 // If the first element of join is not an array, it's an actual join.
-                if (!is_array($table['join'][0])) {
+                if (!is_array(current($table['join']))) {
                     // Wrap it in an array so we can loop over it.
                     $table['join'] = array($table['join']);
                 }
                 // Foreach join.
-                foreach ($table['join'] as $join) {
-                    $output .= $this->implodeJoin($join[0], $join[1], !empty($join[2]) ? $join[2] : '', $values);
+                foreach ($table['join'] as $alias => $join) {
+                    $output .= $this->implodeJoin($join[0], $join[1], !empty($join[2]) ? $join[2] : '', $values, is_string($alias) ? $alias : null);
                     // Add any extra replacement variables.
                     if (isset($join[3])) {
                         $values = array_merge($values, $join[3]);
