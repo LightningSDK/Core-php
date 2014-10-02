@@ -30,7 +30,7 @@ class Output {
      * @param array|integer $data
      *   The data to output as JSON.
      */
-    public static function json($data) {
+    public static function json($data = array()) {
         // Predefined outputs.
         if ($data == self::ACCESS_DENIED) {
             $data = array('status' => 'access_denied');
@@ -41,7 +41,7 @@ class Output {
 
         // Add errors and messages.
         $data['errors'] = Messenger::getErrors();
-        $data['messages'] = Messenger::getErrors();
+        $data['messages'] = Messenger::getMessages();
 
         // Output the data.
         header('Content-type: application/json');
