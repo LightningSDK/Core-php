@@ -5,4 +5,5 @@ $language = array(
         .'<a href="{LINK}">click here</a>',
     'invalid_token' => 'You submitted a form with an invalid token. Your requested has been ignored as a security precaution.',
     'optin' => 'Thank you for subscribing to our mailing list!',
+    'saved' => 'Your data has been saved!',
 );
