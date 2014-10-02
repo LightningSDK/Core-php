@@ -577,7 +577,7 @@ class Database extends Singleton {
      * @param string $final
      *   A final string to append to the query, such as limit and sort.
      *
-     * @return PDOStatement
+     * @return array
      *   The query results.
      */
     public function selectAll($table, $where = array(), $fields = array(), $final = '') {
