@@ -388,6 +388,32 @@ class Database extends Singleton {
     }
 
     /**
+     * Get a list of counted groups, keyed by an index.
+     *
+     * @param string $table
+     *   The table to search.
+     * @param string $key
+     *   The table to use as the key.
+     * @param array $where
+     *   A list of conditions for the query.
+     * @param string $order
+     *   Additional order information.
+     *
+     * @return array
+     *   A list of counts keyed by the $key column.
+     */
+    public function countKeyed($table, $key, $where = array(), $order = ''){
+        $this->_select($table, $where, array('count' => array('expression' => 'COUNT(*)'), $key), NULL, 'GROUP BY `' . $key . '` ' . $order);
+        $results = array();
+        // TODO: This is built in to PDO.
+        while ($row = $this->result->fetch(PDO::FETCH_ASSOC)) {
+            $results[$row[$key]] = $row['count'];
+        }
+        $this->timerEnd();
+        return $results;
+    }
+
+    /**
      * Update a row.
      *
      * @param string $table
