@@ -56,7 +56,6 @@ sudo gem install foundation
 # Install jquery Validation
 cd ${DIR}/Vendor/jquery-validation
 sudo npm install
-bower install --allow-root
 grunt
 
 # Install ckeditor config.
