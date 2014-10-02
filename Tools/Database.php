@@ -772,8 +772,8 @@ class Database extends Singleton {
      * @return string
      *   The SQL query segment.
      */
-    protected function implodeJoin($joinType, $table, $condition, &$values) {
-        return ' ' . $joinType . ' ' . $this->parseTable($table, $values) . ' ' . $condition;
+    protected function implodeJoin($joinType, $table, $condition, &$values, $alias = null) {
+        return ' ' . $joinType . ' ' . $this->parseTable($table, $values, $alias) . ' ' . $condition;
     }
 
     /**
