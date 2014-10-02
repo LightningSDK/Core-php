@@ -36,11 +36,12 @@ class User extends Page {
                 $user->login($email, $pass2);
                 if($previous_user != 0)
                     $user->merge_users($previous_user);
-                if($_POST['redirect'] != '' && !preg_match('|/?user[/$?]|', $_POST['redirect']))
+                $redirect = Request::post('redirect');
+                if(!empty($redirect) && !preg_match('|/?user[/$?]|', $redirect)) {
                     Navigation::redirect($_POST['redirect']);
-                else
-                    Navigation::redirect($user->login_url);
-                exit;
+                } else {
+                    Navigation::redirect(Configuration::get('user.login_url'));
+                }
             }
         }
     }
