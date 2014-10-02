@@ -206,7 +206,7 @@ class Scrub {
      * @return boolean
      *   Whether the value equates to true.
      */
-    public static function bool($val) {
+    public static function boolean($val) {
         return (intval($val) > 0 || $val === true || strtolower($val) === 'true');
     }
 }
