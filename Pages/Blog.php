@@ -6,7 +6,7 @@
 
 namespace Lightning\Pages;
 
-use Lightning\Tools\Blog as blogTool;
+use Lightning\Model\Blog as BlogModel;
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
@@ -27,7 +27,7 @@ class Blog extends Page {
         $blog_url = Request::get('request');
 
         // SEE IF A SPECIFIC BLOG ARTICLE IS BEING REQUESTED.
-        $blog = blogTool::getInstance();
+        $blog = new BlogModel();
         if($blog_id > 0) {
             $blog->fetch_blog_id($blog_id);
         }
@@ -82,7 +82,6 @@ class Blog extends Page {
 
     public function post() {
         $blog_id = Request::get('id', 'int') | Request::get('blog_id', 'int');
-        $blog_url = Request::get('request');
         $action = Request::get('action');
 
         // AUTHORIZE A BLOG COMMENT.

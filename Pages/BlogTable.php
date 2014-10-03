@@ -4,19 +4,20 @@ namespace Lightning\Pages;
 
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Request;
+use Lightning\Model\Blog as BlogModel;
 
 class BlogTable extends Table {
     protected $trusted = true;
 
-    protected $table = 'blog';
+    protected $table = BlogModel::BLOG_TABLE;
 
     protected $key = 'blog_id';
 
     protected $sort = 'time DESC';
 
     protected $links = array(
-        'blog_category' => array(
-            'index' => 'blog_blog_category',
+        BlogModel::CATEGORY_TABLE => array(
+            'index' => BlogModel::BLOG_CATEGORY_TABLE,
             'key' => 'cat_id',
             'display_column' => 'category',
             'list' => 'compact'
@@ -37,8 +38,4 @@ class BlogTable extends Table {
             };
         }
     }
-
-//    protected $settings = array(
-//        'action_file' => '/blog',
-//    );
 }

@@ -1,10 +1,11 @@
 <?php
 
-namespace Lightning\Tools;
+namespace Overridable\Lightning\Model;
 
-use Lightning\Tools\Singleton;
+use Lightning\Tools\Database;
+use Lightning\Tools\Scrub;
 
-class Blog extends Singleton {
+class Blog {
 
     var $id = 0;
     var $posts = array();
@@ -16,6 +17,10 @@ class Blog extends Singleton {
     var $list_per_page = 10;
     var $page = 1;
     var $post_count;
+    const BLOG_TABLE = 'blog';
+    const CATEGORY_TABLE = 'blog_category';
+    const BLOG_CATEGORY_TABLE = 'blog_blog_category';
+    const COMMENT_TABLE = 'blog_comment';
 
     function body($body, $force_short = false){
         if ($this->shorten_body || $force_short) {
@@ -49,7 +54,7 @@ class Blog extends Singleton {
             else
                 $where['time'] = array('BETWEEN', mktime(0,0,0,1,1,$this->y), mktime(0,0,0,1,1,$this->y+1));
         } else if($this->category != ''){
-            $cat_id = Database::getInstance()->selectField('cat_id', 'blog_category', array('cat_url' => array('LIKE', $this->category)));
+            $cat_id = Database::getInstance()->selectField('cat_id', static::CATEGORY_TABLE, array('cat_url' => array('LIKE', $this->category)));
             $join[] = array('JOIN', 'blog_blog_category', 'USING (blog_id)');
             $where['cat_id'] = $cat_id;
         }
@@ -57,7 +62,7 @@ class Blog extends Singleton {
             $limit = " LIMIT ".intval(($this->page -1) * $this->list_per_page).", {$this->list_per_page}";
         $this->posts = Database::getInstance()->selectAll(
             array(
-                'from' => 'blog',
+                'from' => static::BLOG_TABLE,
                 'join' => $join,
             ),
             $where,
@@ -66,7 +71,7 @@ class Blog extends Singleton {
         );
         $this->post_count = Database::getInstance()->count(
             array(
-                'from' => 'blog',
+                'from' => static::BLOG_TABLE,
                 'join' => $join,
             ),
             $where
@@ -115,7 +120,7 @@ class Blog extends Singleton {
     }
 
     function recent_list($remote=false){
-        $list = Database::getInstance()->select('blog', array(), array(), 'ORDER BY time DESC LIMIT 5');
+        $list = Database::getInstance()->select(static::BLOG_TABLE, array(), array(), 'ORDER BY time DESC LIMIT 5');
         $target = $remote ? "target='_blank'" : '';
         if($list->rowCount() > 0){
             echo "<ul>";
@@ -129,7 +134,7 @@ class Blog extends Singleton {
     function recent_comment_list($remote=false){
         $list = Database::getInstance()->select(
             array(
-                'from' => 'blog_comment',
+                'from' => static::COMMENT_TABLE,
                 'join' => array('LEFT JOIN', 'blog', 'USING (blog_id)'),
             ),
             array(
@@ -154,7 +159,7 @@ class Blog extends Singleton {
     function categories_list(){
         $list = Database::getInstance()->select(
             array(
-                'from' => 'blog_blog_category',
+                'from' => static::BLOG_CATEGORY_TABLE,
                 'join' => array('LEFT JOIN', 'blog_category', 'USING (cat_id)'),
             ),
             array(),
@@ -182,8 +187,7 @@ class Blog extends Singleton {
      *   The blog ID.
      */
     function fetch_blog_url($url){
-        Database::getInstance();
-        $this->posts = Database::getInstance()->selectAll('blog', array('url' => $url));
+        $this->posts = Database::getInstance()->selectAll(static::BLOG_TABLE, array('url' => $url));
         if($this->posts){
             $this->id = $this->posts[0]['blog_id'];
             $this->loadComments();
@@ -203,7 +207,7 @@ class Blog extends Singleton {
      *   The blog ID.
      */
     function fetch_blog_id($id){
-        $this->posts = Database::getInstance()->selectAll('blog', array('blog_id' => $id));
+        $this->posts = Database::getInstance()->selectAll(static::BLOG_TABLE, array('blog_id' => $id));
         if($this->posts){
             $this->id = $this->posts[0]['blog_id'];
             $this->loadComments();
@@ -220,6 +224,6 @@ class Blog extends Singleton {
         if(!$this->show_unapproved_comments) {
             $conditions['approved'] = 1;
         }
-        $this->posts[0]['comments'] = Database::getInstance()->selectAll('blog_comment', $conditions);
+        $this->posts[0]['comments'] = Database::getInstance()->selectAll(static::COMMENT_TABLE, $conditions);
     }
 }
