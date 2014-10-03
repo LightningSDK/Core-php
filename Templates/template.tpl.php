@@ -14,7 +14,7 @@ use Lightning\View\CSS;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title><?=Configuration::get('page_title');?></title>
-    <link rel="icon" href="img/icons/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
     <!-- For third-generation iPad with high-resolution Retina display: -->
     <link rel="apple-touch-icon-precomposed" sizes="144x144" href="img/icons/apple-touch-icon-144x144-precomposed.png">
     <!-- For iPhone with high-resolution Retina display: -->
