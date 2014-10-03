@@ -114,7 +114,7 @@ class User {
      */
     public static function loadBySession($session) {
         if($session->user_id > 0) {
-            return self::loadById($session->user_id);
+            return static::loadById($session->user_id);
         }
         return false;
     }
@@ -135,7 +135,7 @@ class User {
      *   Whther the user is a site admin.
      */
     public function isAdmin() {
-        return $this->type == self::TYPE_ADMIN;
+        return $this->type == static::TYPE_ADMIN;
     }
 
     /**
@@ -221,7 +221,7 @@ class User {
             $salt = $user['salt'];
         }
         // TODO: This should be stronger.
-        return $user_id . "." . self::passHash($user_id . $salt, $salt);
+        return $user_id . "." . static::passHash($user_id . $salt, $salt);
     }
 
     /**
@@ -280,7 +280,7 @@ class User {
             return $user_info['user_id'];
         } else {
             // EMAIL IS NOT IN MAILING LIST AT ALL
-            $user_id = self::insertUser($email, $pass);
+            $user_id = static::insertUser($email, $pass);
             $updates = array();
             if ($ref = Request::cookie('ref', 'int')) {
                 $updates['referrer'] = $ref;
@@ -322,7 +322,7 @@ class User {
             $user_data['list_date'] = time();
             $user_id = $db->insert('user', $options + $user_data);
         }
-        return self::loadById($user_id);
+        return static::loadById($user_id);
     }
 
     /**
@@ -388,8 +388,8 @@ class User {
             'referrer' => 0,
         );
         if ($pass) {
-            $salt = self::getSalt();
-            $user_details['password'] = self::passHash($pass, $salt);
+            $salt = static::getSalt();
+            $user_details['password'] = static::passHash($pass, $salt);
             $user_details['salt'] = bin2hex($salt);
         }
         return Database::getInstance()->insert('user', $user_details);
@@ -511,7 +511,7 @@ class User {
             $user->destroy();
         }
 
-        if($temp_user = self::loadByEmail($email)) {
+        if($temp_user = static::loadByEmail($email)) {
             // user found
             if($temp_user->checkPass($password)) {
                 // We need to create a new session if:
@@ -592,7 +592,7 @@ class User {
      */
     public static function loadByEncryptedUserReference($cypher_string) {
         $email = Encryption::aesDecrypt($cypher_string, Configuration::get('user.key'));
-        return self::loadByEmail($email);
+        return static::loadByEmail($email);
     }
 
     // REDIRECTS THE USER IF THEY ARE NOT LOGGED IN
