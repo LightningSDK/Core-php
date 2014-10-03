@@ -51,6 +51,8 @@ use Lightning\View\Page;
 
 abstract class Table extends Page {
 
+    protected $page = 'table';
+
     protected $table;
     protected $action;
     protected $function;
@@ -76,7 +78,7 @@ abstract class Table extends Page {
     protected $sort;
     protected $maxPerPage = 25;
     protected $listCount = 0;
-    protected $page = 1;
+    protected $page_number = 1;
     protected $action_fields=array();
     protected $custom_templates=array();
     protected $list_where;
@@ -180,7 +182,7 @@ abstract class Table extends Page {
         }
         if (isset($_POST['function'])) $this->function = $_POST['function'];
         if (isset($_REQUEST['id'])) $this->id = Request::get('id');
-        if (isset($_REQUEST['p'])) $this->page = max(1, Request::get('p'));
+        if (isset($_REQUEST['p'])) $this->page_number = max(1, Request::get('p'));
         $this->serial_update = Request::get('serialupdate', 'boolean');
         $this->refer_return = Request::get('refer_return');
 
@@ -1341,7 +1343,7 @@ abstract class Table extends Page {
         if ($pages > 1) {
             $output .= 'Page: ';
             for($i = 1; $i <= $pages; $i++) {
-                if ($this->page == $i) {
+                if ($this->page_number == $i) {
                     $output.= $i;
                 } else {
                     $output.= " <a href='".$this->createUrl($this->action, $i)."'>{$i}</a> ";
@@ -2024,7 +2026,7 @@ abstract class Table extends Page {
             $where
         );
 
-        $start = (max(1, $this->page) - 1) * $this->maxPerPage;
+        $start = (max(1, $this->page_number) - 1) * $this->maxPerPage;
 
         // validate the sort order
         $sort = !empty($this->sort) ? " ORDER BY " . $this->sort : '';
