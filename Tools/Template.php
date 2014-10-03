@@ -21,7 +21,7 @@ class Template extends Singleton {
      *
      * @var string
      */
-    private $template = 'template.tpl.php';
+    private $template;
 
     /**
      * The directory where the templates are located.
@@ -48,6 +48,7 @@ class Template extends Singleton {
      * Initialize the template object.
      */
     public function __construct(){
+        $this->template = Configuration::get('template.default');
         $this->template_dir = HOME_PATH . '/' . Configuration::get('template_dir') . '/';
     }
 
@@ -94,35 +95,13 @@ class Template extends Singleton {
             ob_start();
         }
 
-        include $this->template_dir . $this->template;
+        include $this->template_dir . $this->template . '.tpl.php';
 
         if ($return_as_string) {
             // Setup an output buffer
             return ob_get_clean();
         }
         exit;
-    }
-
-    /**
-     * Set the included page.
-     *
-     * @param string $page
-     *   The page.
-     */
-    public function set_page($page = ""){
-        $this->page = $page;
-    }
-
-    /**
-     * Set the default included page if not already set.
-     *
-     * @param string $page
-     *   The default included page.
-     */
-    public function set_default_page($page) {
-        if (empty($this->page)) {
-            $this->page = $page;
-        }
     }
 
     /**

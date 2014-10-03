@@ -1,6 +1,9 @@
 <?php
 
 $conf = array(
+    'template' => array(
+        'default' => 'template'
+    ),
     'overridable' => array(
         'Lightning\\View\\Page' => 'Overridable\\Lightning\\View\\Page',
         'Lightning\\Model\\User' => 'Overridable\\Lightning\\Model\\User',
