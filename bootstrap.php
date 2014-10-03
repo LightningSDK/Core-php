@@ -33,6 +33,7 @@ function classAutoloader($classname) {
             $overrides[$overridden_name] = $overridden_name;
             loadClassFile($classname);
             loadClassFile($classes[$classname]);
+            class_alias($classes[$classname], $classname);
             return;
         }
         if (isset($overrides[$classname])) {
