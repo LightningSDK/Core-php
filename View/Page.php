@@ -2,8 +2,7 @@
 
 namespace Overridable\Lightning\View;
 
-use Lightning\Tools\Blog;
-use Lightning\Tools\ClientUser;
+use Lightning\Model\Blog;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
@@ -63,7 +62,7 @@ class Page {
         $template->set('messages', Messenger::getMessages());
 
         $template->set('site_name', Configuration::get('site.name'));
-        $template->set('blog', Blog::getInstance());
+        $template->set('blog', new Blog());
         $template->render($this->template);
     }
 
