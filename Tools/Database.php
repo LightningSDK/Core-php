@@ -10,6 +10,7 @@ use Exception;
 use PDO;
 use PDOException;
 use PDOStatement;
+use ReflectionClass;
 
 /**
  * A database abstraction layer.
@@ -67,6 +68,13 @@ class Database extends Singleton {
     private $end2;
 
     /**
+     * The last query executed. If it's the same it does not need to be reprepared.
+     *
+     * @var string
+     */
+    private $last_query;
+
+    /**
      * The total number of queries executed.
      *
      * @var integer
@@ -100,6 +108,8 @@ class Database extends Singleton {
      * @var boolean
      */
     private $inTransaction = FALSE;
+
+    const FETCH_ASSOC = PDO::FETCH_ASSOC;
 
     /**
      * Construct this object.
@@ -326,7 +336,10 @@ class Database extends Singleton {
      */
     private function __query_execute($query, $vars) {
         if (!empty($vars)) {
-            $this->result = $this->connection->prepare($query);
+            if ($this->last_query != $query) {
+                $this->last_query = $query;
+                $this->result = $this->connection->prepare($query);
+            }
             $this->result->execute($vars);
         }
         else {
@@ -367,8 +380,7 @@ class Database extends Singleton {
         if (!empty($where)) {
             $where = ' WHERE ' . $this->sqlImplode($where, $values, 'AND');
         }
-        $this->_query('SELECT ' . $fields . ' FROM ' . $table . $where . ' LIMIT 1', $values);
-        $this->timerEnd();
+        $this->query('SELECT ' . $fields . ' FROM ' . $table . $where . ' LIMIT 1', $values);
         return $this->result->rowCount() > 0;
     }
 
@@ -448,20 +460,102 @@ class Database extends Singleton {
      */
     public function insert($table, $data, $existing = FALSE) {
         $vars = array();
+        $table = $this->parseTable($table, $vars);
         $ignore = $existing === TRUE ? 'IGNORE' : '';
         $set = $this->sqlImplode($data, $vars, ', ', true);
         $duplicate = is_array($existing) ? ' ON DUPLICATE KEY UPDATE ' . $this->sqlImplode($existing, $vars) : '';
-        $this->query('INSERT ' . $ignore . ' INTO `' . $table . '` SET ' . $set . $duplicate, $vars);
+        $this->query('INSERT ' . $ignore . ' INTO ' . $table . ' SET ' . $set . $duplicate, $vars);
         $this->timerEnd();
         return $this->result->rowCount() == 0 ? false : $this->connection->lastInsertId();
     }
 
+    /**
+     * Insert multiple values for each combination of the supplied data values.
+     *
+     * @param array $table
+     *   The table to insert to.
+     * @param array $data
+     *   An array where each item corresponds to a column.
+     *   The value may be a string or an array of multiple values.
+     * @param array|boolean $existing
+     *   TRUE to ignore, or an array of field names from which to copy
+     *   update the value with the value from $data if the unique key exists.
+     *
+     * @return integer
+     *   The last inserted id.
+     */
+    public function insertMultiple($table, $data, $existing = FALSE) {
+        $last_insert = false;
+
+        // Set up the constant variables.
+        $start_vars = array();
+        $table = $this->parseTable($table, $start_vars);
+        $ignore = $existing === TRUE ? 'IGNORE' : '';
+        $reflect  = new ReflectionClass('Lightning\Tools\CombinationIterator');
+        $combinator = $reflect->newInstanceArgs($data);
+        $fields = $this->implodeFields(array_keys($data));
+        $placeholder_set = '(' . implode(',', array_fill(0, count($data), '?')) . ')';
+
+        // Add the update on existing key.
+        $duplicate = '';
+        if (is_array($existing)) {
+            $duplicate .= ' ON DUPLICATE KEY UPDATE ';
+            $feilds = array();
+            foreach ($existing as $field) {
+                $feilds[] = '`' . $field . '`=VALUES(`' . $field . '`)';
+            }
+            $duplicate .= implode(',', $fields);
+        }
+
+        // Initialize data.
+        $vars = array();
+        $i = 0;
+        $iterations_per_query = 100;
+
+        // Iterate over each value combination.
+        foreach ($combinator as $combination) {
+            $i++;
+            // If ($iterations_per_query) have already been inserted, reset to a new query.
+            if ($i > $iterations_per_query) {
+                if (empty($values)) {
+                    $values = implode(',', array_fill(0, $iterations_per_query, $placeholder_set));
+                }
+                $this->query('INSERT ' . $ignore . ' INTO ' . $table . '(' . $fields . ') VALUES ' . $values . $duplicate, $vars);
+                $last_insert = $this->result->rowCount() == 0 ? $last_insert : $this->connection->lastInsertId();
+                // Reset the data.
+                $i = 1;
+                $vars = array();
+            }
+            $vars = array_merge($vars, $combination);
+        }
+
+        // The placeholder count might be different.
+        if (empty($values) || (count($vars) / count($data) != $iterations_per_query)) {
+            $values = implode(',', array_fill(0, count($vars) / count($data), $placeholder_set));
+        }
+
+        // Run the insert query for remaining sets.
+        $this->query('INSERT ' . $ignore . ' INTO ' . $table . '(' . $fields . ') VALUES ' . $values . $duplicate, $vars);
+
+        // Return the last insert ID.
+        return $this->result->rowCount() == 0 ? $last_insert : $this->connection->lastInsertId();
+    }
+
+    /**
+     * Delete rows from the database.
+     *
+     * @param string $table
+     *   The table to delete from.
+     * @param array $where
+     *   The condition for the query.
+     */
     public function delete($table, $where) {
         $values = array();
+        $table = $this->parseTable($table, $values);
         if (is_array($where)) {
-            $where = $this->sqlImplode($where, $values);
+            $where = $this->sqlImplode($where, $values, ' AND ');
         }
-        $this->query('DELETE FROM `' . $table . '` WHERE ' . $where, $values);
+        $this->query('DELETE FROM ' . $table . ' WHERE ' . $where, $values);
     }
 
     /**
@@ -529,16 +623,22 @@ class Database extends Singleton {
                 }
             }
             // If this join is a subquery, wrap it.
-            if (is_array($table) && isset($table['as'])) {
-                if (!empty($table['fields'])) {
-                    $output = $this->implodeFields($table['fields']) . ' FROM ' . $output;
-                } else {
-                    $output = ' * FROM ' . $output;
+            if (is_array($table)) {
+                if (isset($table['as'])) {
+                    if (!empty($table['fields'])) {
+                        $output = $this->implodeFields($table['fields']) . ' FROM ' . $output;
+                    } else {
+                        $output = ' * FROM ' . $output;
+                    }
+                    if (!empty($table['order'])) {
+                        $output .= $this->implodeOrder($table['order'], $values);
+                    }
+                    $output = '( SELECT ' . $output . ') AS ' . $table['as'];
+                } elseif (count($table) == 1) {
+                    $alias = key($table);
+                    $table = current($table);
+                    $output = '`' . $table . '` AS `' . $alias . '`';
                 }
-                if (!empty($table['order'])) {
-                    $output .= $this->implodeOrder($table['order'], $values);
-                }
-                $output = '( SELECT ' . $output . ') AS ' . $table['as'];
             }
             return $output;
         }
@@ -795,11 +895,11 @@ class Database extends Singleton {
                 // Format of array('count' => array('expression' => 'COUNT(*)'))
                 $field = $field['expression'] . ' AS ' . $alias;
             }
-            elseif (!empty($current) && is_array($current)) {
+            elseif (!empty($field) && is_array($field)) {
                 // Format of array('table' => array('column1', 'column2'))
                 // Or array('table' => array('alias' => 'column'))
-                $table = key($field);
-                foreach ($current as $alias => $column) {
+                $table = $alias;
+                foreach ($field as $alias => $column) {
                     if (is_numeric($alias)) {
                         // Format of array('table' => array('column'))
                         if ($column == '*') {
@@ -840,15 +940,22 @@ class Database extends Singleton {
      *   The field ready for SQL.
      */
     protected function formatField($field) {
+        $table = '';
+
+        // Add the table if there is one.
         $field = explode('.', $field);
         if (count($field) == 1) {
-            return '`' . $field[0] . '`';
-        } elseif (count($field == 1)) {
-            if ($field[1] == '*') {
-                return '`' . $field[0] . '`.*';
-            } else{
-                return '`' . $field[0] . '`.`' . $field[1] . '`';
-            }
+            $field = $field[0];
+        } elseif (count($field)  == 2) {
+            $table = '`' . $field[0] . '`.';
+            $field = $field[1];
+        }
+
+        // Add the field.
+        if ($field == '*') {
+            return $table . '*';
+        } else{
+            return $table . '`' . $field . '`';
         }
     }
 
@@ -876,22 +983,27 @@ class Database extends Singleton {
                 continue;
             }
             // This is if and AND/OR is explicitly grouped.
-            elseif ($field == '#OR' || $field == '#AND') {
-                $a2[] = '(' . $this->sqlImplode($v, $values, str_replace('#', '', $field)) . ')';
+            elseif ($field === '#OR' || $field === '#AND') {
+                $a2[] = '(' . $this->sqlImplode($v, $values, ' ' . str_replace('#', '', $field) . ' ') . ')';
                 continue;
             }
-            elseif (is_numeric($field)) {
-                // This can be done if there are more than one condition for the same field.
-                $a2[] = '(' . $this->sqlImplode($v, $values, 'AND') . ')';
-                continue;
+
+            if (is_string($field)) {
+                $field = $this->formatField($field);
             }
-            $field = $this->formatField($field);
 
             // If the value is an array.
             if (is_array($v)) {
                 // Value is an expression.
                 if (!empty($v['expression'])) {
-                    $a2[] = "{$field} = {$v['expression']}";
+                    if (is_numeric($field)) {
+                        // There is no name, this expression should contain it's own equations.
+                        $a2[] = $v['expression'];
+                    } else {
+                        // Check a field equal to an expression.
+                        $a2[] = "{$field} = {$v['expression']}";
+                    }
+                    // Add any vars.
                     if (!empty($v['vars']) && is_array($v['vars'])) {
                         $values = array_merge($values, $v['vars']);
                     }
