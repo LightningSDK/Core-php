@@ -32,6 +32,8 @@ class JS {
      */
     protected static $inline_scripts = array();
 
+    protected static $vars = array();
+
     /**
      * @var array
      *
@@ -80,6 +82,10 @@ class JS {
         }
     }
 
+    public static function set($var, $value) {
+        self::$vars[$var] = $value;
+    }
+
     /**
      * Output all the JS functions including inline, startup and resource files.
      *
@@ -87,7 +93,8 @@ class JS {
      *   The rendered output.
      */
     public static function render() {
-        $output = self::$inited ? '' : '<script language="javascript">lightning={};</script>';
+        $output = self::$inited ? '' :
+            '<script language="javascript">lightning={"vars":' . json_encode(self::$vars) . '};</script>';
         self::$inited = true;
 
         // Include JS files.
