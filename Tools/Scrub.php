@@ -43,6 +43,19 @@ class Scrub {
     }
 
     /**
+     * Encode a string as a query string parameter.
+     *
+     * @param string $value
+     *   The value.
+     *
+     * @return string
+     *   The URL encoded value.
+     */
+    public static function toURL($value) {
+        return urlencode($value);
+    }
+
+    /**
      * Convert a string to a url safe string.
      *
      * @param string $value
