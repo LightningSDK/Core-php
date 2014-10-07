@@ -190,12 +190,13 @@ class Request {
             case 'explode':
                 $data = explode(',', $data);
             case 'array':
+            case 'array_keys':
                 $args = func_get_args();
                 if(!is_array($data) || count($data) == 0)
                     return false;
                 $output = array();
-                foreach($data as $d){
-                    $output[] = self::clean($d, $args[2]);
+                foreach($data as $k => $v){
+                    $output[] = self::clean($type == 'array_keys' ? $k : $v, $args[2]);
                 }
                 return $output;
                 break;
