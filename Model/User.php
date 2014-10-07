@@ -101,7 +101,7 @@ class User {
      */
     public static function loadById($user_id) {
         if($details = Database::getInstance()->selectRow('user', array('user_id' => $user_id))) {
-            return new self($details);
+            return new static($details);
         }
         return false;
     }
@@ -538,7 +538,6 @@ class User {
             Logger::logIP('Bad Username', Logger::SEVERITY_MED);
         }
         // Could not log in.
-        Messenger::error('Invalid Login');
         return false;
     }
 
