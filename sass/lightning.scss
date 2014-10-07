@@ -87,6 +87,11 @@ $amber-low: rgb(255,205,1);
   }
 }
 
+.table_edit_image {
+  max-height: 100px;
+  max-width: 400px;
+}
+
 // Table container.
 #list_table_container {
   overflow-x: auto;
