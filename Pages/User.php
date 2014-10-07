@@ -14,15 +14,17 @@ use Lightning\View\Page;
 use Lightning\Model\User as UserObj;
 
 class User extends Page {
+
+    protected $page = 'user';
+
     public function get() {
         Form::requiresToken();
         $user = ClientUser::getInstance();
+        Template::getInstance()->set('redirect', Request::get('redirect'));
         if($user->id > 0){
             // USER IS LOGGED IN, REDIRECT TO THE DEFAULT PAGE
             $this->loginRedirect();
         }
-
-        Template::getInstance()->set('content', 'user');
     }
 
     public function postRegister() {
@@ -38,7 +40,7 @@ class User extends Page {
                     $user->merge_users($previous_user);
                 $redirect = Request::post('redirect');
                 if(!empty($redirect) && !preg_match('|/?user[/$?]|', $redirect)) {
-                    Navigation::redirect($_POST['redirect']);
+                    Navigation::redirect($redirect);
                 } else {
                     Navigation::redirect(Configuration::get('user.login_url'));
                 }
@@ -46,18 +48,18 @@ class User extends Page {
         }
     }
 
+    /**
+     * Handle the user attempting to log in.
+     */
     public function postLogin() {
         $email = Request::post('email', 'email');
         $pass = Request::post('password');
         $login_result = UserObj::login($email, $pass);
-        $user = ClientUser::getInstance();
-        if ($login_result === -1) {
+        if (!$login_result) {
             // BAD PASSWORD COMBO
-            Database::getInstance()->query("INSERT INTO ban_log (time, ip, type) VALUE (".time().", '{$_SERVER['REMOTE_ADDR']}', 'L')");
-            Messenger::error("You entered the wrong password. If you are having problems and would like to reset your password, <a href='{$user->reset_url}'>click here</a>");
-        } else if ($login_result === -2) {
-            // ACCOUNT UNCONFIRMED
-            Messenger::error('Your email address has not been confirmed. Please look for the confirmation email and click the link to activate your account.');
+            Messenger::error("You entered the wrong password. If you are having problems and would like to reset your password, <a href='/user/reset'>click here</a>");
+            Template::getInstance()->set('action', 'login');
+            return $this->get();
         } else {
             $this->loginRedirect();
             exit;
