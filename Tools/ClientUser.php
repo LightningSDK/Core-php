@@ -45,4 +45,13 @@ class ClientUser extends Singleton {
         // No user was found.
         return User::anonymous();
     }
+
+    /**
+     * Require the user to log in and return to this page afterwards.
+     */
+    public static function requireLogin() {
+        if (self::getInstance()->id == 0) {
+            Navigation::redirect('/user?redirect=' . Scrub::toURL(Request::get('request')));
+        }
+    }
 }
