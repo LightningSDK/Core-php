@@ -153,7 +153,7 @@ class Template extends Singleton {
      *   The main template name excluding .tpl.php.
      */
     public function setTemplate($template){
-        $this->template = $template.".tpl.php";
+        $this->template = $template;
     }
 
     /**

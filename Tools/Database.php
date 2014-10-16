@@ -434,6 +434,9 @@ class Database extends Singleton {
      *   A list of new values keyed by the column.
      * @param array $where
      *   A list of conditions on which rows to update.
+     *
+     * @return integer
+     *   The number of rows updated.
      */
     public function update($table, $data, $where){
         $vars = array();
@@ -443,6 +446,7 @@ class Database extends Singleton {
         }
         $this->query($query, $vars);
         $this->timerEnd();
+        return $this->result->rowCount() == 0 ? false : $this->connection->lastInsertId();
     }
 
     /**
@@ -548,6 +552,9 @@ class Database extends Singleton {
      *   The table to delete from.
      * @param array $where
      *   The condition for the query.
+     *
+     * @return integer
+     *   The number of rows deleted.
      */
     public function delete($table, $where) {
         $values = array();
@@ -556,6 +563,8 @@ class Database extends Singleton {
             $where = $this->sqlImplode($where, $values, ' AND ');
         }
         $this->query('DELETE FROM ' . $table . ' WHERE ' . $where, $values);
+
+        return $this->result->rowCount() == 0 ? false : $this->connection->lastInsertId();
     }
 
     /**
