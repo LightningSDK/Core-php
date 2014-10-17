@@ -5,6 +5,7 @@
  */
 
 namespace Lightning\Tools;
+use Lightning\Pages\Message;
 
 /**
  * Class Output
@@ -70,6 +71,13 @@ class Output {
      * Load and render the access denied page.
      */
     public static function accessDenied() {
+        Messenger::error('Access Denied');
+        if (strpos($_SERVER['HTTP_ACCEPT'], 'json') !== false) {
+            Output::json();
+        } else {
+            $page = new Message();
+            $page->execute();
+        }
         exit;
     }
 
