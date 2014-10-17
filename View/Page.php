@@ -19,7 +19,19 @@ use Lightning\View\JS;
  */
 class Page {
 
-    public $template = 'template';
+    /**
+     * The template file.
+     *
+     * @var string
+     */
+    protected $template = 'template';
+
+    /**
+     * A list of properties to be used as parameters.
+     *
+     * @var array
+     */
+    protected $params = array();
 
     /**
      * Run any global initialization functions.
@@ -104,5 +116,20 @@ class Page {
                 exit;
             }
         }
+    }
+
+    /**
+     * Redirect the page to the same current page with the current query string.
+     */
+    public function redirect($params = array()) {
+        $output_params = array();
+        foreach ($this->params as $param) {
+            if (isset($params[$param])) {
+                $output_params[$param] = $params[$param];
+            } elseif (isset($this->$param)) {
+                $output_params[$param] = $this->$param;
+            }
+        }
+        Navigation::redirect('/' . Request::get('request'), $output_params);
     }
 }
