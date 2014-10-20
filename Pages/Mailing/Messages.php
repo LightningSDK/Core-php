@@ -34,12 +34,19 @@ class Messages extends Table {
         'never_resend' => array(
             'type' => 'checkbox',
         ),
+        'template_id' => array(
+            'type' => 'lookup',
+            'item_display_name' => 'title',
+            'lookuptable'=>'message_template',
+            'display_column'=>'title',
+            'edit_only'=>true
+        ),
     );
     protected $action_fields = array(
         'send' => array(
             'type' => 'link',
             'url' => '/admin/mailing/send?id=',
-            'display_value' => '<img src="/images/lightning/new_message.png" border="0">',
+            'display_value' => '<img src="/images/main/new_message.png" border="0">',
         ),
     );
 }

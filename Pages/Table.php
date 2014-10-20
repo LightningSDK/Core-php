@@ -985,7 +985,7 @@ abstract class Table extends Page {
             foreach($this->fields as $field) {
                 switch($this->which_field($field)) {
                     case 'edit':
-                        $template = str_replace('{'.$field['field'].'}', $this->edit_field_value($field, $this->list), $template);
+                        $template = str_replace('{'.$field['field'].'}', $this->renderEditField($field, $this->list), $template);
                         break;
                     case 'display':
                         $template = str_replace('{'.$field['field'].'}', $this->print_field_value($field, $this->list), $template);
@@ -1082,7 +1082,7 @@ abstract class Table extends Page {
                 if ($which_field == "display")
                     $output .= $this->print_field_value($field, $row);
                 elseif ($which_field == "edit")
-                    $output .= $this->edit_field_value($field, $row);
+                    $output .= $this->renderEditField($field, $row);
                 if ($field['default_reset']) {
                     $output .= "<input type='button' value='Reset to Default' onclick='reset_field_value(\"{$field['field']}\");' />";
                 }
@@ -1096,7 +1096,7 @@ abstract class Table extends Page {
                 if ($which_field == "display")
                     $output .= $this->print_field_value($field, $row);
                 elseif ($which_field == "edit")
-                    $output .= $this->edit_field_value($field, $row);
+                    $output .= $this->renderEditField($field, $row);
                 if (!empty($field['default_reset'])) {
                     $output .= "<input type='button' value='Reset to Default' onclick='reset_field_value(\"{$field['field']}\");' />";
                 }
@@ -2328,14 +2328,14 @@ abstract class Table extends Page {
         if (substr($dir,-1) == "/")
             $dir = substr($dir,0,-1);
         do{
-            $rand_dir = "/".rand(10,999)."/".rand(10,999)."/";
+            $rand_dir = "/".srand(microtime())."/".srand(microtime())."/";
             if (!file_exists($dir.$rand_dir))
-                mkdir($dir.$rand_dir,0755,true);
+                mkdir($dir.$rand_dir, 0755, true);
         } while (count(scandir($dir.$rand_dir))>1000);
         // create random file name
         do{
-            $rand_file = sha1(rand(0,92387542938293847));
-        }while(file_exists($dir.$rand_dir.$rand_file));
+            $rand_file = sha1(srand(microtime()));
+        } while(file_exists($dir.$rand_dir.$rand_file));
 
         // return only random dir and file
         return $rand_dir.$rand_file;
@@ -2480,6 +2480,7 @@ abstract class Table extends Page {
                 case 'mediumtext':
                 case 'longtext':
                 case 'div':
+                case 'html':
                     if ($this->action == "list" || $this->action == "search") {
                         $v = strip_tags($v);
                         if (strlen($v) > 64)
@@ -2532,19 +2533,37 @@ abstract class Table extends Page {
         return str_replace("'", "&apos;", str_replace('"',"&quot;", $v));
     }
 
-    function add_db_quotes($v) {
-        return str_replace("'", "\\'", str_replace('"', '\\"', $v));
-    }
-
     protected function getImageLocation($field, $file = '') {
         return (strpos($field['location'], '/') !== 0 ? HOME_PATH . '/' . $field['location'] : $field['location']) . '/' . $file;
     }
 
+    /**
+     * Get the location of a file from the web.
+     *
+     * @param array $field
+     *   The field settings.
+     * @param string $file
+     *   The file name.
+     *
+     * @return string
+     *   The web location.
+     */
     protected function getImageLocationWeb($field, $file = '') {
         return $field['weblocation'] . '/' . $file;
     }
 
-    function edit_field_value($field, &$row = array()) {
+    /**
+     * Render the edit field component.
+     *
+     * @param array $field
+     *   The field settings.
+     * @param array $row
+     *   The data row.
+     *
+     * @return string
+     *   The rendered HTML.
+     */
+    protected function renderEditField($field, &$row = array()) {
         if (empty($row)) $v = $field['default'];
         else $v = $row[$field['field']];
 
@@ -2572,6 +2591,7 @@ abstract class Table extends Page {
             case 'text':
             case 'mediumtext':
             case 'longtext':
+            case 'html':
                 $config = array();
                 $editor = (!empty($field['editor'])) ? strtolower($field['editor']) : 'default';
                 switch($editor) {
@@ -2634,9 +2654,15 @@ abstract class Table extends Page {
             case 'state':
             case 'select':
                 if ($field['type'] == "lookup") {
-                    if ($field['filter'])
-                        $filter = "WHERE {$field['filter']}";
-                    $options = Database::getInstance()->assoc("SELECT {$field['display_column']} as V, {$field['field']} FROM {$field['lookuptable']} {$filter}", $field['field']);
+                    $options = Database::getInstance()->selectIndexed(
+                        $field['lookuptable'],
+                        $field['field'],
+                        !empty($field['filter']) ? $field['filter'] : array(),
+                        array(
+                            'V' => $field['display_column'],
+                            $field['field']
+                        )
+                    );
                 }
                 elseif ($field['type'] == "yesno")
                     $options = Array(1=>'No', 2=>'Yes');
