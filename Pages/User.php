@@ -57,7 +57,7 @@ class User extends Page {
         $login_result = UserObj::login($email, $pass);
         if (!$login_result) {
             // BAD PASSWORD COMBO
-            Messenger::error("You entered the wrong password. If you are having problems and would like to reset your password, <a href='/user/reset'>click here</a>");
+            Messenger::error("You entered the wrong password. If you are having problems and would like to reset your password, <a href='/user?action=reset'>click here</a>");
             Template::getInstance()->set('action', 'login');
             return $this->get();
         } else {
@@ -88,6 +88,10 @@ class User extends Page {
         }
     }
 
+    public function getReset() {
+        Template::getInstance()->set('action', 'reset');
+    }
+
     /**
      * Send a temporary password.
      *
@@ -102,13 +106,39 @@ class User extends Page {
             Messenger::error('User does not exist.');
             return;
         }
-        if ($user->sendTempPass()) {
-            Messenger::message('Your password has been reset. Please check your email for a temporary password.');
+        if ($user->sendResetLink()) {
+            Navigation::redirect('message?msg=reset');
+        }
+    }
+
+    public function getSetPassword() {
+        $key = Request::get('key', 'base64');
+        if ($user = UserObj::loadByTempKey($key)) {
+            Template::getInstance()->set('action', 'set_password');
+            Template::getInstance()->set('key', $key);
+        } else {
+            $this->page = '';
+            Messenger::error('Invalid Access Key');
+        }
+    }
+
+    public function postSetPassword() {
+        if ($user = UserObj::loadByTempKey(Request::get('key', 'base64'))) {
+            if ($pass = Request::post('password') == Request::post('password2')) {
+                $user->setPass($pass);
+                $user->registerToSession();
+                $user->removeTempKey();
+                $this->loginRedirect();
+            } else {
+                Messenger::error('Please enter a valid password and verify it by entering it again..');
+            }
+        } else {
+            $this->page = '';
+            Messenger::error('Invalid Access Key');
         }
     }
 
     public function getChangePass() {
-
     }
 
     /**

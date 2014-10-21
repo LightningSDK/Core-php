@@ -85,7 +85,6 @@ class Page {
      * rest method.
      */
     public function execute() {
-        $action = ucfirst(Request::get('action'));
         $request_type = strtolower(Request::type());
 
         // If this is a post request, there must be a valid token.
@@ -97,7 +96,7 @@ class Page {
         }
 
         // If there is a requested action.
-        if ($action) {
+        if ($action = Request::get('action')) {
             $method = Request::convertFunctionName($request_type, $action);
             if (method_exists($this, $method)) {
                 $this->{$method}();

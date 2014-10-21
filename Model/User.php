@@ -120,6 +120,34 @@ class User {
     }
 
     /**
+     * Load a user by their temporary access key, from a password reset link.
+     *
+     * @param string $key
+     *   A temporary access key.
+     * @return bool|User
+     */
+    public static function loadByTempKey($key) {
+        if ($details = Database::getInstance()->selectRow(
+            array(
+                'from' => 'user_temp_key',
+                'join' => array(
+                    'LEFT JOIN',
+                    'user',
+                    'using (`user_id`)',
+                )
+            ),
+            array(
+                'temp_key' => $key,
+                // The key is only good for 24 hours.
+                'time' => array('>=', time() - 86400),
+            )
+        )) {
+            return new static ($details);
+        }
+        return false;
+    }
+
+    /**
      * Create a new anonymous user.
      *
      * @return User
@@ -395,16 +423,37 @@ class User {
         return Database::getInstance()->insert('user', $user_details);
     }
 
-    public function setPass($pass,$email='',$user_id=0) {
-        if($email != '')
-            $where = "email='".strtolower($email)."'";
-        elseif($user_id>0)
-            $where = "user_id=".$user_id;
-        else
-            $where = "user_id=".$this->id;
+    /**
+     * Update a user's password.
+     *
+     * @param string $pass
+     *   The new password.
+     * @param string $email
+     *   Their email if updating by email.
+     * @param integer $user_id
+     *   The user_id if updating by user_id.
+     *
+     * @return boolean
+     *   Whether the password was updated.
+     */
+    public function setPass($pass, $email='', $user_id = 0) {
+        if($email != '') {
+            $where['email'] = strtolower($email);
+        } elseif($user_id>0) {
+            $where['user_id'] = $user_id;
+        } else {
+            $where['user_id'] = $this->id;
+        }
 
         $salt = $this->getSalt();
-        Database::getInstance()->query("UPDATE user SET password = '".$this->passHash($pass,$salt)."', salt='".bin2hex($salt)."' WHERE {$where}");
+        return (boolean) Database::getInstance()->update(
+            'user',
+            array(
+                'password' => $this->passHash($pass,$salt),
+                'salt' => bin2hex($salt),
+            ),
+            $where
+        );
     }
 
     public function admin_create($email, $first_name='', $last_name='') {
@@ -461,24 +510,40 @@ class User {
     /**
      * Send a new random password via email.
      */
-    public function sendTempPass() {
-        $pass = $this->randomPass();
-        $salt = $this->getSalt();
-        Database::getInstance()->update(
-            'user',
+    public function sendResetLink() {
+        // Create a temporary key.
+        $reset_key = base64_encode($this->getSalt());
+        Database::getInstance()->insert(
+            'user_temp_key',
             array(
-                'password' => $this->passHash($pass,$salt),
-                'sald' => bin2hex($salt),
+                'user_id' => $this->id,
+                'temp_key' => $reset_key,
+                'time' => time(),
             ),
             array(
-                'email' => strtolower($this->details['email']),
+                'temp_key' => $reset_key,
+                'time' => time(),
             )
         );
+
+        // Send a message.
         $mailer = new Mailer();
         $mailer->to($this->details['email'], $this->fullName())
             ->subject('Password reset')
-            ->message("Your password has been reset. Your temporary password is: $pass\n\nTo reset your password, log in with your temporary password and click 'my profile' in the top right corner of the web page. Follow the instructions to reset your new password.");
+            ->message('A request was made to reset your password. If you did not make this request, please <a href="' . Configuration::get('web_root') . '/contact' . '">notify us</a>. To reset your password, <a href="' . Configuration::get('web_root') . '/user?action=set-password&key=' . $reset_key . '">click here</a>.');
         return $mailer->send();
+    }
+
+    /**
+     * Delete the temoporary password reset key.
+     */
+    public function removeTempKey() {
+        Database::getInstance()->delete(
+            'user_temp_key',
+            array(
+                'user_id' => $this->id,
+            )
+        );
     }
 
     public static function find_by_email($email) {
@@ -514,22 +579,7 @@ class User {
         if($temp_user = static::loadByEmail($email)) {
             // user found
             if($temp_user->checkPass($password)) {
-                // We need to create a new session if:
-                //  There is no session
-                //  The session is blank
-                //  The session user is not set to this user
-                $session = Session::getInstance();
-                if((!is_object($session)) || ($session->id == 0) || ($session->user_id != $temp_user->id)) {
-                    if(is_object($session)) {
-                        // If there is some other session here, we can destroy it.
-                        $session->destroy();
-                    }
-                    $session = Session::create($temp_user->id, $remember);
-                }
-                if (!$auth_only) {
-                    $session->setState(Session::STATE_PASSWORD);
-                }
-                ClientUser::setInstance($temp_user);
+                $temp_user->registerToSession($remember, $auth_only ?: Session::STATE_PASSWORD);
                 return true;
             } else {
                 Logger::logIP('Bad Password', Logger::SEVERITY_HIGH);
@@ -539,6 +589,25 @@ class User {
         }
         // Could not log in.
         return false;
+    }
+
+    public function registerToSession($remember = false, $state = Session::STATE_PASSWORD) {
+        // We need to create a new session if:
+        //  There is no session
+        //  The session is blank
+        //  The session user is not set to this user
+        $session = Session::getInstance();
+        if((!is_object($session)) || ($session->id == 0) || ($session->user_id != $this->id)) {
+            if(is_object($session)) {
+                // If there is some other session here, we can destroy it.
+                $session->destroy();
+            }
+            $session = Session::create($this->id, $remember);
+        }
+        if ($state) {
+            $session->setState($state);
+        }
+        ClientUser::setInstance($this);
     }
 
     /**

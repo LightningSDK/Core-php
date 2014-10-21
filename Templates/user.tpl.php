@@ -18,7 +18,7 @@ use Lightning\Tools\Form;
 
 </script>
 <?
-if (empty($l_page) || $l_page == "join" || $l_page == "register"): ?>
+if (empty($action) || $action == 'join' || $action == 'register'): ?>
     <h2>Create a username and password</h2>
     <form action="/user" method="post" id="register" class="validate">
         <?= Form::renderTokenInput(); ?>
@@ -35,7 +35,7 @@ if (empty($l_page) || $l_page == "join" || $l_page == "register"): ?>
     <br /><br />
 <? endif; ?>
 
-<? if (empty($l_page) || $l_page == "login"): ?>
+<? if (empty($action) || $action == "login"): ?>
 
     <h2>Log In with your email and password.</h2>
 
@@ -54,7 +54,7 @@ if (empty($l_page) || $l_page == "join" || $l_page == "register"): ?>
 
     <br /><br />
 <? endif; ?>
-<? if (!empty($l_page) && $l_page == "reset"): ?>
+<? if (!empty($action) && $action == 'reset'): ?>
     <h2>Forgot your password?</h2>
 
     <form action="/user" method="post" class="validate">
@@ -67,6 +67,20 @@ if (empty($l_page) || $l_page == "join" || $l_page == "register"): ?>
         </table>
         <input type="hidden" name="action" value="reset" />
         <input type="hidden" name="redirect" value="<?=!empty($redirect) ? $redirect : '';?>" />
-        <input type="submit" name="submit" value="Log In" class="button" />
+        <input type="submit" name="submit" value="Reset" class="button" />
+    </form>
+<? endif; ?>
+<? if (!empty($action) && $action == "set_password"): ?>
+    <h2>Forgot your password?</h2>
+
+    <form action="/user" method="post" class="validate">
+        <?= Form::renderTokenInput(); ?>
+        <table>
+            <tr><td>New Password:</td><td><input type='password' name='password' id='password' class="required" /></td></tr>
+            <tr><td>Confirm Password:</td><td><input type='password' name='password2' class="required" /></td></tr>
+        </table>
+        <input type="hidden" name="key" value="<?=$key?>" />
+        <input type="hidden" name="action" value="set_password" />
+        <input type="submit" name="submit" value="Set Password" class="button" />
     </form>
 <? endif; ?>

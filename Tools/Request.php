@@ -27,7 +27,7 @@ class Request {
      *   A proper camelcase function name with the prefix.
      */
     public static function convertFunctionName($prefix, $action) {
-        return $prefix . str_replace(' ', '', ucwords(str_replace('-', ' ', $action)));
+        return $prefix . str_replace(' ', '', ucwords(preg_replace('/[-_]/', ' ', $action)));
     }
 
     /**
@@ -208,6 +208,10 @@ class Request {
             case 'encrypted':
             case 'html':
                 $args = func_get_args();
+                // It's possible that a + was changed to a space in URL decoding.
+                if ($type == 'base64' || $type == 'encrypted') {
+                    $args[0] = str_replace(' ', '+', $args[0]);
+                }
                 // Remove the second item, the type.
                 if (count($args) > 2) {
                     unset($args[1]);
