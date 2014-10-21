@@ -30,7 +30,7 @@ class BasicHTML {
         // Iterate over each option.
         foreach ($values as $value => $label) {
             // Set this value selected if it's the default value.
-            $selected = $value == $default ? 'SELECTED="selected"' : '';
+            $selected = $value === $default ? 'SELECTED="selected"' : '';
             $return .= '<option value="' . $value . '" ' . $selected . '>' . $label . '</option>';
         }
         $return .= '</select>';

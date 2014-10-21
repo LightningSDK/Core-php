@@ -120,7 +120,7 @@ class Time extends Field {
         }
 
         $output = self::hourPop($field."_h", $h, $allow_zero) . ':';
-        $output .= self::minutePop($field . '_i', ($value==0 || $value='') ? '' : $i, $allow_zero);
+        $output .= self::minutePop($field . '_i', empty($value) ? '' : $i, $allow_zero);
         $output .= ' ' . self::APPop($field . '_a', $a, $allow_zero);
         return $output;
     }
@@ -131,27 +131,27 @@ class Time extends Field {
         }
 
         $time = ($value == 0) ? array(0,0,0,0,0,0,0) : explode("/",date("m/d/Y/h/i/s/a", $value));
-        $output = self::monthPop($field."_m", $time[0], $allow_zero, '', 'dateTimePop') . ' / ';
-        $output .= self::dayPop($field."_d", $time[1], $allow_zero, 'dateTimePop') . ' / ';
-        $output .= self::yearPop($field."_y", $time[2], $allow_zero, $first_year, '', 'dateTimePop') . ' at ';
-        $output .= self::hourPop($field."_h", $time[3], $allow_zero, 'dateTimePop') . ':';
-        $output .= self::minutePop($field."_i", $time[4], $allow_zero, 'dateTimePop') . ' ';
-        $output .= self::APPop($field."_a", $time[6], $allow_zero, 'dateTimePop');
+        $output = self::monthPop($field."_m", $time[0], $allow_zero, '', array('class' => 'dateTimePop')) . ' / ';
+        $output .= self::dayPop($field."_d", $time[1], $allow_zero, array('class' => 'dateTimePop')) . ' / ';
+        $output .= self::yearPop($field."_y", $time[2], $allow_zero, $first_year, null, array('class' => 'dateTimePop')) . ' at ';
+        $output .= self::hourPop($field."_h", $time[3], $allow_zero, array('class' => 'dateTimePop')) . ':';
+        $output .= self::minutePop($field."_i", empty($value) ? null : $time[4], $allow_zero, array('class' => 'dateTimePop')) . ' ';
+        $output .= self::APPop($field."_a", $time[6], $allow_zero, array('class' => 'dateTimePop'));
         return $output;
     }
 
-    public static function hourPop($field, $value = '', $allow_zero = false, $class = 'timePop'){
-        $output = "<select name='$field' class='{$class}'>";
-        if($allow_zero)
-            $output .= "<option value=''></option>";
-        for($i = 1; $i <= 12; $i++){
-            $output .= "<option value='{$i}'";
-            if($value == $i)
-                $output .= " SELECTED";
-            $output .= ">{$i}</option>";
+    public static function hourPop($field, $value = '', $allow_zero = false, $attributes = array()){
+        $values = array();
+        if ($allow_zero) {
+            $values[''] = '';
         }
-        $output .= "</select>";
-        return $output;
+        $values += array_combine(range(1, 12), range(1, 12));
+
+        // Set the default class.
+        BasicHTML::setDefaultClass($attributes, 'timePop');
+
+        // TODO: Pass the class into this renderer.
+        return BasicHTML::select($field, $values, strtoupper($value), $attributes);
     }
 
     /**
@@ -163,25 +163,24 @@ class Time extends Field {
      *   The default value.
      * @param boolean $allow_zero
      *   Whether to allow the field to be blank.
-     * @param string $class
-     *   A class to add to the element.
+     * @param array $attributes
+     *   An array of attributes to add to the element..
      *
      * @return string
      *   The rendered HTML.
      */
-    public static function minutePop($field, $value = '', $allow_zero = false, $class = 'timePop'){
-        $output = "<select name='{$field}' class='{$class}'>";
+    public static function minutePop($field, $value = '', $allow_zero = false, $attributes = array()){
+        $values = array();
         if ($allow_zero) {
-            $output .= '<option value=""></option>';
+            $values[''] = '';
         }
-        for ($i = 0; $i <= 45; $i += 15) {
-            $output .= '<option value="' . $i . '"';
-            if($value >= $i && $value < $i+15)
-                $output .= ' SELECTED';
-            $output .= '>' . str_pad($i,2,0,STR_PAD_LEFT) . '</option>';
-        }
-        $output .= '</select>';
-        return $output;
+        $values += array(0 => '00', 15 => 15, 30 => 30, 45 => 45);
+
+        // Set the default class.
+        BasicHTML::setDefaultClass($attributes, 'timePop');
+
+        // TODO: Pass the class into this renderer.
+        return BasicHTML::select($field, $values, strtoupper($value), $attributes);
     }
 
     /**
@@ -194,7 +193,7 @@ class Time extends Field {
      * @param boolean $allow_zero
      *   Whether to allow the field to be blank.
      * @param array $attributes
-     *   A class to add to the element.
+     *   An array of attributes to add to the element..
      *
      * @return string
      *   The rendered HTML
@@ -204,7 +203,7 @@ class Time extends Field {
         if ($allow_zero) {
             $values[''] = '';
         }
-        $values = array_merge($values, array('AM' => 'AM', 'PM' => 'PM'));
+        $values += array('AM' => 'AM', 'PM' => 'PM');
 
         // Set the default class.
         BasicHTML::setDefaultClass($attributes, 'timePop');
@@ -218,7 +217,7 @@ class Time extends Field {
         if ($allow_zero) {
             $values[''] = '';
         }
-        $values = array_merge($values, array_combine(range(1, 31), range(1, 31)));
+        $values += array_combine(range(1, 31), range(1, 31));
 
         // Set the default class.
         BasicHTML::setDefaultClass($attributes, 'datePop');
@@ -233,7 +232,7 @@ class Time extends Field {
             $values[''] = '';
         }
         $info = cal_info(0);
-        $values = array_merge($values, $info['months']);
+        $values += $info['months'];
 
         // Set the default class.
         BasicHTML::setDefaultClass($attributes, 'datePop');
@@ -242,22 +241,25 @@ class Time extends Field {
         return BasicHTML::select($field, $values, $month, $attributes);
     }
 
-    public static function yearPop($field, $year=0, $allow_zero = false, $first_year=0, $js = '', $class='datePop'){
-        $output = "<select name='$field' id='$field' {$js} class='{$class}'>";
-        if($allow_zero)
-            $output .= "<option value=''></option>";
-        else if ($year==0)
-            $year = date("Y");
-        $start_year = date("Y")-1;
-        if($year>0) $start_year = min($year, $start_year);
-        if($first_year > 0)$start_year = min($first_year, $start_year);
-        for($i = $start_year; $i <= date("Y", time())+10; $i++){
-            $output .= "<option value='{$i}'";
-            if($year == $i)
-                $output .= " SELECTED";
-            $output .= ">{$i}</option>";
+    public static function yearPop($field, $year = 0, $allow_zero = false, $first_year = null, $last_year = null, $attributes = array()){
+        $values = array();
+        if ($allow_zero) {
+            $values[''] = '';
         }
-        $output .= "</select>";
-        return $output;
+
+        if (empty($first_year)) {
+            $first_year = date('Y') - 1;
+        }
+        if (empty($last_year)) {
+            $last_year = date('Y') + 10;
+        }
+
+        $values += array_combine(range($first_year, $last_year), range($first_year, $last_year));
+
+        // Set the default class.
+        BasicHTML::setDefaultClass($attributes, 'datePop');
+
+        // TODO: Pass the class into this renderer.
+        return BasicHTML::select($field, $values, $year, $attributes);
     }
 }
