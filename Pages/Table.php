@@ -44,6 +44,7 @@ use Lightning\Tools\Navigation;
 use Lightning\Tools\Request;
 use Lightning\Tools\Scrub;
 use Lightning\Tools\Template;
+use Lightning\View\Field\BasicHTML;
 use Lightning\View\Field\Text;
 use Lightning\View\Field\Time;
 use Lightning\View\JS;
@@ -290,7 +291,8 @@ abstract class Table extends Page {
             }
         }
         Database::getInstance()->delete($this->table, array($this->getKey() => $this->id));
-        Navigation::redirect(Request::get('redirect'));
+
+        $this->afterPostRedirect();
     }
 
     public function postInsert() {
@@ -318,6 +320,8 @@ abstract class Table extends Page {
             header("Location: ".$this->createUrl('pop_return', $this->id));
             exit;
         }
+
+        $this->afterPostRedirect();
     }
 
     public function postUpdate() {
@@ -359,6 +363,25 @@ abstract class Table extends Page {
                 $this->serial_update = false;
             }
         }
+
+        $this->afterPostRedirect();
+    }
+
+    public function afterPostRedirect() {
+        // Run any scripts after execution.
+        if (isset($this->function_after[$this->action])) {
+            $this->function_after[$this->action]();
+        }
+
+        // Redirect to the next page.
+        if ($this->submit_redirect && isset($this->action_after[$this->action])) {
+            Navigation::redirect($this->createUrl($this->action_after[$this->action], $this->action_after[$this->action] == 'list' ? 1 : $this->id));
+        } elseif ($this->submit_redirect && $redirect = Request::get('redirect')) {
+            Navigation::redirect($redirect);
+        } else {
+            // Generic redirect.
+            Navigation::redirect($this->createUrl());
+        }
     }
 
     public function execute() {
@@ -370,17 +393,6 @@ abstract class Table extends Page {
 
         // Call the appropriate execution handler.
         parent::execute();
-
-        // Run any scripts after execution.
-        // TODO: parent::execute() halts execution, so this will never run.
-        if (isset($this->function_after[$this->action])) {
-            $this->function_after[$this->action]();
-        }
-
-        // Redirect to the next page.
-        if ($this->submit_redirect && isset($this->action_after[$this->action])) {
-            Navigation::redirect($this->createUrl($this->action_after[$this->action], $this->id));
-        }
     }
 
     /**
@@ -1015,7 +1027,7 @@ abstract class Table extends Page {
             }
             // use the ID if we are editing a current one
             if ($this->action == "edit")
-                echo "<input type='hidden' name='id' value='{$this->id}' />";
+                echo '<input type="hidden" name="id" id="id" value="' . $this->id . '" />';
             if ($this->action == "view" && !$this->read_only) {
                 if ($this->editable !== false) {
                     echo "<a href='".$this->createUrl('edit', $this->id)."'><img src='/images/lightning/edit.png' border='0' /></a>";
@@ -1110,7 +1122,9 @@ abstract class Table extends Page {
     // (full form)
     function render_form_linked_tables() {
         foreach($this->links as $link => &$link_settings) {
-            if (!isset($link_settings['table'])) $link_settings['table'] = $link;
+            if (empty($link_settings['table'])) {
+                $link_settings['table'] = $link;
+            }
             if ($link_settings['list'] === 'each') {
                 // is this needed in form view?
                 // LOAD THE LIST
@@ -1277,10 +1291,11 @@ abstract class Table extends Page {
             //DEFAULT VIEW MODE
         } else {
             $this->load_all_complete_list($link_settings);
-            $output .= "<select name='{$link_settings['table']}_list' id='{$link_settings['table']}_list' >";
-            foreach($link_settings['complete_list'] as $l)
-                $output .= "<option value='{$l[$link_settings['key']]}'>{$l[$link_settings['display_column']]}</option>";
-            $output .= "</select>";
+            $options = array();
+            foreach($link_settings['complete_list'] as $l) {
+                $options[$l[$link_settings['key']]] = $l[$link_settings['display_column']];
+            }
+            $output .= BasicHTML::select($link_settings['table'] . '_list', $options);
             $output .= "<input type='button' name='add_{$link_settings['table']}_button' value='Add {$link_settings['table']}' id='add_{$link_settings['table']}_button' onclick='add_link(\"{$link_settings['table']}\")' />";
         }
 
@@ -2640,10 +2655,10 @@ abstract class Table extends Page {
                 return $return;
                 break;
             case 'time':
-                return Time::timePop($field['form_field'], $field['Value'], $field['allow_blank']?true:false);
+                return Time::timePop($field['form_field'], $field['Value'], !empty($field['allow_blank']));
                 break;
             case 'date':
-                $return = Time::datePop($field['form_field'], $field['Value'], $field['allow_blank']?true:false, $field['start_year']);
+                $return = Time::datePop($field['form_field'], $field['Value'], !empty($field['allow_blank']), $field['start_year']);
                 return $return;
                 break;
             case 'datetime':

@@ -35,3 +35,47 @@ function cms_save_content(container){
         }
     });
 }
+lightning.admin = {};
+lightning.admin.messageEditor = {
+    checkVars: function() {
+        var selected_items = $('#message_criteria_input_array').val();
+        $.ajax({
+            url:'/admin/mailing/messages',
+            data:{
+                action: 'fields',
+                criteria_list: selected_items,
+                message_id: $('#id').val()
+            },
+            dataType:'JSON',
+            type:'GET',
+            success:function(data){
+                selected_items = selected_items.split(',');
+                // Iterate over active criteria.
+                for(var i=0; i< selected_items.length; i++) {
+                    if (selected_items[i] != '') {
+                        // Iterate over returned criteria.
+                        for (var j in data.criteria) {
+                            var criteria_id = data.criteria[j].criteria_id;
+                            // If this is the matching criteria id.
+                            if (data.criteria[j].criteria_id == selected_items[i]) {
+                                // Iterate over variables.
+                                for (var k in data.criteria[j].variables) {
+                                    // If the field is not already present.
+                                    var variable = data.criteria[j].variables[k];
+                                    if ($('#var_' + i + '_' + variable).length == 0) {
+                                        var value = (data.criteria[j].values && data.criteria[j].values[variable]) ? data.criteria[j].values[variable] : '';
+                                        $('#message_criteria_box_' + selected_items[i])
+                                            .append('<div id="var_' + criteria_id + '_' + variable + '" >' + variable + ': <input type="text" name="var_' + criteria_id + '_' + variable + '" value="' + value + '"></div>');
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            error:function(){
+                alert('error');
+            }
+        });
+    }
+};
