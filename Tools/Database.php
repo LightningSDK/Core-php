@@ -439,7 +439,7 @@ class Database extends Singleton {
         $vars = array();
         $query = 'UPDATE ' . $table . ' SET ' . $this->sqlImplode($data, $vars, ', ', true) . ' WHERE ';
         if (is_array($where)) {
-            $query .= $this->sqlImplode($where, $vars);
+            $query .= $this->sqlImplode($where, $vars, ' AND ');
         }
         $this->query($query, $vars);
         $this->timerEnd();
