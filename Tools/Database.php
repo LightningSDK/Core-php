@@ -335,16 +335,13 @@ class Database extends Singleton {
      *   A list of replacement variables.
      */
     private function __query_execute($query, $vars) {
-        if (!empty($vars)) {
-            if ($this->last_query != $query) {
-                $this->last_query = $query;
-                $this->result = $this->connection->prepare($query);
-            }
-            $this->result->execute($vars);
+        // If the query has changed, we need to prepare a new one.
+        if ($this->last_query != $query) {
+            $this->last_query = $query;
+            $this->result = $this->connection->prepare($query);
         }
-        else {
-            $this->result = $this->connection->query($query);
-        }
+        // Execute the query with subsitutions.
+        $this->result->execute($vars);
     }
 
     /**
