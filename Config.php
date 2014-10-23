@@ -8,6 +8,7 @@ $conf = array(
         'Lightning\\View\\Page' => 'Overridable\\Lightning\\View\\Page',
         'Lightning\\Model\\Blog' => 'Overridable\\Lightning\\Model\\Blog',
         'Lightning\\Model\\User' => 'Overridable\\Lightning\\Model\\User',
+        'Lightning\\Tools\\Session' => 'Overridable\\Lightning\\Tools\\Session',
     ),
     'routes' => array(
         'cli_only' => array(

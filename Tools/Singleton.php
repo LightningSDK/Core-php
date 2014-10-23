@@ -21,7 +21,7 @@ class Singleton {
      * @return Singleton
      */
     public static function getInstance() {
-        $class = get_called_class();
+        $class = str_replace('Overridable\\', '', get_called_class());
         if (empty(static::$instances[$class])) {
             classAutoloader($class);
             if (is_callable($class . '::createInstance')) {

@@ -1,8 +1,14 @@
 <?php
 
-namespace Lightning\Tools;
+namespace Overridable\Lightning\Tools;
 
+use Lightning\Tools\Configuration;
+use Lightning\Tools\Database;
+use Lightning\Tools\Logger;
+use Lightning\Tools\Output;
+use Lightning\Tools\Request;
 use Lightning\Tools\Security\Random;
+use Lightning\Tools\Singleton;
 
 class Session extends Singleton {
     // @todo these vars can probably be removed?
@@ -49,11 +55,11 @@ class Session extends Singleton {
     public static function createInstance() {
         if ($session_key = Request::cookie('session', 'hex')) {
             $session_details = Database::getInstance()->selectRow('session', array('session_key' => array('LIKE', $session_key)));
-            return new self($session_details);
+            return new static($session_details);
         }
 
         // No session exists, create a new one.
-        return self::create();
+        return static::create();
     }
 
     /**
@@ -92,7 +98,7 @@ class Session extends Singleton {
      */
     static function create($user_id=0, $remember=false){
         $session_details = array();
-        $new_sess_key = self::getNewSessionId();
+        $new_sess_key = static::getNewSessionId();
         $new_token = Random::getInstance()->get(64, Random::HEX);
         if (empty($new_sess_key) || empty($new_token)) {
             _die('Session error.');
@@ -101,10 +107,10 @@ class Session extends Singleton {
         $session_details['last_ping'] = time();
         $session_details['session_ip'] = Request::server('ip_int');
         $session_details['user_id'] = $user_id;
-        $session_details['state'] = 0 | ($remember ? self::STATE_REMEMBER : 0);
+        $session_details['state'] = 0 | ($remember ? static::STATE_REMEMBER : 0);
         $session_details['form_token'] = $new_token;
         $session_details['session_id'] = Database::getInstance()->insert('session', $session_details);
-        $session = new self($session_details);
+        $session = new static($session_details);
         $session->setCookie();
         return $session;
     }
@@ -137,7 +143,7 @@ class Session extends Singleton {
                         return false;
                     }
                 } else {
-                    $session->details['state'] |= self::STATE_PASSWORD;
+                    $session->details['state'] |= static::STATE_PASSWORD;
                 }
             }
 
@@ -147,7 +153,7 @@ class Session extends Singleton {
         } else {
             Logger::logIP('Bad session', Logger::SEVERITY_MED);
             // Send a cookie to erase the users cookie, in case this is really a minor error.
-            self::clearCookie();
+            static::clearCookie();
         }
     }
 
@@ -264,7 +270,7 @@ class Session extends Singleton {
      * Issue a new random key to the session. Everything else stays the same.
      */
     public function scramble(){
-        $new_sess_id = self::getNewSessionId();
+        $new_sess_id = static::getNewSessionId();
         if(empty($new_sess_id)) {
             _die('Session error.');
         }

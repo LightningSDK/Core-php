@@ -12,3 +12,7 @@ namespace Lightning\Model;
 
 class Blog extends \Overridable\Lightning\Model\Blog {}
 class User extends \Overridable\Lightning\Model\User {}
+
+namespace Lightning\Tools;
+
+class Session extends \Overridable\Lightning\Tools\Session {}
