@@ -8,6 +8,7 @@ namespace Lightning\Pages;
 
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
+use Lightning\Tools\Output;
 use Lightning\Tools\Request;
 use Lightning\Tools\Tracker;
 
@@ -17,6 +18,7 @@ use Lightning\Tools\Tracker;
  * @package Lightning\Pages
  */
 class Track extends Page {
+
     /**
      * The main page handler, outputs a 1x1 pixel image.
      */
@@ -36,5 +38,22 @@ class Track extends Page {
         header('Content-Type: image/png');
         echo base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUAAACnej3aAAAAAXRSTlMAQObYZgAAAApJREFUCNdjYAAAAAIAAeIhvDMAAAAASUVORK5CYII=');
         exit;
+    }
+
+    /**
+     * Does not require encryption, uses token.
+     */
+    public function post() {
+        $user = ClientUser::getInstance()->id;
+
+        // TODO: These can be spoofed.
+        // A verification method is needed.
+        $tracker = Request::post('tracker');
+        $sub = Request::post('id', 'int');
+
+        // Track.
+        Tracker::trackEvent($tracker, $sub, $user);
+
+        Output::json(Output::SUCCESS);
     }
 }
