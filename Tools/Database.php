@@ -1041,8 +1041,16 @@ class Database extends Singleton {
                 }
                 // IN operator.
                 elseif (strtoupper($v[0]) == 'IN' || strtoupper($v[0]) == 'NOT IN') {
-                    $values = array_merge($values, array_values($v[1]));
-                    $a2[] = "{$field} {$v[0]} (" . implode(array_fill(0, count($v[1]), '?'), ",") . ")";
+                    if (strtoupper($v[0]) == 'IN' && empty($v[1])) {
+                        // The IN list is empty, so the set should be empty.
+                        $a2[] = 'false';
+                    } elseif (strtoupper($v[0]) == 'NOT IN' && empty($v[1])) {
+                        // The NOT IN list is empty, all results apply.
+                    } else {
+                        // Add the IN or NOT IN query.
+                        $values = array_merge($values, array_values($v[1]));
+                        $a2[] = "{$field} {$v[0]} (" . implode(array_fill(0, count($v[1]), '?'), ",") . ")";
+                    }
                 }
                 // Between operator.
                 elseif (strtoupper($v[0]) == 'BETWEEN') {
