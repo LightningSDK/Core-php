@@ -71,6 +71,7 @@ $conf = array(
             'admin/mailing/send' => 'Lightning\\Pages\\Mailing\\Send',
             'admin/mailing/stats' => 'Lightning\\Pages\\Mailing\\Stats',
             'admin/tracker' => 'Lightning\\Pages\\AdminTracker',
+            'admin/pages' => 'Lightning\\Pages\\Admin\\Pages',
             'sitemap' => 'Lightning\\Pages\\Sitemap',
             'track' => 'Lightning\\Pages\\Track',
             'landing' => 'Lightning\\Pages\\OptIn',
