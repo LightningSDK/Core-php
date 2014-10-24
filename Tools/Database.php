@@ -247,8 +247,12 @@ class Database extends Singleton {
      * @param $sql
      *   Add a query to the sql log.
      */
-    public function log($sql){
-        $this->history[] = $sql;
+    public function log($sql, $vars, $time){
+        $this->history[] = array(
+            'query' => $sql,
+            'vars' => $vars,
+            'time' => $time,
+        );
     }
 
     /**
@@ -310,10 +314,10 @@ class Database extends Singleton {
         }
         $this->query_count ++;
         if ($this->verbose) {
-            $this->log($query);
             $this->timerStart();
             $this->__query_execute($query, $vars);
             $this->timerQueryEnd();
+            $this->log($query, $vars, $this->end1 - $this->start);
         }
         else {
             $this->__query_execute($query, $vars);
