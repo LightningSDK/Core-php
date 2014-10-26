@@ -81,6 +81,11 @@ class Output {
         exit;
     }
 
+    public static function error($error) {
+        Messenger::error($error);
+        Template::getInstance()->render('');
+    }
+
     public static function clearCookie($cookie) {
         self::setCookie($cookie, '');
     }
