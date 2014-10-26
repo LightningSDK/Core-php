@@ -80,13 +80,12 @@ class Template extends Singleton {
      * @return string
      *   The rendered content.
      */
-    public function render($page = '', $return_as_string = false){
+    public function render($page = null, $return_as_string = false){
         if (!$return_as_string) {
             Output::sendCookies();
         }
 
-        extract($this->vars);
-        if(!empty($page)) {
+        if($page !== null) {
             $this->page = $page;
         }
 
@@ -95,6 +94,7 @@ class Template extends Singleton {
             ob_start();
         }
 
+        extract($this->vars);
         include $this->template_dir . $this->template . '.tpl.php';
 
         if ($return_as_string) {
