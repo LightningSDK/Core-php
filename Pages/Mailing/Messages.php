@@ -31,7 +31,7 @@ class Messages extends Table {
                 $("#add_message_criteria_button").click(lightning.admin.messageEditor.checkVars);
             ');
         }
-        if (ClientUser::getInstance()->details['type'] < 5) {
+        if (!ClientUser::getInstance()->isAdmin()) {
             Output::accessDenied();
         }
 
@@ -45,7 +45,7 @@ class Messages extends Table {
                 // If the criteria requires variables.
                 if($f['variables'] != ''){
                     // See what variables are required.
-                    $vars = explode(",",$f['variables']);
+                    $vars = explode(',', $f['variables']);
                     $var_data = array();
                     foreach($vars as $v) {
                         $var_data[$v] = Request::post('var_' . $c['message_criteria_id'] . '_' . $v);
