@@ -6,6 +6,7 @@ use Lightning\Model\Blog;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
+use Lightning\Tools\Output;
 use Lightning\Tools\Request;
 use Lightning\Tools\Session;
 use Lightning\Tools\Template;
@@ -111,8 +112,7 @@ class Page {
                 $this->output();
             } else {
                 // TODO: show 302
-                echo 'Method not available';
-                exit;
+                Output::error('Method not available');
             }
         }
     }

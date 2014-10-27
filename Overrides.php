@@ -7,6 +7,7 @@
 namespace Lightning\View;
 
 class Page extends \Overridable\Lightning\View\Page {}
+class API extends \Overridable\Lightning\View\API {}
 
 namespace Lightning\Model;
 

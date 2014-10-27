@@ -5,6 +5,7 @@ namespace Overridable\Lightning\Tools;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
 use Lightning\Tools\Logger;
+use Lightning\Tools\Messenger;
 use Lightning\Tools\Output;
 use Lightning\Tools\Request;
 use Lightning\Tools\Security\Random;
@@ -54,8 +55,9 @@ class Session extends Singleton {
      */
     public static function createInstance() {
         if ($session_key = Request::cookie('session', 'hex')) {
-            $session_details = Database::getInstance()->selectRow('session', array('session_key' => array('LIKE', $session_key)));
-            return new static($session_details);
+            if ($session_details = Database::getInstance()->selectRow('session', array('session_key' => array('LIKE', $session_key)))) {
+                return new static($session_details);
+            }
         }
 
         // No session exists, create a new one.
@@ -96,12 +98,12 @@ class Session extends Singleton {
      *
      * @return session
      */
-    static function create($user_id=0, $remember=false){
+    public static function create($user_id=0, $remember=false){
         $session_details = array();
         $new_sess_key = static::getNewSessionId();
         $new_token = Random::getInstance()->get(64, Random::HEX);
         if (empty($new_sess_key) || empty($new_token)) {
-            _die('Session error.');
+            Messenger::error('Session error.');
         }
         $session_details['session_key'] = $new_sess_key;
         $session_details['last_ping'] = time();
@@ -113,6 +115,10 @@ class Session extends Singleton {
         $session = new static($session_details);
         $session->setCookie();
         return $session;
+    }
+
+    public static function reset($user_id=0, $remember=false) {
+        static::setInstance(static::create($user_id, $remember));
     }
 
     /**

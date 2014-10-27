@@ -591,6 +591,11 @@ class User {
         return false;
     }
 
+    public function destroy() {
+        // TODO: Remove the current user's session.
+        Session::reset();
+    }
+
     public function registerToSession($remember = false, $state = Session::STATE_PASSWORD) {
         // We need to create a new session if:
         //  There is no session

@@ -17,7 +17,8 @@ if (!defined('CONFIG_PATH')) {
  * @param string $classname
  */
 function classAutoloader($classname) {
-    if ($classname != 'Lightning\Tools\Configuration') {
+    static $loadedClasses = array();
+    if (empty($loadedClasses[$classname]) && $classname != 'Lightning\Tools\Configuration') {
         static $loaded = false;
         static $classes;
         static $overrides = array();
@@ -42,10 +43,12 @@ function classAutoloader($classname) {
         if (isset($overridable[$classname]) || isset($overridable['Overridable\\' . $classname])) {
             $class_file = str_replace('Overridable\\', '', $classname);
             loadClassFile($class_file);
+            $loadedClasses[$class_file] = $class_file;
             class_alias($overridable[$class_file], $class_file);
             return;
         }
     }
+    $loadedClasses[$classname] = $classname;
     loadClassFile($classname);
 }
 
