@@ -1,4 +1,7 @@
-
+/**
+ * @file
+ * Contains JS functions for the Table page.
+ */
 var table = {
     /**
      * Click handler for the list row.
@@ -46,6 +49,34 @@ var table = {
      */
     selectAll: function(name) {
         $('.taf_' + name).prop('checked', ($('#taf_all_' + name).is(':checked')));
+    },
+
+    searchTimeout: null,
+    searchIndex: 0,
+    searchIndexDisplayed: 0,
+    search: function(field) {
+        var search_terms = $(field).val();
+        this.searchIndex++;
+        clearTimeout(this.searchTimeout);
+        var self = this;
+        this.searchTimeout = setTimeout(function() {
+            $.ajax({
+                url: table_data.action_file,
+                type: 'GET',
+                dataType: 'json',
+                data: {
+                    ste: search_terms,
+                    i: self.searchIndex,
+                    action: 'search'
+                },
+                success: function (data) {
+                    if (data.d > self.searchIndexDisplayed) {
+                        self.searchIndexDisplayed = data.d;
+                        $('.table_list').html(data.html);
+                    }
+                }
+            });
+        }, 500);
     }
 };
 
@@ -140,21 +171,4 @@ function new_pop(loc,pf,pfdf){
 function update_parent_pop(data){
     window.opener.$('#'+data.pf).append("<option value='"+data.id+"'>"+data.pfdf+"</option>").val(data.id);
     window.close();
-}
-
-function table_search(field){
-    var search_terms = $(field).val();
-    table_search_i++;
-    $.ajax({
-        url:table_data.action_file,
-        type:"POST",
-        dataType:"json",
-        data:{ste:search_terms,i:table_search_i,action:"search"},
-        success:function(data){
-            if(data.d > table_search_d){
-                table_search_i = data.d;
-                $('#list_table_container').html(data.html);
-            }
-        }
-    });
 }

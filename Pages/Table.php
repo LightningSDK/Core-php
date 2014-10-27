@@ -41,8 +41,10 @@ use Lightning\Tools\Database;
 use Lightning\Tools\Form;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
+use Lightning\Tools\Output;
 use Lightning\Tools\Request;
 use Lightning\Tools\Scrub;
+use Lightning\Tools\Session;
 use Lightning\Tools\Template;
 use Lightning\View\Field\BasicHTML;
 use Lightning\View\Field\Text;
@@ -267,6 +269,16 @@ abstract class Table extends Page {
         $this->action = 'list';
     }
 
+    /**
+     * Ajax search, outputs HTML table replacement.
+     */
+    public function getSearch() {
+        $this->action = 'list';
+        $this->get_fields();
+        $this->loadList();
+        Output::json(array('html' => $this->renderList(), 'd' => Request::get('i', 'int')));
+    }
+
     public function getDelete() {
         $this->action = 'delete';
         if (!$this->editable || !$this->addable) {
@@ -476,10 +488,12 @@ abstract class Table extends Page {
             case 'list':
             default:
                 if ($this->searchable)
-                    $this->search_form();
+                    echo $this->search_form();
                 $this->loadList();
                 $this->render_action_header();
+                echo '<div class="table_list">';
                 echo $this->renderList();
+                echo '</div>';
                 break;
 
         }
@@ -491,7 +505,7 @@ abstract class Table extends Page {
     function search_form() {
         // @todo namespace this
         JS::inline('table_search_i=0;table_search_d=0;');
-        return 'Search: <input type="text" name="table_search" value="" onkeyup="table_search(this);" />';
+        return 'Search: <input type="text" name="table_search" value="" onkeyup="table.search(this);" />';
     }
 
     function render_pop_return() {
@@ -725,7 +739,7 @@ abstract class Table extends Page {
                     switch($this->rowClick['type']) {
                         case 'url':
                         case 'action':
-                            JS::startup('$("#list_table_container tbody tr").click(table.click)');
+                            JS::startup('$(".table_list").on("click", "tr", table.click)');
                             break;
                     }
                 }
@@ -1293,7 +1307,8 @@ abstract class Table extends Page {
             $this->load_all_complete_list($link_settings);
             $options = array();
             foreach($link_settings['complete_list'] as $l) {
-                $options[$l[$link_settings['key']]] = $l[$link_settings['display_column']];
+                $key = !empty($link_settings['index_fkey']) ? $link_settings['index_fkey'] : $link_settings['key'];
+                $options[$l[$key]] = $l[$link_settings['display_column']];
             }
             $output .= BasicHTML::select($link_settings['table'] . '_list', $options);
             $output .= "<input type='button' name='add_{$link_settings['table']}_button' value='Add {$link_settings['table']}' id='add_{$link_settings['table']}_button' onclick='add_link(\"{$link_settings['table']}\")' />";
@@ -1308,10 +1323,11 @@ abstract class Table extends Page {
             $output .= $init[$link_settings['key']].",";
         $output .= "' /><br /><div id='{$link_settings['table']}_list_container'>";
         // create each item as a viewable deleteable box
-        foreach($link_settings['active_list'] as $init)
+        foreach($link_settings['active_list'] as $init) {
             $output .= "<div class='{$link_settings['table']}_box' id='{$link_settings['table']}_box_{$init[$link_settings['key']]}'>{$init[$link_settings['display_column']]}
 						<a href='#' onclick='javascript:".(!empty($link_settings['edit_js']) ? $link_settings['edit_js'].'.deleteLink('.
                     $init[$link_settings['key']].')' : "remove_link(\"{$link_settings['table']}\",{$init[$link_settings['key']]})").";return false;'>X</a></div>";
+        }
         $output .= "</div></td></tr>";
         return $output;
     }
@@ -1320,14 +1336,19 @@ abstract class Table extends Page {
     // or by a link table in between. this is used for a one to many relationship, (1 table row to many links)
     function load_all_active_list(&$link_settings, $row_id) {
         $local_key = isset($link_settings['local_key']) ? $link_settings['local_key'] : $this->getKey();
-        if ($link_settings['index']!='') {
+        if (!empty($link_settings['index'])) {
             // many to many - there will be an index table linking the two tables together
+            $table = array('from' => $link_settings['index']);
+            if (!empty($link_settings['index_fkey'])) {
+                $table['join'] = array('JOIN', $link_settings['table'], 'ON `' . $link_settings['index'] . '`.`' . $link_settings['key'] . '` = `' . $link_settings['table'] . '`.`' . $link_settings['index_fkey'] . '`');
+            } else {
+                $table['join'] = array('JOIN', $link_settings['table'], "USING (`$link_settings[key]`)");
+            }
             $link_settings['active_list'] = Database::getInstance()->selectAll(
-                array(
-                    'from' => $link_settings['index'],
-                    'join' => array('JOIN', $link_settings['table'], "USING (`$link_settings[key]`)"),
-                ),
-                array($local_key => $row_id)
+                $table,
+                array($link_settings['index'].'.'.$local_key => $row_id),
+                array(),
+                'ORDER BY ' . $link_settings['display_column']
             );
         } else {
             // 1 to many - each remote table will have a column linking it back to this table
@@ -1339,8 +1360,7 @@ abstract class Table extends Page {
     // used in a many to many
     function load_all_complete_list(&$link_settings) {
         $where = !empty($link_settings['accessControl']) ? $link_settings['accessControl'] : array();
-        $link_settings['complete_list']
-            = Database::getInstance()->selectAll($link_settings['table'], $where);
+        $link_settings['complete_list'] = Database::getInstance()->selectAll($link_settings['table'], $where, array(), 'ORDER BY ' . $link_settings['display_column']);
     }
 
     /**
@@ -1353,14 +1373,17 @@ abstract class Table extends Page {
         $output = '';
         $pages = ceil($this->listCount / $this->maxPerPage);
         if ($pages > 1) {
-            $output .= 'Page: ';
-            for($i = 1; $i <= $pages; $i++) {
+            $output .= '<ul class="pagination">';
+            $output .= '<li class="arrow ' . ($this->page_number > 1 ? '' : 'unavailable') . '"><a href="' . $this->createUrl($this->action, 1) . '">&laquo; First</a></li>';
+            for($i = max(1, $this->page_number - 10); $i <= min($pages, $this->page_number+10); $i++) {
                 if ($this->page_number == $i) {
-                    $output.= $i;
+                    $output.= '<li class="current">' . $i . '</li>';
                 } else {
-                    $output.= " <a href='".$this->createUrl($this->action, $i)."'>{$i}</a> ";
+                    $output.= "<li><a href='".$this->createUrl($this->action, $i)."'>{$i}</a></li>";
                 }
             }
+            $output .= '<li class="arrow ' . ($this->page_number == $pages ? 'unavailable' : '') . '"><a href="' . $this->createUrl($this->action, $pages) . '">Last &raquo;</a></li>';
+            $output .= '</ul>';
         }
         return $output;
     }
@@ -2122,14 +2145,16 @@ abstract class Table extends Page {
                 $where = array_merge($this->subset[$this->cur_subset], $where);
             }
         }
-        if ($this->action == "search") {
-            $this->additional_action_vars['ste'] = urlencode(Scrub::text($_POST['ste']));
-            $search_terms = explode(" ",Scrub::text($_POST['ste']));
-            $search = array();
-            foreach($search_terms as $t)
-                foreach($this->search_fields as $f)
-                    $search[] = "`{$f}` LIKE '%{$t}%'";
-            $where .= " AND (".implode(" OR ", $search).") ";
+        if ($this->action == 'list') {
+            $this->additional_action_vars['ste'] = Request::get('ste');
+            $search_terms = explode(' ', Request::get('ste'));
+            $search = array('#OR' => array());
+            foreach($search_terms as $t) {
+                foreach($this->search_fields as $f) {
+                    $search['#OR'][] = array($f => array('LIKE', "%{$t}%"));
+                }
+            }
+            $where[] = $search;
         }
 
         // get the page count
@@ -2222,15 +2247,6 @@ abstract class Table extends Page {
 
         $this->getKey();
         switch($this->action) {
-            case "search":
-                $this->get_fields();
-                $output = array();
-                $output['d'] = intval($_POST['i']);
-                $this->loadList();
-                $output['html'] = $this->renderList();
-                echo json_encode($output);
-                exit;
-                break;
             case "pop_return": break;
             case "autocomplete":
                 $this->loadList();
