@@ -585,7 +585,11 @@ class Database extends Singleton {
     protected function _select($table, $where = array(), $fields = array(), $limit = NULL, $final = '') {
         $fields = $this->implodeFields($fields);
         $values = array();
-        $where = !empty($where) ? ' WHERE ' . $this->sqlImplode($where, $values, ' AND ') : '';
+        if (!empty($where) && $where = $this->sqlImplode($where, $values, ' AND ')) {
+            $where = ' WHERE ' . $where;
+        } else {
+            $where = '';
+        }
         $limit = is_array($limit) ? ' LIMIT ' . $limit[0] . ', ' . $limit[1] . ' '
             : !empty($limit) ? ' LIMIT ' . intval($limit) : '';
         $table_values = array();
@@ -1008,6 +1012,10 @@ class Database extends Singleton {
     public function sqlImplode($array, &$values, $concatenator = ', ', $setting = false){
         $a2 = array();
         foreach ($array as $field => $v) {
+            if (is_numeric($field)) {
+                $a2[] = $this->sqlImplode($v, $values, ' AND ');
+            }
+
             // This might change from an and to an or.
             if ($field === '#operator') {
                 $concatenator = $v;
