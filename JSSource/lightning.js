@@ -5,6 +5,13 @@ if (!lightning) {
 lightning.startup = {
     init: function() {
         this.initForms();
+        this.initNav();
+    },
+
+    initNav: function() {
+        if (lightning.vars.active_nav && lightning.vars.active_nav.length > 0) {
+            $('nav .' + lightning.vars.active_nav).addClass('active');
+        }
     },
 
     initForms: function() {

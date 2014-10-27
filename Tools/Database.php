@@ -1012,7 +1012,7 @@ class Database extends Singleton {
     public function sqlImplode($array, &$values, $concatenator = ', ', $setting = false){
         $a2 = array();
         foreach ($array as $field => $v) {
-            if (is_numeric($field)) {
+            if (is_numeric($field) && empty($v['expression'])) {
                 $a2[] = $this->sqlImplode($v, $values, ' AND ');
             }
 

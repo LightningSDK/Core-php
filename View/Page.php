@@ -28,6 +28,13 @@ class Page {
     protected $template = 'template';
 
     /**
+     * The current highlighted nav item.
+     *
+     * @var string
+     */
+    protected $nav = '';
+
+    /**
      * A list of properties to be used as parameters.
      *
      * @var array
@@ -76,6 +83,7 @@ class Page {
 
         $template->set('site_name', Configuration::get('site.name'));
         $template->set('blog', new Blog());
+        JS::set('active_nav', $this->nav);
         $template->render($this->template);
     }
 

@@ -52,9 +52,9 @@ use Lightning\View\CSS;
                     </ul>
                     <section class="top-bar-section">
                         <ul class="right">
-                            <li class="active"><a href="/">Home</a></li>
-                            <li><a href="/blog">Blog</a></li>
-                            <li><a href="/contact">Contact</a></li>
+                            <li class="home"><a href="/">Home</a></li>
+                            <li class="blog"><a href="/blog">Blog</a></li>
+                            <li class="contact"><a href="/contact">Contact</a></li>
                             <li>
                                 <?if (ClientUser::getInstance()->id > 0): ?>
                                     <a href="/user?action=logout">Log Out</a>

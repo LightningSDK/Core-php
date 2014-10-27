@@ -21,12 +21,15 @@ use Lightning\View\Page;
  * @package Lightning\Pages
  */
 class Contact extends Page {
+
+    protected $page = 'contact';
+    protected $nav = 'contact';
+
     /**
      * Build the contact form.
      */
     public function get() {
         Form::requiresToken();
-        Template::getInstance()->set('content', 'contact');
     }
 
     /**

@@ -12,6 +12,8 @@ class Profile extends Page {
 
     protected $page = 'profile';
 
+    protected $nav = 'profile';
+
     public function get() {
 
     }
