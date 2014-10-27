@@ -8,6 +8,7 @@ use Lightning\Tools\Database;
 use Lightning\Tools\Logger;
 use Lightning\Tools\Mailer;
 use Lightning\Tools\Messenger;
+use Lightning\Tools\Navigation;
 use Lightning\Tools\Security\Encryption;
 use Lightning\Tools\Security\Random;
 use Lightning\Tools\Request;
@@ -147,6 +148,11 @@ class User {
         return false;
     }
 
+    public function update($values) {
+        $this->details = $values + $this->details;
+        Database::getInstance()->update('user', $values, array('user_id' => $this->id));
+    }
+
     /**
      * Create a new anonymous user.
      *
@@ -257,8 +263,8 @@ class User {
      *
      * This should happen on each page load.
      */
-    public function update() {
-        Database::getInstance()->query("UPDATE user SET last_active = ".time()." WHERE user_id = {$this->id}");
+    public function ping() {
+        Database::getInstance()->update('user', array('last_active' => time()), array('user_id' => $this->id));
     }
 
     /**
@@ -468,16 +474,38 @@ class User {
             // set password, send email
             $randomPass = $this->randomPass();
             $this->setPass($randomPass, $email);
-            send_mail($email, '', "New Account", "Your account has been created with a temporary password. Your temporary password is: {$randomPass}\n\nTo reset your password, log in with your temporary password and click 'my profile'. Follow the instructions to reset your new password.");
-            Database::getInstance()->query("UPDATE user SET register_date = {$today}, confirmed = ".rand(100000,9999999).", type=1 WHERE user_id = {$user_info['user_id']}");
+            $mailer = new Mailer();
+            $mailer->to($email)->subject('New Account')->message("Your account has been created with a temporary password. Your temporary password is: {$randomPass}\n\nTo reset your password, log in with your temporary password and click 'my profile'. Follow the instructions to reset your new password.");
+            Database::getInstance()->update(
+                'user',
+                array(
+                    'register_date' => $today,
+                    'confirmed' => rand(100000,9999999),
+                    'type' => 1,
+                ),
+                array(
+                    'user_id' => $user_info['user_id'],
+                )
+            );
             return $user_info['user_id'];
         } else {
             // user does not exist
             // create user with random password, send email to activate
             $randomPass = $this->randomPass();
             $user_id = $this->insertUser($email, $randomPass, $first_name, $last_name);
-            send_mail($email, '', "New Account", "Your account has been created with a temporary password. Your temporary password is: {$randomPass}\n\nTo reset your password, log in with your temporary password and click 'my profile'. Follow the instructions to reset your new password.");
-            Database::getInstance()->query("UPDATE user SET register_date = {$today}, confirmed = ".rand(100000,9999999).", type=1 WHERE user_id = {$user_id}");
+            $mailer = new Mailer();
+            $mailer->to($email)->subject('New Account')->message("Your account has been created with a temporary password. Your temporary password is: {$randomPass}\n\nTo reset your password, log in with your temporary password and click 'my profile'. Follow the instructions to reset your new password.");
+            Database::getInstance()->update(
+                'user',
+                array(
+                    'register_date' => $today,
+                    'confirmed' => rand(100000,9999999),
+                    'type' => 1,
+                ),
+                array(
+                    'user_id' => $user_id,
+                )
+            );
             return $user_id;
         }
 
@@ -668,15 +696,18 @@ class User {
         return static::loadByEmail($email);
     }
 
-    // REDIRECTS THE USER IF THEY ARE NOT LOGGED IN
+    /**
+     * Redirects the user if they are not logged in.
+     *
+     * @param int $auth
+     *   A required authority level if they are logged in.
+     */
     public function login_required($auth = 0) {
         if($this->id == 0) {
-            header("Location: ".$this->login_url.urlencode($_SERVER['REQUEST_URI']));
-            exit;
+            Navigation::redirect($this->login_url . urlencode($_SERVER['REQUEST_URI']));
         }
         if($this->authority < $auth) {
-            header("Location: ".$this->unauthorized_url.urlencode($_SERVER['REQUEST_URI']));
-            exit;
+            Navigation::redirect($this->unauthorized_url . urlencode($_SERVER['REQUEST_URI']));
         }
     }
 
@@ -684,7 +715,10 @@ class User {
         $acct_details = user::find_by_email($email);
         if($acct_details['confirmed'] == "" || $acct_details['confirmed'] == "confirmed") {
             $acct_details['confirmed'] = hash('sha256',microtime());
-            Database::getInstance()->query("UPDATE user SET confirmed = '{$acct_details['confirmed']}' WHERE user_id = {$acct_details['user_id']}");
+            Database::getInstance()->update('user',
+                array('confirmed' => $acct_details['confirmed']),
+                array('user_id' => $acct_details['user_id'])
+            );
         }
         global $mail_site_name,$email_domain_name,$site_contact_page;
         $mailer = new Mailer();
@@ -696,23 +730,17 @@ class User {
             ->send();
     }
 
-    // WHEN A USER LOGS IN TO AN EXISTING ACCOUNT, THIS IS CALLED TO MOVE OVER ANY INFORMATION FROM AN ANONYMOUS SESSION
-    // CUSTOMIZE THIS ACCORDING TO THE SITES REQUIREMENTS
+    /**
+     * When a user logs in to an existing account from a temporary anonymous session, this
+     * moves the data over to the user's account.
+     *
+     * @param $anon_user
+     */
     public function merge_users($anon_user) {
         // FIRST MAKE SURE THIS USER IS ANONYMOUS
-        if(Database::getInstance()->check("SELECT * FROM user WHERE user_id = {$anon_user} AND email = ''")) {// AND office_id = {$office_id}")) {
-            // $db->query("UPDATE {$table} SET user_id = {$this->id} WHERE user_id = {$anon_user}");
-
-            // MOVE UPLOADS FROM OLD USER
-            // NOT NECESSARY?
-            // WONT UPLOAD UNTIL AFTER ACCOUNT IS CREATED?
-
-            // REMOVE OLD USER
-            Database::getInstance()->query("DELETE FROM user WHERE user_id = {$anon_user}");
+        if(Database::getInstance()->check('user', array('user_id' => $anon_user, 'email' => ''))) {
+            // TODO: Basic information should be moved here, but this function should be overriden.
+            Database::getInstance()->delete('user', array('user_id' => $anon_user));
         }
-
     }
-
-
-
 }

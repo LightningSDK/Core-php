@@ -76,6 +76,7 @@ $conf = array(
             'track' => 'Lightning\\Pages\\Track',
             'landing' => 'Lightning\\Pages\\OptIn',
             'optin' => 'Lightning\\Pages\\OptIn',
+            'profile' => 'Lightning\\Pages\\Profile',
         ),
         'cli_only' => array(
             'bounce' => 'Lightning\\CLI\\BouncedEmail',

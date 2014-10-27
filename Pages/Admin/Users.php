@@ -6,6 +6,8 @@ use Lightning\Pages\Table;
 
 class Users extends Table {
     protected $table = 'user';
+    protected $searchable = 'true';
+    protected $search_fields = array('email', 'first', 'last');
     protected $preset = array(
         'password' => array(
             'type' => 'hidden',
