@@ -7,7 +7,7 @@ use Lightning\Tools\Form;
     <input type="hidden" name="action" value="save">
     <fieldset>
         <legend>Personal Information:</legend>
-        <table>
+        <table class="small-12">
             <tr>
                 <td>
                     First Name:
@@ -28,7 +28,7 @@ use Lightning\Tools\Form;
     </fieldset>
     <fieldset>
         <legend>Password:</legend>
-        <table>
+        <table class="small-12">
             <tr>
                 <td>
                     Current Password:

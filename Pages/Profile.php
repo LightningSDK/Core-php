@@ -15,7 +15,7 @@ class Profile extends Page {
     protected $nav = 'profile';
 
     public function get() {
-
+        ClientUser::requireLogin();
     }
 
     public function postSave() {
@@ -23,8 +23,6 @@ class Profile extends Page {
 
         // Update the user name.
         $user->update(array('first' => Request::get('first'), 'last' => Request::get('last')));
-
-        // Update the email.
 
         // Update the password.
         $password = Request::post('password');

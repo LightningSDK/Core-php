@@ -31,13 +31,6 @@ class Template extends Singleton {
     private $template_dir;
 
     /**
-     * The page to render.
-     *
-     * @var string
-     */
-    private $page;
-
-    /**
      * The variables accessible within the template.
      *
      * @var array
@@ -72,21 +65,21 @@ class Template extends Singleton {
     /**
      * Render a template and it's main page content.
      *
-     * @param string $page
-     *   The page to render within the template.
+     * @param string $template
+     *   The main template to render within the template.
      * @param bool $return_as_string
      *   When TRUE, the output will be returned instead of output.
      *
      * @return string
      *   The rendered content.
      */
-    public function render($page = null, $return_as_string = false){
+    public function render($template = null, $return_as_string = false){
         if (!$return_as_string) {
             Output::sendCookies();
         }
 
-        if($page !== null) {
-            $this->page = $page;
+        if($template !== null) {
+            $this->template = $template;
         }
 
         if ($return_as_string) {

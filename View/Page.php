@@ -25,7 +25,7 @@ class Page {
      *
      * @var string
      */
-    protected $template = 'template';
+    protected $template;
 
     /**
      * The current highlighted nav item.
@@ -84,7 +84,7 @@ class Page {
         $template->set('site_name', Configuration::get('site.name'));
         $template->set('blog', new Blog());
         JS::set('active_nav', $this->nav);
-        $template->render($this->template);
+        $template->render();
     }
 
     /**
