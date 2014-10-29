@@ -96,12 +96,8 @@ class Page {
     public function execute() {
         $request_type = strtolower(Request::type());
 
-        // If this is a post request, there must be a valid token.
-        if ($request_type == 'post') {
-            $token = Request::post('token', 'hex');
-            if (empty($token) || $token != Session::getInstance()->getToken()) {
-                Navigation::redirect('/message?err=invalid_token');
-            }
+        if (!$this->validateToken()) {
+            Navigation::redirect('/message?err=invalid_token');
         }
 
         // If there is a requested action.
@@ -122,6 +118,23 @@ class Page {
                 // TODO: show 302
                 Output::error('Method not available');
             }
+        }
+    }
+
+    /**
+     * Make sure a valid token has been received.
+     *
+     * @return boolean
+     *   Whether the token is valid.
+     */
+    public function validateToken() {
+        // If this is a post request, there must be a valid token.
+        if (strtolower(Request::type()) == 'post') {
+            $token = Request::post('token', 'hex');
+            return !empty($token) && $token == Session::getInstance()->getToken();
+        } else {
+            // This is not a POST request so it's not required.
+            return true;
         }
     }
 

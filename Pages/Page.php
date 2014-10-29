@@ -33,7 +33,7 @@ class Page extends PageView {
         $template->set('content', 'page');
 
         // LOAD PAGE DETAILS
-        if($full_page = Database::getInstance()->selectRow('page', array('url' => array('LIKE', $content_locator)))){
+        if($full_page = $this->loadPage($content_locator)){
             header('HTTP/1.0 200 OK');
             if(Configuration::get('page.modification_date') && $full_page['last_update'] > 0) {
                 header("Last-Modified: ".gmdate("D, d M Y H:i:s", $full_page['last_update'])." GMT");
@@ -47,7 +47,7 @@ class Page extends PageView {
             $full_page['layout'] = 0;
             $full_page['site_map'] = 1;
             JS::startup('edit_page();');
-        } elseif ($full_page = Database::getInstance()->selectRow('page', array('url' => '404'))) {
+        } elseif ($full_page = $this->loadPage('404')) {
             header('HTTP/1.0 404 NOT FOUND');
             $full_page['url'] = Request::get('page');
             $template->set('page_blank',true);
@@ -81,6 +81,10 @@ class Page extends PageView {
         $template->set('page_header', $full_page['title']);
         $template->set('full_page', $full_page);
         $template->set('full_width', $full_page['layout'] == 1);
+    }
+
+    public function loadPage($content_locator) {
+        Database::getInstance()->selectRow('page', array('url' => array('LIKE', $content_locator)));
     }
 
     public function getNew() {
