@@ -78,7 +78,7 @@ class Template extends Singleton {
             Output::sendCookies();
         }
 
-        if($template !== null) {
+        if(!empty($template)) {
             $this->template = $template;
         }
 
