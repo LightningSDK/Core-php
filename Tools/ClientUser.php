@@ -21,8 +21,8 @@ class ClientUser extends Singleton {
      * @return User
      *   The currently logged in user.
      */
-    public static function getInstance() {
-        return parent::getInstance();
+    public static function getInstance($create = true) {
+        return parent::getInstance($create);
     }
 
     /**

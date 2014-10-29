@@ -15,8 +15,8 @@ class Language extends Singleton {
     /**
      * @return Language
      */
-    public static function getInstance() {
-        return parent::getInstance();
+    public static function getInstance($create = true) {
+        return parent::getInstance($create);
     }
 
     /**

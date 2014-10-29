@@ -148,8 +148,8 @@ class Database extends Singleton {
      * @return Database
      *   The singleton Database object.
      */
-    public static function getInstance() {
-        return parent::getInstance();
+    public static function getInstance($create = true) {
+        return parent::getInstance($create);
     }
 
     /**

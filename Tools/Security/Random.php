@@ -21,8 +21,8 @@ class Random extends Singleton {
     /**
      * @return Random
      */
-    public static function getInstance() {
-        return parent::getInstance();
+    public static function getInstance($create = true) {
+        return parent::getInstance($create);
     }
 
     /**
