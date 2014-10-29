@@ -299,15 +299,23 @@ class Session extends Singleton {
 
     // Return the session content
     public function getData () {
-        if ($field = Database::getInstance()->selectField('content', 'session', array('session_id'=>request::cookie(Configuration::get('session.cookie'))))) {
-            return $field;
+        if ($field = Database::getInstance()->selectField(
+            'content',
+            'session',
+            array('session_id' => $this->id)
+        )) {
+            return json_decode($field, true);
         } else {
-            return NULL;
+            return array();
         }
     }
 
     // Set session content
     public function setData ($content) {
-        Database::getInstance()->update('session', (array('content'=>$content)), array('session_id'=>request::cookie(Configuration::get('session.cookie'))));
+        Database::getInstance()->update(
+            'session',
+            array('content' => json_encode($content)),
+            array('session_id' => $this->id)
+        );
     }
 }

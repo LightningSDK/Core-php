@@ -17,6 +17,7 @@ class Session extends Schema {
             'user_id' => $this->int(true),
             'state' => $this->int(true, Schema::TINYINT),
             'form_token' => $this->char(128),
+            'content' => $this->text(),
         );
     }
 
