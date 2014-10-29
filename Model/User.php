@@ -629,13 +629,14 @@ class User {
         //  There is no session
         //  The session is blank
         //  The session user is not set to this user
-        $session = Session::getInstance();
+        $session = Session::getInstance(false);
         if((!is_object($session)) || ($session->id == 0) || ($session->user_id != $this->id)) {
             if(is_object($session)) {
                 // If there is some other session here, we can destroy it.
                 $session->destroy();
             }
             $session = Session::create($this->id, $remember);
+            Session::setInstance($session);
         }
         if ($state) {
             $session->setState($state);

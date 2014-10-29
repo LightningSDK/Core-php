@@ -18,11 +18,14 @@ class Singleton {
 
     /**
      * Initialize or return an instance of the requested class.
+     * @param boolean $create
+     *   Whether to create the instance if it doesn't exist.
+     *
      * @return Singleton
      */
-    public static function getInstance() {
+    public static function getInstance($create = true) {
         $class = str_replace('Overridable\\', '', get_called_class());
-        if (empty(static::$instances[$class])) {
+        if (empty(static::$instances[$class]) && $create) {
             classAutoloader($class);
             if (is_callable($class . '::createInstance')) {
                 self::$instances[$class] = $class::createInstance();
@@ -40,7 +43,7 @@ class Singleton {
      *   The new instance.
      */
     public static function setInstance($object) {
-        $class = get_called_class();
+        $class = str_replace('Overridable\\', '', get_called_class());
         self::$instances[$class] = $object;
     }
 }
