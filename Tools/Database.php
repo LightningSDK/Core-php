@@ -1022,7 +1022,7 @@ class Database extends Singleton {
                 continue;
             }
             // This is if and AND/OR is explicitly grouped.
-            elseif ($field === '#OR' || $field === '#AND') {
+            elseif (($field === '#OR' || $field === '#AND') && !empty($v)) {
                 $a2[] = '(' . $this->sqlImplode($v, $values, ' ' . str_replace('#', '', $field) . ' ') . ')';
                 continue;
             }
