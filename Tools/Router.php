@@ -52,5 +52,10 @@ class Router extends Singleton {
                 }
             }
         }
+
+        // Nothing found, use the default route.
+        if (!empty(self::$routes['default'])) {
+            return self::$routes['default'];
+        }
     }
 }
