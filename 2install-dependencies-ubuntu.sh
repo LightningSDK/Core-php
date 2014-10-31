@@ -4,15 +4,7 @@ cd "$( dirname "${BASH_SOURCE[0]}" )"
 DIR=${PWD}
 PLATFORM=`uname`
 
-if [[ "$PLATFORM" == 'Linux' ]]; then
-  # add repo for nodejs
-  sudo apt-get install python-software-properties
-  sudo add-apt-repository -y ppa:chris-lea/node.js
-  sudo apt-get update
-
-  # install ruby for compass and grunt
-  sudo apt-get -y install ruby-full rubygems python-software-properties python g++ make nodejs ruby-bundler
-elif [[ -f /etc/redhat-release ]]; then
+if [[ -f /etc/redhat-release ]]; then
   # todo: pick repo based on centos version in /etc/redhat-release
   # 5.x
   # wget http://dl.fedoraproject.org/pub/epel/5/x86_64/epel-release-5-4.noarch.rpm
@@ -28,6 +20,14 @@ elif [[ -f /etc/redhat-release ]]; then
   sudo yum -y install npm
   sudo yum -y install ruby
   gem install bundle
+elif [[ "$PLATFORM" == 'Linux' ]]; then
+  # add repo for nodejs
+  sudo apt-get install python-software-properties
+  sudo add-apt-repository -y ppa:chris-lea/node.js
+  sudo apt-get update
+
+  # install ruby for compass and grunt
+  sudo apt-get -y install ruby-full rubygems python-software-properties python g++ make nodejs ruby-bundler
 elif [[ "$PLATFORM" == 'Darwin' ]]; then
   # install ruby for mac
   \curl -L https://get.rvm.io | bash -s stable
@@ -38,7 +38,10 @@ sudo gem install sass
 sudo gem install compass
 sudo gem install foundation
 
-# Install foundation dependencies with npm and bower.
+  # Some git repos will rime out on git://
+  git config --global url.https://.insteadOf git://
+
+  # Install foundation dependencies with npm and bower.
   cd ${DIR}/Vendor/foundation
   sudo npm install -g bower grunt-cli
 
