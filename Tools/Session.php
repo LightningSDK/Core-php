@@ -230,7 +230,7 @@ class Session extends Singleton {
      * Output the cookie to the requesting web server (for relay to the client).
      */
     public function setCookie(){
-        Output::setCookie(Configuration::get('session.cookie'), $this->key, Configuration::get('session.remember_ttl'));
+        Output::setCookie(Configuration::get('session.cookie'), $this->key, Configuration::get('session.remember_ttl'), '/', Configuration::get('cookie_domain'));
     }
 
     /**
