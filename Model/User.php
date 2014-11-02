@@ -523,7 +523,7 @@ class User {
                 array(
                     'email' => strtolower($email),
                     // Ref should only be added for new users.
-                    'ref' => Request::cookie('ref'),
+                    'referrer' => Request::cookie('ref') ?: 0,
                 )
             ),
             $user_values
