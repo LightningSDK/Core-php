@@ -40,8 +40,8 @@ function classAutoloader($classname) {
         if (isset($overrides[$classname])) {
             return;
         }
-        if (isset($overridable[$classname]) || isset($overridable['Overridable\\' . $classname])) {
-            $class_file = str_replace('Overridable\\', '', $classname);
+        $class_file = str_replace('Overridable\\', '', $classname);
+        if (isset($overridable[$classname]) || isset($overridable[$class_file])) {
             loadClassFile($class_file);
             $loadedClasses[$class_file] = $class_file;
             class_alias($overridable[$class_file], $class_file);
