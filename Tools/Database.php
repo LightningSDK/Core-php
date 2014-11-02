@@ -381,7 +381,7 @@ class Database extends Singleton {
         if (!empty($where)) {
             $where = ' WHERE ' . $this->sqlImplode($where, $values, 'AND');
         }
-        $this->query('SELECT ' . $fields . ' FROM ' . $table . $where . ' LIMIT 1', $values);
+        $this->query('SELECT ' . $fields . ' FROM ' . $this->parseTable($table, $values) . $where . ' LIMIT 1', $values);
         return $this->result->rowCount() > 0;
     }
 
@@ -441,7 +441,7 @@ class Database extends Singleton {
      */
     public function update($table, $data, $where){
         $vars = array();
-        $query = 'UPDATE ' . $table . ' SET ' . $this->sqlImplode($data, $vars, ', ', true) . ' WHERE ';
+        $query = 'UPDATE ' . $this->parseTable($table, $vars) . ' SET ' . $this->sqlImplode($data, $vars, ', ', true) . ' WHERE ';
         if (is_array($where)) {
             $query .= $this->sqlImplode($where, $vars, ' AND ');
         }
