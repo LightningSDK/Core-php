@@ -27,7 +27,7 @@
 	url = https://github.com/macdabby/official-library-php-email-parser.git
 [submodule "Vendor/chartjs"]
 	path = Vendor/chartjs
-	url = https://github.com/nnnick/Chart.js.git
+	url = https://github.com/macdabby/Chart.js.git
 [submodule "Vendor/BounceHandler"]
 	path = Vendor/BounceHandler
 	url = https://github.com/Rambomst/PHP-Bounce-Handler.git
