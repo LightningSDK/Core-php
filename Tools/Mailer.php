@@ -59,8 +59,7 @@ class Mailer {
     }
 
     public function message($message) {
-        $this->mail->HTMLBody = $message;
-        $this->mail->Body = $message;
+        $this->mail->MsgHTML($message);
         return $this;
     }
 
