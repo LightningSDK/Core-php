@@ -93,6 +93,7 @@ class JS {
      *   The rendered output.
      */
     public static function render() {
+        $output = '';
         if (!self::$inited) {
             $output = '<script language="javascript">lightning={"vars":' . json_encode(self::$vars) . '};</script>';
             self::$vars = array();
