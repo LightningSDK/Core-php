@@ -93,9 +93,13 @@ class JS {
      *   The rendered output.
      */
     public static function render() {
-        $output = self::$inited ? '' :
-            '<script language="javascript">lightning={"vars":' . json_encode(self::$vars) . '};</script>';
-        self::$inited = true;
+        if (!self::$inited) {
+            $output = '<script language="javascript">lightning={"vars":' . json_encode(self::$vars) . '};</script>';
+            self::$vars = array();
+            self::$inited = true;
+        } elseif (!empty(self::$vars)) {
+            $output = '<script language="javascript">$.extend(true, lightning.vars, ' . json_encode(self::$vars) . ');</script>';
+        }
 
         // Include JS files.
         foreach (self::$included_scripts as &$file) {
