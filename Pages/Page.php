@@ -63,6 +63,28 @@ class Page extends PageView {
             $template->set('page_blank',true);
         }
 
+        // Replace special tags.
+        if (!$user->isAdmin()) {
+            $matches = array();
+
+            preg_match_all('|{{.*}}|', $full_page['body'], $matches);
+
+            foreach ($matches as $match) {
+                $match_clean = trim($match[0], '{} ');
+                $match_clean = explode('=', $match_clean);
+                switch ($match_clean[0]) {
+                    case 'template':
+                        $sub_template = new Template();
+                        $full_page['body'] = str_replace(
+                            $match[0],
+                            $sub_template->render($match_clean[1], true),
+                            $full_page['body']
+                        );
+                        break;
+                }
+            }
+        }
+
         // PREPARE FORM DATA CONTENTS
         foreach (array('title', 'keywords', 'description') as $meta_data) {
             $full_page[$meta_data] = Scrub::toHTML($full_page[$meta_data]);
