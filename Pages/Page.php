@@ -5,6 +5,7 @@
 
 namespace Lightning\Pages;
 
+use Lightning\Tools\CKEditor;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
 use Lightning\Tools\Output;
@@ -46,7 +47,8 @@ class Page extends PageView {
             $full_page['body'] = 'This is your new page.';
             $full_page['layout'] = 0;
             $full_page['site_map'] = 1;
-            JS::startup('edit_page();');
+            CKEditor::init();
+            JS::startup('lightning.page.edit();');
         } elseif ($full_page = $this->loadPage('404')) {
             header('HTTP/1.0 404 NOT FOUND');
             $full_page['url'] = Request::get('page');
