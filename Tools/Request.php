@@ -5,6 +5,14 @@ namespace Lightning\Tools;
 use Lightning\Tools\Scrub;
 
 class Request {
+
+    /**
+     * The parsed input from a posted JSON string.
+     *
+     * @var array
+     */
+    protected static $parsedInput = null;
+
     /**
      * Get the HTTP request type.
      *
@@ -16,7 +24,7 @@ class Request {
     }
 
     /**
-     * Convert a reuqested action to a controller method name.
+     * Convert a requested action to a controller method name.
      *
      * @param string $prefix
      *   The prefix to add. 'execute' for CLI or 'post' or 'get' for Page requests.
@@ -62,7 +70,7 @@ class Request {
      * @return mixed
      *   value or false if none.
      */
-    public static function get($var, $type='', $subtype='', $default=null){
+    public static function get($var, $type='', $subtype='', $default = null){
         if(!isset($_REQUEST[$var]))
             return $default;
 
@@ -80,7 +88,7 @@ class Request {
      *
      * @return bool|float|int|string
      */
-    public static function cookie($var, $type='', $subtype='', $default=null){
+    public static function cookie($var, $type='', $subtype='', $default = null){
         if(!isset($_COOKIE[$var]))
             return $default;
 
@@ -98,7 +106,7 @@ class Request {
      *
      * @return bool|float|int|string
      */
-    public static function post($var, $type='', $subtype='', $default=null){
+    public static function post($var, $type='', $subtype='', $default = null){
         if(!isset($_POST[$var]))
             return $default;
 
@@ -113,15 +121,39 @@ class Request {
      * @param $var
      * @param string $type
      * @param $subtype
+     * @param default
      *
-     * @return bool|float|int|string
+     * @return mixed
      */
-    public static function query($var, $type='', $subtype='', $default=null){
+    public static function query($var, $type='', $subtype='', $default = null){
         if(!isset($_GET[$var]))
             return $default;
 
         $args = func_get_args();
         $args[0] = $_GET[$var];
+        return call_user_func_array('self::clean', $args);
+    }
+
+    /**
+     * Get a variable from posted json data.
+     *
+     * @param $var
+     * @param string $type
+     * @param $subtype
+     * @param default
+     *
+     * @return mixed
+     */
+    public static function json($var, $type='', $subtype='', $default = null) {
+        if (self::$parsedInput === null && $json = file_get_contents('php://input')) {
+            self::$parsedInput = json_decode($json, true) ?: array();
+        }
+
+        if(!isset(self::$parsedInput[$var])) {
+            return $default;
+        }
+        $args = func_get_args();
+        $args[0] = self::$parsedInput[$var];
         return call_user_func_array('self::clean', $args);
     }
 
