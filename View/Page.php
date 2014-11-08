@@ -28,6 +28,13 @@ class Page {
     protected $template;
 
     /**
+     * Whether to ignore missing or invalid tokens on post requests.
+     *
+     * @var boolean
+     */
+    protected $ignoreToken = false;
+
+    /**
      * The current highlighted nav item.
      *
      * @var string
@@ -129,7 +136,7 @@ class Page {
      */
     public function validateToken() {
         // If this is a post request, there must be a valid token.
-        if (strtolower(Request::type()) == 'post') {
+        if (!$this->ignoreToken && strtolower(Request::type()) == 'post') {
             $token = Request::post('token', 'hex');
             return !empty($token) && $token == Session::getInstance()->getToken();
         } else {
