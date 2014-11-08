@@ -72,17 +72,19 @@ class Page extends PageView {
             preg_match_all('|{{.*}}|', $full_page['body'], $matches);
 
             foreach ($matches as $match) {
-                $match_clean = trim($match[0], '{} ');
-                $match_clean = explode('=', $match_clean);
-                switch ($match_clean[0]) {
-                    case 'template':
-                        $sub_template = new Template();
-                        $full_page['body'] = str_replace(
-                            $match[0],
-                            $sub_template->render($match_clean[1], true),
-                            $full_page['body']
-                        );
-                        break;
+                if (!empty($match)) {
+                    $match_clean = trim($match[0], '{} ');
+                    $match_clean = explode('=', $match_clean);
+                    switch ($match_clean[0]) {
+                        case 'template':
+                            $sub_template = new Template();
+                            $full_page['body'] = str_replace(
+                                $match[0],
+                                $sub_template->render($match_clean[1], true),
+                                $full_page['body']
+                            );
+                            break;
+                    }
                 }
             }
         }
