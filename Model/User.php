@@ -159,7 +159,7 @@ class User {
      * @return User
      */
     public static function anonymous() {
-        return new self(array('user_id' => 0));
+        return new static(array('user_id' => 0));
     }
 
     /**
