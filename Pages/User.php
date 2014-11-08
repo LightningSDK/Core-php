@@ -161,10 +161,13 @@ class User extends Page {
         }
     }
 
-    public function loginRedirect() {
+    public function loginRedirect($page = null) {
         $redirect = Request::get('redirect');
         if ($redirect && !preg_match('|^[/?]user|', $redirect)) {
             Navigation::redirect($redirect);
+        }
+        elseif (!empty($page)) {
+            Navigation::redirect($page);
         }
         else {
             Navigation::redirect(Configuration::get('user.login_url'));
