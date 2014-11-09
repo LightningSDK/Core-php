@@ -85,11 +85,13 @@ if [ ! -d $DIR/../js/ckfinder ]; then
   cp -r $DIR/Vendor/ckfinder/lang ../js/ckfinder/
   cp -r $DIR/Vendor/ckfinder/plugins ../js/ckfinder/
   cp -r $DIR/Vendor/ckfinder/skins ../js/ckfinder/
-  cp -r $DIR/Vendor/ckfinder/ckfinder.js ../js/ckfinder/
-  cp -r $DIR/Vendor/ckfinder/ckfinder.php ../js/ckfinder/
-  cp -r $DIR/Vendor/ckfinder/ckfinder.html ../js/ckfinder/
+  cp $DIR/Vendor/ckfinder/ckfinder.js ../js/ckfinder/
+  cp $DIR/Vendor/ckfinder/ckfinder.php ../js/ckfinder/
+  cp $DIR/Vendor/ckfinder/ckfinder.html ../js/ckfinder/
 
-  cp -r $DIR/install/ckfinder_config_ref.php ../js/ckfinder/config.php
+  # Config files.
+  cp $DIR/Vendor/ckfinder/config.js ../Source/Resources/js/ckfinder_config.js
+  cp $DIR/install/ckfinder_config_ref.php ../js/ckfinder/config.php
 fi
 
 # Setup CKFinder content directory.

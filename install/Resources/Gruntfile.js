@@ -29,6 +29,7 @@ module.exports = function(grunt) {
             dist: {
                 files: {
                     '../../js/ckeditor/config.js': 'js/ckeditor_config.js',
+                    '../../js/ckfinder/config.js': 'js/ckfinder_config.js',
                     '../../js/lightning.min.js': '../../Lightning/JSSource/*.js',
                 }
             },

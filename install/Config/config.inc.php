@@ -41,6 +41,9 @@ $conf = array(
         // **** THIS KEY IS INCLUDED WITH THE DISTRIBUTION AND IS NOT SECURE ****
         'key' => '0Xx+v7xGDanBpTgDoIqwlA==:JPJdzm5ifvePYztVj1ICrQ==',
     ),
+    'ckfinder' => array(
+        'content' => '/images/'
+    ),
     'meta_data' => array(
         'title' => '',
         'keywords' => '',

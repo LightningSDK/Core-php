@@ -75,11 +75,12 @@ class CKEditor {
     public static function iframe($id, $value, $options = array()) {
         self::init();
 
+        JS::startup('lightning.ckeditors["' . $id . '"] = CKEDITOR.replace("' . $id . '", ' . json_encode($options) . ');');
         if (!empty($options['finder'])) {
             JS::add('/js/ckfinder/ckfinder.js');
+            JS::startup('CKFinder.setupCKEditor(lightning.ckeditors["' . $id . '"], "/js/ckfinder/")');
         }
 
-        JS::startup('lightning.ckeditors["' . $id . '"] = CKEDITOR.replace("' . $id . '", ' . json_encode($options) . ');');
         return '<textarea name="' . $id . '" id="' . $id . '">' . Scrub::toHTML($value) . '</textarea>';
     }
 }
