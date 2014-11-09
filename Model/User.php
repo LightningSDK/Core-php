@@ -232,7 +232,7 @@ class User {
      * @return string
      *   The hashed password.
      */
-    protected static function passHash($pass, $salt) {
+    public static function passHash($pass, $salt) {
         return hash("sha256", $pass . $salt);
     }
 
@@ -242,7 +242,7 @@ class User {
      * @return string
      *   A binary string of salt.
      */
-    protected static function getSalt() {
+    public static function getSalt() {
         return Random::getInstance()->get(32, Random::BIN);
     }
 
