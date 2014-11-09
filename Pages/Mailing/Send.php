@@ -13,7 +13,9 @@ use Lightning\Tools\Mailer;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Output;
 use Lightning\Tools\Request;
+use Lightning\Tools\Session;
 use Lightning\Tools\Template;
+use Lightning\View\JS;
 use Lightning\View\Page;
 
 /**
@@ -45,6 +47,8 @@ class Send extends Page {
         $template = Template::getInstance();
         $template->set('content', 'mailing_send');
         $template->set('message', $message);
+        JS::set('message_id', $message['message_id']);
+        Session::getInstance()->addJSToken();
     }
 
     /**
