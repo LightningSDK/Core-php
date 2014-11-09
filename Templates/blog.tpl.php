@@ -1,5 +1,7 @@
 <?
 use Lightning\Tools\ClientUser;
+use Lightning\Tools\Configuration;
+
 $user = ClientUser::getInstance();
 
 if ($user->isAdmin()): ?>
@@ -26,19 +28,7 @@ if ($user->isAdmin()): ?>
         <br />
 
         <? if (count($blog->posts) == 1): ?>
-            <script type="text/javascript"><!--
-                google_ad_client = "ca-pub-9935477002839455";
-                /* AA big square */
-                google_ad_slot = "3389299937";
-                google_ad_width = 300;
-                google_ad_height = 250;
-                //-->
-            </script>
-            <script type="text/javascript"
-                    src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
-            </script>
-            <br>
-            <div class="fb-comments" data-href="http://accountableauthority.com/<?=$blog->posts[0]['url']?>.htm" data-width="560" data-num-posts="10"></div>
+            <div class="fb-comments" data-href="http://<?=Configuration::get('site.domain')?>/<?=$blog->posts[0]['url']?>.htm" data-width="560" data-num-posts="10"></div>
 
         <? endif; ?>
 
