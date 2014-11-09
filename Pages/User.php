@@ -124,7 +124,7 @@ class User extends Page {
 
     public function postSetPassword() {
         if ($user = UserObj::loadByTempKey(Request::get('key', 'base64'))) {
-            if ($pass = Request::post('password') == Request::post('password2')) {
+            if (($pass = Request::post('password')) && $pass == Request::post('password2')) {
                 $user->setPass($pass);
                 $user->registerToSession();
                 $user->removeTempKey();
