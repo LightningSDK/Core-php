@@ -308,7 +308,7 @@ class User {
             $user->setPass($pass, '', $user_info['user_id']);
             $updates['register_date'] = Time::today();
             Database::getInstance()->update('user', $updates, array('user_id' => $user_info['user_id']));
-            if($user_info['confirmed'] != 0) {
+            if($user_info['confirmed'] != 0 && Configuration::get('user.requires_confirmation')) {
                 $user->sendConfirmationEmail($email);
             }
             return $user_info['user_id'];
@@ -323,7 +323,9 @@ class User {
             $updates['type'] = 1;
             Database::getInstance()->update('user', $updates, array('user_id' => $user_id));
             $user = new self($user_id);
-            $user->sendConfirmationEmail($email);
+            if (Configuration::get('user.requires_confirmation')) {
+                $user->sendConfirmationEmail($email);
+            }
             return $user_id;
         }
     }
