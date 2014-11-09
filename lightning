@@ -3,7 +3,7 @@
 FILE="$(dirname "${BASH_SOURCE[0]}")/../index.php"
 
 if [ $1 == "debug" ]; then
-  DEBUG="-d xdebug.profiler_enable=On"
+  DEBUG="-d xdebug.remote_autostart=On"
   XDEBUG_CONFIG="idekey=PHPSTORM remote_host=127.0.0.1 remote_port=9000"
   PHP_IDE_CONFIG="serverName=lightning"
   REQUEST=${*:2}
