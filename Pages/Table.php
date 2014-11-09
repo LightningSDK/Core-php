@@ -2647,17 +2647,11 @@ abstract class Table extends Page {
                     default:			$config['toolbar']="CKEDITOR.config.toolbar_Basic";       break;
                 }
 
-                if (!emptY($field['absolute'])) {
-                    $config['filebrowserBrowseUrl'] =      "/ckfinder/ckfinder.html";
-                    $config['filebrowserImageBrowseUrl'] = "/ckfinder/ckfinder.html?type=Images";
-                    $config['filebrowserFlashBrowseUrl'] = "/ckfinder/ckfinder.html?type=Flash";
-                    $config['filebrowserUploadUrl'] =      "/ckfinder/core/connector/php/connector.php?command=QuickUpload&type=Files";
-                    $config['filebrowserImageUploadUrl'] = "/ckfinder/core/connector/php/connector.php?command=QuickUpload&type=Images";
-                    $config['filebrowserFlashUploadUrl'] = "/ckfinder/core/connector/php/connector.php?command=QuickUpload&type=Flash";
-                }
-
                 if (!empty($field['height'])) {
                     $config['height'] = $field['height'];
+                }
+                if (!empty($field['upload'])) {
+                    $config['finder'] = true;
                 }
                 return CKEditor::iframe($field['form_field'], $field['Value'], $config);
                 break;
