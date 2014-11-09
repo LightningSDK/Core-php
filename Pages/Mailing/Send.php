@@ -48,7 +48,7 @@ class Send extends Page {
         $template->set('content', 'mailing_send');
         $template->set('message', $message);
         JS::set('message_id', $message['message_id']);
-        Session::getInstance()->addJSToken();
+        JS::addSessionToken();
     }
 
     /**

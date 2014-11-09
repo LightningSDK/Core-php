@@ -5,6 +5,7 @@
  */
 
 namespace Lightning\View;
+use Overridable\Lightning\Tools\Session;
 
 /**
  * Class JS
@@ -84,6 +85,10 @@ class JS {
 
     public static function set($var, $value) {
         self::$vars[$var] = $value;
+    }
+
+    public static function addSessionToken() {
+        self::set('token', Session::getInstance()->getToken());
     }
 
     /**

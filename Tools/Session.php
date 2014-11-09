@@ -175,13 +175,6 @@ class Session extends Singleton {
     }
 
     /**
-     * Add the token to a JS variable.
-     */
-    public function addJSToken() {
-        JS::set('token', $this->getToken());
-    }
-
-    /**
      * Checks for password access.
      *
      * @param int $state
