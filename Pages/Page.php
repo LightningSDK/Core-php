@@ -157,6 +157,7 @@ class Page extends PageView {
         $output['status'] = "OK";
         $output['url'] = $new_values['url'];
         $output['page_id'] = $page_id;
+        $output['title'] = $title;
         Output::json($output);
     }
 
