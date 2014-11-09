@@ -28,7 +28,7 @@ class BlogTable extends Table {
         'user_id' => array('type' => 'hidden'),
         'time' => array('type' => 'datetime', 'unlisted' => true),
         'url' => array('type' => 'url', 'unlisted' => true),
-        'body' => array('editor' => 'full'),
+        'body' => array('editor' => 'full', 'upload' => true),
     );
 
     protected function initSettings() {
