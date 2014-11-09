@@ -94,6 +94,11 @@ class Messages extends Table {
                 5 => 'Everybody (incl unsubscribed DANGEROUS)',
                 6 => 'Temp List (experimental)',
             )
+        ),
+        'body' => array(
+            'type' => 'html',
+            'editor' => 'full',
+            'upload' => true,
         )
     );
 
