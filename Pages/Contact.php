@@ -6,13 +6,13 @@
 
 namespace Lightning\Pages;
 
+use Lightning\Tools\Configuration;
 use Lightning\Tools\Form;
 use Lightning\Tools\Mailer;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\ReCaptcha;
 use Lightning\Tools\Request;
-use Lightning\Tools\Template;
 use Lightning\View\Page;
 
 /**
@@ -47,16 +47,19 @@ class Contact extends Page {
             return $this->get();
         }
 
-        $subject = 'Form Mail from Accountable Authority';
+        $subject = Configuration::get('contact.subject');
         $body = "
 Name: {$_POST['name']}
 Email: {$sender_email}
 Message:
 {$_POST['message']}";
-        $to_address = 'info@accountableauthority.com';
+        $to_addresses = Configuration::get('contact.to');
 
         $mailer = new Mailer();
-        $sent = $mailer->to($to_address)
+        foreach ($to_addresses as $to) {
+            $mailer->to($to);
+        }
+        $sent = $mailer
             ->from($sender_email)
             ->subject($subject)
             ->message($body)
