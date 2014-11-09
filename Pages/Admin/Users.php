@@ -2,7 +2,9 @@
 
 namespace Lightning\Pages\Admin;
 
+use Lightning\Model\User;
 use Lightning\Pages\Table;
+use Lightning\Tools\Request;
 
 class Users extends Table {
     protected $table = 'user';
@@ -10,7 +12,7 @@ class Users extends Table {
     protected $search_fields = array('email', 'first', 'last');
     protected $preset = array(
         'password' => array(
-            'type' => 'hidden',
+            'type' => 'char',
         ),
         'salt' => array(
             'type' => 'hidden',
@@ -35,4 +37,20 @@ class Users extends Table {
             'display_column' => 'name',
         ),
     );
+
+    public function initSettings() {
+        $this->preset['password']['submit_function'] = function(&$output) {
+            if ($pass = Request::post('password')) {
+                $salt = User::getSalt();
+                $output['salt'] = bin2hex($salt);
+                $output['password'] = User::passHash($pass, $salt);
+            }
+        };
+        $this->preset['password']['edit_value'] = function(&$row) {
+            return '';
+        };
+        $this->preset['password']['display_value'] = function(&$row) {
+            return !empty($row['password']) ? 'Set' : '';
+        };
+    }
 }
