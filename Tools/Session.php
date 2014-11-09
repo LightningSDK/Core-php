@@ -10,6 +10,7 @@ use Lightning\Tools\Output;
 use Lightning\Tools\Request;
 use Lightning\Tools\Security\Random;
 use Lightning\Tools\Singleton;
+use Lightning\View\JS;
 
 class Session extends Singleton {
     // @todo these vars can probably be removed?
@@ -174,6 +175,13 @@ class Session extends Singleton {
     }
 
     /**
+     * Add the token to a JS variable.
+     */
+    public function addJSToken() {
+        JS::set('token', $this->getToken());
+    }
+
+    /**
      * Checks for password access.
      *
      * @param int $state
@@ -205,6 +213,11 @@ class Session extends Singleton {
     public function destroy (){
         if($this->id) {
             Database::getInstance()->delete('session', array('session_id' => $this->id));
+            $this->key = null;
+            $this->id = null;
+            $this->details = null;
+            $this->state = null;
+            $this->user_id = null;
         }
         $this->setCookie();
     }
