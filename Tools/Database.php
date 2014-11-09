@@ -565,7 +565,7 @@ class Database extends Singleton {
         }
         $this->query('DELETE FROM ' . $table . ' WHERE ' . $where, $values);
 
-        return $this->result->rowCount() == 0 ? false : $this->connection->lastInsertId();
+        return $this->result->rowCount() ?: false;
     }
 
     /**
