@@ -1736,6 +1736,7 @@ abstract class Table extends Page {
     }
 
     function getfieldValues(&$field_list, $accessTable=false) {
+        $output = array();
         foreach($field_list as $f => $field) {
             // check for settings that override user input
             if ($this->action == "insert") {
@@ -1770,23 +1771,24 @@ abstract class Table extends Page {
 
             if (!empty($field['force_default_new']) && $this->action == "insert") {
                 $val = $field['Default'];
-                // developer enterd, could need sanitization
+                // developer entered, could need sanitization
                 $sanitize = true;
             } elseif ($this->parentLink == $field['field']) {
                 // parent link
                 $val = $this->parentId;
                 // already sanitized, not needed
                 // FUNCTIONS
-            } elseif (isset($field['insert_function']) && $this->action == "insert") {
+            } elseif ($this->action == 'insert' && isset($field['insert_function'])) {
                 // function when modified
-                $val = $this->preset[$field['field']]['insert_function']();
-                $sanitize = true;
-            } elseif (isset($field['modified_function']) && $this->action == "update") {
-                $val = $this->preset[$field['field']]['modified_function']();
-                $sanitize = true;
-            } elseif (isset($field['submit_function'])) { // covers both unsert_function and modified_function
-                $val = $this->preset[$field['field']]['submit_function']();
-                $sanitize = true;
+                $val = $this->preset[$field['field']]['insert_function']($output);
+                continue;
+            } elseif ($this->action == 'update' && isset($field['modified_function'])) {
+                $this->preset[$field['field']]['modified_function']($output);
+                continue;
+            } elseif (isset($field['submit_function'])) {
+                // covers both insert_function and modified_function
+                $this->preset[$field['field']]['submit_function']($output);
+                continue;
             } else {
                 switch ($field['type']) {
                     case 'image':
@@ -2595,8 +2597,20 @@ abstract class Table extends Page {
      *   The rendered HTML.
      */
     protected function renderEditField($field, &$row = array()) {
-        if (empty($row)) $v = $field['default'];
-        else $v = $row[$field['field']];
+        // Get the default field value.
+        if (empty($row)) {
+            $v = $field['default'];
+        }
+        elseif (isset($field['edit_value'])) {
+            if (is_callable($field['edit_value'])) {
+                $v = $row[] = $field['edit_value']($row);
+            } else {
+                $v = $row[] = $field['edit_value'];
+            }
+        }
+        else {
+            $v = $row[$field['field']];
+        }
 
         if (!isset($field['form_field']))
             $field['form_field'] = $field['field'];
