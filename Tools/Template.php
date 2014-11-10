@@ -88,7 +88,8 @@ class Template extends Singleton {
         }
 
         extract($this->vars);
-        include $this->template_dir . $this->template . '.tpl.php';
+
+		include $this->template_dir . $this->template . '.tpl.php';
 
         if ($return_as_string) {
             // Setup an output buffer
