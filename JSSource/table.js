@@ -60,6 +60,7 @@ var table = {
         clearTimeout(this.searchTimeout);
         var self = this;
         this.searchTimeout = setTimeout(function() {
+            table_data.vars.ste = search_terms;
             $.ajax({
                 url: table_data.action_file,
                 type: 'GET',

@@ -505,7 +505,7 @@ abstract class Table extends Page {
     function search_form() {
         // @todo namespace this
         JS::inline('table_search_i=0;table_search_d=0;');
-        return 'Search: <input type="text" name="table_search" value="" onkeyup="table.search(this);" />';
+        return 'Search: <input type="text" name="table_search" value="' . Scrub::toHTML(Request::get('ste')) . '" onkeyup="table.search(this);" />';
     }
 
     function render_pop_return() {
