@@ -144,7 +144,7 @@ class Message {
      */
     protected function getUnsubscribeString() {
         return Language::getInstance()->translate('unsubscribe', array(
-                '{UNSUBSCRIBE}' => $this->user->getUnsubscribeLink()
+                '{LINK}' => $this->user->getUnsubscribeLink()
             )
         );
     }

@@ -28,7 +28,18 @@ class Language extends Singleton {
      * @return string
      *   The translated value.
      */
-    public function translate($key) {
-        return !empty(self::$language[$key]) ? self::$language[$key] : '';
+    public function translate($key, $replacements = array()) {
+        $text = '';
+
+        // If a translation was found.
+        if (!empty(self::$language[$key])) {
+            $text = self::$language[$key];
+            foreach ($replacements as $replace => $with) {
+                $text = str_replace($replace, $with, $text);
+            }
+        }
+
+        // Return the translation.
+        return $text;
     }
 }
