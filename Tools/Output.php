@@ -23,6 +23,16 @@ class Output {
      */
     const SUCCESS = 2;
 
+    /**
+     * The default output for an error.
+     */
+    const ERROR = 3;
+
+    /**
+     * A list of cookies to output.
+     *
+     * @var array
+     */
     protected static $cookies = array();
 
     /**
@@ -39,10 +49,38 @@ class Output {
         elseif ($data == self::SUCCESS) {
             $data = array('status' => 'success');
         }
+        elseif ($data == self::ERROR) {
+            $data = array('status' => 'error');
+        }
 
         // Add errors and messages.
         $data['errors'] = Messenger::getErrors();
         $data['messages'] = Messenger::getMessages();
+
+        // Output the data.
+        header('Content-type: application/json');
+        echo json_encode($data);
+
+        // Terminate the script.
+        exit;
+    }
+
+    /**
+     * Die on an error with a message in json format.
+     *
+     * @param string $error
+     *   The error message.
+     */
+    public static function jsonError($error = '') {
+        $data = array(
+            'errors' => Messenger::getErrors(),
+            'messages' => Messenger::getMessages(),
+            'status' => 'error',
+        );
+
+        if (!empty($error)) {
+            $data['errors'][] = $error;
+        }
 
         // Output the data.
         header('Content-type: application/json');
