@@ -1059,6 +1059,9 @@ class Database extends Singleton {
                         case 'NOT IN':
                             // The NOT IN list is empty, all results apply.
                             // Add the IN or NOT IN query.
+                            if (empty($v[1])) {
+                                break;
+                            }
                             $values = array_merge($values, array_values($v[1]));
                             $a2[] = "{$field} {$v[0]} (" . implode(array_fill(0, count($v[1]), '?'), ",") . ")";
                             break;
