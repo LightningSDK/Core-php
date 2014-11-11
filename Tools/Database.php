@@ -1048,31 +1048,36 @@ class Database extends Singleton {
                     }
                 }
                 // IN operator.
-                elseif (strtoupper($v[0]) == 'IN' || strtoupper($v[0]) == 'NOT IN') {
-                    if (strtoupper($v[0]) == 'IN' && empty($v[1])) {
-                        // The IN list is empty, so the set should be empty.
-                        $a2[] = 'false';
-                    } elseif (strtoupper($v[0]) == 'NOT IN' && empty($v[1])) {
-                        // The NOT IN list is empty, all results apply.
-                    } else {
-                        // Add the IN or NOT IN query.
-                        $values = array_merge($values, array_values($v[1]));
-                        $a2[] = "{$field} {$v[0]} (" . implode(array_fill(0, count($v[1]), '?'), ",") . ")";
+                elseif (!empty($v[0])){
+                    switch (strtoupper($v[0])) {
+                        case 'IN':
+                            // The IN list is empty, so the set should be empty.
+                            $a2[] = 'false';
+                        case 'NOT IN':
+                            // The NOT IN list is empty, all results apply.
+                            // Add the IN or NOT IN query.
+                            $values = array_merge($values, array_values($v[1]));
+                            $a2[] = "{$field} {$v[0]} (" . implode(array_fill(0, count($v[1]), '?'), ",") . ")";
+                            break;
+                        case 'BETWEEN':
+                            $a2[] = "{$field} BETWEEN ? AND ? ";
+                            $values[] = $v[1];
+                            $values[] = $v[2];
+                            break;
+                        case 'IS NULL':
+                        case 'IS NOT NULL':
+                            $a2[] = "{$field} {$v[0]} ";
+                            break;
+                        case '!=':
+                        case '<':
+                        case '<=':
+                        case '>':
+                        case '>=':
+                        case 'LIKE':
+                            $values[] = $v[1];
+                            $a2[] = "{$field} {$v[0]} ? ";
+                            break;
                     }
-                }
-                // Between operator.
-                elseif (strtoupper($v[0]) == 'BETWEEN') {
-                    $a2[] = "{$field} BETWEEN ? AND ? ";
-                    $values[] = $v[1];
-                    $values[] = $v[2];
-                }
-                // Single comparison operators.
-                elseif (in_array($v[0], array('!=', '<', '<=', '>', '>=', 'LIKE'))) {
-                    $values[] = $v[1];
-                    $a2[] = "{$field} {$v[0]} ? ";
-                }
-                elseif (in_array($v[0], array('IS NULL', 'IS NOT NULL'))) {
-                    $a2[] = "{$field} {$v[0]} ";
                 }
             }
             elseif ($v === null) {
