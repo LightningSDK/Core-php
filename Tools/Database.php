@@ -1052,7 +1052,10 @@ class Database extends Singleton {
                     switch (strtoupper($v[0])) {
                         case 'IN':
                             // The IN list is empty, so the set should be empty.
-                            $a2[] = 'false';
+                            if (empty($v[1])) {
+                                $a2[] = 'false';
+                                break;
+                            }
                         case 'NOT IN':
                             // The NOT IN list is empty, all results apply.
                             // Add the IN or NOT IN query.
