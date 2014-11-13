@@ -35,7 +35,10 @@ module.exports = function(grunt) {
             },
             vendor: {
                 files: {
-                    '../../js/foundation.min.js': '../../Lightning/Vendor/foundation/js/foundation/foundation.js',
+                    '../../js/foundation.min.js': [
+                        '../../Lightning/Vendor/foundation/js/foundation/foundation.js',
+                        '../../Lightning/Vendor/foundation/js/foundation/foundation.*.js'
+                    ],
                     '../../js/modernizr.min.js': '../../Lightning/Vendor/foundation/vendor/modernizr/modernizr.js',
                     '../../js/placeholder.min.js': '../../Lightning/Vendor/foundation/vendor/jquery-placeholder/jquery.placeholder.js',
                     '../../js/fastclick.min.js': '../../Lightning/Vendor/foundation/vendor/fastclick/lib/fastclick.js',
