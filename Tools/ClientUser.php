@@ -54,4 +54,11 @@ class ClientUser extends Singleton {
             Navigation::redirect('/user?redirect=' . Scrub::toURL(Request::get('request')));
         }
     }
+
+    public static function requireAdmin() {
+        self::requireLogin();
+        if (!self::getInstance()->isAdmin()) {
+            Output::accessDenied();
+        }
+    }
 }

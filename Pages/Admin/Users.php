@@ -4,9 +4,16 @@ namespace Lightning\Pages\Admin;
 
 use Lightning\Model\User;
 use Lightning\Pages\Table;
+use Lightning\Tools\ClientUser;
 use Lightning\Tools\Request;
 
 class Users extends Table {
+
+    public function __construct() {
+        ClientUser::requireAdmin();
+        parent::__construct();
+    }
+
     protected $table = 'user';
     protected $searchable = true;
     protected $search_fields = array('email', 'first', 'last');

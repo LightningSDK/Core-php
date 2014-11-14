@@ -23,16 +23,15 @@ class Messages extends Table {
      * Require admin privileges.
      */
     public function __construct() {
+        ClientUser::requireAdmin();
         parent::__construct();
+
         $action = Request::get('action');
         if ($action == 'edit' || $action == 'new') {
             JS::startup('
                 lightning.admin.messageEditor.checkVars();
                 $("#add_message_criteria_button").click(lightning.admin.messageEditor.checkVars);
             ');
-        }
-        if (!ClientUser::getInstance()->isAdmin()) {
-            Output::accessDenied();
         }
 
         $this->post_actions['after_post'] = function() {

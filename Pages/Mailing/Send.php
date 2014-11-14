@@ -28,10 +28,8 @@ class Send extends Page {
      * Require admin privileges.
      */
     public function __construct() {
+        ClientUser::requireAdmin();
         parent::__construct();
-        if (ClientUser::getInstance()->details['type'] < 5) {
-            Output::accessDenied();
-        }
     }
 
     /**

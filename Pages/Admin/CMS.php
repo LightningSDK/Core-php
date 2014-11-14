@@ -6,9 +6,14 @@ use Lightning\Tools\ClientUser;
 use Lightning\Tools\Database;
 use Lightning\Tools\Output;
 use Lightning\Tools\Request;
-use Lightning\View\Page;
+use Lightning\View\API;
 
-class CMS extends Page {
+class CMS extends API {
+
+    public function __construct() {
+        ClientUser::requireAdmin();
+    }
+
     public function postSave() {
         if (ClientUser::getInstance()->isAdmin()) {
             $name = Request::post('cms');

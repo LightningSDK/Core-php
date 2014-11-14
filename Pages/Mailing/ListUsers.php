@@ -10,6 +10,7 @@ namespace Lightning\Pages\Mailing;
 
 
 use Lightning\Pages\Table;
+use Lightning\Tools\ClientUser;
 use Lightning\Tools\Database;
 use Lightning\Tools\Request;
 use Lightning\Tools\Template;
@@ -48,8 +49,9 @@ class ListUsers extends Table {
     protected $editable = false;
     protected $deleteable = false;
 
-
     public function __construct() {
+        ClientUser::requireAdmin();
+
         $list_id = Request::get('list', 'int');
         if ($list_id === 0) {
             Template::getInstance()->set('title', 'Users not on any mailing list.');

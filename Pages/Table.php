@@ -1847,7 +1847,12 @@ abstract class Table extends Page {
                         $val = bindec(strrev($vals));
                         break;
                     case 'html':
-                        $val = Request::get($field['form_field'], 'html');
+                        $val = Request::get($field['form_field'],
+                            'html',
+                            !empty($field['allowed_html']) ? $field['allowed_html'] : '',
+                            !empty($field['allowed_css']) ? $field['allowed_css'] : '',
+                            !empty($field['trusted'])
+                        );
                         break;
                     default:
                         // This will include 'url'

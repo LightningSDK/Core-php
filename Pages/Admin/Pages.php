@@ -5,6 +5,12 @@ namespace Lightning\Pages\Admin;
 use Lightning\Pages\Table;
 
 class Pages extends Table {
+
+    public function __construct() {
+        ClientUser::requireAdmin();
+        parent::__construct();
+    }
+
     protected $nav = 'admin_pages';
     protected $table = 'page';
     protected $sortable = true;

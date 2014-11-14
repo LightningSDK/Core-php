@@ -2,12 +2,15 @@
 
 namespace Lightning\Pages\Admin;
 
+use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration as Config;
 use Lightning\Tools\Template;
 use Lightning\View\Page;
 
 class Configuration extends Page {
+
     public function get() {
+        ClientUser::requireAdmin();
         $template = Template::getInstance();
 
         $config_files = Config::getConfigurations();
@@ -41,6 +44,7 @@ class Configuration extends Page {
     }
 
     protected function processSettingsForm($config, $key = 'Config', $path = array()) {
+        ClientUser::requireAdmin();
         $output = '<li><input name="" value="' . $key . '" /></li>';
 
         foreach ($config as $subkey => $value) {

@@ -6,13 +6,12 @@ use Lightning\Tools\ClientUser;
 use Lightning\Tools\Output;
 use Lightning\Tools\Request;
 use Lightning\Tools\Tracker;
+use Lightning\View\API;
 use Lightning\View\Field\Time;
 
-class AdminTracker extends Page {
+class AdminTracker extends API {
     public function __construct() {
-        if (ClientUser::getInstance()->details['type'] < 5) {
-            Output::json(Output::ACCESS_DENIED);
-        }
+        ClientUser::requireAdmin();
     }
 
     public function getTrackerStats() {

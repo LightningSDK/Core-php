@@ -21,9 +21,7 @@ class Lists extends Table {
      * Require admin privileges.
      */
     public function __construct() {
-        if (ClientUser::getInstance()->type < 5) {
-            Output::accessDenied();
-        }
+        ClientUser::requireAdmin();
         parent::__construct();
     }
 
