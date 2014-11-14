@@ -79,6 +79,7 @@ fi
 
 # Install CKFinder
 if [ ! -d $DIR/../js/ckfinder ]; then
+  echo "Copying ckfinder files to web directory"
   mkdir $DIR/../js/ckfinder
   cp -r $DIR/Vendor/ckfinder/core ../js/ckfinder/
   cp -r $DIR/Vendor/ckfinder/help ../js/ckfinder/
