@@ -104,11 +104,13 @@ class Mailer {
         }
     }
 
-    function sendBulk($id, $test = false){
-        $this->message = new Message($id);
+    function sendBulk($message_id, $test = false){
+        $this->message = new Message($message_id);
 
-        $this->from = Configuration::get('mailer.mail_from') ?: Configuration::get('site.mail_from');
-        $this->fromName = Configuration::get('mailer.mail_from_name') ?: Configuration::get('site.mail_from_name');
+        $this->from(
+            Configuration::get('mailer.mail_from') ?: Configuration::get('site.mail_from'),
+            Configuration::get('mailer.mail_from_name') ?: Configuration::get('site.mail_from_name')
+        );
 
         if ($test) {
             $this->message->setTest(true);
