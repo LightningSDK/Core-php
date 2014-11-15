@@ -354,10 +354,10 @@ abstract class Table extends Page {
         $this->set_posted_links();
         // If serial update is set, set the next action to be an edit of the next higest key,
         // otherwise, go back to the list.
-        if ($this->post_actions['after_update']) {
+        if (!empty($this->post_actions['after_update'])) {
             $this->get_row();
             $this->post_actions['after_update']($this->list);
-        } elseif ($this->post_actions['after_post']) {
+        } elseif (!empty($this->post_actions['after_post'])) {
             $this->get_row();
             $this->post_actions['after_post']($this->list);
         }
@@ -2483,7 +2483,7 @@ abstract class Table extends Page {
                         if ($v) {
                             $fk = isset($field['lookupkey']) ? $field['lookupkey'] : $field['field'];
                             $filter = array($fk => $v);
-                            if ($field['filter']) {
+                            if (!empty($field['filter'])) {
                                 $filter += $field['filter'];
                             }
                             $value = Database::getInstance()->selectRow(
@@ -2718,7 +2718,7 @@ abstract class Table extends Page {
                 if (!is_array($options)) return false;
 
                 $output = "<select name='{$field['form_field']}' id='{$field['form_field']}'>";
-                if ($field['allow_blank'])
+                if (!empty($field['allow_blank']))
                     $output .= '<option value=""></option>';
                 foreach($options as $k=>$v) {
                     $output .= "<option value='{$k}'".(($field['Value'] == $k) ? 'selected="selected"' : '').'>'
