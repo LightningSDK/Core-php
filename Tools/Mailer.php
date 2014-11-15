@@ -129,6 +129,23 @@ class Mailer {
         }
     }
 
+    /**
+     * Send a single email to a single user.
+     *
+     * @param int $message_id
+     *   The message id.
+     * @param User $user
+     *   The user object to send to.
+     */
+    function sendOne($message_id, $user) {
+        $this->message = new Message($message_id);
+        $this->to($user->email, $user->first . ' ' . $user->last);
+        $this->message->setUser($user);
+        $this->subject($this->message->getSubject());
+        $this->message($this->message->getMessage());
+        $this->send();
+    }
+
     protected function sendToList() {
         foreach($this->users as $user){
             if ($this->verbose) {
