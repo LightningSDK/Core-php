@@ -64,9 +64,6 @@ class Messages extends Table {
 
     protected $table = 'message';
     protected $preset = array(
-        'message_id' => array(
-            'type' => 'hidden',
-        ),
         'never_resend' => array(
             'type' => 'checkbox',
         ),
