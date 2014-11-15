@@ -1851,7 +1851,8 @@ abstract class Table extends Page {
                             'html',
                             !empty($field['allowed_html']) ? $field['allowed_html'] : '',
                             !empty($field['allowed_css']) ? $field['allowed_css'] : '',
-                            !empty($field['trusted'])
+                            !empty($field['trusted']),
+                            !empty($field['full_page'])
                         );
                         break;
                     default:
@@ -2650,6 +2651,9 @@ abstract class Table extends Page {
                     case 'basic_image':	$config['toolbar']="CKEDITOR.config.toolbar_Basic_Image"; break;
                     case 'basic':
                     default:			$config['toolbar']="CKEDITOR.config.toolbar_Basic";       break;
+                }
+                if (!empty($field['full_page'])) {
+                    $config['fullPage'] = true;
                 }
 
                 if (!empty($field['height'])) {
