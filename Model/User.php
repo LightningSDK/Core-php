@@ -406,11 +406,14 @@ class User {
                 $db->update('user', $user_data, $update);
             }
             $user_id = $user['user_id'];
+            return static::loadById($user_id);
         } else {
             $user_data['list_date'] = time();
             $user_id = $db->insert('user', $options + $user_data);
+            $user = static::loadById($user_id);
+            $user->new = true;
+            return $user;
         }
-        return static::loadById($user_id);
     }
 
     /**
