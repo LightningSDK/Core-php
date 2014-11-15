@@ -50,10 +50,22 @@ class User {
         $this->details = $details;
     }
 
+    public function __isset($var) {
+        switch($var) {
+            case 'id':
+            case 'details':
+                return true;
+                break;
+            default:
+                return isset($this->details[$var]);
+                break;
+        }
+    }
+
     /**
-     * A magic getter function.
+     * A getter function.
      *
-     * This word for:
+     * This works for:
      *   ->id
      *   ->details
      *   ->user_id (item inside ->details)
@@ -77,6 +89,36 @@ class User {
                     return $this->details[$var];
                 else
                     return NULL;
+                break;
+        }
+    }
+
+    /**
+     * A setter function.
+     *
+     * This works for:
+     *   ->id
+     *   ->details
+     *   ->user_id (item inside ->details)
+     *
+     * @param string $var
+     *   The name of the variable to set.
+     * @param mixed $value
+     *   The value to set.
+     *
+     * @return mixed
+     *   The variable value.
+     */
+    public function __set($var, $value) {
+        switch($var) {
+            case 'id':
+                $this->details['user_id'] = $value;
+                break;
+            case 'details':
+                $this->details = $value;
+                break;
+            default:
+                $this->details[$var] = $value;
                 break;
         }
     }
@@ -166,10 +208,20 @@ class User {
      * Check if a user is a site admin.
      *
      * @return boolean
-     *   Whther the user is a site admin.
+     *   Whether the user is a site admin.
      */
     public function isAdmin() {
         return $this->type == static::TYPE_ADMIN;
+    }
+
+    /**
+     * Check if a user is anonymous.
+     *
+     * @return boolean
+     *   Whether the user is anonymous.
+     */
+    public function isAnonymous() {
+        return $this->user_id == 0;
     }
 
     /**
