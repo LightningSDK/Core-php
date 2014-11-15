@@ -176,11 +176,13 @@ class Scrub {
      * @return string
      *   The sanitized HTML.
      */
-    public static function html($html, $allowed_tags = '', $allowed_css = '', $trusted = false) {
+    public static function html($html, $allowed_tags = '', $allowed_css = '', $trusted = false, $full_page = false) {
         $purifier = HTMLPurifierWrapper::getInstance();
         $config = HTMLPurifierConfig::createDefault();
 
-        if ($trusted) {
+        if ($full_page) {
+            return $html;
+        } elseif ($trusted) {
             $config->set('CSS.Trusted', true);
             $config->set('HTML.Trusted', true);
             $config->set('Attr.EnableID', true);
