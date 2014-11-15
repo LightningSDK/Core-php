@@ -40,6 +40,13 @@ class Message {
     protected $message;
 
     /**
+     * The name to use if the users name is not set.
+     *
+     * @var string
+     */
+    protected $default_name = 'friend';
+
+    /**
      * The template data from the database.
      *
      * @var array
@@ -80,6 +87,7 @@ class Message {
         $this->loadTemplate();
         $this->loadCriteria();
         $this->unsubscribe = $unsubscribe;
+        $this->default_name = Configuration::get('mailer.default_name');
         if (
             $this->unsubscribe
             && !strstr($this->message['body'], '{UNSUBSCRIBE}')
@@ -167,7 +175,7 @@ class Message {
         // Replace standard variables.
         $source = str_replace("{USER_ID}", $this->user->details['user_id'], $source);
         $source = str_replace("{MESSAGE_ID}", $this->message['message_id'], $source);
-        $source = str_replace("{FULL_NAME}", (!empty($this->user->details['first']) ? $this->user->details['first'] . ' ' . $this->user->details['last'] : "friend"), $source);
+        $source = str_replace("{FULL_NAME}", (!empty($this->user->details['first']) ? $this->user->details['first'] . ' ' . $this->user->details['last'] : $this->default_name), $source);
         $source = str_replace("{URL_KEY}", User::urlKey($this->user->details['user_id'], $this->user->details['salt']), $source);
         $source = str_replace("{EMAIL}", $this->user->details['email'], $source);
 
