@@ -16,9 +16,7 @@ class Templates extends Table {
     protected $preset = array(
         'body' => array(
             'type' => 'html',
-            'allowed_html' => 'body,html,style',
-            'allowed_css' => '*',
-            'trusted' => true,
+            'full_page' => true,
         )
     );
 }
