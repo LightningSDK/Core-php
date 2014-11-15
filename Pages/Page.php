@@ -175,6 +175,6 @@ class Page extends PageView {
             0 => 'Right Column',
             1 => 'Full Width',
         );
-        return BasicHTML::select('page_layout', $options, $default);
+        return BasicHTML::select('page_layout', $options, intval($default));
     }
 }

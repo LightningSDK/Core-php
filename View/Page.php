@@ -91,7 +91,7 @@ class Page {
         $template->set('site_name', Configuration::get('site.name'));
         $template->set('blog', new Blog());
         JS::set('active_nav', $this->nav);
-        $template->render();
+        $template->render($this->template);
     }
 
     /**
