@@ -29,12 +29,21 @@ class CMS {
                 'content' => !empty($settings['default']) ? $settings['default'] : '',
             );
         }
+        $forced_classes = !empty($settings['class']) ? $settings['class'] : '';
+        $added_classes = !empty($content['class']) ? $content['class'] : '';
         if (!empty($settings['class'])) {
             $content['class'] .= ' ' . $settings['class'];
         }
 
         if (ClientUser::getInstance()->isAdmin()) {
+            JS::add('/js/ckfinder/ckfinder.js');
             JS::set('token', Session::getInstance()->getToken());
+            JS::set('cms.basepath', self::getBaseDir());
+            JS::startup('lightning.cms.initImage()');
+            return '<a href="" class="button" onclick="javascript:lightning.cms.editImage(\'cms_' . $name . '\'); return false;">Change</a>'
+                . '<a href="" class="button" onclick="javascript:lightning.cms.saveImage(\'' . $name . '\'); return false;">Save</a>'
+                . '<input type="text" id="cms_' . $name . '_class" class="imagesCSS" name="' . $forced_classes . '" value="' . $added_classes . '" />'
+                . '<img src="' . $content['content'] . '" id="cms_' . $name . '" class="' . $content['class'] .  '" />';
         } else {
             return '<img src="' . $content['content'] . '" class="' . $content['class'] .  '" />';
         }
@@ -42,5 +51,9 @@ class CMS {
 
     protected static function loadCMS($name) {
         return $content = Database::getInstance()->selectRow('cms', array('name' => $name));
+    }
+
+    protected static function getBaseDir() {
+        return '/images/';
     }
 }

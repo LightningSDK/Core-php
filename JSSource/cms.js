@@ -44,5 +44,58 @@ lightning.cms = {
                 self.edit();
             }
         });
+    },
+
+    initImage: function() {
+        $('.imagesCSS').keyup(function() {
+            var textField = $(this);
+            var id = textField.attr('id').replace('_class', '');
+            var classes = textField.attr('name') + ' ' + textField.val();
+            $('#' + id).removeClass().addClass(classes);
+        });
+    },
+
+    editImage: function(id) {
+        var self = this;
+        CKFinder.popup({
+            basePath: lightning.cms.basepath,
+            selectActionFunction: function(fileUrl) {
+                self.updateImage(id, fileUrl);
+            }
+        });
+    },
+
+    updateImage: function(id, fileUrl) {
+        $('#' + id).attr('src', fileUrl);
+    },
+
+    saveImage: function(id) {
+        $.ajax({
+            url: '/admin/cms',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                cms: id,
+                class: $('#cms_' + id + '_class').val(),
+                token: lightning.vars.token,
+                action: "save-image",
+                content: $('#cms_' + id).attr('src')
+            },
+            success:function(data){
+                if(data.status != 'success'){
+                    var error = '';
+                    for (var i in data.errors) {
+                        error += data.error[i] + ' ';
+                    }
+                    if (error == '') {
+                        error = 'Could not save: Unknown error.';
+                    }
+                }
+            },
+            error:function(){
+                alert('The image could not be saved, please try again later.');
+                self.edit();
+            }
+        });
     }
 };

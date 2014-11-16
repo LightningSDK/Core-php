@@ -27,4 +27,19 @@ class CMS extends API {
             Output::json(Output::ACCESS_DENIED);
         }
     }
+
+    public function postSaveImage() {
+        if (ClientUser::getInstance()->isAdmin()) {
+            $name = Request::post('cms');
+            $content = Request::post('content');
+            $class = Request::post('class');
+            Database::getInstance()->insert('cms',
+                array('name' => $name, 'content' => $content, 'last_modified' => time(), 'class' => $class),
+                array('content' => $content, 'last_modified' => time(), 'class' => $class)
+            );
+            Output::json(Output::SUCCESS);
+        } else {
+            Output::json(Output::ACCESS_DENIED);
+        }
+    }
 }

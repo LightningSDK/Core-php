@@ -157,7 +157,7 @@ class Template extends Singleton {
      */
     public function _include($page){
         extract($this->vars);
-        include $this->template_dir.$page.".tpl.php";
+        include $this->template_dir . $page . '.tpl.php';
     }
 
     /**
@@ -171,7 +171,7 @@ class Template extends Singleton {
      *
      * @todo this needs JS injection and should be moved to a view.
      */
-    public function help($help_string, $image='/images/qmark.png', $id='', $class='', $url=NULL){
+    public function help($help_string, $image = '/images/qmark.png', $id = '', $class = '', $url = NULL){
         if($url){
             echo "<a href='{$url}'>";
         }

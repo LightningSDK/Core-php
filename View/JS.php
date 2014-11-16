@@ -84,7 +84,21 @@ class JS {
     }
 
     public static function set($var, $value) {
-        self::$vars[$var] = $value;
+        $var = explode('.', $var);
+        self::setSubPath($var, $value, self::$vars);
+    }
+
+    protected static function setSubPath($var, $value, &$container) {
+        if (count($var) == 1) {
+            $container[$var[0]] = $value;
+        } else {
+            $top_var = $var[0];
+            if (!is_array($container[$top_var])) {
+                $container[$top_var] = array();
+            }
+            array_shift($var);
+            self::setSubPath($var, $value, $container[$top_var]);
+        }
     }
 
     public static function addSessionToken() {
