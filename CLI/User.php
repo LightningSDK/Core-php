@@ -23,11 +23,11 @@ class User extends CLI {
             if (!empty($email_input)) {
                 echo "That is not a valid email.\n";
             }
-            $email_input = readline('Email: ');
+            $email_input = $this->readline('Email: ');
         } while (!$email = Scrub::email($email_input));
 
         do {
-            $password = readline('Password: ');
+            $password = $this->readline('Password: ');
         } while (strlen($password) < 6);
 
         $user = UserObj::create($email, $password);
