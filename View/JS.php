@@ -93,7 +93,7 @@ class JS {
             $container[$var[0]] = $value;
         } else {
             $top_var = $var[0];
-            if (!is_array($container[$top_var])) {
+            if (!isset($container[$top_var]) || !is_array($container[$top_var])) {
                 $container[$top_var] = array();
             }
             array_shift($var);
