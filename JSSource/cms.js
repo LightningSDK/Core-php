@@ -66,7 +66,7 @@ lightning.cms = {
     },
 
     updateImage: function(id, fileUrl) {
-        $('#' + id).attr('src', fileUrl);
+        $('#cms_' + id).attr('src', fileUrl);
     },
 
     saveImage: function(id) {
@@ -90,6 +90,44 @@ lightning.cms = {
                     if (error == '') {
                         error = 'Could not save: Unknown error.';
                     }
+                }
+            },
+            error:function(){
+                alert('The image could not be saved, please try again later.');
+                self.edit();
+            }
+        });
+    },
+
+    editPlain: function(id) {
+        $('#display_cms_' + id).hide();
+        $('#cms_' + id).show();
+    },
+
+    savePlain: function(id) {
+        $.ajax({
+            url: '/admin/cms',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                cms: id,
+                token: lightning.vars.token,
+                action: "save",
+                content: $('#cms_' + id).val()
+            },
+            success:function(data){
+                if(data.status != 'success'){
+                    var error = '';
+                    for (var i in data.errors) {
+                        error += data.error[i] + ' ';
+                    }
+                    if (error == '') {
+                        error = 'Could not save: Unknown error.';
+                    }
+                } else {
+                    // Switch back to the main view.
+                    $('#cms_' + id).hide();
+                    $('#display_cms_' + id).html($('#cms_' + id).val()).show();
                 }
             },
             error:function(){

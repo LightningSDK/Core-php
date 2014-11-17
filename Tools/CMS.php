@@ -40,12 +40,32 @@ class CMS {
             JS::set('token', Session::getInstance()->getToken());
             JS::set('cms.basepath', self::getBaseDir());
             JS::startup('lightning.cms.initImage()');
-            return '<a href="" class="button" onclick="javascript:lightning.cms.editImage(\'cms_' . $name . '\'); return false;">Change</a>'
+            return '<a href="" class="button" onclick="javascript:lightning.cms.editImage(\'' . $name . '\'); return false;">Change</a>'
                 . '<a href="" class="button" onclick="javascript:lightning.cms.saveImage(\'' . $name . '\'); return false;">Save</a>'
                 . '<input type="text" id="cms_' . $name . '_class" class="imagesCSS" name="' . $forced_classes . '" value="' . $added_classes . '" />'
                 . '<img src="' . $content['content'] . '" id="cms_' . $name . '" class="' . $content['class'] .  '" />';
         } else {
             return '<img src="' . $content['content'] . '" class="' . $content['class'] .  '" />';
+        }
+    }
+
+    public static function plain($name, $settings) {
+        if ($content = self::loadCMS($name)) {
+            $value = $content['content'];
+        } elseif (!empty($settings['default'])) {
+            $value = $settings['default'];
+        } else {
+            $value = '';
+        }
+
+        if (ClientUser::getInstance()->isAdmin()) {
+            JS::set('token', Session::getInstance()->getToken());
+            return '<a href="" class="button" onclick="javascript:lightning.cms.editPlain(\'' . $name . '\'); return false;">Change</a>'
+            . '<a href="" class="button" onclick="javascript:lightning.cms.savePlain(\'' . $name . '\'); return false;">Save</a>'
+            . '<input type="text" id="cms_' . $name . '" value="' . $value . '" style="display:none" />'
+            . '<span id="display_cms_' . $name . '">' . $value . '</span>';
+        } else {
+            return $value;
         }
     }
 
