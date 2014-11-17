@@ -18,7 +18,7 @@ class Configuration extends Page {
         foreach ($config_files as $source => $file) {
             $config_data[$source] = Config::getConfigurationData($file);
         }
-//print_r($config_data);
+
         foreach ($config_data as $source => &$config) {
             array_walk_recursive(
                 $config,
@@ -32,13 +32,10 @@ class Configuration extends Page {
                 }
             );
         }
-//        print_r($config_data);
 
         $config_data = call_user_func_array('array_merge_recursive', $config_data);
-//        print_r($config_data);
 
         $output = '<ul>' . $this->processSettingsForm($config_data) . '</ul>';
-
 
         $template->set('rendered_content', $output);
     }
