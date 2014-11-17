@@ -1628,8 +1628,8 @@ abstract class Table extends Page {
             return false;
         // TODO: This should be replaced by an overriding method in the child class.
         if (
-            (!empty($field['display_function']) && is_callable($field['display_function']))
-            || (!empty($field['display_new_function']) && is_callable($field['display_new_function']))
+            (!empty($field['display_value']) && is_callable($field['display_value']))
+            || (!empty($field['display_new_value']) && is_callable($field['display_new_value']))
         )
             return true;
         if ($field['field'] == $this->parentLink)
@@ -1646,8 +1646,8 @@ abstract class Table extends Page {
             return false;
         // TODO: This should be replaced by an overriding method in the child class.
         if (
-            (!empty($field['display_function']) && is_callable($field['display_function']))
-            || (!empty($field['display_edit_function']) && is_callable($field['display_edit_function']))
+            (!empty($field['display_value']) && is_callable($field['display_value']))
+            || (!empty($field['display_edit_value']) && is_callable($field['display_edit_value']))
         )
             return true;
         if ($field['field'] == $this->parentLink)
@@ -1658,8 +1658,8 @@ abstract class Table extends Page {
     function display_list(&$field) {
         // TODO: This should be replaced by an overriding method in the child class.
         if (
-            (!empty($field['display_function']) && is_callable($field['display_function']))
-            || (!empty($field['display_list_function']) && is_callable($field['display_list_function']))
+            (!empty($field['display_value']) && is_callable($field['display_value']))
+            || (!empty($field['display_list_value']) && is_callable($field['display_list_value']))
         )
             return true;
         if ($field['field'] == $this->parentLink)
@@ -1673,8 +1673,8 @@ abstract class Table extends Page {
 
     function display_view(&$field) {
         if (
-            (!empty($field['display_function']) && is_callable($field['display_function']))
-            || (!empty($field['display_view_function']) && is_callable($field['display_view_function']))
+            (!empty($field['display_value']) && is_callable($field['display_value']))
+            || (!empty($field['display_view_value']) && is_callable($field['display_view_value']))
         )
             return true;
         if ($field['type'] == "note" && $field['view'])
@@ -2474,8 +2474,8 @@ abstract class Table extends Page {
 
         if (!empty($field['render_'.$this->action.'_field']) && is_callable($field['render_'.$this->action.'_field'])) {
             return $field['render_'.$this->action.'_field']($row);
-        } elseif (!empty($field['display_function']) && is_callable($field['display_function'])) {
-            return $field['display_function']($row);
+        } elseif (!empty($field['display_value']) && is_callable($field['display_value'])) {
+            return $field['display_value']($row);
         } else {
             switch(preg_replace('/\([0-9]+\)/', '', $field['type'])) {
                 case 'lookup':
