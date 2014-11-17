@@ -59,11 +59,12 @@ class CMS {
         }
 
         if (ClientUser::getInstance()->isAdmin()) {
+            JS::startup('lightning.cms.initPlain()');
             JS::set('token', Session::getInstance()->getToken());
-            return '<a href="" class="button" onclick="javascript:lightning.cms.editPlain(\'' . $name . '\'); return false;">Change</a>'
-            . '<a href="" class="button" onclick="javascript:lightning.cms.savePlain(\'' . $name . '\'); return false;">Save</a>'
+            return '<img src="/images/lightning/pencil.png" class="cms_edit_plain icon-16" id="cms_edit_' . $name . '">'
+            . '<img src="/images/lightning/save.png" class="cms_save_plain icon-16" id="cms_save_' . $name . '" style="display:none">'
             . '<input type="text" id="cms_' . $name . '" value="' . $value . '" style="display:none" />'
-            . '<span id="display_cms_' . $name . '">' . $value . '</span>';
+            . '<span id="cms_display_' . $name . '">' . $value . '</span>';
         } else {
             return $value;
         }

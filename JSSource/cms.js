@@ -94,13 +94,26 @@ lightning.cms = {
             },
             error:function(){
                 alert('The image could not be saved, please try again later.');
-                self.edit();
             }
         });
     },
 
+    initPlain: function() {
+        var self = this;
+        $('.cms_edit_plain').click(function(e){
+            var id = $(e.target).attr('id').replace(/^cms_edit_/, '');
+            self.editPlain(id);
+        });
+        $('.cms_save_plain').click(function(e){
+            var id = $(e.target).attr('id').replace(/^cms_save_/, '');
+            self.savePlain(id);
+        });
+    },
+
     editPlain: function(id) {
-        $('#display_cms_' + id).hide();
+        $('#cms_edit_' + id).hide();
+        $('#cms_save_' + id).show();
+        $('#cms_display_' + id).hide();
         $('#cms_' + id).show();
     },
 
@@ -126,13 +139,14 @@ lightning.cms = {
                     }
                 } else {
                     // Switch back to the main view.
+                    $('#cms_edit_' + id).show();
+                    $('#cms_save_' + id).hide();
                     $('#cms_' + id).hide();
-                    $('#display_cms_' + id).html($('#cms_' + id).val()).show();
+                    $('#cms_display_' + id).html($('#cms_' + id).val()).show();
                 }
             },
             error:function(){
                 alert('The image could not be saved, please try again later.');
-                self.edit();
             }
         });
     }
