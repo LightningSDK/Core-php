@@ -6,6 +6,7 @@
 
 namespace Lightning\Tools;
 
+use Lightning\Tools\Cache\Cache;
 use Lightning\Tools\Configuration;
 use stdClass;
 
@@ -16,26 +17,28 @@ use stdClass;
  */
 class Template extends Singleton {
 
+    protected $cache = array();
+
     /**
      * The main template file.
      *
      * @var string
      */
-    private $template;
+    protected $template;
 
     /**
      * The directory where the templates are located.
      *
      * @var string
      */
-    private $template_dir;
+    protected $template_dir;
 
     /**
      * The variables accessible within the template.
      *
      * @var array
      */
-    private $vars = array();
+    protected $vars;
 
     /**
      * Initialize the template object.
@@ -78,23 +81,16 @@ class Template extends Singleton {
             Output::sendCookies();
         }
 
-        if(!empty($template)) {
-            $this->template = $template;
+        // Get the default template if none is supplied.
+        if (empty($template)) {
+            $template = $this->template;
         }
 
         if ($return_as_string) {
-            // Setup an output buffer
-            ob_start();
+            return $this->build($template, true);
+        } else {
+            print $this->build($template, false);
         }
-
-        extract($this->vars);
-        include $this->template_dir . $this->template . '.tpl.php';
-
-        if ($return_as_string) {
-            // Setup an output buffer
-            return ob_get_clean();
-        }
-        exit;
     }
 
     /**
@@ -149,15 +145,74 @@ class Template extends Singleton {
         $this->template = $template;
     }
 
+    public function setCache($page, $ttl = null, $size = null) {
+        $ttl = $ttl ?: (Configuration::get('page.cache.ttl')) ?: Cache::MONTH;
+        $size = $size ?: (Configuration::get('page.cache.size')) ?: Cache::MEDIUM;
+        $this->cache[$page] = array(
+            'ttl' => $ttl,
+            'size' => $size,
+        );
+    }
+
     /**
-     * Include a template from within another template.
+     * Build a template file, optionally with caching.
      *
-     * @param string $page
+     * @param string $template
      *   The name of the template excluding .tpl.php.
+     * @param boolean $return_as_string
+     *   Whether to return the contents or print them to the stdout.
+     *
+     * @return string|null
+     *   The output if requested, or null.
      */
-    public function _include($page){
+    public function build($template, $return_as_string = false){
+        if (!empty($this->cache[$template])) {
+            // Cache is enabled for this page.
+            $ttl = !empty($this->cache[$template]['ttl']) ? $this->cache[$template]['ttl'] : Cache::MONTH;
+            $size = !empty($this->cache[$template]['size']) ? $this->cache[$template]['size'] : Cache::MEDIUM;
+
+            // Load the cache.
+            $cache = Cache::get('template_' . $template, $ttl, $size);
+
+            // If the cache doesn't exist.
+            if ($cache->isNew()) {
+                // Build the page.
+                $cache->value = $this->_include($template, true);
+            }
+
+            // Return or output.
+            if ($return_as_string) {
+                return $cache->value;
+            } else {
+                print $cache->value;
+            }
+        } else {
+            // Return or output without cache.
+            return $this->_include($template, $return_as_string);
+        }
+    }
+
+    /**
+     * @param string $template
+     *   The name of the template file to render.
+     * @param boolean $return_as_string
+     *   Whether to return the contents or print them to the stdout.
+     *
+     * @return string|null
+     *   The output if requested, or null.
+     */
+    protected function _include($template, $return_as_string = false) {
+        if ($return_as_string) {
+            ob_start();
+        }
+
+        // Include the file with vars in scope.
         extract($this->vars);
-        include $this->template_dir . $page . '.tpl.php';
+        include $this->template_dir . $template . '.tpl.php';
+
+        if ($return_as_string) {
+            return ob_get_clean();
+        }
     }
 
     /**

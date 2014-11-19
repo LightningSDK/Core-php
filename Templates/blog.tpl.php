@@ -14,7 +14,7 @@ if ($user->isAdmin()): ?>
     <? foreach ($blog->posts as $post): ?>
         <? if ( count($blog->posts) == 1): ?>
             <h1><?=$post['title'];?></h1>
-            <?= $this->_include('social_links'); ?>
+            <?= $this->build('social_links'); ?>
         <? else: ?>
             <h2><a href='/<?=$post['url'];?>.htm'><?=$post['title'];?></a></h2>
         <? endif; ?>
@@ -24,7 +24,7 @@ if ($user->isAdmin()): ?>
             <?=$blog->body($post['body'])?><? if ( count($blog->posts) > 1):?> <a href='/<?=$post['url']?>.htm'>read more...</a><? endif; ?>
         </div>
         <br />
-        <?= $this->_include('social_links'); ?>
+        <?= $this->build('social_links'); ?>
         <br />
 
         <? if (count($blog->posts) == 1): ?>

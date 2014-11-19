@@ -3,6 +3,6 @@
 <?
 
 $opt_in_redirect = '/message?msg=optin';
-$this->_include('optin');
+$this->build('optin');
 
 ?>

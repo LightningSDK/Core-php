@@ -147,6 +147,9 @@ class Page {
 
     /**
      * Redirect the page to the same current page with the current query string.
+     *
+     * @param array
+     *   Additional query string parameters to add to the current url.
      */
     public function redirect($params = array()) {
         $output_params = array();

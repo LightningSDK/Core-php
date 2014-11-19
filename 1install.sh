@@ -25,7 +25,12 @@ if [ ! -d $DIR/../Source ]; then
   echo "Making Source Directory"
   mkdir $DIR/../Source
   echo "Copying Source htaccess file"
-  cp install/.htaccess-protected ../Source/.htaccess
+  cp $DIR/install/.htaccess-protected $DIR/../Source/.htaccess
+fi
+
+# Install the cache directory.
+if [ ! -d $DIR/../cache ]; then
+  cp -r $DIR/install/cache $DIR/../
 fi
 
 # Copy the core foundation files.

@@ -35,6 +35,6 @@
             <input type="button" name="submit" class='button page_edit' onclick="lightning.page.save();" value="Save" <? if (empty($action) || $action != 'new'):?>style="display:none;"<? endif; ?> /><br />
         <? endif; ?>
 
-        <?= $this->_include('social_links'); ?>
+        <?= $this->build('social_links'); ?>
     </div>
 </div>

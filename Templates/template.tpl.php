@@ -125,11 +125,11 @@ use Lightning\View\CSS;
                         <?
                         endif;
                         if (!empty($content)) :
-                            $this->_include($content);
+                            $this->build($content);
                         endif; ?>
                     </div>
                     <div class="small-12 medium-4 columns">
-                        <? $this->_include('right_column'); ?>
+                        <? $this->build('right_column'); ?>
                     </div>
                 <? else: ?>
                     <div class="large-12 columns">
@@ -151,7 +151,7 @@ use Lightning\View\CSS;
                         <?
                         endif;
                         if (!empty($content)) :
-                            $this->_include($content);
+                            $this->build($content);
                         endif; ?>
                     </div>
                 <? endif; ?>
