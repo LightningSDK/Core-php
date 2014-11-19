@@ -35,41 +35,6 @@ if ($user->isAdmin()): ?>
         <div data-src="<?=$post['url']?>" class="OUTBRAIN" ></div>
         <script type="text/javascript">(function(){window.OB_platformType=8;window.OB_langJS="http://widgets.outbrain.com/lang_en.js";window.OBITm="1394419150171";window.OB_recMode="brn_strip";var ob=document.createElement("script");ob.type="text/javascript";ob.async=true;ob.src="http"+("https:"===document.location.protocol?"s":"")+"://widgets.outbrain.com/outbrainLT.js";var h=document.getElementsByTagName("script")[0];h.parentNode.insertBefore(ob,h);})();</script>
 
-        <? if (count($blog->posts) == 1 || !empty($post['comments'])):?>
-            <h2>Comments:</h2>
-            <? if (count($blog->posts) == 1): ?>
-                <div id='new_comment_box'>
-                    <table border="0">
-                        <tr><td>Name:</td><td><input type="text" name="blog_comment_name" id="blog_comment_name" /></td></tr>
-                        <tr><td>Email:</td><td><input type="text" name="blog_comment_email" id="blog_comment_email" /></td></tr>
-                        <tr><td>Website:</td><td><input type="text" name="blog_comment_web" id="blog_comment_web" /></td></tr>
-                        <tr><td colspan="2"><textarea id='blog_new_comment' name="blog_new_comment"></textarea></td></tr>
-                        <tr><td colspan="2" align="center">
-                                <input type="button" name="blog_submit_comment" id="blog_submit_comment" value="comment" onclick="submit_comment(<?=$post['blog_id']?>)" /></td></tr>
-                    </table>
-                </div>
-            <? endif; ?>
-            <div class="blog_comment_container" id='blog_comment_container'>
-                <? foreach ($post['comments'] as $comment): ?>
-                    <div class="blog_comment" id='blog_comment_<?=$comment['blog_comment_id']?>'>
-                        <? if ($user->isAdmin()): ?>
-                            <span class="delete_comment" onclick="delete_blog_comment(<?=$$comment['blog_comment_id']?>);">X</span>
-                            <? if ( $comment['approved'] == 0): ?>
-                                <span class="approve_comment" onclick="approve_blog_comment(<?=$comment['blog_comment_id']?>);">Approve</span>
-                            <? endif; ?>
-                        <? endif; ?>
-                        <span class="blog_comment_body"><?=$comment['comment']?></span><br />
-                        <span class="blog_comment_name">By <?=$comment['name']?></span>
-                        <span class="blog_comment_date">on <?=date('F j, Y \a\t g:iA', $comment['time'])?></span>
-                    </div>
-                <? endforeach; ?>
-            </div>
-            <div class="blog_comment" id='blog_comment_blank' style="display:none;">
-                <span class="blog_comment_body"></span><br />
-                <span class="blog_comment_name"></span> <span class="blog_comment_date"></span>
-            </div>
-        <? endif; ?>
-
     <? endforeach; ?>
     <?=$blog->pagination()?>
 <? elseif ($page_section == "blog"): ?>

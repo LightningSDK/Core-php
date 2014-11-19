@@ -30,7 +30,7 @@ class Blog extends Page {
         $blog_url = Request::get('request');
 
         // SEE IF A SPECIFIC BLOG ARTICLE IS BEING REQUESTED.
-        $blog = new BlogModel();
+        $blog = BlogModel::getInstance();
         if($blog_id > 0) {
             $blog->fetch_blog_id($blog_id);
         }

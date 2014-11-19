@@ -89,7 +89,7 @@ class Page {
         $template->set('messages', Messenger::getMessages());
 
         $template->set('site_name', Configuration::get('site.name'));
-        $template->set('blog', new Blog());
+        $template->set('blog', Blog::getInstance());
         JS::set('active_nav', $this->nav);
         $template->render($this->template);
     }

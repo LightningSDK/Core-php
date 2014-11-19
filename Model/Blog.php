@@ -4,8 +4,9 @@ namespace Overridable\Lightning\Model;
 
 use Lightning\Tools\Database;
 use Lightning\Tools\Scrub;
+use Lightning\Tools\Singleton;
 
-class Blog {
+class Blog extends Singleton {
 
     var $id = 0;
     var $posts = array();
@@ -21,6 +22,13 @@ class Blog {
     const CATEGORY_TABLE = 'blog_category';
     const BLOG_CATEGORY_TABLE = 'blog_blog_category';
     const COMMENT_TABLE = 'blog_comment';
+
+    /**
+     * @return Blog
+     */
+    public static function getInstance() {
+        return parent::getInstance();
+    }
 
     function body($body, $force_short = false){
         if ($this->shorten_body || $force_short) {
