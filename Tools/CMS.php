@@ -5,16 +5,21 @@ namespace Lightning\Tools;
 use Lightning\View\JS;
 
 class CMS {
-    public static function embed($name, $default_value = '') {
+    public static function embed($name, $settings = array()) {
         $content = self::loadCMS($name);
-        $content = (!empty($content) ? $content['content'] : $default_value);
+        $content = (!empty($content) ? $content['content'] : (!empty($settings['default']) ? $settings : ''));
         if (ClientUser::getInstance()->isAdmin()) {
             JS::set('token', Session::getInstance()->getToken());
             return
                 '<a href="javascript:lightning.cms.edit(\'cms_' . $name . '\')" class="button" id="cms_edit_' . $name . '">Edit</a>'
                 . '<a href="javascript:lightning.cms.save(\'cms_' . $name . '\')" class="button hide" id="cms_save_' . $name . '">Save</a>'
                 . CKEditor::editableDiv('cms_' . $name,
-                    array('spellcheck' => true, 'content' => $content, 'finder' => true)
+                    array(
+                        'spellcheck' => true,
+                        'content' => $content,
+                        'finder' => true,
+                        'edit_border' => !empty($settings['edit_border']),
+                    )
                 );
         } else {
             return '<div>' . $content . '</div>';
@@ -49,7 +54,7 @@ class CMS {
         }
     }
 
-    public static function plain($name, $settings) {
+    public static function plain($name, $settings = array()) {
         if ($content = self::loadCMS($name)) {
             $value = $content['content'];
         } elseif (!empty($settings['default'])) {
