@@ -17,6 +17,11 @@ use stdClass;
  */
 class Template extends Singleton {
 
+    /**
+     * Cache settings for specific pages.
+     *
+     * @var array
+     */
     protected $cache = array();
 
     /**
