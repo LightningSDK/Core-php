@@ -51,10 +51,10 @@ class CKEditor {
         if (empty($options['content'])) {
             $options['content'] = '<p></p>';
         }
+
         $spellcheck = !empty($options['spellcheck']) ? 'spellcheck="true"' : '';
-        if (!empty($options['edit_border'])) {
-            $style = ' style="border:1px solid red;"';
-        }
+        $style = !empty($options['edit_border']) ? ' style="border:1px solid red;"' : '';
+
         $output = '<div id="' .$id . '" ' . $spellcheck . $style . '>';
         $output .= $options['content'];
         $output .= '</div>';

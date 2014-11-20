@@ -24,10 +24,15 @@ class Blog extends Singleton {
     const COMMENT_TABLE = 'blog_comment';
 
     /**
+     * Overrides parent function.
+     *
+     * @param boolean $create
+     *   Whether to create a new instance.
+     *
      * @return Blog
      */
-    public static function getInstance() {
-        return parent::getInstance();
+    public static function getInstance($create = true) {
+        return parent::getInstance($create);
     }
 
     function body($body, $force_short = false){

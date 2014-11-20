@@ -709,8 +709,9 @@ class User {
         if($this->id > 0) {
             $this->details = NULL;
             $this->id = 0;
-            if(is_object($session))
+            if(is_object($session)) {
                 $session->destroy();
+            }
         }
     }
 
