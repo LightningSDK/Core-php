@@ -24,16 +24,20 @@ class CLI {
             $this->$func();
         }
         else {
-            echo "No handler found.\n";
+            $this->out('No handler found.');
         }
     }
 
-    public function readline($prompt = null){
-        if($prompt){
+    public function readline($prompt = null) {
+        if ($prompt) {
             echo $prompt;
         }
-        $fp = fopen("php://stdin","r");
+        $fp = fopen("php://stdin", "r");
         $line = rtrim(fgets($fp, 1024));
         return $line;
+    }
+
+    public function out($string) {
+        print $string . "\n";
     }
 }
