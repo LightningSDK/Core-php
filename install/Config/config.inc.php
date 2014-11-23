@@ -56,6 +56,17 @@ $conf = array(
         'private' => '',
     ),
     'web_root' => 'http://www.Website.com',
+    'daemon' => array(
+        'max_threads' => 3,
+    ),
+    'jobs' => array(
+        'session_cleanup' => array(
+            'class' => 'Lightning\\Jobs\\Session',
+            'offset' => 7200, // 2 am server time
+            'interval' => 86400,
+            'max_threads' => 1,
+        ),
+    ),
     'routes' => array(
         'dynamic' => array(
             '.*\.html' => 'Lightning\\Pages\\Page',
