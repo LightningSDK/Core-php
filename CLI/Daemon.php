@@ -2,6 +2,7 @@
 
 namespace Lightning\CLI;
 
+use DateTime;
 use Lightning\Tools\Configuration;
 
 // This is required for the signal handler.
@@ -57,7 +58,6 @@ class Daemon extends CLI {
     public function executeStart() {
         exec('pgrep lightning.*daemon', $pids);
         if (!empty($pids)) {
-            $this->out('Already running');
             return;
         }
 
@@ -71,15 +71,13 @@ class Daemon extends CLI {
             return;
         } else if ($pid) {
             // This is the parent thread.
-            $this->out('pid; ' . $pid);
             $status = null;
             pcntl_waitpid($pid, $status, WNOHANG);
             return;
         }
 
         // This is the child thread.
-        $set = pcntl_signal(SIGCHLD, array($this, 'childSignalHandler'));
-        $this->out($set ? 'true' : 'false');
+        pcntl_signal(SIGCHLD, array($this, 'childSignalHandler'));
         $this->lastCheck = time();
         do {
             $this->checkForJobs();
@@ -93,21 +91,22 @@ class Daemon extends CLI {
      * Check to see if there are any jobs to fork.
      */
     protected function checkForJobs() {
-        $this->out('checking for jobs');
         if (!$this->hasFreeThreads()) {
             // There are too many threads running already.
-            $this->out('no free threads');
             return;
         }
 
         foreach ($this->jobs as &$job) {
+            $date = new DateTime();
             if (
                 // If this was skipped last time.
                 !empty($this->job['skipped'])
                 // Or it's time to run again.
-                || (time() - $job['offset']) % $job['interval'] < (time() - $this->lastCheck)
+                || (
+                    time() + $job['offset'] + $date->getOffset()) % $job['interval']
+                    < (time() - $this->lastCheck
+                )
             ) {
-                $this->out('starting job');
                 $this->startJob($job);
             }
         }
@@ -125,8 +124,6 @@ class Daemon extends CLI {
 
         $remainingThreads = $max_threads - count($job['max_threads']);
         $remainingThreads = min($remainingThreads, $this->maxThreads - count($this->threads));
-
-        $this->out('remaining threads: ' . $remainingThreads);
 
         // If this job was skipped, we can start it up again next time regardless of
         // interval.
@@ -171,12 +168,10 @@ class Daemon extends CLI {
             }
         }
 
-        $this->out(count($this->threads) . ' < ' . $this->maxThreads);
         return count($this->threads) < $this->maxThreads;
     }
 
     public function childSignalHandler($signo, $pid=null, $status=null) {
-        $this->out('signal: ' . $signo . ' : ' . $pid . ' : ' . $status);
         // If no pid is provided, Let's wait to figure out which child process ended
         if(!$pid){
             $pid = pcntl_waitpid(-1, $status, WNOHANG);
