@@ -2654,6 +2654,7 @@ abstract class Table extends Page {
                 }
                 if (!empty($field['full_page'])) {
                     $config['fullPage'] = true;
+                    $config['allowedContent'] = true;
                 }
 
                 if (!empty($field['height'])) {

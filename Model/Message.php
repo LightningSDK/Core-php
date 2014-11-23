@@ -26,6 +26,13 @@ class Message {
     protected $customVariables = array();
 
     /**
+     * Custom variables to replace in the message, read from templates.
+     *
+     * @var array
+     */
+    protected $internalCustomVariables = array();
+
+    /**
      * The formatted message contents.
      *
      * @var array
@@ -96,6 +103,19 @@ class Message {
             $this->combinedMessageTemplate = str_replace('{CONTENT_BODY}', $this->message['body'] . '{UNSUBSCRIBE}', $this->template['body']) . '{TRACKING_IMAGE}';
         } else {
             $this->combinedMessageTemplate = str_replace('{CONTENT_BODY}', $this->message['body'], $this->template['body']) . '{TRACKING_IMAGE}';
+        }
+
+        $this->loadVariablesFromTemplate();
+    }
+
+    protected function loadVariablesFromTemplate() {
+        $set_variable = array();
+        preg_match_all('/{([a-z_]+)=(.*)}/imU', $this->combinedMessageTemplate, $set_variable);
+        foreach ($set_variable[1] as $index => $var) {
+            // Save the variable value.
+            $this->internalCustomVariables[$var] = $set_variable[2][$index];
+            // Remove the setting tag.
+            $this->combinedMessageTemplate = str_replace($set_variable[0][$index], '', $this->combinedMessageTemplate);
         }
     }
 
@@ -168,8 +188,21 @@ class Message {
      */
     public function replaceVariables($source) {
         // Replace custom variables.
-        foreach($this->customVariables as $cv => $cvv){
+        foreach($this->customVariables + $this->internalCustomVariables as $cv => $cvv){
+            // Replace simple variables as a string.
             $source = str_replace("{".$cv."}", $cvv, $source);
+        }
+
+        // Replace conditions.
+        $conditions = array();
+        $conditional_search = '/{IF ([a-z_]+)}(.*){ENDIF \1}/imU';
+        preg_match_all($conditional_search, $source, $conditions);
+        foreach ($conditions[1] as $key => $var) {
+            if (!empty($this->customVariables[$var]) || !empty($this->internalCustomVariables[$var])) {
+                $source = preg_replace($conditional_search, $conditions[2][$key], $source);
+            } else {
+                $source = preg_replace($conditional_search, '', $source);
+            }
         }
 
         // Replace standard variables.
