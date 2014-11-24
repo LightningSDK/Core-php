@@ -57,11 +57,12 @@ $conf = array(
     ),
     'web_root' => 'http://www.Website.com',
     'daemon' => array(
-        'max_threads' => 3,
+        'max_threads' => 5,
+        'log' => '../logs/daemon.log',
     ),
     'jobs' => array(
         'session_cleanup' => array(
-            'class' => 'Lightning\\Jobs\\Session',
+            'class' => 'Lightning\\Jobs\\UserCleanup',
             'offset' => 7200, // 2 am server time
             'interval' => 86400,
             'max_threads' => 1,
