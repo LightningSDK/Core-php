@@ -279,6 +279,25 @@ class Session extends Singleton {
     }
 
     /**
+     * Remove all expired sessions from the database.
+     *
+     * @return integer
+     *   The number of sessions removed.
+     */
+    public static function clearExpiredSessions() {
+        $remember_ttl = Configuration::get('session.remember_ttl');
+        if (empty($remember_ttl)) {
+            return 0;
+        }
+        return Database::getInstance()->delete(
+            'session',
+            array(
+                'last_ping' => array('<', time() - $remember_ttl)
+            )
+        );
+    }
+
+    /**
      * Issue a new random key to the session. Everything else stays the same.
      */
     public function scramble(){
