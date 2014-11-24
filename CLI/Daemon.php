@@ -4,6 +4,7 @@ namespace Lightning\CLI;
 
 use DateTime;
 use Lightning\Tools\Configuration;
+use Lightning\Tools\Logger;
 
 // This is required for the signal handler.
 declare(ticks = 1);
@@ -53,13 +54,28 @@ class Daemon extends CLI {
     protected $lastCheck;
 
     /**
+     * The timezone offset in seconds.
+     *
+     * @var integer
+     */
+    protected $timezoneOffset;
+
+    /**
      * Initial start command from the terminal.
      */
     public function executeStart() {
-        exec('pgrep lightning.*daemon', $pids);
-        if (!empty($pids)) {
+        Logger::setLog(Configuration::get('daemon.log'));
+        Logger::message('Starting Daemon');
+
+        if ($this->getMyPid() != posix_getpid()) {
+            $this->out('Already running.');
             return;
         }
+        $this->out('Starting Daemon');
+
+        // Get the timezone offset.
+        $date = new DateTime();
+        $this->timezoneOffset = $date->getOffset();
 
         $this->maxThreads = Configuration::get('daemon.max_threads');
         $this->jobs = Configuration::get('jobs');
@@ -77,7 +93,8 @@ class Daemon extends CLI {
         }
 
         // This is the child thread.
-        pcntl_signal(SIGCHLD, array($this, 'childSignalHandler'));
+        pcntl_signal(SIGCHLD, array($this, 'handlerSIGCHLD'));
+        pcntl_signal(SIGTERM, array($this, 'handlerSIGTERM'));
         $this->lastCheck = time();
         do {
             $this->checkForJobs();
@@ -85,6 +102,39 @@ class Daemon extends CLI {
 
             // TODO: add sigint and memory check.
         } while ($this->keepAlive);
+    }
+
+    /**
+     * Command to send SIGTERM to the running daemon.
+     */
+    public function executeStop() {
+        if ($pid = $this->getMyPid()) {
+            $this->out('Stopping process: ' . $pid);
+            posix_kill($pid, SIGTERM);
+            do {
+                sleep(1);
+            } while ($this->getMyPid());
+            $this->out('Stopped');
+        } else {
+            $this->out('Not running.');
+        }
+    }
+
+    /**
+     * Get the PID of the current running daemon process.
+     *
+     * @return integer
+     *   The PID.
+     */
+    protected function getMyPid() {
+        exec('ps -ef | grep ' . realpath(HOME_PATH . '/index.php'), $output);
+        foreach ($output as $command) {
+            if (preg_match('/daemon start/', $command)) {
+                preg_match('/[0-9]+/', $command, $matches);
+                return $matches[0];
+            }
+        }
+        return null;
     }
 
     /**
@@ -97,13 +147,12 @@ class Daemon extends CLI {
         }
 
         foreach ($this->jobs as &$job) {
-            $date = new DateTime();
             if (
                 // If this was skipped last time.
                 !empty($this->job['skipped'])
                 // Or it's time to run again.
                 || (
-                    time() + $job['offset'] + $date->getOffset()) % $job['interval']
+                    time() - $job['offset'] + $this->timezoneOffset) % $job['interval']
                     < (time() - $this->lastCheck
                 )
             ) {
@@ -113,6 +162,12 @@ class Daemon extends CLI {
         $this->lastCheck = time();
     }
 
+    /**
+     * Attempt to start child processes for a job.
+     *
+     * @param array $job
+     *   The job that is timed to start.
+     */
     protected function startJob(&$job) {
         // Make sure there are free threads.
         $max_threads = !empty($job['max_threads']) ? $job['max_threads'] : 1;
@@ -122,7 +177,7 @@ class Daemon extends CLI {
             $job['threads'] = array();
         }
 
-        $remainingThreads = $max_threads - count($job['max_threads']);
+        $remainingThreads = $max_threads - count($job['threads']);
         $remainingThreads = min($remainingThreads, $this->maxThreads - count($this->threads));
 
         // If this job was skipped, we can start it up again next time regardless of
@@ -146,7 +201,7 @@ class Daemon extends CLI {
                 $this->threads[$pid] = $pid;
                 if (!empty($this->signalQueue[$pid])) {
                     // This will happen if the item died instantly.
-                    $this->childSignalHandler(SIGCHLD, $pid, $this->signalQueue[$pid]);
+                    $this->handlerSIGCHLD(SIGCHLD, $pid, $this->signalQueue[$pid]);
                     unset($this->signalQueue[$pid]);
                 }
                 // Continue looping.
@@ -159,7 +214,13 @@ class Daemon extends CLI {
             }
         }
     }
-    
+
+    /**
+     * Check if the daemon has free child threads.
+     *
+     * @return boolean
+     *   Whether the daemon has child threads available.
+     */
     protected function hasFreeThreads() {
         foreach ($this->threads as $thread) {
             if (!file_exists('/proc/' . $thread)) {
@@ -171,7 +232,15 @@ class Daemon extends CLI {
         return count($this->threads) < $this->maxThreads;
     }
 
-    public function childSignalHandler($signo, $pid=null, $status=null) {
+    /**
+     * The handler for when a child process dies.
+     *
+     * @param $signo
+     * @param null $pid
+     * @param null $status
+     * @return bool
+     */
+    protected function handlerSIGCHLD($signo, $pid=null, $status=null) {
         // If no pid is provided, Let's wait to figure out which child process ended
         if(!$pid){
             $pid = pcntl_waitpid(-1, $status, WNOHANG);
@@ -190,5 +259,12 @@ class Daemon extends CLI {
             $pid = pcntl_waitpid(-1, $status, WNOHANG);
         }
         return true;
+    }
+
+    /**
+     * The handler for receiving a SIGTERM signal.
+     */
+    protected function handlerSIGTERM() {
+        $this->keepAlive = false;
     }
 }
