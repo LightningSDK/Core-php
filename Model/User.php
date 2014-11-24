@@ -33,6 +33,8 @@ class User {
      */
     const TYPE_ADMIN = 5;
 
+    const TEMP_KEY_TTL = 86400;
+
     /**
      * The row from the database.
      *
@@ -182,7 +184,7 @@ class User {
             array(
                 'temp_key' => $key,
                 // The key is only good for 24 hours.
-                'time' => array('>=', time() - 86400),
+                'time' => array('>=', time() - static::TEMP_KEY_TTL),
             )
         )) {
             return new static ($details);
@@ -627,6 +629,15 @@ class User {
             'user_temp_key',
             array(
                 'user_id' => $this->id,
+            )
+        );
+    }
+
+    public static function removeExpiredTempKeys() {
+        return Database::getInstance()->delete(
+            'user_temp_key',
+            array(
+                'time' => array('<', time() - static::TEMP_KEY_TTL)
             )
         );
     }
