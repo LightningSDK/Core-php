@@ -115,7 +115,7 @@ class Page {
                 $this->output();
             }
             else {
-                Messenger::error('There was an error processing your submission.');
+                Output::error('There was an error processing your submission.');
             }
         } else {
             if (method_exists($this, $request_type)) {
