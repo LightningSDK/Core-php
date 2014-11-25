@@ -43,7 +43,7 @@ class Template extends Singleton {
      *
      * @var array
      */
-    protected $vars;
+    protected $vars = array();
 
     /**
      * Initialize the template object.
