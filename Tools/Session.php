@@ -212,7 +212,7 @@ class Session extends Singleton {
             $this->state = null;
             $this->user_id = null;
         }
-        $this->setCookie();
+        $this->clearCookie();
     }
 
     /**

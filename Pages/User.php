@@ -17,7 +17,7 @@ class User extends Page {
 
     protected $page = 'user';
 
-    public function __construct() {
+    public function get() {
         parent::__construct();
         Form::requiresToken();
         $user = ClientUser::getInstance();
