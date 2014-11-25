@@ -48,13 +48,22 @@ class ClientUser extends Singleton {
 
     /**
      * Require the user to log in and return to this page afterwards.
+     *
+     * @param string $action
+     *   The action on the login page.
      */
-    public static function requireLogin() {
+    public static function requireLogin($action = '') {
         if (self::getInstance()->id == 0) {
-            Navigation::redirect('/user?redirect=' . Scrub::toURL(Request::get('request')));
+            if (!empty($action)) {
+                $action = 'action=' . Scrub::toURL($action) . '&';
+            }
+            Navigation::redirect('/user?' . $action . 'redirect=' . Scrub::toURL(Request::get('request')));
         }
     }
 
+    /**
+     * Require to log in if not, and to be an admin or give an access denied page.
+     */
     public static function requireAdmin() {
         self::requireLogin();
         if (!self::getInstance()->isAdmin()) {
