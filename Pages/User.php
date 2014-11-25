@@ -17,7 +17,8 @@ class User extends Page {
 
     protected $page = 'user';
 
-    public function get() {
+    public function __construct() {
+        parent::__construct();
         Form::requiresToken();
         $user = ClientUser::getInstance();
         Template::getInstance()->set('redirect', Request::get('redirect'));
@@ -36,8 +37,9 @@ class User extends Page {
             $previous_user = $user->id;
             if($user->create($email, $pass)){
                 $user->login($email, $pass2);
-                if($previous_user != 0)
+                if($previous_user != 0) {
                     $user->merge_users($previous_user);
+                }
                 $redirect = Request::post('redirect');
                 if(!empty($redirect) && !preg_match('|/?user[/$?]|', $redirect)) {
                     Navigation::redirect($redirect);
