@@ -94,7 +94,9 @@ class Message {
         $this->loadTemplate();
         $this->loadCriteria();
         $this->unsubscribe = $unsubscribe;
-        $this->default_name = Configuration::get('mailer.default_name');
+        if ($default_name_settings = Configuration::get('mailer.default_name')) {
+            $this->default_name = $default_name_settings;
+        }
         if (
             $this->unsubscribe
             && !strstr($this->message['body'], '{UNSUBSCRIBE}')
