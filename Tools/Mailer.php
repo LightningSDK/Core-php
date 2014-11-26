@@ -11,6 +11,14 @@ use Lightning\Model\User;
 require_once HOME_PATH . '/Lightning/Vendor/PHPMailer/class.phpmailer.php';
 
 class Mailer {
+
+    /**
+     * A list of custom variables to be supplied to the message.
+     *
+     * @var array
+     */
+    protected $customVariables = array();
+
     /**
      * The PHPMailer object.
      *
@@ -71,6 +79,28 @@ class Mailer {
         $this->mailer->Sender = Configuration::get('mailer.bounce_address');
         $this->verbose = $verbose;
         Messenger::setVerbose(true);
+    }
+
+    /**
+     * Set the value for a custom variable.
+     *
+     * @param string $var
+     *   The variable name found in the email template.
+     * @param string $value
+     *   The replacement value.
+     */
+    public function setCustomVariable($var, $value) {
+        $this->customVariables[$var] = $value;
+    }
+
+    /**
+     * Reset all custom variables to the supplied list.
+     *
+     * @param array $values
+     *   A list of variable values keyed by variable names.
+     */
+    public function resetCustomVariables($values = array()) {
+        $this->customVariables = $values;
     }
 
     /**
@@ -245,6 +275,7 @@ class Mailer {
      */
     function sendOne($message_id, $user) {
         $this->message = new Message($message_id);
+        $this->message->resetCustomVariables($this->customVariables);
         $this->to($user->email, $user->first . ' ' . $user->last);
         $this->message->setUser($user);
         $this->subject($this->message->getSubject());

@@ -110,6 +110,31 @@ class Message {
         $this->loadVariablesFromTemplate();
     }
 
+    /**
+     * Set the value for a custom variable.
+     *
+     * @param string $var
+     *   The variable name found in the email template.
+     * @param string $value
+     *   The replacement value.
+     */
+    public function setCustomVariable($var, $value) {
+        $this->customVariables[$var] = $value;
+    }
+
+    /**
+     * Reset all custom variables to the supplied list.
+     *
+     * @param array $values
+     *   A list of variable values keyed by variable names.
+     */
+    public function resetCustomVariables($values = array()) {
+        $this->customVariables = $values;
+    }
+
+    /**
+     * Parse the template for {VARIABLE=VALUE} tags.
+     */
     protected function loadVariablesFromTemplate() {
         $set_variable = array();
         preg_match_all('/{([a-z_]+)=(.*)}/imU', $this->combinedMessageTemplate, $set_variable);
