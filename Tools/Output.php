@@ -122,6 +122,7 @@ class Output {
     public static function error($error) {
         Messenger::error($error);
         Template::getInstance()->render('');
+        exit;
     }
 
     public static function clearCookie($cookie) {
