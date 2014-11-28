@@ -15,7 +15,20 @@ lightning.startup = {
     },
 
     initForms: function() {
-        $('form.validate').each(function() {
+        var forms = $('form.validate');
+
+        if (forms.length == 0) {
+            return;
+        }
+
+        // Add lightning validation rules.
+        $.validator.addMethod("passwordLength", $.validator.methods.minlength, "Your password must be at least {0} characters long.");
+        $.validator.addMethod("passwordVerify", $.validator.methods.equalTo, "Please enter the same password twice.");
+        $.validator.addClassRules("password", { required: true, passwordLength: 6});
+        $.validator.addClassRules("password2", { required: true, passwordLength: 6, passwordVerify: '.password'});
+
+        // Activate validation for forms.
+        forms.each(function() {
             var id = $(this).attr('id');
             if (lightning.formValidation && lightning.formValidation[id]) {
                 $(this).validate(lightning.formValidation[id]);
