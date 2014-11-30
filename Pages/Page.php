@@ -110,7 +110,7 @@ class Page extends PageView {
     }
 
     public function loadPage($content_locator) {
-        Database::getInstance()->selectRow('page', array('url' => array('LIKE', $content_locator)));
+        return Database::getInstance()->selectRow('page', array('url' => array('LIKE', $content_locator)));
     }
 
     public function getNew() {
