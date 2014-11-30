@@ -36,6 +36,7 @@ class Session extends Singleton {
         $this->state = $session_details['state'];
         $this->user_id = $session_details['user_id'];
         $this->details = $session_details;
+        $this->details['content'] = empty($this->details['content']) ? '' : json_decode($this->details['content'], true);
     }
 
     /**
@@ -322,17 +323,21 @@ class Session extends Singleton {
         Output::clearCookie(Configuration::get('session.cookie'));
     }
 
+    public function getSetting($field) {
+        if (!empty($this->details['content'])) {
+            return $this->details['content'][$field];
+        } else {
+            return null;
+        }
+    }
+
+    public function setSettings($field, $value) {
+        $this->details['content'][$field] = $value;
+    }
+
     // Return the session content
     public function getData () {
-        if ($field = Database::getInstance()->selectField(
-            'content',
-            'session',
-            array('session_id' => $this->id)
-        )) {
-            return json_decode($field, true);
-        } else {
-            return array();
-        }
+        return $this->details['content'];
     }
 
     // Set session content
@@ -340,6 +345,14 @@ class Session extends Singleton {
         Database::getInstance()->update(
             'session',
             array('content' => json_encode($content)),
+            array('session_id' => $this->id)
+        );
+    }
+
+    public function saveData () {
+        Database::getInstance()->update(
+            'session',
+            array('content' => json_encode($this->details['content'])),
             array('session_id' => $this->id)
         );
     }

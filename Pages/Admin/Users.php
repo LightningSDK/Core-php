@@ -5,7 +5,9 @@ namespace Lightning\Pages\Admin;
 use Lightning\Model\User;
 use Lightning\Pages\Table;
 use Lightning\Tools\ClientUser;
+use Lightning\Tools\Navigation;
 use Lightning\Tools\Request;
+use Overridable\Lightning\Tools\Session;
 
 class Users extends Table {
 
@@ -36,12 +38,21 @@ class Users extends Table {
             'type' => 'checkbox',
         ),
     );
+
     protected $links = array(
         'message_list' => array(
             'display_name' => 'Mailing Lists',
             'key' => 'message_list_id',
             'index' => 'message_list_user',
             'display_column' => 'name',
+        ),
+    );
+
+    protected $action_fields = array(
+        'impersonate' => array(
+            'type' => 'link',
+            'url' => '/admin/users?action=impersonate&id=',
+            'display_value' => 'Impersonate',
         ),
     );
 
@@ -59,5 +70,13 @@ class Users extends Table {
         $this->preset['password']['display_value'] = function(&$row) {
             return !empty($row['password']) ? 'Set' : '';
         };
+    }
+
+    public function getImpersonate() {
+        $session = Session::getInstance();
+        $session->setSettings('impersonate', Request::get('id', 'int'));
+        $session->saveData();
+        // TODO: This should call the User::loginRedirect() function.
+        Navigation::redirect('/');
     }
 }

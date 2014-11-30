@@ -152,19 +152,6 @@ class User {
     }
 
     /**
-     * Load a user for the provided session.
-     *
-     * @param $session
-     * @return bool|User
-     */
-    public static function loadBySession($session) {
-        if($session->user_id > 0) {
-            return static::loadById($session->user_id);
-        }
-        return false;
-    }
-
-    /**
      * Load a user by their temporary access key, from a password reset link.
      *
      * @param string $key

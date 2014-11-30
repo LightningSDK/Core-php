@@ -36,14 +36,21 @@ class ClientUser extends Singleton {
         $session_ip = Request::server('ip_int');
         // If a session is found.
         if ($session_id && $session_ip && $session = Session::load($session_id, $session_ip)) {
-            // Try to load the user on this session.
-            if ($user = User::loadBySession($session)) {
-                return $user;
+            // If we are logged into someone elses account.
+            if ($impersonate = $session->getSetting('impersonate')) {
+                $user = User::loadById($impersonate);
+            } else {
+                // Try to load the user on this session.
+                $user = User::loadById($session->user_id);
             }
         }
 
-        // No user was found.
-        return User::anonymous();
+        if ($user) {
+            return $user;
+        } else {
+            // No user was found.
+            return User::anonymous();
+        }
     }
 
     /**
