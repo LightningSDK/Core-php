@@ -3,6 +3,7 @@
 namespace Lightning\Pages\Admin;
 
 use Lightning\Pages\Table;
+use Lightning\Tools\ClientUser;
 
 class Pages extends Table {
 
@@ -10,6 +11,9 @@ class Pages extends Table {
         ClientUser::requireAdmin();
         parent::__construct();
     }
+
+    protected $searchable = true;
+    protected $search_fields = array('title', 'url', 'body');
 
     protected $nav = 'admin_pages';
     protected $table = 'page';
