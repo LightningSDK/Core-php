@@ -59,6 +59,9 @@ class Session extends Singleton {
         if ($session_key = Request::cookie('session', 'hex')) {
             if ($session_details = Database::getInstance()->selectRow('session', array('session_key' => array('LIKE', $session_key)))) {
                 return new static($session_details);
+            } else {
+                // There is an old cookie that we should delete.
+                static::clearCookie();
             }
         }
 
@@ -234,7 +237,7 @@ class Session extends Singleton {
      * Sends a blank cookie to overwrite and forget any current session cookie.
      */
     static function clearCookie(){
-        Output::setCookie(Configuration::get('session.cookie'), '', Configuration::get('session.remember_ttl'));
+        Output::setCookie(Configuration::get('session.cookie'), '', -1, '', Configuration::get('cookie_domain'));
     }
 
     /**

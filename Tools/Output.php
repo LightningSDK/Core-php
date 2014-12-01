@@ -134,7 +134,7 @@ class Output {
             'value' => $value,
             'ttl' => $ttl ? $ttl + time() : 0,
             'path' => $path,
-            'domain' => $domain ?: Configuration::get('cookie_domain'),
+            'domain' => $domain !== null ? $domain : Configuration::get('cookie_domain'),
             'secure' => $secure !== null ? $secure : (!empty($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] == 1 || strtolower($_SERVER['HTTPS']) == 'on')),
             'httponly' => $httponly,
         );
