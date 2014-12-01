@@ -45,7 +45,7 @@ class ClientUser extends Singleton {
             }
         }
 
-        if ($user) {
+        if (!empty($user)) {
             return $user;
         } else {
             // No user was found.
