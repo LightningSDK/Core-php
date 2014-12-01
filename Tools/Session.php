@@ -223,7 +223,10 @@ class Session extends Singleton {
      * Update the last active time on the session.
      */
     public function ping(){
+        // Make the cookie last longer in the database.
         Database::getInstance()->update('session', array('last_ping' => time()), array('session_id' => $this->id));
+        // Make the cookie last longer in the browser.
+        $this->setCookie();
     }
 
     /**
