@@ -691,7 +691,7 @@ abstract class Table extends Page {
     function renderList() {
 
         if (count($this->list) == 0 && empty($this->prefixRows)) {
-            echo "<p></p><p></p><p>There is nothing to show. <a href='".$this->createUrl('new')."'>Add a new entry</a></p><p></p><p></p>";
+            return "<p></p><p></p><p>There is nothing to show. <a href='".$this->createUrl('new')."'>Add a new entry</a></p><p></p><p></p>";
         }
 
         $output = '';
