@@ -33,7 +33,7 @@ class BlogTable extends Table {
     );
 
     protected function initSettings() {
-        ClientUser::requireAdmin();
+        ClientUser::requireAdmin(); 
         if (Request::get('return') == 'view') {
             $this->post_actions['after_post'] = function($row) {
                 Navigation::redirect('/' . $row['url'] . '.htm');
