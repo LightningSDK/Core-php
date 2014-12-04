@@ -4,6 +4,7 @@ namespace Lightning\Pages;
 
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Request;
+use Lightning\Tools\ClientUser;
 use Lightning\Model\Blog as BlogModel;
 
 class BlogTable extends Table {
@@ -30,6 +31,11 @@ class BlogTable extends Table {
         'url' => array('type' => 'url', 'unlisted' => true),
         'body' => array('editor' => 'full', 'upload' => true),
     );
+
+    public function __construct() {
+        ClientUser::requireAdmin();
+        parent::__construct();
+    }
 
     protected function initSettings() {
         if (Request::get('return') == 'view') {
