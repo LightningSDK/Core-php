@@ -35,9 +35,12 @@ class User extends Page {
         if ($email && $pass == $pass2){
             $user = ClientUser::getInstance();
             $previous_user = $user->id;
-            if($user->create($email, $pass)){
-                $user->login($email, $pass2);
+            if($user_id = UserObj::create($email, $pass)){
+                UserObj::login($email, $pass2);
+                $user = ClientUser::getInstance();
+
                 if($previous_user != 0) {
+                    // TODO: This should only happen if the user is a placeholder.
                     $user->merge_users($previous_user);
                 }
                 $redirect = Request::post('redirect');
