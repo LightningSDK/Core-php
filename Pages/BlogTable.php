@@ -4,6 +4,7 @@ namespace Lightning\Pages;
 
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Request;
+use Lightning\Tools\ClientUser;
 use Lightning\Model\Blog as BlogModel;
 
 class BlogTable extends Table {
@@ -32,6 +33,7 @@ class BlogTable extends Table {
     );
 
     protected function initSettings() {
+        ClientUser::requireAdmin();
         if (Request::get('return') == 'view') {
             $this->post_actions['after_post'] = function($row) {
                 Navigation::redirect('/' . $row['url'] . '.htm');
