@@ -32,8 +32,12 @@ class BlogTable extends Table {
         'body' => array('editor' => 'full', 'upload' => true),
     );
 
+    public function __construct() {
+        ClientUser::requireAdmin();
+        parent::__construct();
+    }
+
     protected function initSettings() {
-        ClientUser::requireAdmin(); 
         if (Request::get('return') == 'view') {
             $this->post_actions['after_post'] = function($row) {
                 Navigation::redirect('/' . $row['url'] . '.htm');
