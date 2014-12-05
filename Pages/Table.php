@@ -85,6 +85,12 @@ abstract class Table extends Page {
     protected $action_fields=array();
     protected $custom_templates=array();
     protected $list_where;
+
+    /**
+     * Criteria of elements editable by this object.
+     *
+     * @var array
+     */
     protected $accessControl;
 
     /**
