@@ -180,6 +180,16 @@ class Session extends Singleton {
     }
 
     /**
+     * Set the user to the session.
+     *
+     * @param $user_id
+     *   The new user id.
+     */
+    public function setUser($user_id) {
+        Database::getInstance()->update('session', array('user_id' => $user_id), array('session_id' => $this->id));
+    }
+
+    /**
      * Checks for password access.
      *
      * @param int $state
