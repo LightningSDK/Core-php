@@ -22,7 +22,9 @@ class User extends API {
             // BAD PASSWORD COMBO
             Messenger::error('Invalid password.');
         } else {
-            $data['cookies'] = array('session' => Session::getInstance()->key);
+            $session = Session::getInstance();
+            $session->setState(Session::STATE_APP);
+            $data['cookies'] = array('session' => $session->key);
         }
         Output::json($data);
     }

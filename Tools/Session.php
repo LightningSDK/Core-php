@@ -22,6 +22,7 @@ class Session extends Singleton {
 
     const STATE_REMEMBER = 1;
     const STATE_PASSWORD = 2;
+    const STATE_APP = 4;
 
     /**
      * Constructs the session object given it's row from the database, possibly with some
