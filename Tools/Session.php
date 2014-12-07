@@ -341,7 +341,7 @@ class Session extends Singleton {
     }
 
     public function getSetting($field) {
-        if (!empty($this->details['content'])) {
+        if (!empty($this->details['content'][$field])) {
             return $this->details['content'][$field];
         } else {
             return null;
