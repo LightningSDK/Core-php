@@ -180,7 +180,7 @@ class Time extends Field {
         BasicHTML::setDefaultClass($attributes, 'timePop');
 
         // TODO: Pass the class into this renderer.
-        return BasicHTML::select($field, $values, strtoupper($value), $attributes);
+        return BasicHTML::select($field, $values, intval($value), $attributes);
     }
 
     /**
@@ -209,7 +209,7 @@ class Time extends Field {
         BasicHTML::setDefaultClass($attributes, 'timePop');
 
         // TODO: Pass the class into this renderer.
-        return BasicHTML::select($field, $values, strtoupper($value), $attributes);
+        return BasicHTML::select($field, $values, intval($value), $attributes);
     }
 
     /**
@@ -252,10 +252,10 @@ class Time extends Field {
         BasicHTML::setDefaultClass($attributes, 'datePop');
 
         // TODO: Pass the class into this renderer.
-        return BasicHTML::select($field, $values, $day, $attributes);
+        return BasicHTML::select($field, $values, intval($day), $attributes);
     }
 
-    public static function monthPop($field, $month=0, $allow_zero = false, $attributes = array()){
+    public static function monthPop($field, $month = 0, $allow_zero = false, $attributes = array()){
         $values = array();
         if ($allow_zero) {
             $values[''] = '';
@@ -267,7 +267,7 @@ class Time extends Field {
         BasicHTML::setDefaultClass($attributes, 'datePop');
 
         // TODO: Pass the class into this renderer.
-        return BasicHTML::select($field, $values, $month, $attributes);
+        return BasicHTML::select($field, $values, intval($month), $attributes);
     }
 
     public static function yearPop($field, $year = 0, $allow_zero = false, $first_year = null, $last_year = null, $attributes = array()){
@@ -289,6 +289,6 @@ class Time extends Field {
         BasicHTML::setDefaultClass($attributes, 'datePop');
 
         // TODO: Pass the class into this renderer.
-        return BasicHTML::select($field, $values, $year, $attributes);
+        return BasicHTML::select($field, $values, intval($year), $attributes);
     }
 }
