@@ -12,6 +12,7 @@ class MessageList extends Schema {
         return array(
             'message_list_id' => $this->autoincrement(),
             'name' => $this->varchar(128),
+            'visible' => $this->int(true, self::TINYINT),
         );
     }
 
