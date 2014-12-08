@@ -33,6 +33,9 @@ class Lists extends Table {
         'name' => array(
             'type' => 'string',
         ),
+        'visible' => array(
+            'type' => 'checkbox',
+        )
     );
 
     protected $prefixRows = array(
