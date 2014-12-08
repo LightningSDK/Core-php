@@ -32,12 +32,11 @@ class User extends API {
     public function postRegister() {
         $email = Request::post('email', 'email');
         $pass = Request::post('password');
-        $pass2 = Request::post('password2');
-        if ($email && $pass == $pass2){
+        if ($email && $pass){
             $user = ClientUser::getInstance();
             $previous_user = $user->id;
             if($user_id = UserObj::create($email, $pass)){
-                UserObj::login($email, $pass2);
+                UserObj::login($email, $pass);
                 $user = ClientUser::getInstance();
 
                 if($previous_user != 0) {
