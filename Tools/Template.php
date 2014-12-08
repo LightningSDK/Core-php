@@ -54,6 +54,19 @@ class Template extends Singleton {
     }
 
     /**
+     * Get the template instance.
+     *
+     * @param boolean $create
+     *   Whether to create the instance if it doesn't exist.
+     *
+     * @return Template
+     *   The template object.
+     */
+    public static function getInstance($create = true) {
+        return parent::getInstance($create);
+    }
+
+    /**
      * Get a variable stored in the template.
      *
      * @param string $var
