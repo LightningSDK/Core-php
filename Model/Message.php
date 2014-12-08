@@ -19,6 +19,12 @@ use Lightning\Tools\Tracker;
 class Message {
 
     /**
+     * Whether this is being sent by the auto mailer.
+     * @var boolean
+     */
+    protected $auto = false;
+
+    /**
      * Custom variables to replace in the message.
      *
      * @var array
@@ -40,11 +46,25 @@ class Message {
     protected $formattedMessage = array();
 
     /**
+     * The mailing lists that will receive the message.
+     *
+     * @var array
+     */
+    protected $lists = array();
+
+    /**
      * The message data from the database.
      *
      * @var array
      */
     protected $message;
+
+    /**
+     * The tracker ID for a sent message.
+     *
+     * @var integer
+     */
+    protected static $message_sent_id;
 
     /**
      * The name to use if the users name is not set.
@@ -88,12 +108,21 @@ class Message {
      *   The ID of the message to load.
      * @param boolean $unsubscribe
      *   Whether to include the ubsubscribe link when sending.
+     * @param boolean $auto
+     *   Whether this is called as an automatic mailer.
      */
-    public function __construct($message_id, $unsubscribe = true) {
+    public function __construct($message_id = null, $unsubscribe = true, $auto = true) {
+        $this->auto = $auto;
         $this->message = Database::getInstance()->selectRow('message', array('message_id' => $message_id));
         $this->loadTemplate();
+        $this->loadLists();
         $this->loadCriteria();
         $this->unsubscribe = $unsubscribe;
+
+        if (empty(self::$message_sent_id)) {
+            self::$message_sent_id = Tracker::getTrackerId('Email Sent');
+        }
+
         if ($default_name_settings = Configuration::get('mailer.default_name')) {
             $this->default_name = $default_name_settings;
         }
@@ -108,6 +137,37 @@ class Message {
         }
 
         $this->loadVariablesFromTemplate();
+    }
+
+    /**
+     * A getter function.
+     *
+     * This works for:
+     *   ->id
+     *   ->details
+     *   ->user_id (item inside ->details)
+     *
+     * @param string $var
+     *   The name of the requested variable.
+     *
+     * @return mixed
+     *   The variable value.
+     */
+    public function __get($var) {
+        switch($var) {
+            case 'id':
+                return $this->message['message_id'];
+                break;
+            case 'details':
+                return $this->message;
+                break;
+            default:
+                if(isset($this->message[$var]))
+                    return $this->message[$var];
+                else
+                    return NULL;
+                break;
+        }
     }
 
     /**
@@ -163,6 +223,10 @@ class Message {
                 );
             }
         }
+    }
+
+    protected function loadLists() {
+        $this->lists = Database::getInstance()->selectColumn('message_message_list', 'message_list_id', array('message_id' => $this->message['message_id']));
     }
 
     /**
@@ -286,9 +350,28 @@ class Message {
         $table = array(
             'from' => 'user',
         );
+        // Deprecated. Users should now be members of a mailing list and messages should include
+        // which lists they are sending to.
         $where = array(
             'active' => 1,
         );
+        if (!empty($this->lists)) {
+            unset($where['active']);
+            $table['join'][] = array(
+                'JOIN',
+                'message_list_user',
+                'ON message_list_user.user_id = user.user_id',
+            );
+            $where['message_list_id'] = array('IN', $this->lists);
+        }
+        if ($this->auto || !empty($this->message['never_resend'])) {
+            $table['join'][] = array(
+                'LEFT JOIN',
+                'tracker_event',
+                'ON tracker_event.user_id = user.user_id AND tracker_event.tracker_id = ' . self::$message_sent_id . ' AND tracker_event.sub_id = ' . $this->message['message_id'],
+            );
+            $where['tracker_event.user_id'] = null;
+        }
 
         return array('table' => $table, 'where' => $where);
     }
@@ -301,7 +384,7 @@ class Message {
      */
     public function getUsers() {
         $query = $this->getUsersQuery();
-        return Database::getInstance()->select($query['table'], $query['where']);
+        return Database::getInstance()->select($query['table'], $query['where'], array('user.*'));
     }
 
     /**

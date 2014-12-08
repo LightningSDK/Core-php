@@ -69,6 +69,13 @@ class Mailer {
     protected $message;
 
     /**
+     * The number of users that the message was sent to.
+     *
+     * @var integer
+     */
+    protected $sentCount = 0;
+
+    /**
      * Construct the mailer object.
      *
      * @param boolean $verbose
@@ -123,6 +130,8 @@ class Mailer {
      *   Returns itself for method chaining.
      */
     public function from($email, $name = null) {
+        $this->from = $email;
+        $this->fromName = $name;
         try {
             $this->mailer->AddReplyTo($email, $name);
             $this->mailer->SetFrom($email, $name);
@@ -239,9 +248,14 @@ class Mailer {
      *   The ID of the message.
      * @param boolean $test
      *   Whether to just sent a test message.
+     * @param boolean $auto
+     *   Whether this is called as an automatic mailer.
+     *
+     * @return integer
+     *   The number of users the message was sent to.
      */
-    function sendBulk($message_id, $test = false){
-        $this->message = new Message($message_id);
+    function sendBulk($message_id, $test = false, $auto = false){
+        $this->message = new Message($message_id, true, $auto);
 
         $this->from(
             Configuration::get('mailer.mail_from') ?: Configuration::get('site.mail_from'),
@@ -263,6 +277,8 @@ class Mailer {
         if ($this->verbose) {
             echo "Test complete";
         }
+
+        return $this->sentCount;
     }
 
     /**
@@ -281,12 +297,14 @@ class Mailer {
         $this->subject($this->message->getSubject());
         $this->message($this->message->getMessage());
         $this->send();
+        Tracker::trackEvent('Email Sent', $message_id, $user->id);
     }
 
     /**
      * Send the current message to the current list of users.
      */
     protected function sendToList() {
+        $this->sentCount = 0;
         foreach($this->users as $user){
             if ($this->verbose) {
                 echo $user['email'] . "<br>\n";
@@ -299,8 +317,11 @@ class Mailer {
             $this->message->setUser(new User($user));
             $this->subject($this->message->getSubject());
             $this->message($this->message->getMessage());
-            $this->send();
+            if ($this->send()) {
+                $this->sentCount ++;
+            }
             $this->mailer->ClearAddresses();
+            Tracker::trackEvent('Email Sent', $this->message->id, !empty($user['user_id']) ? $user['user_id'] : 0);
         }
     }
 }

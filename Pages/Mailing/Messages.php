@@ -108,6 +108,14 @@ class Messages extends Table {
             'display_column' => 'criteria_name',
             'function' => 'update_field_values'
         ),
+        'message_list' => array(
+            'list' => true,
+            'index' => 'message_message_list',
+            'key' => 'message_list_id',
+            'option_name' => 'name',
+            'display_name' => 'Lists',
+            'display_column' => 'name',
+        ),
     );
 
     protected $action_fields = array(
