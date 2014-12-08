@@ -6,8 +6,37 @@ use Lightning\Tools\Request;
 use Lightning\View\Field;
 
 class Time extends Field {
+    /**
+     * Get today's date on the JD calendar.
+     *
+     * @return integer
+     *   The JD date of the server.
+     */
     public static function today() {
         return gregoriantojd(date('m'), date('d'), date('Y'));
+    }
+
+    /**
+     * Create a string like 2 hours, 4 minutes, and 21 seconds.
+     *
+     * @param $time
+     *   The time in seconds.
+     *
+     * @return string
+     *   The formatted time.
+     */
+    public static function formatLength($time) {
+        $seconds = $time % 60;
+        $minutes = floor($time / 60) % 60;
+        $hours = floor($time / 3600);
+
+        if ($hours > 0) {
+            return "$hours hours, $minutes minutes, and $seconds seconds";
+        } elseif ($minutes > 0) {
+            return "$minutes minutes and $seconds seconds";
+        } else {
+            return "$seconds seconds";
+        }
     }
 
     public static function getDate($id, $allow_blank = true) {
@@ -50,9 +79,9 @@ class Time extends Field {
         $y = Request::get($id .'_y', 'int');
         $h = Request::get($id .'_h', 'int');
         $i = str_pad(Request::get($id .'_i', 'int'), 2, 0, STR_PAD_LEFT);
-        $a = Request::get($id . '_a');
+        $a = Request::get($id . '_a', '', '', 'AM');
 
-        if ($allow_blank && (empty($m) || empty($d) || empty($y) || empty($h) || empty($i) || empty($s))) {
+        if ($allow_blank && (empty($m) || empty($d) || empty($y) || empty($h))) {
             return 0;
         }
 
