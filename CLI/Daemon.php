@@ -149,7 +149,7 @@ class Daemon extends CLI {
         foreach ($this->jobs as &$job) {
             if (
                 // If this was skipped last time.
-                !empty($this->job['skipped'])
+                !empty($job['skipped'])
                 // Or it's time to run again.
                 || (
                     time() - $job['offset'] + $this->timezoneOffset) % $job['interval']
