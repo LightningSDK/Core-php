@@ -33,6 +33,8 @@ $conf = array(
         'mail_from' => null,
         'mail_from_name' => null,
         'bounce_address' => null,
+        'default_template' => null,
+        'default_list' => null,
     ),
     'tracker' => array(
         'allow_unencrypted' => true,
