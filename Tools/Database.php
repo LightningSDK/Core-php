@@ -496,8 +496,11 @@ class Database extends Singleton {
         $start_vars = array();
         $table = $this->parseTable($table, $start_vars);
         $ignore = $existing === TRUE ? 'IGNORE' : '';
+
+        // This passes $data as individual params to the __construct() function.
         $reflect  = new ReflectionClass('Lightning\Tools\CombinationIterator');
         $combinator = $reflect->newInstanceArgs($data);
+
         $fields = $this->implodeFields(array_keys($data));
         $placeholder_set = '(' . implode(',', array_fill(0, count($data), '?')) . ')';
 
