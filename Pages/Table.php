@@ -1752,12 +1752,10 @@ abstract class Table extends Page {
         $output = array();
         foreach($field_list as $f => $field) {
             // check for settings that override user input
-            if ($this->action == "insert") {
-                if (!$this->get_value_on_new($field))
-                    continue;
-            } elseif ($this->action == "update") {
-                if (!$this->get_value_on_update($field))
-                    continue;
+            if ($this->action == "insert" && !$this->get_value_on_new($field)) {
+                continue;
+            } elseif ($this->action == "update" && !$this->get_value_on_update($field)) {
+                continue;
             }
             if ($field['type'] == 'note') {
                 continue;
@@ -1773,7 +1771,7 @@ abstract class Table extends Page {
             }
 
             unset($val);
-            $sanitize=false;
+            $sanitize = false;
             $html = false;
             $ignore = false;
 
@@ -1896,7 +1894,7 @@ abstract class Table extends Page {
                 $val = $this->encrypt($this->table, $field['field'], $val);
             }
 
-            if (!$ignore) {
+            if (!$ignore && empty($field['no_save'])) {
                 $output[$field['field']] = $val;
             }
         }
@@ -1916,51 +1914,88 @@ abstract class Table extends Page {
         return $string;
     }
 
+    /**
+     * Save the uploaded data as modified images.
+     *
+     * @param array $field
+     *   The field settings.
+     * @param array $file
+     *   The uploaded file information from $_FILES
+     *
+     * @return string
+     *   The name of the last image created.
+     */
     protected function saveImage($field, $file) {
         // Load the image
-        $output_file = str_replace("/tmp/", '', $file['tmp_name']).rand(0,99999).".jpg";
-        $output_location = $this->getImageLocation($field, $output_file);
         $src_image = imagecreatefromstring(file_get_contents($file['tmp_name']));
 
-        if (is_callable($field['image_preprocess'])) {
-            $src_image = $field['image_preprocess']($src_image);
+        if (empty($field['images'])) {
+            $field['images'] = $field;
         }
 
-        if (!$src_image) {
-            // The image failed to load.
-            return false;
-        }
+        $output_location = '';
+        foreach ($field['images'] as $image) {
+            $image = array_replace($field, $image);
 
-        // Set the quality.
-        $quality = !empty($field['quality']) ? $field['quality'] : 75;
+            // Get the output file location.
+            $output_location = $this->getNewImageLocation($image);
 
-        // Initialized some parameters.
-        // The coordinates of the top left in the dest image where the src image will start.
-        $dest_x = 0;
-        $dest_y = 0;
-        // The coordinates of the source image where the copy will start.
-        $src_x = 0;
-        $src_y = 0;
-        // Src frame = The original image width/height
-        // Dest frame = The destination image width/height
-        // Dest w/h = The destination scaled image content size
-        // Src w/h = The source image copy size
-        $src_frame_w = $dest_frame_w = $dest_w = $src_w = imagesx($src_image);
-        $src_frame_h = $dest_frame_h = $dest_h = $src_h = imagesy($src_image);
+            if (is_callable($image['image_preprocess'])) {
+                $src_image = $image['image_preprocess']($src_image);
+            }
 
-        if (!empty($field['width']) || !empty($field['height'])) {
-            // TODO: Set max width/height
+            if (!$src_image) {
+                // The image failed to load.
+                return false;
+            }
+
+            // Set the quality.
+            $quality = !empty($image['quality']) ? $image['quality'] : 75;
+
+            // Initialized some parameters.
+            // The coordinates of the top left in the dest image where the src image will start.
+            $dest_x = 0;
+            $dest_y = 0;
+            // The coordinates of the source image where the copy will start.
+            $src_x = 0;
+            $src_y = 0;
+            // Src frame = The original image width/height
+            // Dest frame = The destination image width/height
+            // Dest w/h = The destination scaled image content size
+            // Src w/h = The source image copy size
+            $src_frame_w = $dest_frame_w = $dest_w = $src_w = imagesx($src_image);
+            $src_frame_h = $dest_frame_h = $dest_h = $src_h = imagesy($src_image);
+
+            if (!empty($image['max_size']) && empty($image['max_height'])) {
+                $image['max_height'] = $image['max_size'];
+            }
+            if (!empty($image['max_size']) && empty($image['max_width'])) {
+                $image['max_width'] = $image['max_size'];
+            }
+
+            // Set max sizes
+            if (!empty($image['max_width']) && $dest_frame_w > $image['max_width']) {
+                $dest_frame_w = $dest_w = $image['max_width'];
+                // Scale down the height.
+                $dest_frame_h = $dest_h = ($dest_w * $src_h/$src_w);
+            }
+            if (!empty($image['max_height']) && $dest_frame_w > $image['max_height']) {
+                $dest_frame_h = $dest_h = $image['max_height'];
+                // Scale down the width.
+                $dest_frame_w = $dest_w = ($dest_h * $src_w/$src_h);
+            }
 
             // Set absolute width/height
-            if (!empty($field['width'])) {
-                $dest_frame_w = $dest_w = $field['width'];
+            if (!empty($image['width'])) {
+                $dest_frame_w = $dest_w = $image['width'];
             }
-            if (!empty($field['height'])) {
-                $dest_frame_h = $dest_h = $field['height'];
+            if (!empty($image['height'])) {
+                $dest_frame_h = $dest_h = $image['height'];
             }
 
-            if (!empty($field['crop'])) {
-                if ($field['crop'] == 'x') {
+            // If the image can be cropped.
+            if (!empty($image['crop'])) {
+                if ($image['crop'] == 'x') {
                     $scale = $dest_frame_h / $src_frame_h;
                     // Get the width of the destination image if it were scaled.
                     $dest_w = $scale * $src_frame_w;
@@ -1974,26 +2009,23 @@ abstract class Table extends Page {
                         $dest_x = $dest_border / 2;
                     }
                 }
-            } else {
-                // Just copy the image exactly into the new size.
             }
+
+            $dest_image = imagecreatetruecolor($dest_frame_w, $dest_frame_h);
+
+            imagecopyresized(
+                $dest_image, $src_image,
+                $dest_x, $dest_y, $src_x, $src_y,
+                $dest_w, $dest_h, $src_w, $src_h
+            );
+
+            if (is_callable($image['image_postprocess'])) {
+                $dest_image = $image['image_postprocess']($dest_image);
+            }
+
+            imagejpeg($dest_image, $output_location, $quality);
         }
-
-        $dest_image = imagecreatetruecolor($dest_frame_w, $dest_frame_h);
-
-        imagecopyresized(
-            $dest_image, $src_image,
-            $dest_x, $dest_y, $src_x, $src_y,
-            $dest_w, $dest_h, $src_w, $src_h
-        );
-
-        if (is_callable($field['image_postprocess'])) {
-            $dest_image = $field['image_postprocess']($dest_image);
-        }
-
-        imagejpeg($dest_image, $output_location, $quality);
-
-        return $output_file;
+        return $output_location;
     }
 
     function decode_bool_group($int) {
@@ -2585,8 +2617,19 @@ abstract class Table extends Page {
         return str_replace("'", "&apos;", str_replace('"',"&quot;", $v));
     }
 
-    protected function getImageLocation($field, $file = '') {
-        return (strpos($field['location'], '/') !== 0 ? HOME_PATH . '/' . $field['location'] : $field['location']) . '/' . $file;
+    protected function getNewRandomImageName() {
+        return rand(0,99999) . '.jpg';
+    }
+
+    protected function getNewImageLocation($field) {
+        $base = strpos($field['location'], '/') !== 0 ? HOME_PATH . '/' . $field['location'] : $field['location'];
+        if (!empty($field['file_name'])) {
+            return $base . '/' . $field['file_name'];
+        }
+        do {
+            $file = $this->getNewRandomImageName();
+        } while (file_exists($base . '/' . $file));
+        return $base . '/' . $file;
     }
 
     /**
