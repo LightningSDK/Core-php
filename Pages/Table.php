@@ -47,6 +47,7 @@ use Lightning\Tools\Scrub;
 use Lightning\Tools\Session;
 use Lightning\Tools\Template;
 use Lightning\View\Field\BasicHTML;
+use Lightning\View\Field\Hidden;
 use Lightning\View\Field\Text;
 use Lightning\View\Field\Time;
 use Lightning\View\JS;
@@ -392,6 +393,9 @@ abstract class Table extends Page {
         }
 
         // Redirect to the next page.
+        if ($return = Request::get('table_return')) {
+            Navigation::redirect($return);
+        }
         if ($this->submit_redirect && isset($this->action_after[$this->action])) {
             Navigation::redirect($this->createUrl($this->action_after[$this->action], $this->action_after[$this->action] == 'list' ? 1 : $this->id));
         } elseif ($this->submit_redirect && $redirect = Request::get('redirect')) {
@@ -1044,6 +1048,9 @@ abstract class Table extends Page {
                 $multipart_header = $this->hasUploadfield() ? "enctype='multipart/form-data'" : '';
                 echo "<form action='".$this->createUrl()."' id='form_{$this->table}' method='POST' {$multipart_header}><input type='hidden' name='action' id='action' value='{$new_action}' />";
                 echo Form::renderTokenInput();
+                if ($return = Request::get('return')) {
+                    echo Hidden::render('table_return', $return);
+                }
             }
             // use the ID if we are editing a current one
             if ($this->action == "edit")
