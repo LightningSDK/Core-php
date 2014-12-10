@@ -14,4 +14,8 @@ class Navigation {
         header('Location: ' . $url);
         exit;
     }
+
+    public static function currentLocation() {
+        return $_SERVER['REQUEST_URI'];
+    }
 }
