@@ -1,6 +1,8 @@
 <?
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Form;
+use Lightning\View\Field\Checkbox;
+
 ?>
 <form method="post">
     <?=Form::renderTokenInput(); ?>
