@@ -55,5 +55,34 @@ use Lightning\Tools\Form;
             </tr>
         </table>
     </fieldset>
+    <? if ($mailing_lists): ?>
+        <fieldset>
+            <legend>Subscriptions:</legend>
+            <table class="small-12">
+                <tr>
+                    <td>List</td>
+                    <td>Subscribed</td>
+                </tr>
+                <?
+                $subscribe_other_active = false;
+                foreach ($all_lists as $list):
+                    if (!empty($list['name']) && !empty($list['visible'])): ?>
+                        <tr>
+                            <td><?= $list['name'] ?></td>
+                            <td><?= Checkbox::render('subscribed[' . $list['message_list_id'] . ']', $list['message_list_id'], isset($mailing_lists[$list['message_list_id']])); ?></td>
+                        </tr>
+                    <? else:
+                        $subscribe_other_active |= isset($mailing_lists[$list['message_list_id']]);
+                    endif;
+                endforeach; ?>
+                <? if ($subscribe_other_active): ?>
+                    <tr>
+                        <td>Other</td>
+                        <td><?= Checkbox::render('subscribed[]', '0', $subscribe_other_active); ?></td>
+                    </tr>
+                <? endif; ?>
+            </table>
+        </fieldset>
+    <? endif; ?>
     <input type="submit" name="submit" value="Save" class="button">
 </form>
