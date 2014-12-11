@@ -29,7 +29,7 @@ class Bootstrap {
      * @param string $classname
      */
     public static function classAutoloader($classname) {
-        if (empty($loadedClasses[$classname]) && $classname != 'Lightning\Tools\Configuration') {
+        if (empty(self::$loadedClasses[$classname]) && $classname != 'Lightning\Tools\Configuration') {
             if (!self::$loaded) {
                 self::$classes = Configuration::get('classes');
                 self::$overridable = Configuration::get('overridable');
