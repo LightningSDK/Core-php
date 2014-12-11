@@ -32,10 +32,9 @@ class ClientUser extends Singleton {
      *   The currently logged in user.
      */
     public static function createInstance() {
-        $session_id = Request::cookie(Configuration::get('session.cookie'), 'hex');
-        $session_ip = Request::server('ip_int');
         // If a session is found.
-        if ($session_id && $session_ip && $session = Session::load($session_id, $session_ip)) {
+        $session = Session::getInstance();
+        if ($session->user_id > 0) {
             // If we are logged into someone elses account.
             if ($impersonate = $session->getSetting('impersonate')) {
                 $user = User::loadById($impersonate);

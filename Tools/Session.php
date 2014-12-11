@@ -14,7 +14,7 @@ use Lightning\View\JS;
 
 class Session extends Singleton {
     // @todo these vars can probably be removed?
-    var $id = 0;								// ROW ID in DB
+    var $id = 0;							// ROW ID in DB
     var $key;								// hex session key
     var $state = 0;
     var $user_id = 0;
@@ -58,16 +58,46 @@ class Session extends Singleton {
      */
     public static function createInstance() {
         if ($session_key = Request::cookie('session', 'hex')) {
-            if ($session_details = Database::getInstance()->selectRow('session', array('session_key' => array('LIKE', $session_key)))) {
-                return new static($session_details);
+            $session_criteria = array(
+                'session_key' => array('LIKE', $session_key)
+            );
+            // If the session is only allowed on one IP.
+            if (Configuration::get('session.single_ip')) {
+                $session_criteria['session_ip'] = Request::server('ip_int');
+            }
+
+            // See if the session exists.
+            if ($session_details = Database::getInstance()->selectRow('session', $session_criteria)) {
+                // Load the session.
+                $session = new static($session_details);
+
+                // If the password time has lapsed, remove password status.
+                if ($session->getState(Session::STATE_PASSWORD)) {
+                    if ($session_details['last_ping'] < time() - Configuration::get('session.password_ttl')) {
+                        if (!$session->unsetState(Session::STATE_PASSWORD)) {
+                            // The session does not want to be remembered and has been destroyed.
+                            return false;
+                        }
+                    } else {
+                        $session->details['state'] |= static::STATE_PASSWORD;
+                    }
+                }
+
+                $session->ping();
+                return $session;
             } else {
+                // Possible security issue.
+                Logger::logIP('Bad session', Logger::SEVERITY_MED);
                 // There is an old cookie that we should delete.
+                // Send a cookie to erase the users cookie, in case this is really a minor error.
                 static::clearCookie();
+                return static::create();
             }
         }
-
-        // No session exists, create a new one.
-        return static::create();
+        else {
+            // No session exists, create a new one.
+            return static::create();
+        }
     }
 
     /**
@@ -123,50 +153,8 @@ class Session extends Singleton {
         return $session;
     }
 
-    public static function reset($user_id=0, $remember=false) {
+    public static function reset($user_id = 0, $remember = false) {
         static::setInstance(static::create($user_id, $remember));
-    }
-
-    /**
-     * Load a session if one is available for this IP and key.
-     *
-     * @param $session_key
-     *   A unique hex key for the session.
-     * @param $ip_address
-     *   An int value of the IP address that must match the session.
-     * @todo for certain IPs we should allow a range of IPs that are in the same area?
-     *   such as a cell phone that might be changing towers?
-     *
-     * @return bool|session
-     */
-    static function load($session_key, $ip_address){
-        $filter = array('session_key' => $session_key);
-        if (Configuration::get('session.single_ip')) {
-            $filter['session_ip'] = $ip_address;
-        }
-        if ($session_details = Database::getInstance()->selectRow('session', $filter)) {
-            $session = new session($session_details);
-
-            // If the password time has lapsed, remove password status.
-            if ($session->getState(Session::STATE_PASSWORD)) {
-                if ($session_details['last_ping'] < time() - Configuration::get('session.password_ttl')) {
-                    if (!$session->unsetState(Session::STATE_PASSWORD)) {
-                        // The session does not want to be remembered and has been destroyed.
-                        return false;
-                    }
-                } else {
-                    $session->details['state'] |= static::STATE_PASSWORD;
-                }
-            }
-
-            // Update the sessions ping time.
-            $session->ping();
-            return $session;
-        } else {
-            Logger::logIP('Bad session', Logger::SEVERITY_MED);
-            // Send a cookie to erase the users cookie, in case this is really a minor error.
-            static::clearCookie();
-        }
     }
 
     /**
