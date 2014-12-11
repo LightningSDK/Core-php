@@ -43,12 +43,7 @@ class User extends Page {
                     // TODO: This should only happen if the user is a placeholder.
                     $user->merge_users($previous_user);
                 }
-                $redirect = Request::post('redirect');
-                if(!empty($redirect) && !preg_match('|/?user[/$?]|', $redirect)) {
-                    Navigation::redirect($redirect);
-                } else {
-                    Navigation::redirect(Configuration::get('user.login_url'));
-                }
+                $this->loginRedirect();
             }
         }
     }
