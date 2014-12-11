@@ -135,7 +135,6 @@ class Mailer {
         try {
             $this->mailer->AddReplyTo($email, $name);
             $this->mailer->SetFrom($email, $name);
-            $this->mailer->AddReplyTo($email, $name);
             $this->fromSet = true;
         } catch (\Exception $e) {
             Messenger::error($e->getMessage());

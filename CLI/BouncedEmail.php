@@ -20,12 +20,14 @@ class BouncedEmail extends CLI {
             $email = $bounce_info[0]['recipient'];
 
             $user = User::loadByEmail($email);
-            if ($user->id == 0) {
+            if (!$user) {
                 // Bounced from an unknown sender, ignore this.
+                Tracker::trackEvent('Bounced Email', 0, 0);
                 return;
             }
 
             // Track the bounced event.
+            // TODO: we can scan the email for a link to see if we know the message id.
             Tracker::trackEvent('Bounced Email', 0, $user->user_id);
 
             // Get the last 6 send/bounce events.
