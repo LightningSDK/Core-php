@@ -179,6 +179,7 @@ abstract class Table extends Page {
             $this->additional_action_vars['pf'] = $pf;		//Per DAB: PF = popup field
             $this->additional_action_vars['pfdf'] = Request::get('pfdf');	//Per DAB: PFDF = popup display field
         }
+        // TODO: Action is not set yet. Is any of this necessary?
         if ($this->action == 'new') {
             $backlinkname = '';
             $backlinkvalue = '';
@@ -690,15 +691,15 @@ abstract class Table extends Page {
         echo !empty($template) ? $template : '';
     }
 
-    function render_action_header() {
+    public function render_action_header() {
         if (isset($this->custom_templates[$this->action.'_action_header'])) {
             if ($this->custom_templates[$this->action.'_action_header'] != '')
                 echo $this->load_template($this->custom_template_directory.$this->custom_templates[$this->action.'_action_header']);
         } elseif ($this->addable)
-            echo "<a href='".$this->createUrl("new")."'><img src='/images/lightning/new.png' border='0' /></a><br />";
+            echo "<a href='".$this->createUrl('new') . "'><img src='/images/lightning/new.png' border='0' /></a><br />";
     }
 
-    function renderList() {
+    public function renderList() {
 
         if (count($this->list) == 0 && empty($this->prefixRows)) {
             return "<p></p><p></p><p>There is nothing to show. <a href='".$this->createUrl('new')."'>Add a new entry</a></p><p></p><p></p>";
@@ -1188,11 +1189,17 @@ abstract class Table extends Page {
                     echo "<tr><td>{$link}</td><td>";
 
                 // LOAD THE LINKED ROWS
+                // The local key is the primary key column by default or another specified column.
                 $local_key = isset($link_settings['local_key']) ? $link_settings['local_key'] : $this->getKey();
+                // The value of the local key column.
                 $local_id = ($this->table) ? $this->list[$local_key] : $this->id;
 
+                // If there is a local key ID and no active list, load it.
                 if ($local_id > 0 && !isset($link_settings['active_list'])) {
                     $this->load_all_active_list($link_settings, $local_id );
+                } elseif (empty($local_id)) {
+                    // If there is no local ID, this is probably a new item, so the list should be blank.
+                    $link_settings['active_list'] = array();
                 }
 
                 $link_settings['row_count'] = count($link_settings['active_list']);
@@ -1305,7 +1312,7 @@ abstract class Table extends Page {
     // returns drop down menu
     // this renders a linked table showing a list of all available options, and a list of
     // all items that are already added to this table item
-    // this is a many to many - where you can add any of the options from load_all_complete_list()
+    // this is a many to many - where you can add any of the options from loadAllLinkOptions()
     // but you can't edit the actual content unless you go to the table page for that table
     function render_linked_table_editable(&$link_settings) {
         // show list of options to ad
@@ -1317,9 +1324,9 @@ abstract class Table extends Page {
 
             //DEFAULT VIEW MODE
         } else {
-            $this->load_all_complete_list($link_settings);
+            $this->loadAllLinkOptions($link_settings);
             $options = array();
-            foreach($link_settings['complete_list'] as $l) {
+            foreach($link_settings['options'] as $l) {
                 $key = !empty($link_settings['index_fkey']) ? $link_settings['index_fkey'] : $link_settings['key'];
                 $options[$l[$key]] = $l[$link_settings['display_column']];
             }
@@ -1337,7 +1344,7 @@ abstract class Table extends Page {
         $output .= "' /><br /><div id='{$link_settings['table']}_list_container'>";
         // create each item as a viewable deleteable box
         foreach($link_settings['active_list'] as $init) {
-            $output .= "<div class='{$link_settings['table']}_box' id='{$link_settings['table']}_box_{$init[$link_settings['key']]}'>{$init[$link_settings['display_column']]}
+            $output .= "<div class='{$link_settings['table']}_box table_link_box_selected' id='{$link_settings['table']}_box_{$init[$link_settings['key']]}'>{$init[$link_settings['display_column']]}
 						<a href='#' onclick='javascript:".(!empty($link_settings['edit_js']) ? $link_settings['edit_js'].'.deleteLink('.
                     $init[$link_settings['key']].')' : "remove_link(\"{$link_settings['table']}\",{$init[$link_settings['key']]})").";return false;'>X</a></div>";
         }
@@ -1371,9 +1378,9 @@ abstract class Table extends Page {
 
     // this loads all possible optiosn for a link to be joined
     // used in a many to many
-    function load_all_complete_list(&$link_settings) {
+    protected function loadAllLinkOptions(&$link_settings) {
         $where = !empty($link_settings['accessControl']) ? $link_settings['accessControl'] : array();
-        $link_settings['complete_list'] = Database::getInstance()->selectAll($link_settings['table'], $where, array(), 'ORDER BY ' . $link_settings['display_column']);
+        $link_settings['options'] = Database::getInstance()->selectAll($link_settings['table'], $where, array(), 'ORDER BY ' . $link_settings['display_column']);
     }
 
     /**
@@ -1428,43 +1435,40 @@ abstract class Table extends Page {
             if (!empty($other['sort'])) {
                 foreach($other['sort'] as $f=>$d) {
                     switch($d) {
-                        case "A": $sort_fields[$f] = "A"; break;
-                        case "D": $sort_fields[$f] = "D"; break;
-                        case "X":
-                            if (!empty($this->sort_fields[$f]) && $this->sort_fields[$f] == "A")
-                                $sort_fields[$f] = "D";
-                            else
-                                $sort_fields[$f] = "A";
+                        case 'A': $sort_fields[$f] = 'A'; break;
+                        case 'D': $sort_fields[$f] = 'D'; break;
+                        case 'X':
+                            $sort_fields[$f] =
+                                (!empty($this->sort_fields[$f]) && $this->sort_fields[$f] == 'A')
+                                    ? 'D' : 'A';
                             break;
                     }
                 }
             }
             foreach($sort_fields as $f=>$d) {
-                if ($d == "D")
-                    $sort[] = "{$f}:D";
-                else
-                    $sort[] = "{$f}";
+                $sort[] = ($d == 'D') ? $f . ':D' : $f;
             }
-            $vars['sort']=implode(";", $sort);
+            $vars['sort']=implode(';', $sort);
         } elseif (!empty($other['sort'])) {
             $sort = array();
             foreach($other['sort'] as $f=>$d) {
                 switch($d) {
-                    case "D": $sort[] = "{$f}:D"; break;
+                    case 'D': $sort[] = $f . ':D'; break;
 
-                    case "A":
+                    case 'A':
                     default:	 $sort[] = $f; break;
                 }
             }
-            $vars['sort']=implode(";", $sort);
+            $vars['sort']=implode(';', $sort);
         }
 
         $query = $_GET;
-        unset($_GET['request']);
+        unset($query['request']);
+        unset($query['id']);
 
         // Put it all together
         $vars = http_build_query($vars + $query);
-        return "{$this->action_file}".($vars!=''?"?".$vars:'');
+        return $this->action_file . ($vars != '' ? ('?' . $vars) : '');
     }
 
     function load_template($file) {
@@ -2748,7 +2752,12 @@ abstract class Table extends Page {
                 return Time::timePop($field['form_field'], $field['Value'], !empty($field['allow_blank']));
                 break;
             case 'date':
-                $return = Time::datePop($field['form_field'], $field['Value'], !empty($field['allow_blank']), $field['start_year']);
+                $return = Time::datePop(
+                    $field['form_field'],
+                    $field['Value'],
+                    !empty($field['allow_blank']),
+                    !empty($field['start_year']) ? $field['start_year'] : 0
+                );
                 return $return;
                 break;
             case 'datetime':

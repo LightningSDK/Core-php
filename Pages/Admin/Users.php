@@ -20,9 +20,6 @@ class Users extends Table {
     protected $searchable = true;
     protected $search_fields = array('email', 'first', 'last');
     protected $preset = array(
-        'password' => array(
-            'type' => 'char',
-        ),
         'salt' => array(
             'type' => 'hidden',
         ),
