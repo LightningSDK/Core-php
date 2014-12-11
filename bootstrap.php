@@ -1,6 +1,6 @@
 <?php
 
-use Lightning\Tools\Configuration;
+namespace Lightning;
 
 // Set required global parameters.
 if (!defined('HOME_PATH')) {
@@ -11,57 +11,62 @@ if (!defined('CONFIG_PATH')) {
     define('CONFIG_PATH', HOME_PATH . '/Source/Config');
 }
 
-/**
- * A custom class loader.
- *
- * @param string $classname
- */
-function classAutoloader($classname) {
-    static $loadedClasses = array();
-    if (empty($loadedClasses[$classname]) && $classname != 'Lightning\Tools\Configuration') {
-        static $loaded = false;
-        static $classes;
-        static $overrides = array();
-        static $overridable = array();
-        if (!$loaded) {
-            $classes = Configuration::get('classes');
-            $overridable = Configuration::get('overridable');
-            $loaded = true;
-        }
-        if (!empty($classes[$classname])) {
-            // Load an override class and override it.
-            $overridden_name = 'Overridden\\' . $classname;
-            $overrides[$overridden_name] = $overridden_name;
-            loadClassFile($classname);
-            loadClassFile($classes[$classname]);
-            class_alias($classes[$classname], $classname);
-            return;
-        }
-        if (isset($overrides[$classname])) {
-            return;
-        }
-        $class_file = str_replace('Overridable\\', '', $classname);
-        if (isset($overridable[$classname]) || isset($overridable[$class_file])) {
-            loadClassFile($class_file);
-            $loadedClasses[$class_file] = $class_file;
-            class_alias($overridable[$class_file], $class_file);
-            return;
-        }
-    }
-    $loadedClasses[$classname] = $classname;
-    loadClassFile($classname);
-}
-
-/**
- * Require the requested class file.
- *
- * @param $classname
- *   The name of the class.
- */
-function loadClassFile($classname) {
-    $class_path = str_replace('\\', DIRECTORY_SEPARATOR, $classname);
-    require_once HOME_PATH . DIRECTORY_SEPARATOR . $class_path . '.php';
-}
+use Lightning\Tools\Configuration;
 
 // Set the autoloader to the Lightning autoloader.
-spl_autoload_register('classAutoloader');
+spl_autoload_register(array('\\Lightning\\Bootstrap', 'classAutoloader'));
+
+class Bootstrap {
+    static $loaded = false;
+    static $classes;
+    static $overrides = array();
+    static $overridable = array();
+    static $loadedClasses = array();
+
+    /**
+     * A custom class loader.
+     *
+     * @param string $classname
+     */
+    public static function classAutoloader($classname) {
+        if (empty($loadedClasses[$classname]) && $classname != 'Lightning\Tools\Configuration') {
+            if (!self::$loaded) {
+                self::$classes = Configuration::get('classes');
+                self::$overridable = Configuration::get('overridable');
+                self::$loaded = true;
+            }
+            if (!empty(self::$classes[$classname])) {
+                // Load an override class and override it.
+                $overridden_name = 'Overridden\\' . $classname;
+                self::$overrides[$overridden_name] = $overridden_name;
+                self::loadClassFile($classname);
+                self::loadClassFile(self::$classes[$classname]);
+                class_alias(self::$classes[$classname], $classname);
+                return;
+            }
+            if (isset(self::$overrides[$classname])) {
+                return;
+            }
+            $class_file = str_replace('Overridable\\', '', $classname);
+            if (isset(self::$overridable[$classname]) || isset(self::$overridable[$class_file])) {
+                self::loadClassFile($class_file);
+                self::$loadedClasses[$class_file] = $class_file;
+                class_alias(self::$overridable[$class_file], $class_file);
+                return;
+            }
+        }
+        self::$loadedClasses[$classname] = $classname;
+        self::loadClassFile($classname);
+    }
+
+    /**
+     * Require the requested class file.
+     *
+     * @param string $classname
+     *   The name of the class.
+     */
+    public static function loadClassFile($classname) {
+        $class_path = str_replace('\\', DIRECTORY_SEPARATOR, $classname);
+        require_once HOME_PATH . DIRECTORY_SEPARATOR . $class_path . '.php';
+    }
+}
