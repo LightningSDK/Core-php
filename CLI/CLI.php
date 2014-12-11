@@ -6,6 +6,8 @@
 
 namespace Lightning\CLI;
 
+use Lightning\Tools\Configuration;
+use Lightning\Tools\Logger;
 use Lightning\Tools\Request;
 
 /**
@@ -14,6 +16,13 @@ use Lightning\Tools\Request;
  * @package Lightning\CLI
  */
 class CLI {
+    /**
+     * Create the object and set the logger.
+     */
+    public function __construct() {
+        Logger::setLog(Configuration::get('cli.log'));
+    }
+
     /**
      * The main execute method called from index.php
      */

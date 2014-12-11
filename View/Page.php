@@ -4,6 +4,7 @@ namespace Overridable\Lightning\View;
 
 use Lightning\Model\Blog;
 use Lightning\Tools\Configuration;
+use Lightning\Tools\Logger;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Output;
@@ -101,6 +102,8 @@ class Page {
      * rest method.
      */
     public function execute() {
+        Logger::setLog(Configuration::get('site.log'));
+
         $request_type = strtolower(Request::type());
 
         if (!$this->validateToken()) {

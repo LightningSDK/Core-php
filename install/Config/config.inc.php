@@ -19,6 +19,7 @@ $conf = array(
         'name' => 'My Website',
         'domain' => 'Website.com',
         'email_domain' => 'www.Website.com',
+        'log' => '../logs/web.log',
     ),
     'contact' => array(
         'subject' => 'Message from Website.com',
@@ -61,6 +62,9 @@ $conf = array(
     'daemon' => array(
         'max_threads' => 5,
         'log' => '../logs/daemon.log',
+    ),
+    'cli' => array(
+        'log' => '../logs/cli.log',
     ),
     'jobs' => array(
         'session_cleanup' => array(
