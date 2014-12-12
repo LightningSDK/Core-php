@@ -2674,7 +2674,7 @@ abstract class Table extends Page {
                 $v = $row[] = $field['edit_value'];
             }
         }
-        else {
+        elseif (!empty($row[$field['field']])) {
             $v = $row[$field['field']];
         }
 
@@ -2686,7 +2686,9 @@ abstract class Table extends Page {
         }
 
         // prepare value
-        if (!isset($field['Value']) )$field['Value'] = $v;
+        if (!isset($field['Value'])) {
+            $field['Value'] = isset($v) ? $v : null;
+        }
         if (!empty($field['encrypted'])) {
             $field['Value'] = table::decrypt($field['Value']);
         }
@@ -2743,7 +2745,7 @@ abstract class Table extends Page {
                 }
                 // Fall through.
             case 'file':
-                if (($field['Value'] != '' && $field['replaceable'] !== false) || $field['Value'] == ''){
+                if (($field['Value'] != '' && (!isset($field['replaceable']) || empty($field['replaceable']))) || $field['Value'] == ''){
                     $return .= "<input type='file' name='{$field['form_field']}' id='{$field['form_field']}' />";
                 }
                 return $return;
