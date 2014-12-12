@@ -42,4 +42,23 @@ class CMS extends API {
             Output::json(Output::ACCESS_DENIED);
         }
     }
+    
+    public function postUpdateExpire(){
+        $id = Request::post('id');
+        $field = Request::post('field');
+        $m = Request::post("date_m");
+        $d = Request::post("date_d");
+        $y = Request::post("date_y");
+        if($m > 0 && $d > 0){
+            if($y == 0) $y = date("Y");
+            $value = gregoriantojd($m, $d, $y);
+        } else {
+            $value = 0;
+        }
+        Database::getInstance()->update('affiliate_link',
+            array($field => $value),
+            array('affiliate_link_id' => $id)
+        );
+        Output::json(Output::SUCCESS);
+    }
 }
