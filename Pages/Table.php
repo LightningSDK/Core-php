@@ -2795,7 +2795,7 @@ abstract class Table extends Page {
                         .strip_tags((is_array($v)?$v['V']:$v)).'</option>';
                 }
                 $output .= '</select>';
-                if ($field['pop_add']) {
+                if (!empty($field['pop_add'])) {
                     if ($field['table_url']) $location = $field['table_url'];
                     else $location = "table.php?table=".$field['lookuptable'];
                     $output .= "<a onclick='new_pop(\"{$location}\",\"{$field['form_field']}\",\"{$field['display_column']}\")'>Add New Item</a>";
