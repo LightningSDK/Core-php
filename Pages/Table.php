@@ -2017,7 +2017,7 @@ abstract class Table extends Page {
 
             $dest_image = imagecreatetruecolor($dest_frame_w, $dest_frame_h);
 
-            imagecopyresized(
+            imagecopyresampled(
                 $dest_image, $src_image,
                 $dest_x, $dest_y, $src_x, $src_y,
                 $dest_w, $dest_h, $src_w, $src_h
