@@ -129,3 +129,11 @@ $amber-low: rgb(255,205,1);
 .icon-32 {
   height:32px;
 }
+
+.button.red {
+  background-color: #88000b;
+  color: white;
+}
+.button.red:hover {
+  background-color: #c60012;
+}

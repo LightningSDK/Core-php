@@ -2,7 +2,7 @@
 
 <h3>Status:</h3>
 <div class="mail_buttons">
-    <input type="button" id='start_button' class="button" value="Send to All" onclick="lightning.admin.messages.send('all')" />
+    <input type="button" id='start_button' class="button red" value="Send to All" onclick="lightning.admin.messages.send('all')" />
     <input type="button" id='test_button' class="button" value="Send Test" onclick="lightning.admin.messages.send('test')" />
     <input type="button" id='test_button' class="button" value="Send Count" onclick="lightning.admin.messages.send('count')" />
     <input type="button" id='edit_button' class="button" value="Edit" onclick="document.location='/admin/mailing/messages?action=edit&id=<?=$message['message_id']?>'" />
