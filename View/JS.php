@@ -5,7 +5,8 @@
  */
 
 namespace Lightning\View;
-use Overridable\Lightning\Tools\Session;
+
+use Lightning\Tools\Session;
 
 /**
  * Class JS
