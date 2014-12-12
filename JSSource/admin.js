@@ -3,7 +3,7 @@ function add_link(link){
     new_link_name = $('#'+link+'_list option:selected').text();
     remove_link(link,$('#'+link+'_list').val())
     $('#'+link+'_input_array').val($('#'+link+'_input_array').val()+new_link+",");
-    $('#'+link+'_list_container').append($("<div class='"+link+"_box' id='"+link+"_box_"+new_link+"'>"+new_link_name+" <a href='#' onclick='javascript:remove_link(\""+link+"\","+new_link+");return false;'>X</a></div>"));
+    $('#'+link+'_list_container').append($("<div class='"+link+"_box table_link_box_selected' id='"+link+"_box_"+new_link+"'>"+new_link_name+" <a href='#' onclick='javascript:remove_link(\""+link+"\","+new_link+");return false;'>X</a></div>"));
 }
 
 function remove_link(link,link_id){
