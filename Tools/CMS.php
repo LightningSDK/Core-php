@@ -85,11 +85,9 @@ class CMS {
     }
     
     public static function date($name, $settings = array()) {
-        $content = Database::getInstance()->selectRow('affiliate_link', array('affiliate_link_id' => $settings['id']), array('expire'));
+        $content = Database::getInstance()->selectRow($settings['table'], array($settings['key'] => $settings['id']), array($settings['column']));
         if ($content) {
-            $value = $content['expire'];
-        } elseif (!empty($settings['default'])) {
-            $value = $settings['default'];
+            $value = $content[$settings['column']];
         } else {
             $value = '';
         }
@@ -98,7 +96,10 @@ class CMS {
             JS::set('token', Session::getInstance()->getToken());
             return '<img src="/images/lightning/pencil.png" class="cms_edit_date icon-16" id="cms_edit_' . $settings['id'] . '">'
             . '<img src="/images/lightning/save.png" class="cms_save_date icon-16" id="cms_save_' . $settings['id'] . '" style="display:none">'
-            . '<span id="cms_'.$settings['id'].'" style="display:none">' . Time::datePop('cms_'.$settings['id'], $value, 'true', 0) . '</span>';
+            . '<span id="cms_'.$settings['id'].'" style="display:none">' . Time::datePop('cms_'.$settings['id'], $value, 'true', 0) . '</span>'
+            . '<input type="hidden" id="cms_key_' . $settings['id'] . '" value="' . $settings['key'] . '" />'
+            . '<input type="hidden" id="cms_column_' . $settings['id'] . '" value="' . $settings['column'] . '" />'
+            . '<input type="hidden" id="cms_table_' . $settings['id'] . '" value="' . $settings['table'] . '" />';
         } else {
             return $value;
         }

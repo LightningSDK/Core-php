@@ -173,9 +173,11 @@ lightning.cms = {
             dataType: 'json',
             data: {
                 id: id,
-                field: 'expire',
+                key: $('#cms_key_' + id).val(),
+                column: $('#cms_column_' + id).val(),
+                table: $('#cms_table_' + id).val(),
                 token: lightning.vars.token,
-                action: "update-expire",
+                action: "update-date",
                 date_m: $('#cms_' + id + '_m').val(),
                 date_d: $('#cms_' + id + '_d').val(),
                 date_y: $('#cms_' + id + '_y').val()
@@ -195,7 +197,7 @@ lightning.cms = {
                     $('#cms_save_' + id).hide();
                     $('#cms_' + id).hide();
                     var newDate = $('#cms_' + id + '_m').val() + '/' + $('#cms_' + id + '_d').val() + '/' + $('#cms_' + id + '_y').val();
-                    $('#expire_'+id).text(newDate);
+                    $('#date_'+id).text(newDate);
                 }
             },
             error:function(){
