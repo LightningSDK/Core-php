@@ -334,8 +334,10 @@ class User {
     public static function create($email, $pass) {
         if (Database::getInstance()->check('user', array('email' => strtolower($email), 'password' => array('!=', '')))) {
             // An account already exists with that email.
-            Messenger::error('An account with that email already exists. Please try again. if you lost your password, click <a href="/user?action=reset&email=' . urlencode($email) . '">here</a>');
-            return false;
+            return [
+                'success'   => false, 
+                'error'     => 'exists'
+            ];
         } elseif ($user_info = Database::getInstance()->selectRow('user', array('email' => strtolower($email), 'password' => ''))) {
             // EMAIL EXISTS IN MAILING LIST ONLY
             $updates = array();
@@ -352,7 +354,10 @@ class User {
             if($user_info['confirmed'] != 0 && Configuration::get('user.requires_confirmation')) {
                 $user->sendConfirmationEmail($email);
             }
-            return $user_info['user_id'];
+            return [
+                'success'   => true, 
+                'data'      => $user_info['user_id']
+            ];
         } else {
             // EMAIL IS NOT IN MAILING LIST AT ALL
             $user_id = static::insertUser($email, $pass);
@@ -367,7 +372,10 @@ class User {
             if (Configuration::get('user.requires_confirmation')) {
                 $user->sendConfirmationEmail($email);
             }
-            return $user_id;
+            return [
+                'success'   => true, 
+                'data'      => $user_id
+            ];
         }
     }
 
@@ -801,6 +809,51 @@ class User {
         if(Database::getInstance()->check('user', array('user_id' => $anon_user, 'email' => ''))) {
             // TODO: Basic information should be moved here, but this function should be overriden.
             Database::getInstance()->delete('user', array('user_id' => $anon_user));
+        }
+    }
+
+    /**
+     * 
+     * 
+     * @param type $email
+     * @param type $pass
+     * @param type $name
+     * @return type
+     */
+    public static function register($email, $pass, $name = NULL) {
+        // Save current user for further anonymous check
+        $user = ClientUser::getInstance();
+        $previous_user = $user->id;
+
+        // Try to create a user or abort with error message
+        $res = self::create($email, $pass);
+        if ($res['success']) {
+
+            self::login($email, $pass);
+            $user = ClientUser::getInstance();
+
+            // Add the user name.
+            if ($name) {
+                $user->setFullName($name);
+            }
+
+            // Merge with a previous anon user if necessary.
+            if($previous_user != 0) {
+                // TODO: This should only happen if the user is a placeholder.
+                $user->merge_users($previous_user);
+            }
+            
+            // Success
+            return [
+                'success'   => true, 
+                'data'      => ['user_id' => ClientUser::getInstance()->id]
+            ];
+        } else {
+            // Error
+            return [
+                'success'   => false, 
+                'error'     => $res['error']
+            ];
         }
     }
 }

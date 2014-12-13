@@ -9,14 +9,14 @@ use Lightning\Tools\Navigation;
 use Lightning\Tools\Output;
 use Lightning\Tools\Request;
 use Lightning\Tools\Session;
-use Lightning\Model\User as UserObj;
+use Lightning\Model\User as UserModel;
 use Lightning\View\API;
 
 class User extends API {
     public function postLogin() {
         $email = Request::post('email', 'email');
         $pass = Request::post('password');
-        $login_result = UserObj::login($email, $pass);
+        $login_result = UserModel::login($email, $pass);
         $data = array();
         if (!$login_result) {
             // BAD PASSWORD COMBO
@@ -32,20 +32,14 @@ class User extends API {
     public function postRegister() {
         $email = Request::post('email', 'email');
         $pass = Request::post('password');
-        if ($email && $pass){
-            $user = ClientUser::getInstance();
-            $previous_user = $user->id;
-            if($user_id = UserObj::create($email, $pass)){
-                UserObj::login($email, $pass);
-                $user = ClientUser::getInstance();
+        if ($email && $pass) {
 
-                if($previous_user != 0) {
-                    // TODO: This should only happen if the user is a placeholder.
-                    $user->merge_users($previous_user);
-                }
-                Output::json(array('user_id' => ClientUser::getInstance()->id));
+            $res = UserModel::register($email, $pass);
+            if ($res['success']) {
+                Output::json($res['data']);
+            } else {
+                Output::jsonError('User could not be created');
             }
-            Output::jsonError('User could not be created');
         }
         Output::jsonError('Missing data');
     }
