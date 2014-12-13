@@ -11,7 +11,7 @@ use Lightning\Tools\Navigation;
 use Lightning\Tools\Request;
 use Lightning\Tools\Template;
 use Lightning\View\Page;
-use Lightning\Model\User as UserObj;
+use Lightning\Model\User as UserModel;
 
 class User extends Page {
 
@@ -32,18 +32,14 @@ class User extends Page {
         $email = Request::post('email', 'email');
         $pass = Request::post('password');
         $pass2 = Request::post('password2');
-        if ($email && $pass == $pass2){
-            $user = ClientUser::getInstance();
-            $previous_user = $user->id;
-            if($user_id = UserObj::create($email, $pass)){
-                UserObj::login($email, $pass2);
-                $user = ClientUser::getInstance();
-
-                if($previous_user != 0) {
-                    // TODO: This should only happen if the user is a placeholder.
-                    $user->merge_users($previous_user);
-                }
-                $this->loginRedirect();
+        
+        if ($email && $pass == $pass2) {
+            // Register user
+            $res = UserModel::register($email, $pass2);
+            if ($res['error'] == 'exists') {
+                Messenger::error('An account with that email already exists. Please try again. if you lost your password, click <a href="/user?action=reset&email=' . urlencode($email) . '">here</a>');            
+            } else {
+                Messenger::error('User could not be created');
             }
         }
     }
@@ -54,7 +50,7 @@ class User extends Page {
     public function postLogin() {
         $email = Request::post('email', 'email');
         $pass = Request::post('password');
-        $login_result = UserObj::login($email, $pass);
+        $login_result = UserModel::login($email, $pass);
         if (!$login_result) {
             // BAD PASSWORD COMBO
             Messenger::error("You entered the wrong password. If you are having problems and would like to reset your password, <a href='/user?action=reset'>click here</a>");
@@ -80,7 +76,7 @@ class User extends Page {
      */
     public function getUnsubscribe() {
         if ($cyphserstring = Request::get('u', 'encrypted')) {
-            $user = UserObj::loadByEncryptedUserReference($cyphserstring);
+            $user = UserModel::loadByEncryptedUserReference($cyphserstring);
             $user->setActive(0);
             Messenger::message('Your email ' . $user->details['email'] . ' has been removed from all mailing lists.');
         } else {
@@ -102,7 +98,7 @@ class User extends Page {
             Messenger::error('Invalid email');
             return;
         }
-        elseif (!$user = UserObj::loadByEmail($email)) {
+        elseif (!$user = UserModel::loadByEmail($email)) {
             Messenger::error('User does not exist.');
             return;
         }
@@ -113,7 +109,7 @@ class User extends Page {
 
     public function getSetPassword() {
         $key = Request::get('key', 'base64');
-        if ($user = UserObj::loadByTempKey($key)) {
+        if ($user = UserModel::loadByTempKey($key)) {
             Template::getInstance()->set('action', 'set_password');
             Template::getInstance()->set('key', $key);
         } else {
@@ -123,7 +119,7 @@ class User extends Page {
     }
 
     public function postSetPassword() {
-        if ($user = UserObj::loadByTempKey(Request::get('key', 'base64'))) {
+        if ($user = UserModel::loadByTempKey(Request::get('key', 'base64'))) {
             if (($pass = Request::post('password')) && $pass == Request::post('password2')) {
                 $user->setPass($pass);
                 $user->registerToSession();
