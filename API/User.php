@@ -71,7 +71,7 @@ class User extends API {
         }
 
         // Are passwords strong enough? Check its length
-        if (strlen($pass) < 6 OR strlen($pass2) < 6) {
+        if (strlen($pass) < 6) {
             Messenger::error('Passwords must be at least 6 characters');
             $result = FALSE;
         }
