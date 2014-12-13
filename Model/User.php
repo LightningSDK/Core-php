@@ -328,8 +328,11 @@ class User {
      * @param string $pass
      *   The new password.
      *
-     * @return boolean
-     *   Whether the user could be created.
+     * @return Array
+     *   When creation is successful:
+     *      [Status of creation, user id]      
+     *   When not:
+     *      [Status of creation, Error short code]
      */
     public static function create($email, $pass) {
         if (Database::getInstance()->check('user', array('email' => strtolower($email), 'password' => array('!=', '')))) {
@@ -813,12 +816,15 @@ class User {
     }
 
     /**
+     * Registers user
      * 
-     * 
-     * @param type $email
-     * @param type $pass
-     * @param type $name
-     * @return type
+     * @param string $email email
+     * @param string $pass password
+     * @return Array
+     *   When successful:
+     *      [Status, new user id]
+     *   When not:
+     *      [Status, error short code]
      */
     public static function register($email, $pass) {
         // Save current user for further anonymous check
