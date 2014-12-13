@@ -48,9 +48,9 @@ class User extends Page {
         $res = UserModel::register($email, $pass2);
         if (!$res['success']) {
             if ($res['error'] == 'exists') {
-                Messenger::error('An account with that email already exists. Please try again. if you lost your password, click <a href="/user?action=reset&email=' . urlencode($email) . '">here</a>');            
+                Output::error('An account with that email already exists. Please try again. if you lost your password, click <a href="/user?action=reset&email=' . urlencode($email) . '">here</a>');            
             } else {
-                Messenger::error('User could not be created');
+                Output::error('User could not be created');
             }
         }
     }
