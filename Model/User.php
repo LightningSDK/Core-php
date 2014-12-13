@@ -820,7 +820,7 @@ class User {
      * @param type $name
      * @return type
      */
-    public static function register($email, $pass, $name = NULL) {
+    public static function register($email, $pass) {
         // Save current user for further anonymous check
         $user = ClientUser::getInstance();
         $previous_user = $user->id;
@@ -831,11 +831,6 @@ class User {
 
             self::login($email, $pass);
             $user = ClientUser::getInstance();
-
-            // Add the user name.
-            if ($name) {
-                $user->setFullName($name);
-            }
 
             // Merge with a previous anon user if necessary.
             if($previous_user != 0) {
