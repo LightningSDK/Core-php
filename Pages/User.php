@@ -4,7 +4,7 @@ namespace Lightning\Pages;
 
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
-use Lightning\Tools\Database;
+use Lightning\Tools\Output;
 use Lightning\Tools\Form;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
@@ -28,20 +28,71 @@ class User extends Page {
         }
     }
 
+    /**
+     * This is common user register algorithm.
+     * It validates POST data and registers user.
+     */
     public function postRegister() {
+
         $email = Request::post('email', 'email');
         $pass = Request::post('password');
         $pass2 = Request::post('password2');
         
-        if ($email && $pass == $pass2) {
-            // Register user
-            $res = UserModel::register($email, $pass2);
+        // Validate POST data
+        if (!$this->validateData($email, $pass, $pass2)) {
+            // No need to proceed. Immediately output all errors
+            Output::error('');
+        }
+
+        // Register user
+        $res = UserModel::register($email, $pass2);
+        if (!$res['success']) {
             if ($res['error'] == 'exists') {
                 Messenger::error('An account with that email already exists. Please try again. if you lost your password, click <a href="/user?action=reset&email=' . urlencode($email) . '">here</a>');            
             } else {
                 Messenger::error('User could not be created');
             }
         }
+    }
+
+    /**
+     * Validates POST data (email, password and confirmation).
+     * 
+     * @param string $email
+     * @param string $pass
+     * @param string $pass2
+     * @return boolean Is data correct?
+     */
+    protected function validateData($email, $pass, $pass2) {
+        
+        // Default value
+        $result = TRUE;
+        
+        // Are all fields filled?
+        if (is_null($email) OR is_null($pass) OR is_null($pass2)) {
+            Messenger::error('Please fill out all the fields');
+            $result = FALSE;
+        }
+        
+        // Is email correct?
+        if ($email === FALSE) {
+            Messenger::error('Please enter a correct email');
+            $result = FALSE;
+        }
+        
+        // Are passwords strong enough? Check its length
+        if (strlen($pass) < 6 OR strlen($pass2) < 6) {
+            Messenger::error('Passwords must be at least 6 characters');
+            $result = FALSE;
+        }
+
+        // Are passwords match?
+        if ($pass != $pass2) {
+            Messenger::error('Passwords do not match');
+            $result = FALSE;
+        }
+        
+        return $result;
     }
 
     /**
