@@ -1929,9 +1929,13 @@ abstract class Table extends Page {
      * @return string
      *   The name of the last image created.
      */
-    protected function saveImage($field, $file) {
+    public function saveImage($field, $file) {
         // Load the image
         $src_image = imagecreatefromstring(file_get_contents($file['tmp_name']));
+
+        if (!$src_image) {
+            return;
+        }
 
         if (empty($field['images'])) {
             $field['images'] = $field;
@@ -1944,7 +1948,7 @@ abstract class Table extends Page {
             // Get the output file location.
             $output_location = $this->getNewImageLocation($image);
 
-            if (is_callable($image['image_preprocess'])) {
+            if (!empty($image['image_preprocess']) && is_callable($image['image_preprocess'])) {
                 $src_image = $image['image_preprocess']($src_image);
             }
 
@@ -2023,7 +2027,7 @@ abstract class Table extends Page {
                 $dest_w, $dest_h, $src_w, $src_h
             );
 
-            if (is_callable($image['image_postprocess'])) {
+            if (!empty($image['image_postprocess']) && is_callable($image['image_postprocess'])) {
                 $dest_image = $image['image_postprocess']($dest_image);
             }
 
