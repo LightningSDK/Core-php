@@ -95,6 +95,7 @@ class Messages extends Table {
             'type' => 'html',
             'editor' => 'full',
             'upload' => true,
+            'full_page' => true,
         )
     );
 
