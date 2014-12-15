@@ -71,8 +71,9 @@ class User extends API {
         }
 
         // Are passwords strong enough? Check its length
-        if (strlen($pass) < 6) {
-            Messenger::error('Passwords must be at least 6 characters');
+        $min_password_length = Configuration::get('site.min_password_length');
+        if (strlen($pass) < $min_password_length) {
+            Messenger::error("Passwords must be at least {$min_password_length} characters");
             $result = FALSE;
         }
     }
