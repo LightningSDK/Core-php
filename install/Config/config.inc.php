@@ -9,6 +9,7 @@ $conf = array(
         // **** THIS KEY IS INCLUDED WITH THE DISTRIBUTION AND IS NOT SECURE ****
         'key' => 'o2sdxfGwHn2YGcQ3Xh2Z8p5y/BP0dHdbtdmU3ATdMwE=',
         'multiple_devices' => false,
+        'min_password_length' => 6,
     ),
     'session' => array(
         'single_ip' => true,

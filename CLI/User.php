@@ -7,7 +7,8 @@
 namespace Lightning\CLI;
 
 use Lightning\Tools\Scrub;
-use Lightning\Model\User as UserObj;
+use Lightning\Tools\ClientUser;
+use Lightning\Model\User as UserModel;
 
 /**
  * A CLI interface for user functions.
@@ -30,9 +31,10 @@ class User extends CLI {
             $password = $this->readline('Password: ');
         } while (strlen($password) < 6);
 
-        $user = UserObj::create($email, $password);
-        if ($user) {
-            $user->setType(UserObj::TYPE_ADMIN);
+        $res = UserModel::create($email, $password);
+        if ($res['success']) {
+            $user = ClientUser::getInstance(); 
+            $user->setType(UserModel::TYPE_ADMIN);
         } else {
             echo "Failed to create user.\n";
         }
