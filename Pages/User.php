@@ -40,17 +40,17 @@ class User extends Page {
         
         // Validate POST data
         if (!$this->validateData($email, $pass, $pass2)) {
-            // No need to proceed. Immediately output all errors
-            Output::error('');
+            // No need to proceed. Just return, all errors are in Messenger stack
+            return;
         }
 
         // Register user
         $res = UserModel::register($email, $pass2);
         if (!$res['success']) {
             if ($res['error'] == 'exists') {
-                Output::error('An account with that email already exists. Please try again. if you lost your password, click <a href="/user?action=reset&email=' . urlencode($email) . '">here</a>');            
+                Messenger::error('An account with that email already exists. Please try again. if you lost your password, click <a href="/user?action=reset&email=' . urlencode($email) . '">here</a>');            
             } else {
-                Output::error('User could not be created');
+                Messenger::error('User could not be created');
             }
         }
     }
