@@ -198,7 +198,7 @@ class Tracker extends Singleton {
     /**
      * Get an array of data sets.
      *
-     * @param integer $tracker
+     * @param integer $tracker_id
      *   The tracker id.
      * @param integer $start
      *   How many days back to start.

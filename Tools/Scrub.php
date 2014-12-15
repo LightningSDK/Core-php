@@ -172,6 +172,9 @@ class Scrub {
      *   The allowed css elements.
      * @param boolean $trusted
      *   Whether this is from a trusted source like an admin user.
+     * @param boolean $full_page
+     *   Whether to allow all HTML.
+     *   TODO: This currently skips all validation and returns the input.
      *
      * @return string
      *   The sanitized HTML.
