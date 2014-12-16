@@ -44,7 +44,7 @@ class User extends API {
         if ($res['success']) {
             Output::json($res['data']);
         } else {
-            Output::jsonError('User could not be created');
+            Output::jsonError($res['error']);
         }
     }
     
