@@ -53,6 +53,8 @@ class User extends Page {
                 Messenger::error('User could not be created');
             }
         }
+
+        $this->loginRedirect();
     }
 
     /**

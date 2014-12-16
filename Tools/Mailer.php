@@ -85,7 +85,6 @@ class Mailer {
         $this->mailer = new \PHPMailer(true);
         $this->mailer->Sender = Configuration::get('mailer.bounce_address');
         $this->verbose = $verbose;
-        Messenger::setVerbose(true);
     }
 
     /**
