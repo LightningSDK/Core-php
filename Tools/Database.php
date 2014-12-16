@@ -651,7 +651,7 @@ class Database extends Singleton {
                         $output .= $this->implodeOrder($table['order'], $values);
                     }
                     $output = '( SELECT ' . $output . ') AS ' . $table['as'];
-                } elseif (count($table) == 1) {
+                } elseif (count($table) == 1 && empty($table['from'])) {
                     $alias = key($table);
                     $table = current($table);
                     $output = '`' . $table . '` AS `' . $alias . '`';
