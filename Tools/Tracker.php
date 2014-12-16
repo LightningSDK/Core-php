@@ -130,8 +130,8 @@ class Tracker extends Singleton {
             'tracker_event',
             array(
                 'tracker_id' => $tracker_id,
-                'user_id' => $user_id,
-                'sub_id' => $sub_id,
+                'user_id' => $user_id ?: 0,
+                'sub_id' => $sub_id ?: 0,
                 'date' => $today
             )
         );
