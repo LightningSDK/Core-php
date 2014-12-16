@@ -71,12 +71,21 @@ class Request {
      *   value or false if none.
      */
     public static function get($var, $type='', $subtype='', $default = null){
-        if(!isset($_REQUEST[$var]))
-            return $default;
+        if(isset($_POST[$var])) {
+            $args = func_get_args();
+            $args[0] = $_POST[$var];
+            return call_user_func_array('self::clean', $args);
+        }
 
-        $args = func_get_args();
-        $args[0] = $_REQUEST[$var];
-        return call_user_func_array('self::clean', $args);
+        if(isset($_GET[$var])) {
+            $args = func_get_args();
+            $args[0] = $_GET[$var];
+            return call_user_func_array('self::clean', $args);
+        }
+
+        else {
+            return $default;
+        }
     }
 
     /**
