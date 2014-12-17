@@ -1938,15 +1938,16 @@ abstract class Table extends Page {
         }
 
         if (empty($field['images'])) {
-            $field['images'] = $field;
+            $field['images'] = array($field);
         }
 
-        $output_location = '';
+        $new_image = '';
         foreach ($field['images'] as $image) {
             $image = array_replace($field, $image);
 
             // Get the output file location.
-            $output_location = $this->getNewImageLocation($image);
+            $new_image = $this->getNewImageLocation($image);
+            $output_location = $this->getOutputPath($image) . '/' . $new_image;
 
             if (!empty($image['image_preprocess']) && is_callable($image['image_preprocess'])) {
                 $src_image = $image['image_preprocess']($src_image);
@@ -2033,7 +2034,7 @@ abstract class Table extends Page {
 
             imagejpeg($dest_image, $output_location, $quality);
         }
-        return $output_location;
+        return $new_image;
     }
 
     function decode_bool_group($int) {
@@ -2630,14 +2631,18 @@ abstract class Table extends Page {
     }
 
     protected function getNewImageLocation($field) {
-        $base = strpos($field['location'], '/') !== 0 ? HOME_PATH . '/' . $field['location'] : $field['location'];
+        $base = $this->getOutputPath($field);
         if (!empty($field['file_name'])) {
-            return $base . '/' . $field['file_name'];
+            return $field['file_name'];
         }
         do {
             $file = $this->getNewRandomImageName();
         } while (file_exists($base . '/' . $file));
-        return $base . '/' . $file;
+        return $file;
+    }
+
+    protected function getOutputPath($field) {
+        return strpos($field['location'], '/') !== 0 ? HOME_PATH . '/' . $field['location'] : $field['location'];
     }
 
     /**
