@@ -2515,7 +2515,7 @@ abstract class Table extends Page {
         if (empty($row)) {
             $v = !empty($field['Value']) ? $field['Value'] : '';
         } else {
-            $v = $row[$field['field']];
+            $v = !empty($row[$field['field']]) ? $row[$field['field']] : '';
         }
 
         if (!empty($field['encrypted'])) {
