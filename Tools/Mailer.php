@@ -284,13 +284,35 @@ class Mailer {
 
     /**
      * Send a single email to a single user.
+     * It can send either the message loaded from db (determined by message id)
+     * or custom message created with chainable methods to(), subject(), etc.
+     * message_id variable existing is the condition rules the logic.
      *
      * @param int $message_id
      *   The message id.
      * @param User $user
      *   The user object to send to.
      */
-    function sendOne($message_id, $user) {
+    function sendOne($message_id = null, $user = null) {
+        if (empty($message_id)) {
+            // Load form db and send
+            $this->sendAsDbMessage($message_id, $user);
+        } else {
+            // Assue the message is created. Put in a template and send
+            $this->sendAsCustomMessage();
+        }
+    }
+
+    /**
+     * Loads the message from db and sends it
+     * 
+     * @param int $message_id
+     *   The message id.
+     * @param User $user
+     *   The user object to send to.
+     */
+    protected function sendAsDbMessage($message_id, $user) {
+        
         $this->message = new Message($message_id);
         $this->message->resetCustomVariables($this->customVariables);
         $this->to($user->email, $user->first . ' ' . $user->last);
@@ -300,6 +322,30 @@ class Mailer {
         $this->send();
         Tracker::trackEvent('Email Sent', $message_id, $user->id);
     }
+    
+    /**
+     * Send a custom message created with chainable methods like to(), subject(),
+     * etc.
+     */
+    public function sendAsCustomMessage() {
+        
+        // Need to create a Message object to use a template
+        $this->message = new Message(NULL, FALSE);
+        
+        // Set custom variables
+        $vars = [
+            'FULL_NAME'     => $this->fromName,
+            'CONTENT_BODY'  => $this->mailer->Body,
+        ];
+        $this->message->resetCustomVariables($vars);
+        
+        // Set subject and message body. They are applied to a template already
+        $this->subject($this->message->getSubject());
+        $this->message($this->message->getMessage());
+        
+        // Actual send
+        $this->send();
+   }
 
     /**
      * Send the current message to the current list of users.
