@@ -326,11 +326,10 @@ abstract class Table extends Page {
         $this->get_fields();
         $values = $this->getfieldValues($this->fields);
         $this->id = Database::getInstance()->insert($this->table, $values, $this->update_on_duplicate_key ? $values : false);
-        if ($this->post_actions['after_insert']) {
+        if (!empty($this->post_actions['after_insert'])) {
             $this->get_row();
             $this->post_actions['after_insert']($this->list);
-        }
-        elseif ($this->post_actions['after_post']) {
+        } elseif (!empty($this->post_actions['after_post'])) {
             $this->get_row();
             $this->post_actions['after_post']($this->list);
         }
@@ -2561,10 +2560,13 @@ abstract class Table extends Page {
                         // TODO: Needs to implement Time field.
                         $field['options'] = $this->state_options();
                 case 'select':
-                    if (is_array($field['options'][$v]))
-                        return $field['options'][$v]['V'];
-                    else
-                        return $field['options'][$v];
+                    if (isset($field['options'][$v])) {
+                        if (is_array($field['options'][$v])) {
+                            return $field['options'][$v]['V'];
+                        } else {
+                            return $field['options'][$v];
+                        }
+                    }
                     break;
                 case 'file':
                     // TODO: Display thumbmail.
