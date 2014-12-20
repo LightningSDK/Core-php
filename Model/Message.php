@@ -20,9 +20,17 @@ class Message {
 
     /**
      * Whether this is being sent by the auto mailer.
+     *
      * @var boolean
      */
     protected $auto = false;
+
+    /**
+     * A list of criteria associated with the message.
+     *
+     * @var
+     */
+    protected $criteria;
 
     /**
      * Custom variables to replace in the message.
@@ -116,7 +124,6 @@ class Message {
         $this->message = Database::getInstance()->selectRow('message', array('message_id' => $message_id));
         $this->loadTemplate();
         $this->loadLists();
-        $this->loadCriteria();
         $this->unsubscribe = $unsubscribe;
 
         if (empty(self::$message_sent_id)) {
@@ -230,13 +237,24 @@ class Message {
     }
 
     /**
-     * Loads sending criteria.
-     *
-     * @todo
-     *   This should load conditions on the message to get a limited list of users.
+     * Loads sending criteria and specific message variables.
      */
     protected function loadCriteria() {
-
+        if ($this->criteria === null) {
+            $this->criteria = Database::getInstance()->selectAll(
+                array(
+                    'from' => 'message_message_criteria',
+                    'join' => array(
+                        'LEFT JOIN',
+                        'message_criteria',
+                        'USING (message_criteria_id)',
+                    ),
+                ),
+                array(
+                    'message_id' => $this->message['message_id'],
+                )
+            );
+        }
     }
 
     /**
@@ -355,6 +373,9 @@ class Message {
         $where = array(
             'active' => 1,
         );
+
+        // Filter by which lists.
+        // TODO: If no lists are selected it should get no users, (if $this->auto?)
         if (!empty($this->lists)) {
             unset($where['active']);
             $table['join'][] = array(
@@ -364,6 +385,8 @@ class Message {
             );
             $where['message_list_id'] = array('IN', $this->lists);
         }
+
+        // Make sure the message is never resent.
         if ($this->auto || !empty($this->message['never_resend'])) {
             $table['join'][] = array(
                 'LEFT JOIN',
@@ -373,7 +396,41 @@ class Message {
             $where['tracker_event.user_id'] = null;
         }
 
+        // Make sure the user matches a criteria.
+        $this->loadCriteria();
+        foreach ($this->criteria as $criteria) {
+            $field_values = json_decode($criteria['field_values'], true);
+            if (!empty($criteria['join'])) {
+                if ($c_table = json_decode($criteria['join'], true)) {
+                    // The entry is a full join array.
+                    $this->replaceCriteriaVariables($c_table, $field_values);
+                    $table['join'][] = $c_table;
+                } else {
+                    // The entry is just a table name.
+                    $table['join'][] = array(
+                        'LEFT JOIN',
+                        $criteria['join'],
+                        'ON ' . $criteria['join'] . '.user_id = user.user_id',
+                    );
+                }
+            }
+            if ($test = json_decode($criteria['test'], true)) {
+                $this->replaceCriteriaVariables($test, $field_values);
+                $where[] = $test;
+            }
+        }
+
         return array('table' => $table, 'where' => $where);
+    }
+
+    protected function replaceCriteriaVariables(&$test, $variables) {
+        array_walk_recursive($test, function(&$item) use ($variables) {
+            if (is_string($item)) {
+                foreach ($variables as $var => $value) {
+                    $item = preg_replace('/{' . $var . '}/', $value, $item);
+                }
+            }
+        });
     }
 
     /**
