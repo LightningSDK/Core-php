@@ -33,6 +33,9 @@ class User {
      */
     const TYPE_ADMIN = 5;
 
+    /**
+     * How long a temporary reset key is available.
+     */
     const TEMP_KEY_TTL = 86400;
 
     /**
@@ -421,10 +424,20 @@ class User {
      *
      * @param $list_id
      *   The ID of the mailing list.
+     *
+     * @return boolean
+     *   Whether they were actualy inserted.
      */
     public function subscribe($list_id = 0) {
-        Database::getInstance()->insert('message_list_user', array('message_list_id' => $list_id, 'user_id' => $this->id), true);
-        Tracker::trackEvent('Subscribe', $list_id, $this->id);
+        if (Database::getInstance()->insert('message_list_user', array('message_list_id' => $list_id, 'user_id' => $this->id), true)) {
+            // If a result was returned, they were added to the list.
+            Tracker::trackEvent('Subscribe', $list_id, $this->id);
+            return true;
+        }
+        else {
+            // They were already in the list.
+            return false;
+        }
     }
 
     /**
