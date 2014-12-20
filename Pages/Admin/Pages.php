@@ -30,6 +30,9 @@ class Pages extends Table {
             'unlisted' => true,
             'type' => 'textarea',
         ),
+        'body' => array(
+            'upload' => true
+        ),
         'site_map' => array(
             'type' => 'checkbox',
         ),
