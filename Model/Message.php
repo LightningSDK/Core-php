@@ -9,6 +9,7 @@ namespace Lightning\Model;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
 use Lightning\Tools\Language;
+use Lightning\Tools\Messenger;
 use Lightning\Tools\Tracker;
 
 /**
@@ -365,26 +366,21 @@ class Message {
      *   An array of users.
      */
     protected function getUsersQuery() {
-        $table = array(
-            'from' => 'user',
-        );
-        // Deprecated. Users should now be members of a mailing list and messages should include
-        // which lists they are sending to.
-        $where = array(
-            'active' => 1,
-        );
-
-        // Filter by which lists.
-        // TODO: If no lists are selected it should get no users, (if $this->auto?)
-        if (!empty($this->lists)) {
-            unset($where['active']);
-            $table['join'][] = array(
-                'JOIN',
-                'message_list_user',
-                'ON message_list_user.user_id = user.user_id',
-            );
-            $where['message_list_id'] = array('IN', $this->lists);
+        if (empty($this->lists)) {
+            Messenger::error('Your message does not have any mailing lists selected.');
+            return array('table' => 'user', 'where' => array('false' => array('expression' => 'false')));
         }
+
+        // Start with a list of users in the messages selected lists.
+        $table = array(
+            'from' => 'message_list_user',
+            'join' => array(array(
+                'JOIN',
+                'user',
+                'ON user.user_id = message_list_user.user_id',
+            )),
+        );
+        $where = array('message_list_id' => array('IN', $this->lists));
 
         // Make sure the message is never resent.
         if ($this->auto || !empty($this->message['never_resend'])) {
@@ -441,7 +437,7 @@ class Message {
      */
     public function getUsers() {
         $query = $this->getUsersQuery();
-        return Database::getInstance()->select($query['table'], $query['where'], array('user.*'));
+        return Database::getInstance()->select($query['table'], $query['where'], array('uid' => array('expression' => 'DISTINCT(user.user_id)'), 'user.*'));
     }
 
     /**
@@ -452,6 +448,6 @@ class Message {
      */
     public function getUsersCount() {
         $query = $this->getUsersQuery();
-        return Database::getInstance()->count($query['table'], $query['where']);
+        return Database::getInstance()->count($query['table'], $query['where'], 'DISTINCT(user.user_id)');
     }
 }
