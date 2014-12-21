@@ -8,8 +8,10 @@ namespace Lightning\Pages;
 
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
+use Lightning\Tools\Logger;
 use Lightning\Tools\Output;
 use Lightning\Tools\Request;
+use Lightning\Tools\Security\Encryption;
 use Lightning\Tools\Tracker;
 
 /**
@@ -25,7 +27,9 @@ class Track extends Page {
     public function get() {
         if ($t = Request::get('t', 'encrypted')) {
             // Track an encrypted link.
-            Tracker::trackLink($t);
+            if (!Tracker::trackLink($t)) {
+                Logger::error('Failed to track encrypted link: ' . Encryption::aesDecrypt($t, Configuration::get('tracker.key')));
+            }
         }
         elseif (Configuration::get('tracker.allow_unencrypted') && $tracker = Request::get('tracker', 'int')) {
             // Track an unencrypted link.

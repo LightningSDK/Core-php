@@ -185,14 +185,20 @@ class Tracker extends Singleton {
      *
      * @param string $tracker_string
      *   Encrypted data.
+     *
+     * @return boolean
+     *   Whether the link was tracked.
      */
     public static function trackLink($tracker_string) {
         // Decrypt and decode the string with the private key.
         $string = Encryption::aesDecrypt($tracker_string, Configuration::get('tracker.key'));
-        $data = json_decode($string, true);
+        if ($data = json_decode($string, true)) {
+            // Track the data.
+            self::trackEventID($data['tracker'], $data['sub'], $data['user']);
+            return true;
+        }
 
-        // Track the data.
-        self::trackEventID($data['tracker'], $data['sub'], $data['user']);
+        return false;
     }
 
     /**
