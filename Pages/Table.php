@@ -275,6 +275,7 @@ abstract class Table extends Page {
 
     public function getList() {
         $this->action = 'list';
+        Template::getInstance()->set('full_width', true);
     }
 
     /**
@@ -411,7 +412,6 @@ abstract class Table extends Page {
         $template = Template::getInstance();
         $template->set('table', $this);
         $template->set('content', 'table');
-        $template->set('full_width', true);
 
         // Call the appropriate execution handler.
         parent::execute();
