@@ -28,13 +28,13 @@ class Configuration {
      * @return mixed
      *   The value of the variable.
      */
-    public static function get($variable) {
+    public static function get($variable, $default = null) {
         if (empty(self::$configuration)) {
             self::loadConfiguration();
         }
 
         $path = explode('.', $variable);
-        return self::getSub($path, self::$configuration);
+        return self::getSub($path, self::$configuration, $default);
     }
 
     /**
@@ -44,20 +44,22 @@ class Configuration {
      *   The path to the value.
      * @param array $content
      *   The value of the current variable.
+     * @param mixed $default
+     *   The default value if it does not exist in the configuration.
      *
      * @return mixed
      *   The value of the variable.
      */
-    protected static function getSub($path, $content) {
+    protected static function getSub($path, $content, $default = null) {
         $next = array_shift($path);
         if (!empty($content[$next])) {
             $content = $content[$next];
         } else {
-            return null;
+            return $default;
         }
 
         if (!empty($path)) {
-            $content = self::getSub($path, $content);
+            $content = self::getSub($path, $content, $default);
         }
 
         return $content;
