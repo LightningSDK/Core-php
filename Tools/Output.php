@@ -152,10 +152,13 @@ class Output {
     }
 
     public static function disableBuffering() {
+        if (function_exists('apache_setenv')) {
+            apache_setenv('no-gzip', 1);
+        }
         @ini_set('zlib.output_compression', "Off");
         @ini_set('implicit_flush', 1);
 
-        ob_end_flush();
+        for ($i = 0; $i < ob_get_level(); $i++) { ob_end_flush(); }
         ob_implicit_flush(true);
         echo str_repeat(' ', 9000);
     }
