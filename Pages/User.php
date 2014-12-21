@@ -58,7 +58,7 @@ class User extends Page {
         $default_list = Configuration::get('mailer.default_list', 0);
         $mailing_list = Request::post('list_id', 'int', null, $default_list);
         if (!empty($mailing_list)) {
-            $user = UserModel::loadById($res['data']);
+            $user = UserModel::loadByEmail($email);
             $user->subscribe($mailing_list);
         }
 
