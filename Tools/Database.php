@@ -471,7 +471,9 @@ class Database extends Singleton {
         $duplicate = is_array($existing) ? ' ON DUPLICATE KEY UPDATE ' . $this->sqlImplode($existing, $vars) : '';
         $this->query('INSERT ' . $ignore . ' INTO ' . $table . ' SET ' . $set . $duplicate, $vars);
         $this->timerEnd();
-        return $this->result->rowCount() == 0 ? false : $this->connection->lastInsertId();
+        return $this->result->rowCount() == 0 ? false :
+            // If there is no auto increment, just return true.
+            ($this->connection->lastInsertId() ?: true);
     }
 
     /**
