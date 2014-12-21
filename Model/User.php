@@ -426,15 +426,22 @@ class User {
      *   The ID of the mailing list.
      *
      * @return boolean
-     *   Whether they were actualy inserted.
+     *   Whether they were actually inserted.
      */
-    public function subscribe($list_id = 0) {
-        if (Database::getInstance()->insert('message_list_user', array('message_list_id' => $list_id, 'user_id' => $this->id), true)) {
+    public function subscribe($list_id) {
+        if (Database::getInstance()->insert(
+            'message_list_user',
+            array(
+                'message_list_id' => $list_id,
+                'user_id' => $this->id,
+                'time' => time(),
+            ),
+            true
+        )) {
             // If a result was returned, they were added to the list.
             Tracker::trackEvent('Subscribe', $list_id, $this->id);
             return true;
-        }
-        else {
+        } else {
             // They were already in the list.
             return false;
         }

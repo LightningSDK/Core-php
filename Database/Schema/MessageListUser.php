@@ -12,6 +12,7 @@ class MessageListUser extends Schema {
         return array(
             'message_list_id' => $this->int(true),
             'user_id' => $this->int(true),
+            'time' => $this->int(true),
         );
     }
 
