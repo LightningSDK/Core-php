@@ -845,6 +845,8 @@ class User {
      *      [Status, new user id]
      *   When not:
      *      [Status, error short code]
+     *
+     * @todo This should return the user object, with other data contained inside.
      */
     public static function register($email, $pass) {
         // Save current user for further anonymous check
