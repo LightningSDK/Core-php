@@ -78,6 +78,42 @@ var table = {
                 }
             });
         }, 500);
+    },
+
+    /**
+     * Add the selected link to the list.
+     *
+     * @param {string} link
+     *   The id of the link container.
+     */
+    addLink: function(link) {
+        var list = $('#' + link + '_list');
+        var new_link = list.val();
+        var new_link_name = $('#'+link+'_list option:selected').text();
+        // TODO: This shouldn't be removed, but just check if it's already there.
+        this.removeLink(link, new_link);
+        var input_array = $('#'+link+'_input_array');
+        input_array.val(input_array.val() + new_link + ',');
+        $('#'+link+'_list_container').append($('<div class="' + link + '_box table_link_box_selected" id="' + link + '_box_' + new_link + '">' + new_link_name + ' <a href="#" onclick="javascript:table.removeLink(\'' + link + '\', ' + new_link + ');return false;">X</a></div>'));
+    },
+
+    /**
+     * Remove the selected link to the list.
+     *
+     * @param {string} link
+     *   The id of the link container.
+     * @param {integer} link_id
+     *   The id of the link item.
+     */
+    removeLink: function(link,link_id) {
+        $('#'+link+'_box_'+link_id).remove();
+        var input_array = $('#' + link + '_input_array');
+        var new_links = input_array.val();
+        var regex = new RegExp("[\\^,]" + link_id + ",", "i");
+        new_links = new_links.replace(regex,",");
+        regex = new RegExp("^" + link_id + ",", "i");
+        new_links = new_links.replace(regex, '');
+        input_array.val(new_links);
     }
 };
 

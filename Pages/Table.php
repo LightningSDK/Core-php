@@ -1330,7 +1330,7 @@ abstract class Table extends Page {
                 $options[$l[$key]] = $l[$link_settings['display_column']];
             }
             $output .= BasicHTML::select($link_settings['table'] . '_list', $options);
-            $output .= "<input type='button' name='add_{$link_settings['table']}_button' value='Add {$link_settings['table']}' id='add_{$link_settings['table']}_button' onclick='add_link(\"{$link_settings['table']}\")' />";
+            $output .= "<input type='button' name='add_{$link_settings['table']}_button' value='Add {$link_settings['table']}' id='add_{$link_settings['table']}_button' onclick='table.addLink(\"{$link_settings['table']}\")' />";
         }
 
         //set up initial list - these are already added
@@ -1345,7 +1345,7 @@ abstract class Table extends Page {
         foreach($link_settings['active_list'] as $init) {
             $output .= "<div class='{$link_settings['table']}_box table_link_box_selected' id='{$link_settings['table']}_box_{$init[$link_settings['key']]}'>{$init[$link_settings['display_column']]}
 						<a href='#' onclick='javascript:".(!empty($link_settings['edit_js']) ? $link_settings['edit_js'].'.deleteLink('.
-                    $init[$link_settings['key']].')' : "remove_link(\"{$link_settings['table']}\",{$init[$link_settings['key']]})").";return false;'>X</a></div>";
+                    $init[$link_settings['key']].')' : "table.removeLink(\"{$link_settings['table']}\",{$init[$link_settings['key']]})").";return false;'>X</a></div>";
         }
         $output .= "</div></td></tr>";
         return $output;
@@ -2453,8 +2453,9 @@ abstract class Table extends Page {
         foreach($this->links as $link => $link_settings) {
             // FOR 1 (local) TO MANY (foreign)
             if (!empty($link_settings['full_form'])) {
-                if (!isset($this->list))
+                if (!isset($this->list)) {
                     $this->get_row();
+                }
                 $local_key = isset($link_settings['local_key']) ? $link_settings['local_key'] : $this->getKey();
                 $local_id = isset($this->list[$local_key]) ? $this->list[$local_key] : $this->id;
 
@@ -2468,7 +2469,7 @@ abstract class Table extends Page {
                         );
                     }
                     // update
-                    $list = Database::getInstance()->selectAll($link, array($local_key => $local_id), array(), $sort);
+                    $list = Database::getInstance()->selectAll($link, array($local_key => $local_id), array());
                     foreach($list as $l) {
                         foreach($link_settings['fields'] as $f=>$field) {
                             $link_settings['fields'][$f]['field'] = $f;
@@ -2497,14 +2498,16 @@ abstract class Table extends Page {
                 );
 
                 // GET INPUT ARRAY
-                $list = explode(",", $_POST[$link.'_input_array']);
-                foreach($list as $l)
-                    if ($l != '') {
-                        Database::getInstance()->insert(
-                            $link_settings['index'],
-                            array($this->getKey() => $this->id, $link_settings['key'] => $l)
-                        );
-                    }
+                $list = Request::get($link.'_input_array', 'explode', 'int');
+                foreach($list as $l) {
+                    Database::getInstance()->insert(
+                        $link_settings['index'],
+                        array(
+                            $this->getKey() => $this->id,
+                            $link_settings['key'] => $l,
+                        )
+                    );
+                }
             }
         }
     }

@@ -36,15 +36,26 @@ class Messages extends Table {
 
         $this->post_actions['after_post'] = function() {
             $db = Database::getInstance();
+
             // Find all the criteria added to this message
-            $criteria_list = $db->select('message_message_criteria', array('message_id' => $this->id));
+            $criteria_list = $db->select(
+                array(
+                    'from' => 'message_message_criteria',
+                    'join' => array(
+                        'JOIN',
+                        'message_criteria',
+                        'USING (message_criteria_id)',
+                    ),
+                ),
+                array('message_id' => $this->id)
+            );
+
+            // See if any variables have been set.
             foreach($criteria_list as $c){
-                // Find the required fields
-                $f = $db->selectRow('message_criteria', array('message_criteria_id' => $c['message_criteria_id']));
                 // If the criteria requires variables.
-                if($f['variables'] != ''){
+                if(!empty($c['variables'])){
                     // See what variables are required.
-                    $vars = explode(',', $f['variables']);
+                    $vars = explode(',', $c['variables']);
                     $var_data = array();
                     foreach($vars as $v) {
                         $var_data[$v] = Request::post('var_' . $c['message_criteria_id'] . '_' . $v);
@@ -107,7 +118,6 @@ class Messages extends Table {
             'option_name' => 'criteria_name',
             'display_name' => 'Criteria',
             'display_column' => 'criteria_name',
-            'function' => 'update_field_values'
         ),
         'message_list' => array(
             'list' => true,
