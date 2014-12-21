@@ -227,15 +227,18 @@ class Mailer {
 
         // Load the spam test users.
         $spam_test_from = Configuration::get('spam_test_from');
-        foreach (Configuration::get('mailer.spam_test') as $spam_test) {
-            $this->users[] = array(
-                'email' => $spam_test,
-                'first' => 'Spam',
-                'last' => 'Test',
-                'from' => $spam_test_from,
-                'user_id' => 0,
-                'salt' => 'na',
-            );
+        $spam_test_emails = Configuration::get('mailer.spam_test');
+        if (is_array($spam_test_emails)) {
+            foreach ($spam_test_emails as $spam_test) {
+                $this->users[] = array(
+                    'email' => $spam_test,
+                    'first' => 'Spam',
+                    'last' => 'Test',
+                    'from' => $spam_test_from,
+                    'user_id' => 0,
+                    'salt' => 'na',
+                );
+            }
         }
     }
 
@@ -268,7 +271,7 @@ class Mailer {
         }
 
         if ($this->verbose) {
-            echo 'Sending' . ($test ? 'Test' : 'Real') . " Email<br>\n";
+            echo 'Sending ' . ($test ? 'Test' : 'Real') . " Email<br>\n";
         }
         $this->sendToList();
 
