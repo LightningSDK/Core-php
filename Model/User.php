@@ -228,17 +228,6 @@ class User {
     }
 
     /**
-     * Change the user's active status.
-     *
-     * @param integer $new_value
-     *   The new active status.
-     */
-    public function setActive($new_value) {
-        $this->details['active'] = $new_value;
-        Database::getInstance()->update('user', array('active' => $new_value), array('user_id' => $this->id));
-    }
-
-    /**
      * Check if the supplied password is correct.
      *
      * @param string $pass
@@ -403,15 +392,11 @@ class User {
         $db = Database::getInstance();
         if ($user = $db->selectRow('user', $user_data)) {
             if($update) {
-                if (!isset($update['list_date'])) {
-                    $update['list_date'] = time();
-                }
                 $db->update('user', $user_data, $update);
             }
             $user_id = $user['user_id'];
             return static::loadById($user_id);
         } else {
-            $user_data['list_date'] = time();
             $user_id = $db->insert('user', $options + $user_data);
             $user = static::loadById($user_id);
             $user->new = true;
@@ -445,6 +430,13 @@ class User {
             // They were already in the list.
             return false;
         }
+    }
+
+    /**
+     * Remove this user from all mailing lists.
+     */
+    public function unsubscribeAll() {
+        Database::getInstance()->delete('message_list_user', array('user_id' => $this->id));
     }
 
     /**
@@ -586,26 +578,6 @@ class User {
             return $user_id;
         }
 
-    }
-
-    public static function add_to_mailing_list($email) {
-        // These will be set on either insert or update.
-        $user_values = array(
-            'list_date' => Time::today(),
-            'active' => 1,
-        );
-        $user_id = Database::getInstance()->insert(
-            'user',
-            array_merge($user_values,
-                array(
-                    'email' => strtolower($email),
-                    // Ref should only be added for new users.
-                    'referrer' => Request::cookie('ref') ?: 0,
-                )
-            ),
-            $user_values
-        );
-        return $user_id;
     }
 
     public function fullName() {

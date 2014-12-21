@@ -61,7 +61,7 @@ class BouncedEmail extends CLI {
                 // TODO: Instead of '1' here, we should have a table like `tracker`
                 // that tracks tracker sub_ids by name.
                 Tracker::trackEvent('Deactivate User', 1, $user->user_id);
-                $user->setActive(0);
+                $user->unsubscribeAll();
             }
         }
     }

@@ -139,7 +139,7 @@ class User extends Page {
     public function getUnsubscribe() {
         if ($cyphserstring = Request::get('u', 'encrypted')) {
             $user = UserModel::loadByEncryptedUserReference($cyphserstring);
-            $user->setActive(0);
+            $user->unsubscribeAll();
             Messenger::message('Your email ' . $user->details['email'] . ' has been removed from all mailing lists.');
         } else {
             Messenger::error('Invalid request');

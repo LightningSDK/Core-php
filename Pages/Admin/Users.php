@@ -23,16 +23,9 @@ class Users extends Table {
         'salt' => array(
             'type' => 'hidden',
         ),
-        'list_date' => array(
-            'type' => 'datetime',
-            'allow_blank' => true,
-        ),
         'last_login' => array(
             'type' => 'datetime',
             'editable' => false,
-        ),
-        'active' => array(
-            'type' => 'checkbox',
         ),
     );
 

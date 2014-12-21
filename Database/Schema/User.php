@@ -16,7 +16,6 @@ class User extends Schema {
             'salt' => $this->char(64),
             'first' => $this->varchar(64),
             'last' => $this->varchar(64),
-            'list_date' => $this->int(true),
             'register_date' => $this->int(true),
             'last_login' => $this->int(true),
             'last_active' => $this->int(true),
