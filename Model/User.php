@@ -608,7 +608,7 @@ class User {
         $mailer->to($this->details['email'], $this->fullName())
             ->subject('Password reset')
             ->message('A request was made to reset your password. If you did not make this request, please <a href="' . Configuration::get('web_root') . '/contact' . '">notify us</a>. To reset your password, <a href="' . Configuration::get('web_root') . '/user?action=set-password&key=' . $reset_key . '">click here</a>.');
-        return $mailer->sendOne();
+        return $mailer->send();
     }
 
     /**
@@ -790,7 +790,7 @@ class User {
             ->message("You new account has been created. To activate your account, <a href='http://{$email_domain_name}/user.php?confirm={$acct_details['user_id']}.{$acct_details['confirmed']}'>click here</a> or copy and paste this link into your browser:<br /><br />
 	http://{$email_domain_name}/user.php?confirm={$acct_details['user_id']}.{$acct_details['confirmed']}
 	<br /><br /> If you did not open an account with {$mail_site_name}, please let us know by contacting us at http://{$email_domain_name}/{$site_contact_page}")
-            ->sendOne();
+            ->send();
     }
 
     /**

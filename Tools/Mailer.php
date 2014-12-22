@@ -195,7 +195,7 @@ class Mailer {
      * @return boolean
      *   Whether the message was successful.
      */
-    public function send() {
+    public function sendMessage() {
         // Set the default from name if it wasn't set.
         if (!$this->fromSet) {
             $this->from(
@@ -283,58 +283,41 @@ class Mailer {
     }
 
     /**
-     * Send a single email to a single user.
-     * It can send either the message loaded from db (determined by message id)
-     * or custom message created with chainable methods to(), subject(), etc.
-     * message_id variable existing is the condition rules the logic.
+     * Sends a single email to a single user.
+     * It sends a message loaded from db
      *
      * @param int $message_id
      *   The message id.
      * @param User $user
      *   The user object to send to.
      */
-    function sendOne($message_id = null, $user = null) {
-        if (empty($message_id)) {
-            // Load form db and send
-            $this->sendAsDbMessage($message_id, $user);
-        } else {
-            // Assue the message is created. Put in a template and send
-            $this->sendAsCustomMessage();
-        }
-    }
-
-    /**
-     * Loads the message from db and sends it
-     * 
-     * @param int $message_id
-     *   The message id.
-     * @param User $user
-     *   The user object to send to.
-     */
-    protected function sendAsDbMessage($message_id, $user) {
-        
+    function sendOne($message_id, $user) {
         $this->message = new Message($message_id);
         $this->message->resetCustomVariables($this->customVariables);
         $this->to($user->email, $user->first . ' ' . $user->last);
         $this->message->setUser($user);
         $this->subject($this->message->getSubject());
         $this->message($this->message->getMessage());
-        $this->send();
+        $this->sendMessage();
         Tracker::trackEvent('Email Sent', $message_id, $user->id);
     }
-    
+
     /**
      * Send a custom message created with chainable methods like to(), subject(),
      * etc.
      */
-    public function sendAsCustomMessage() {
+    public function send() {
         
         // Need to create a Message object to use a template
         $this->message = new Message(NULL, FALSE);
         
+        // Assuming the to address is the only one
+        $to = $this->mailer->getToAddresses();
+        $toName = $to[0][1];
+        
         // Set custom variables
         $vars = [
-            'FULL_NAME'     => $this->fromName,
+            'FULL_NAME'     => $toName,
             'CONTENT_BODY'  => $this->mailer->Body,
         ];
         $this->message->resetCustomVariables($vars);
@@ -344,7 +327,7 @@ class Mailer {
         $this->message($this->message->getMessage());
         
         // Actual send
-        $this->send();
+        $this->sendMessage();
    }
 
     /**
