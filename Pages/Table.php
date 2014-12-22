@@ -1794,7 +1794,7 @@ abstract class Table extends Page {
                 // FUNCTIONS
             } elseif ($this->action == 'insert' && isset($field['insert_function'])) {
                 // function when modified
-                $val = $this->preset[$field['field']]['insert_function']($output);
+                $this->preset[$field['field']]['insert_function']($output);
                 continue;
             } elseif ($this->action == 'update' && isset($field['modified_function'])) {
                 $this->preset[$field['field']]['modified_function']($output);
@@ -1819,11 +1819,7 @@ abstract class Table extends Page {
                         ) {
                             // delete previous file
                             $this->get_row();
-                            if ($this->list[$f] != '') {
-                                if (file_exists($this->get_full_file_location($field['location'], $this->list[$f]))) {
-                                    unlink($this->get_full_file_location($field['location'], $this->list[$f]));
-                                }
-                            }
+
                             if ($field['type'] == 'file') {
                                 $val = $this->saveFile($field, $_FILES[$field['field']]);
                             } else {
@@ -2636,10 +2632,10 @@ abstract class Table extends Page {
     }
 
     protected function getNewImageLocation($field) {
-        $base = $this->getOutputPath($field);
         if (!empty($field['file_name'])) {
             return $field['file_name'];
         }
+        $base = $this->getOutputPath($field);
         do {
             $file = $this->getNewRandomImageName();
         } while (file_exists($base . '/' . $file));
@@ -2647,7 +2643,13 @@ abstract class Table extends Page {
     }
 
     protected function getOutputPath($field) {
-        return strpos($field['location'], '/') !== 0 ? HOME_PATH . '/' . $field['location'] : $field['location'];
+        if (empty($field['location'])) {
+            return HOME_PATH;
+        } elseif (strpos($field['location'], '/') !== 0) {
+            return HOME_PATH . '/' . $field['location'];
+        } else {
+            return $field['location'];
+        }
     }
 
     /**
