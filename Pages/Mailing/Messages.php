@@ -89,19 +89,6 @@ class Messages extends Table {
             'type' => 'datetime',
             'allow_blank' => true,
         ),
-        'list_status' => array(
-            'type' => 'select',
-            'edit_only' => true,
-            'options' => array(
-                0 => 'Nobody',
-                1 => 'Mailing List: Non Members',
-                2 => 'Mailing List: All',
-                3 => 'Mailing List: Members Only',
-                4 => 'All Registered (incl unsubscribed)',
-                5 => 'Everybody (incl unsubscribed DANGEROUS)',
-                6 => 'Temp List (experimental)',
-            )
-        ),
         'body' => array(
             'type' => 'html',
             'editor' => 'full',
