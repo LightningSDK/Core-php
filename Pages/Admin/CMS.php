@@ -42,4 +42,30 @@ class CMS extends API {
             Output::json(Output::ACCESS_DENIED);
         }
     }
+    
+    public function postUpdateDate(){
+        if (ClientUser::getInstance()->isAdmin()) {
+            $id = Request::post('id');
+            $key = Request::post('key');
+            $column = Request::post('column');
+            $table = Request::post('table');
+            $m = Request::post("date_m");
+            $d = Request::post("date_d");
+            $y = Request::post("date_y");
+            if($m > 0 && $d > 0){
+                if($y == 0) $y = date("Y");
+                $value = gregoriantojd($m, $d, $y);
+            } else {
+                $value = 0;
+            }
+            Database::getInstance()->update($table,
+                array($column => $value),
+                array($key => $id)
+            );
+            Output::json(Output::SUCCESS);
+        }else{
+            Output::json(Output::ACCESS_DENIED);
+        }
+        
+    }
 }
