@@ -320,7 +320,7 @@ class Mailer {
             'FULL_NAME'     => $toName,
             'CONTENT_BODY'  => $this->mailer->Body,
         ];
-        $this->message->resetCustomVariables($vars);
+        $this->message->setDefaultVars($vars);
         
         // Set subject and message body. They are applied to a template already
         $this->subject($this->message->getSubject());

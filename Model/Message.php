@@ -41,6 +41,13 @@ class Message {
     protected $customVariables = array();
 
     /**
+     * Default variables to replace in the message.
+     *
+     * @var array
+     */
+    protected $defaultVariables = array();
+
+    /**
      * Custom variables to replace in the message, read from templates.
      *
      * @var array
@@ -136,6 +143,12 @@ class Message {
             $this->default_name = $default_name_settings;
         }
 
+        /*
+         * Define any possible default variables for a message depending on 
+         * its type: db or chainable message
+         */
+        $this->setDefaultVars();
+        
         $this->setCombinedMessageTemplate();
         
         $this->loadVariablesFromTemplate();
@@ -362,8 +375,8 @@ class Message {
      *   The content with replaced variables.
      */
     public function replaceVariables($source) {
-        // Replace custom variables.
-        foreach($this->customVariables + $this->internalCustomVariables as $cv => $cvv){
+        // Replace variables.
+        foreach($this->customVariables + $this->internalCustomVariables + $this->defaultVariables as $cv => $cvv){
             // Replace simple variables as a string.
             $source = str_replace("{".$cv."}", $cvv, $source);
         }
@@ -380,27 +393,6 @@ class Message {
             }
         }
 
-        /*
-         * If there's no 'message' variable set, it's a custom message, 
-         * so we don't replace any variables except custom ones.
-         */
-        
-        if (!empty($this->message)) {
-            // Replace standard variables.
-            $source = str_replace("{USER_ID}", $this->user->details['user_id'], $source);
-            $source = str_replace("{MESSAGE_ID}", $this->message['message_id'], $source);
-            $source = str_replace("{FULL_NAME}", (!empty($this->user->details['first']) ? $this->user->details['first'] . ' ' . $this->user->details['last'] : $this->default_name), $source);
-            $source = str_replace("{URL_KEY}", User::urlKey($this->user->details['user_id'], $this->user->details['salt']), $source);
-            $source = str_replace("{EMAIL}", $this->user->details['email'], $source);
-
-            // Add the unsubscribe link.
-            $source = str_replace('{UNSUBSCRIBE}', $this->unsubscribe ? $this->getUnsubscribeString() : '', $source);
-
-            // Add the tracking image to the bottom of the email.
-            $tracking_image = Tracker::getTrackerImage('Message Opened', $this->message['message_id'], $this->user->details['user_id']);
-            $source = str_replace('{TRACKING_IMAGE}', $tracking_image, $source);
-        }
-        
         return $source;
     }
 
@@ -431,6 +423,43 @@ class Message {
         return $message;
     }
 
+    /**
+     * Sets default variables for db and chainable messages
+     * 
+     * @param array $vars
+     *   Variables to set for chainable messages
+     */
+    public function setDefaultVars($vars = null) {
+        /*
+         * If there's no 'message' variable set, it's a custom message, 
+         * so we don't replace any variables except custom ones.
+         */
+        
+        if (!empty($this->message)) {
+            
+            $tracking_image = Tracker::getTrackerImage('Message Opened', $this->message['message_id'], $this->user->details['user_id']);
+            
+            // Replace standard variables.
+            $this->defaultVariables = [
+                "{USER_ID}" => $this->user->details['user_id'],
+                "{MESSAGE_ID}" => $this->message['message_id'],
+                "{FULL_NAME}" => (!empty($this->user->details['first']) ? $this->user->details['first'] . ' ' . $this->user->details['last'] : $this->default_name),
+                "{URL_KEY}" => User::urlKey($this->user->details['user_id'], $this->user->details['salt']),
+                "{EMAIL}" => $this->user->details['email'],
+
+                // Add the unsubscribe link.
+                "{UNSUBSCRIBE}" => $this->unsubscribe ? $this->getUnsubscribeString() : '',
+
+                // Add the tracking image to the bottom of the email.
+                "{TRACKING_IMAGE}" => $tracking_image,
+            ];
+        } else {
+            if (!empty($vars)) {
+                $this->defaultVariables = $vars;
+            }
+        }
+    }
+    
     /**
      * Get the user query for users who will receive this message.
      *
