@@ -143,12 +143,6 @@ class Message {
             $this->default_name = $default_name_settings;
         }
 
-        /*
-         * Define any possible default variables for a message depending on 
-         * its type: db or chainable message
-         */
-        $this->setDefaultVars();
-        
         $this->setCombinedMessageTemplate();
         
         $this->loadVariablesFromTemplate();
@@ -268,7 +262,7 @@ class Message {
     protected function loadTemplateFromConfig() {
         
         // check configuration
-        $template_id = Configuration::get('mail_template');
+        $template_id = Configuration::get('mailer.mail_template');
         
         // set template from config or default template
         $this->template = Database::getInstance()->selectRow(
@@ -441,17 +435,17 @@ class Message {
             
             // Replace standard variables.
             $this->defaultVariables = [
-                "{USER_ID}" => $this->user->details['user_id'],
-                "{MESSAGE_ID}" => $this->message['message_id'],
-                "{FULL_NAME}" => (!empty($this->user->details['first']) ? $this->user->details['first'] . ' ' . $this->user->details['last'] : $this->default_name),
-                "{URL_KEY}" => User::urlKey($this->user->details['user_id'], $this->user->details['salt']),
-                "{EMAIL}" => $this->user->details['email'],
+                "USER_ID" => $this->user->details['user_id'],
+                "MESSAGE_ID" => $this->message['message_id'],
+                "FULL_NAME" => (!empty($this->user->details['first']) ? $this->user->details['first'] . ' ' . $this->user->details['last'] : $this->default_name),
+                "URL_KEY" => User::urlKey($this->user->details['user_id'], $this->user->details['salt']),
+                "EMAIL" => $this->user->details['email'],
 
                 // Add the unsubscribe link.
-                "{UNSUBSCRIBE}" => $this->unsubscribe ? $this->getUnsubscribeString() : '',
+                "UNSUBSCRIBE" => $this->unsubscribe ? $this->getUnsubscribeString() : '',
 
                 // Add the tracking image to the bottom of the email.
-                "{TRACKING_IMAGE}" => $tracking_image,
+                "TRACKING_IMAGE" => $tracking_image,
             ];
         } else {
             if (!empty($vars)) {

@@ -37,6 +37,7 @@ $conf = array(
         'bounce_address' => null,
         'default_template' => null,
         'default_list' => null,
+        'mail_template' => null,
     ),
     'tracker' => array(
         'allow_unencrypted' => true,

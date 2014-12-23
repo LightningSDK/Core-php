@@ -293,9 +293,10 @@ class Mailer {
      */
     function sendOne($message_id, $user) {
         $this->message = new Message($message_id);
+        $this->message->setUser($user);
         $this->message->resetCustomVariables($this->customVariables);
         $this->to($user->email, $user->first . ' ' . $user->last);
-        $this->message->setUser($user);
+        $this->message->setDefaultVars();
         $this->subject($this->message->getSubject());
         $this->message($this->message->getMessage());
         $this->sendMessage();
@@ -310,6 +311,7 @@ class Mailer {
         
         // Need to create a Message object to use a template
         $this->message = new Message(NULL, FALSE);
+        $this->message->resetCustomVariables($this->customVariables);
         
         // Assuming the to address is the only one
         $to = $this->mailer->getToAddresses();
