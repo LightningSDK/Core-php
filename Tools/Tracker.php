@@ -272,20 +272,15 @@ class Tracker extends Singleton {
             'tracker_event',
             $criteria,
             array(
-                'count' => array('expression' => 'COUNT(*)'),
-                'date', 'sub_id'
+                'y' => array('expression' => 'COUNT(*)'),
+                'x' => 'date',
+                'set' => 'sub_id',
             ),
             'GROUP BY date, sub_id'
         );
 
-        $output = array();
-        foreach ($results as $row) {
-            if (!isset($output[$row['sub_id']])) {
-                $output[$row['sub_id']] = array_fill($start, $end - $start + 1, 0);
-            }
-            $output[$row['sub_id']][$row['date']] = $row['count'];
-        }
-
-        return $output;
+        $data = new ChartData($start, $end);
+        $data->createDataSets($results);
+        return $data->getData();
     }
 }

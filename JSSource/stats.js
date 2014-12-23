@@ -13,7 +13,7 @@ lightning.stats = {
             );
         });
 
-        this.getTrackerStats(requestData, this.updateeStats)
+        this.getTrackerStats(requestData, this.updateStats)
     },
 
     updateStats: function(data) {
