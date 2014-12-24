@@ -210,7 +210,7 @@ class Tracker extends Singleton {
      *   How many days back to start.
      * @param integer $end
      *   How many days ago to end.
-     * @param integer $sub_id
+     * @param integer|array $sub_id
      *   The tracker sub_id. -1 to include all.
      * @param integer $user_id
      *   The tracker user. -1 to include all.
@@ -229,7 +229,11 @@ class Tracker extends Singleton {
 
         // Add the sub_id if required.
         if ($sub_id != -1) {
-            $criteria['sub_id'] = $sub_id;
+            if (is_array($sub_id)) {
+                $criteria['sub_id'] = array('IN', $sub_id);
+            } else {
+                $criteria['sub_id'] = $sub_id;
+            }
         }
 
         // Add the user ID if required.
