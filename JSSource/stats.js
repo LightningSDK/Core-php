@@ -16,15 +16,15 @@ lightning.stats = {
         this.getTrackerStats(requestData, this.updateStats)
     },
 
-    updateStats: function(data) {
-        var ctx = document.getElementById("canvas").getContext("2d");
+    drawData: function(id, data) {
+        var ctx = document.getElementById(id).getContext("2d");
         window.myLine = new Chart(ctx).Line(data, {
             responsive: true,
             datasetFill: false
         });
     },
 
-    getTrackerStats: function(data, callback) {
+    getTrackerStats: function(id, data, callback) {
         data.action = 'trackerStats';
         $.ajax({
             type: 'GET',
@@ -35,14 +35,33 @@ lightning.stats = {
         });
     },
 
-    getCustomStats: function(url, data) {
+    getParameters: function(id) {
+        if (!lightning.vars.chart[id].params) {
+            return {};
+        } else {
+            var params = {};
+            for (var i in lightning.vars.chart[id].params) {
+                var param = lightning.vars.chart[id].params[i];
+                if (param.source) {
+                    params[i] = $('#' + param.source).val();
+                } else if (param.value) {
+                    params[i] = param.value;
+                }
+            }
+            return params;
+        }
+    },
+
+    updateStats: function(id) {
         var self = this;
+        var data = this.getParameters(id);
+        data.action = 'get-data';
         $.ajax({
             type: 'GET',
-            url: url,
+            url: lightning.vars.chart[id].url,
             dataType: 'JSON',
             data: data,
-            success: self.updateStats
+            success: function(result_data){ self.drawData(id, result_data) }
         });
     }
 };
