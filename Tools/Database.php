@@ -912,7 +912,7 @@ class Database extends Singleton {
             }
             if (!empty($current) && !empty($field['expression'])) {
                 // Format of array('count' => array('expression' => 'COUNT(*)'))
-                $field = $field['expression'] . ' AS ' . $alias;
+                $field = $field['expression'] . ' AS ' . $this->formatField($alias);
             }
             elseif (!empty($field) && is_array($field)) {
                 // Format of array('table' => array('column1', 'column2'))
