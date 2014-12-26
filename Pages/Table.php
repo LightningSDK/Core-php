@@ -1138,20 +1138,23 @@ abstract class Table extends Page {
             return;
         }
 
+        $button_id = 0;
         foreach ($this->custom_buttons as $button) {
+            $button_id++;
             switch ($button['type']) {
                 case self::CB_SUBMITANDREDIRECT:
-                    $this->renderSubmitAndRedirect($button);
+                    $this->renderSubmitAndRedirect($button, $button_id);
                     break;
             }
         }
     }
 
-    protected function renderSubmitAndRedirect($button) {
-        echo "<input id='custombutton' type='button' value='{$button['text']}' class='button'/>";
-        echo "<input type='hidden' name='redirect' value='{$button['data']}{$this->id}'/>";
+    protected function renderSubmitAndRedirect($button, $button_id) {
+        echo "<input id='custombutton_{$button_id}' type='button' value='{$button['text']}' class='button'/>";
+        echo "<input id='custom_redirect_{$button_id}' type='hidden' name='redirect' value=''/>";
         JS::startup("
-            $('#custombutton').on('click', function(){ 
+            $('#custombutton_{$button_id}').on('click', function(){ 
+                $('#custom_redirect_{$button_id}').val('{$button['data']}{$this->id}');
                 $('#form_{$this->table}').submit();
             });"
         );
