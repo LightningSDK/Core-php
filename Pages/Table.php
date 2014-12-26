@@ -393,14 +393,6 @@ abstract class Table extends Page {
 
     public function afterPostRedirect() {
         
-        
-        \Lightning\Tools\Logger::setLog('mylog.log');
-        \Lightning\Tools\Logger::message('ok');
-        \Lightning\Tools\Logger::message(Request::get('redirect'));
-        \Lightning\Tools\Logger::message($this->submit_redirect);
-        \Lightning\Tools\Logger::message($this->action_after[$this->action]);
-        
-        
         // Run any scripts after execution.
         if (isset($this->function_after[$this->action])) {
             $this->function_after[$this->action]();
