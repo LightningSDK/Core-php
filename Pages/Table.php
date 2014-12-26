@@ -141,12 +141,30 @@ abstract class Table extends Page {
     protected $search_fields = array();
     protected $submit_redirect = true;
     protected $additional_action_vars = array();
+    
     /**
      * Button names according to action type
      * @var array
      */
     protected $button_names = Array("insert"=>"Insert","cancel"=>"Cancel","update"=>"Update");
+    /**
+     * The list of actions perform after post request depending on type of the request
+     * @var array
+     */
     protected $action_after = Array("insert"=>"list","update"=>"list");
+    /**
+     * Extra buttons added to from. Array structure:
+     * - type (type of the button out of available ones);
+     * - text (text on the button);
+     * - data (custom data);
+     * @var Array
+     */
+    protected $custom_buttons = Array();
+    /**
+     * Available custom button types
+     */
+    const CB_SUBMITANDREDIRECT = 1;
+        
     protected $function_after = Array();
     protected $table_descriptions = "table_descriptions/";
     protected $singularity = false;
@@ -1090,7 +1108,7 @@ abstract class Table extends Page {
 
     protected function renderButtons($new_action) {
         if ($this->action != "view") {
-                echo "<tr><td colspan='2'><input type='submit' name='submit' value='{$this->button_names[$new_action]}' class='button'>";
+                echo "<tr><td colspan='2'><input type='submit' name='sbmt' value='{$this->button_names[$new_action]}' class='button'>";
                 $this->renderCustomButtons();
             if ($this->cancel) {
                 echo "<input type='button' name='cancel' value='{$this->button_names['cancel']}' onclick='document.location=\"".$this->createUrl()."\";' />";
@@ -1115,8 +1133,23 @@ abstract class Table extends Page {
     }
     
     protected function renderCustomButtons() {
-        echo "<input id='custombutton' type='button' value='Update & Send' class='button'/>";
-        echo "<input type='hidden' name='redirect' value='/admin/mailing/send?id=273'/>";
+        
+        if (empty($this->custom_buttons)) {
+            return;
+        }
+
+        foreach ($this->custom_buttons as $button) {
+            switch ($button['type']) {
+                case self::CB_SUBMITANDREDIRECT:
+                    $this->renderSubmitAndRedirect($button);
+                    break;
+            }
+        }
+    }
+
+    protected function renderSubmitAndRedirect($button) {
+        echo "<input id='custombutton' type='button' value='{$button['text']}' class='button'/>";
+        echo "<input type='hidden' name='redirect' value='{$button['data']}{$this->id}'/>";
         JS::startup("
             $('#custombutton').on('click', function(){ 
                 $('#form_{$this->table}').submit();
