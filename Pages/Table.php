@@ -1102,14 +1102,30 @@ abstract class Table extends Page {
 
             $this->render_form_linked_tables();
 
+            // Render all submission buttons
             $this->renderButtons($new_action);
         }
     }
 
+    /**
+     * Renders all submission buttons of the form.
+     * Depending on action performing, it will output also 
+     * other types of buttons, plus any needed fields and links
+     *
+     * @param string $new_action
+     *   Alternative name of the action processing
+     */
     protected function renderButtons($new_action) {
         if ($this->action != "view") {
-                echo "<tr><td colspan='2'><input type='submit' name='sbmt' value='{$this->button_names[$new_action]}' class='button'>";
-                $this->renderCustomButtons();
+            /*
+             * Submit button has name parameter as 'sbmt' by purpose. 
+             * When it is 'submit', form doesn't get submitted by javascript
+             * submit() function.
+             */
+            echo "<tr><td colspan='2'><input type='submit' name='sbmt' value='{$this->button_names[$new_action]}' class='button'>";
+            
+            // If exist render all custom buttons
+            $this->renderCustomButtons();
             if ($this->cancel) {
                 echo "<input type='button' name='cancel' value='{$this->button_names['cancel']}' onclick='document.location=\"".$this->createUrl()."\";' />";
             }
@@ -1131,27 +1147,59 @@ abstract class Table extends Page {
                 echo "<a href='".$this->createUrl('delete', $this->id)."'><img src='/images/lightning/remove.png' border='0' /></a>";
         }
     }
-    
+
+    /**
+     * Outputs custom buttons depending on its type
+     * 
+     * @return boolean
+     *   If there's no custom buttons, just exit the function
+     */
     protected function renderCustomButtons() {
         
         if (empty($this->custom_buttons)) {
-            return;
+            return FALSE;
         }
 
+        /*
+         * In case of there're a few buttons, set the different ids to them
+         * by adding a ppostfix
+         */
         $button_id = 0;
         foreach ($this->custom_buttons as $button) {
+            // Id for a single button
             $button_id++;
+            // Check the type and render
             switch ($button['type']) {
                 case self::CB_SUBMITANDREDIRECT:
+                    // Submimt & Redirect button
                     $this->renderSubmitAndRedirect($button, $button_id);
                     break;
             }
         }
     }
 
+    /**
+     * Renders button which submit the form and redirect user to a specified 
+     * link
+     * 
+     * @param array $button
+     *   Button data
+     * @param string $button_id
+     *   Button id which would be used and postfix in html id parameter
+     */
     protected function renderSubmitAndRedirect($button, $button_id) {
+        // Output the actual button
         echo "<input id='custombutton_{$button_id}' type='button' value='{$button['text']}' class='button'/>";
+        /*
+         * Hidden field has to store a redirect link in a value parameter.
+         * It's set to empty string because we don't need redirection on plain
+         * form submission (with standard submit button)
+         */
         echo "<input id='custom_redirect_{$button_id}' type='hidden' name='redirect' value=''/>";
+        /*
+         * Script fires up on clicking the button. It sets 'redirect' hidden 
+         * field value and submit the form
+         */
         JS::startup("
             $('#custombutton_{$button_id}').on('click', function(){ 
                 $('#custom_redirect_{$button_id}').val('{$button['data']}{$this->id}');
