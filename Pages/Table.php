@@ -141,6 +141,10 @@ abstract class Table extends Page {
     protected $search_fields = array();
     protected $submit_redirect = true;
     protected $additional_action_vars = array();
+    /**
+     * Button names according to action type
+     * @var array
+     */
     protected $button_names = Array("insert"=>"Insert","cancel"=>"Cancel","update"=>"Update");
     protected $action_after = Array("insert"=>"list","update"=>"list");
     protected $function_after = Array();
@@ -388,6 +392,15 @@ abstract class Table extends Page {
     }
 
     public function afterPostRedirect() {
+        
+        
+        \Lightning\Tools\Logger::setLog('mylog.log');
+        \Lightning\Tools\Logger::message('ok');
+        \Lightning\Tools\Logger::message(Request::get('redirect'));
+        \Lightning\Tools\Logger::message($this->submit_redirect);
+        \Lightning\Tools\Logger::message($this->action_after[$this->action]);
+        
+        
         // Run any scripts after execution.
         if (isset($this->function_after[$this->action])) {
             $this->function_after[$this->action]();
@@ -397,10 +410,11 @@ abstract class Table extends Page {
         if ($return = Request::get('table_return')) {
             Navigation::redirect($return);
         }
-        if ($this->submit_redirect && isset($this->action_after[$this->action])) {
-            Navigation::redirect($this->createUrl($this->action_after[$this->action], $this->action_after[$this->action] == 'list' ? 1 : $this->id));
-        } elseif ($this->submit_redirect && $redirect = Request::get('redirect')) {
+        
+        if ($this->submit_redirect && $redirect = Request::get('redirect')) {
             Navigation::redirect($redirect);
+        } elseif ($this->submit_redirect && isset($this->action_after[$this->action])) {
+            Navigation::redirect($this->createUrl($this->action_after[$this->action], $this->action_after[$this->action] == 'list' ? 1 : $this->id));
         } else {
             // Generic redirect.
             Navigation::redirect($this->createUrl());
@@ -1053,7 +1067,7 @@ abstract class Table extends Page {
                 }
             }
             // use the ID if we are editing a current one
-            if ($this->action == "edit")
+            if ($this->action == "edit") 
                 echo '<input type="hidden" name="id" id="id" value="' . $this->id . '" />';
             if ($this->action == "view" && !$this->read_only) {
                 if ($this->editable !== false) {
@@ -1078,31 +1092,46 @@ abstract class Table extends Page {
 
             $this->render_form_linked_tables();
 
-            if ($this->action != "view") {
-                echo "<tr><td colspan='2'><input type='submit' name='submit' value='{$this->button_names[$new_action]}' class='button'>";
-                if ($this->cancel) {
-                    echo "<input type='button' name='cancel' value='{$this->button_names['cancel']}' onclick='document.location=\"".$this->createUrl()."\";' />";
-                }
-                if ($this->refer_return) {
-                    echo '<input type="hidden" name="refer_return" value="'.$this->refer_return.'" />';
-                }
-                if ($new_action == 'update' && $this->enable_serial_update) {
-                    echo '<input type="checkbox" name="serialupdate" '.($this->serial_update ? 'checked="checked" ' : '').' /> Edit Next Record';
-                }
-                echo $this->form_buttons_after;
-                echo "</td></tr>";
-            }
-            echo "</table>";
-            if ($this->action != "view") echo "</form>";
-            if ($this->action == "view" && !$this->read_only) {
-                if ($this->editable !== false)
-                    echo "<a href='".$this->createUrl('edit', $this->id)."'><img src='/images/lightning/edit.png' border='0' /></a>";
-                if ($this->deleteable !== false)
-                    echo "<a href='".$this->createUrl('delete', $this->id)."'><img src='/images/lightning/remove.png' border='0' /></a>";
-            }
+            $this->renderButtons($new_action);
         }
     }
 
+    protected function renderButtons($new_action) {
+        if ($this->action != "view") {
+                echo "<tr><td colspan='2'><input type='submit' name='submit' value='{$this->button_names[$new_action]}' class='button'>";
+                $this->renderCustomButtons();
+            if ($this->cancel) {
+                echo "<input type='button' name='cancel' value='{$this->button_names['cancel']}' onclick='document.location=\"".$this->createUrl()."\";' />";
+            }
+            if ($this->refer_return) {
+                echo '<input type="hidden" name="refer_return" value="'.$this->refer_return.'" />';
+            }
+            if ($new_action == 'update' && $this->enable_serial_update) {
+                echo '<input type="checkbox" name="serialupdate" '.($this->serial_update ? 'checked="checked" ' : '').' /> Edit Next Record';
+            }
+            echo $this->form_buttons_after;
+            echo "</td></tr>";
+        }
+        echo "</table>";
+        if ($this->action != "view") echo "</form>";
+        if ($this->action == "view" && !$this->read_only) {
+            if ($this->editable !== false)
+                echo "<a href='".$this->createUrl('edit', $this->id)."'><img src='/images/lightning/edit.png' border='0' /></a>";
+            if ($this->deleteable !== false)
+                echo "<a href='".$this->createUrl('delete', $this->id)."'><img src='/images/lightning/remove.png' border='0' /></a>";
+        }
+    }
+    
+    protected function renderCustomButtons() {
+        echo "<input id='custombutton' type='button' value='Update & Send' class='button'/>";
+        echo "<input type='hidden' name='redirect' value='/admin/mailing/send?id=273'/>";
+        JS::startup("
+            $('#custombutton').on('click', function(){ 
+                $('#form_{$this->table}').submit();
+            });"
+        );
+    }
+    
     function render_form_row(&$field, $row) {
         $output = '';
         if ($which_field = $this->which_field($field)) {
