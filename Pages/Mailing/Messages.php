@@ -124,6 +124,14 @@ class Messages extends Table {
         ),
     );
 
+    protected $custom_buttons = [
+        'send' => [
+            'type' => self::CB_SUBMITANDREDIRECT,
+            'text' => 'Update & Send',
+            'data' => '/admin/mailing/send?id=',
+        ],
+    ];
+    
     protected $sort = 'message_id DESC';
     protected $maxPerPage = 100;
 

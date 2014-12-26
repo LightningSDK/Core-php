@@ -141,8 +141,30 @@ abstract class Table extends Page {
     protected $search_fields = array();
     protected $submit_redirect = true;
     protected $additional_action_vars = array();
+    
+    /**
+     * Button names according to action type
+     * @var array
+     */
     protected $button_names = Array("insert"=>"Insert","cancel"=>"Cancel","update"=>"Update");
+    /**
+     * The list of actions perform after post request depending on type of the request
+     * @var array
+     */
     protected $action_after = Array("insert"=>"list","update"=>"list");
+    /**
+     * Extra buttons added to from. Array structure:
+     * - type (type of the button out of available ones);
+     * - text (text on the button);
+     * - data (custom data);
+     * @var Array
+     */
+    protected $custom_buttons = Array();
+    /**
+     * Available custom button types
+     */
+    const CB_SUBMITANDREDIRECT = 1;
+        
     protected $function_after = Array();
     protected $table_descriptions = "table_descriptions/";
     protected $singularity = false;
@@ -388,6 +410,7 @@ abstract class Table extends Page {
     }
 
     public function afterPostRedirect() {
+        
         // Run any scripts after execution.
         if (isset($this->function_after[$this->action])) {
             $this->function_after[$this->action]();
@@ -397,10 +420,11 @@ abstract class Table extends Page {
         if ($return = Request::get('table_return')) {
             Navigation::redirect($return);
         }
-        if ($this->submit_redirect && isset($this->action_after[$this->action])) {
-            Navigation::redirect($this->createUrl($this->action_after[$this->action], $this->action_after[$this->action] == 'list' ? 1 : $this->id));
-        } elseif ($this->submit_redirect && $redirect = Request::get('redirect')) {
+        
+        if ($this->submit_redirect && $redirect = Request::get('redirect')) {
             Navigation::redirect($redirect);
+        } elseif ($this->submit_redirect && isset($this->action_after[$this->action])) {
+            Navigation::redirect($this->createUrl($this->action_after[$this->action], $this->action_after[$this->action] == 'list' ? 1 : $this->id));
         } else {
             // Generic redirect.
             Navigation::redirect($this->createUrl());
@@ -1053,7 +1077,7 @@ abstract class Table extends Page {
                 }
             }
             // use the ID if we are editing a current one
-            if ($this->action == "edit")
+            if ($this->action == "edit") 
                 echo '<input type="hidden" name="id" id="id" value="' . $this->id . '" />';
             if ($this->action == "view" && !$this->read_only) {
                 if ($this->editable !== false) {
@@ -1078,31 +1102,112 @@ abstract class Table extends Page {
 
             $this->render_form_linked_tables();
 
-            if ($this->action != "view") {
-                echo "<tr><td colspan='2'><input type='submit' name='submit' value='{$this->button_names[$new_action]}' class='button'>";
-                if ($this->cancel) {
-                    echo "<input type='button' name='cancel' value='{$this->button_names['cancel']}' onclick='document.location=\"".$this->createUrl()."\";' />";
-                }
-                if ($this->refer_return) {
-                    echo '<input type="hidden" name="refer_return" value="'.$this->refer_return.'" />';
-                }
-                if ($new_action == 'update' && $this->enable_serial_update) {
-                    echo '<input type="checkbox" name="serialupdate" '.($this->serial_update ? 'checked="checked" ' : '').' /> Edit Next Record';
-                }
-                echo $this->form_buttons_after;
-                echo "</td></tr>";
+            // Render all submission buttons
+            $this->renderButtons($new_action);
+        }
+    }
+
+    /**
+     * Renders all submission buttons of the form.
+     * Depending on action performing, it will output also 
+     * other types of buttons, plus any needed fields and links
+     *
+     * @param string $new_action
+     *   Alternative name of the action processing
+     */
+    protected function renderButtons($new_action) {
+        if ($this->action != "view") {
+            /*
+             * Submit button has name parameter as 'sbmt' by purpose. 
+             * When it is 'submit', form doesn't get submitted by javascript
+             * submit() function.
+             */
+            echo "<tr><td colspan='2'><input type='submit' name='sbmt' value='{$this->button_names[$new_action]}' class='button'>";
+            
+            // If exist render all custom buttons
+            $this->renderCustomButtons();
+            if ($this->cancel) {
+                echo "<input type='button' name='cancel' value='{$this->button_names['cancel']}' onclick='document.location=\"".$this->createUrl()."\";' />";
             }
-            echo "</table>";
-            if ($this->action != "view") echo "</form>";
-            if ($this->action == "view" && !$this->read_only) {
-                if ($this->editable !== false)
-                    echo "<a href='".$this->createUrl('edit', $this->id)."'><img src='/images/lightning/edit.png' border='0' /></a>";
-                if ($this->deleteable !== false)
-                    echo "<a href='".$this->createUrl('delete', $this->id)."'><img src='/images/lightning/remove.png' border='0' /></a>";
+            if ($this->refer_return) {
+                echo '<input type="hidden" name="refer_return" value="'.$this->refer_return.'" />';
+            }
+            if ($new_action == 'update' && $this->enable_serial_update) {
+                echo '<input type="checkbox" name="serialupdate" '.($this->serial_update ? 'checked="checked" ' : '').' /> Edit Next Record';
+            }
+            echo $this->form_buttons_after;
+            echo "</td></tr>";
+        }
+        echo "</table>";
+        if ($this->action != "view") echo "</form>";
+        if ($this->action == "view" && !$this->read_only) {
+            if ($this->editable !== false)
+                echo "<a href='".$this->createUrl('edit', $this->id)."'><img src='/images/lightning/edit.png' border='0' /></a>";
+            if ($this->deleteable !== false)
+                echo "<a href='".$this->createUrl('delete', $this->id)."'><img src='/images/lightning/remove.png' border='0' /></a>";
+        }
+    }
+
+    /**
+     * Outputs custom buttons depending on its type
+     * 
+     * @return boolean
+     *   If there's no custom buttons, just exit the function
+     */
+    protected function renderCustomButtons() {
+        
+        if (empty($this->custom_buttons)) {
+            return FALSE;
+        }
+
+        /*
+         * In case of there're a few buttons, set the different ids to them
+         * by adding a ppostfix
+         */
+        $button_id = 0;
+        foreach ($this->custom_buttons as $button) {
+            // Id for a single button
+            $button_id++;
+            // Check the type and render
+            switch ($button['type']) {
+                case self::CB_SUBMITANDREDIRECT:
+                    // Submimt & Redirect button
+                    $this->renderSubmitAndRedirect($button, $button_id);
+                    break;
             }
         }
     }
 
+    /**
+     * Renders button which submit the form and redirect user to a specified 
+     * link
+     * 
+     * @param array $button
+     *   Button data
+     * @param string $button_id
+     *   Button id which would be used and postfix in html id parameter
+     */
+    protected function renderSubmitAndRedirect($button, $button_id) {
+        // Output the actual button
+        echo "<input id='custombutton_{$button_id}' type='button' value='{$button['text']}' class='button'/>";
+        /*
+         * Hidden field has to store a redirect link in a value parameter.
+         * It's set to empty string because we don't need redirection on plain
+         * form submission (with standard submit button)
+         */
+        echo "<input id='custom_redirect_{$button_id}' type='hidden' name='redirect' value=''/>";
+        /*
+         * Script fires up on clicking the button. It sets 'redirect' hidden 
+         * field value and submit the form
+         */
+        JS::startup("
+            $('#custombutton_{$button_id}').on('click', function(){ 
+                $('#custom_redirect_{$button_id}').val('{$button['data']}{$this->id}');
+                $('#form_{$this->table}').submit();
+            });"
+        );
+    }
+    
     function render_form_row(&$field, $row) {
         $output = '';
         if ($which_field = $this->which_field($field)) {
