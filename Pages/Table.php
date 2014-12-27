@@ -416,6 +416,14 @@ abstract class Table extends Page {
             $this->function_after[$this->action]();
         }
 
+        // If this is a custom submit action.
+        $submit = Request::get('submit');
+        foreach ($this->custom_buttons as $button) {
+            if ($button['text'] == $submit && !empty($button['redirect'])) {
+                Navigation::redirect($this->replaceURLVariables($button['redirect']));
+            }
+        }
+
         // Redirect to the next page.
         if ($return = Request::get('table_return')) {
             Navigation::redirect($return);
@@ -1171,7 +1179,7 @@ abstract class Table extends Page {
             // Check the type and render
             switch ($button['type']) {
                 case self::CB_SUBMITANDREDIRECT:
-                    // Submimt & Redirect button
+                    // Submit & Redirect button
                     $this->renderSubmitAndRedirect($button, $button_id);
                     break;
             }
@@ -1188,24 +1196,8 @@ abstract class Table extends Page {
      *   Button id which would be used and postfix in html id parameter
      */
     protected function renderSubmitAndRedirect($button, $button_id) {
-        // Output the actual button
-        echo "<input id='custombutton_{$button_id}' type='button' value='{$button['text']}' class='button'/>";
-        /*
-         * Hidden field has to store a redirect link in a value parameter.
-         * It's set to empty string because we don't need redirection on plain
-         * form submission (with standard submit button)
-         */
-        echo "<input id='custom_redirect_{$button_id}' type='hidden' name='redirect' value=''/>";
-        /*
-         * Script fires up on clicking the button. It sets 'redirect' hidden 
-         * field value and submit the form
-         */
-        JS::startup("
-            $('#custombutton_{$button_id}').on('click', function(){ 
-                $('#custom_redirect_{$button_id}').val('{$button['data']}{$this->id}');
-                $('#form_{$this->table}').submit();
-            });"
-        );
+        // Output the button.
+        echo "<input id='custombutton_{$button_id}' type='submit' name='submit' value='{$button['text']}' class='button'/>";
     }
     
     function render_form_row(&$field, $row) {
@@ -1516,7 +1508,12 @@ abstract class Table extends Page {
         $this->preset = $new_preset;
     }
 
-    function createUrl($action = '', $id = 0, $field = '', $other = array()) {
+    protected function replaceURLVariables($string) {
+        $string = str_replace('{ID}', $this->id, $string);
+        return $string;
+    }
+
+    public function createUrl($action = '', $id = 0, $field = '', $other = array()) {
         $vars = array();
         if ($action == 'list') $vars['p'] = $id;
         if ($action != '') $vars['action'] = $action;

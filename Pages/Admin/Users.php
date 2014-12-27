@@ -19,8 +19,8 @@ class Users extends Table {
     protected $custom_buttons = [
         'send' => [
             'type' => self::CB_SUBMITANDREDIRECT,
-            'text' => 'Impersonate',
-            'data' => '/admin/users?action=impersonate&id=',
+            'text' => 'Save &amp; Impersonate',
+            'redirect' => '/admin/users?action=impersonate&id={ID}',
         ],
     ];
 
