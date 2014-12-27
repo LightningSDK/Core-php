@@ -16,6 +16,14 @@ class Users extends Table {
         parent::__construct();
     }
 
+    protected $custom_buttons = [
+        'send' => [
+            'type' => self::CB_SUBMITANDREDIRECT,
+            'text' => 'Impersonate',
+            'data' => '/admin/users?action=impersonate&id=',
+        ],
+    ];
+
     protected $table = 'user';
     protected $searchable = true;
     protected $search_fields = array('email', 'first', 'last');
