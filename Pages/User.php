@@ -12,6 +12,7 @@ use Lightning\Tools\Request;
 use Lightning\Tools\Template;
 use Lightning\View\Page;
 use Lightning\Model\User as UserModel;
+use Source\Tools\Session;
 
 class User extends Page {
 
@@ -229,6 +230,15 @@ class User extends Page {
         }
         else {
             Navigation::redirect(Configuration::get('user.login_url'));
+        }
+    }
+
+    public function getStopImpersonating() {
+        $session = Session::getInstance();
+        if (ClientUser::getInstance()->isImpersonating()) {
+            $session->unsetSetting('impersonate');
+            $session->saveData();
+            Navigation::redirect('/');
         }
     }
 }

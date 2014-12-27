@@ -56,6 +56,9 @@ use Lightning\View\CSS;
                             <li class="blog"><a href="/blog">Blog</a></li>
                             <li class="contact"><a href="/contact">Contact</a></li>
                             <li>
+                                <? if (ClientUser::getInstance()->isImpersonating()): ?>
+                                    <a href="/user?action=stop-impersonating">Return to Admin User</a><
+                                <? endif; ?>
                                 <?if (ClientUser::getInstance()->id > 0): ?>
                                     <a href="/user?action=logout">Log Out</a>
                                 <? else: ?>

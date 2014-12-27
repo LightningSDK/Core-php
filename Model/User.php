@@ -197,6 +197,16 @@ class User {
     }
 
     /**
+     * Check if the current user is being impersonated by an admin.
+     *
+     * @return boolean
+     *   Whether the current user is impersonated.
+     */
+    public function isImpersonating() {
+        return (boolean) Session::getInstance()->getSetting('impersonate');
+    }
+
+    /**
      * Check if a user is a site admin.
      *
      * @return boolean
