@@ -24,6 +24,20 @@ lightning.stats = {
         });
     },
 
+    updateTotals: function(id, data) {
+        var container = $('#chart_totals_' + id);
+        if (container.length == 1) {
+            container.empty();
+            for (var i in data.datasets) {
+                var sum = 0;
+                for (var j in data.datasets[i].data) {
+                    sum += parseInt(data.datasets[i].data[j]);
+                }
+                container.append($('<li>' + (data.datasets[i].label ? data.datasets[i].label : i) + ': ' + sum + '</li>'));
+            }
+        }
+    },
+
     getTrackerStats: function(id, data, callback) {
         data.action = 'trackerStats';
         $.ajax({
@@ -61,7 +75,18 @@ lightning.stats = {
             url: lightning.vars.chart[id].url,
             dataType: 'JSON',
             data: data,
-            success: function(result_data){ self.drawData(id, result_data) }
+            success: function(result_data){
+                self.drawData(id, result_data);
+                self.updateTotals(id, result_data);
+            }
+        });
+    },
+
+    init: function() {
+        var self = this;
+        $('.chart_controls input, .chart_controls select').change(function(e){
+            var id = $(e.target).closest('.chart_controls').attr('id').replace('chart_controls_', '');
+            self.updateStats(id);
         });
     }
 };
