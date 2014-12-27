@@ -328,6 +328,15 @@ class Session extends Singleton {
         Output::clearCookie(Configuration::get('session.cookie'));
     }
 
+    /**
+     * Get the value of a saved session variable.
+     *
+     * @param string $field
+     *   The name of the field.
+     *
+     * @return mixed
+     *   The set value.
+     */
     public function getSetting($field) {
         if (!empty($this->details['content'][$field])) {
             return $this->details['content'][$field];
@@ -336,16 +345,41 @@ class Session extends Singleton {
         }
     }
 
+    /**
+     * Set a value for a setting.
+     *
+     * @param string $field
+     *   The name of the field.
+     * @param mixed $value
+     *   The value for the field.
+     */
     public function setSettings($field, $value) {
         $this->details['content'][$field] = $value;
     }
 
-    // Return the session content
+    /**
+     * Remove a setting from the session.
+     *
+     * @param string $field
+     *   The field name
+     */
+    public function unsetSetting($field) {
+        unset($this->details['content'][$field]);
+    }
+
+    /**
+     * Return the session content
+     */
     public function getData () {
         return $this->details['content'];
     }
 
-    // Set session content
+    /**
+     * Set session content
+     *
+     * @param $content
+     *   Set all session fields.
+     */
     public function setData ($content) {
         Database::getInstance()->update(
             'session',
@@ -354,6 +388,9 @@ class Session extends Singleton {
         );
     }
 
+    /**
+     * Save the current session data.
+     */
     public function saveData () {
         Database::getInstance()->update(
             'session',
