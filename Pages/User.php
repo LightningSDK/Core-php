@@ -30,6 +30,15 @@ class User extends Page {
     }
 
     /**
+     * Show just the registration page.
+     */
+    public function getRegister() {
+        $template = Template::getInstance();
+        $template->set('action', 'register');
+        $template->set('redirect', Request::get('redirect'));
+    }
+
+    /**
      * This is common user register algorithm.
      * It validates POST data and registers user.
      */
@@ -49,9 +58,11 @@ class User extends Page {
         $res = UserModel::register($email, $pass2);
         if (!$res['success']) {
             if ($res['error'] == 'exists') {
-                Messenger::error('An account with that email already exists. Please try again. if you lost your password, click <a href="/user?action=reset&email=' . urlencode($email) . '">here</a>');            
+                Messenger::error('An account with that email already exists. Please try again. if you lost your password, click <a href="/user?action=reset&email=' . urlencode($email) . '">here</a>');
+                return $this->getRegister();
             } else {
                 Messenger::error('User could not be created');
+                return $this->getRegister();
             }
         }
 
