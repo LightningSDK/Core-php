@@ -2,10 +2,8 @@
 
 namespace Lightning\API;
 
-use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Messenger;
-use Lightning\Tools\Navigation;
 use Lightning\Tools\Output;
 use Lightning\Tools\Request;
 use Lightning\Tools\Session;
@@ -53,6 +51,8 @@ class User extends API {
      * 
      * @param string $email
      * @param string $pass
+     *
+     * @return boolean
      */
     protected function validateData($email, $pass) {
         // Default value
@@ -76,5 +76,7 @@ class User extends API {
             Messenger::error("Passwords must be at least {$min_password_length} characters");
             $result = FALSE;
         }
+
+        return $result;
     }
 }
