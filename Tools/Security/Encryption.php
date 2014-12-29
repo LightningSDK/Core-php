@@ -88,6 +88,9 @@ class Encryption {
     }
 
     public static function aesDecrypt($data, $key) {
+        if (strpos($data, ':') === false) {
+            return null;
+        }
         list($iv, $data) = explode(':', $data);
         $iv = base64_decode($iv);
         $data = base64_decode($data);
