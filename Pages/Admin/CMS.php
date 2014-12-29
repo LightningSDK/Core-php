@@ -10,8 +10,9 @@ use Lightning\View\API;
 
 class CMS extends API {
 
-    public function __construct() {
+    protected function hasAccess() {
         ClientUser::requireAdmin();
+        return true;
     }
 
     public function postSave() {

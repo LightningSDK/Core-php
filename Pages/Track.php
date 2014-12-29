@@ -20,6 +20,9 @@ use Lightning\Tools\Tracker;
  * @package Lightning\Pages
  */
 class Track extends Page {
+    protected function hasAccess() {
+        return true;
+    }
 
     /**
      * The main page handler, outputs a 1x1 pixel image.

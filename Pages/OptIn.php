@@ -2,6 +2,7 @@
 
 namespace Lightning\Pages;
 
+use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Request;
@@ -9,6 +10,11 @@ use Lightning\Tools\Template;
 use Lightning\Model\User;
 
 class OptIn extends Page {
+    protected function hasAccess() {
+        ClientUser::requireAdmin();
+        return true;
+    }
+
     public function get() {
         Template::getInstance()->set('content', 'landing');
     }

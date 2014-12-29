@@ -17,9 +17,12 @@ class Profile extends Page {
 
     protected $nav = 'profile';
 
-    public function get() {
+    protected function hasAccess() {
         ClientUser::requireLogin();
+        return true;
+    }
 
+    public function get() {
         // Load mailing list preferences.
         $all_lists = Subscription::getLists();
         $mailing_lists = Subscription::getUserLists(ClientUser::getInstance()->id);

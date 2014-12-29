@@ -21,6 +21,10 @@ class Page extends PageView {
 
     protected $new = false;
 
+    protected function hasAccess() {
+        return true;
+    }
+
     public function get() {
         $user = ClientUser::getInstance();
         $template = Template::getInstance();

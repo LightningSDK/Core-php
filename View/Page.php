@@ -18,6 +18,7 @@ use Lightning\View\JS;
  * The basic html page handler.
  *
  * @package Overridable\Lightning\View
+ * @todo: Should be abstract
  */
 class Page {
 
@@ -69,6 +70,8 @@ class Page {
         CSS::add('/css/site.css');
     }
 
+    public function get() {}
+
     /**
      * Prepare the output and tell the template to render.
      */
@@ -96,6 +99,13 @@ class Page {
     }
 
     /**
+     * Determine if the current use has access to the page.
+     */
+    protected function hasAccess() {
+        return false;
+    }
+
+    /**
      * Determine which handler in the page to run. This will automatically
      * determine if there is a form based on the submitted action variable.
      * If no action variable, it will call get() or post() or any other
@@ -105,6 +115,10 @@ class Page {
         Logger::setLog(Configuration::get('site.log'));
 
         $request_type = strtolower(Request::type());
+
+        if (!$this->hasAccess()) {
+            Output::accessDenied();
+        }
 
         if (!$this->validateToken()) {
             Navigation::redirect('/message?err=invalid_token');

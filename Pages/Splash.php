@@ -9,6 +9,10 @@ use Lightning\View\Page;
 
 class Splash extends Page {
 
+    protected function hasAccess() {
+        return true;
+    }
+
     public function get() {
         $page = Request::get('request');
 

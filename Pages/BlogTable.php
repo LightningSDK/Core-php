@@ -32,9 +32,9 @@ class BlogTable extends Table {
         'body' => array('editor' => 'full', 'upload' => true),
     );
 
-    public function __construct() {
+    protected function hasAccess() {
         ClientUser::requireAdmin();
-        parent::__construct();
+        return true;
     }
 
     protected function initSettings() {

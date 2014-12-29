@@ -25,6 +25,10 @@ class Blog extends Page {
 
     protected $nav = 'blog';
 
+    protected function hasAccess() {
+        return true;
+    }
+
     public function get() {
         $blog_id = Request::get('id', 'int') | Request::get('blog_id', 'int');
         $blog_url = Request::get('request');

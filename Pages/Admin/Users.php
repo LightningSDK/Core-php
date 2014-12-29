@@ -11,9 +11,9 @@ use Overridable\Lightning\Tools\Session;
 
 class Users extends Table {
 
-    public function __construct() {
+    protected function hasAccess() {
         ClientUser::requireAdmin();
-        parent::__construct();
+        return true;
     }
 
     protected $custom_buttons = [

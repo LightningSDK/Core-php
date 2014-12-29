@@ -25,6 +25,10 @@ class Contact extends Page {
     protected $page = 'contact';
     protected $nav = 'contact';
 
+    protected function hasAccess() {
+        return true;
+    }
+
     /**
      * Build the contact form.
      */

@@ -18,6 +18,10 @@ class User extends Page {
 
     protected $page = 'user';
 
+    protected function hasAccess() {
+        return true;
+    }
+
     public function get() {
         parent::__construct();
         Form::requiresToken();
