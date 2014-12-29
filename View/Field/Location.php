@@ -54,7 +54,21 @@ class Location {
     public static function statePop($name, $default = '', $extra = '') {
         $output = '<select name="' . $name . '" id="' . $name . '" ' . $extra . '>';
         $output .= '<option value=""></option>';
-        $states = array(
+        $states = self::getStateOptions();
+        foreach($states as $abbr => $state){
+            if($default == $abbr) {
+                $output .= '<option value="' . $abbr . '" SELECTED>' . $state . '</option>';
+            }
+            else {
+                $output .= '<option value="' . $abbr . '">' . $state . '</option>';
+            }
+        }
+        $output .= '</select>';
+        return $output;
+    }
+
+    public static function getStateOptions() {
+        return array(
             'AL' => 'Alabama','AK' => 'Alaska','AZ' => 'Arizona','AR' => 'Arkansas','CA' => 'California',
             'CO' => 'Colorado','CT' => 'Connecticut','DE' => 'Delaware','DC' => 'District of Columbia',
             'FL' => 'Florida','GA' => 'Georgia','HI' => 'Hawaii','ID' => 'Idaho','IL' => 'Illinois',
@@ -68,16 +82,6 @@ class Location {
             'TN' => 'Tennessee','TX' => 'Texas','UT' => 'Utah','VT' => 'Vermont','VA' => 'Virginia',
             'WA' => 'Washington','WV' => 'West Virginia','WI' => 'Wisconsin','WY' => 'Wyoming'
         );
-        foreach($states as $abbr => $state){
-            if($default == $abbr) {
-                $output .= '<option value="' . $abbr . '" SELECTED>' . $state . '</option>';
-            }
-            else {
-                $output .= '<option value="' . $abbr . '">' . $state . '</option>';
-            }
-        }
-        $output .= '</select>';
-        return $output;
     }
 
     /**
@@ -94,7 +98,20 @@ class Location {
      *   The full HTML code.
      */
     public static function countryPop($id, $extra="", $default="US"){
-        $list = array(
+        $output = "<select name='{$id}' id='{$id}' {$extra}>";
+        $output .= "<option value=''></option>";
+        foreach(self::getCountryOptions() as $key=>$value){
+            $output .= "<option value='$key'";
+            if($key == $default)
+                $output .= " selected='selected' ";
+            $output .= ">$value</option>";
+        }
+        $output .= "</select>";
+        return $output;
+    }
+
+    public static function getCountryOptions() {
+        return array(
             "US"=>"United States","CA"=>"Canada","UK"=>"United Kingdom","AC"=>"Ascension Island",
             "AF"=>"Afghanistan","AL"=>"Albania","DZ"=>"Algeria","AD"=>"Andorra","AO"=>"Angola",
             "AI"=>"Anguilla","AQ"=>"Antarctica","AG"=>"Antigua And Barbuda","AR"=>"Argentina Republic",
@@ -154,15 +171,5 @@ class Location {
             "WF"=>"Wallis And Futuna Islands","EH"=>"Western Sahara","YE"=>"Yemen",
             "YU"=>"Yugoslavia","ZR"=>"Zaire","ZM"=>"Zambia","ZW"=>"Zimbabwe"
         );
-        $output = "<select name='{$id}' id='{$id}' {$extra}>";
-        $output .= "<option value=''></option>";
-        foreach($list as $key=>$value){
-            $output .= "<option value='$key'";
-            if($key == $default)
-                $output .= " selected='selected' ";
-            $output .= ">$value</option>";
-        }
-        $output .= "</select>";
-        return $output;
     }
 }
