@@ -37,6 +37,7 @@
 namespace Lightning\Pages;
 
 use Lightning\Tools\CKEditor;
+use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
 use Lightning\Tools\Form;
 use Lightning\Tools\Messenger;
@@ -44,10 +45,12 @@ use Lightning\Tools\Navigation;
 use Lightning\Tools\Output;
 use Lightning\Tools\Request;
 use Lightning\Tools\Scrub;
+use Lightning\Tools\Security\Encryption;
 use Lightning\Tools\Session;
 use Lightning\Tools\Template;
 use Lightning\View\Field\BasicHTML;
 use Lightning\View\Field\Hidden;
+use Lightning\View\Field\Location;
 use Lightning\View\Field\Text;
 use Lightning\View\Field\Time;
 use Lightning\View\JS;
@@ -147,11 +150,13 @@ abstract class Table extends Page {
      * @var array
      */
     protected $button_names = Array("insert"=>"Insert","cancel"=>"Cancel","update"=>"Update");
+
     /**
      * The list of actions perform after post request depending on type of the request
      * @var array
      */
     protected $action_after = Array("insert"=>"list","update"=>"list");
+
     /**
      * Extra buttons added to from. Array structure:
      * - type (type of the button out of available ones);
@@ -160,6 +165,7 @@ abstract class Table extends Page {
      * @var Array
      */
     protected $custom_buttons = Array();
+
     /**
      * Available custom button types
      */
@@ -253,7 +259,7 @@ abstract class Table extends Page {
     public function get() {
         if ($this->singularity) {
             // The user only has access to a single entry. ID is irrelevant.
-
+            $this->getEdit();
         } elseif (Request::query('id', 'int')) {
             $this->action = $this->defaultAction;
             if ($this->editable) {
@@ -268,7 +274,8 @@ abstract class Table extends Page {
 
     public function getEdit() {
         $this->action = 'edit';
-        $this->id = Request::query('id', 'int');
+        $this->id = $this->singularity ? $this->singularityID : Request::query('id', 'int');
+
         if (!$this->id) {
             Messenger::error('Invalid ID');
             return;
@@ -347,7 +354,10 @@ abstract class Table extends Page {
 
         // Insert a new record.
         $this->get_fields();
-        $values = $this->getfieldValues($this->fields);
+        $values = $this->getFieldValues($this->fields);
+        if ($values === false) {
+            return $this->getNew();
+        }
         $this->id = Database::getInstance()->insert($this->table, $values, $this->update_on_duplicate_key ? $values : false);
         if (!empty($this->post_actions['after_insert'])) {
             $this->get_row();
@@ -363,20 +373,27 @@ abstract class Table extends Page {
             exit;
         }
 
+        $this->afterInsert();
+
         $this->afterPostRedirect();
     }
+
+    protected function afterInsert() {}
 
     public function postUpdate() {
         $this->id = Request::post('id', 'int');
         $this->action = 'update';
         if (!$this->editable) {
-            Messenger::error('Access Denied');
-            return;
+            Output::error('Access Denied');
         }
 
         // Update the record.
         $this->get_fields();
-        $new_values = $this->getfieldValues($this->fields);
+        $new_values = $this->getFieldValues($this->fields);
+        if ($new_values === false) {
+            return $this->getEdit();
+        }
+
         if (!empty($new_values)) {
             Database::getInstance()->update($this->table, $new_values, array($this->getKey() => $this->id));
         }
@@ -406,8 +423,12 @@ abstract class Table extends Page {
             }
         }
 
+        $this->afterUpdate();
+
         $this->afterPostRedirect();
     }
+
+    protected function afterUpdate() {}
 
     public function afterPostRedirect() {
         
@@ -431,8 +452,13 @@ abstract class Table extends Page {
         
         if ($this->submit_redirect && $redirect = Request::get('redirect')) {
             Navigation::redirect($redirect);
+        } elseif (!empty($this->redirectAfter[$this->action])) {
+            Navigation::redirect($this->redirectAfter[$this->action]);
         } elseif ($this->submit_redirect && isset($this->action_after[$this->action])) {
-            Navigation::redirect($this->createUrl($this->action_after[$this->action], $this->action_after[$this->action] == 'list' ? 1 : $this->id));
+            Navigation::redirect($this->createUrl(
+                $this->action_after[$this->action],
+                $this->action_after[$this->action] == 'list' ? 1 : $this->id)
+            );
         } else {
             // Generic redirect.
             Navigation::redirect($this->createUrl());
@@ -1846,15 +1872,16 @@ abstract class Table extends Page {
 
     function update_accessTable() {
         if (isset($this->accessTable)) {
-            $accessTable_values = $this->getfieldValues($this->fields, true);
+            $accessTable_values = $this->getFieldValues($this->fields, true);
             if (!empty($accessTable_values)) {
                 Database::getInstance()->update($this->accessTable, $accessTable_values, array_merge($this->accessTableCondition, array($this->getKey() => $this->id)));
             }
         }
     }
 
-    function getfieldValues(&$field_list, $accessTable=false) {
+    protected function getFieldValues(&$field_list, $accessTable=false) {
         $output = array();
+        $dependenciesMet = true;
         foreach($field_list as $f => $field) {
             // check for settings that override user input
             if ($this->action == "insert" && !$this->get_value_on_new($field)) {
@@ -1967,6 +1994,12 @@ abstract class Table extends Page {
                             !empty($field['full_page'])
                         );
                         break;
+                    case 'int':
+                    case 'float':
+                    case 'email':
+                    case 'url':
+                        $val = Request::post($field['form_field'], $field['type']);
+                        break;
                     default:
                         // This will include 'url'
                         // TODO: this can be set to include the date types above also.
@@ -1975,14 +2008,14 @@ abstract class Table extends Page {
                 }
             }
 
-            // if there is an alternate default value
+            // If there is an alternate default value
             if (!isset($val) && $this->action == "insert" && isset($field['Default'])) {
                 $val = $field['Default'];
-                // developer input - could require sanitization
+                // Developer input - could require sanitization.
                 $sanitize = true;
             }
 
-            // sanitize
+            // Sanitize the input.
             if ($sanitize &&
                 !($this->action == "insert" && ($field['insert_sanitize'] === false || $field['submit_sanitize'] === false)) &&
                 !($this->action == "update" && ($field['modify_sanitize'] === false || $field['submit_sanitize'] === false))
@@ -1990,7 +2023,13 @@ abstract class Table extends Page {
                 $val = $this->input_sanitize($val, $html);
             }
 
-            // if the value needs to be encrypted
+            // If this value is required.
+            if (!empty($field['required']) && empty($val)) {
+                Messenger::error('The field ' . $this->fields[$f]['display_name'] . ' is required.');
+                $dependenciesMet = false;
+            }
+
+            // If the value needs to be encrypted
             if (!empty($field['encrypted'])) {
                 $val = $this->encrypt($this->table, $field['field'], $val);
             }
@@ -1999,8 +2038,13 @@ abstract class Table extends Page {
                 $output[$field['field']] = $val;
             }
         }
-        return $output;
+
+        $this->processFieldValues($output);
+
+        return $dependenciesMet ? $output : false;
     }
+
+    protected function processFieldValues(&$values) {}
 
     protected function saveFile($field, $file) {
         // copy the uploaded file to the right directory
@@ -2162,33 +2206,15 @@ abstract class Table extends Page {
     }
 
     function encrypt($table, $column, $value) {
-        if ($value == '') return '';
-
-        global $encryption_engine_url;
-        $fields = "c=e&t={$table}&f={$column}&d=".urlencode($value);
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $encryption_engine_url);
-        curl_setopt($ch,CURLOPT_POST,4);
-        curl_setopt($ch,CURLOPT_POSTFIELDS, $fields);
-        curl_setopt($ch,CURLOPT_RETURNTRANSFER, true);
-        $result = curl_exec($ch);
-        curl_close($ch);
-        return $result;
+        // TODO: use remote AES encryption method for isolated HSM.
+        $table_key = Configuration::get('table.encryption_key');
+        return Encryption::aesEncrypt($value, $table_key);
     }
 
     public static function decrypt($data) {
-        if ($data=='') return '';
-
-        global $encryption_engine_url;
-        $fields = "c=d&d=".$data;
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $encryption_engine_url);
-        curl_setopt($ch,CURLOPT_POST,2);
-        curl_setopt($ch,CURLOPT_POSTFIELDS, $fields);
-        curl_setopt($ch,CURLOPT_RETURNTRANSFER, true);
-        $result = curl_exec($ch);
-        curl_close($ch);
-        return $result;
+        // TODO: use remote AES encryption method for isolated HSM.
+        $table_key = Configuration::get('table.encryption_key');
+        return Encryption::aesDecrypt($data, $table_key);
     }
 
     /**
@@ -2227,7 +2253,7 @@ abstract class Table extends Page {
             $where = array_merge($this->accessControl, $where);
         }
         if ($this->singularity) {
-            $where[$this->singularity] = $this->singularity_id;
+            $where[$this->singularity] = $this->singularityID;
         }
         $join = array();
         if ($this->accessTable) {
@@ -2385,7 +2411,7 @@ abstract class Table extends Page {
 
         // check for a singularity, only allow edit/update (this means a user only has access to one of these entries, so there is no list view)
         if ($this->singularity) {
-            $row = Database::getInstance()->selectRow($this->table, array($this->singularity => $this->singularity_id));
+            $row = Database::getInstance()->selectRow($this->table, array($this->singularity => $this->singularityID));
             if (count($row) > 0) $singularity_exists = true;
             if ($singularity_exists) $this->id = $row[$this->getKey()];
             // there can be no "new", "delete", "delconf", "list"
@@ -2573,7 +2599,7 @@ abstract class Table extends Page {
                             $link_settings['fields'][$f]['field'] = $f;
                             $link_settings['fields'][$f]['form_field'] = "st_{$link}_{$f}_{$l[$link_settings['key']]}";
                         }
-                        $field_values = $this->getfieldValues($link_settings['fields']);
+                        $field_values = $this->getFieldValues($link_settings['fields']);
                         Database::getInstance()->update($link, $field_values, array($local_key => $local_id, $link_settings['key'] => $l[$link_settings['key']]));
                     }
                 }
@@ -2584,7 +2610,7 @@ abstract class Table extends Page {
                         $link_settings['fields'][$f]['field'] = $f;
                         $link_settings['fields'][$f]['form_field'] = "st_{$link}_{$f}_-{$i}";
                     }
-                    $field_values = $this->getfieldValues($link_settings['fields']);
+                    $field_values = $this->getFieldValues($link_settings['fields']);
                     Database::getInstance()->insert($link, $field_values, array($local_key => $local_id));
                 }
             }
@@ -2619,7 +2645,7 @@ abstract class Table extends Page {
         }
 
         if (!empty($field['encrypted'])) {
-            $v = table::decrypt($v);
+            $v = $this->decrypt($v);
         }
 
         // set the default value if new
@@ -2657,9 +2683,9 @@ abstract class Table extends Page {
                 case 'yesno':
                     $field['options'] = Array(1=>'No',2=>'Yes');
                 case 'state':
-                    if ($field['type'] == "state")
-                        // TODO: Needs to implement Time field.
-                        $field['options'] = $this->state_options();
+                    if ($field['type'] == "state") {
+                        $field['options'] = Location::getStateOptions();
+                    }
                 case 'select':
                     if (isset($field['options'][$v])) {
                         if (is_array($field['options'][$v])) {
@@ -2781,9 +2807,17 @@ abstract class Table extends Page {
      *   The rendered HTML.
      */
     protected function renderEditField($field, &$row = array()) {
+        // Make sure the form_field is set.
+        if (!isset($field['form_field'])) {
+            $field['form_field'] = $field['field'];
+        }
+
         // Get the default field value.
-        if (empty($row)) {
-            $v = $field['default'];
+        if (!empty($_POST)) {
+            $v = Request::post($field['form_field']);
+        }
+        elseif (empty($row)) {
+            $v = isset($field['default']) ? $field['default'] : '';
         }
         elseif (isset($field['edit_value'])) {
             if (is_callable($field['edit_value'])) {
@@ -2796,8 +2830,6 @@ abstract class Table extends Page {
             $v = $row[$field['field']];
         }
 
-        if (!isset($field['form_field']))
-            $field['form_field'] = $field['field'];
         if (isset($this->preset[$field['field']]['render_'.$this->action.'_field'])) {
             $this->get_row(false);
             return $this->preset[$field['field']]['render_'.$this->action.'_field']($this->list);
@@ -2808,7 +2840,7 @@ abstract class Table extends Page {
             $field['Value'] = isset($v) ? $v : null;
         }
         if (!empty($field['encrypted'])) {
-            $field['Value'] = table::decrypt($field['Value']);
+            $field['Value'] = $this->decrypt($field['Value']);
         }
 
         // set the default value if new
@@ -2886,6 +2918,7 @@ abstract class Table extends Page {
             case 'lookup':
             case 'yesno':
             case 'state':
+            case 'country':
             case 'select':
                 if ($field['type'] == "lookup") {
                     $options = Database::getInstance()->selectIndexed(
@@ -2901,8 +2934,9 @@ abstract class Table extends Page {
                 elseif ($field['type'] == "yesno")
                     $options = Array(1=>'No', 2=>'Yes');
                 elseif ($field['type'] == "state")
-                    // TODO: Needs to implement Time field.
-                    $options = $this->state_options();
+                    $options = Location::getStateOptions();
+                elseif ($field['type'] == "country")
+                    $options = Location::getCountryOptions();
                 else
                     $options = $field['options'];
                 if (!is_array($options)) return false;
