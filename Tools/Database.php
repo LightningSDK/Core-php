@@ -1018,7 +1018,9 @@ class Database extends Singleton {
         $a2 = array();
         foreach ($array as $field => $v) {
             if (is_numeric($field) && empty($v['expression'])) {
-                $a2[] = $this->sqlImplode($v, $values, ' AND ');
+                if ($subImplode = $this->sqlImplode($v, $values, ' AND ')) {
+                    $a2[] = $subImplode;
+                }
             }
 
             // This might change from an and to an or.
@@ -1028,7 +1030,9 @@ class Database extends Singleton {
             }
             // This is if and AND/OR is explicitly grouped.
             elseif (($field === '#OR' || $field === '#AND') && !empty($v)) {
-                $a2[] = '(' . $this->sqlImplode($v, $values, ' ' . str_replace('#', '', $field) . ' ') . ')';
+                if ($subImplode = $this->sqlImplode($v, $values, ' ' . str_replace('#', '', $field) . ' ')) {
+                    $a2[] = '(' . $subImplode . ')';
+                }
                 continue;
             }
 
