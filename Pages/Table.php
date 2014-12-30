@@ -528,7 +528,7 @@ abstract class Table extends Page {
     function render() {
         $this->get_fields();
         $this->check_default_rowClick();
-        $this->render_header();
+        $this->renderHeader();
 
         if ($this->action == "new" && !$this->addable) {
             Messenger::error('Access Denied');
@@ -589,7 +589,7 @@ abstract class Table extends Page {
     function render_calendar_list() {
         $this->js_init_calendar();
         $this->get_fields();
-        $this->render_header();
+        $this->renderHeader();
         $last_date = 0;
         foreach($this->list as $l) {
             if ($last_date != $l['date']) {
@@ -625,7 +625,7 @@ abstract class Table extends Page {
         if ($get_new_list)
             $this->loadList();
         $this->get_fields();
-        $this->render_header();
+        $this->renderHeader();
         $today = GregorianToJD(date("m"), date("d"), date("Y"));
 
 
@@ -730,7 +730,7 @@ abstract class Table extends Page {
         return preg_replace('|\?.*|', '', $_SERVER['REQUEST_URI']);
     }
 
-    function render_header() {
+    protected function renderHeader() {
         if (is_array($this->template_vars)) {
             foreach ($this->template_vars as $row) {
 
