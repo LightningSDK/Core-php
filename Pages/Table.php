@@ -174,6 +174,7 @@ abstract class Table extends Page {
     protected $function_after = Array();
     protected $table_descriptions = "table_descriptions/";
     protected $singularity = false;
+    protected $singularityID = 0;
     protected $parentLink;
     protected $accessTable;
     protected $accessTableJoinOn;
@@ -357,6 +358,9 @@ abstract class Table extends Page {
         $values = $this->getFieldValues($this->fields);
         if ($values === false) {
             return $this->getNew();
+        }
+        if ($this->singularity) {
+            $values[$this->singularity] = $this->singularityID;
         }
         $this->id = Database::getInstance()->insert($this->table, $values, $this->update_on_duplicate_key ? $values : false);
         if (!empty($this->post_actions['after_insert'])) {
