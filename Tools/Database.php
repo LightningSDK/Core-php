@@ -378,9 +378,7 @@ class Database extends Singleton {
     public function check($table, $where = array()){
         $fields = empty($fields) ? '*' : implode($fields);
         $values = array();
-        if (!empty($where)) {
-            $where = ' WHERE ' . $this->sqlImplode($where, $values, 'AND');
-        }
+        $where = empty($where) ? '' : ' WHERE ' . $this->sqlImplode($where, $values, 'AND');
         $this->query('SELECT ' . $fields . ' FROM ' . $this->parseTable($table, $values) . $where . ' LIMIT 1', $values);
         return $this->result->rowCount() > 0;
     }
