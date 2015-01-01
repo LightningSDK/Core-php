@@ -601,6 +601,72 @@ class Database extends Singleton {
     }
 
     /**
+     * Experimental:
+     * This should parse the entire query provided as an array.
+     *
+     * @param array $query
+     *   The query to run.
+     * @param array $values
+     *   Empty array for new values.
+     *
+     * @return string
+     *   The built query.
+     *
+     * @todo This should be protected.
+     */
+    public function parseQuery($query, &$values, $type = 'SELECT') {
+        $output = $type . ' ';
+        if ($type == 'SELECT') {
+            $output .= $this->implodeFields(!empty($query['select']) ? $query['select'] : '*');
+        }
+        if (!empty($query['from'])) {
+            $output .= ' FROM ' . $this->parseTable($query['from'], $values);
+        }
+        if (!empty($query['join'])) {
+            $output .= $this->parseJoin($query['join'], $values);
+        }
+        if (!empty($query['where'])) {
+            $output .= ' WHERE ' . $this->sqlImplode($query['where'], $values, ' AND ');
+        }
+        if (!empty($query['group_by'])) {
+            $output .= ' GROUP BY ' . $this->implodeFields($query['group_by']);
+        }
+        if (!empty($query['order_by'])) {
+            $output .= ' ORDER BY ' . $this->sqlImplode($query['order_by'][0], $values) . ' ' . $query['order_by'][1];
+        }
+
+        return $output;
+    }
+
+    /**
+     * Parse join data into a query string.
+     *
+     * @param array $join
+     *   The join data.
+     * @param array $values
+     *   The array to add variables to.
+     *
+     * @return string
+     *   The rendered query portion.
+     */
+    protected function parseJoin($join, &$values) {
+        // If the first element of join is not an array, it's an actual join.
+        if (!is_array(current($join))) {
+            // Wrap it in an array so we can loop over it.
+            $join = array($join);
+        }
+        // Foreach join.
+        foreach ($join as $alias => $join) {
+            $output = $this->implodeJoin($join[0], $join[1], !empty($join[2]) ? $join[2] : '', $values, is_string($alias) ? $alias : null);
+            // Add any extra replacement variables.
+            if (isset($join[3])) {
+                $values = array_merge($values, $join[3]);
+            }
+        }
+        return $output;
+    }
+
+    /**
      * Create a query-ready string for a table and it's joins.
      *
      * @param string|array $table
@@ -625,19 +691,7 @@ class Database extends Singleton {
                 $output = $this->parseTable($table['from'], $values);
             }
             if (!empty($table['join'])) {
-                // If the first element of join is not an array, it's an actual join.
-                if (!is_array(current($table['join']))) {
-                    // Wrap it in an array so we can loop over it.
-                    $table['join'] = array($table['join']);
-                }
-                // Foreach join.
-                foreach ($table['join'] as $alias => $join) {
-                    $output .= $this->implodeJoin($join[0], $join[1], !empty($join[2]) ? $join[2] : '', $values, is_string($alias) ? $alias : null);
-                    // Add any extra replacement variables.
-                    if (isset($join[3])) {
-                        $values = array_merge($values, $join[3]);
-                    }
-                }
+                $output .= $this->parseJoin($table['join'], $values);
             }
             // If this join is a subquery, wrap it.
             if (is_array($table)) {
@@ -654,7 +708,12 @@ class Database extends Singleton {
                 } elseif (count($table) == 1 && empty($table['from'])) {
                     $alias = key($table);
                     $table = current($table);
-                    $output = '`' . $table . '` AS `' . $alias . '`';
+                    if (is_array($table)) {
+                        // This must be the new experimental format.
+                        $output = '(' . $this->parseQuery($table, $values) . ') AS `' . $alias . '`';
+                    } else {
+                        $output = '`' . $table . '` AS `' . $alias . '`';
+                    }
                 }
             }
             return $output;
@@ -903,6 +962,9 @@ class Database extends Singleton {
      *   The SQL query segment.
      */
     protected function implodeFields($fields) {
+        if (!is_array($fields)) {
+            $fields = array($fields);
+        }
         foreach ($fields as $alias => &$field) {
             $current = null;
             if (is_array($field)) {
@@ -1014,6 +1076,9 @@ class Database extends Singleton {
      */
     public function sqlImplode($array, &$values, $concatenator = ', ', $setting = false){
         $a2 = array();
+        if (!is_array($array)) {
+            $array = array($array);
+        }
         foreach ($array as $field => $v) {
             if (is_numeric($field) && empty($v['expression'])) {
                 if ($subImplode = $this->sqlImplode($v, $values, ' AND ')) {
