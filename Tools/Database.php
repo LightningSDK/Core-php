@@ -656,8 +656,9 @@ class Database extends Singleton {
             $join = array($join);
         }
         // Foreach join.
+        $output = '';
         foreach ($join as $alias => $join) {
-            $output = $this->implodeJoin($join[0], $join[1], !empty($join[2]) ? $join[2] : '', $values, is_string($alias) ? $alias : null);
+            $output .= $this->implodeJoin($join[0], $join[1], !empty($join[2]) ? $join[2] : '', $values, is_string($alias) ? $alias : null);
             // Add any extra replacement variables.
             if (isset($join[3])) {
                 $values = array_merge($values, $join[3]);
