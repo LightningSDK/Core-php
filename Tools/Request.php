@@ -203,6 +203,8 @@ class Request {
         switch ($var) {
             case 'ip_int':
                 return ip2long($_SERVER['REMOTE_ADDR']);
+            case 'ip':
+                return $_SERVER['REMOTE_ADDR'];
         }
     }
 
