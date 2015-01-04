@@ -2043,12 +2043,14 @@ abstract class Table extends Page {
             }
         }
 
-        $this->processFieldValues($output);
+        $dependenciesMet &= $this->processFieldValues($output);
 
         return $dependenciesMet ? $output : false;
     }
 
-    protected function processFieldValues(&$values) {}
+    protected function processFieldValues(&$values) {
+        return true;
+    }
 
     protected function saveFile($field, $file) {
         // copy the uploaded file to the right directory
