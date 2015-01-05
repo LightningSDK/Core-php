@@ -1261,8 +1261,12 @@ abstract class Table extends Page {
                 // show the field
                 if ($which_field == "display")
                     $output .= $this->print_field_value($field, $row);
-                elseif ($which_field == "edit")
+                elseif ($which_field == "edit") {
                     $output .= $this->renderEditField($field, $row);
+                    if (!empty($field['note'])) {
+                        $output .= $field['note'];
+                    }
+                }
                 if (!empty($field['default_reset'])) {
                     $output .= "<input type='button' value='Reset to Default' onclick='reset_field_value(\"{$field['field']}\");' />";
                 }
