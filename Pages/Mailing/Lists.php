@@ -17,13 +17,6 @@ use Lightning\Tools\Output;
  * @package Lightning\Pages\Mailing
  */
 class Lists extends Table {
-    /**
-     * Require admin privileges.
-     */
-    public function __construct() {
-        ClientUser::requireAdmin();
-        parent::__construct();
-    }
 
     protected $table = 'message_list';
     protected $preset = array(
@@ -49,6 +42,11 @@ class Lists extends Table {
         'type' => 'action',
         'action' => 'view',
     );
+
+    public function hasAccess() {
+        ClientUser::requireAdmin();
+        return true;
+    }
 
     protected function afterDelete($deleted_id) {
         // Clean up user connections for this list.

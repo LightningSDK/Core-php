@@ -7,12 +7,6 @@ use Lightning\Tools\ClientUser;
 use Lightning\View\JS;
 
 class Templates extends Table {
-
-    public function __construct() {
-        ClientUser::requireAdmin();
-        parent::__construct();
-    }
-
     protected $table = 'message_template';
     protected $preset = array(
         'body' => array(
@@ -20,4 +14,9 @@ class Templates extends Table {
             'full_page' => true,
         )
     );
+
+    public function hasAccess() {
+        ClientUser::requireAdmin();
+        return true;
+    }
 }

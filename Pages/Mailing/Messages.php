@@ -85,8 +85,12 @@ class Messages extends Table {
     /**
      * Require admin privileges.
      */
-    public function __construct() {
+    public function hasAccess() {
         ClientUser::requireAdmin();
+        return true;
+    }
+
+    public function __construct() {
         parent::__construct();
 
         $action = Request::get('action');
