@@ -11,6 +11,7 @@ abstract class Chart extends Page {
     protected $page = 'chart';
     protected $width = '600';
     protected $height = '450';
+    protected $numberFormat = 'float';
     public $id = 'chart';
 
     public function __construct() {
@@ -20,6 +21,7 @@ abstract class Chart extends Page {
         JS::startup("lightning.stats.init()");
         JS::startup("lightning.stats.updateStats('" . $this->id . "')");
         JS::set('chart.' . $this->id . '.params.start', ['source' => 'start']);
+        JS::set('chart.' . $this->id . '.params.number_format', $this->numberFormat);
     }
 
     public function get() {

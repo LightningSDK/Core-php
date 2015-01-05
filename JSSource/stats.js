@@ -33,6 +33,9 @@ lightning.stats = {
                 for (var j in data.datasets[i].data) {
                     sum += parseInt(data.datasets[i].data[j]);
                 }
+                if (lightning.vars.chart[id].params.number_format && lightning.vars.chart[id].params.number_format == 'money') {
+                    sum = '$' + sum.toFixed(2);
+                }
                 container.append($('<li>' + (data.datasets[i].label ? data.datasets[i].label : i) + ': ' + sum + '</li>'));
             }
         }
