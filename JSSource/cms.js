@@ -6,6 +6,7 @@ lightning.cms = {
                 allowedContent: true
             }
         );
+        CKFinder.setupCKEditor(lightning.ckeditors[editor], '/js/ckfinder/');
         $('#' + editor.replace(/^cms_/, 'cms_edit_')).hide();
         $('#' + editor.replace(/^cms_/, 'cms_save_')).removeClass('hide').show();
     },
