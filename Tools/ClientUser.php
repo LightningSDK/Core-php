@@ -63,7 +63,13 @@ class ClientUser extends Singleton {
             if (!empty($action)) {
                 $action = 'action=' . Scrub::toURL($action) . '&';
             }
-            Navigation::redirect('/user?' . $action . 'redirect=' . Scrub::toURL(Request::get('request')));
+            $redirect = Request::get('request');
+            $query = $_GET;
+            unset($query['request']);
+            if (!empty($query)) {
+                $redirect .= '?' . http_build_query($query);
+            }
+            Navigation::redirect('/user?' . $action . 'redirect=' . Scrub::toURL($redirect));
         }
     }
 
