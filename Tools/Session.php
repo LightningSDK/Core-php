@@ -250,7 +250,10 @@ class Session extends Singleton {
      * Sends a blank cookie to overwrite and forget any current session cookie.
      */
     static function clearCookie(){
-        Output::setCookie(Configuration::get('session.cookie'), '', -1, '', Configuration::get('cookie_domain'));
+        if (!headers_sent()) {
+            unset($_COOKIE[Configuration::get('session.cookie')]);
+            Output::setCookie(Configuration::get('session.cookie'), '', -1, '', Configuration::get('cookie_domain'));
+        }
     }
 
     /**
