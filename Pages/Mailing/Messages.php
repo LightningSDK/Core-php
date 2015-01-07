@@ -64,6 +64,11 @@ class Messages extends Table {
     );
 
     protected $action_fields = array(
+        'stats' => array(
+            'type' => 'link',
+            'url' => '/admin/mailing/stats?message_id=',
+            'display_value' => 'Stats',
+        ),
         'send' => array(
             'type' => 'link',
             'url' => '/admin/mailing/send?id=',
