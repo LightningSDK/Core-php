@@ -43,20 +43,28 @@ class Session extends Singleton {
     /**
      * Get the current session.
      *
+     * @param boolean $create_object
+     *   Whether to create a new object if it doesn't exist.
+     * @param boolean $create_session
+     *   Whether to create a new session for the client if one doesn't exit.
+     *
      * @return Session
      *   The current session.
      */
-    public static function getInstance($create = true) {
-        return parent::getInstance($create);
+    public static function getInstance($create_object = true, $create_session = true) {
+        return parent::getInstance($create_object, $create_session);
     }
 
     /**
      * Create the session object.
      *
+     * @param boolean $create_session
+     *   Whether to create the session for the user.
+     *
      * @return Session
      *   The current session.
      */
-    public static function createInstance() {
+    public static function createInstance($create_session = true) {
         if ($session_key = Request::cookie('session', 'hex')) {
             $session_criteria = array(
                 'session_key' => array('LIKE', $session_key)
@@ -94,9 +102,12 @@ class Session extends Singleton {
                 return static::create();
             }
         }
-        else {
+        elseif ($create_session) {
             // No session exists, create a new one.
             return static::create();
+        }
+        else {
+            return null;
         }
     }
 

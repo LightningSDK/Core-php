@@ -3,6 +3,7 @@
 namespace Lightning\Tools;
 
 use Lightning\Bootstrap;
+use ReflectionClass;
 
 /**
  * Class Singleton
@@ -29,10 +30,14 @@ class Singleton {
         $class = str_replace('Overridable\\', '', get_called_class());
         if (empty(static::$instances[$class]) && $create) {
             Bootstrap::classAutoloader($class);
+            // There may be additional args passed to this function.
+            $args = func_get_args();
+            array_shift($args);
             if (is_callable($class . '::createInstance')) {
-                self::$instances[$class] = $class::createInstance();
+                self::$instances[$class] = call_user_func_array(array($class, 'createInstance'), $args);
             } else {
-                self::$instances[$class] = new $class();
+                $reflect  = new ReflectionClass($class);
+                self::$instances[$class] = $reflect->newInstanceArgs($args);
             }
         }
         return !empty(self::$instances[$class]) ? self::$instances[$class] : null;

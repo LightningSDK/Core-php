@@ -33,8 +33,8 @@ class ClientUser extends Singleton {
      */
     public static function createInstance() {
         // If a session is found.
-        $session = Session::getInstance();
-        if ($session->user_id > 0) {
+        $session = Session::getInstance(true, false);
+        if ($session && $session->user_id > 0) {
             // If we are logged into someone elses account.
             if ($impersonate = $session->getSetting('impersonate')) {
                 $user = User::loadById($impersonate);
