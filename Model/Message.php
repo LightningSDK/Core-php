@@ -326,7 +326,7 @@ class Message {
         $source = str_replace('{UNSUBSCRIBE}', $this->unsubscribe ? $this->getUnsubscribeString() : '', $source);
 
         // Add the tracking image to the bottom of the email.
-        $tracking_image = Tracker::getTrackerImage('Message Opened', $this->message['message_id'], $this->user->details['user_id']);
+        $tracking_image = Tracker::getTrackerImage('Email Opened', $this->message['message_id'], $this->user->details['user_id']);
         $source = str_replace('{TRACKING_IMAGE}', $tracking_image, $source);
 
         return $source;

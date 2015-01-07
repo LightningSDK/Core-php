@@ -22,13 +22,13 @@ class BouncedEmail extends CLI {
             $user = User::loadByEmail($email);
             if (!$user) {
                 // Bounced from an unknown sender, ignore this.
-                Tracker::trackEvent('Bounced Email', 0, 0);
+                Tracker::trackEvent('Email Bounced', 0, 0);
                 return;
             }
 
             // Track the bounced event.
             // TODO: we can scan the email for a link to see if we know the message id.
-            Tracker::trackEvent('Bounced Email', 0, $user->user_id);
+            Tracker::trackEvent('Email Bounced', 0, $user->user_id);
 
             // Get the last 6 send/bounce events.
             // TODO: Also check for a reactivation email.
@@ -39,8 +39,8 @@ class BouncedEmail extends CLI {
                     'tracker_id' => array(
                         'IN',
                         array(
-                            Tracker::getTrackerId('Message Sent'),
-                            Tracker::getTrackerId('Bounced Email'),
+                            Tracker::getTrackerId('Email Sent'),
+                            Tracker::getTrackerId('Email Bounced'),
                         ),
                     ),
                 ),
@@ -49,7 +49,7 @@ class BouncedEmail extends CLI {
             );
 
             $bounce_count = 0;
-            $bounce_id = Tracker::getTrackerId('Bounced Email');
+            $bounce_id = Tracker::getTrackerId('Email Bounced');
             foreach ($mail_history as $history) {
                 if ($history['tracker_id'] == $bounce_id) {
                     $bounce_count++;
