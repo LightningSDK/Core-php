@@ -35,7 +35,7 @@ class Singleton {
                 self::$instances[$class] = new $class();
             }
         }
-        return self::$instances[$class];
+        return !empty(self::$instances[$class]) ? self::$instances[$class] : null;
     }
 
     /**

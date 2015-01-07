@@ -17,6 +17,7 @@ use Source\Tools\Session;
 class User extends Page {
 
     protected $page = 'user';
+    protected $ignoreToken = true;
 
     protected function hasAccess() {
         return true;
@@ -24,7 +25,6 @@ class User extends Page {
 
     public function get() {
         parent::__construct();
-        Form::requiresToken();
         $user = ClientUser::getInstance();
         Template::getInstance()->set('redirect', Request::get('redirect'));
         if($user->id > 0){
