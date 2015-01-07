@@ -33,12 +33,29 @@ class ChartData {
         }
     }
 
+    /**
+     * Set the titles for the existing sets.
+     *
+     * @param array $titles
+     *   An array of strings keyed by the set_id.
+     * @param string $default
+     *   The default label if not in the $titles array.
+     */
     public function setTitles($titles, $default = null) {
         foreach ($this->data as $key => &$set) {
             $set['label'] = !empty($titles[$key]) ? $titles[$key] : ($default ?: $key);
         }
     }
 
+    /**
+     * Make sure the data has an entry for each point in the range.
+     *
+     * @param array $data
+     *   An array of arrays. The sub arrays are values keyed by range.
+     *
+     * @return array
+     *   The conformed array.
+     */
     public function conformData($data) {
         $conformed_data = array_fill(0, $this->end - $this->start + 1, 0);
         foreach ($data as $row) {
@@ -51,6 +68,14 @@ class ChartData {
         return $conformed_data;
     }
 
+    /**
+     * Add a dataset.
+     *
+     * @param array $data
+     *   A list of values keyed by the range point.
+     * @param string $title
+     *   The title of the set.
+     */
     public function addDataSet($data, $title = 'Unknown') {
         $this->data[] = array(
             'data' => array_values($data),
@@ -84,6 +109,6 @@ class ChartData {
         if (!empty($this->Xlabels)) {
             $output['labels'] = $this->Xlabels;
         }
-        Output::json($output);
+        Output::json(array('data' => $output));
     }
 }

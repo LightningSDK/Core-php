@@ -259,7 +259,11 @@ class Tracker extends Singleton {
 
     public static function getHistoryAllSubIDs($tracker, $start = -30, $end = 0, $user_id = -1) {
         // Start the criteria with tracker id.
-        $criteria = array('tracker_id' => $tracker);
+        if (is_array($tracker)) {
+            $criteria = array('tracker_id' => array('IN', $tracker));
+        } else {
+            $criteria = array('tracker_id' => $tracker);
+        }
 
         // Filter by date range.
         $start = Time::today() + $start;

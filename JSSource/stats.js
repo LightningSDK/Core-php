@@ -18,7 +18,8 @@ lightning.stats = {
 
     drawData: function(id, data) {
         var ctx = document.getElementById(id).getContext("2d");
-        window.myLine = new Chart(ctx).Line(data, {
+        var renderer = lightning.vars.chart[id].renderer;
+        window.myLine = new Chart(ctx)[renderer](data, {
             responsive: true,
             datasetFill: false
         });
@@ -73,14 +74,15 @@ lightning.stats = {
         var self = this;
         var data = this.getParameters(id);
         data.action = 'get-data';
+        data.id = id;
         $.ajax({
             type: 'GET',
             url: lightning.vars.chart[id].url,
             dataType: 'JSON',
             data: data,
             success: function(result_data){
-                self.drawData(id, result_data);
-                self.updateTotals(id, result_data);
+                self.drawData(id, result_data.data);
+                self.updateTotals(id, result_data.data);
             }
         });
     },
