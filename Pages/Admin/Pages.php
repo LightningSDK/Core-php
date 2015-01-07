@@ -7,9 +7,9 @@ use Lightning\Tools\ClientUser;
 
 class Pages extends Table {
 
-    public function __construct() {
+    public function hasAccess() {
         ClientUser::requireAdmin();
-        parent::__construct();
+        return true;
     }
 
     protected $searchable = true;

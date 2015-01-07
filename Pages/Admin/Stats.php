@@ -18,9 +18,9 @@ class Stats extends Page {
     /**
      * Require admin privileges.
      */
-    public function __construct() {
+    public function hasAccess() {
         ClientUser::requireAdmin();
-        parent::__construct();
+        return true;
     }
 
     /**
