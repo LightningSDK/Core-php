@@ -2,7 +2,9 @@
 
 namespace Lightning\Tools;
 
-class CombinationIterator implements \Iterator {
+use Iterator;
+
+class CombinationIterator implements Iterator {
 
     protected $iterators;
 

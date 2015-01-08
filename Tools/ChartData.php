@@ -103,6 +103,20 @@ class ChartData {
         if (empty($this->data)) {
             $this->data[] = array();
         }
+
+        $colors = new ColorIterator();
+        foreach ($this->data as &$set) {
+            $set += [
+                'fillColor' => 'rgba(220,220,220,0.2)',//$colors->current(ColorIterator::RGBA, ColorIterator::TRANSPARENT),
+                'strokeColor' => $colors->current(ColorIterator::RGBA),
+                'pointColor' => $colors->current(ColorIterator::RGBA),
+                'pointStrokeColor' => $colors->current(ColorIterator::HEX),
+                'pointHighlightFill' => $colors->current(ColorIterator::HEX),
+                'pointHighlightStroke' => $colors->current(ColorIterator::RGBA),
+            ];
+            $colors->next();
+        }
+
         $output = array(
             'datasets' => array_values($this->data)
         );
