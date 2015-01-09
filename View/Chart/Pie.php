@@ -29,6 +29,7 @@ class Pie extends Base {
 
     public function renderControls() {
         return BasicHTML::select('start', [
+            -7 => 'Last 7 Days',
             -30 => 'Last 30 Days',
             -60 => 'Last 60 Days',
             -90 => 'Last 90 Days',
