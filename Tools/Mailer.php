@@ -351,9 +351,10 @@ class Mailer {
             $from_name = !empty($user['from_name']) ? $user['from_name'] : $this->fromName;
             $this->from($from, $from_name);
             $this->message->setUser(new User($user));
+            $this->message->setDefaultVars();
             $this->subject($this->message->getSubject());
             $this->message($this->message->getMessage());
-            if ($this->send()) {
+            if ($this->sendMessage()) {
                 $this->sentCount ++;
             }
             $this->mailer->ClearAddresses();

@@ -353,7 +353,7 @@ class Message {
      *   Outputs the unsubscribe string.
      */
     protected function getUnsubscribeString() {
-        return $this->user->isAnonymous() ? '' : Language::getInstance()->translate('unsubscribe', array(
+        return Language::getInstance()->translate('unsubscribe', array(
                 '{LINK}' => $this->user->getUnsubscribeLink()
             )
         );
@@ -442,7 +442,7 @@ class Message {
                 'EMAIL' => $this->user->details['email'],
 
                 // Add the unsubscribe link.
-                'UNSUBSCRIBE' => $this->unsubscribe ? $this->getUnsubscribeString() : '',
+                'UNSUBSCRIBE' => $this->unsubscribe && !empty($this->user->user_id) ? $this->getUnsubscribeString() : '',
 
                 // Add the tracking image to the bottom of the email.
                 'TRACKING_IMAGE' => $tracking_image,
@@ -450,7 +450,7 @@ class Message {
         } else {
             $this->defaultVariables = [
                 // Add the unsubscribe link.
-                'UNSUBSCRIBE' => $this->unsubscribe ? $this->getUnsubscribeString() : '',
+                'UNSUBSCRIBE' => $this->unsubscribe && !empty($this->user->user_id) ? $this->getUnsubscribeString() : '',
             ];
             if (!empty($vars)) {
                 $this->defaultVariables += $vars;
