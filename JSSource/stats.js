@@ -61,7 +61,7 @@ lightning.stats = {
             for (var i in lightning.vars.chart[id].params) {
                 var param = lightning.vars.chart[id].params[i];
                 if (param.source) {
-                    params[i] = $('#' + param.source).val();
+                    params[i] = $('#chart_controls_' + id + ' #' + param.source).val();;
                 } else if (param.value) {
                     params[i] = param.value;
                 }

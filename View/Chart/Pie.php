@@ -20,11 +20,6 @@ class Pie extends Base {
 
         // Construct the parent.
         parent::__construct();
-
-        // Prepare the JS.
-        JS::set('chart.' . $this->id . '.url', '/' . Request::get('request'));
-        JS::set('chart.' . $this->id . '.params.start', ['source' => 'start']);
-        JS::set('chart.' . $this->id . '.params.number_format', $this->numberFormat);
     }
 
     public function renderControls() {

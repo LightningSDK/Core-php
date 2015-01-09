@@ -9,11 +9,17 @@ use Lightning\View\JS;
 class Line extends Base {
     protected $renderer = 'Line';
 
-    public function __construct() {
+    public function __construct($id = null, $settings = array()) {
+        // Import the settings.
+        if ($id) {
+            $this->id = $id;
+        }
+        foreach ($settings as $key => $value) {
+            $this->$key = $value;
+        }
+
+        // Construct the parent.
         parent::__construct();
-        JS::set('chart.' . $this->id . '.url', '/' . Request::get('request'));
-        JS::set('chart.' . $this->id . '.params.start', ['source' => 'start']);
-        JS::set('chart.' . $this->id . '.params.number_format', $this->numberFormat);
     }
 
     public function renderControls() {

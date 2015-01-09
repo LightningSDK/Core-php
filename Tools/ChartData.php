@@ -69,6 +69,25 @@ class ChartData {
     }
 
     /**
+     * Make sure an array has all the required values for the full range.
+     *
+     * @param array $data
+     *   The data keyed by the X value.
+     *
+     * @return array
+     *   The data values.
+     */
+    public function conformSet($data) {
+        $conformed_data = array_fill($this->start, $this->end - $this->start + 1, 0);
+        foreach ($conformed_data as $key => $value) {
+            if (!empty($data[$key])) {
+                $conformed_data[$key] = $data[$key];
+            }
+        }
+        return $conformed_data;
+    }
+
+    /**
      * Add a dataset.
      *
      * @param array $data

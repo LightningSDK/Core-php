@@ -2,6 +2,7 @@
 
 namespace Lightning\View\Chart;
 
+use Lightning\Tools\Request;
 use Lightning\Tools\Template;
 use Lightning\View\JS;
 use Lightning\View\Page;
@@ -20,7 +21,10 @@ abstract class Base extends Page {
         JS::add('/js/Chart.min.js');
         JS::startup('lightning.stats.init()');
         JS::startup('lightning.stats.updateStats("' . $this->id . '")');
+
+        // Prepare the JS.
         JS::set('chart.' . $this->id . '.renderer', $this->renderer);
+        JS::set('chart.' . $this->id . '.url', '/' . Request::get('request'));
         JS::set('chart.' . $this->id . '.params.start', ['source' => 'start']);
         JS::set('chart.' . $this->id . '.params.number_format', $this->numberFormat);
     }
