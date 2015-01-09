@@ -407,7 +407,7 @@ class User {
             $user_id = $user['user_id'];
             return static::loadById($user_id);
         } else {
-            $user_id = $db->insert('user', $options + $user_data);
+            $user_id = $db->insert('user', $options + $user_data + ['created' => Time::today()]);
             $user = static::loadById($user_id);
             $user->new = true;
             return $user;
@@ -494,7 +494,7 @@ class User {
             'email' => Scrub::email(strtolower($email)),
             'first' => $first_name,
             'last' => $last_name,
-            'register_date' => Time::today(),
+            'created' => Time::today(),
             'confirmed' => rand(100000,9999999),
             'type' => 0,
             // TODO: Need to get the referrer id.
@@ -504,6 +504,7 @@ class User {
             $salt = static::getSalt();
             $user_details['password'] = static::passHash($pass, $salt);
             $user_details['salt'] = bin2hex($salt);
+            $user_details['registered'] = Time::today();
         }
         return Database::getInstance()->insert('user', $user_details);
     }
@@ -558,7 +559,7 @@ class User {
             Database::getInstance()->update(
                 'user',
                 array(
-                    'register_date' => $today,
+                    'registered' => $today,
                     'confirmed' => rand(100000,9999999),
                     'type' => 1,
                 ),
@@ -577,7 +578,7 @@ class User {
             Database::getInstance()->update(
                 'user',
                 array(
-                    'register_date' => $today,
+                    'registered' => $today,
                     'confirmed' => rand(100000,9999999),
                     'type' => 1,
                 ),

@@ -35,6 +35,14 @@ class Users extends Table {
             'type' => 'datetime',
             'editable' => false,
         ),
+        'created' => array(
+            'type' => 'date',
+            'editable' => false,
+        ),
+        'registered' => array(
+            'type' => 'date',
+            'editable' => false,
+        ),
     );
 
     protected $links = array(
