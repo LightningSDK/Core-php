@@ -58,7 +58,7 @@ class Users extends Table {
         'impersonate' => array(
             'type' => 'link',
             'url' => '/admin/users?action=impersonate&id=',
-            'display_value' => 'Impersonate',
+            'display_value' => '<img src="/images/lightning/user.png" border="0">',
         ),
     );
 
