@@ -41,6 +41,13 @@ class Message {
     protected $customVariables = array();
 
     /**
+     * Default variables to replace in the message.
+     *
+     * @var array
+     */
+    protected $defaultVariables = array();
+
+    /**
      * Custom variables to replace in the message, read from templates.
      *
      * @var array
@@ -111,7 +118,8 @@ class Message {
     protected $user;
 
     /**
-     * Load a message from the database.
+     * Loads a message either from the database or create it from scratch for
+     * custom messages.
      *
      * @param integer $message_id
      *   The ID of the message to load.
@@ -134,6 +142,29 @@ class Message {
         if ($default_name_settings = Configuration::get('mailer.default_name')) {
             $this->default_name = $default_name_settings;
         }
+
+        $this->setCombinedMessageTemplate();
+        
+        $this->loadVariablesFromTemplate();
+    }
+
+    /**
+     * Sets a combined message template.
+     * For custom message it means defining it as template body
+     * For db message it makes some replaces
+     */
+    protected function setCombinedMessageTemplate() {
+        if (empty($this->message)) {
+            $this->combinedMessageTemplate = $this->template['body'];
+        } else {
+            $this->replaceContentBody();
+        }
+    }
+
+    /**
+     * Replaces some variables in db message
+     */
+    protected function replaceContentBody() {
         if (
             $this->unsubscribe
             && !strstr($this->message['body'], '{UNSUBSCRIBE}')
@@ -143,10 +174,8 @@ class Message {
         } else {
             $this->combinedMessageTemplate = str_replace('{CONTENT_BODY}', $this->message['body'], $this->template['body']) . '{TRACKING_IMAGE}';
         }
-
-        $this->loadVariablesFromTemplate();
     }
-
+    
     /**
      * A getter function.
      *
@@ -215,9 +244,54 @@ class Message {
     }
 
     /**
+     * Loads template depending on message type: custom or database
+     */
+    protected function loadTemplate() {
+        if (!empty($this->message)) {
+            $this->loadTemplateByMessage();
+        } else {
+            $this->loadTemplateFromConfig();
+        }
+        
+    }
+
+    /**
+     * Custom message has a template which determined in configuration.
+     * It gets it, checks and applies a message to it.
+     */
+    protected function loadTemplateFromConfig() {
+        
+        // check configuration
+        $template_id = Configuration::get('mailer.mail_template');
+        
+        // set template from config or default template
+        $this->template = Database::getInstance()->selectRow(
+            'message_template',
+            ['template_id' => $template_id]
+        );
+        
+        // If there's no such template or it's not configured set the default template
+        if (empty($this->template)) {
+            $this->setDefaultTemplate();
+        }
+    }
+    
+    /**
+     * The default template is used when there was no chance to define a template
+     * for a message.
+     * This function creates it.
+     */
+    protected function setDefaultTemplate() {
+        $this->template = array(
+            "subject"=>"A message from " . Configuration::get('site.name'),
+            "body"=>"{CONTENT_BODY}"
+        );
+    }
+
+    /**
      * Loads the template from the database based on the message.
      */
-    protected function loadTemplate(){
+    protected function loadTemplateByMessage() {
         if($this->template['template_id'] != $this->message['template_id']){
             if($this->message['template_id'] > 0) {
                 $this->template = Database::getInstance()->selectRow(
@@ -225,13 +299,11 @@ class Message {
                     array('template_id' => $this->message['template_id'])
                 );
             } else {
-                $this->template = array(
-                    "subject"=>"A message from " . Configuration::get('site.name'),
-                    "body"=>"{CONTENT_BODY}"
-                );
+                $this->setDefaultTemplate();
             }
         }
     }
+
 
     protected function loadLists() {
         $this->lists = Database::getInstance()->selectColumn('message_message_list', 'message_list_id', array('message_id' => $this->message['message_id']));
@@ -297,8 +369,8 @@ class Message {
      *   The content with replaced variables.
      */
     public function replaceVariables($source) {
-        // Replace custom variables.
-        foreach($this->customVariables + $this->internalCustomVariables as $cv => $cvv){
+        // Replace variables.
+        foreach($this->customVariables + $this->internalCustomVariables + $this->defaultVariables as $cv => $cvv){
             // Replace simple variables as a string.
             $source = str_replace("{".$cv."}", $cvv, $source);
         }
@@ -314,20 +386,6 @@ class Message {
                 $source = preg_replace($conditional_search, '', $source);
             }
         }
-
-        // Replace standard variables.
-        $source = str_replace("{USER_ID}", $this->user->details['user_id'], $source);
-        $source = str_replace("{MESSAGE_ID}", $this->message['message_id'], $source);
-        $source = str_replace("{FULL_NAME}", (!empty($this->user->details['first']) ? $this->user->details['first'] . ' ' . $this->user->details['last'] : $this->default_name), $source);
-        $source = str_replace("{URL_KEY}", User::urlKey($this->user->details['user_id'], $this->user->details['salt']), $source);
-        $source = str_replace("{EMAIL}", $this->user->details['email'], $source);
-
-        // Add the unsubscribe link.
-        $source = str_replace('{UNSUBSCRIBE}', $this->unsubscribe ? $this->getUnsubscribeString() : '', $source);
-
-        // Add the tracking image to the bottom of the email.
-        $tracking_image = Tracker::getTrackerImage('Email Opened', $this->message['message_id'], $this->user->details['user_id']);
-        $source = str_replace('{TRACKING_IMAGE}', $tracking_image, $source);
 
         return $source;
     }
@@ -359,6 +417,43 @@ class Message {
         return $message;
     }
 
+    /**
+     * Sets default variables for db and chainable messages
+     * 
+     * @param array $vars
+     *   Variables to set for chainable messages
+     */
+    public function setDefaultVars($vars = null) {
+        /*
+         * If there's no 'message' variable set, it's a custom message, 
+         * so we don't replace any variables except custom ones.
+         */
+        
+        if (!empty($this->message)) {
+
+            $tracking_image = Tracker::getTrackerImage('Email Opened', $this->message['message_id'], $this->user->details['user_id']);
+            
+            // Replace standard variables.
+            $this->defaultVariables = [
+                'USER_ID' => $this->user->details['user_id'],
+                'MESSAGE_ID' => $this->message['message_id'],
+                'FULL_NAME' => (!empty($this->user->details['first']) ? $this->user->details['first'] . ' ' . $this->user->details['last'] : $this->default_name),
+                'URL_KEY' => User::urlKey($this->user->details['user_id'], $this->user->details['salt']),
+                'EMAIL' => $this->user->details['email'],
+
+                // Add the unsubscribe link.
+                'UNSUBSCRIBE' => $this->unsubscribe ? $this->getUnsubscribeString() : '',
+
+                // Add the tracking image to the bottom of the email.
+                'TRACKING_IMAGE' => $tracking_image,
+            ];
+        } else {
+            if (!empty($vars)) {
+                $this->defaultVariables = $vars;
+            }
+        }
+    }
+    
     /**
      * Get the user query for users who will receive this message.
      *
@@ -449,5 +544,12 @@ class Message {
     public function getUsersCount() {
         $query = $this->getUsersQuery();
         return Database::getInstance()->count($query['table'], $query['where'], 'DISTINCT(user.user_id)');
+    }
+    
+    public function setTemplate($template_id) {
+        $this->template = Database::getInstance()->selectRow(
+            'message_template',
+            array('template_id' => $template_id)
+        );
     }
 }

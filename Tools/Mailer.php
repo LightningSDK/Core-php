@@ -195,7 +195,7 @@ class Mailer {
      * @return boolean
      *   Whether the message was successful.
      */
-    public function send() {
+    public function sendMessage() {
         // Set the default from name if it wasn't set.
         if (!$this->fromSet) {
             $this->from(
@@ -283,7 +283,8 @@ class Mailer {
     }
 
     /**
-     * Send a single email to a single user.
+     * Sends a single email to a single user.
+     * It sends a message loaded from db
      *
      * @param int $message_id
      *   The message id.
@@ -292,14 +293,44 @@ class Mailer {
      */
     function sendOne($message_id, $user) {
         $this->message = new Message($message_id);
+        $this->message->setUser($user);
         $this->message->resetCustomVariables($this->customVariables);
         $this->to($user->email, $user->first . ' ' . $user->last);
-        $this->message->setUser($user);
+        $this->message->setDefaultVars();
         $this->subject($this->message->getSubject());
         $this->message($this->message->getMessage());
-        $this->send();
+        $this->sendMessage();
         Tracker::trackEvent('Email Sent', $message_id, $user->id);
     }
+
+    /**
+     * Send a custom message created with chainable methods like to(), subject(),
+     * etc.
+     */
+    public function send() {
+        
+        // Need to create a Message object to use a template
+        $this->message = new Message(NULL, FALSE);
+        $this->message->resetCustomVariables($this->customVariables);
+        
+        // Assuming the to address is the only one
+        $to = $this->mailer->getToAddresses();
+        $toName = $to[0][1];
+        
+        // Set custom variables
+        $vars = [
+            'FULL_NAME'     => $toName,
+            'CONTENT_BODY'  => $this->mailer->Body,
+        ];
+        $this->message->setDefaultVars($vars);
+        
+        // Set subject and message body. They are applied to a template already
+        $this->subject($this->message->getSubject());
+        $this->message($this->message->getMessage());
+        
+        // Actual send
+        $this->sendMessage();
+   }
 
     /**
      * Send the current message to the current list of users.
