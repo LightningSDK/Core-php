@@ -283,8 +283,8 @@ class Message {
      */
     protected function setDefaultTemplate() {
         $this->template = array(
-            "subject"=>"A message from " . Configuration::get('site.name'),
-            "body"=>"{CONTENT_BODY}"
+            'subject' => 'A message from ' . Configuration::get('site.name'),
+            'body' => '{CONTENT_BODY}',
         );
     }
 
@@ -353,7 +353,7 @@ class Message {
      *   Outputs the unsubscribe string.
      */
     protected function getUnsubscribeString() {
-        return Language::getInstance()->translate('unsubscribe', array(
+        return $this->user->isAnonymous() ? '' : Language::getInstance()->translate('unsubscribe', array(
                 '{LINK}' => $this->user->getUnsubscribeLink()
             )
         );
@@ -448,8 +448,12 @@ class Message {
                 'TRACKING_IMAGE' => $tracking_image,
             ];
         } else {
+            $this->defaultVariables = [
+                // Add the unsubscribe link.
+                'UNSUBSCRIBE' => $this->unsubscribe ? $this->getUnsubscribeString() : '',
+            ];
             if (!empty($vars)) {
-                $this->defaultVariables = $vars;
+                $this->defaultVariables += $vars;
             }
         }
     }

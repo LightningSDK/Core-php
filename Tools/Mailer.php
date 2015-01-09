@@ -321,15 +321,19 @@ class Mailer {
         $vars = [
             'FULL_NAME'     => $toName,
             'CONTENT_BODY'  => $this->mailer->Body,
+            'SUBJECT'       => $this->mailer->Subject,
         ];
         $this->message->setDefaultVars($vars);
         
         // Set subject and message body. They are applied to a template already
+        // TODO: If the message chain is called twice (eg, creating the mail, setting the to address,
+        // setting the subject, sending, setting another to address, sending again, this could cause
+        // the subject and message to nest recursively, or not render correctly the second time around.
         $this->subject($this->message->getSubject());
         $this->message($this->message->getMessage());
         
         // Actual send
-        $this->sendMessage();
+        return $this->sendMessage();
    }
 
     /**
