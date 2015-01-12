@@ -1012,7 +1012,8 @@ abstract class Table extends Page {
             elseif (isset($action['display_name']))
                 $output.= $action['display_name']; else $output.= $a;
             switch($action['type']) {
-                case "link":
+                case 'link':
+                case 'html':
                     break;
                 case "checkbox":
                 default:
@@ -1036,10 +1037,15 @@ abstract class Table extends Page {
             $output.= "<td>";
             switch($action['type']) {
                 case "function":
+                    // Have table call a function.
                     $output.= "<a href='".$this->createUrl("action", $row[$this->getKey()], $a,array("ra"=>$this->action))."'>{$action['display_name']}</a>";
                     break;
                 case "link":
                     $output.= "<a href='{$action['url']}{$row[$this->getKey()]}'>{$action['display_value']}</a>";
+                    break;
+                case 'html':
+                    // Render the HTML.
+                    $output .= is_callable($action['html']) ? $action['html']($row) : $action['html'];
                     break;
                 case "action":
                     $output.= "<a href='".$this->createUrl($action['action'], $row[$this->getKey()], $action['action_field'])."'>{$action['display_name']}</a>";
