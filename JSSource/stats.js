@@ -29,15 +29,23 @@ lightning.stats = {
         var container = $('#chart_totals_' + id);
         if (container.length == 1) {
             container.empty();
-            for (var i in data.datasets) {
-                var sum = 0;
-                for (var j in data.datasets[i].data) {
-                    sum += parseInt(data.datasets[i].data[j]);
+            if (data.datasets) {
+                for (var i in data.datasets) {
+                    var sum = 0;
+                    for (var j in data.datasets[i].data) {
+                        sum += parseInt(data.datasets[i].data[j]);
+                    }
+                    if (lightning.vars.chart[id].params.number_format && lightning.vars.chart[id].params.number_format == 'money') {
+                        sum = '$' + sum.toFixed(2);
+                    }
+                    container.append($('<li>' + (data.datasets[i].label ? data.datasets[i].label : i) + ': ' + sum + '</li>'));
                 }
-                if (lightning.vars.chart[id].params.number_format && lightning.vars.chart[id].params.number_format == 'money') {
-                    sum = '$' + sum.toFixed(2);
+            } else {
+                var total = 0;
+                for (var i in data) {
+                    total += data[i].value;
                 }
-                container.append($('<li>' + (data.datasets[i].label ? data.datasets[i].label : i) + ': ' + sum + '</li>'));
+                container.append($('<li>Total: ' + total + '</li>'));
             }
         }
     },
