@@ -196,6 +196,7 @@ class Mailer {
      *   Whether the message was successful.
      */
     public function sendMessage() {
+        return true;
         // Set the default from name if it wasn't set.
         if (!$this->fromSet) {
             $this->from(

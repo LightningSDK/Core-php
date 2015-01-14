@@ -22,21 +22,22 @@ class API extends Page {
         $request_type = strtolower(Request::type());
 
         // If there is a requested action.
+        $output = [];
         if ($action = Request::get('action')) {
             $method = Request::convertFunctionName($request_type, $action);
             if (method_exists($this, $method)) {
-                $this->{$method}();
+                $output = $this->{$method}();
             }
             else {
                 Messenger::error('Method not available');
             }
         } else {
             if (method_exists($this, $request_type)) {
-                $this->$request_type();
+                $output = $this->$request_type();
             } else {
                 Messenger::error('Method not available');
             }
         }
-        Output::json();
+        Output::json($output);
     }
 }
