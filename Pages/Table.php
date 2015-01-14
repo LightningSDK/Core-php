@@ -2088,6 +2088,9 @@ abstract class Table extends Page {
      */
     public function saveImage($field, $file) {
         // Load the image
+        if (!is_uploaded_file($file['tmp_name'])) {
+            return false;
+        }
         $src_image = imagecreatefromstring(file_get_contents($file['tmp_name']));
 
         if (!$src_image) {
@@ -2105,6 +2108,11 @@ abstract class Table extends Page {
             // Get the output file location.
             $new_image = $this->getNewImageLocation($image);
             $output_location = $this->getOutputPath($image) . '/' . $new_image;
+
+            if (!empty($image['original'])) {
+                copy($file['tmp_name'], $output_location);
+                continue;
+            }
 
             if (!empty($image['image_preprocess']) && is_callable($image['image_preprocess'])) {
                 $src_image = $image['image_preprocess']($src_image);
@@ -2187,6 +2195,11 @@ abstract class Table extends Page {
 
             if (!empty($image['image_postprocess']) && is_callable($image['image_postprocess'])) {
                 $dest_image = $image['image_postprocess']($dest_image);
+            }
+
+            $path = pathinfo($output_location);
+            if (!file_exists($path['dirname'])) {
+                mkdir($path['dirname'], 0777, true);
             }
 
             imagejpeg($dest_image, $output_location, $quality);
