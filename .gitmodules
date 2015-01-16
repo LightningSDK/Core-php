@@ -34,3 +34,6 @@
 [submodule "Vendor/jquery-validation"]
 	path = Vendor/jquery-validation
 	url = https://github.com/jzaefferer/jquery-validation.git
+[submodule "Vendor/videojs"]
+	path = Vendor/videojs
+	url = https://github.com/videojs/video.js.git
