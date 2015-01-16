@@ -5,8 +5,15 @@ namespace Lightning\View;
 class Video {
 
     public static function initDisplay() {
-        $html5Video = self::html5Video();
-        JS::set('video.html5', $html5Video);
+        static $inited = false;
+        if (!$inited) {
+            $html5Video = self::html5Video();
+            JS::set('video.html5', $html5Video);
+            JS::add('/js/video-js.min.js', $html5Video);
+            JS::startup('videojs.options.flash.swf = "/swf/video-js.swf"');
+            CSS::add('/css/video-js.min.css', $html5Video);
+            $inited = true;
+        }
     }
 
     public static function html5Video() {
@@ -14,7 +21,8 @@ class Video {
     }
 
     public static function add($video_id, $settings) {
-        JS::set('lightning.video.' . $video_id, $settings);
+        self::initDisplay();
+        JS::set('videos.' . $video_id, $settings);
         JS::startup('lightning.video.init()');
     }
 }
