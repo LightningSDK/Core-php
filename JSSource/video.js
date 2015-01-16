@@ -26,36 +26,34 @@ lightning.video = {
         var video = lightning.vars.videos[id];
         var container = $('#video_' + id);
         var showControls = !video.hasOwnProperty('controls') || video.controls;
-        if (true) {
-            var video_tag = '<video id=video_player_' + id + ' class="video-js vjs-default-skin" width="640" height="360" poster="' + (video.still ? video.still : '') + '" ' + (showControls ? 'controls' : '') + ' preload>';
-            for (codec in {'mp4': 1, 'ogg': 1, 'webm': 1}) {
-                if (video[codec]) {
-                    video_tag += '<source src="' + video[codec] + '" type="video/' + codec + ';">';
-                }
+        var video_tag = '<video id=video_player_' + id + ' class="video-js vjs-default-skin" width="640" height="360" poster="' + (video.still ? video.still : '') + '" ' + (showControls ? 'controls' : '') + ' preload>';
+        for (codec in {'mp4': 1, 'ogg': 1, 'webm': 1}) {
+            if (video[codec]) {
+                video_tag += '<source src="' + video[codec] + '" type="video/' + codec + ';">';
             }
-            // TODO: Add flash fallback here.
-            video_tag += '</video>';
-            container.append(video_tag);
+        }
+        // TODO: Add flash fallback here.
+        video_tag += '</video>';
+        container.append(video_tag);
 
-            // Initialize the player.
-            videojs.autoSetup();
-            var myPlayer = videojs(
-                document.getElementById('video_player_' + id),
-                {
-                    width: '100%',
-                    controls: showControls,
-                }
-            );
-
-            // Start playing.
-            if (video.autoPlay) {
-                myPlayer.play();
-                // Jump to the start time.
-                if (video.startTime && video.startTime > 0) {
-                    myPlayer.currentTime(video.startTime);
-                }
-                myPlayer.one("play", video.call.afterLoad);
+        // Initialize the player.
+        videojs.autoSetup();
+        var myPlayer = videojs(
+            document.getElementById('video_player_' + id),
+            {
+                width: '100%',
+                controls: showControls
             }
+        );
+
+        // Start playing.
+        if (video.autoPlay) {
+            myPlayer.play();
+            // Jump to the start time.
+            if (video.startTime && video.startTime > 0) {
+                myPlayer.currentTime(video.startTime);
+            }
+            myPlayer.one("play", video.call.afterLoad);
         }
     }
 };
