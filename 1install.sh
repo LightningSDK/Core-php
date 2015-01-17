@@ -4,8 +4,17 @@ cd "$( dirname "${BASH_SOURCE[0]}" )"
 DIR=$PWD
 
 # Updating git submodules
-echo "Updating git submodules"
-git submodule update --init --recursive
+echo "Installing git submodules"
+# Only download the ones that are required for php to run.
+git submodule update --init Vendor/BounceHandler
+git submodule update --init Vendor/ckeditor
+git submodule update --init Vendor/ckfinder
+git submodule update --init Vendor/compass
+git submodule update --init Vendor/foundation
+git submodule update --init Vendor/htmlpurifier
+git submodule update --init Vendor/PHPMailer
+git submodule update --init Vendor/plancakeEmailParser
+git submodule update --init Vendor/recaptcha
 
 if [ ! -f $DIR/../index.php ]; then
   echo "Copying index.php to webroot"
