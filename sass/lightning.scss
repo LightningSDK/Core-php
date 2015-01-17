@@ -140,3 +140,14 @@ $amber-low: rgb(255,205,1);
 .chart_totals {
   clear: both;
 }
+.table_container {
+  max-height: 200px;
+  overflow-y: scroll;
+  position: absolute;
+  background: #ffffff;
+  border: 1px solid #cccccc;
+  padding: 5px;
+  span {
+    display: block;
+  }
+}

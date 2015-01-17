@@ -111,6 +111,11 @@ class Database extends Singleton {
 
     const FETCH_ASSOC = PDO::FETCH_ASSOC;
 
+    const WILDCARD_NONE = 0;
+    const WILDCARD_BEFORE = 1;
+    const WILDCARD_AFTER = 2;
+    const WILDCARD_EITHER = 3;
+
     /**
      * Construct this object.
      *
@@ -1309,5 +1314,46 @@ class Database extends Singleton {
      */
     public function tableExists($table) {
         return $this->query('SHOW TABLES LIKE ?', array($table))->rowCount() == 1;
+    }
+
+    /**
+     * Create a search condition that has all of the values in at least one of the fields.
+     *
+     * @param $fields
+     *   The fields to search.
+     * @param $values
+     *   The values to look for.
+     * @param int $wildcard
+     *   Whether to add wildcards and where.
+     *
+     * @return array
+     *   A where condition.
+     */
+    public static function getMultiFieldSearch($fields, $values, $wildcard = self::WILDCARD_AFTER) {
+        $where = array();
+        // where field_1 like a or field_2 like a or field_3 like a
+        // AND field_1 like b or field_2 like b or field_3 like b
+        foreach ($values as $v) {
+            $wv = self::addWildCards($v, self::WILDCARD_AFTER);
+            $set = array('#OR' => array());
+            foreach ($fields as $f) {
+                $set['#OR'][$f] = array('LIKE', $wv);
+            }
+            $where[] = $set;
+        }
+        return $where;
+    }
+
+    public static function addWildCards($value, $wildcard = self::WILDCARD_AFTER) {
+        switch ($wildcard) {
+            case self::WILDCARD_NONE:
+                return $value;
+            case self::WILDCARD_BEFORE:
+                return '%' . $value;
+            case self::WILDCARD_AFTER:
+                return $value . '%';
+            case self::WILDCARD_EITHER:
+                return '%' . $value . '%';
+        }
     }
 }

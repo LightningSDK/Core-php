@@ -35,7 +35,9 @@ var table = {
         }
         if (table_data.vars) {
             for (var i in table_data.vars) {
-                vars.push(i + '=' + encodeURIComponent(table_data.vars[i]));
+                if (table_data.vars[i] != null) {
+                    vars.push(i + '=' + encodeURIComponent(table_data.vars[i]));
+                }
             }
         }
         return url = "?" + vars.join("&");
@@ -114,98 +116,101 @@ var table = {
         regex = new RegExp("^" + link_id + ",", "i");
         new_links = new_links.replace(regex, '');
         input_array.val(new_links);
-    }
-};
+    },
 
-function table_autocomplete(){
-    ac_field = $(this).attr("id");
-    if(typeof ac_settings === "undefined"){
-        ac_settings = Array();
-        ac_settings[ac_field] = {};
-    }
-    if(typeof ac_settings[ac_field].last_fetch === "undefined" || ac_settings[ac_field].last_fetch != $(this).val()){
-        ac_settings[ac_field].last_fetch = $(this).val();
-        $.ajax({url:table_data.action_file,
-            type:"POST",
-            dataType:"json",
-            data:{action:'autocomplete',field:ac_field,st:ac_settings[ac_field].last_fetch},
-            success:function(data){
-                console.log(data);
-                if(data.search == ac_settings[ac_field].last_fetch)
-                    set_autocomplete_dropdown(ac_field,data.list);
-            },
-            error:function(){
-                alert("error");
+    autocomplete: function(){
+        var field = $(this).attr('id');
+        if(!table_data.fields){
+            table_data.fields = {};
+            table_data.fields[field] = {};
+        }
+        var search = $(this).val();
+        if(search.length >= 2 && (!table_data.fields[field].last_fetch || table_data.fields[field].last_fetch != search)){
+            table_data.fields[field].last_fetch = search;
+            $.ajax({
+                url: table_data.action_file,
+                type: 'get',
+                dataType: 'json',
+                data: {
+                    action: 'autocomplete',
+                    field: field,
+                    st: table_data.fields[field].last_fetch,
+                },
+                success: function(data) {
+                    if(search == table_data.fields[field].last_fetch) {
+                        table.autocompleteDropdown(field, data.results);
+                    }
+                },
+                error: function() {
+                    alert("error");
+                }
+            });
+        }
+    },
+
+    autocompleteDropdown: function(field,list){
+        $('.table_container').each(function(){
+            if($(this).attr('id') != "table_container_" + field) {
+                $(this).remove();
+            } else {
+                $('#list_' + field).empty();
             }
         });
-    }
-}
-
-function set_autocomplete_dropdown(field,list){
-    $('.table_ac_container').each(function(){
-        if($(this).attr('id')!="table_ac_container_"+field)
-            $(this).remove();
-        else
-            $('#ac_list_'+field).empty();
-    });
-    if($('.table_ac_container').length == 0){
-        $("#"+field).after("<div id='table_ac_container_"+field+"' class='table_ac_container'><div id='ac_list_"+field+"'></div></div>");
-    }
-    var count = 0;
-    for(var i in list){
-        if(count < 10){
-            $("#ac_list_"+field).append("<a id='ac_"+field+"_"+i+"' >"+list[i][field]+"</a>");
+        if ($('.table_container').length == 0) {
+            $("#" + field).after("<div id='table_container_"+field+"' class='table_container'><div id='list_" + field + "'></div></div>");
+        }
+        var count = 0;
+        for (var i in list) {
+            $('#list_' + field).append('<span id="' + field + '_' + i + '" >' + list[i] + '</span>');
             count++;
         }
-        $("#ac_list_"+field+" a").click(set_autocomplete_selection);
+        $('#list_' + field + ' span').click(table.setAutocompleteSelection);
+    },
+
+    setAutocompleteSelection: function(event){
+        var id = $(this).attr('id').split('_');
+        var value = id.pop();
+        var field = id.join('_');
+        $('#table_container_' + field).remove();
+        $('#' + field).val(value);
+    },
+
+    /* TABLE SUBTABLE  */
+
+    deleteSubtable: function(button){
+        var entry_id = $(button).closest("div").attr("id").replace("subtable_","");
+        var entry_id_no = entry_id.split("_");
+        entry_id_no = entry_id_no[entry_id_no.length-1];
+        entry_id_table = entry_id.replace("_"+entry_id_no,"");
+        if(parseInt(entry_id_no) > 0)
+            $('#delete_subtable_'+entry_id_table).val($('#delete_subtable_'+entry_id_table).val()+entry_id_no+",");
+        else{
+            reg = new RegExp(Math.abs(entry_id_no)+',');
+            $('#new_subtable_'+entry_id_table).val($('#new_subtable_'+entry_id_table).val().replace(reg,''));
+        }
+        $('#subtable_'+entry_id_table+'_'+entry_id_no).fadeOut(function(){$(this).remove();});
+    },
+
+    newSubtable: function(table){
+        if(typeof new_subtables === "undefined")
+            new_subtables = Array();
+        if(typeof new_subtables[table] === "undefined")
+            new_subtables[table] = 1;
+        else
+            new_subtables[table]++;
+        $('#subtable_'+table+'__N_').before($("<div class='subtable' id='subtable_"+table+"_-"+new_subtables[table]+"'></div>").html($('#subtable_'+table+'__N_').html().replace(/_N_/g,"-"+new_subtables[table])));
+        $('#new_subtable_'+table).val($('#new_subtable_'+table).val()+new_subtables[table]+",");
+    },
+
+    newPop: function(loc,pf,pfdf){
+        if(loc.indexOf("?")>-1)
+            window.open(loc+"&pf="+pf+"&pfdf="+pfdf+"&pop=1",'New','width=400,height=500');
+        else
+            window.open(loc+"?pf="+pf+"&pfdf="+pfdf+"&pop=1",'New','width=400,height=500');
+    },
+
+    updateParentPop: function(data){
+        window.opener.$('#'+data.pf).append("<option value='"+data.id+"'>"+data.pfdf+"</option>").val(data.id);
+        window.close();
     }
-}
-
-function set_autocomplete_selection(event){
-    var id = $(this).attr('id').split("_");
-    var field = id[1];
-    id = id[2];
-    $("#table_ac_container_"+field).remove();
-    $("#"+field).val($(this).html());
-    event.preventDefault();
-    return false;
-}
-
-/* TABLE SUBTABLE  */
-
-function delete_subtable(button){
-    var entry_id = $(button).closest("div").attr("id").replace("subtable_","");
-    var entry_id_no = entry_id.split("_");
-    entry_id_no = entry_id_no[entry_id_no.length-1];
-    entry_id_table = entry_id.replace("_"+entry_id_no,"");
-    if(parseInt(entry_id_no) > 0)
-        $('#delete_subtable_'+entry_id_table).val($('#delete_subtable_'+entry_id_table).val()+entry_id_no+",");
-    else{
-        reg = new RegExp(Math.abs(entry_id_no)+',');
-        $('#new_subtable_'+entry_id_table).val($('#new_subtable_'+entry_id_table).val().replace(reg,''));
-    }
-    $('#subtable_'+entry_id_table+'_'+entry_id_no).fadeOut(function(){$(this).remove();});
-}
-
-function new_subtable(table){
-    if(typeof new_subtables === "undefined")
-        new_subtables = Array();
-    if(typeof new_subtables[table] === "undefined")
-        new_subtables[table] = 1;
-    else
-        new_subtables[table]++;
-    $('#subtable_'+table+'__N_').before($("<div class='subtable' id='subtable_"+table+"_-"+new_subtables[table]+"'></div>").html($('#subtable_'+table+'__N_').html().replace(/_N_/g,"-"+new_subtables[table])));
-    $('#new_subtable_'+table).val($('#new_subtable_'+table).val()+new_subtables[table]+",");
-}
-
-function new_pop(loc,pf,pfdf){
-    if(loc.indexOf("?")>-1)
-        window.open(loc+"&pf="+pf+"&pfdf="+pfdf+"&pop=1",'New','width=400,height=500');
-    else
-        window.open(loc+"?pf="+pf+"&pfdf="+pfdf+"&pop=1",'New','width=400,height=500');
-}
-
-function update_parent_pop(data){
-    window.opener.$('#'+data.pf).append("<option value='"+data.id+"'>"+data.pfdf+"</option>").val(data.id);
-    window.close();
-}
+};

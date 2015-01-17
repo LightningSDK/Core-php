@@ -17,10 +17,9 @@ class Text extends Field {
      *   The rendered HTML.
      */
     public static function textField($id, $value, $options = array()) {
-        $attributes['class'] = !empty($options['classes']) ? empty($options['classes']) : array();
-        if (isset($options['autocomplete']) && empty($options['autocomplete'])) {
-            $attributes['autocomplete'] = 'off';
-            $attributes['class'][] = 'table_autocomplete';
+        $attributes['class'] = !empty($options['classes']) ? $options['classes'] : array();
+        if (isset($options['autocomplete'])) {
+            $attributes['autocomplete'] = empty($options['autocomplete']) ? 'off' : 'on';
         }
         if (!empty($options['size'])) {
             $attributes['max_length'] = $options['size'];

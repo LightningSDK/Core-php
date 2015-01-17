@@ -325,6 +325,34 @@ abstract class Table extends Page {
         }
     }
 
+    public function getAutocomplete() {
+        // Initialize some variables.
+        $this->get_fields();
+        $field = Request::get('field');
+        $string = Request::get('st');
+        $autocomplete = $this->fields[$field]['autocomplete'];
+
+        $where = array();
+        if (!empty($autocomplete['search'])) {
+            if (!is_array($autocomplete['search'])) {
+                $autocomplete['search'] = array($autocomplete['search']);
+            }
+            $where = Database::getMultiFieldSearch($autocomplete['search'], explode(' ', $string));
+        }
+        $results = Database::getInstance()->selectIndexed(
+            $this->fields[$field]['autocomplete']['table'],
+            $autocomplete['field'],
+            $where,
+            array(),
+            'LIMIT 50'
+        );
+
+        if (!empty($autocomplete['display_value']) && is_callable($autocomplete['display_value'])) {
+            array_walk($results, $autocomplete['display_value']);
+        }
+        Output::json(array('results' => $results));
+    }
+
     public function postDelconf() {
         $this->action = 'delconf';
         if (!$this->editable || !$this->addable) {
@@ -2533,7 +2561,7 @@ abstract class Table extends Page {
         $js_startup = '';
         foreach($this->fields as $f => $field) {
             if (!empty($field['autocomplete'])) {
-                $js_startup .= '$(".table_autocomplete").keyup(table_autocomplete);';
+                $js_startup .= '$(".table_autocomplete").keyup(table.autocomplete);';
                 $use_autocomplete = true;
             }
             if (!empty($field['default_reset'])) {
@@ -2561,10 +2589,12 @@ abstract class Table extends Page {
         }
 
         if (count($table_data) > 0 || $use_autocomplete || $js_startup) {
-            if (count($table_data) > 0 || $use_autocomplete)
-                JS::inline ("var table_data=".json_encode($table_data).";");
-            if ($js_startup)
-                JS::startup ($js_startup);
+            if (count($table_data) > 0 || $use_autocomplete) {
+                JS::inline('var table_data = ' . json_encode($table_data));
+            }
+            if ($js_startup) {
+                JS::startup($js_startup);
+            }
         }
     }
 
@@ -3022,6 +3052,10 @@ abstract class Table extends Page {
                 preg_match('/(.+)\(([0-9]+)\)/i', $field['type'], $array);
                 $options['size'] = $array[2];
             default:
+                if (!empty($field['autocomplete'])) {
+                    $options['classes'] = array('table_autocomplete');
+                    $options['autocomplete'] = false;
+                }
                 return Text::textfield($field['form_field'], $field['Value'], $options);
                 break;
         }
