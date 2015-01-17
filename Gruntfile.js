@@ -9,6 +9,7 @@ module.exports = function(grunt) {
             },
             vendor: {
                 files: {
+                    'build/js/lightning.min.js': '../../Lightning/JSSource/*.js',
                     'build/js/foundation.min.js': [
                         'Vendor/foundation/js/foundation/foundation.js',
                         'Vendor/foundation/js/foundation/foundation.*.js'
@@ -42,6 +43,7 @@ module.exports = function(grunt) {
 
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-copy');
+    grunt.loadNpmTasks('grunt-contrib-watch');
 
     grunt.registerTask('default', ['uglify', 'copy']);
     grunt.registerTask('watch', ['default','watch']);

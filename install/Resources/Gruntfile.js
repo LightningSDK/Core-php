@@ -30,23 +30,8 @@ module.exports = function(grunt) {
                 files: {
                     '../../js/ckeditor/config.js': 'js/ckeditor_config.js',
                     '../../js/ckfinder/config.js': 'js/ckfinder_config.js',
-                    '../../js/lightning.min.js': '../../Lightning/JSSource/*.js',
                 }
             },
-            vendor: {
-                files: {
-                    '../../js/foundation.min.js': [
-                        '../../Lightning/Vendor/foundation/js/foundation/foundation.js',
-                        '../../Lightning/Vendor/foundation/js/foundation/foundation.*.js'
-                    ],
-                    '../../js/modernizr.min.js': '../../Lightning/Vendor/foundation/vendor/modernizr/modernizr.js',
-                    '../../js/placeholder.min.js': '../../Lightning/Vendor/foundation/vendor/jquery-placeholder/jquery.placeholder.js',
-                    '../../js/fastclick.min.js': '../../Lightning/Vendor/foundation/vendor/fastclick/lib/fastclick.js',
-                    '../../js/jquery.cookie.min.js': '../../Lightning/Vendor/foundation/vendor/jquery.cookie/jquery.cookie.js',
-                    '../../js/jquery.min.js': '../../Lightning/Vendor/foundation/vendor/jquery/dist/jquery.js',
-                    '../../js/jquery.validate.min.js': '../../Lightning/Vendor/jquery-validation/dist/jquery.validate.js'
-                }
-            }
         },
 
         copy: {
@@ -54,7 +39,7 @@ module.exports = function(grunt) {
                 files: [
                     {
                         src: [
-                            '../../Lightning/Vendor/chartjs/Chart.min.js'
+                            '../../Lightning/build/js/*'
                         ],
                         dest: '../../js',
                         expand: true,
