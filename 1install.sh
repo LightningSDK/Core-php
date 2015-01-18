@@ -46,8 +46,6 @@ fi
 if [ ! -d $DIR/../Source/Resources ]; then
   echo "Linking compass files"
   cp -r ${DIR}/install/Resources ${DIR}/../Source/
-  ln -s ${DIR}/Vendor/foundation/scss/foundation.scss ${DIR}/../Source/Resources/sass/
-  ln -s ${DIR}/Vendor/foundation/scss/normalize.scss ${DIR}/../Source/Resources/sass/
 fi
 
 # Install the sample config file as active.

@@ -16,7 +16,7 @@ module.exports = function(grunt) {
                     importPath: [
                         '../../Lightning/Vendor/foundation/scss',
                         '../../Lightning/Vendor/compass/frameworks/compass/stylesheets',
-                        '../../Lightning/sass'
+                        '../../Lightning/Resources/sass'
                     ]
                 }
             }
@@ -29,7 +29,6 @@ module.exports = function(grunt) {
             dist: {
                 files: {
                     '../../js/ckeditor/config.js': 'js/ckeditor_config.js',
-                    '../../js/ckfinder/config.js': 'js/ckfinder_config.js',
                 }
             },
         },
@@ -39,9 +38,29 @@ module.exports = function(grunt) {
                 files: [
                     {
                         src: [
-                            '../../Lightning/build/js/*'
+                            '../../Lightning/build/js/*',
+                            '../../Lightning/Vendor/build/*/*.js',
                         ],
                         dest: '../../js',
+                        expand: true,
+                        flatten: true,
+                        filter:'isFile'
+                    },
+                    {
+                        src: [
+                            '../../Lightning/build/css/*',
+                            '../../Lightning/Vendor/build/*/*.css'
+                        ],
+                        dest: '../../css',
+                        expand: true,
+                        flatten: true,
+                        filter:'isFile'
+                    },
+                    {
+                        src: [
+                            '../../Lightning/Vendor/build/*/*.swf'
+                        ],
+                        dest: '../../swf',
                         expand: true,
                         flatten: true,
                         filter:'isFile'
@@ -52,14 +71,14 @@ module.exports = function(grunt) {
 
         watch: {
             js: {
-                files: '**/*.js',
+                files: 'js/**/*.js',
                 tasks: 'uglify',
                 options: {
                     spawn: false
                 }
             },
             sass: {
-                files: ['**/*.scss', '**/*.css'],
+                files: ['sass/**/*.scss', 'sass/**/*.css'],
                 tasks: 'compass',
                 options: {
                     spawn: false
