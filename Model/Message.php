@@ -66,7 +66,7 @@ class Message {
      *
      * @var array
      */
-    protected $lists = array();
+    protected $lists = null;
 
     /**
      * The message data from the database.
@@ -132,7 +132,6 @@ class Message {
         $this->auto = $auto;
         $this->message = Database::getInstance()->selectRow('message', array('message_id' => $message_id));
         $this->loadTemplate();
-        $this->loadLists();
         $this->unsubscribe = $unsubscribe;
 
         if (empty(self::$message_sent_id)) {
@@ -306,7 +305,9 @@ class Message {
 
 
     protected function loadLists() {
-        $this->lists = Database::getInstance()->selectColumn('message_message_list', 'message_list_id', array('message_id' => $this->message['message_id']));
+        if ($this->lists === null) {
+            $this->lists = Database::getInstance()->selectColumn('message_message_list', 'message_list_id', array('message_id' => $this->message['message_id']));
+        }
     }
 
     /**
@@ -465,6 +466,7 @@ class Message {
      *   An array of users.
      */
     protected function getUsersQuery() {
+        $this->loadLists();
         if (empty($this->lists)) {
             Messenger::error('Your message does not have any mailing lists selected.');
             return array('table' => 'user', 'where' => array('false' => array('expression' => 'false')));
