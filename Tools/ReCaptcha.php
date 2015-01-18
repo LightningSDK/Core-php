@@ -20,7 +20,7 @@ class ReCaptcha {
      */
     public static function render() {
         require_once HOME_PATH . '/Lightning/Vendor/recaptcha/recaptcha-plugins/php/recaptchalib.php';
-        return recaptcha_get_html(Configuration::get('recaptcha.public'));
+        return recaptcha_get_html(Configuration::get('recaptcha.public'), null, Request::isHTTPS());
     }
 
     /**

@@ -23,6 +23,10 @@ class Request {
         return $_SERVER['REQUEST_METHOD'];
     }
 
+    public static function isHTTPS() {
+        return !empty($_SERVER['HTTPS']);
+    }
+
     /**
      * Convert a requested action to a controller method name.
      *
