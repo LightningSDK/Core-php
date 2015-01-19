@@ -113,6 +113,7 @@ class Output {
         if (strpos($_SERVER['HTTP_ACCEPT'], 'json') !== false) {
             Output::json();
         } else {
+            Template::resetInstance();
             $page = new Message();
             $page->execute();
         }
