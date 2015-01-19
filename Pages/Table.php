@@ -2389,14 +2389,7 @@ abstract class Table extends Page {
         }
         if ($this->action == 'list') {
             $this->additional_action_vars['ste'] = Request::get('ste');
-            $search_terms = explode(' ', Request::get('ste'));
-            $search = array('#OR' => array());
-            foreach($search_terms as $t) {
-                foreach($this->search_fields as $f) {
-                    $search['#OR'][] = array($f => array('LIKE', "%{$t}%"));
-                }
-            }
-            $where[] = $search;
+            $where[] = Database::getMultiFieldSearch($this->search_fields, explode(' ', Request::get('ste')));
         }
 
         // get the page count
