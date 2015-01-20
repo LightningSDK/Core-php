@@ -84,11 +84,11 @@ class Blog extends Page {
             }
         }
 
-        foreach($blog->posts as $key => $post) {
+        foreach($blog->posts as &$post) {
             //Header images
             $header_image = '';
 
-            if(empty($post['header_image']) OR $post['header_image'] == '') {
+            if(empty($post['header_image'])) {
                 preg_match_all('/<img\s+.*?src=[\"\']?([^\"\' >]*)[\"\']?[^>]*>/i',$post['body'],$matches,PREG_SET_ORDER);
                 if(!empty($matches[0][1])) {
                     $header_image = (file_exists(HOME_PATH.$matches[0][1]))?$matches[0][1]:NULL;
@@ -99,7 +99,7 @@ class Blog extends Page {
                 $header_image = (file_exists(HOME_PATH.'/img/blog/'.$post[header_image]))?'/img/blog/'.$post[header_image]:NULL;
             }
 
-            $blog->posts[$key]['default_header_image'] = $header_image;
+            $post['header_image'] = $header_image;
         }
 
         $template->set('content', 'blog');
