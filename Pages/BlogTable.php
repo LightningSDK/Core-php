@@ -30,6 +30,11 @@ class BlogTable extends Table {
         'time' => array('type' => 'datetime', 'unlisted' => true),
         'url' => array('type' => 'url', 'unlisted' => true),
         'body' => array('editor' => 'full', 'upload' => true),
+        'header_image' => array(
+            'type' => 'image',
+            'location' => 'img/blog',
+            'weblocation' => '/img/blog',
+        )
     );
 
     protected function hasAccess() {
