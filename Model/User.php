@@ -55,6 +55,15 @@ class User {
         $this->details = $details;
     }
 
+    /**
+     * Assist the getter function by checking for isset()
+     *
+     * @param string $var
+     *   The name of the variable.
+     *
+     * @return boolean
+     *   Whether the variable is set.
+     */
     public function __isset($var) {
         switch($var) {
             case 'id':
