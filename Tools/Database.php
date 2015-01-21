@@ -1126,7 +1126,7 @@ class Database extends Singleton {
                     }
                 }
                 // IN operator.
-                elseif (!empty($v[0])){
+                elseif (!empty($v[0]) && is_string($v[0])){
                     switch (strtoupper($v[0])) {
                         case 'IN':
                             // The IN list is empty, so the set should be empty.
