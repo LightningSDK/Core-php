@@ -53,7 +53,7 @@ class Profile extends Page {
         }
 
         // Update mailing list preferences.
-        $new_lists = Request::get('subscribed', 'array', 'int');
+        $new_lists = Request::get('subscribed', 'array', 'int', array());
         $new_lists = array_combine($new_lists, $new_lists);
         $all_lists = Subscription::getLists();
         $user_id = ClientUser::getInstance()->id;
