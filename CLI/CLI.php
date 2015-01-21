@@ -26,7 +26,7 @@ class CLI {
     /**
      * The main execute method called from index.php
      */
-    public function execute() {
+    public function execute($job) {
         global $argv;
         $func = Request::convertFunctionName('execute', $argv[2]);
         if (method_exists($this, $func)) {
