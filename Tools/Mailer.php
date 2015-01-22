@@ -13,6 +13,13 @@ require_once HOME_PATH . '/Lightning/Vendor/PHPMailer/class.phpmailer.php';
 class Mailer {
 
     /**
+     * Whether the message and subject have been built.
+     *
+     * @var boolean
+     */
+    protected $built = false;
+
+    /**
      * A list of custom variables to be supplied to the message.
      *
      * @var array
@@ -162,6 +169,19 @@ class Mailer {
     }
 
     /**
+     * Set the recipient user and the default variables.
+     *
+     * @param User $user
+     *   The user to receive the email.
+     */
+    public function setUser($user) {
+        $this->message->setUser($user);
+        $this->message->setDefaultVars();
+        $this->to($user->email, $user->first . ' ' . $user->last);
+        $this->built = false;
+    }
+
+    /**
      * Set the message subject.
      *
      * @param string $subject
@@ -190,6 +210,17 @@ class Mailer {
     }
 
     /**
+     * Load a message from the database.
+     *
+     * @param $message_id
+     */
+    public function loadMessage($message_id) {
+        $this->message = new Message($message_id);
+        $this->subject($this->message->getSubject());
+        $this->message($this->message->getMessage());
+    }
+
+    /**
      * Send the current single message.
      *
      * @return boolean
@@ -202,6 +233,14 @@ class Mailer {
                 Configuration::get('site.mail_from'),
                 Configuration::get('site.mail_from_name')
             );
+        }
+
+        if (!$this->built) {
+            // Rebuild with the new custom variables.
+            $this->message->resetCustomVariables($this->customVariables);
+            $this->subject($this->message->getSubject());
+            $this->message($this->message->getMessage());
+            $this->built = true;
         }
 
         // Send the message.
@@ -292,13 +331,11 @@ class Mailer {
      *   The user object to send to.
      */
     function sendOne($message_id, $user) {
-        $this->message = new Message($message_id);
-        $this->message->setUser($user);
+        $this->loadMessage($message_id);
         $this->message->resetCustomVariables($this->customVariables);
-        $this->to($user->email, $user->first . ' ' . $user->last);
+        $this->message->setUser($user);
         $this->message->setDefaultVars();
-        $this->subject($this->message->getSubject());
-        $this->message($this->message->getMessage());
+        $this->to($user->email, $user->first . ' ' . $user->last);
         $this->sendMessage();
         Tracker::trackEvent('Email Sent', $message_id, $user->id);
     }
