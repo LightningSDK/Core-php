@@ -20,7 +20,11 @@ class CombinationIterator implements Iterator {
      */
     public function __construct() {
         $this->iterators = func_get_args();
+        $valid = true;
         foreach ($this->iterators as $k => $v) {
+            if (empty($v)) {
+                $valid = false;
+            }
             if (!is_array($v)) {
                 // Make sure a single value is wrapped in an array.
                 $this->iterators[$k] = array($v);
@@ -30,6 +34,9 @@ class CombinationIterator implements Iterator {
             }
         }
         $this->rewind();
+        if (!$valid) {
+            $this->more = false;
+        }
     }
 
     /**

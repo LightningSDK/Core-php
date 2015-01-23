@@ -542,16 +542,20 @@ class Database extends Singleton {
             $vars = array_merge($vars, $combination);
         }
 
-        // The placeholder count might be different.
-        if (empty($values) || (count($vars) / count($data) != $iterations_per_query)) {
-            $values = implode(',', array_fill(0, count($vars) / count($data), $placeholder_set));
+        if (!empty($vars)) {
+            // The placeholder count might be different.
+            if (empty($values) || (count($vars) / count($data) != $iterations_per_query)) {
+                $values = implode(',', array_fill(0, count($vars) / count($data), $placeholder_set));
+            }
+
+            // Run the insert query for remaining sets.
+            $this->query('INSERT ' . $ignore . ' INTO ' . $table . '(' . $fields . ') VALUES ' . $values . $duplicate, $vars);
+
+            // Return the last insert ID.
+            return $this->result->rowCount() == 0 ? $last_insert : $this->connection->lastInsertId();
         }
 
-        // Run the insert query for remaining sets.
-        $this->query('INSERT ' . $ignore . ' INTO ' . $table . '(' . $fields . ') VALUES ' . $values . $duplicate, $vars);
-
-        // Return the last insert ID.
-        return $this->result->rowCount() == 0 ? $last_insert : $this->connection->lastInsertId();
+        return 0;
     }
 
     /**
