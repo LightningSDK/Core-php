@@ -60,16 +60,20 @@ class ClientUser extends Singleton {
      */
     public static function requireLogin($action = '') {
         if (self::getInstance()->id == 0) {
+            $query = array();
             if (!empty($action)) {
-                $action = 'action=' . Scrub::toURL($action) . '&';
+                $query['action'] = $action;
             }
-            $redirect = Request::get('request');
-            $query = $_GET;
-            unset($query['request']);
-            if (!empty($query)) {
-                $redirect .= '?' . http_build_query($query);
+
+            // Set the redirect parameter.
+            $query['redirect'] = Request::get('request');
+            // Add the current query string.
+            $redirect_query = $_GET;
+            unset($redirect_query['request']);
+            if (!empty($redirect_query)) {
+                $query['redirect'] .= '?' . http_build_query($redirect_query);
             }
-            Navigation::redirect('/user?' . $action . 'redirect=' . Scrub::toURL($redirect));
+            Navigation::redirect('/user' . $action, $query);
         }
     }
 

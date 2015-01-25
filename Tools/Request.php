@@ -74,7 +74,7 @@ class Request {
      * @return mixed
      *   value or false if none.
      */
-    public static function get($var, $type='', $subtype='', $default = null){
+    public static function get($var, $type = '', $subtype = '', $default = null){
         if(isset($_POST[$var])) {
             $args = func_get_args();
             $args[0] = $_POST[$var];
@@ -265,6 +265,9 @@ class Request {
                     $args = array_values($args);
                 }
                 return call_user_func_array("Lightning\\Tools\\Scrub::{$type}", $args);
+                break;
+            case 'urlencoded':
+                return urldecode($data);
                 break;
             case 'text':
                 // This still allows some basic HTML.

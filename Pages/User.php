@@ -9,6 +9,7 @@ use Lightning\Tools\Form;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Request;
+use Lightning\Tools\Scrub;
 use Lightning\Tools\Template;
 use Lightning\View\Page;
 use Lightning\Model\User as UserModel;
@@ -26,7 +27,7 @@ class User extends Page {
     public function get() {
         parent::__construct();
         $user = ClientUser::getInstance();
-        Template::getInstance()->set('redirect', Request::get('redirect'));
+        Template::getInstance()->set('redirect', Scrub::toURL(Request::get('redirect', 'string')));
         if($user->id > 0){
             // USER IS LOGGED IN, REDIRECT TO THE DEFAULT PAGE
             $this->loginRedirect();
@@ -39,7 +40,7 @@ class User extends Page {
     public function getRegister() {
         $template = Template::getInstance();
         $template->set('action', 'register');
-        $template->set('redirect', Request::get('redirect'));
+        $template->set('redirect', Scrub::toURL(Request::get('redirect', 'string')));
     }
 
     /**
@@ -181,7 +182,7 @@ class User extends Page {
             return;
         }
         if ($user->sendResetLink()) {
-            Navigation::redirect('message?msg=reset');
+            Navigation::redirect('message', array('msg' => 'reset'));
         }
     }
 
@@ -236,7 +237,7 @@ class User extends Page {
     }
 
     public function loginRedirect($page = null) {
-        $redirect = Request::get('redirect');
+        $redirect = Request::post('redirect', 'urlencoded') ?: Request::query('redirect');
         if ($redirect && !preg_match('|^[/?]user|', $redirect)) {
             Navigation::redirect($redirect);
         }
