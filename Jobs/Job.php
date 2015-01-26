@@ -12,6 +12,6 @@ class Job {
     }
 
     public function out($string) {
-        Logger::message($string, true);
+        Logger::message($string);
     }
 }
