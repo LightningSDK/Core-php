@@ -2,15 +2,12 @@
 
 namespace Lightning\Jobs;
 
-use Lightning\CLI\CLI;
 use Lightning\Model\User;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Database;
 use Lightning\Tools\Logger;
 use Lightning\Tools\Session;
 
-class UserCleanup extends CLI {
-    public function execute() {
+class UserCleanup extends Job {
+    public function execute($job) {
         // Remove expired sessions.
         Logger::message('Cleaning sessions...');
         $count = Session::clearExpiredSessions();

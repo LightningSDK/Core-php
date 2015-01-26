@@ -3,12 +3,11 @@
 namespace Lightning\Jobs;
 
 use DateTime;
-use Lightning\CLI\CLI;
 use Lightning\Tools\Database;
 use Lightning\Tools\Mailer as MailerTool;
 use Lightning\View\Field\Time;
 
-class Mailer extends CLI {
+class Mailer extends Job {
     public function execute($job) {
         $mailer = new MailerTool();
 
