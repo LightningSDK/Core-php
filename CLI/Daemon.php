@@ -11,6 +11,8 @@ declare(ticks = 1);
 
 class Daemon extends CLI {
 
+    protected $debug = false;
+
     /**
      * The maximum number of child threads.
      *
@@ -80,21 +82,27 @@ class Daemon extends CLI {
         $this->maxThreads = Configuration::get('daemon.max_threads');
         $this->jobs = Configuration::get('jobs');
 
-        // Create initial fork.
-        $pid = pcntl_fork();
-        if ($pid == -1) {
-            $this->out('Could not fork.');
-            return;
-        } else if ($pid) {
-            // This is the parent thread.
-            $status = null;
-            pcntl_waitpid($pid, $status, WNOHANG);
-            return;
+        // If this is not in debug mode, fork to a daemon process.
+        $this->disableSTDIO($logfile);
+        if (!$this->debug) {
+            // Create initial fork.
+            $pid = pcntl_fork();
+            if ($pid == -1) {
+                $this->out('Could not fork.', true);
+                return;
+            } else if ($pid) {
+                // This is the parent thread.
+                $status = null;
+                pcntl_waitpid($pid, $status, WNOHANG);
+                return;
+            }
+
+            // This is the child thread.
+            pcntl_signal(SIGCHLD, array($this, 'handlerSIGCHLD'));
+            pcntl_signal(SIGTERM, array($this, 'handlerSIGTERM'));
         }
 
-        // This is the child thread.
-        pcntl_signal(SIGCHLD, array($this, 'handlerSIGCHLD'));
-        pcntl_signal(SIGTERM, array($this, 'handlerSIGTERM'));
+        // Loop infinitely, checking for jobs.
         $this->lastCheck = time();
         do {
             $this->checkForJobs();
