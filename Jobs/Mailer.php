@@ -15,11 +15,11 @@ class Mailer extends Job {
         $timezone_offset = $date->getOffset();
 
         $time = time() + $timezone_offset;
-
         // Load all messages that should be sent on a specific date.
+        $start_time = !empty($job['last_start']) ? $job['last_start'] : $time - $job['interval'];
         $messages = Database::getInstance()->selectColumn(
             'message', 'message_id',
-            ['send_date' => ['BETWEEN', $time - $job['interval'], $time + $job['interval']]]
+            ['send_date' => ['BETWEEN', $start_time, $time + $job['interval']]]
         );
         foreach ($messages as $message_id) {
             $start_time = time();
