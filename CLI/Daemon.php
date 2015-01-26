@@ -273,7 +273,7 @@ class Daemon extends CLI {
             } else {
                 // Execute the job.
                 $object = new $job['class']();
-                $this->out('Starting thread for job: ' . $object->name ?: $job['class'], true);
+                $this->out('Starting thread for job: ' . $job['class'], true);
                 $object->execute($job);
                 // Stop the daemon.
                 exit;
