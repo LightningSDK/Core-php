@@ -2,6 +2,8 @@
 
 namespace Lightning\View\Field;
 
+use DateTime;
+use DateTimeZone;
 use Lightning\Tools\Request;
 use Lightning\View\Field;
 
@@ -79,13 +81,13 @@ class Time extends Field {
         $y = Request::get($id .'_y', 'int');
         $h = Request::get($id .'_h', 'int');
         $i = str_pad(Request::get($id .'_i', 'int'), 2, 0, STR_PAD_LEFT);
-        $a = Request::get($id . '_a', '', '', 'AM');
+        $h += Request::get($id . '_a', '', '', 'AM') == 'AM' ? 0 : 12;
 
         if ($allow_blank && (empty($m) || empty($d) || empty($y) || empty($h))) {
             return 0;
         }
 
-        return strtotime("{$m}/{$d}/{$y} {$h}:{$i} {$a}");
+        return gmmktime($h, $i, 0, $m, $d, $y);
     }
 
     public static function printDate($value) {
@@ -111,9 +113,10 @@ class Time extends Field {
 
     public static function printDateTime($value) {
         if(empty($value)) {
-            return "";
+            return '';
         } else {
-            return date('m/d/Y h:ia', $value);
+            $date = new Datetime('@' . $value, new DateTimeZone('UTC'));
+            return $date->format('m/d/Y h:ia');
         }
     }
 
@@ -136,10 +139,10 @@ class Time extends Field {
             $i = $time[1];
             $a = $time[2];
             if($a == 'PM') $h += 12;
-            $value = ($h*60)+$i;
+            $value = ($h * 60) + $i;
         } else {
-            $i = $value%60;
-            $h = ($value-$i)/60;
+            $i = $value % 60;
+            $h = ($value - $i) / 60;
             if($h > 12){
                 $a = "PM";
                 $h -= 12;
@@ -159,7 +162,12 @@ class Time extends Field {
             $value = time();
         }
 
-        $time = ($value == 0) ? array(0,0,0,0,0,0,0) : explode("/",date("m/d/Y/h/i/s/a", $value));
+        if (empty($value)) {
+            $time = array(0,0,0,0,0,0,0);
+        } else {
+            $date = new DateTime('@' . $value, new DateTimeZone('UTC'));
+            $time = explode('/', $date->format('m/d/Y/h/i/s/a'));
+        }
         $output = self::monthPop($field."_m", $time[0], $allow_zero, '', array('class' => 'dateTimePop')) . ' / ';
         $output .= self::dayPop($field."_d", $time[1], $allow_zero, array('class' => 'dateTimePop')) . ' / ';
         $output .= self::yearPop($field."_y", $time[2], $allow_zero, $first_year, null, array('class' => 'dateTimePop')) . ' at ';
