@@ -247,6 +247,7 @@ class Daemon extends CLI {
         // If this job was skipped, we can start it up again next time regardless of
         // interval.
         if ($remainingThreads < 1) {
+            $this->out('No threads available for: ' . $job['class'], true);
             $job['skipped'] = true;
             return;
         } else {
@@ -272,6 +273,7 @@ class Daemon extends CLI {
             } else {
                 // Execute the job.
                 $object = new $job['class']();
+                $this->out('Starting thread for job: ' . $object->name ?: $job['class'], true);
                 $object->execute($job);
                 // Stop the daemon.
                 exit;
