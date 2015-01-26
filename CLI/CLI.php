@@ -46,8 +46,10 @@ class CLI {
         return $line;
     }
 
-    public function out($string) {
-        Logger::message($string, true);
+    public function out($string, $log = false) {
+        if ($log) {
+            Logger::message($string);
+        }
         print $string . "\n";
     }
 }
