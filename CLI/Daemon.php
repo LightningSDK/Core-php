@@ -140,6 +140,22 @@ class Daemon extends CLI {
     }
 
     /**
+     * Test a job without starting the daemon.
+     */
+    public function executeTest() {
+        global $argv;
+        foreach ($argv as $i => $arg) {
+            if ($arg == 'test') {
+                $job = $argv[$i + 1];
+            }
+        }
+        $jobs = Configuration::get('jobs');
+        $job = $jobs[$job];
+        $object = new $job['class']();
+        $object->execute($job);
+    }
+
+    /**
      * Restart the daemon.
      */
     public function executeRestart() {
