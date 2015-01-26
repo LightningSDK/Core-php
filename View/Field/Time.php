@@ -80,6 +80,9 @@ class Time extends Field {
         $d = Request::get($id .'_d', 'int');
         $y = Request::get($id .'_y', 'int');
         $h = Request::get($id .'_h', 'int');
+        if ($h == 12) {
+            $h = 0;
+        }
         $i = str_pad(Request::get($id .'_i', 'int'), 2, 0, STR_PAD_LEFT);
         $h += Request::get($id . '_a', '', '', 'AM') == 'AM' ? 0 : 12;
 
