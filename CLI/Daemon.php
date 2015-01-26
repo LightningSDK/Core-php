@@ -193,19 +193,30 @@ class Daemon extends CLI {
         }
 
         foreach ($this->jobs as &$job) {
+            $time = time();
+            if (empty($this->lastCheck)) {
+                $this->lastCheck = $time;
+            }
+            $interval_diff = ($time - $job['offset'] + $this->timezoneOffset) % $job['interval'];
+            $time_since_last_check = $time - $this->lastCheck;
+            if (empty($job['last_start'])) {
+                $job['last_start'] = $time;
+            }
+            $time_since_last_start = $time - $job['last_start'];
             if (
                 // If this was skipped last time.
                 !empty($job['skipped'])
                 // Or it's time to run again.
-                || (
-                    time() - $job['offset'] + $this->timezoneOffset) % $job['interval']
-                    < (time() - $this->lastCheck
-                )
+                // Either the time it was supposed to run fell between the last two checks.
+                || $time_since_last_check > $interval_diff
+                // Or the interval has lapsed since the last time it was run.
+                || $time_since_last_start > $job['interval']
             ) {
+                $job['last_start'] = $time;
                 $this->startJob($job);
             }
         }
-        $this->lastCheck = time();
+        $this->lastCheck = $time;
     }
 
     /**
