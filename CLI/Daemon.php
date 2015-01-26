@@ -65,13 +65,13 @@ class Daemon extends CLI {
      */
     public function executeStart() {
         Logger::setLog(Configuration::get('daemon.log'));
-        Logger::message('Starting Daemon');
 
-        if ($this->getMyPid() != posix_getpid()) {
-            $this->out('Already running.');
+        if (!empty($mypid) && $mypid != posix_getpid()) {
+            $this->out('Already running.', true);
             return;
         }
-        $this->out('Starting Daemon');
+
+        $this->out('Starting Daemon', true);
 
         // Get the timezone offset.
         $date = new DateTime();
@@ -109,15 +109,23 @@ class Daemon extends CLI {
      */
     public function executeStop() {
         if ($pid = $this->getMyPid()) {
-            $this->out('Stopping process: ' . $pid);
+            $this->out('Stopping process: ' . $pid, true);
             posix_kill($pid, SIGTERM);
             do {
                 sleep(1);
             } while ($this->getMyPid());
-            $this->out('Stopped');
+            $this->out('Stopped', true);
         } else {
-            $this->out('Not running.');
+            $this->out('Not running.', true);
         }
+    }
+
+    /**
+     * Restart the daemon.
+     */
+    public function executeRestart() {
+        $this->executeStop();
+        $this->executeStart();
     }
 
     /**
@@ -128,10 +136,13 @@ class Daemon extends CLI {
      */
     protected function getMyPid() {
         exec('ps -ef | grep ' . realpath(HOME_PATH . '/index.php'), $output);
+        $this_pid = posix_getpid();
         foreach ($output as $command) {
-            if (preg_match('/daemon start/', $command)) {
+            if (preg_match('/daemon (re)?start/', $command)) {
                 preg_match('/[0-9]+/', $command, $matches);
-                return $matches[0];
+                if ($matches[0] != $this_pid) {
+                    return $matches[0];
+                }
             }
         }
         return null;
@@ -193,7 +204,7 @@ class Daemon extends CLI {
         for ($i = 0; $i < $remainingThreads; $i++) {
             $pid = pcntl_fork();
             if ($pid == -1) {
-                $this->out('Could not fork.');
+                $this->out('Could not fork.', true);
                 return;
             } else if ($pid) {
                 // This is the parent thread.
