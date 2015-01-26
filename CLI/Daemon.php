@@ -62,11 +62,22 @@ class Daemon extends CLI {
      */
     protected $timezoneOffset;
 
+    protected function disableSTDIO($logfile) {
+        fclose(STDIN);
+        fclose(STDOUT);
+        fclose(STDERR);
+        $STDIN = fopen(HOME_PATH . '/' . $logfile, 'r');
+        $STDOUT = fopen(HOME_PATH . '/' . $logfile, 'wb');
+        $STDERR = fopen(HOME_PATH . '/' . $logfile, 'wb');
+    }
+
     /**
      * Initial start command from the terminal.
      */
     public function executeStart() {
-        Logger::setLog(Configuration::get('daemon.log'));
+
+        $logfile = Configuration::get('daemon.log');
+        Logger::setLog($logfile);
 
         if (!empty($mypid) && $mypid != posix_getpid()) {
             $this->out('Already running.', true);
