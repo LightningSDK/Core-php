@@ -204,15 +204,11 @@ class Daemon extends CLI {
             }
             $time_since_last_start = $time - $job['last_start'];
             if (
-                // If this was skipped last time.
-                !empty($job['skipped'])
-                // Or it's time to run again.
                 // Either the time it was supposed to run fell between the last two checks.
-                || $time_since_last_check > $interval_diff
+                $time_since_last_check > $interval_diff
                 // Or the interval has lapsed since the last time it was run.
                 || $time_since_last_start > $job['interval']
             ) {
-                $job['last_start'] = $time;
                 $this->startJob($job);
             }
         }
@@ -244,14 +240,12 @@ class Daemon extends CLI {
         $remainingThreads = $max_threads - count($job['threads']);
         $remainingThreads = min($remainingThreads, $this->maxThreads - count($this->threads));
 
-        // If this job was skipped, we can start it up again next time regardless of
-        // interval.
+        // Check if there are threads available.
         if ($remainingThreads < 1) {
             $this->out('No threads available for: ' . $job['class'], true);
-            $job['skipped'] = true;
             return;
         } else {
-            $job['skipped'] = false;
+            $job['last_start'] = time();
         }
 
         // For each remaining thread we have, start one.
