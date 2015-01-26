@@ -47,6 +47,7 @@ class CLI {
     }
 
     public function out($string) {
+        Logger::message($string, true);
         print $string . "\n";
     }
 }
