@@ -1489,7 +1489,7 @@ abstract class Table extends Page {
             //DEFAULT VIEW MODE
         } else {
             $this->loadAllLinkOptions($link_settings);
-            $options = array();
+            $options = array('');
             foreach($link_settings['options'] as $l) {
                 $key = !empty($link_settings['index_fkey']) ? $link_settings['index_fkey'] : $link_settings['key'];
                 $options[$l[$key]] = $l[$link_settings['display_column']];
