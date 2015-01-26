@@ -234,6 +234,13 @@ class Daemon extends CLI {
             $job['threads'] = array();
         }
 
+        // Make sure there are no threads
+        foreach ($job['threads'] as $pid) {
+            if(!file_exists('/proc/' . $pid)) {
+                unset($job['threads'][$pid]);
+            }
+        }
+
         $remainingThreads = $max_threads - count($job['threads']);
         $remainingThreads = min($remainingThreads, $this->maxThreads - count($this->threads));
 
