@@ -1,7 +1,3 @@
-if (!lightning) {
-    var lightning = {};
-}
-
 lightning.startup = {
     init: function() {
         this.initForms();
@@ -48,7 +44,6 @@ lightning.startup = {
         });
     }
 };
-
 
 function json_to_ul (jsondata, target) {
     if (typeof(jsondata) == 'undefined' || typeof(target) == 'undefined') {

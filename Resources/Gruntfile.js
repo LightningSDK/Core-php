@@ -27,6 +27,7 @@ module.exports = function(grunt) {
             },
             vendor: {
                 files: {
+                    '../build/js/lightning.min.js': 'init.js',
                     '../build/js/lightning.min.js': 'js/*.js',
                     '../build/js/foundation.min.js': [
                         '../Vendor/foundation/js/foundation/foundation.js',
