@@ -851,6 +851,7 @@ class User {
 
             self::login($email, $pass);
             $user = ClientUser::getInstance();
+            $user->subscribe(Configuration::get('mailer.default_list'));
 
             // Merge with a previous anon user if necessary.
             if($previous_user != 0) {
