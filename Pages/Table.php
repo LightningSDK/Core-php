@@ -1052,10 +1052,12 @@ abstract class Table extends Page {
             }
             $output.= "</td>";
         }
-        if ($this->editable !== false)
+        if ($this->editable !== false) {
             $output.= "<td>Edit</td>";
-        if ($this->deleteable !== false)
+        }
+        if ($this->deleteable !== false) {
             $output.= "<td>Delete</td>";
+        }
         return $output;
     }
 
@@ -1134,12 +1136,14 @@ abstract class Table extends Page {
         } else {
 
             // show form
-            if ($this->action == "view")
-                ;
-            if ($this->action == "new")
+            if ($this->action == "view") {
+
+            }
+            if ($this->action == "new") {
                 $new_action = "insert";
-            else
+            } else {
                 $new_action = "update";
+            }
             if ($this->action != "view") {
                 $multipart_header = $this->hasUploadfield() ? "enctype='multipart/form-data'" : '';
                 echo "<form action='".$this->createUrl()."' id='form_{$this->table}' method='POST' {$multipart_header}><input type='hidden' name='action' id='action' value='{$new_action}' />";
@@ -1149,8 +1153,9 @@ abstract class Table extends Page {
                 }
             }
             // use the ID if we are editing a current one
-            if ($this->action == "edit") 
+            if ($this->action == "edit") {
                 echo '<input type="hidden" name="id" id="id" value="' . $this->id . '" />';
+            }
             if ($this->action == "view" && !$this->read_only) {
                 if ($this->editable !== false) {
                     echo "<a href='".$this->createUrl('edit', $this->id)."'><img src='/images/lightning/edit.png' border='0' /></a>";
@@ -1211,7 +1216,9 @@ abstract class Table extends Page {
             echo "</td></tr>";
         }
         echo "</table>";
-        if ($this->action != "view") echo "</form>";
+        if ($this->action != "view") {
+            echo "</form>";
+        }
         if ($this->action == "view" && !$this->read_only) {
             if ($this->editable !== false)
                 echo "<a href='".$this->createUrl('edit', $this->id)."'><img src='/images/lightning/edit.png' border='0' /></a>";
@@ -1267,22 +1274,25 @@ abstract class Table extends Page {
     function render_form_row(&$field, $row) {
         $output = '';
         if ($which_field = $this->which_field($field)) {
-            if (isset($f['type']))
+            if (isset($f['type'])) {
                 $field['type'] = $this->fields[$field['field']]['type'];
+            }
             // double column width row
             if ($field['type'] == "note") {
-                if ($field['note'] != '')
+                if ($field['note'] != '') {
                     $output .= "<tr><td colspan='2'><h3>{$field['note']}</h3></td></tr>";
-                else
+                } else {
                     $output .= "<tr><td colspan='2'><h3>{$field['display_name']}</h3></td></tr>";
+                }
             } elseif (!empty($field['width']) && $field['width']=="full") {
                 $output .= "<tr><td colspan='2'>{$field['display_name']}</td></tr>";
                 $output .= "<tr><td colspan='2'>";
                 // show the field
-                if ($which_field == "display")
+                if ($which_field == "display") {
                     $output .= $this->print_field_value($field, $row);
-                elseif ($which_field == "edit")
+                } elseif ($which_field == "edit") {
                     $output .= $this->renderEditField($field, $row);
+                }
                 if ($field['default_reset']) {
                     $output .= "<input type='button' value='Reset to Default' onclick='reset_field_value(\"{$field['field']}\");' />";
                 }
@@ -1293,9 +1303,9 @@ abstract class Table extends Page {
                 $output .= $field['display_name'];
                 $output .= "</td><td valign='top'>";
                 // show the field
-                if ($which_field == "display")
+                if ($which_field == "display") {
                     $output .= $this->print_field_value($field, $row);
-                elseif ($which_field == "edit") {
+                } elseif ($which_field == "edit") {
                     $output .= $this->renderEditField($field, $row);
                     if (!empty($field['note'])) {
                         $output .= $field['note'];
@@ -1347,10 +1357,11 @@ abstract class Table extends Page {
                 /* 	END TODO: This section should mirror the similar section from the LIST MODE below */
             } else {
                 // DISPLAY NAME ON THE LEFT
-                if (isset($link_settings['display_name']))
+                if (isset($link_settings['display_name'])) {
                     echo "<tr><td>{$link_settings['display_name']}</td><td>";
-                else
+                } else {
                     echo "<tr><td>{$link}</td><td>";
+                }
 
                 // LOAD THE LINKED ROWS
                 // The local key is the primary key column by default or another specified column.
@@ -1742,43 +1753,42 @@ abstract class Table extends Page {
     function which_field(&$field) {
         switch($this->action) {
             case "new":
-                if ($this->user_input_new($field))
+                if ($this->userInputNew($field)) {
                     return "edit";
-                elseif ($this->user_display_new($field))
+                } elseif ($this->userDisplayNew($field)) {
                     return "display";
-                else
+                } else {
                     return false;
+                }
                 break;
             case "edit":
-                if ($this->user_input_edit($field))
+                if ($this->userInputEdit($field)) {
                     return "edit";
-                elseif ($this->user_display_edit($field))
+                } elseif ($this->userDisplayEdit($field)) {
                     return "display";
-                else
+                } else {
                     return false;
+                }
                 break;
             case "view":
-                if ($this->display_view($field))
-                    return "display";
-                else
-                    return false;
+                return $this->displayView($field) ? 'display' : false;
                 break;
             case "list":
             default:
-                return $this->display_list($field) ? 'display' : false;
+                return $this->displayList($field) ? 'display' : false;
                 break;
         }
     }
 
     // is the field editable in these forms
-    function user_input_new(&$field) {
+    function userInputNew(&$field) {
         if (isset($field['render_'.$this->action.'_field']))
             return true;
         if ($field['type'] == "note")
             return true;
         if ($field['type'] == 'hidden' || (!empty($field['hidden']) && $field['hidden'] == 'true'))
             return false;
-        if ($field['field'] == $this->getKey())
+        if ($field['field'] == $this->getKey() && empty($field['editable']))
             return false;
         if ($field['field'] == $this->parentLink)
             return false;
@@ -1789,7 +1799,7 @@ abstract class Table extends Page {
         return true;
     }
 
-    function user_input_edit(&$field) {
+    function userInputEdit(&$field) {
         if (isset($field['render_'.$this->action.'_field']))
             return true;
         if ($field['type'] == "note")
@@ -1809,7 +1819,7 @@ abstract class Table extends Page {
         return true;
     }
 
-    function user_display_new(&$field) {
+    function userDisplayNew(&$field) {
         if (!empty($field['list_only']))
             return false;
         // TODO: This should be replaced by an overriding method in the child class.
@@ -1825,7 +1835,7 @@ abstract class Table extends Page {
         return true;
     }
 
-    function user_display_edit(&$field) {
+    function userDisplayEdit(&$field) {
         if (!empty($field['list_only']))
             return false;
         if ((!empty($field['type']) && $field['type'] == 'hidden') || !empty($field['hidden']))
@@ -1841,11 +1851,11 @@ abstract class Table extends Page {
         return true;
     }
 
-    function display_list(&$field) {
+    function displayList(&$field) {
         // TODO: This should be replaced by an overriding method in the child class.
         if (
             (!empty($field['display_value']) && is_callable($field['display_value']))
-            || (!empty($field['display_list_value']) && is_callable($field['display_list_value']))
+            || (!empty($field['displayList_value']) && is_callable($field['displayList_value']))
         )
             return true;
         if ($field['field'] == $this->parentLink)
@@ -1857,10 +1867,10 @@ abstract class Table extends Page {
         return true;
     }
 
-    function display_view(&$field) {
+    function displayView(&$field) {
         if (
             (!empty($field['display_value']) && is_callable($field['display_value']))
-            || (!empty($field['display_view_value']) && is_callable($field['display_view_value']))
+            || (!empty($field['displayView_value']) && is_callable($field['displayView_value']))
         )
             return true;
         if ($field['type'] == "note" && $field['view'])
@@ -2911,8 +2921,9 @@ abstract class Table extends Page {
         }
 
         // set the default value if new
-        if ($this->action == "new" && isset($field['Default']))
+        if ($this->action == "new" && isset($field['Default'])) {
             $field['Value'] = $field['Default'];
+        }
 
         // print form input
         $options = array();
