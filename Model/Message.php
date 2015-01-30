@@ -439,7 +439,7 @@ class Message {
                 'USER_ID' => $this->user->details['user_id'],
                 'MESSAGE_ID' => $this->message['message_id'],
                 'FULL_NAME' => (!empty($this->user->details['first']) ? $this->user->details['first'] . ' ' . $this->user->details['last'] : $this->default_name),
-                'URL_KEY' => User::urlKey($this->user->details['user_id'], $this->user->details['salt']),
+                'URL_KEY' => !empty($this->user->details['user_id']) ? User::urlKey($this->user->details['user_id'], $this->user->details['salt']) : '',
                 'EMAIL' => $this->user->details['email'],
 
                 // Add the unsubscribe link.
