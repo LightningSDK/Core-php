@@ -151,7 +151,10 @@ class Daemon extends CLI {
         }
         $jobs = Configuration::get('jobs');
         $job = $jobs[$job];
+        // This would normally be set to the last job run time.
+        $job['last_start'] = time() - $job['interval'];
         $object = new $job['class']();
+        $object->debug = true;
         $object->execute($job);
     }
 

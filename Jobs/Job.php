@@ -12,6 +12,10 @@ class Job {
     }
 
     public function out($string) {
-        Logger::message($string);
+        if ($this->debug) {
+            print $string . "\n";
+        } else {
+            Logger::message($string);
+        }
     }
 }
