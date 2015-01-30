@@ -29,7 +29,7 @@ class Object {
     public function __isset($var) {
         switch($var) {
             case 'id':
-                return !empty($this->data[self::PRIMARY_KEY]);
+                return !empty($this->data[static::PRIMARY_KEY]);
                 break;
             case 'data':
                 return true;
@@ -57,7 +57,7 @@ class Object {
     public function __get($var) {
         switch($var) {
             case 'id':
-                return $this->data[self::PRIMARY_KEY];
+                return $this->data[static::PRIMARY_KEY];
                 break;
             case 'data':
                 return $this->data;
@@ -90,7 +90,7 @@ class Object {
     public function __set($var, $value) {
         switch($var) {
             case 'id':
-                $this->data[self::PRIMARY_KEY] = $value;
+                $this->data[static::PRIMARY_KEY] = $value;
                 break;
             case 'data':
                 $this->data = $value;
