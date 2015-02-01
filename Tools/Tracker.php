@@ -230,7 +230,13 @@ class Tracker extends Singleton {
         // Add the sub_id if required.
         if ($sub_id != -1) {
             if (is_array($sub_id)) {
-                $criteria['sub_id'] = array('IN', $sub_id);
+                if (empty($sub_id)) {
+                    $criteria['sub_id'] = null;
+                } elseif ($sub_id[0] == 'NOT IN') {
+                    $criteria['sub_id'] = $sub_id;
+                } else {
+                    $criteria['sub_id'] = array('IN', $sub_id);
+                }
             } else {
                 $criteria['sub_id'] = $sub_id;
             }
