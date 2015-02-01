@@ -303,7 +303,7 @@ class Daemon extends CLI {
      * @param null $status
      * @return bool
      */
-    protected function handlerSIGCHLD($signo, $pid=null, $status=null) {
+    public function handlerSIGCHLD($signo, $pid=null, $status=null) {
         // If no pid is provided, Let's wait to figure out which child process ended
         if(!$pid){
             $pid = pcntl_waitpid(-1, $status, WNOHANG);
@@ -327,7 +327,7 @@ class Daemon extends CLI {
     /**
      * The handler for receiving a SIGTERM signal.
      */
-    protected function handlerSIGTERM() {
+    public function handlerSIGTERM() {
         $this->keepAlive = false;
     }
 }
