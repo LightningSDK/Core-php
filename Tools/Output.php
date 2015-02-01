@@ -65,6 +65,16 @@ class Output {
         exit;
     }
 
+    public static function jsonData($data) {
+        echo json_encode(array(
+            'data' => $data,
+            'status' => 'success',
+            'errors' => Messenger::getErrors(),
+            'messages' => Messenger::getMessages(),
+        ));
+        exit;
+    }
+
     /**
      * Die on an error with a message in json format.
      *

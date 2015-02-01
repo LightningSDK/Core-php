@@ -142,6 +142,6 @@ class ChartData {
         if (!empty($this->Xlabels)) {
             $output['labels'] = $this->Xlabels;
         }
-        Output::json(array('data' => $output));
+        Output::jsonData($output);
     }
 }
