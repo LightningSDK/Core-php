@@ -1,30 +1,44 @@
 lightning.dialog = {
+    originalScroll: 0,
+    newPosition: 0,
+    dialogBox: false,
+    dialogBoxLoader: undefined,
+    dialogBoxInner: undefined,
+
+    init: function() {
+        if (!this.dialogBox) {
+            this.dialogBox = $('#dialog_box');
+            this.dialogBoxLoader = $('#dialog_box_loader');
+            this.dialogBoxInner = $('#dialog_box_inner');
+        }
+    },
+
     reposition: function(){
-        if($('#dialog_box').is(":visible")){
-            if($(window).height() > $('#dialog_box').height()){
-                var new_position = (($(window).height()-$('#dialog_box').height())/2)+$(window).scrollTop();
-                $('#dialog_box').css("top",new_position+"px");
+        if (this.dialogBox.is(":visible")) {
+            if($(window).height() > this.dialogBox.height()){
+                this.newPosition = (($(window).height()-this.dialogBox.height())/2)+$(window).scrollTop();
+                this.dialogBox.css("top",this.newPosition+"px");
             } else {
-                var new_position = $ac.original_scroll-$(window).scrollTop()+$('#dialog_box').position().top;
-                var min_pos = Math.max(0,$(window).height()+$(window).scrollTop()-$('#dialog_box').height()-20);
+                this.newPosition = this.originalScroll-$(window).scrollTop()+this.dialogBox.position().top;
+                var min_pos = Math.max(0,$(window).height()+$(window).scrollTop()-this.dialogBox.height()-20);
                 var max_pos = $(window).scrollTop()+10;
-                new_position = Math.min(new_position, max_pos);
-                new_position = Math.max(new_position, min_pos);
-                $ac.original_scroll = $(window).scrollTop();
-                $('#dialog_box').css("top",new_position+"px");
+                this.newPosition = Math.min(this.newPosition, max_pos);
+                this.newPosition = Math.max(this.newPosition, min_pos);
+                this.originalScroll = $(window).scrollTop();
+                this.dialogBox.css("top",this.newPosition+"px");
             }
         }
     },
 
     setDialogPosition: function(){
-        $ac.original_scroll = $(window).scrollTop();
-        $ac.reposition();
+        this.originalScroll = $(window).scrollTop();
+        this.reposition();
     },
 
     showDialogURL: function(url){
-        $ac.showDialog();
+        this.showDialog();
         $.ajax({dataType:'HTML',url:url,success:function(data){
-            $ac.setContent(data);
+            this.setContent(data);
         }});
     },
 
@@ -33,16 +47,19 @@ lightning.dialog = {
      * @param show_loader
      */
     showDialog: function(show_loader){
-        $('#dialog_box_loader').stop(true);
-        $('#dialog_box_inner').stop(true);
-        if(show_loader == "undefined") show_loader = true;
-        if($('#dialog_box').is(":visible")){
-            $('#dialog_box_inner').fadeOut('fast',function(){
-                $ac.showDialogContainer(show_loader);
+        this.dialogBoxLoader.stop(true);
+        this.dialogBoxInner.stop(true);
+        if(show_loader == "undefined") {
+            show_loader = true;
+        }
+        if(this.dialogBox.is(":visible")){
+            var self = this;
+            this.dialogBoxInner.fadeOut('fast',function(){
+                self.showDialogContainer(show_loader);
             });
         } else {
-            $ac.setDialogPosition();
-            $ac.showDialogContainer(show_loader);
+            this.setDialogPosition();
+            this.showDialogContainer(show_loader);
         }
     },
 
@@ -51,14 +68,15 @@ lightning.dialog = {
      * @param show_loader
      */
     showDialogContainer: function(show_loader){
-        $ac.clear();
+        this.clear();
         $('#veil').fadeIn('fast');
-        $('#dialog_box_inner').hide();
-        if(show_loader)
-            $('#dialog_box_loader').show();
-        else
-            $('#dialog_box_loader').hide();
-        $('#dialog_box').fadeIn('fast', $ac.reposition);
+        this.dialogBoxInner.hide();
+        if(show_loader) {
+            this.dialogBoxLoader.show();
+        } else {
+            this.dialogBoxLoader.hide();
+        }
+        this.dialogBox.fadeIn('fast', this.reposition);
     },
 
     /**
@@ -66,40 +84,31 @@ lightning.dialog = {
      * @param callback
      */
     showPrepared: function(callback){
-        $('#dialog_box_loader').stop(true);
-        $('#dialog_box_inner').stop(true);
+        this.dialogBoxLoader.stop(true);
+        this.dialogBoxInner.stop(true);
         $('#veil').fadeIn('fast');
-        $('#dialog_box').fadeOut('fast',function(){
-            $ac.clear();
+        var self = this;
+        this.dialogBox.fadeOut('fast',function(){
+            self.clear();
             if(callback != undefined)
                 callback();
-            $('#dialog_box').fadeIn('fast', $ac.reposition);
+            self.dialogBox.fadeIn('fast', this.reposition);
         });
     },
 
     hide: function(){
-        $('#dialog_box').fadeOut('fast', function(){
+        this.dialogBox.fadeOut('fast', function(){
             $('#veil').fadeOut('fast');
         });
     },
 
-    /*
-     showsetContent: function(callback){
-     $("#dialog_")
-     $('#dialog_box_inner').fadeOut('fast', function(){
-     if(callback != undefined)
-     callback();
-     });
-     },
-     */
-
     clear: function(){
-        $("#dialog_box_inner .content").empty().hide();
-        $("#dialog_box_inner .errors ul").empty();
-        $("#dialog_box_inner .errors").hide();
-        $("#dialog_box_inner .messages ul").empty();
-        $("#dialog_box_inner .messages").hide();
-        $('#dialog_box_loader').hide();
+        this.dialogBoxInner.find('.content').empty().hide();
+        this.dialogBoxInner.find('.errors ul').empty();
+        this.dialogBoxInner.find('.errors').hide();
+        this.dialogBoxInner.find('.messages ul').empty();
+        this.dialogBoxInner.find('.messages').hide();
+        this.dialogBoxLoader.hide();
     },
 
     /**
@@ -108,11 +117,11 @@ lightning.dialog = {
      */
     addContent: function(content){
         content = $(content).hide();
-        $('#dialog_box_inner .content').append(content);
+        this.dialogBoxInner.find('.content').append(content);
         content.fadeIn('fast');
-        $('#dialog_box_inner').fadeIn('fast');
-        $('#dialog_box_inner .content').fadeIn('fast');
-        $ac.reposition();
+        this.dialogBoxInner.fadeIn('fast');
+        this.dialogBoxInner.find('.content').fadeIn('fast');
+        this.reposition();
     },
 
     /**
@@ -121,72 +130,52 @@ lightning.dialog = {
      * @param callback
      */
     setContent: function(content, callback){
-        $('#dialog_box_loader').fadeOut('fast', function(){
-            $('#dialog_box_inner').fadeOut('fast', function(){
-                $ac.showPreparedDialog(function(){
-                    $('#dialog_box_inner .content').html(content).show();
-                    $('#dialog_box_inner').fadeIn('fast');
+        var self = this;
+        this.dialogBoxLoader.fadeOut('fast', function(){
+            this.dialogBoxInner.fadeOut('fast', function(){
+                self.showPrepared(function(){
+                    this.dialogBoxInner.find('.content').html(content).show();
+                    this.dialogBoxInner.fadeIn('fast');
                 });
-                if(callback != undefined)
+                if(callback) {
                     callback();
+                }
             });
         });
-        $ac.reposition();
-    },
-
-    /**
-     * Add a new error to an existing dialog.
-     * @param error
-     */
-    addError: function(error){
-        var new_error = $("<li>"+error+"</li>");
-        $('#dialog_box_loader').fadeOut('fast',function(){
-            if($("#dialog_box_inner .errors").is(":visible")){
-                new_error.hide();
-                $("#dialog_box_inner .errors ul").append(new_error);
-                new_error.fadeIn("fast");
-            } else {
-                $("#dialog_box_inner .errors ul").append(new_error);
-                if($("#dialog_box_inner").is(":visible")){
-                    $("#dialog_box_inner .errors").fadeIn("fast");
-                } else {
-                    $("#dialog_box_inner .errors").show();
-                }
-            }
-            $("#dialog_box_inner").fadeIn("fast");
-        });
-        $ac.reposition();
+        this.reposition();
     },
 
     /**
      * Add a success message to an existing dialog.
      * @param message
      */
-    addMessage: function(message){
-        message = $("<li>"+message+"</li>");
-        $('#dialog_box_loader').fadeOut('fast',function(){
-            if($("#dialog_box_inner .messages").is(":visible")){
+    add: function(message, message_type) {
+        message = $('<li>' + message + '</li>');
+        var container = (message_type == 'message') ? '.messages' : '.errors';
+        var self = this;
+        this.dialogBoxLoader.fadeOut('fast', function(){
+            if(self.dialogBoxInner.find(container).is(':visible')){
                 message.hide();
-                $("#dialog_box_inner .messages ul").append(message);
+                self.dialogBoxInner.find(container + ' ul').append(message);
                 message.fadeIn("fast");
             } else {
-                $("#dialog_box_inner .messages ul").append(message);
-                if($("#dialog_box_inner").is(":visible")){
-                    $("#dialog_box_inner .messages").fadeIn("fast");
+                self.dialogBoxInner.find(container + ' ul').append(message);
+                if(self.dialogBoxInner.is(':visible')){
+                    self.dialogBoxInner.find(container).fadeIn('fast');
                 } else {
-                    $("#dialog_box_inner .messages").show();
+                    self.dialogBoxInner.find(container).show();
                 }
             }
-            $("#dialog_box_inner").fadeIn("fast");
+            self.dialogBoxInner.find(container).fadeIn('fast');
         });
-        $ac.reposition();
+        this.reposition();
     },
 
     setContent: function(content, callback){
-        $('#dialog_box_inner').fadeOut('fast',function(){$(this).html(content).fadeIn('fast',callback);})
+        this.dialogBoxInner.fadeOut('fast',function(){$(this).html(content).fadeIn('fast', callback);})
     },
 
     hide: function(callback){
-        $('#dialog_box').fadeOut('fast',function(){$('#veil').fadeOut(callback);})
+        this.dialogBox.fadeOut('fast',function(){$('#veil').fadeOut(callback);})
     }
 };

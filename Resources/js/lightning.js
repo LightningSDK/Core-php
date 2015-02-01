@@ -2,6 +2,8 @@ lightning.startup = {
     init: function() {
         this.initForms();
         this.initNav();
+        lightning.ajax.init();
+        lightning.dialog.init();
     },
 
     initNav: function() {
