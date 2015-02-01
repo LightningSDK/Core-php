@@ -18,6 +18,8 @@ lightning.dialog = {
             '<div class="inner" id="dialog_box_loader"><p align="center"><img src="/images/coganim2.gif" class="loader_image"></p></div>'+
             '</div>'+
             '</div>').prependTo('body');
+            $('#veil').click(lightning.dialog.hide);
+            $(window).scroll(lightning.dialog.reposition).resize(lightning.dialog.reposition);
             this.dialogBox = $('#dialog_box');
             this.dialogBoxLoader = $('#dialog_box_loader');
             this.dialogBoxInner = $('#dialog_box_inner');
@@ -108,7 +110,7 @@ lightning.dialog = {
     },
 
     hide: function(){
-        this.dialogBox.fadeOut('fast', function(){
+        lightning.dialog.dialogBox.fadeOut('fast', function(){
             $('#veil').fadeOut('fast');
         });
     },
@@ -185,8 +187,4 @@ lightning.dialog = {
     setContent: function(content, callback){
         this.dialogBoxInner.fadeOut('fast',function(){$(this).html(content).fadeIn('fast', callback);})
     },
-
-    hide: function(callback){
-        this.dialogBox.fadeOut('fast',function(){$('#veil').fadeOut(callback);})
-    }
 };
