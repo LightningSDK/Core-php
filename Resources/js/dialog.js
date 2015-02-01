@@ -7,6 +7,17 @@ lightning.dialog = {
 
     init: function() {
         if (!this.dialogBox) {
+            $('<div id="veil"></div>'+
+            '<div id="dialog_box">'+
+            '<div class="table_data clear border_top">'+
+            '<div class="inner" id="dialog_box_inner">'+
+            '<div class="messenger error"><ul></ul></div>'+
+            '<div class="messenger message"><ul></ul></div>'+
+            '<div class="content"><ul></ul></div>'+
+            '</div>'+
+            '<div class="inner" id="dialog_box_loader"><p align="center"><img src="/images/coganim2.gif" class="loader_image"></p></div>'+
+            '</div>'+
+            '</div>').prependTo('body');
             this.dialogBox = $('#dialog_box');
             this.dialogBoxLoader = $('#dialog_box_loader');
             this.dialogBoxInner = $('#dialog_box_inner');
@@ -14,29 +25,29 @@ lightning.dialog = {
     },
 
     reposition: function(){
-        if (this.dialogBox.is(":visible")) {
-            if($(window).height() > this.dialogBox.height()){
-                this.newPosition = (($(window).height()-this.dialogBox.height())/2)+$(window).scrollTop();
-                this.dialogBox.css("top",this.newPosition+"px");
+        if (lightning.dialog.dialogBox.is(":visible")) {
+            if($(window).height() > lightning.dialog.dialogBox.height()){
+                lightning.dialog.newPosition = (($(window).height() - lightning.dialog.dialogBox.height())/2) + $(window).scrollTop();
+                lightning.dialog.dialogBox.css("top",lightning.dialog.newPosition+"px");
             } else {
-                this.newPosition = this.originalScroll-$(window).scrollTop()+this.dialogBox.position().top;
-                var min_pos = Math.max(0,$(window).height()+$(window).scrollTop()-this.dialogBox.height()-20);
+                lightning.dialog.newPosition = lightning.dialog.originalScroll-$(window).scrollTop() + lightning.dialog.dialogBox.position().top;
+                var min_pos = Math.max(0,$(window).height()+$(window).scrollTop() - lightning.dialog.dialogBox.height()-20);
                 var max_pos = $(window).scrollTop()+10;
-                this.newPosition = Math.min(this.newPosition, max_pos);
-                this.newPosition = Math.max(this.newPosition, min_pos);
-                this.originalScroll = $(window).scrollTop();
-                this.dialogBox.css("top",this.newPosition+"px");
+                lightning.dialog.newPosition = Math.min(lightning.dialog.newPosition, max_pos);
+                lightning.dialog.newPosition = Math.max(lightning.dialog.newPosition, min_pos);
+                lightning.dialog.originalScroll = $(window).scrollTop();
+                lightning.dialog.dialogBox.css('top', lightning.dialog.newPosition + 'px');
             }
         }
     },
 
-    setDialogPosition: function(){
+    showPosition: function(){
         this.originalScroll = $(window).scrollTop();
         this.reposition();
     },
 
-    showDialogURL: function(url){
-        this.showDialog();
+    showURL: function(url){
+        this.show();
         $.ajax({dataType:'HTML',url:url,success:function(data){
             this.setContent(data);
         }});
@@ -46,7 +57,7 @@ lightning.dialog = {
      * Stop any fading out (if required) and fade in.
      * @param show_loader
      */
-    showDialog: function(show_loader){
+    show: function(show_loader){
         this.dialogBoxLoader.stop(true);
         this.dialogBoxInner.stop(true);
         if(show_loader == "undefined") {
@@ -55,11 +66,11 @@ lightning.dialog = {
         if(this.dialogBox.is(":visible")){
             var self = this;
             this.dialogBoxInner.fadeOut('fast',function(){
-                self.showDialogContainer(show_loader);
+                self.showContainer(show_loader);
             });
         } else {
-            this.setDialogPosition();
-            this.showDialogContainer(show_loader);
+            this.showPosition();
+            this.showContainer(show_loader);
         }
     },
 
@@ -67,7 +78,7 @@ lightning.dialog = {
      * Fades in all dialog components.
      * @param show_loader
      */
-    showDialogContainer: function(show_loader){
+    showContainer: function(show_loader){
         this.clear();
         $('#veil').fadeIn('fast');
         this.dialogBoxInner.hide();
@@ -76,7 +87,7 @@ lightning.dialog = {
         } else {
             this.dialogBoxLoader.hide();
         }
-        this.dialogBox.fadeIn('fast', this.reposition);
+        this.dialogBox.fadeIn('fast', lightning.dialog.reposition);
     },
 
     /**
@@ -92,7 +103,7 @@ lightning.dialog = {
             self.clear();
             if(callback != undefined)
                 callback();
-            self.dialogBox.fadeIn('fast', this.reposition);
+            self.dialogBox.fadeIn('fast', lightning.dialog.reposition);
         });
     },
 
@@ -104,10 +115,10 @@ lightning.dialog = {
 
     clear: function(){
         this.dialogBoxInner.find('.content').empty().hide();
-        this.dialogBoxInner.find('.errors ul').empty();
-        this.dialogBoxInner.find('.errors').hide();
-        this.dialogBoxInner.find('.messages ul').empty();
-        this.dialogBoxInner.find('.messages').hide();
+        this.dialogBoxInner.find('.error ul').empty();
+        this.dialogBoxInner.find('.error').hide();
+        this.dialogBoxInner.find('.message ul').empty();
+        this.dialogBoxInner.find('.message').hide();
         this.dialogBoxLoader.hide();
     },
 
@@ -151,7 +162,7 @@ lightning.dialog = {
      */
     add: function(message, message_type) {
         message = $('<li>' + message + '</li>');
-        var container = (message_type == 'message') ? '.messages' : '.errors';
+        var container = (message_type == 'message') ? '.message' : '.error';
         var self = this;
         this.dialogBoxLoader.fadeOut('fast', function(){
             if(self.dialogBoxInner.find(container).is(':visible')){

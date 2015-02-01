@@ -153,3 +153,58 @@ $amber-low: rgb(255,205,1);
     display: block;
   }
 }
+
+/* DIALOG BOX */
+#veil{
+  width:100%;
+  height: 100%;
+  background-color: black;
+  filter:alpha(opacity=70);
+  -moz-opacity:0.7;
+  -khtml-opacity: 0.7;
+  opacity: 0.7;
+  position: fixed;
+  z-index: 1000;
+  display: none;
+}
+#dialog_box{
+  width:600px;
+  overflow: hidden;
+  box-shadow: 0 5px 5px #333;
+  margin: 0px 0px 0px -300px;
+  position: absolute;
+  left: 50%;
+  top: 100px;
+  z-index: 1500;
+  display: none;
+  border-radius: 10px;
+  background-color: #ffffff;
+}
+#dialog_box_inner{
+  overflow: hidden;
+  padding: 10px;
+}
+.loader_image{
+  margin: 75px auto;
+  left: 50%;
+  top:50%;
+}
+#dialog_buttons{
+  padding: 5px;
+  overflow: hidden;
+  margin: 10px;
+  text-align:center;
+  li{
+    padding: 5px;
+    background: blue;
+    color: white;
+    list-style: none;
+    display: inline;
+    margin: 10px;
+    border: 1px solid black;
+    overflow: hidden;
+    width:auto;
+    white-space: nowrap;
+  }
+}
+.header_name{text-align:right;clear:both;margin-bottom:5px;color:white;font-size:12pt;}
