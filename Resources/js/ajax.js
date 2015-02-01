@@ -40,21 +40,22 @@ lightning.ajax = {
                 lightning.dialog.add(data.messages[i], 'message');
             }
         }
+        // Add standard error messages.
+        if (data.errors && data.errors.length) {
+            // TODO: make this more graceful.
+            lightning.ajax.error(settings, data, error_callback);
+        }
+
+        // Process success handling.
         if(data.status == 'success'){
             if(success_callback){
                 success_callback(data);
             } else {
                 lightning.dialog.hide();
             }
-        } else if(data.status == 'redirect') {
+        } else if (data.status == 'redirect') {
             // TODO: check for redirect cookie
             document.location = data.location;
-        } else {
-            // TODO: make this more graceful.
-            lightning.ajax.error(data);
-            if(error_callback) {
-                error_callback(data);
-            }
         }
     },
 
@@ -64,7 +65,7 @@ lightning.ajax = {
      * @param {string|object} data
      *   The response from the server.
      */
-    error: function(settings, data, user_error) {
+    error: function(settings, data, error_callback) {
         lightning.dialog.showPrepared(function(){
             if (data == undefined) {
                 lightning.dialog.add('Communication Error', 'error');
@@ -84,8 +85,8 @@ lightning.ajax = {
                 }
             }
             // Allows an additional error handler.
-            if(settings.user_error) {
-                settings.user_error(settings, data);
+            if(settings.error_callback) {
+                settings.error_callback(data);
             }
         });
     },
