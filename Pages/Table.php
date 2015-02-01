@@ -315,7 +315,7 @@ abstract class Table extends Page {
         $this->action = 'list';
         $this->get_fields();
         $this->loadList();
-        Output::json(array('html' => $this->renderList(), 'd' => Request::get('i', 'int')));
+        Output::json(array('html' => $this->renderList(), 'd' => Request::get('i', 'int'), 'status' => 'success'));
     }
 
     public function getDelete() {
