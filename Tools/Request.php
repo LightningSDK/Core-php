@@ -243,7 +243,10 @@ class Request {
                     return false;
                 $output = array();
                 foreach($data as $k => $v){
-                    $output[] = self::clean($type == 'array_keys' ? $k : $v, $args[2]);
+                    $output[] = self::clean(
+                        $type == 'array_keys' ? $k : $v,
+                        !empty($args[2]) ? $args[2] : null
+                    );
                 }
                 return $output;
                 break;
