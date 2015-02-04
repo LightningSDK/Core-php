@@ -2835,7 +2835,7 @@ abstract class Table extends Page {
         $filename = $file['name'];
         $bits = explode('.', $filename);
         $extension = end($bits);
-        $extension = $field['format']!="" ? $field['format'] : $extension;
+        $extension = isset($field['format']) && $field['format']!="" ? $field['format'] : $extension;
         return rand(0,99999) . '.' . $extension;
     }
 
