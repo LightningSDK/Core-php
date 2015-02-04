@@ -12,13 +12,14 @@ class Mailer extends Job {
         $mailer = new MailerTool();
 
         $date = new DateTime();
-        $time = $date->getTimestamp() + $date->getOffset();
+        $time = $date->getTimestamp();
+        $start = $job['last_start'] + $date->getOffset();
+        $end = $time + $date->getOffset();
 
         // Load all messages that should be sent on a specific date.
-        $start_time = !empty($job['last_start']) ? $job['last_start'] + $date->getOffset() : $time - $job['interval'];
         $messages = Database::getInstance()->selectColumn(
             'message', 'message_id',
-            ['send_date' => ['BETWEEN', $start_time, $time + $job['interval']]]
+            ['send_date' => ['BETWEEN', $start, $end]]
         );
         foreach ($messages as $message_id) {
             $start_time = time();

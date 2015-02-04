@@ -19,10 +19,6 @@ class Job {
     }
 
     public function out($string) {
-        if ($this->debug) {
-            print $string . "\n";
-        } else {
-            Logger::message($string);
-        }
+        Logger::message($string);
     }
 }

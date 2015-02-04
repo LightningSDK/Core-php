@@ -14,6 +14,7 @@ class Message extends Schema {
             'subject' => $this->varchar(255),
             'body' => $this->text(),
             'template_id' => $this->int(true),
+            'send_date' => $this->int(true),
             'never_resend' => $this->int(Schema::TINYINT),
             'note' => $this->varchar(255),
         );

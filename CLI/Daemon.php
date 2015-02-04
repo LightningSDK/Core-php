@@ -14,11 +14,11 @@ class Daemon extends CLI {
     protected $debug = false;
 
     /**
-     * The maximum number of child threads.
+     * A list of jobs to run.
      *
-     * @var integer
+     * @var array
      */
-    protected $maxThreads = 5;
+    protected $jobs = array();
 
     /**
      * Whether to keep the daemon running.
@@ -28,18 +28,18 @@ class Daemon extends CLI {
     protected $keepAlive = true;
 
     /**
-     * A list of jobs to run.
+     * The last time we checked for jobs.
      *
      * @var array
      */
-    protected $jobs = array();
+    protected $lastCheck;
 
     /**
-     * A list of current running threads.
+     * The maximum number of child threads.
      *
-     * @var array
+     * @var integer
      */
-    protected $threads = array();
+    protected $maxThreads = 5;
 
     /**
      * A queue for items that have died but not been tracked yet.
@@ -49,11 +49,18 @@ class Daemon extends CLI {
     protected $signalQueue = array();
 
     /**
-     * The last time we checked for jobs.
+     * The time the daemon was started.
+     *
+     * @var integer
+     */
+    protected $startTime;
+
+    /**
+     * A list of current running threads.
      *
      * @var array
      */
-    protected $lastCheck;
+    protected $threads = array();
 
     /**
      * The timezone offset in seconds.
@@ -61,15 +68,6 @@ class Daemon extends CLI {
      * @var integer
      */
     protected $timezoneOffset;
-
-    protected function disableSTDIO($logfile) {
-        fclose(STDIN);
-        fclose(STDOUT);
-        fclose(STDERR);
-        $STDIN = fopen(HOME_PATH . '/' . $logfile, 'r');
-        $STDOUT = fopen(HOME_PATH . '/' . $logfile, 'wb');
-        $STDERR = fopen(HOME_PATH . '/' . $logfile, 'wb');
-    }
 
     /**
      * Initial start command from the terminal.
@@ -84,7 +82,8 @@ class Daemon extends CLI {
             return;
         }
 
-        $this->out('Starting Daemon', true);
+        $this->out('Starting Daemon');
+        $this->startTime = time();
 
         // Get the timezone offset.
         $date = new DateTime();
@@ -94,12 +93,11 @@ class Daemon extends CLI {
         $this->jobs = Configuration::get('jobs');
 
         // If this is not in debug mode, fork to a daemon process.
-        $this->disableSTDIO($logfile);
         if (!$this->debug) {
             // Create initial fork.
             $pid = pcntl_fork();
             if ($pid == -1) {
-                $this->out('Could not fork.', true);
+                $this->out('Could not fork.');
                 return;
             } else if ($pid) {
                 // This is the parent thread.
@@ -118,8 +116,7 @@ class Daemon extends CLI {
         do {
             $this->checkForJobs();
             sleep(10);
-
-            // TODO: add sigint and memory check.
+            gc_collect_cycles();
         } while ($this->keepAlive);
     }
 
@@ -128,14 +125,14 @@ class Daemon extends CLI {
      */
     public function executeStop() {
         if ($pid = $this->getMyPid()) {
-            $this->out('Stopping process: ' . $pid, true);
+            $this->out('Stopping process: ' . $pid);
             posix_kill($pid, SIGTERM);
             do {
                 sleep(1);
             } while ($this->getMyPid());
-            $this->out('Stopped', true);
+            $this->out('Stopped');
         } else {
-            $this->out('Not running.', true);
+            $this->out('Not running.');
         }
     }
 
@@ -203,7 +200,7 @@ class Daemon extends CLI {
             $interval_diff = ($time - $job['offset'] + $this->timezoneOffset) % $job['interval'];
             $time_since_last_check = $time - $this->lastCheck;
             if (empty($job['last_start'])) {
-                $job['last_start'] = $time;
+                $job['last_start'] = $this->startTime;
             }
             $time_since_last_start = $time - $job['last_start'];
             if (
@@ -245,9 +242,10 @@ class Daemon extends CLI {
 
         // Check if there are threads available.
         if ($remainingThreads < 1) {
-            $this->out('No threads available for: ' . $job['class'], true);
+            $this->out('No threads available for: ' . $job['class']);
             return;
         } else {
+            $executable_job = $job;
             $job['last_start'] = time();
         }
 
@@ -255,11 +253,11 @@ class Daemon extends CLI {
         for ($i = 0; $i < $remainingThreads; $i++) {
             $pid = pcntl_fork();
             if ($pid == -1) {
-                $this->out('Could not fork.', true);
+                $this->out('Could not fork.');
                 return;
             } else if ($pid) {
                 // This is the parent thread.
-                $job['threads'][$pid] = $pid;
+                $executable_job['threads'][$pid] = $pid;
                 $this->threads[$pid] = $pid;
                 if (!empty($this->signalQueue[$pid])) {
                     // This will happen if the item died instantly.
@@ -269,9 +267,9 @@ class Daemon extends CLI {
                 // Continue looping.
             } else {
                 // Execute the job.
-                $object = new $job['class']();
-                $this->out('Starting thread for job: ' . $job['class'], true);
-                $object->execute($job);
+                $object = new $executable_job['class']();
+                $this->out('Starting thread for job: ' . $executable_job['class']);
+                $object->execute($executable_job);
                 // Stop the daemon.
                 exit;
             }
@@ -329,5 +327,9 @@ class Daemon extends CLI {
      */
     public function handlerSIGTERM() {
         $this->keepAlive = false;
+    }
+
+    public function out($string, $log = false) {
+        Logger::message($string);
     }
 }
