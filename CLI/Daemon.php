@@ -56,6 +56,13 @@ class Daemon extends CLI {
     protected $startTime;
 
     /**
+     * Whether to output to the STDout.
+     *
+     * @var boolean
+     */
+    protected $stdOUT = true;
+
+    /**
      * A list of current running threads.
      *
      * @var array
@@ -94,6 +101,7 @@ class Daemon extends CLI {
 
         // If this is not in debug mode, fork to a daemon process.
         if (!$this->debug) {
+            $this->stdOUT = false;
             // Create initial fork.
             $pid = pcntl_fork();
             if ($pid == -1) {
@@ -330,6 +338,9 @@ class Daemon extends CLI {
     }
 
     public function out($string, $log = false) {
+        if ($this->stdOUT) {
+            echo $string . "\n";
+        }
         Logger::message($string);
     }
 }
