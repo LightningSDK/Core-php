@@ -2145,7 +2145,7 @@ abstract class Table extends Page {
             $image = array_replace($field, $image);
 
             // Get the output file location.
-            $new_image = $this->getNewImageLocation($image);
+            $new_image = $this->getNewImageLocation($image, $file);
             $output_location = $this->getOutputPath($image) . '/' . $new_image;
 
             if (!empty($image['original'])) {
@@ -2831,18 +2831,21 @@ abstract class Table extends Page {
         return str_replace("'", "&apos;", str_replace('"',"&quot;", $v));
     }
 
-    protected function getNewRandomImageName($field) {
-        $extension = !empty($field['extension']) ? $field['extension'] : (!empty($field['format']) ? $field['format'] : 'jpg');
+    protected function getNewRandomImageName($field, $file) {
+        $filename = $file['name'];
+        $bits = explode('.', $filename);
+        $extension = end($bits);
+        $extension = isset($field['format']) && $field['format']!="" ? $field['format'] : $extension;
         return rand(0,99999) . '.' . $extension;
     }
 
-    protected function getNewImageLocation($field) {
+    protected function getNewImageLocation($field, $file) {
         if (!empty($field['file_name'])) {
             return $field['file_name'];
         }
         $base = $this->getOutputPath($field);
         do {
-            $file = $this->getNewRandomImageName($field);
+            $file = $this->getNewRandomImageName($field,$file);
         } while (file_exists($base . '/' . $file));
         return $file;
     }
