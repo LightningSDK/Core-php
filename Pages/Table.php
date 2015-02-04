@@ -2145,7 +2145,8 @@ abstract class Table extends Page {
             $image = array_replace($field, $image);
 
             // Get the output file location.
-            $new_image = $this->getNewImageLocation($image);
+            $output_format = $this->getOutputFormat($image, $file);
+            $new_image = $this->getNewImageLocation($image, $output_format);
             $output_location = $this->getOutputPath($image) . '/' . $new_image;
 
             if (!empty($image['original'])) {
@@ -2247,10 +2248,11 @@ abstract class Table extends Page {
                 mkdir($path['dirname'], 0777, true);
             }
 
-            switch ($image['format']) {
+            switch ($output_format) {
                 case 'png':
                     imagepng($dest_image, $output_location);
                     break;
+                case 'jpg':
                 default:
                     imagejpeg($dest_image, $output_location, $quality);
                     break;
@@ -2517,7 +2519,7 @@ abstract class Table extends Page {
                 $this->get_fields();
                 $field = $_GET['f'];
                 $this->get_row();
-                if ($this->fields[$field]['type'] == 'file' && count($this->list)>0) { //&& isset($this->fields[$field]['extension'])
+                if ($this->fields[$field]['type'] == 'file' && count($this->list)>0) {
                     $file = $this->get_full_file_location($this->fields[$field]['location'], $this->list[$field]);
                     if (!file_exists($file)) die("No File Uploaded");
                     switch($this->list[$this->fields[$field]['extension']]) {
@@ -2831,18 +2833,78 @@ abstract class Table extends Page {
         return str_replace("'", "&apos;", str_replace('"',"&quot;", $v));
     }
 
-    protected function getNewRandomImageName($field) {
-        $extension = !empty($field['extension']) ? $field['extension'] : (!empty($field['format']) ? $field['format'] : 'jpg');
+    /**
+     * Get a new random file name.
+     *
+     * @param string $extension
+     *   The file from the $_FILE array.
+     *
+     * @return string
+     *   The file name.
+     */
+    protected function getNewRandomImageName($extension) {
         return rand(0,99999) . '.' . $extension;
     }
 
-    protected function getNewImageLocation($field) {
+    /**
+     * Get the uploaded file format.
+     *
+     * @param array $file
+     *   The file from the $_FILE array.
+     *
+     * @return string
+     *   The file name.
+     */
+    protected function getUploadedFileFormat($file) {
+        switch (exif_imagetype($file['tmp_name'])) {
+            case IMAGETYPE_PNG:  return 'png'; break;
+            case IMAGETYPE_GIF:  return 'gif'; break;
+            case IMAGETYPE_JPEG:
+            default:             return 'jpg';
+        }
+    }
+
+    /**
+     * Get the output file format.
+     *
+     * @param array $field
+     *   The field settings.
+     * @param array $file
+     *   The file from the $_FILE array.
+     *
+     * @return string
+     *   The file name.
+     */
+    protected function getOutputFormat($field, $file) {
+        $uploadedFormat = $this->getUploadedFileFormat($file);
+
+        if (empty($field['format'])) {
+            return $uploadedFormat;
+        }
+        if (is_array($field['format'])) {
+            return in_array($uploadedFormat, $field['format']) ? $uploadedFormat : $field['format'][0];
+        }
+        return $field['format'];
+    }
+
+    /**
+     * Get the image location for a file name.
+     *
+     * @param array $field
+     *   The field settings.
+     * @param string $output_format
+     *   The file from the $_FILE array.
+     *
+     * @return string
+     *   The new absolute file location.
+     */
+    protected function getNewImageLocation($field, $output_format) {
         if (!empty($field['file_name'])) {
             return $field['file_name'];
         }
         $base = $this->getOutputPath($field);
         do {
-            $file = $this->getNewRandomImageName($field);
+            $file = $this->getNewRandomImageName($output_format);
         } while (file_exists($base . '/' . $file));
         return $file;
     }
