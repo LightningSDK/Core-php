@@ -2835,7 +2835,7 @@ abstract class Table extends Page {
         $filename = $file['name'];
         $bits = explode('.', $filename);
         $ext = end($bits);
-        $extension = isset($field['extension']) && in_array($ext, $field['extension']) ? $ext : '.jpg';
+        $extension = isset($field['extension']) && in_array($ext,$field['extension']) ? $ext : '.jpg';
         return rand(0,99999) . '.' . $extension;
     }
 
