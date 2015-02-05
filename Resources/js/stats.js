@@ -1,4 +1,5 @@
 lightning.stats = {
+    charts: {},
     loadData: function() {
         var requestData = {
             sets: []
@@ -19,7 +20,10 @@ lightning.stats = {
     drawData: function(id, data) {
         var ctx = document.getElementById(id).getContext("2d");
         var renderer = lightning.vars.chart[id].renderer;
-        window.myLine = new Chart(ctx)[renderer](data, {
+        if (lightning.stats.charts[id]) {
+            lightning.stats.charts[id].destroy();
+        }
+        lightning.stats.charts[id] = new Chart(ctx)[renderer](data, {
             responsive: true,
             datasetFill: false
         });
