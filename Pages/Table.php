@@ -313,7 +313,7 @@ abstract class Table extends Page {
      */
     public function getSearch() {
         $this->action = 'list';
-        $this->get_fields();
+        $this->loadMainFields();
         $this->loadList();
         Output::json(array('html' => $this->renderList(), 'd' => Request::get('i', 'int'), 'status' => 'success'));
     }
@@ -327,7 +327,7 @@ abstract class Table extends Page {
 
     public function getAutocomplete() {
         // Initialize some variables.
-        $this->get_fields();
+        $this->loadMainFields();
         $field = Request::get('field');
         $string = Request::get('st');
         $autocomplete = $this->fields[$field]['autocomplete'];
@@ -360,7 +360,7 @@ abstract class Table extends Page {
         }
 
         // loop through and delete any files
-        $this->get_fields();
+        $this->loadMainFields();
         $this->get_row();
         foreach($this->fields as $f=>$field) {
             if ($field['type'] == 'file' || $field['type'] == 'image') {
@@ -382,7 +382,7 @@ abstract class Table extends Page {
         }
 
         // Insert a new record.
-        $this->get_fields();
+        $this->loadMainFields();
         $values = $this->getFieldValues($this->fields);
         if ($values === false) {
             return $this->getNew();
@@ -390,7 +390,7 @@ abstract class Table extends Page {
         if ($this->singularity) {
             $values[$this->singularity] = $this->singularityID;
         }
-        $this->id = Database::getInstance()->insert($this->table, $values, $this->update_on_duplicate_key ? $values : false);
+        $this->id = Database::getInstance()->insert($this->table, $values, $this->update_on_duplicate_key ? $values : true);
         if (!empty($this->post_actions['after_insert'])) {
             $this->get_row();
             $this->post_actions['after_insert']($this->list);
@@ -420,7 +420,7 @@ abstract class Table extends Page {
         }
 
         // Update the record.
-        $this->get_fields();
+        $this->loadMainFields();
         $new_values = $this->getFieldValues($this->fields);
         if ($new_values === false) {
             return $this->getEdit();
@@ -554,7 +554,7 @@ abstract class Table extends Page {
     }
 
     function render() {
-        $this->get_fields();
+        $this->loadMainFields();
         $this->check_default_rowClick();
         $this->renderHeader();
 
@@ -616,7 +616,7 @@ abstract class Table extends Page {
 
     function render_calendar_list() {
         $this->js_init_calendar();
-        $this->get_fields();
+        $this->loadMainFields();
         $this->renderHeader();
         $last_date = 0;
         foreach($this->list as $l) {
@@ -652,7 +652,7 @@ abstract class Table extends Page {
         $this->js_init_calendar();
         if ($get_new_list)
             $this->loadList();
-        $this->get_fields();
+        $this->loadMainFields();
         $this->renderHeader();
         $today = GregorianToJD(date("m"), date("d"), date("Y"));
 
@@ -823,7 +823,7 @@ abstract class Table extends Page {
                     $output .= "<form action='".$this->createUrl()."' method='POST'>";
                     $output .= Form::renderTokenInput();
                 }
-                $output.= "<div id='list_table_container'>";
+                $output.= "<div class='list_table_container'>";
                 $output.= '<table cellspacing="0" cellpadding="3" border="0" width="100%">';
 
                 // SHOW HEADER
@@ -926,8 +926,8 @@ abstract class Table extends Page {
                     } else {
                         $output.= '<td>';
                     }
-                    $output.= $this->print_field_value($field, $row);
-                    $output.= '</td>';
+                    $output .= $this->print_field_value($field, $row);
+                    $output .= '</td>';
                 }
             }
             // LINKS w ALL ITEMS LISTED IN ONE BOX
@@ -994,40 +994,57 @@ abstract class Table extends Page {
         return $output;
     }
 
+    protected function getMainTableColumnCount() {
+        if (empty($this->mainTableColumnCount)) {
+            $this->mainTableColumnCount = count($this->fields);
+            if ($this->editable) {
+                $this->mainTableColumnCount++;
+            }
+            if ($this->deleteable) {
+                $this->mainTableColumnCount++;
+            }
+        }
+        return $this->mainTableColumnCount;
+    }
 
     // called when rendering lists
     function render_linked_table(&$row) {
-        $output = '';
+        $output = "<tr class='linked_list_container_row'><td colspan='" . $this->getMainTableColumnCount() . "'><table width='100%'>";
         foreach($this->links as $link => $link_settings) {
             if ($link_settings['list'] === "each") {
-                $this->load_all_active_list($link_settings, $row[$this->getKey()] );
+                $link_settings['fields'] = $this->get_fields($link_settings['table'], $link_settings['preset']);
+                $links = $this->load_all_active_list($link_settings, $row[$this->getKey()] );
 
                 // Set the character to join the URL parameters to the edit_link
-                $joinchar = (strpos($link_settings['edit_link'], "?") !== false) ? '&' : '?';
+                $joinchar = (!empty($link_settings['edit_link']) && strpos($link_settings['edit_link'], "?") !== false) ? '&' : '?';
 
-                if ($link_settings['display_header'])
-                    $output.= "<tr {$style}><td>{$link_settings['display_header']}";
-                if ($link_settings['edit_link'])
+                if (!empty($link_settings['display_header'])) {
+                    $output .= "<tr class='linked_list_header'><td>{$link_settings['display_header']}";
+                }
+                if (!empty($link_settings['edit_link'])) {
                     $output .= " <a href='{$link_settings['edit_link']}{$joinchar}action=new&backlinkname={$this->getKey()}&backlinkvalue={$row[$this->getKey()]}'>New</a>";
-                if ($link_settings['edit_js'])
+                }
+                if (!empty($link_settings['edit_js'])) {
+                    // TODO: Move this to an init function.
                     $output .= " <a href='' onclick='{$link_settings['edit_js']}.newLink({$row[$this->getKey()]})'>New</a>";
+                }
                 $output .= "</td></tr>";
-                for($i = 0; $i < count($links); $i++) {
-                    $output.= "<tr id='link_{$link}_{$links[$i][$link_settings['key']]}' {$style}>";
-                    foreach($links[$i] as $v) {
-                        $output.= "<td>{$v}</td>";
+                foreach($links as $row) {
+                    $output.= "<tr id='link_{$link}_{$row[$link_settings['key']]}' class='linked_list_row'>";
+                    foreach($link_settings['fields'] as $field_name => $field) {
+                        $output .= '<td>' . $this->print_field_value($field, $row) . '</td>';
                     }
-                    if ($link_settings['edit_link'] != '') {
-                        $output.= "<td><a href='{$link_settings['edit_link']}{$joinchar}action=edit&id={$links[$i][$link_settings['key']]}'>Edit</a> <a href='{$link_settings['edit_link']}{$joinchar}action=delete&id={$links[$i][$link_settings['key']]}'><img src='/images/lightning/remove.png' border='0' /></a></td>";
+                    if (!empty($link_settings['edit_link'])) {
+                        $output.= "<td><a href='{$link_settings['edit_link']}{$joinchar}action=edit&id={$row[$link_settings['key']]}'>Edit</a> <a href='{$link_settings['edit_link']}{$joinchar}action=delete&id={$row[$link_settings['key']]}'><img src='/images/lightning/remove.png' border='0' /></a></td>";
                     }
-                    if ($link_settings['edit_js'] != '') {
-                        $output.= "<td><a href='' onclick='{$link_settings['edit_js']}.editLink({$links[$i][$link_settings['key']]})'>Edit</a> <a href='' onclick='{$link_settings['edit_js']}.deleteLink({$links[$i][$link_settings['key']]})'><img src='/images/lightning/remove.png' border='0' /></a></td>";
+                    if (!empty($link_settings['edit_js'])) {
+                        $output.= "<td><a href='' onclick='{$link_settings['edit_js']}.editLink({$row[$link_settings['key']]})'>Edit</a> <a href='' onclick='{$link_settings['edit_js']}.deleteLink({$row[$link_settings['key']]})'><img src='/images/lightning/remove.png' border='0' /></a></td>";
                     }
                     $output.= "</tr>";
                 }
-                $output.= "<tr {$style}><td colspan='20' bgcolor='#000'></td></tr>"; // What is this used for? -ctg 6.30.11
             }
         }
+        $output.= "</table></td></tr>";
         return $output;
     }
 
@@ -1539,7 +1556,7 @@ abstract class Table extends Page {
             } else {
                 $table['join'] = array('JOIN', $link_settings['table'], "USING (`$link_settings[key]`)");
             }
-            $link_settings['active_list'] = Database::getInstance()->selectAll(
+            return Database::getInstance()->selectAll(
                 $table,
                 array($link_settings['index'].'.'.$local_key => $row_id),
                 array(),
@@ -1547,7 +1564,7 @@ abstract class Table extends Page {
             );
         } else {
             // 1 to many - each remote table will have a column linking it back to this table
-            $link_settings['active_list'] = Database::getInstance()->selectAll($link_settings['table'], array($local_key => $row_id));
+            return Database::getInstance()->selectAll($link_settings['table'], array($local_key => $row_id));
         }
     }
 
@@ -1698,30 +1715,42 @@ abstract class Table extends Page {
         return $template;
     }
 
+    protected function loadMainFields() {
+        if (empty($this->fields)) {
+            $this->fields = $this->get_fields($this->table, $this->preset);
+        }
+    }
+
     /**
      * Get the list of fields.
+     *
+     * @param string $table
+     *   The table to load field data from.
+     * @param array $preset
+     *   The extra field data settings.
+     *
+     * @return array
+     *   The processed field data.
      */
-    function get_fields() {
-        if (!empty($this->fields)) {
-            $fields = $this->fields;
-        } elseif ($this->table) {
-            $fields = Database::getInstance()->query("SHOW COLUMNS FROM `{$this->table}`")->fetchAll(Database::FETCH_ASSOC);
+    protected function get_fields($table, $preset) {
+        if (!empty($table)) {
+            $fields = Database::getInstance()->query("SHOW COLUMNS FROM `{$table}`")->fetchAll(Database::FETCH_ASSOC);
         } else {
             $fields = array();
         }
 
-        $this->fields = array();
+        $return_fields = array();
         foreach ($fields as $column => $field) {
             $column = !empty($field['Field']) ? $field['Field'] : $column;
-            $this->fields[$column] = array();
+            $return_fields[$column] = array();
             foreach ($field as $key => $value) {
-                $this->fields[$column][strtolower($key)] = $value;
+                $return_fields[$column][strtolower($key)] = $value;
             }
         }
 
-        $this->fields = array_replace_recursive($this->fields, $this->preset);
+        $return_fields = array_replace_recursive($return_fields, $preset);
         //make sure there is a 'field' element and 'display_name' for each $field
-        foreach ($this->fields as $f => &$field) {
+        foreach ($return_fields as $f => &$field) {
             if (empty($field['display_name'])) {
                 $field['display_name'] = ucwords(str_replace("_"," ", $f));
             }
@@ -1733,21 +1762,23 @@ abstract class Table extends Page {
             }
             if ($field['type'] == "file") {
                 if (isset($field['extension'])) {
-                    $this->fields[$field['extension']]['type'] = "hidden";
+                    $return_fields[$field['extension']]['type'] = "hidden";
                 }
             }
         }
-        if (is_array($this->links)) {
-            foreach($this->links as $l=>&$s) {
-                // Add missing defaults.
-                $s += array(
-                    'display_name' => ucwords(str_replace("_"," ", $l)),
-                    'add_name' => 'Add Item',
-                    'delete_name' => 'Delete Item',
-                    'list' => false,
-                );
-            }
-        }
+//        if (is_array($this->links)) {
+//            foreach($this->links as $l=>&$s) {
+//                // Add missing defaults.
+//                $s += array(
+//                    'display_name' => ucwords(str_replace("_"," ", $l)),
+//                    'add_name' => 'Add Item',
+//                    'delete_name' => 'Delete Item',
+//                    'list' => false,
+//                );
+//            }
+//        }
+
+        return $return_fields;
     }
 
     function which_field(&$field) {
@@ -2516,7 +2547,7 @@ abstract class Table extends Page {
                 exit;
                 break;
             case "file":
-                $this->get_fields();
+                $this->loadMainFields();
                 $field = $_GET['f'];
                 $this->get_row();
                 if ($this->fields[$field]['type'] == 'file' && count($this->list)>0) {

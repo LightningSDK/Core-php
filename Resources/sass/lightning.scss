@@ -95,9 +95,35 @@ $amber-low: rgb(255,205,1);
 }
 
 // Table container.
-#list_table_container {
+.list_table_container {
   overflow-x: auto;
   overflow-y: hidden;
+  table tr {
+    border-top: 1px solid #bbb;
+    &.linked_list_container_row {
+      border-top: none;
+      background-color: #fff;
+      td {
+        padding: 0;
+        table {
+          border: 0;
+          margin-bottom: 5px;
+          tr.linked_list_row {
+            border-top: 1px dashed #ccc;
+            background-color: #fff;
+            td {
+              padding: 9px 10px;
+              table {
+                border: 0;
+                padding: 0;
+                margin: 0;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 // Table linked options selection.
