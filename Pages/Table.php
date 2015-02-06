@@ -1388,7 +1388,7 @@ abstract class Table extends Page {
 
                 // If there is a local key ID and no active list, load it.
                 if ($local_id > 0 && !isset($link_settings['active_list'])) {
-                    $this->load_all_active_list($link_settings, $local_id );
+                    $link_settings['active_list'] = $this->load_all_active_list($link_settings, $local_id );
                 } elseif (empty($local_id)) {
                     // If there is no local ID, this is probably a new item, so the list should be blank.
                     $link_settings['active_list'] = array();
