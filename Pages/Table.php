@@ -143,6 +143,7 @@ abstract class Table extends Page {
     protected $calendar_year = '';
     protected $subset = Array();
     protected $search_fields = array();
+    protected $searchWildcard = Database::WILDCARD_AFTER;
     protected $submit_redirect = true;
     protected $additional_action_vars = array();
     
@@ -2447,7 +2448,7 @@ abstract class Table extends Page {
         }
         if ($this->action == 'list') {
             $this->additional_action_vars['ste'] = Request::get('ste');
-            $where[] = Database::getMultiFieldSearch($this->search_fields, explode(' ', Request::get('ste')));
+            $where[] = Database::getMultiFieldSearch($this->search_fields, explode(' ', Request::get('ste')), $this->searchWildcard);
         }
 
         // get the page count
