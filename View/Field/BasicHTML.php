@@ -28,19 +28,32 @@ class BasicHTML {
         // Build the main tag.
         $return = '<select name="' . $name . '" id="' . $name . '" ' . $attribute_string . '>';
         // Iterate over each option.
+        $return .= self::renderSelectOptions($values, $default);
+        $return .= '</select>';
+        return $return;
+    }
+
+    protected static function renderSelectOptions($values, $default) {
+        $return = '';
         foreach ($values as $value => $label) {
             // Set this value selected if it's the default value.
-            if (
-                (is_numeric($value) && $value > 0 && $value == $default)
-                || $value === $default
-            ) {
-                $selected = 'SELECTED="selected"';
-            } else {
-                $selected = '';
+            if (is_array($label)) {
+                $return .= '<optgroup label="' . $value . '">';
+                $return .= self::renderSelectOptions($label, $default);
+                $return .= '</optgroup>';
             }
-            $return .= '<option value="' . $value . '" ' . $selected . '>' . $label . '</option>';
+            else {
+                if (
+                    (is_numeric($value) && $value > 0 && $value == $default)
+                    || $value === $default
+                ) {
+                    $selected = 'SELECTED="selected"';
+                } else {
+                    $selected = '';
+                }
+                $return .= '<option value="' . $value . '" ' . $selected . '>' . $label . '</option>';
+            }
         }
-        $return .= '</select>';
         return $return;
     }
 

@@ -48,6 +48,7 @@ use Lightning\Tools\Scrub;
 use Lightning\Tools\Security\Encryption;
 use Lightning\Tools\Session;
 use Lightning\Tools\Template;
+use Lightning\View\Field;
 use Lightning\View\Field\BasicHTML;
 use Lightning\View\Field\Hidden;
 use Lightning\View\Field\Location;
@@ -2750,7 +2751,7 @@ abstract class Table extends Page {
         if (empty($row)) {
             $v = !empty($field['Value']) ? $field['Value'] : '';
         } else {
-            $v = !empty($row[$field['field']]) ? $row[$field['field']] : '';
+            $v = isset($row[$field['field']]) ? $row[$field['field']] : '';
         }
 
         if (!empty($field['encrypted'])) {
@@ -2802,7 +2803,14 @@ abstract class Table extends Page {
                         } else {
                             return $field['options'][$v];
                         }
+                    } else {
+                        foreach ($field['options'] as $sub_options) {
+                            if (is_array($sub_options) && isset($sub_options[$v])) {
+                                return $sub_options[$v];
+                            }
+                        }
                     }
+                    return '';
                     break;
                 case 'file':
                     // TODO: Display thumbmail.
@@ -3110,16 +3118,15 @@ abstract class Table extends Page {
                     $options = Location::getCountryOptions();
                 else
                     $options = $field['options'];
-                if (!is_array($options)) return false;
-
-                $output = "<select name='{$field['form_field']}' id='{$field['form_field']}'>";
-                if (!empty($field['allow_blank']))
-                    $output .= '<option value=""></option>';
-                foreach($options as $k=>$v) {
-                    $output .= "<option value='{$k}'".(($field['Value'] == $k) ? 'selected="selected"' : '').'>'
-                        .strip_tags((is_array($v)?$v['V']:$v)).'</option>';
+                if (!is_array($options)) {
+                    return false;
                 }
-                $output .= '</select>';
+
+                if (!empty($field['allow_blank'])) {
+                    $options = array_merge(array('' => ''), $options);
+                }
+                $output = BasicHTML::select($field['form_field'], $options, $field['Value']);
+
                 if (!empty($field['pop_add'])) {
                     if ($field['table_url']) $location = $field['table_url'];
                     else $location = "table.php?table=".$field['lookuptable'];
