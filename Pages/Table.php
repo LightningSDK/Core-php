@@ -1013,7 +1013,7 @@ abstract class Table extends Page {
     function render_linked_table(&$row) {
         $output = "<tr class='linked_list_container_row'><td colspan='" . $this->getMainTableColumnCount() . "'><table width='100%'>";
         foreach($this->links as $link => $link_settings) {
-            if ($link_settings['list'] === "each") {
+            if (!empty($link_settings['list']) && $link_settings['list'] === "each") {
                 $link_settings['fields'] = $this->get_fields($link_settings['table'], $link_settings['preset']);
                 $links = $this->load_all_active_list($link_settings, $row[$this->getKey()] );
 
@@ -1346,7 +1346,7 @@ abstract class Table extends Page {
             if (empty($link_settings['table'])) {
                 $link_settings['table'] = $link;
             }
-            if ($link_settings['list'] === 'each') {
+            if (!empty($link_settings['list']) && $link_settings['list'] === 'each') {
                 // is this needed in form view?
                 // LOAD THE LIST
                 /*
