@@ -250,6 +250,19 @@ class Request {
                 }
                 return $output;
                 break;
+            case 'keyed_array':
+                $args = func_get_args();
+                if(!is_array($data) || count($data) == 0)
+                    return false;
+                $output = array();
+                foreach($data as $k => $v){
+                    $output[$k] = self::clean(
+                        $v,
+                        !empty($args[2]) ? $args[2] : null
+                    );
+                }
+                return $output;
+                break;
             case 'url':
             case 'email':
             case 'boolean':
