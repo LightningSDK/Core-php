@@ -70,7 +70,4 @@ if [[ ! -f "${DIR}/../Source/Resources/sass/ckeditor_contents.scss" ]]; then
   cp ${DIR}/Vendor/ckeditor/contents.css ${DIR}/../Source/Resources/sass/ckeditor_contents.scss
 fi
 
-# Install lightning dependencies with grunt
-cd ${DIR}/../Source/Resources
-npm install
-grunt build
+echo "Complete."

@@ -116,3 +116,5 @@ if [ ! -d $DIR/../content ]; then
   chown $OWNER:$GROUP $DIR/../content
   chmod 775 $DIR/../content
 fi
+
+echo "Complete."

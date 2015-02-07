@@ -15,11 +15,15 @@ cd Lightning
 # Run the main install script.
 ./1install.sh
 
-# Install dependencies for ubuntu including foundation dependencies in the correct directory.
-./2install-dependencies-ubuntu.sh
+# Install dependencies for building your project css and js files.
+./2install-project-dependencies.sh
+
+# Install dependencies for building lightning files.
+# This is not required if you do not intend to tweak or contribute.
+./3install-dependencies-ubuntu.sh
 
 # Install the base template package - This can be done to reset the site at any time.
-./3install-templates.php
+./4install-templates.shs
 
 # Install default content.
 ./lightning database import-defaults
@@ -29,5 +33,5 @@ cd Lightning
 ./lightning user create-admin
 
 # Build the CSS and JS files
-cd ../Source/foundation
+cd ../Source/Resources
 grunt
