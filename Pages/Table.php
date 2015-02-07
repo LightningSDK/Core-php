@@ -3233,14 +3233,11 @@ abstract class Table extends Page {
             case 'country':
             case 'select':
                 if ($field['type'] == "lookup") {
-                    $options = Database::getInstance()->selectIndexed(
+                    $options = Database::getInstance()->selectColumn(
                         $field['lookuptable'],
-                        $field['field'],
+                        $field['display_column'],
                         !empty($field['filter']) ? $field['filter'] : array(),
-                        array(
-                            'V' => $field['display_column'],
-                            $field['field']
-                        )
+                        $field['field']
                     );
                 }
                 elseif ($field['type'] == "yesno")
