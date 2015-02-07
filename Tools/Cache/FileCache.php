@@ -6,6 +6,8 @@ class FileCache extends BaseCache {
 
     protected $fileName;
 
+    protected $reference;
+
     protected $ttl = INF;
 
     public function __construct() {
@@ -15,11 +17,13 @@ class FileCache extends BaseCache {
 
     public function setName($name) {
         $this->name = $name;
-        $this->fileName = $this->getFileName($name);
+        $this->reference = md5($name);
+        $this->fileName = $this->directory . '/' . $this->reference . '.cache';
     }
 
-    protected function getFileName($name) {
-        return $this->directory . '/' . md5($name) . '.cache';
+    public function loadReference($reference) {
+        $this->reference = $reference;
+        $this->fileName = $this->directory . '/' . $this->reference . '.cache';
     }
 
     public function isValid() {
@@ -31,6 +35,7 @@ class FileCache extends BaseCache {
     }
 
     public function write() {
+        // TODO: create database with TTL so this can be purged.
         file_put_contents($this->fileName, serialize($this->value));
     }
 
@@ -47,5 +52,34 @@ class FileCache extends BaseCache {
         foreach ($files as $f) {
             unlink ($f);
         }
+    }
+
+    /**
+     * This is for more explicit caching methods from an uploaded file.
+     *
+     * @param $file
+     * @param bool $uploaded
+     */
+    public function moveFile($file, $uploaded = true) {
+        // TODO: create database with TTL so this can be purged.
+        if ($uploaded) {
+            move_uploaded_file($_FILES[$file]['tmp_name'], $this->fileName);
+        } else {
+            rename($file, $this->fileName);
+        }
+    }
+
+    /**
+     * This should only be used when direct access to the file is required,
+     * like in CSV imports.
+     *
+     * @return string
+     */
+    public function getFile() {
+        return $this->fileName;
+    }
+
+    public function getReference() {
+        return $this->reference;
     }
 }
