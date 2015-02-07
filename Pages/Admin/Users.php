@@ -45,6 +45,8 @@ class Users extends Table {
         ),
     );
 
+    protected $importable = true;
+
     protected $links = array(
         'message_list' => array(
             'display_name' => 'Mailing Lists',
