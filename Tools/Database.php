@@ -479,6 +479,30 @@ class Database extends Singleton {
             ($this->connection->lastInsertId() ?: true);
     }
 
+    public function insertSets($table, $fields, $value_sets, $existing = FALSE) {
+        $vars = array();
+        $table = $this->parseTable($table, $vars);
+        $ignore = $existing === TRUE ? 'IGNORE' : '';
+        $field_string = '`' . implode('`,`', $fields) . '`';
+
+        $values = '(' . implode(',', array_fill(0, count($fields), '?')) . ')';
+        $set_count = count(current($value_sets));
+        $values = implode(',', array_fill(0, $set_count, $values));
+        foreach ($fields as $field) {
+            for ($i = 0; $i < $set_count; $i++) {
+                $vars[] = $value_sets[$field][$i];
+            }
+        }
+
+        // TODO: Verify that this works.
+        $duplicate = is_array($existing) ? ' ON DUPLICATE KEY UPDATE ' . $this->sqlImplode($existing, $vars) : '';
+        $this->query('INSERT ' . $ignore . ' INTO ' . $table . ' ('  . $field_string . ') VALUES ' . $values . $duplicate, $vars);
+        $this->timerEnd();
+        return $this->result->rowCount() == 0 ? false :
+            // If there is no auto increment, just return true.
+            ($this->connection->lastInsertId() ?: true);
+    }
+
     /**
      * Insert multiple values for each combination of the supplied data values.
      *
