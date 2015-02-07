@@ -36,8 +36,11 @@
 
 namespace Lightning\Pages;
 
+use Lightning\Tools\Cache\Cache;
+use Lightning\Tools\Cache\FileCache;
 use Lightning\Tools\CKEditor;
 use Lightning\Tools\Configuration;
+use Lightning\Tools\CSVIterator;
 use Lightning\Tools\Database;
 use Lightning\Tools\Form;
 use Lightning\Tools\Messenger;
@@ -90,6 +93,12 @@ abstract class Table extends Page {
     protected $action_fields=array();
     protected $custom_templates=array();
     protected $list_where;
+
+    protected $importable = false;
+    /**
+     * @var FileCache
+     */
+    protected $importCache;
 
     /**
      * Criteria of elements editable by this object.
@@ -253,6 +262,7 @@ abstract class Table extends Page {
         }
 
         $this->initSettings();
+        Template::getInstance()->set('full_width', true);
         parent::__construct();
     }
 
@@ -305,9 +315,31 @@ abstract class Table extends Page {
         }
     }
 
+    public function getImport() {
+        $this->action = 'import';
+        if (!$this->editable || !$this->addable || !$this->importable) {
+            Messenger::error('Access Denied');
+        }
+    }
+
+    public function postImport() {
+        $this->action = 'import-align';
+        $this->cacheImportFile();
+        if (!$this->editable || !$this->addable || !$this->importable) {
+            Messenger::error('Access Denied');
+        }
+    }
+
+    public function postImportAlign() {
+        $this->importDataFile();
+        if (!$this->editable || !$this->addable || !$this->importable) {
+            Messenger::error('Access Denied');
+        }
+        Navigation::redirect();
+    }
+
     public function getList() {
         $this->action = 'list';
-        Template::getInstance()->set('full_width', true);
     }
 
     /**
@@ -587,10 +619,16 @@ abstract class Table extends Page {
                 }
                 echo $this->render_del_conf();
                 break;
+            case 'import':
+                echo $this->renderImportFile();
+                break;
+            case 'import-align':
+                echo $this->renderAlignmentForm();
+                break;
             case 'list':
             default:
                 if ($this->searchable)
-                    echo $this->search_form();
+                    echo $this->renderSearchForm();
                 $this->loadList();
                 $this->render_action_header();
                 echo '<div class="table_list">';
@@ -604,7 +642,95 @@ abstract class Table extends Page {
         $this->js_init_data();
     }
 
-    function search_form() {
+    protected function renderImportFile() {
+        return '<form action="' . $this->getRedirectURL() . '" method="post" enctype="multipart/form-data">' . Form::renderTokenInput() . '<input type="hidden" name="action" value="import"><input type="file" name="import-file" /><input type="submit" name="submit" value="Submit" class="button"></form>';
+    }
+
+    protected function renderAlignmentForm() {
+        $csv = new CSVIterator($this->importCache->getFile());
+        $header_row = $csv->current();
+        $output = '<form action="" method="POST">' . Form::renderTokenInput();
+        $output .= '<input type="hidden" name="action" value="import-align">';
+        $output .= '<input type="hidden" name="cache" value="' . $this->importCache->getReference() . '" />';
+        $output .= '<table><thead><tr><td>Field</td><td>From CSV Column</td></tr></thead>';
+
+        $input_select = BasicHTML::select('%%', array('-1' => '') + $header_row);
+
+        $fields = $this->get_fields($this->table, $this->preset);
+        foreach ($fields as $field) {
+            if ($field['field'] != $this->getKey()) {
+                $output .= '<tr><td>' . $field['display_name'] . '</td><td>'
+                    . preg_replace('/%%/', 'alignment[' . $field['field'] . ']', $input_select) . '</td></tr>';
+            }
+        }
+
+        $output .= '</table><label><input type="checkbox" name="header" value="1" /> First row is a header, do not import.</label>';
+
+        $output .= '<input type="submit" name="submit" value="Submit" class="button" />';
+
+        $output .= '</form>';
+        return $output;
+    }
+
+    /**
+     * Load the uploaded import file into cache and parse it for input variables.
+     */
+    protected function cacheImportFile() {
+        // Cache the uploaded file.
+        $this->importCache = new FileCache();
+        $this->importCache->setName('table import ' . microtime());
+        $this->importCache->moveFile('import-file');
+    }
+
+    /**
+     * Process the data and import it based on alignment fields.
+     */
+    protected function importDataFile() {
+        $cache = new FileCache();
+        $cache->loadReference(Request::post('cache'));
+        if (!$cache->isValid()) {
+            Output::error('Invalid reference. Please try again.');
+        }
+
+        // Load the CSV, skip the first row if it's a header.
+        $csv = new CSVIterator($cache->getFile());
+        if (Request::post('header', 'int')) {
+            $csv->next();
+        }
+
+        // Process the alignment so we know which fields to import.
+        $alignment = Request::get('alignment', 'keyed_array', 'int');
+        $fields = array();
+        foreach ($alignment as $field => $column) {
+            if ($column != -1) {
+                $fields[$field] = $column;
+            }
+        }
+
+        $database = Database::getInstance();
+
+        $values = array();
+        while ($csv->valid()) {
+            $row = $csv->current();
+            foreach ($fields as $field => $column) {
+                $values[$field][] = $row[$column];
+            }
+
+            if (count($values) > 100) {
+                // Insert what we have so far and continue.
+                $database->insertSets($this->table, array_keys($fields), $values, true);
+                $values = array();
+            }
+
+            $csv->next();
+        }
+
+        if (!empty($values)) {
+            $database->insertSets($this->table, array_keys($fields), $values, true);
+        }
+    }
+
+    protected function renderSearchForm() {
         // @todo namespace this
         JS::inline('table_search_i=0;table_search_d=0;');
         return 'Search: <input type="text" name="table_search" value="' . Scrub::toHTML(Request::get('ste')) . '" onkeyup="table.search(this);" />';
@@ -786,8 +912,14 @@ abstract class Table extends Page {
         if (isset($this->custom_templates[$this->action.'_action_header'])) {
             if ($this->custom_templates[$this->action.'_action_header'] != '')
                 echo $this->load_template($this->custom_template_directory.$this->custom_templates[$this->action.'_action_header']);
-        } elseif ($this->addable)
-            echo "<a href='".$this->createUrl('new') . "'><img src='/images/lightning/new.png' border='0' /></a><br />";
+        } else {
+            if ($this->addable) {
+                echo "<a href='".$this->createUrl('new') . "'><img src='/images/lightning/new.png' border='0' title='Add New' /></a><br />";
+            }
+            if ($this->importable) {
+                echo "<a href='".$this->createUrl('import') . "'><img src='/images/lightning/import.png' border='0' title='Import' /></a><br />";
+            }
+        }
     }
 
     public function renderList() {
