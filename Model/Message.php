@@ -17,7 +17,9 @@ use Lightning\Tools\Tracker;
  *
  * @package Lightning\Model
  */
-class Message {
+class Message extends Object {
+
+    const PRIMARY_KEY = 'message_id';
 
     /**
      * Whether this is being sent by the auto mailer.
@@ -172,37 +174,6 @@ class Message {
             $this->combinedMessageTemplate = str_replace('{CONTENT_BODY}', $this->message['body'] . '{UNSUBSCRIBE}', $this->template['body']) . '{TRACKING_IMAGE}';
         } else {
             $this->combinedMessageTemplate = str_replace('{CONTENT_BODY}', $this->message['body'], $this->template['body']) . '{TRACKING_IMAGE}';
-        }
-    }
-    
-    /**
-     * A getter function.
-     *
-     * This works for:
-     *   ->id
-     *   ->details
-     *   ->user_id (item inside ->details)
-     *
-     * @param string $var
-     *   The name of the requested variable.
-     *
-     * @return mixed
-     *   The variable value.
-     */
-    public function __get($var) {
-        switch($var) {
-            case 'id':
-                return $this->message['message_id'];
-                break;
-            case 'details':
-                return $this->message;
-                break;
-            default:
-                if(isset($this->message[$var]))
-                    return $this->message[$var];
-                else
-                    return NULL;
-                break;
         }
     }
 
@@ -432,15 +403,15 @@ class Message {
         
         if (!empty($this->message)) {
 
-            $tracking_image = Tracker::getTrackerImage('Email Opened', $this->message['message_id'], $this->user->details['user_id']);
+            $tracking_image = Tracker::getTrackerImage('Email Opened', $this->message['message_id'], $this->user->id);
             
             // Replace standard variables.
             $this->defaultVariables = [
-                'USER_ID' => $this->user->details['user_id'],
+                'USER_ID' => $this->user->id,
                 'MESSAGE_ID' => $this->message['message_id'],
-                'FULL_NAME' => (!empty($this->user->details['first']) ? $this->user->details['first'] . ' ' . $this->user->details['last'] : $this->default_name),
-                'URL_KEY' => !empty($this->user->details['user_id']) ? User::urlKey($this->user->details['user_id'], $this->user->details['salt']) : '',
-                'EMAIL' => $this->user->details['email'],
+                'FULL_NAME' => (!empty($this->user->first) ? $this->user->fullName() : $this->default_name),
+                'URL_KEY' => !empty($this->user->id) ? User::urlKey($this->user->id, $this->user->salt) : '',
+                'EMAIL' => $this->user->email,
 
                 // Add the unsubscribe link.
                 'UNSUBSCRIBE' => $this->unsubscribe && !empty($this->user->user_id) ? $this->getUnsubscribeString() : '',

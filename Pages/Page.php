@@ -130,7 +130,7 @@ class Page extends PageView {
     public function postSave() {
         $user = ClientUser::getInstance();
 
-        if($user->details['type'] < 5){
+        if(!$user->isAdmin()){
             return $this->get();
         }
 

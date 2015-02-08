@@ -3,6 +3,7 @@
 namespace Lightning\Tools;
 
 use Lightning\Bootstrap;
+use Lightning\Model\Object;
 use ReflectionClass;
 
 /**
@@ -10,7 +11,7 @@ use ReflectionClass;
  *
  * A base class for singleton tools.
  */
-class Singleton {
+class Singleton extends Object {
 
     /**
      * A static instance of the singleton.

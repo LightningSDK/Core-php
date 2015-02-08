@@ -2,12 +2,12 @@
 
 namespace Overridable\Lightning\Model;
 
+use Lightning\Model\Object;
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
 use Lightning\Tools\Logger;
 use Lightning\Tools\Mailer;
-use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Security\Encryption;
 use Lightning\Tools\Security\Random;
@@ -17,9 +17,9 @@ use Lightning\Tools\Session;
 use Lightning\Tools\Tracker;
 use Lightning\View\Field\Time;
 
-class User {
+class User extends Object {
     /**
-     * A default user with no priviliges.
+     * A default user with no privileges.
      */
     const TYPE_UNREGISTERED_USER = 0;
 
@@ -38,104 +38,7 @@ class User {
      */
     const TEMP_KEY_TTL = 86400;
 
-    /**
-     * The row from the database.
-     *
-     * @var array
-     */
-    protected $details;
-
-    /**
-     * Instantiate a user object with it's data row.
-     *
-     * @param array $details
-     *   The user's data row from the database.
-     */
-    public function __construct($details) {
-        $this->details = $details;
-    }
-
-    /**
-     * Assist the getter function by checking for isset()
-     *
-     * @param string $var
-     *   The name of the variable.
-     *
-     * @return boolean
-     *   Whether the variable is set.
-     */
-    public function __isset($var) {
-        switch($var) {
-            case 'id':
-            case 'details':
-                return true;
-                break;
-            default:
-                return isset($this->details[$var]);
-                break;
-        }
-    }
-
-    /**
-     * A getter function.
-     *
-     * This works for:
-     *   ->id
-     *   ->details
-     *   ->user_id (item inside ->details)
-     *
-     * @param string $var
-     *   The name of the requested variable.
-     *
-     * @return mixed
-     *   The variable value.
-     */
-    public function __get($var) {
-        switch($var) {
-            case 'id':
-                return $this->details['user_id'];
-                break;
-            case 'details':
-                return $this->details;
-                break;
-            default:
-                if(isset($this->details[$var]))
-                    return $this->details[$var];
-                else
-                    return NULL;
-                break;
-        }
-    }
-
-    /**
-     * A setter function.
-     *
-     * This works for:
-     *   ->id
-     *   ->details
-     *   ->user_id (item inside ->details)
-     *
-     * @param string $var
-     *   The name of the variable to set.
-     * @param mixed $value
-     *   The value to set.
-     *
-     * @return mixed
-     *   The variable value.
-     */
-    public function __set($var, $value) {
-        switch($var) {
-            case 'id':
-                $this->details['user_id'] = $value;
-                break;
-            case 'details':
-                $this->details = $value;
-                break;
-            default:
-                $this->details[$var] = $value;
-                break;
-        }
-    }
+    const PRIMARY_KEY = 'user_id';
 
     /**
      * Load a user by their email.
@@ -145,7 +48,7 @@ class User {
      */
     public static function loadByEmail($email) {
         if($details = Database::getInstance()->selectRow('user', array('email' => array('LIKE', $email)))) {
-            return new self($details);
+            return new static($details);
         }
         return false;
     }
@@ -192,7 +95,7 @@ class User {
     }
 
     public function update($values) {
-        $this->details = $values + $this->details;
+        $this->data = $values + $this->data;
         Database::getInstance()->update('user', $values, array('user_id' => $this->id));
     }
 
@@ -242,7 +145,7 @@ class User {
      *   The new type.
      */
     public function setType($type) {
-        $this->details['type'] = $type;
+        $this->type = $type;
         Database::getInstance()->update('user', array('type' => $type), array('user_id' => $this->id));
     }
 
@@ -262,8 +165,8 @@ class User {
     public function checkPass($pass, $salt = '', $hashed_pass = '') {
         if($salt == '') {
             $this->load_info();
-            $salt = $this->details['salt'];
-            $hashed_pass = $this->details['password'];
+            $salt = $this->salt;
+            $hashed_pass = $this->password;
         }
         if ($hashed_pass == $this->passHash($pass, pack("H*",$salt))) {
             return true;
@@ -301,7 +204,7 @@ class User {
     public static function urlKey($user_id = -1, $salt = null) {
         if($user_id == -1) {
             $user_id = ClientUser::getInstance()->id;
-            $salt = ClientUser::getInstance()->details['salt'];
+            $salt = ClientUser::getInstance()->salt;
         } elseif (!$salt) {
             $user = Database::getInstance()->selectRow('user', array('user_id' => $user_id));
             $salt = $user['salt'];
@@ -326,8 +229,8 @@ class User {
      *   Whether to force the data to load and overwrite current data.
      */
     public function load_info($force = false) {
-        if(!isset($this->details) || $force) {
-            $this->details = Database::getInstance()->selectRow('user', array('user_id' => $this->id));
+        if(!isset($this->data) || $force) {
+            $this->data = Database::getInstance()->selectRow('user', array('user_id' => $this->id));
         }
     }
 
@@ -601,7 +504,7 @@ class User {
     }
 
     public function fullName() {
-        return $this->details['first'] . ' ' . $this->details['last'];
+        return $this->first . ' ' . $this->last;
     }
 
     /**
@@ -625,7 +528,7 @@ class User {
 
         // Send a message.
         $mailer = new Mailer();
-        $mailer->to($this->details['email'], $this->fullName())
+        $mailer->to($this->email, $this->fullName())
             ->subject('Password reset')
             ->message('A request was made to reset your password. If you did not make this request, please <a href="' . Configuration::get('web_root') . '/contact' . '">notify us</a>. To reset your password, <a href="' . Configuration::get('web_root') . '/user?action=set-password&key=' . $reset_key . '">click here</a>.');
         return $mailer->send();
@@ -731,7 +634,7 @@ class User {
     public function logOut() {
         $session = Session::getInstance();
         if($this->id > 0) {
-            $this->details = NULL;
+            $this->data = NULL;
             $this->id = 0;
             if(is_object($session)) {
                 $session->destroy();
@@ -762,7 +665,7 @@ class User {
      *   The encrypted email reference.
      */
     public function getEncryptedUserReference() {
-        return Encryption::aesEncrypt($this->details['email'], Configuration::get('user.key'));
+        return Encryption::aesEncrypt($this->email, Configuration::get('user.key'));
     }
 
     /**

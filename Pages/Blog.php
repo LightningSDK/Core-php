@@ -138,7 +138,7 @@ class Blog extends Page {
 
             case 'remove_blog_comment':
                 $user = ClientUser::getInstance();
-                if ($user->details['type'] >= 5 && $_POST['blog_comment_id'] > 0) {
+                if ($user->isAdmin() && $_POST['blog_comment_id'] > 0) {
                     Database::getInstance()->delete('blog_comment', array('blog_comment_id' => Request::post('blog_comment_id', 'int')));
                     echo "ok";
                 } else {
@@ -148,7 +148,7 @@ class Blog extends Page {
 
             case 'approve_blog_comment':
                 $user = ClientUser::getInstance();
-                if ($user->details['type'] >= 5 && $_POST['blog_comment_id'] > 0) {
+                if ($user->isAdmin() && $_POST['blog_comment_id'] > 0) {
                     Database::getInstance()->update(
                         'blog_comment',
                         array('approved' => 1),

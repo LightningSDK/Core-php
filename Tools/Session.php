@@ -13,31 +13,24 @@ use Lightning\Tools\Singleton;
 use Lightning\View\JS;
 
 class Session extends Singleton {
-    // @todo these vars can probably be removed?
-    var $id = 0;							// ROW ID in DB
-    var $key;								// hex session key
-    var $state = 0;
-    var $user_id = 0;
-    var $details;
 
     const STATE_REMEMBER = 1;
     const STATE_PASSWORD = 2;
     const STATE_APP = 4;
 
+    const PRIMARY_KEY = 'session_id';
+
     /**
      * Constructs the session object given it's row from the database, possibly with some
      * altered values from the instantiating static function.
      *
-     * @param array $session_details
+     * @param array $data
      */
-    private function __construct($session_details=array()){
-        $this->id = $session_details['session_id'];
-        $this->key = $session_details['session_key'];
-        $this->user_id = $session_details['user_id'];
-        $this->state = $session_details['state'];
-        $this->user_id = $session_details['user_id'];
-        $this->details = $session_details;
-        $this->details['content'] = empty($this->details['content']) ? '' : json_decode($this->details['content'], true);
+    public function __construct($data = array()) {
+        $this->data = $data;
+        if (!empty($this->content)) {
+            $this->content = json_decode($this->content);
+        }
     }
 
     /**
@@ -87,7 +80,7 @@ class Session extends Singleton {
                             return false;
                         }
                     } else {
-                        $session->details['state'] |= static::STATE_PASSWORD;
+                        $session->state |= static::STATE_PASSWORD;
                     }
                 }
 
@@ -108,30 +101,6 @@ class Session extends Singleton {
         }
         else {
             return null;
-        }
-    }
-
-    /**
-     * Overrides magic get function.
-     *
-     * @param $var
-     * @return mixed
-     */
-    public function __get($var){
-        switch($var){
-            case 'id':
-                return $this->id;
-                break;
-            case 'details':
-                return $this->details;
-                break;
-            default:
-                if (isset($this->details[$var])) {
-                    return $this->details[$var];
-                } else {
-                    return NULL;
-                }
-                break;
         }
     }
 
@@ -175,7 +144,7 @@ class Session extends Singleton {
      *   The token.
      */
     public function getToken() {
-        return $this->details['form_token'];
+        return $this->form_token;
     }
 
     /**
@@ -195,14 +164,14 @@ class Session extends Singleton {
      * @return bool
      */
     public function getState($state){
-        return (($state & $this->details['state']) == $state);
+        return (($state & $this->state) == $state);
     }
 
     /**
      * This is called when the user enters their password and password access is now allowed.
      */
     public function setState($state){
-        $this->details['state'] = $this->details['state'] | $state;
+        $this->state = $this->state | $state;
         Database::getInstance()->query("UPDATE session SET state = (state | " . $state . ") WHERE session_id={$this->id}");
     }
 
@@ -210,7 +179,7 @@ class Session extends Singleton {
      * Drops the user out of the PIN approved state. This may still leave them with password access.
      */
     public function unsetState($state){
-        $this->details['state'] = $this->details['state'] & ~$state;
+        $this->state = $this->state & ~$state;
         Database::getInstance()->query("UPDATE session SET state = (state & ~".$state.") WHERE session_id={$this->id}");
     }
 
@@ -220,11 +189,7 @@ class Session extends Singleton {
     public function destroy (){
         if($this->id) {
             Database::getInstance()->delete('session', array('session_id' => $this->id));
-            $this->key = null;
-            $this->id = null;
-            $this->details = null;
-            $this->state = null;
-            $this->user_id = null;
+            $this->data = null;
         }
         $this->clearCookie();
     }
@@ -243,7 +208,7 @@ class Session extends Singleton {
      * Output the cookie to the requesting web server (for relay to the client).
      */
     public function setCookie(){
-        Output::setCookie(Configuration::get('session.cookie'), $this->key, Configuration::get('session.remember_ttl'), '/', Configuration::get('cookie_domain'));
+        Output::setCookie(Configuration::get('session.cookie'), $this->session_key, Configuration::get('session.remember_ttl'), '/', Configuration::get('cookie_domain'));
     }
 
     /**
@@ -326,8 +291,7 @@ class Session extends Singleton {
             _die('Session error.');
         }
         Database::getInstance()->update('session', array('session_key'=>$new_sess_id), array('session_id'=>$this->id));
-        $this->key = $new_sess_id;
-        $this->details['session_key'] = $new_sess_id;
+        $this->session_key = $new_sess_id;
         $this->setCookie();
     }
 
@@ -352,8 +316,8 @@ class Session extends Singleton {
      *   The set value.
      */
     public function getSetting($field) {
-        if (!empty($this->details['content'][$field])) {
-            return $this->details['content'][$field];
+        if (!empty($this->content[$field])) {
+            return $this->content[$field];
         } else {
             return null;
         }
@@ -368,7 +332,7 @@ class Session extends Singleton {
      *   The value for the field.
      */
     public function setSettings($field, $value) {
-        $this->details['content'][$field] = $value;
+        $this->content[$field] = $value;
     }
 
     /**
@@ -378,14 +342,14 @@ class Session extends Singleton {
      *   The field name
      */
     public function unsetSetting($field) {
-        unset($this->details['content'][$field]);
+        unset($this->content[$field]);
     }
 
     /**
      * Return the session content
      */
     public function getData () {
-        return $this->details['content'];
+        return $this->content;
     }
 
     /**
@@ -408,7 +372,7 @@ class Session extends Singleton {
     public function saveData () {
         Database::getInstance()->update(
             'session',
-            array('content' => json_encode($this->details['content'])),
+            array('content' => json_encode($this->content)),
             array('session_id' => $this->id)
         );
     }

@@ -22,7 +22,7 @@ class User extends API {
         } else {
             $session = Session::getInstance();
             $session->setState(Session::STATE_APP);
-            $data['cookies'] = array('session' => $session->key);
+            $data['cookies'] = array('session' => $session->session_key);
         }
         Output::json($data);
     }
