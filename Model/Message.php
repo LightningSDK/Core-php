@@ -388,7 +388,7 @@ class Message extends Object {
         
         if (!empty($this->message_id)) {
 
-            $tracking_image = Tracker::getTrackerImage('Email Opened', $this->message['message_id'], $this->user->id);
+            $tracking_image = Tracker::getTrackerImage('Email Opened', $this->message_id, $this->user->id);
             
             // Replace standard variables.
             $this->defaultVariables = [
