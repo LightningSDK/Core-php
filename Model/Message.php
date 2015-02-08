@@ -155,10 +155,10 @@ class Message extends Object {
      * For db message it makes some replaces
      */
     protected function setCombinedMessageTemplate() {
-        if (empty($this->message)) {
+        if (empty($this->data)) {
             $this->combinedMessageTemplate = $this->template['body'];
         } else {
-            $this->combinedMessageTemplate = str_replace('{CONTENT_BODY}', $this->message['body'] . '{UNSUBSCRIBE}', $this->template['body']) . '{TRACKING_IMAGE}';
+            $this->combinedMessageTemplate = str_replace('{CONTENT_BODY}', $this->body . '{UNSUBSCRIBE}', $this->template['body']) . '{TRACKING_IMAGE}';
         }
     }
 
@@ -202,7 +202,7 @@ class Message extends Object {
      * Loads template depending on message type: custom or database
      */
     protected function loadTemplate() {
-        if (!empty($this->message)) {
+        if (!empty($this->message_id)) {
             $this->loadTemplateByMessage();
         } else {
             $this->loadTemplateFromConfig();
@@ -247,11 +247,11 @@ class Message extends Object {
      * Loads the template from the database based on the message.
      */
     protected function loadTemplateByMessage() {
-        if($this->template['template_id'] != $this->message['template_id']){
-            if($this->message['template_id'] > 0) {
+        if($this->template['template_id'] != $this->template_id){
+            if($this->template_id > 0) {
                 $this->template = Database::getInstance()->selectRow(
                     'message_template',
-                    array('template_id' => $this->message['template_id'])
+                    array('template_id' => $this->template_id)
                 );
             } else {
                 $this->setDefaultTemplate();
@@ -262,7 +262,7 @@ class Message extends Object {
 
     protected function loadLists() {
         if ($this->lists === null) {
-            $this->lists = Database::getInstance()->selectColumn('message_message_list', 'message_list_id', array('message_id' => $this->message['message_id']));
+            $this->lists = Database::getInstance()->selectColumn('message_message_list', 'message_list_id', array('message_id' => $this->message_id));
         }
     }
 
@@ -281,7 +281,7 @@ class Message extends Object {
                     ),
                 ),
                 array(
-                    'message_id' => $this->message['message_id'],
+                    'message_id' => $this->message_id,
                 )
             );
         }
@@ -355,7 +355,7 @@ class Message extends Object {
      */
     public function getSubject() {
         // Start by combining subject and template.
-        $subject = !empty($this->message['subject']) ? $this->message['subject'] : $this->template['subject'];
+        $subject = !empty($this->subject) ? $this->subject : $this->template['subject'];
         $subject = $this->replaceVariables($subject);
 
         return ($this->test ? 'TEST ' : '') . $subject;
@@ -386,14 +386,14 @@ class Message extends Object {
          * so we don't replace any variables except custom ones.
          */
         
-        if (!empty($this->message)) {
+        if (!empty($this->message_id)) {
 
             $tracking_image = Tracker::getTrackerImage('Email Opened', $this->message['message_id'], $this->user->id);
             
             // Replace standard variables.
             $this->defaultVariables = [
                 'USER_ID' => $this->user->id,
-                'MESSAGE_ID' => $this->message['message_id'],
+                'MESSAGE_ID' => $this->message_id,
                 'FULL_NAME' => (!empty($this->user->first) ? $this->user->fullName() : $this->default_name),
                 'URL_KEY' => !empty($this->user->id) ? User::urlKey($this->user->id, $this->user->salt) : '',
                 'EMAIL' => $this->user->email,
@@ -441,11 +441,11 @@ class Message extends Object {
         $where = array('message_list_id' => array('IN', $this->lists));
 
         // Make sure the message is never resent.
-        if ($this->auto || !empty($this->message['never_resend'])) {
+        if ($this->auto || !empty($this->never_resend)) {
             $table['join'][] = array(
                 'LEFT JOIN',
                 'tracker_event',
-                'ON tracker_event.user_id = user.user_id AND tracker_event.tracker_id = ' . self::$message_sent_id . ' AND tracker_event.sub_id = ' . $this->message['message_id'],
+                'ON tracker_event.user_id = user.user_id AND tracker_event.tracker_id = ' . self::$message_sent_id . ' AND tracker_event.sub_id = ' . $this->message_id,
             );
             $where['tracker_event.user_id'] = null;
         }
