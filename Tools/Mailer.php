@@ -310,7 +310,7 @@ class Mailer {
         }
 
         if ($this->verbose) {
-            echo 'Sending ' . ($test ? 'Test' : 'Real') . " Email<br>\n";
+            echo 'Sending ' . ($test ? 'Test' : 'Real') . " Email ";
         }
         $this->sendToList();
 
@@ -379,8 +379,8 @@ class Mailer {
     protected function sendToList() {
         $this->sentCount = 0;
         foreach($this->users as $user){
-            if ($this->verbose) {
-                echo $user['email'] . "<br>\n";
+            if ($this->verbose && $this->sentCount % 100 == 0) {
+                echo '. ';
             }
             // Send message.
             $this->to($user['email'], $user['first'] . ' ' . $user['last']);
@@ -397,5 +397,6 @@ class Mailer {
             $this->mailer->ClearAddresses();
             Tracker::trackEvent('Email Sent', $this->message->id, !empty($user['user_id']) ? $user['user_id'] : 0);
         }
+        echo "\n\n";
     }
 }

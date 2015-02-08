@@ -85,8 +85,7 @@ lightning.admin.messages = {
                     last_response_len = response.length;
                 }
             },
-            success: function(data) {
-                self.addContent('#message_status', data.substring(last_response_len));
+            complete: function() {
                 $('.mail_buttons').fadeIn();
             },
             error: function() {
@@ -95,7 +94,7 @@ lightning.admin.messages = {
         });
     },
     addContent: function (container, content) {
-        $container = $(container);
+        var $container = $(container);
         $container.html($container.html() + content);
         $container.animate({ scrollTop: $container.attr("scrollHeight") }, 500);
     }

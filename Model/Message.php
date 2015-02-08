@@ -43,6 +43,13 @@ class Message extends Object {
     protected $customVariables = array();
 
     /**
+     * The combined template and message without variables filled.
+     *
+     * @var string
+     */
+    protected $combinedMessageTemplate;
+
+    /**
      * Default variables to replace in the message.
      *
      * @var array
@@ -69,13 +76,6 @@ class Message extends Object {
      * @var array
      */
     protected $lists = null;
-
-    /**
-     * The message data from the database.
-     *
-     * @var array
-     */
-    protected $message;
 
     /**
      * The tracker ID for a sent message.
@@ -132,7 +132,7 @@ class Message extends Object {
      */
     public function __construct($message_id = null, $unsubscribe = true, $auto = true) {
         $this->auto = $auto;
-        $this->message = Database::getInstance()->selectRow('message', array('message_id' => $message_id));
+        $this->data = Database::getInstance()->selectRow('message', array('message_id' => $message_id));
         $this->loadTemplate();
         $this->unsubscribe = $unsubscribe;
 
@@ -158,22 +158,7 @@ class Message extends Object {
         if (empty($this->message)) {
             $this->combinedMessageTemplate = $this->template['body'];
         } else {
-            $this->replaceContentBody();
-        }
-    }
-
-    /**
-     * Replaces some variables in db message
-     */
-    protected function replaceContentBody() {
-        if (
-            $this->unsubscribe
-            && !strstr($this->message['body'], '{UNSUBSCRIBE}')
-            && !strstr($this->template['body'], '{UNSUBSCRIBE}')
-        ) {
             $this->combinedMessageTemplate = str_replace('{CONTENT_BODY}', $this->message['body'] . '{UNSUBSCRIBE}', $this->template['body']) . '{TRACKING_IMAGE}';
-        } else {
-            $this->combinedMessageTemplate = str_replace('{CONTENT_BODY}', $this->message['body'], $this->template['body']) . '{TRACKING_IMAGE}';
         }
     }
 
@@ -423,6 +408,7 @@ class Message extends Object {
             $this->defaultVariables = [
                 // Add the unsubscribe link.
                 'UNSUBSCRIBE' => $this->unsubscribe && !empty($this->user->user_id) ? $this->getUnsubscribeString() : '',
+                'TRACKING_IMAGE' => '',
             ];
             if (!empty($vars)) {
                 $this->defaultVariables += $vars;

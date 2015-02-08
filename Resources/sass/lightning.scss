@@ -234,3 +234,8 @@ $amber-low: rgb(255,205,1);
   }
 }
 .header_name{text-align:right;clear:both;margin-bottom:5px;color:white;font-size:12pt;}
+
+// Admin message page
+#message_status {
+  width:100%; height: 300px; overflow:auto; border:1px solid grey; white-space: pre-wrap;
+}
