@@ -34,7 +34,7 @@ class User extends API {
         // Validate POST data
         if (!$this->validateData($email, $pass)) {
             // Immediately output all the errors
-            Output::jsonError('');
+            Output::jsonError();
         }
         
         // Register user
