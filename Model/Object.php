@@ -9,6 +9,13 @@ class Object {
     const PRIMARY_KEY = '';
 
     /**
+     * A row from the database.
+     *
+     * @var array
+     */
+    protected $data = array();
+
+    /**
      * Build an object from a data array.
      *
      * @param array $data
