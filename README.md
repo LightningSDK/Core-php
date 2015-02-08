@@ -23,13 +23,12 @@ cd Lightning
 ./3install-dependencies-ubuntu.sh
 
 # Install the base template package - This can be done to reset the site at any time.
-./4install-templates.shs
+./4install-templates.sh
 
 # Install default content.
 ./lightning database import-defaults
 
 # Create an admin user.
-# TODO: This current returns an error although it works.
 ./lightning user create-admin
 
 # Build the CSS and JS files
