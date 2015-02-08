@@ -7,7 +7,6 @@
 namespace Lightning\CLI;
 
 use Lightning\Tools\Scrub;
-use Lightning\Tools\ClientUser;
 use Lightning\Model\User as UserModel;
 
 /**
@@ -22,21 +21,21 @@ class User extends CLI {
     public function executeCreateAdmin() {
         do {
             if (!empty($email_input)) {
-                echo "That is not a valid email.\n";
+                $this->out('That is not a valid email.');
             }
             $email_input = $this->readline('Email: ');
         } while (!$email = Scrub::email($email_input));
 
         do {
-            $password = $this->readline('Password: ');
+            $password = $this->readline('Password: ', true);
         } while (strlen($password) < 6);
 
         $res = UserModel::create($email, $password);
         if ($res['success']) {
-            $user = ClientUser::getInstance(); 
+            $user = UserModel::loadById($res['data']);
             $user->setType(UserModel::TYPE_ADMIN);
         } else {
-            echo "Failed to create user.\n";
+            $this->out('Failed to create user.');
         }
     }
 }

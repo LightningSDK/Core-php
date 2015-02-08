@@ -37,15 +37,41 @@ class CLI {
         }
     }
 
-    public function readline($prompt = null) {
+    /**
+     * Get a line from the CLI input.
+     *
+     * @param string $prompt
+     *   A line to prompt the user.
+     * @param boolean $password
+     *   Whether to hide the input for private data.
+     *
+     * @return string
+     *   Return the user input.
+     */
+    public function readline($prompt = null, $password = false) {
         if ($prompt) {
             echo $prompt;
         }
-        $fp = fopen("php://stdin", "r");
+        if ($password) {
+            system('stty -echo');
+        }
+        $fp = fopen('php://stdin', 'r');
         $line = rtrim(fgets($fp, 1024));
+        if ($password) {
+            system('stty echo');
+            echo "\n";
+        }
         return $line;
     }
 
+    /**
+     * Print a line to the stdout.
+     *
+     * @param string $string
+     *   The output.
+     * @param boolean $log
+     *   Whether to add the output to the log.
+     */
     public function out($string, $log = false) {
         if ($log) {
             Logger::message($string);

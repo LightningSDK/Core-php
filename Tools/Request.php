@@ -206,9 +206,9 @@ class Request {
     public static function server($var) {
         switch ($var) {
             case 'ip_int':
-                return ip2long($_SERVER['REMOTE_ADDR']);
+                return empty($_SERVER['REMOTE_ADDR']) ? 0 : ip2long($_SERVER['REMOTE_ADDR']);
             case 'ip':
-                return $_SERVER['REMOTE_ADDR'];
+                return empty($_SERVER['REMOTE_ADDR']) ? '' : $_SERVER['REMOTE_ADDR'];
         }
     }
 
