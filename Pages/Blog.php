@@ -31,50 +31,46 @@ class Blog extends Page {
 
     public function get() {
         $blog_id = Request::get('id', 'int') | Request::get('blog_id', 'int');
-        $blog_url = Request::get('request');
+        $path = explode('/', Request::get('request'));
 
-        // SEE IF A SPECIFIC BLOG ARTICLE IS BEING REQUESTED.
         $blog = BlogModel::getInstance();
-        if($blog_id > 0) {
-            $blog->fetch_blog_id($blog_id);
+
+        if (preg_match('/.*\.htm/', $path[0])) {
+            $blog->loadByURL($path[0]);
         }
-        elseif (!empty($blog_url)) {
-            $blogroll = explode("/",$blog_url);
-            if($blogroll[0] == "blog" && !empty($blogroll[1]) && $blogroll[1] == 'page'){
-                $blog->page = intval($blogroll[2]);
-            } else {
-                $blog->fetch_blog_url(preg_replace('/\.htm$/', '', $blog_url));
+        elseif ($blog_id) {
+            $blog->loadById($blog_id);
+        }
+        elseif (array_shift($path) == 'blog') {
+            if (!empty($path)) {
+                $page = is_numeric($path[count($path) - 1]) ? $path[count($path) - 1] : 1;
+                if ($path[0] == 'category') {
+                    // Load category roll
+                    $blog->loadList($page, 'category', $path[1]);
+                } elseif ($path[0] == 'author') {
+                    // Load an author roll.
+                    $blog->loadList($page, 'author', $path[1]);
+                } elseif (!empty($page)) {
+                    $blog->loadList($page);
+                } else {
+                    // Try to load a specific blog.
+                    $blog->loadByURL($path[0]);
+                }
             }
         }
 
-        // SEE IF A SPECIFIC CATEGORY IS BEING REQUESTED.
-        if (isset($_GET['blog_cat'])) {
-            $blog->category = $_GET['blog_cat'];
+        if (empty($blog->posts)) {
+            // Fall back, load blogroll
+            $blog->loadList(1);
         }
-
-        // SEE IF THE ARCHIVE IS BEING REQUESTED.
-        if (isset($_GET['archive'])) {
-            $archive = str_replace('.htm','',$_GET['archive']);
-            $archive = explode("-",$archive);
-            if(count($archive) == 2)
-                $blog->page = intval($archive[1]);
-            $archive = explode("/",$archive[0]);
-            $blog->y = intval($archive[0]);
-            $blog->m = intval($archive[1]);
-        }
-
         $template = Template::getInstance();
-
-        if ($blog->id > 0) {
-            // IF THERE IS A SPECIFIC BLOG, SHOW IT
+        if (count($blog->posts) == 1) {
             $template->set('page_section','blog');
         } else {
-            // SHOW THE BLOGROLL OR ARCHIVE
-            $blog->list_post();
-            if(count($blog->posts) > 1)
-                $blog->shorten_body = true;
-            $template->set('page_section', 'blog_list');
+            // If there is more than one, we show a list with short bodies.
+            $blog->shorten_body = true;
         }
+
         if(count($blog->posts) == 1){
             foreach (array('title', 'keywords', 'description') as $meta_data) {
                 $value = $meta_data == 'description' ?
