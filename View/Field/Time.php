@@ -126,7 +126,9 @@ class Time extends Field {
     public static function datePop($field, $value, $allow_zero, $first_year = 0){
         if(!$allow_zero && ($value == 0 || $value == '')){
             $date = array(date('m'), date('d'), date('Y'));
-        } else $date = explode('/', jdtogregorian($value));
+        } else {
+            $date = explode('/', jdtogregorian($value));
+        }
         $output = self::monthPop($field . '_m', $date[0], $allow_zero);
         $output .= ' / ';
         $output .= self::dayPop($field . '_d', $date[1], $allow_zero);
