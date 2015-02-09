@@ -20,6 +20,8 @@ class Session extends Singleton {
 
     const PRIMARY_KEY = 'session_id';
 
+    protected $content = array();
+
     /**
      * Constructs the session object given it's row from the database, possibly with some
      * altered values from the instantiating static function.
@@ -28,8 +30,8 @@ class Session extends Singleton {
      */
     public function __construct($data = array()) {
         $this->data = $data;
-        if (!empty($this->content)) {
-            $this->content = json_decode($this->content);
+        if (!empty($this->data['content'])) {
+            $this->content = json_decode($this->data['content'], true);
         }
     }
 
