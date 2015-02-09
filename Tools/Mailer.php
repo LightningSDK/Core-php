@@ -315,7 +315,7 @@ class Mailer {
         $this->sendToList();
 
         if ($this->verbose) {
-            echo "Test complete";
+            echo ($test ? 'Test' : 'Mailing') . ' complete';
         }
 
         return $this->sentCount;
