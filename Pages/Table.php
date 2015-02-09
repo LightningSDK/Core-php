@@ -262,11 +262,21 @@ abstract class Table extends Page {
         }
 
         $this->initSettings();
+
+        $this->fillDetaultSettings();
+
         Template::getInstance()->set('full_width', true);
         parent::__construct();
     }
 
-    protected function initSettings() {
+    protected function initSettings() {}
+
+    protected function fillDetaultSettings() {
+        foreach ($this->links as $table => &$link_settings) {
+            if (empty($link_settings['table'])) {
+                $link_settings['table'] = $table;
+            }
+        }
     }
 
     public function get() {
@@ -1035,7 +1045,7 @@ abstract class Table extends Page {
             // Add the linked tables.
             foreach($this->links as $l => $v) {
                 if (!empty($v['list']) && $v['list'] == 'compact') {
-                    if ($v['display_name']) {
+                    if (!empty($v['display_name'])) {
                         $output.= "<td>{$v['display_name']}</td>";
                     } else {
                         $output.= "<td>{$l}</td>";
@@ -1065,7 +1075,7 @@ abstract class Table extends Page {
                 }
             }
             // LINKS w ALL ITEMS LISTED IN ONE BOX
-            $output .= $this->render_linked_list($row);
+            $output .= $this->renderLinkList($row);
 
             // EDIT, DELETE, AND OTHER ACTIONS
             $output .= $this->render_action_fields_list($row, $editable);
@@ -1085,19 +1095,14 @@ abstract class Table extends Page {
         }
     }
 
-    // caled when rendering lists
-    function render_linked_list(&$row) {
+    // Called when rendering lists
+    function renderLinkList(&$row) {
         $output = '';
         foreach($this->links as $link => $link_settings) {
             if (!empty($link_settings['list']) && $link_settings['list'] == 'compact') {
-                if ($link_settings['index']!='') {
-                    $links = Database::getInstance()->select(
-                        array(
-                            'from' => $link_settings['index'],
-                            'join' => array('JOIN', $link, "USING (`{$link_settings['key']}`)")
-                        ),
-                        array($this->getKey() => $row[$this->getKey()])
-                    );
+                if (!empty($link_settings['index'])) {
+                    // There is a link table joining them. (Many to many){
+                    $links = $this->load_all_active_list($link_settings, $row[$this->getKey()]);
                 }
                 else {
                     $links = Database::getInstance()->select($link, array($this->getKey() => $row[$this->getKey()]));
