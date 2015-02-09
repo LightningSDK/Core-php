@@ -4,7 +4,7 @@
  * Contains Lightning\Tools\API\Server
  */
 
-namespace Lightning\Tools\API;
+namespace Lightning\Tools\Communicator;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Request;
 

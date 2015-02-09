@@ -5,7 +5,6 @@ namespace Overridable\Lightning\View;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Output;
 use Lightning\Tools\Request;
-use Lightning\View\Page;
 
 /**
  * The basic html page handler.
