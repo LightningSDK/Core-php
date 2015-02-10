@@ -54,7 +54,7 @@ class Logger extends Singleton {
         $server = !isset($_SERVER['SERVER_NAME']) ? '' : $_SERVER['SERVER_NAME'];
         $uri = !isset($_SERVER['REQUEST_URI']) ? '' : $_SERVER['REQUEST_URI'];
         $method = !isset($_SERVER['REQUEST_METHOD']) ? '' : $_SERVER['REQUEST_METHOD'];
-        $protocol = !empty($_SERVER['https']) ? 'https://' : 'http://';
+        $protocol = !empty($_SERVER['HTTPS']) ? 'https://' : 'http://';
         $type = empty(self::$errorTypes[$errno]) ? 'Unknown Error Type' : self::$errorTypes[$errno];
         $output = (ini_get('display_errors') == 'On' || ini_get('display_errors') == 1);
 
