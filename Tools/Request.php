@@ -226,10 +226,10 @@ class Request {
         // Return the value.
         switch($type) {
             case 'int':
-                return intval($data);
+                return Scrub::int($data);
                 break;
             case 'float':
-                return floatval($data);
+                return Scrub::float($data);
                 break;
             case 'boolean-int':
                 return intval(Scrub::boolean($data));

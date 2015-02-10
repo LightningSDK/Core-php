@@ -227,4 +227,12 @@ class Scrub {
     public static function boolean($val) {
         return (intval($val) > 0 || $val === true || strtolower($val) === 'true');
     }
+
+    public static function int($val) {
+        return intval(str_replace(',', '', $val));
+    }
+
+    public static function float($val) {
+        return floatval(str_replace(',', '', $val));
+    }
 }
