@@ -12,9 +12,15 @@ if (!defined('CONFIG_PATH')) {
 }
 
 use Lightning\Tools\Configuration;
+use Lightning\Tools\Logger;
 
 // Set the autoloader to the Lightning autoloader.
 spl_autoload_register(array('\\Lightning\\Bootstrap', 'classAutoloader'));
+
+// Set the error handler.
+if (Configuration::get('errorlog') == 'stacktrace') {
+    set_error_handler(array('\\Lightning\\Bootstrap', 'errorHandler'));
+}
 
 class Bootstrap {
     static $loaded = false;
@@ -70,5 +76,9 @@ class Bootstrap {
     public static function loadClassFile($classname) {
         $class_path = str_replace('\\', DIRECTORY_SEPARATOR, $classname);
         require_once HOME_PATH . DIRECTORY_SEPARATOR . $class_path . '.php';
+    }
+
+    public static function errorHandler($errno, $errstr, $errfile, $errline) {
+        Logger::errorLogStacktrace($errno, $errstr, $errfile, $errline);
     }
 }
