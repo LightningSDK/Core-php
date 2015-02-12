@@ -743,7 +743,7 @@ abstract class Table extends Page {
     protected function renderSearchForm() {
         // @todo namespace this
         JS::inline('table_search_i=0;table_search_d=0;');
-        return 'Search: <input type="text" name="table_search" value="' . Scrub::toHTML(Request::get('ste')) . '" onkeyup="table.search(this);" />';
+        return 'Search: <input type="text" name="table_search" value="' . Scrub::toHTML(Request::get('ste')) . '" onkeyup="lightning.table.search(this);" />';
     }
 
     function render_pop_return() {
@@ -983,7 +983,7 @@ abstract class Table extends Page {
                     switch($this->rowClick['type']) {
                         case 'url':
                         case 'action':
-                            JS::startup('$(".table_list").on("click", "tr", table.click)');
+                            JS::startup('$(".table_list").on("click", "tr", lightning.table.click)');
                             break;
                     }
                 }
@@ -1202,7 +1202,7 @@ abstract class Table extends Page {
                 case "checkbox":
                 default:
                     if (!isset($action['check_all']) || empty($action['check_all'])) {
-                        $output.= "<input type='checkbox' name='taf_all_{$a}' id='taf_all_{$a}' value='1' onclick=\"table.selectAll('{$a}');\" />";
+                        $output.= "<input type='checkbox' name='taf_all_{$a}' id='taf_all_{$a}' value='1' onclick=\"lightning.table.selectAll('{$a}');\" />";
                     }
                     break;
             }
@@ -1543,7 +1543,11 @@ abstract class Table extends Page {
                         echo $this->render_full_linked_table_editable($link_settings);
                     } else {
                         // drop down menu (many to many)
-                        echo $this->render_linked_table_editable($link_settings);
+                        if (!empty($link_settings['type']) && $link_settings['type'] == 'image') {
+                            echo $this->render_linked_table_editable_image($link_settings);
+                        } else {
+                            echo $this->render_linked_table_editable_select($link_settings);
+                        }
                     }
                 }
 
@@ -1640,12 +1644,40 @@ abstract class Table extends Page {
         return $output;
     }
 
-    // returns drop down menu
-    // this renders a linked table showing a list of all available options, and a list of
-    // all items that are already added to this table item
-    // this is a many to many - where you can add any of the options from loadAllLinkOptions()
-    // but you can't edit the actual content unless you go to the table page for that table
-    function render_linked_table_editable(&$link_settings) {
+    /**
+     * Renders an 'upload image' button and a list of selected current images.
+     *
+     * @param $link_settings
+     *
+     * @return string
+     */
+    protected function render_linked_table_editable_image(&$link_settings) {
+        JS::add('/js/ckfinder/ckfinder.js');
+        JS::startup('lightning.table.init()');
+        JS::set('table.links.' . $link_settings['table'], $link_settings);
+        $output = '<span class="button add_image" id="add_image_' . $link_settings['table'] . '">Add Image</span>';
+        $output .= '<span class="linked_images" id="linked_images_' . $link_settings['table'] . '">';
+        foreach ($link_settings['active_list'] as $image) {
+            $output .= '<span class="selected_image_container">
+                <input type="hidden" name="linked_images_' . $link_settings['table'] . '[]" value="' . $image['image'] . '">
+                <span class="remove">X</span>
+                <img src="' . $image['image'] . '"></span>';
+        }
+        $output .= '</span>';
+
+        return $output;
+    }
+
+    /**
+     * this renders a linked table showing a list of all available options, and a list of
+     * all items that are already added to this table item
+     * this is a many to many - where you can add any of the options from loadAllLinkOptions()
+     * but you can't edit the actual content unless you go to the table page for that table
+     *
+     * @param $link_settings
+     * @return string
+     */
+    protected function render_linked_table_editable_select(&$link_settings) {
         // show list of options to ad
         // IN REGULAR MODE IF edit_js? IS TURNED ON
         $output = '';
@@ -1662,11 +1694,8 @@ abstract class Table extends Page {
                 $options[$l[$key]] = $l[$link_settings['display_column']];
             }
             $output .= BasicHTML::select($link_settings['table'] . '_list', $options);
-            $output .= "<input type='button' name='add_{$link_settings['table']}_button' value='Add {$link_settings['table']}' id='add_{$link_settings['table']}_button' onclick='table.addLink(\"{$link_settings['table']}\")' />";
+            $output .= "<input type='button' name='add_{$link_settings['table']}_button' value='Add {$link_settings['table']}' id='add_{$link_settings['table']}_button' onclick='lightning.table.addLink(\"{$link_settings['table']}\")' />";
         }
-
-        //set up initial list - these are already added
-        $this->load_all_active_list($link_settings, $this->id);
 
         // create the hidden array field
         $output .= "<input type='hidden' name='{$link_settings['table']}_input_array' id='{$link_settings['table']}_input_array' value='";
@@ -1677,7 +1706,7 @@ abstract class Table extends Page {
         foreach($link_settings['active_list'] as $init) {
             $output .= "<div class='{$link_settings['table']}_box table_link_box_selected' id='{$link_settings['table']}_box_{$init[$link_settings['key']]}'>{$init[$link_settings['display_column']]}
 						<a href='#' onclick='javascript:".(!empty($link_settings['edit_js']) ? $link_settings['edit_js'].'.deleteLink('.
-                    $init[$link_settings['key']].')' : "table.removeLink(\"{$link_settings['table']}\",{$init[$link_settings['key']]})").";return false;'>X</a></div>";
+                    $init[$link_settings['key']].')' : "lightning.table.removeLink(\"{$link_settings['table']}\",{$init[$link_settings['key']]})").";return false;'>X</a></div>";
         }
         $output .= "</div></td></tr>";
         return $output;
@@ -2460,13 +2489,13 @@ abstract class Table extends Page {
 
     function encrypt($table, $column, $value) {
         // TODO: use remote AES encryption method for isolated HSM.
-        $table_key = Configuration::get('table.encryption_key');
+        $table_key = Configuration::get('lightning.table.encryption_key');
         return Encryption::aesEncrypt($value, $table_key);
     }
 
     public static function decrypt($data) {
         // TODO: use remote AES encryption method for isolated HSM.
-        $table_key = Configuration::get('table.encryption_key');
+        $table_key = Configuration::get('lightning.table.encryption_key');
         return Encryption::aesDecrypt($data, $table_key);
     }
 
@@ -2750,7 +2779,7 @@ abstract class Table extends Page {
         $js_startup = '';
         foreach($this->fields as $f => $field) {
             if (!empty($field['autocomplete'])) {
-                $js_startup .= '$(".table_autocomplete").keyup(table.autocomplete);';
+                $js_startup .= '$(".table_autocomplete").keyup(lightning.table.autocomplete);';
                 $use_autocomplete = true;
             }
             if (!empty($field['default_reset'])) {
@@ -2824,7 +2853,25 @@ abstract class Table extends Page {
     function set_posted_links() {
         foreach($this->links as $link => $link_settings) {
             // FOR 1 (local) TO MANY (foreign)
-            if (!empty($link_settings['full_form'])) {
+            if (!empty($link_settings['type']) && $link_settings['type'] == 'image') {
+                $filenames = Request::post('linked_images_' . $link_settings['table'], 'array', 'string');
+                // Insert new links.
+                Database::getInstance()->insertMultiple($link_settings['table'],
+                    array(
+                        $link_settings['key'] => $this->id,
+                        $link_settings['display_column'] => $filenames,
+                    ),
+                    true
+                );
+                // Remove old links.
+                Database::getInstance()->delete($link_settings['table'],
+                    array(
+                        $link_settings['key'] => $this->id,
+                        $link_settings['display_column'] => array('NOT IN', $filenames),
+                    )
+                );
+            }
+            elseif (!empty($link_settings['full_form'])) {
                 if (!isset($this->list)) {
                     $this->get_row();
                 }

@@ -2,7 +2,12 @@
  * @file
  * Contains JS functions for the Table page.
  */
-var table = {
+lightning.table = {
+    init: function() {
+        $('.add_image').click(lightning.table.clickAddImage);
+        $('.linked_images').on('click', '.remove', lightning.table.removeLinkedImage);
+    },
+
     /**
      * Click handler for the list row.
      *
@@ -17,7 +22,7 @@ var table = {
                     document.location = table_data.rowClick.url + id;
                     break;
                 case 'action':
-                    document.location = table.createUrl(table_data.rowClick.action, id);
+                    document.location = lightning.table.createUrl(table_data.rowClick.action, id);
                     break;
             }
         }
@@ -96,7 +101,7 @@ var table = {
         this.removeLink(link, new_link);
         var input_array = $('#'+link+'_input_array');
         input_array.val(input_array.val() + new_link + ',');
-        $('#'+link+'_list_container').append($('<div class="' + link + '_box table_link_box_selected" id="' + link + '_box_' + new_link + '">' + new_link_name + ' <a href="#" onclick="javascript:table.removeLink(\'' + link + '\', ' + new_link + ');return false;">X</a></div>'));
+        $('#'+link+'_list_container').append($('<div class="' + link + '_box table_link_box_selected" id="' + link + '_box_' + new_link + '">' + new_link_name + ' <a href="#" onclick="javascript:lightning.table.removeLink(\'' + link + '\', ' + new_link + ');return false;">X</a></div>'));
     },
 
     /**
@@ -116,6 +121,27 @@ var table = {
         regex = new RegExp("^" + link_id + ",", "i");
         new_links = new_links.replace(regex, '');
         input_array.val(new_links);
+    },
+
+    clickAddImage: function(event) {
+        var link_table = event.target.id.replace('add_image_', '');
+        CKFinder.popup({
+            basePath: lightning.vars.table.links[link_table].web_location,
+            selectActionFunction: function(fileUrl) {
+                lightning.table.addImageCallback(link_table, fileUrl);
+            }
+        });
+    },
+
+    addImageCallback: function(link_table, fileUrl) {
+        $('#linked_images_' + link_table).append('<span class="selected_image_container">' +
+        '<input type="hidden" name="linked_images_' + link_table + '[]" value="' + fileUrl + '">' +
+        '<span class="remove">X</span>' +
+        '<img src="' + fileUrl + '" /></span>');
+    },
+
+    removeLinkedImage: function(event) {
+        $(event.target).closest('.selected_image_container').remove();
     },
 
     autocomplete: function(){
@@ -138,7 +164,7 @@ var table = {
                 },
                 success: function(data) {
                     if(search == table_data.fields[field].last_fetch) {
-                        table.autocompleteDropdown(field, data.results);
+                        lightning.table.autocompleteDropdown(field, data.results);
                     }
                 },
                 error: function() {
@@ -164,7 +190,7 @@ var table = {
             $('#list_' + field).append('<span id="' + field + '_' + i + '" >' + list[i] + '</span>');
             count++;
         }
-        $('#list_' + field + ' span').click(table.setAutocompleteSelection);
+        $('#list_' + field + ' span').click(lightning.table.setAutocompleteSelection);
     },
 
     setAutocompleteSelection: function(event){
