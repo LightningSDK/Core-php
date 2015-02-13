@@ -213,12 +213,6 @@ abstract class Table extends Page {
     public function __construct($options = array()) {
         $this->calendar_year = date('Y');
         $this->calendar_month = date('m');
-        if ($pf = Request::get('pf')) {
-            if (!isset($this->action))
-                $this->action = "new";
-            $this->additional_action_vars['pf'] = $pf;		//Per DAB: PF = popup field
-            $this->additional_action_vars['pfdf'] = Request::get('pfdf');	//Per DAB: PFDF = popup display field
-        }
         // TODO: Action is not set yet. Is any of this necessary?
         if ($this->action == 'new') {
             $backlinkname = '';
@@ -325,6 +319,25 @@ abstract class Table extends Page {
         }
     }
 
+    public function getPop() {
+        if (!$this->editable || !$this->addable) {
+            Messenger::error('Access Denied');
+        }
+        if ($pf = Request::get('pf')) {
+            if (!isset($this->action)) {
+                $this->action = 'new';
+            }
+            // Pop field table.
+            $this->additional_action_vars['pf'] = $pf;
+            // Pop field display name.
+            $this->additional_action_vars['pfdf'] = Request::get('pfdf');
+        }
+    }
+
+    public function getPopReturn() {
+        $this->action = 'pop_return';
+    }
+
     public function getImport() {
         $this->action = 'import';
         if (!$this->editable || !$this->addable || !$this->importable) {
@@ -400,7 +413,7 @@ abstract class Table extends Page {
     public function postDelconf() {
         $this->action = 'delconf';
         if (!$this->editable || !$this->addable) {
-            Messenger::error('Access Denied');
+            Output::error('Access Denied');
         }
 
         // loop through and delete any files
@@ -421,8 +434,7 @@ abstract class Table extends Page {
     public function postInsert() {
         $this->action = 'insert';
         if (!$this->addable) {
-            Messenger::error('Access Denied');
-            return;
+            Output::error('Access Denied');
         }
 
         // Insert a new record.
@@ -443,10 +455,9 @@ abstract class Table extends Page {
             $this->post_actions['after_post']($this->list);
         }
         $this->set_posted_links();
-        if (isset($_REQUEST['pf'])) {
+        if (Request::get('pf')) {
             // if we are in a popup, redirect to the popup close script page
-            header("Location: ".$this->createUrl('pop_return', $this->id));
-            exit;
+            Navigation::redirect($this->createUrl('pop-return', $this->id));
         }
 
         $this->afterInsert();
@@ -603,12 +614,10 @@ abstract class Table extends Page {
         $this->renderHeader();
 
         if ($this->action == "new" && !$this->addable) {
-            Messenger::error('Access Denied');
-            return false;
+            Output::error('Access Denied');
         }
         if ($this->action == "edit" && !$this->editable) {
-            Messenger::error('Access Denied');
-            return false;
+            Output::error('Access Denied');
         }
 
         switch($this->action) {
@@ -624,7 +633,7 @@ abstract class Table extends Page {
             // DELETE CONFIRMATION
             case 'delete':
                 if (!$this->deleteable) {
-                    Messenger::error('Access Denied');
+                    Output::error('Access Denied');
                     break;
                 }
                 echo $this->render_del_conf();
@@ -748,8 +757,12 @@ abstract class Table extends Page {
 
     function render_pop_return() {
         $this->get_row();
-        $send_data = array("pf"=>$this->additional_action_vars['pf'], 'id'=>$this->id, 'pfdf'=>$this->list[$this->additional_action_vars['pfdf']]);
-        JS::startup('update_parent_pop('.json_encode($send_data).')');
+        $send_data = array(
+            'pf' => Request::get('pf'),
+            'id' => $this->id,
+            'pfdf' => $this->list[Request::get('pfdf')]
+        );
+        JS::startup('lightning.table.returnPop('.json_encode($send_data).')');
     }
 
     function render_calendar_list() {
@@ -1695,6 +1708,11 @@ abstract class Table extends Page {
             }
             $output .= BasicHTML::select($link_settings['table'] . '_list', $options);
             $output .= "<input type='button' name='add_{$link_settings['table']}_button' value='Add {$link_settings['table']}' id='add_{$link_settings['table']}_button' onclick='lightning.table.addLink(\"{$link_settings['table']}\")' />";
+        }
+
+        if (!empty($link_settings['pop_add'])) {
+            $location = !empty($link_settings['table_url']) ? $link_settings['table_url'] :  "/table?table=".$link_settings['table'];
+            $output .= "<a onclick='lightning.table.newPop(\"{$location}\",\"{$link_settings['table']}\",\"{$link_settings['display_column']}\")'>Add New Item</a>";
         }
 
         // create the hidden array field
@@ -3312,7 +3330,7 @@ abstract class Table extends Page {
                 if (!empty($field['pop_add'])) {
                     if ($field['table_url']) $location = $field['table_url'];
                     else $location = "table.php?table=".$field['lookuptable'];
-                    $output .= "<a onclick='new_pop(\"{$location}\",\"{$field['form_field']}\",\"{$field['display_column']}\")'>Add New Item</a>";
+                    $output .= "<a onclick='lightning.table.newPop(\"{$location}\",\"{$field['form_field']}\",\"{$field['display_column']}\")'>Add New Item</a>";
                 }
                 return $output;
                 break;

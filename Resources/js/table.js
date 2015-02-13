@@ -230,13 +230,13 @@ lightning.table = {
 
     newPop: function(loc,pf,pfdf){
         if(loc.indexOf("?")>-1)
-            window.open(loc+"&pf="+pf+"&pfdf="+pfdf+"&pop=1",'New','width=400,height=500');
+            window.open(loc+"&action=pop&pf="+pf+"&pfdf="+pfdf+"&pop=1",'New','width=400,height=500');
         else
-            window.open(loc+"?pf="+pf+"&pfdf="+pfdf+"&pop=1",'New','width=400,height=500');
+            window.open(loc+"?action=pop&pf="+pf+"&pfdf="+pfdf+"&pop=1",'New','width=400,height=500');
     },
 
-    updateParentPop: function(data){
-        window.opener.$('#'+data.pf).append("<option value='"+data.id+"'>"+data.pfdf+"</option>").val(data.id);
+    returnPop: function(data){
+        window.opener.$('#' + data.pf + '_list').append("<option value='"+data.id+"'>"+data.pfdf+"</option>").val(data.id);
         window.close();
     }
 };
