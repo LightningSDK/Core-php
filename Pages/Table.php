@@ -2440,6 +2440,29 @@ abstract class Table extends Page {
                         $dest_x = $dest_border / 2;
                     }
                 }
+                if ($image['crop'] == 'y') {
+                    $scale = $src_frame_w / $src_frame_h;
+                    // Get the height of the destination image if it were scaled.
+                    $dest_h = ( int ) ($dest_frame_w / $scale);
+                    if ($dest_h > $dest_frame_h) {
+                        $dest_crop = $dest_h - $dest_frame_h;
+                        $dest_h = $dest_frame_h;
+                        $src_y = $dest_crop / $scale / 2;
+                        $src_h = $src_frame_h - ($src_y * 2);
+                    } else {
+                        $dest_border = $dest_frame_h - $dest_h;
+                        $dest_y = $dest_border / 2;
+                    }
+                }
+                if ($image['crop'] == 'bottom') {
+                    $scale = $src_frame_w / $src_frame_h;
+                    // Get the height of the destination image if it were scaled.
+                    $dest_h = ( int ) ($dest_frame_w / $scale);
+                    if ($dest_h < $dest_frame_h) {
+                        $dest_border = $dest_frame_h - $dest_h;
+                        $dest_y = $dest_border / 2;
+                    }
+                }
             }
 
             $dest_image = imagecreatetruecolor($dest_frame_w, $dest_frame_h);
