@@ -2,7 +2,7 @@ lightning.ajax = {
     /**
      * This will hold the original jQuery ajax.
      */
-    jqueryAjax: function(){},
+    jqueryAjax: function() {},
 
     /**
      * Called at startup to replace the original jQuery function with the lightning version.
@@ -18,24 +18,22 @@ lightning.ajax = {
     /**
      * The lightning callback that will wrap the user callback.
      *
+     * @param {object} settings
+     *   The ajax connection settings.
      * @param {string|object} data
      *   The data returned by the server.
-     * @param {function} success_callback
-     *   The user success callback, if any.
-     * @param {function} error_callback
-     *   The user error callback, if any.
      */
-    success: function(settings, data, success_callback, error_callback) {
+    success: function(settings, data) {
         // If the output was HTML, add it to the dialog.
-        if(settings.dataType == "HTML") {
-            if(success_callback){
-                success_callback(data);
+        if (settings.dataType == "HTML") {
+            if (settings.user_success) {
+                settings.user_success(data);
             } else {
                 lightning.dialog.setContent(data);
             }
         }
         // Add standard messages to the dialog.
-        if(data.messages){
+        if (data.messages) {
             for(var i in data.messages) {
                 lightning.dialog.add(data.messages[i], 'message');
             }
@@ -43,13 +41,13 @@ lightning.ajax = {
         // Add standard error messages.
         if (data.errors && data.errors.length) {
             // TODO: make this more graceful.
-            lightning.ajax.error(settings, data, error_callback);
+            lightning.ajax.error(settings, data);
         }
 
         // Process success handling.
-        if(data.status == 'success'){
-            if(success_callback){
-                success_callback(data);
+        if (data.status == 'success') {
+            if (settings.user_success) {
+                settings.user_success(data);
             } else {
                 lightning.dialog.hide();
             }
@@ -62,11 +60,13 @@ lightning.ajax = {
     /**
      * The lightning ajax error handler.
      *
+     * @param {object} settings
+     *   The ajax connection settings.
      * @param {string|object} data
      *   The response from the server.
      */
-    error: function(settings, data, error_callback) {
-        lightning.dialog.showPrepared(function(){
+    error: function(settings, data) {
+        lightning.dialog.showPrepared(function() {
             if (data == undefined) {
                 lightning.dialog.add('Communication Error', 'error');
             } else if (typeof(data) == 'string') {
@@ -77,16 +77,16 @@ lightning.ajax = {
                 }
             } else {
                 lightning.dialog.add('There was an error loading the page. Please reload the page. If the problem persists, please <a href="/contact">contact support</a>.', 'error');
-                if(data.hasOwnProperty('status')) {
+                if (data.hasOwnProperty('status')) {
                     lightning.dialog.add('HTTP: ' + data.status, 'error');
                 }
-                if(data.hasOwnProperty('responseText') && !data.responseText.match(/<html/i)) {
+                if (data.hasOwnProperty('responseText') && !data.responseText.match(/<html/i)) {
                     lightning.dialog.add(data.responseText, 'error');
                 }
             }
             // Allows an additional error handler.
-            if(settings.error_callback) {
-                settings.error_callback(data);
+            if (settings.user_error) {
+                settings.user_error(data);
             }
         });
     },
@@ -103,13 +103,13 @@ lightning.ajax = {
         settings.user_success = settings.success;
 
         // Override the success handler.
-        settings.success = function(data){
-            lightning.ajax.success(settings, data, settings.user_success, settings.user_error);
+        settings.success = function(data) {
+            lightning.ajax.success(settings, data);
         };
         // Override the error handler.
-        settings.error = function (data){
+        settings.error = function (data) {
             // TODO: make this more graceful.
-            lightning.ajax.error(settings, data, settings.user_error);
+            lightning.ajax.error(settings, data);
         };
         // Call the original ajax function.
         lightning.ajax.jqueryAjax(settings);
