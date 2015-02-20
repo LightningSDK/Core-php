@@ -97,4 +97,9 @@ class Encryption {
         $key = base64_decode($key);
         return openssl_decrypt($data, 'AES-256-CBC', $key, true, $iv);
     }
+
+    public static function checkSaltHash($data, $salt_hash) {
+        list($salt, $hash) = explode(':', $salt_hash);
+        return $hash == hash('sha256', $data . pack('H*', $salt));
+    }
 }
