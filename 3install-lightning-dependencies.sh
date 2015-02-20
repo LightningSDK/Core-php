@@ -22,7 +22,7 @@ if [[ -f /etc/redhat-release ]]; then
   gem install bundle
 elif [[ "$PLATFORM" == 'Linux' ]]; then
   # add repo for nodejs
-  sudo apt-get install python-software-properties curl
+  sudo apt-get -y install python-software-properties curl
   curl -sL https://deb.nodesource.com/setup | sudo bash -
 
   # install ruby for compass and grunt
