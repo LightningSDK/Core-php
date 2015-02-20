@@ -17,3 +17,5 @@ class User extends \Overridable\Lightning\Model\User {}
 namespace Lightning\Tools;
 
 class Session extends \Overridable\Lightning\Tools\Session {}
+class Request extends \Overridable\Lightning\Tools\Request {}
+class ClientUser extends \Overridable\Lightning\Tools\ClientUser {}
