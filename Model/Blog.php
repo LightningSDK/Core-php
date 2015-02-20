@@ -23,6 +23,7 @@ class Blog extends Singleton {
     const BLOG_CATEGORY_TABLE = 'blog_blog_category';
     const COMMENT_TABLE = 'blog_comment';
     const AUTHOR_TABLE = 'blog_author';
+    const IMAGE_PATH = 'img/blog';
 
     /**
      * Overrides parent function.
@@ -169,21 +170,6 @@ class Blog extends Singleton {
             ),
             $where
         );
-
-        //Header images
-        foreach($this->posts as &$post) {
-            $header_image = NULL;
-            if(empty($post['header_image'])) {
-                preg_match_all('/<img\s+.*?src=[\"\']?([^\"\' >]*)[\"\']?[^>]*>/i',$post['body'],$matches,PREG_SET_ORDER);
-                if(!empty($matches[0][1])) {
-                    $header_image = (file_exists(HOME_PATH.$matches[0][1]))?$matches[0][1]:NULL;
-                }
-            } else {
-                $header_image = (file_exists(HOME_PATH . '/img/blog/' . $post['header_image']))?'/img/blog/'.$post['header_image']:NULL;
-            }
-
-            $post['header_image'] = $header_image;
-        }
     }
 
     public function loadByURL($url) {
@@ -214,6 +200,23 @@ class Blog extends Singleton {
     protected function postProcessResults() {
         foreach ($this->posts as &$post) {
             $post['categories'] = empty($post['categories']) ? array() : explode(',', $post['categories']);
+        }
+
+        //Header images
+        foreach($this->posts as &$post) {
+            $header_image = NULL;
+            if(empty($post['header_image'])) {
+                preg_match_all('/<img\s+.*?src=[\"\']?([^\"\' >]*)[\"\']?[^>]*>/i',$post['body'],$matches,PREG_SET_ORDER);
+                if(!empty($matches[0][1])) {
+                    $header_image = (file_exists(HOME_PATH.$matches[0][1]))?$matches[0][1]:NULL;
+                }
+            } else {
+                $header_image = file_exists(HOME_PATH . '/' . self::IMAGE_PATH . '/' . $post['header_image'])
+                    ? '/' . self::IMAGE_PATH . '/'.$post['header_image']
+                    : NULL;
+            }
+
+            $post['header_image'] = $header_image;
         }
     }
 

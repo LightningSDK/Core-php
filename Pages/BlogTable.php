@@ -30,11 +30,6 @@ class BlogTable extends Table {
         'time' => array('type' => 'datetime', 'unlisted' => true),
         'url' => array('type' => 'url', 'unlisted' => true),
         'body' => array('editor' => 'full', 'upload' => true),
-        'header_image' => array(
-            'type' => 'image',
-            'location' => 'img/blog',
-            'weblocation' => '/img/blog',
-        )
     );
 
     protected function hasAccess() {
@@ -48,5 +43,14 @@ class BlogTable extends Table {
                 Navigation::redirect('/' . $row['url'] . '.htm');
             };
         }
+        $this->preset['user_id']['default'] = ClientUser::getInstance()->id;
+        $this->preset['url']['submit_function'] = function(&$output) {
+            $output['url'] = Request::post('url', 'url') ?: Request::post('title', 'url');
+        };
+        $this->preset['header_image'] = array(
+            'type' => 'image',
+            'location' => BlogModel::IMAGE_PATH,
+            'weblocation' => '/' . BlogModel::IMAGE_PATH,
+        );
     }
 }
