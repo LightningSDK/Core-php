@@ -5,6 +5,8 @@
  */
 
 namespace Lightning\Tools\Communicator;
+use Exception;
+use Lightning\Tools\Configuration;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Request;
 
@@ -37,16 +39,7 @@ class Server {
         $this->action_path = $action_path;
         $this->auth_key = $auth_key;
         $this->shutdown_function = $shutdown_function;
-    }
-
-    /**
-     * Sets the debug mode.
-     *
-     * @param boolean $debug
-     *   Whether to set the debug mode on or off.
-     */
-    function debug($debug = true){
-        $this->debug = $debug;
+        $this->verbose = Configuration::get('communicator.server.debug', false);
     }
 
     function __set($var, $value){
