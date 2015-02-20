@@ -222,7 +222,7 @@ abstract class Table extends Page {
             if (isset($_REQUEST['backlinkvalue'])) $backlinkvalue = $_REQUEST['backlinkvalue'];
             // must have both
             if ($backlinkname && $backlinkvalue) {
-                $this->preset[$backlinkname] = array('Default' => $backlinkvalue);
+                $this->preset[$backlinkname] = array('default' => $backlinkvalue);
             }
         }
         if (isset($_POST['function'])) $this->function = $_POST['function'];
@@ -1463,7 +1463,7 @@ abstract class Table extends Page {
                     $output .= $this->renderEditField($field, $row);
                 }
                 if ($field['default_reset']) {
-                    $output .= "<input type='button' value='Reset to Default' onclick='reset_field_value(\"{$field['field']}\");' />";
+                    $output .= "<input type='button' value='Reset to default' onclick='reset_field_value(\"{$field['field']}\");' />";
                 }
                 $output .= "</td></tr>";
                 // column for title and column for field
@@ -1481,7 +1481,7 @@ abstract class Table extends Page {
                     }
                 }
                 if (!empty($field['default_reset'])) {
-                    $output .= "<input type='button' value='Reset to Default' onclick='reset_field_value(\"{$field['field']}\");' />";
+                    $output .= "<input type='button' value='Reset to default' onclick='reset_field_value(\"{$field['field']}\");' />";
                 }
                 $output .= "</td></tr>";
             }
@@ -2107,7 +2107,7 @@ abstract class Table extends Page {
             return true;
         if (isset($field['submit_function']))
             return true;
-        if (!empty($field['force_default_new']) || !empty($field['Default']))
+        if (!empty($field['force_default_new']) || !empty($field['default']))
             return true;
         if (!empty($field['set_on_new']))
             return true;
@@ -2182,7 +2182,7 @@ abstract class Table extends Page {
             // OVERRIDES
 
             if (!empty($field['force_default_new']) && $this->action == "insert") {
-                $val = $field['Default'];
+                $val = $field['default'];
                 // developer entered, could need sanitization
                 $sanitize = true;
             } elseif ($this->parentLink == $field['field']) {
@@ -2278,8 +2278,8 @@ abstract class Table extends Page {
             }
 
             // If there is an alternate default value
-            if (!isset($val) && $this->action == "insert" && isset($field['Default'])) {
-                $val = $field['Default'];
+            if (!isset($val) && $this->action == "insert" && isset($field['default'])) {
+                $val = $field['default'];
                 // Developer input - could require sanitization.
                 $sanitize = true;
             }
@@ -2697,7 +2697,6 @@ abstract class Table extends Page {
     }
 
     function executeTask() {
-        /* 		xdebug_print_function_stack(); */
         // do we load a subset or ss vars?
         if (isset($_REQUEST['ss'])) $this->cur_subset = Scrub::variable($_REQUEST['ss']);
         elseif ($this->subset_default) $this->cur_subset = $this->subset_default;
@@ -2824,7 +2823,7 @@ abstract class Table extends Page {
                 $use_autocomplete = true;
             }
             if (!empty($field['default_reset'])) {
-                $table_data['defaults'][$f] = $field['Default'];
+                $table_data['defaults'][$f] = $field['default'];
             }
             if (!empty($field['type']) && $field['type'] == "div") {
                 $include_ck = true;
@@ -2985,8 +2984,8 @@ abstract class Table extends Page {
         }
 
         // set the default value if new
-        if ($this->action == "new" && isset($field['Default']))
-            $v = $field['Default'];
+        if ($this->action == "new" && isset($field['default']))
+            $v = $field['default'];
 
         if (!empty($field['render_'.$this->action.'_field']) && is_callable($field['render_'.$this->action.'_field'])) {
             return $field['render_'.$this->action.'_field']($row);
@@ -3239,7 +3238,7 @@ abstract class Table extends Page {
             return $this->preset[$field['field']]['render_'.$this->action.'_field']($this->list);
         }
 
-        // prepare value
+        // Prepare value.
         if (!isset($field['Value'])) {
             $field['Value'] = isset($v) ? $v : null;
         }
@@ -3247,12 +3246,12 @@ abstract class Table extends Page {
             $field['Value'] = $this->decrypt($field['Value']);
         }
 
-        // set the default value if new
-        if ($this->action == "new" && isset($field['Default'])) {
-            $field['Value'] = $field['Default'];
+        // Set the default value if new.
+        if ($this->action == "new" && isset($field['default'])) {
+            $field['Value'] = $field['default'];
         }
 
-        // print form input
+        // Print form input.
         $options = array();
         $return = '';
         switch(preg_replace('/\([0-9]+\)/', '', $field['type'])) {

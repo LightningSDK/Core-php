@@ -12,7 +12,6 @@ use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
 use Lightning\Tools\Request;
 use Lightning\Tools\Scrub;
-use Lightning\Tools\Table;
 use Lightning\Tools\Template;
 use Lightning\View\Page;
 

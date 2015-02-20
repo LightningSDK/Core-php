@@ -160,6 +160,7 @@ class Blog extends Singleton {
             $this->blogFields(),
             'GROUP BY ' . static::BLOG_TABLE . '.blog_id ORDER BY time DESC ' . $limit
         );
+        $this->postProcessResults();
 
         $this->post_count = Database::getInstance()->count(
             array(
@@ -178,7 +179,7 @@ class Blog extends Singleton {
                     $header_image = (file_exists(HOME_PATH.$matches[0][1]))?$matches[0][1]:NULL;
                 }
             } else {
-                $header_image = (file_exists(HOME_PATH . '/img/blog/' . $post[header_image]))?'/img/blog/'.$post[header_image]:NULL;
+                $header_image = (file_exists(HOME_PATH . '/img/blog/' . $post['header_image']))?'/img/blog/'.$post['header_image']:NULL;
             }
 
             $post['header_image'] = $header_image;
@@ -195,6 +196,7 @@ class Blog extends Singleton {
             array('url' => $url),
             $this->blogFields()
         );
+        $this->postProcessResults();
     }
 
     public function loadByID($id) {
@@ -206,6 +208,13 @@ class Blog extends Singleton {
             array('blog_id' => $id),
             $this->blogFields()
         );
+        $this->postProcessResults();
+    }
+
+    protected function postProcessResults() {
+        foreach ($this->posts as &$post) {
+            $post['categories'] = empty($post['categories']) ? array() : explode(',', $post['categories']);
+        }
     }
 
     protected function joinAuthorCatTables() {
