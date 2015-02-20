@@ -7,7 +7,6 @@ use Lightning\Tools\Database;
 use Lightning\Tools\Logger;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Output;
-use Lightning\Tools\Request;
 use Lightning\Tools\Security\Random;
 use Lightning\Tools\Singleton;
 use Lightning\View\JS;
