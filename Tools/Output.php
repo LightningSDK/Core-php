@@ -35,6 +35,12 @@ class Output {
      */
     protected static $cookies = array();
 
+    protected static $statusStrings = array(
+        1 => 'access denied',
+        2 => 'success',
+        3 => 'error',
+    );
+
     /**
      * Output data as json and end the request.
      *
@@ -52,10 +58,18 @@ class Output {
         elseif ($data == self::ERROR) {
             $data = array('status' => 'error');
         }
+        elseif (!empty($data['status']) && !empty(self::$statusStrings[$data['status']])) {
+            // Convert numeric status to string.
+            $data['status'] = self::$statusStrings[$data['status']];
+        }
 
         // Add errors and messages.
         $data['errors'] = Messenger::getErrors();
         $data['messages'] = Messenger::getMessages();
+
+        if (empty($data['status']) && empty($data['errors'])) {
+            $data['status'] = self::$statusStrings[self::SUCCESS];
+        }
 
         // Output the data.
         header('Content-type: application/json');
