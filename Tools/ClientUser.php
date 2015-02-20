@@ -7,6 +7,9 @@
 namespace Overridable\Lightning\Tools;
 
 use Lightning\Model\User;
+use Lightning\Tools\Navigation;
+use Lightning\Tools\Output;
+use Lightning\Tools\Singleton;
 
 /**
  * A singleton for the global user.
