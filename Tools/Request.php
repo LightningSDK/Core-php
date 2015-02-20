@@ -1,6 +1,6 @@
 <?php
 
-namespace Lightning\Tools;
+namespace Overridable\Lightning\Tools;
 
 use Lightning\Tools\Scrub;
 

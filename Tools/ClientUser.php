@@ -4,7 +4,7 @@
  * Lightning\Tools\ClientUser
  */
 
-namespace Lightning\Tools;
+namespace Overridable\Lightning\Tools;
 
 use Lightning\Model\User;
 
