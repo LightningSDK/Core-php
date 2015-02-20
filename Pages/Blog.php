@@ -70,7 +70,7 @@ class Blog extends Page {
             $blog->shorten_body = true;
         }
 
-        if(count($blog->posts) == 1){
+        if (count($blog->posts) == 1) {
             foreach (array('title', 'keywords', 'description') as $meta_data) {
                 $value = $meta_data == 'description' ?
                     Scrub::toHTML($blog->body($blog->posts[0]['body'],true)) :
@@ -80,7 +80,7 @@ class Blog extends Page {
         }
 
         //meta facebook image
-        if(count($blog->posts) == 1 && !empty($blog->posts[0]['header_image'])){
+        if (count($blog->posts) == 1 && !empty($blog->posts[0]['header_image'])) {
             $template->set('og_image', $blog->posts[0]['header_image']);
         }
 
@@ -99,7 +99,7 @@ class Blog extends Page {
 
             case 'post_comment':
                 // FIRST CHECK FOR SPAM
-                if($_POST['check_val'] == md5($_POST['email'].$_POST['name'].$_POST['comment'])){
+                if ($_POST['check_val'] == md5($_POST['email'].$_POST['name'].$_POST['comment'])) {
                     $values = array(
                         'blog_id' => $blog_id,
                         'ip_address' => Request::server('ip_int'),

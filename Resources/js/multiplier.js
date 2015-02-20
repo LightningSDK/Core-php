@@ -1,9 +1,9 @@
 lightning.multiplier = {
     init: function() {
         var self = this;
-        $('.multiplier').each(function(){
-            $(this).on('click', '.multiplier_add', null, function(e){self.addOption(e.target)});
-            $(this).on('click', '.multiplier_remove', null, function(e){self.removeOption(e.target)});
+        $('.multiplier').each(function() {
+            $(this).on('click', '.multiplier_add', null, function(e) {self.addOption(e.target)});
+            $(this).on('click', '.multiplier_remove', null, function(e) {self.removeOption(e.target)});
             $(this).append('<input class="multiplier_count" value="0" type="hidden" />');
             $(this).find('.template').hide();
             self.addOption(this);

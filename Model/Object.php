@@ -74,7 +74,7 @@ class Object {
                 return $this->data;
                 break;
             default:
-                if(isset($this->data[$var]))
+                if (isset($this->data[$var]))
                     return $this->data[$var];
                 else
                     return NULL;

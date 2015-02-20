@@ -778,7 +778,7 @@ abstract class Table extends Page {
             echo "<div class='list_cal_item' class='office_calendar {item_color}'>";
             if ($l['evt_type'] == 1) {
                 $this_item_output = $this->load_template($this->custom_template_directory.$this->custom_templates[$this->action.'_item_t']);
-            }elseif ($l['evt_type'] == 2) {
+            } elseif ($l['evt_type'] == 2) {
                 $this_item_output = $this->load_template($this->custom_template_directory.$this->custom_templates[$this->action.'_item_d']);
             } else {
                 $this_item_output = $this->load_template($this->custom_template_directory.$this->custom_templates[$this->action.'_item_c']);
@@ -1114,7 +1114,7 @@ abstract class Table extends Page {
         foreach($this->links as $link => $link_settings) {
             if (!empty($link_settings['list']) && $link_settings['list'] == 'compact') {
                 if (!empty($link_settings['index'])) {
-                    // There is a link table joining them. (Many to many){
+                    // There is a link table joining them. (Many to many) {
                     $links = $this->load_all_active_list($link_settings, $row[$this->getKey()]);
                 }
                 else {
@@ -3299,7 +3299,7 @@ abstract class Table extends Page {
                 }
                 // Fall through.
             case 'file':
-                if (($field['Value'] != '' && (!isset($field['replaceable']) || empty($field['replaceable']))) || $field['Value'] == ''){
+                if (($field['Value'] != '' && (!isset($field['replaceable']) || empty($field['replaceable']))) || $field['Value'] == '') {
                     $return .= "<input type='file' name='{$field['form_field']}' id='{$field['form_field']}' />";
                 }
                 return $return;

@@ -21,7 +21,7 @@ lightning.startup = {
 
         // Add lightning validation rules.
         $.validator.addMethod("passwordLength", $.validator.methods.minlength, "Your password must be at least {0} characters long.");
-        $.validator.addMethod("passwordVerify", function(value, element, param){
+        $.validator.addMethod("passwordVerify", function(value, element, param) {
             // Copied from $.validator.methods.equalTo
             var $element = $(element);
             var target = $element.closest('form').find(param);
@@ -79,13 +79,13 @@ function json_on_id (jsonreq, target) {
     });
 }
 
-function reset_field_value(field){
+function reset_field_value(field) {
     // check for ckeditor
-    if(typeof CKEDITOR.instances[field] !== "undefined")
+    if (typeof CKEDITOR.instances[field] !== "undefined")
         CKEDITOR.instances[field].setData(table_data.defaults[field]);
 
     // other fields
-    else if(typeof ("#"+field).val !== "undefined")
+    else if (typeof ("#"+field).val !== "undefined")
         $('#'+field).val(table_data.defaults[field]);
     else
         $('#'+field).html(table_data.defaults[field]);

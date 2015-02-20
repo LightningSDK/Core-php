@@ -37,7 +37,7 @@ class Blog extends Singleton {
         return parent::getInstance($create);
     }
 
-    function body($body, $force_short = false){
+    function body($body, $force_short = false) {
         if ($this->shorten_body || $force_short) {
             return $this->shortBody($body);
         } else {
@@ -45,7 +45,7 @@ class Blog extends Singleton {
         }
     }
 
-    function shortBody($body, $length = 250){
+    function shortBody($body, $length = 250) {
         $body = str_replace('<', ' <', $body);
         $body = strip_tags($body);
         if (strlen($body) <= $length) {
@@ -66,21 +66,21 @@ class Blog extends Singleton {
         return $body;
     }
 
-    function list_post(){
+    function list_post() {
         $join = array();
         $where = array();
-        if($this->y != 0){
-            if($this->m > 0) // SELECT A MONTH
+        if ($this->y != 0) {
+            if ($this->m > 0) // SELECT A MONTH
                 $where['time'] = array('BETWEEN', mktime(0,0,0,$this->m,1,$this->y), mktime(0,0,0,$this->m+1,1,$this->y));
             else
                 $where['time'] = array('BETWEEN', mktime(0,0,0,1,1,$this->y), mktime(0,0,0,1,1,$this->y+1));
-        } elseif (!empty($this->category)){
+        } elseif (!empty($this->category)) {
             $cat_id = Database::getInstance()->selectField('cat_id', static::CATEGORY_TABLE, array('cat_url' => array('LIKE', $this->category)));
             $join[] = array('JOIN', 'blog_blog_category', 'USING (blog_id)');
             $where['cat_id'] = $cat_id;
         }
 
-        if($this->list_per_page > 0) {
+        if ($this->list_per_page > 0) {
             $limit = " LIMIT ".intval(($this->page -1) * $this->list_per_page).", {$this->list_per_page}";
         }
         $this->posts = Database::getInstance()->selectAll(
@@ -120,12 +120,12 @@ class Blog extends Singleton {
     public function loadList($page, $search_field = null, $search_value = null) {
         $join = array();
         $where = array();
-        if($this->y != 0){
-            if($this->m > 0) // SELECT A MONTH
+        if ($this->y != 0) {
+            if ($this->m > 0) // SELECT A MONTH
                 $where['time'] = array('BETWEEN', mktime(0,0,0,$this->m,1,$this->y), mktime(0,0,0,$this->m+1,1,$this->y));
             else
                 $where['time'] = array('BETWEEN', mktime(0,0,0,1,1,$this->y), mktime(0,0,0,1,1,$this->y+1));
-        } elseif (!empty($this->category)){
+        } elseif (!empty($this->category)) {
             $cat_id = Database::getInstance()->selectField('cat_id', static::CATEGORY_TABLE, array('cat_url' => array('LIKE', $this->category)));
             $join[] = array('JOIN', 'blog_blog_category', 'USING (blog_id)');
             $where['cat_id'] = $cat_id;
@@ -244,16 +244,16 @@ class Blog extends Singleton {
         );
     }
 
-    function pagination(){
+    function pagination() {
         // do noting if we don't have more than one page
-        if($this->post_count <= $this->list_per_page) {
+        if ($this->post_count <= $this->list_per_page) {
             return false;
         }
 
         // set up some variables
         $pages = ceil($this->post_count / $this->list_per_page);
 
-        if($this->m > 0)
+        if ($this->m > 0)
             $base_link = "/archive/{$this->y}/{$this->m}-%%.htm";
         else if ($this->y > 0)
             $base_link = "/archive/{$this->y}-%%.htm";
@@ -269,7 +269,7 @@ class Blog extends Singleton {
             <a href="' . str_replace('%%', $this->page - 1, $base_link) . '">&laquo;</a>';
 
         // Page numbers.
-        for ($i = 1; $i <= $pages; $i++){
+        for ($i = 1; $i <= $pages; $i++) {
             if ($i == $this->page) {
                 $output .= '<li class="current"><a href="">' . $i . '</a></li>';
             } else {
@@ -285,10 +285,10 @@ class Blog extends Singleton {
         return $output;
     }
 
-    function recent_list($remote=false){
+    function recent_list($remote=false) {
         $list = Database::getInstance()->select(static::BLOG_TABLE, array(), array(), 'ORDER BY time DESC LIMIT 5');
         $target = $remote ? "target='_blank'" : '';
-        if($list->rowCount() > 0){
+        if ($list->rowCount() > 0) {
             echo "<ul>";
             foreach($list as $r) {
                 echo "<li><a href='/{$r['url']}.htm' {$target}>{$r['title']}</a></li>";
@@ -297,7 +297,7 @@ class Blog extends Singleton {
         }
     }
 
-    function recent_comment_list($remote=false){
+    function recent_comment_list($remote=false) {
         $list = Database::getInstance()->select(
             array(
                 'from' => static::COMMENT_TABLE,
@@ -314,7 +314,7 @@ class Blog extends Singleton {
             )
         );
         $target = $remote ? "target='_blank'" : '';
-        if($list->rowCount() > 0){
+        if ($list->rowCount() > 0) {
             echo "<ul>";
             foreach($list as $r)
                 echo "<li><a href='/{$r['url']}.htm' {$target}>".$this->shortBody($r['comment'],50)."...</a> in <a href='/{$r['url']}.htm'>{$r['title']}</a></li>";
@@ -338,9 +338,9 @@ class Blog extends Singleton {
         );
     }
 
-    function categories_list(){
+    function categories_list() {
         $list = $this->allCategories();
-        if($list->rowCount() > 0){
+        if ($list->rowCount() > 0) {
             echo "<ul>";
             foreach($list as $r)
                 echo "<li><a href='/category/". Scrub::url($r['category']) . ".htm'>{$r['category']}</a> ({$r['count']})</li>";
@@ -357,9 +357,9 @@ class Blog extends Singleton {
      * @return int
      *   The blog ID.
      */
-    function fetch_blog_url($url){
+    function fetch_blog_url($url) {
         $this->loadByURL($url);
-        if($this->posts){
+        if ($this->posts) {
             $this->id = $this->posts[0]['blog_id'];
             $this->loadComments();
         } else {
@@ -377,9 +377,9 @@ class Blog extends Singleton {
      * @return int
      *   The blog ID.
      */
-    function fetch_blog_id($id){
+    function fetch_blog_id($id) {
         $this->loadByID($id);
-        if($this->posts){
+        if ($this->posts) {
             $this->id = $this->posts[0]['blog_id'];
             $this->loadComments();
         } else {
@@ -392,7 +392,7 @@ class Blog extends Singleton {
      */
     protected function loadComments() {
         $conditions = array('blog_id' => $this->id);
-        if(!$this->show_unapproved_comments) {
+        if (!$this->show_unapproved_comments) {
             $conditions['approved'] = 1;
         }
         $this->posts[0]['comments'] = Database::getInstance()->selectAll(static::COMMENT_TABLE, $conditions);

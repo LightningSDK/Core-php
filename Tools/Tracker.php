@@ -24,8 +24,8 @@ class Tracker extends Singleton {
     /**
      * Load the trackers from the DB.
      */
-    protected static function loadTrackers(){
-        if(!isset(self::$trackers)){
+    protected static function loadTrackers() {
+        if (!isset(self::$trackers)) {
             self::$trackers = Database::getInstance()->selectColumn('tracker', 'tracker_id', array(), 'tracker_name');
         }
     }
@@ -43,7 +43,7 @@ class Tracker extends Singleton {
      * @return string
      *   The rendered HTML.
      */
-    public static function options($name, $default = '', $other = ''){
+    public static function options($name, $default = '', $other = '') {
         self::loadTrackers();
         $output = '<select name="' . $name . '" id="' . $name . '" ' . $other . '>';
         foreach (self::$trackers as $name => $id) {
@@ -60,7 +60,7 @@ class Tracker extends Singleton {
      * @return integer
      *   The numeric tracker ID.
      */
-    public static function getTrackerId($tracker_name){
+    public static function getTrackerId($tracker_name) {
         // Make sure the trackers are loaded.
         self::loadTrackers();
 
@@ -103,7 +103,7 @@ class Tracker extends Singleton {
      * @param integer $user_id
      *   The user committing the action.
      */
-    public static function trackEvent($tracker_name, $sub_id = 0, $user_id = -1){
+    public static function trackEvent($tracker_name, $sub_id = 0, $user_id = -1) {
         $tracker_id = self::getTrackerId($tracker_name);
         self::trackEventID($tracker_id, $sub_id, $user_id);
     }
@@ -119,7 +119,7 @@ class Tracker extends Singleton {
      *   The user id.
      */
     public static function trackEventID($tracker_id, $sub_id = 0, $user_id = -1) {
-        if($user_id == -1){
+        if ($user_id == -1) {
             $user_id = ClientUser::getInstance()->id;
         }
 

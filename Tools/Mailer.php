@@ -294,7 +294,7 @@ class Mailer {
      * @return integer
      *   The number of users the message was sent to.
      */
-    function sendBulk($message_id, $test = false, $auto = false){
+    function sendBulk($message_id, $test = false, $auto = false) {
         $this->message = new Message($message_id, true, $auto);
 
         $this->from(
@@ -378,7 +378,7 @@ class Mailer {
      */
     protected function sendToList() {
         $this->sentCount = 0;
-        foreach($this->users as $user){
+        foreach($this->users as $user) {
             if ($this->verbose && $this->sentCount % 100 == 0) {
                 echo '. ';
             }

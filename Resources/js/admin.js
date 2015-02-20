@@ -1,15 +1,15 @@
-function cms_edit_content(container){
+function cms_edit_content(container) {
     $('#content_block_'+container).hide();
     $('#edit_content_block_'+container).show();
 }
 
-function cms_save_content(container){
+function cms_save_content(container) {
     $.ajax({
         url:'/cms.php',
         data:{action:'update_content','container':container,content:CKEDITOR.instances["cke_"+container].getData()},
         type:"POST",
         dataType:"html",
-        success:function(){
+        success:function() {
             $('#content_body_'+container).html(CKEDITOR.instances["cke_"+container].getData());
             $('#content_block_'+container).show();
             $('#edit_content_block_'+container).hide();
@@ -34,7 +34,7 @@ lightning.admin.messageEditor = {
             },
             dataType:'JSON',
             type:'GET',
-            success:function(data){
+            success:function(data) {
                 selected_items = selected_items.split(',');
                 // Iterate over active criteria.
                 for(var i=0; i< selected_items.length; i++) {
@@ -59,7 +59,7 @@ lightning.admin.messageEditor = {
                     }
                 }
             },
-            error:function(){
+            error:function() {
                 alert('error');
             }
         });

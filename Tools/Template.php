@@ -48,7 +48,7 @@ class Template extends Singleton {
     /**
      * Initialize the template object.
      */
-    public function __construct(){
+    public function __construct() {
         $this->template = Configuration::get('template.default');
         $this->template_dir = HOME_PATH . '/' . Configuration::get('template_dir') . '/';
     }
@@ -75,8 +75,8 @@ class Template extends Singleton {
      * @return mixed
      *   The variable's value.
      */
-    public function __get($var){
-        if(isset($this->vars[$var])) {
+    public function __get($var) {
+        if (isset($this->vars[$var])) {
             return $this->vars[$var];
         } else {
             return null;
@@ -94,7 +94,7 @@ class Template extends Singleton {
      * @return string
      *   The rendered content.
      */
-    public function render($template = null, $return_as_string = false){
+    public function render($template = null, $return_as_string = false) {
         if (!$return_as_string) {
             Output::sendCookies();
         }
@@ -122,7 +122,7 @@ class Template extends Singleton {
      * @return Template
      *   Return self for function chaining.
      */
-    public function set($name, $value){
+    public function set($name, $value) {
         $this->vars[$name] = $value;
         return $this;
     }
@@ -135,8 +135,8 @@ class Template extends Singleton {
      * @param array $vars
      *   A list of variable names to copy.
      */
-    public function copy($object, $vars){
-        foreach($vars as $v){
+    public function copy($object, $vars) {
+        foreach($vars as $v) {
             $this->set($v, $object->get($v));
         }
     }
@@ -149,7 +149,7 @@ class Template extends Singleton {
      * @param mixed $var
      *   The variable value.
      */
-    public function setReference($name,&$var){
+    public function setReference($name,&$var) {
         $this->vars[$name] =& $var;
     }
 
@@ -159,7 +159,7 @@ class Template extends Singleton {
      * @param string $template
      *   The main template name excluding .tpl.php.
      */
-    public function setTemplate($template){
+    public function setTemplate($template) {
         $this->template = $template;
     }
 
@@ -183,7 +183,7 @@ class Template extends Singleton {
      * @return string|null
      *   The output if requested, or null.
      */
-    public function build($template, $return_as_string = false){
+    public function build($template, $return_as_string = false) {
         if (!empty($this->cache[$template])) {
             // Cache is enabled for this page.
             $ttl = !empty($this->cache[$template]['ttl']) ? $this->cache[$template]['ttl'] : Cache::MONTH;
@@ -244,13 +244,13 @@ class Template extends Singleton {
      *
      * @todo this needs JS injection and should be moved to a view.
      */
-    public function help($help_string, $image = '/images/qmark.png', $id = '', $class = '', $url = NULL){
-        if($url){
+    public function help($help_string, $image = '/images/qmark.png', $id = '', $class = '', $url = NULL) {
+        if ($url) {
             echo "<a href='{$url}'>";
         }
         echo "<img src='{$image}' border='0' class='help {$class}' id='{$id}' />";
         echo "<div class='tooltip'>{$help_string}</div>";
-        if($url){
+        if ($url) {
             echo "</a>";
         }
     }

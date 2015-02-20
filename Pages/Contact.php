@@ -41,7 +41,7 @@ class Contact extends Page {
      */
     public function postSendMessage() {
         // Make sure the sender's email address is valid.
-        if(!$sender_email = Request::post('email', 'email')) {
+        if (!$sender_email = Request::post('email', 'email')) {
             Messenger::error('Please enter a valid email address.');
             return $this->get();
         }
@@ -69,7 +69,7 @@ Message:
             ->message($body)
             ->send();
 
-        if(!$sent) {
+        if (!$sent) {
             Messenger::error('Your message could not be sent. Please try again later');
             return $this->get();
         }

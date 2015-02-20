@@ -247,8 +247,8 @@ class Message extends Object {
      * Loads the template from the database based on the message.
      */
     protected function loadTemplateByMessage() {
-        if($this->template['template_id'] != $this->template_id){
-            if($this->template_id > 0) {
+        if ($this->template['template_id'] != $this->template_id) {
+            if ($this->template_id > 0) {
                 $this->template = Database::getInstance()->selectRow(
                     'message_template',
                     array('template_id' => $this->template_id)
@@ -327,14 +327,14 @@ class Message extends Object {
      */
     public function replaceVariables($source) {
         // Replace variables.
-        foreach($this->customVariables + $this->internalCustomVariables + $this->defaultVariables as $cv => $cvv){
+        foreach($this->customVariables + $this->internalCustomVariables + $this->defaultVariables as $cv => $cvv) {
             // Replace simple variables as a string.
             $source = str_replace("{".$cv."}", $cvv, $source);
         }
 
         // Replace conditions.
         $conditions = array();
-        $conditional_search = '/{IF ([a-z_]+)}(.*){ENDIF \1}/imU';
+        $conditional_search = '/{IF ([a-z_]+)}(.*) {ENDIF \1}/imU';
         preg_match_all($conditional_search, $source, $conditions);
         foreach ($conditions[1] as $key => $var) {
             if (!empty($this->customVariables[$var]) || !empty($this->internalCustomVariables[$var])) {

@@ -32,8 +32,8 @@ lightning.page = {
             type:'POST',
             dataType:'json',
             data:send,
-            success:function(data){
-                if(data.status == 'OK'){
+            success:function(data) {
+                if (data.status == 'OK') {
                     $(".page_edit").fadeOut();
                     $('.page_edit_links').fadeIn();
                     $('#page_display').attr('contentEditable', 'false');
@@ -46,7 +46,7 @@ lightning.page = {
                     self.edit();
                 }
             },
-            error:function(){
+            error:function() {
                 alert('The page could not be saved, please try again later.');
                 self.edit();
             }

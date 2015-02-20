@@ -20,8 +20,8 @@ class Sitemap extends API {
         // Load the pages.
         $pages = $db->select('page', array('site_map' => 1));
 
-        foreach($pages as $p){
-            if($p['last_update'] == 0) {
+        foreach($pages as $p) {
+            if ($p['last_update'] == 0) {
                 $p['last_update'] = time();
             }
             switch($p['frequency']) {
@@ -61,7 +61,7 @@ class Sitemap extends API {
             'GROUP BY blog_id'
         );
 
-        foreach($blogs as $b){
+        foreach($blogs as $b) {
             $urls[] = array(
                 'loc' => $web_root . "/{$b['url']}.htm",
                 'lastmod' => date("Y-m-d", max($b['blog_time'],$b['blog_comment_time']) ?: time()),

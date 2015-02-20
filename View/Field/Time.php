@@ -45,8 +45,8 @@ class Time extends Field {
         $m = Request::get($id ."_m");
         $d = Request::get($id ."_d");
         $y = Request::get($id ."_y");
-        if($m > 0 && $d > 0){
-            if($y == 0) $y = date("Y");
+        if ($m > 0 && $d > 0) {
+            if ($y == 0) $y = date("Y");
             return gregoriantojd($m, $d, $y);
         } elseif (!$allow_blank) {
             return gregoriantojd(date("m"),date("d"),date("Y"));
@@ -94,7 +94,7 @@ class Time extends Field {
     }
 
     public static function printDate($value) {
-        if($value == 0) return '';
+        if ($value == 0) return '';
         $date = explode('/',jdtogregorian($value));
         return "{$date[0]}/{$date[1]}/{$date[2]}";
     }
@@ -115,7 +115,7 @@ class Time extends Field {
     }
 
     public static function printDateTime($value) {
-        if(empty($value)) {
+        if (empty($value)) {
             return '';
         } else {
             $date = new Datetime('@' . $value, new DateTimeZone('UTC'));
@@ -123,8 +123,8 @@ class Time extends Field {
         }
     }
 
-    public static function datePop($field, $value, $allow_zero, $first_year = 0){
-        if(!$allow_zero && ($value == 0 || $value == '')){
+    public static function datePop($field, $value, $allow_zero, $first_year = 0) {
+        if (!$allow_zero && ($value == 0 || $value == '')) {
             $date = array(date('m'), date('d'), date('Y'));
         } else {
             $date = explode('/', jdtogregorian($value));
@@ -137,18 +137,18 @@ class Time extends Field {
         return $output;
     }
 
-    public static function timePop($field, $value, $allow_zero){
-        if(!$allow_zero && empty($value)){
+    public static function timePop($field, $value, $allow_zero) {
+        if (!$allow_zero && empty($value)) {
             $time = explode("/", date("h/i/a", time()));
             $h = $time[0];
             $i = $time[1];
             $a = $time[2];
-            if($a == 'PM') $h += 12;
+            if ($a == 'PM') $h += 12;
             $value = ($h * 60) + $i;
         } else {
             $i = $value % 60;
             $h = ($value - $i) / 60;
-            if($h > 12){
+            if ($h > 12) {
                 $a = "PM";
                 $h -= 12;
             } else {
@@ -162,8 +162,8 @@ class Time extends Field {
         return $output;
     }
 
-    public static function dateTimePop($field, $value, $allow_zero, $first_year = 0){
-        if(!$allow_zero && empty($value)) {
+    public static function dateTimePop($field, $value, $allow_zero, $first_year = 0) {
+        if (!$allow_zero && empty($value)) {
             $value = time();
         }
 
@@ -182,7 +182,7 @@ class Time extends Field {
         return $output;
     }
 
-    public static function hourPop($field, $value = '', $allow_zero = false, $attributes = array()){
+    public static function hourPop($field, $value = '', $allow_zero = false, $attributes = array()) {
         $values = array();
         if ($allow_zero) {
             $values[''] = '';
@@ -211,7 +211,7 @@ class Time extends Field {
      * @return string
      *   The rendered HTML.
      */
-    public static function minutePop($field, $value = '', $allow_zero = false, $attributes = array()){
+    public static function minutePop($field, $value = '', $allow_zero = false, $attributes = array()) {
         $values = array();
         if ($allow_zero) {
             $values[''] = '';
@@ -240,7 +240,7 @@ class Time extends Field {
      * @return string
      *   The rendered HTML
      */
-    public static function APPop($field, $value = '', $allow_zero = false, $attributes = array()){
+    public static function APPop($field, $value = '', $allow_zero = false, $attributes = array()) {
         $values = array();
         if ($allow_zero) {
             $values[''] = '';
@@ -254,7 +254,7 @@ class Time extends Field {
         return BasicHTML::select($field, $values, strtoupper($value), $attributes);
     }
 
-    public static function dayPop($field, $day=0, $allow_zero = false, $attributes = array()){
+    public static function dayPop($field, $day=0, $allow_zero = false, $attributes = array()) {
         $values = array();
         if ($allow_zero) {
             $values[''] = '';
@@ -268,7 +268,7 @@ class Time extends Field {
         return BasicHTML::select($field, $values, intval($day), $attributes);
     }
 
-    public static function monthPop($field, $month = 0, $allow_zero = false, $attributes = array()){
+    public static function monthPop($field, $month = 0, $allow_zero = false, $attributes = array()) {
         $values = array();
         if ($allow_zero) {
             $values[''] = '';
@@ -283,7 +283,7 @@ class Time extends Field {
         return BasicHTML::select($field, $values, intval($month), $attributes);
     }
 
-    public static function yearPop($field, $year = 0, $allow_zero = false, $first_year = null, $last_year = null, $attributes = array()){
+    public static function yearPop($field, $year = 0, $allow_zero = false, $first_year = null, $last_year = null, $attributes = array()) {
         $values = array();
         if ($allow_zero) {
             $values[''] = '';

@@ -18,7 +18,7 @@ class Location {
      *   The query condition.
      */
     public static function zipQuery($zip, $distance) {
-        if($start = Database::getInstance()->selectRow('zipcode', array('zip' => $zip))){
+        if ($start = Database::getInstance()->selectRow('zipcode', array('zip' => $zip))) {
             $lat1 = $start['lat'];
             $lon1 = $start['long'];
             //earth's radius in miles
@@ -55,8 +55,8 @@ class Location {
         $output = '<select name="' . $name . '" id="' . $name . '" ' . $extra . '>';
         $output .= '<option value=""></option>';
         $states = self::getStateOptions();
-        foreach($states as $abbr => $state){
-            if($default == $abbr) {
+        foreach($states as $abbr => $state) {
+            if ($default == $abbr) {
                 $output .= '<option value="' . $abbr . '" SELECTED>' . $state . '</option>';
             }
             else {
@@ -97,12 +97,12 @@ class Location {
      * @return string
      *   The full HTML code.
      */
-    public static function countryPop($id, $extra="", $default="US"){
+    public static function countryPop($id, $extra="", $default="US") {
         $output = "<select name='{$id}' id='{$id}' {$extra}>";
         $output .= "<option value=''></option>";
-        foreach(self::getCountryOptions() as $key=>$value){
+        foreach(self::getCountryOptions() as $key=>$value) {
             $output .= "<option value='$key'";
-            if($key == $default)
+            if ($key == $default)
                 $output .= " selected='selected' ";
             $output .= ">$value</option>";
         }

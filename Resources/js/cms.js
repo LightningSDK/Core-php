@@ -24,8 +24,8 @@ lightning.cms = {
                 action: "save",
                 content: $('#' + editor).html()
             },
-            success:function(data){
-                if(data.status == 'success'){
+            success:function(data) {
+                if (data.status == 'success') {
                     $('#' + editor.replace(/^cms_/, 'cms_edit_')).show();
                     $('#' + editor.replace(/^cms_/, 'cms_save_')).hide();
                 } else {
@@ -40,7 +40,7 @@ lightning.cms = {
                     self.edit();
                 }
             },
-            error:function(){
+            error:function() {
                 alert('The page could not be saved, please try again later.');
                 self.edit();
             }
@@ -82,8 +82,8 @@ lightning.cms = {
                 action: "save-image",
                 content: $('#cms_' + id).attr('src')
             },
-            success:function(data){
-                if(data.status != 'success'){
+            success:function(data) {
+                if (data.status != 'success') {
                     var error = '';
                     for (var i in data.errors) {
                         error += data.error[i] + ' ';
@@ -93,7 +93,7 @@ lightning.cms = {
                     }
                 }
             },
-            error:function(){
+            error:function() {
                 alert('The image could not be saved, please try again later.');
             }
         });
@@ -101,11 +101,11 @@ lightning.cms = {
 
     initPlain: function() {
         var self = this;
-        $('.cms_edit_plain').click(function(e){
+        $('.cms_edit_plain').click(function(e) {
             var id = $(e.target).attr('id').replace(/^cms_edit_/, '');
             self.editPlain(id);
         });
-        $('.cms_save_plain').click(function(e){
+        $('.cms_save_plain').click(function(e) {
             var id = $(e.target).attr('id').replace(/^cms_save_/, '');
             self.savePlain(id);
         });
@@ -129,8 +129,8 @@ lightning.cms = {
                 action: "save",
                 content: $('#cms_' + id).val()
             },
-            success:function(data){
-                if(data.status != 'success'){
+            success:function(data) {
+                if (data.status != 'success') {
                     var error = '';
                     for (var i in data.errors) {
                         error += data.error[i] + ' ';
@@ -146,18 +146,18 @@ lightning.cms = {
                     $('#cms_display_' + id).html($('#cms_' + id).val()).show();
                 }
             },
-            error:function(){
+            error:function() {
                 alert('The image could not be saved, please try again later.');
             }
         });
     },
     initDate: function() {
         var self = this;
-        $('.cms_edit_date').click(function(e){
+        $('.cms_edit_date').click(function(e) {
             var id = $(e.target).attr('id').replace(/^cms_edit_/, '');
             self.editDate(id);
         });
-        $('.cms_save_date').click(function(e){
+        $('.cms_save_date').click(function(e) {
             var id = $(e.target).attr('id').replace(/^cms_save_/, '');
             self.saveDate(id);
         });
@@ -183,8 +183,8 @@ lightning.cms = {
                 date_d: $('#cms_' + id + '_d').val(),
                 date_y: $('#cms_' + id + '_y').val()
             },
-            success:function(data){
-                if(data.status != 'success'){
+            success:function(data) {
+                if (data.status != 'success') {
                     var error = '';
                     for (var i in data.errors) {
                         error += data.error[i] + ' ';
@@ -201,7 +201,7 @@ lightning.cms = {
                     $('#date_'+id).text(newDate);
                 }
             },
-            error:function(){
+            error:function() {
                 alert('The image could not be saved, please try again later.');
             }
         });

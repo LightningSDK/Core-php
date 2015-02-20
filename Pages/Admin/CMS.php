@@ -44,7 +44,7 @@ class CMS extends API {
         }
     }
     
-    public function postUpdateDate(){
+    public function postUpdateDate() {
         if (ClientUser::getInstance()->isAdmin()) {
             $id = Request::post('id');
             $key = Request::post('key');
@@ -53,8 +53,8 @@ class CMS extends API {
             $m = Request::post("date_m");
             $d = Request::post("date_d");
             $y = Request::post("date_y");
-            if($m > 0 && $d > 0){
-                if($y == 0) $y = date("Y");
+            if ($m > 0 && $d > 0) {
+                if ($y == 0) $y = date("Y");
                 $value = gregoriantojd($m, $d, $y);
             } else {
                 $value = 0;
@@ -64,7 +64,7 @@ class CMS extends API {
                 array($key => $id)
             );
             Output::json(Output::SUCCESS);
-        }else{
+        } else {
             Output::json(Output::ACCESS_DENIED);
         }
         

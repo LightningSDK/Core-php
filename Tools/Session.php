@@ -115,7 +115,7 @@ class Session extends Singleton {
      *
      * @return session
      */
-    public static function create($user_id=0, $remember=false){
+    public static function create($user_id=0, $remember=false) {
         $session_details = array();
         $new_sess_key = static::getNewSessionId();
         $new_token = Random::getInstance()->get(64, Random::HEX);
@@ -164,14 +164,14 @@ class Session extends Singleton {
      * @param int $state
      * @return bool
      */
-    public function getState($state){
+    public function getState($state) {
         return (($state & $this->state) == $state);
     }
 
     /**
      * This is called when the user enters their password and password access is now allowed.
      */
-    public function setState($state){
+    public function setState($state) {
         $this->state = $this->state | $state;
         Database::getInstance()->query("UPDATE session SET state = (state | " . $state . ") WHERE session_id={$this->id}");
     }
@@ -179,7 +179,7 @@ class Session extends Singleton {
     /**
      * Drops the user out of the PIN approved state. This may still leave them with password access.
      */
-    public function unsetState($state){
+    public function unsetState($state) {
         $this->state = $this->state & ~$state;
         Database::getInstance()->query("UPDATE session SET state = (state & ~".$state.") WHERE session_id={$this->id}");
     }
@@ -187,8 +187,8 @@ class Session extends Singleton {
     /**
      * Destroy the current session and remove it from the database.
      */
-    public function destroy (){
-        if($this->id) {
+    public function destroy () {
+        if ($this->id) {
             Database::getInstance()->delete('session', array('session_id' => $this->id));
             $this->data = null;
         }
@@ -198,7 +198,7 @@ class Session extends Singleton {
     /**
      * Update the last active time on the session.
      */
-    public function ping(){
+    public function ping() {
         // Make the cookie last longer in the database.
         Database::getInstance()->update('session', array('last_ping' => time()), array('session_id' => $this->id));
         // Make the cookie last longer in the browser.
@@ -208,14 +208,14 @@ class Session extends Singleton {
     /**
      * Output the cookie to the requesting web server (for relay to the client).
      */
-    public function setCookie(){
+    public function setCookie() {
         Output::setCookie(Configuration::get('session.cookie'), $this->session_key, Configuration::get('session.remember_ttl'), '/', Configuration::get('cookie_domain'));
     }
 
     /**
      * Sends a blank cookie to overwrite and forget any current session cookie.
      */
-    static function clearCookie(){
+    static function clearCookie() {
         if (!headers_sent()) {
             unset($_COOKIE[Configuration::get('session.cookie')]);
             Output::setCookie(Configuration::get('session.cookie'), '', -1, '', Configuration::get('cookie_domain'));
@@ -227,7 +227,7 @@ class Session extends Singleton {
      *
      * @return mixed
      */
-    static function getNewSessionId(){
+    static function getNewSessionId() {
         do{
             $key = Random::getInstance()->get(64, Random::HEX);
             if (empty($key)) {
@@ -243,7 +243,7 @@ class Session extends Singleton {
      * @param int $exception
      *   A session ID that can be left as active.
      */
-    public function dump_sessions($exception=0){
+    public function dump_sessions($exception=0) {
         // Delete this session.
         Database::getInstance()->delete('session',
             array(
@@ -286,9 +286,9 @@ class Session extends Singleton {
     /**
      * Issue a new random key to the session. Everything else stays the same.
      */
-    public function scramble(){
+    public function scramble() {
         $new_sess_id = static::getNewSessionId();
-        if(empty($new_sess_id)) {
+        if (empty($new_sess_id)) {
             _die('Session error.');
         }
         Database::getInstance()->update('session', array('session_key'=>$new_sess_id), array('session_id'=>$this->id));
@@ -297,7 +297,7 @@ class Session extends Singleton {
     }
 
 
-    public function destroy_all($user_id){
+    public function destroy_all($user_id) {
         Database::getInstance()->delete('session', array('user_id'=>$user_id));
     }
 

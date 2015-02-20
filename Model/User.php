@@ -47,7 +47,7 @@ class User extends Object {
      * @return bool|User
      */
     public static function loadByEmail($email) {
-        if($details = Database::getInstance()->selectRow('user', array('email' => array('LIKE', $email)))) {
+        if ($details = Database::getInstance()->selectRow('user', array('email' => array('LIKE', $email)))) {
             return new static($details);
         }
         return false;
@@ -60,7 +60,7 @@ class User extends Object {
      * @return bool|User
      */
     public static function loadById($user_id) {
-        if($details = Database::getInstance()->selectRow('user', array('user_id' => $user_id))) {
+        if ($details = Database::getInstance()->selectRow('user', array('user_id' => $user_id))) {
             return new static($details);
         }
         return false;
@@ -163,7 +163,7 @@ class User extends Object {
      *   Whether the correct password was supplied.
      */
     public function checkPass($pass, $salt = '', $hashed_pass = '') {
-        if($salt == '') {
+        if ($salt == '') {
             $this->load_info();
             $salt = $this->salt;
             $hashed_pass = $this->password;
@@ -202,7 +202,7 @@ class User extends Object {
     }
 
     public static function urlKey($user_id = -1, $salt = null) {
-        if($user_id == -1) {
+        if ($user_id == -1) {
             $user_id = ClientUser::getInstance()->id;
             $salt = ClientUser::getInstance()->salt;
         } elseif (!$salt) {
@@ -229,7 +229,7 @@ class User extends Object {
      *   Whether to force the data to load and overwrite current data.
      */
     public function load_info($force = false) {
-        if(!isset($this->data) || $force) {
+        if (!isset($this->data) || $force) {
             $this->data = Database::getInstance()->selectRow('user', array('user_id' => $this->id));
         }
     }
@@ -268,7 +268,7 @@ class User extends Object {
             $user->setPass($pass, '', $user_info['user_id']);
             $updates['registered'] = Time::today();
             Database::getInstance()->update('user', $updates, array('user_id' => $user_info['user_id']));
-            if($user_info['confirmed'] != 0 && Configuration::get('user.requires_confirmation')) {
+            if ($user_info['confirmed'] != 0 && Configuration::get('user.requires_confirmation')) {
                 $user->sendConfirmationEmail($email);
             }
             return [
@@ -313,7 +313,7 @@ class User extends Object {
         $user_data['email'] = strtolower($email);
         $db = Database::getInstance();
         if ($user = $db->selectRow('user', $user_data)) {
-            if($update) {
+            if ($update) {
                 $db->update('user', $user_data, $update);
             }
             $user_id = $user['user_id'];
@@ -372,13 +372,13 @@ class User extends Object {
         $arrangement = "aaaaaaaAAAAnnnnn";
         $pass = "";
         for($i = 0; $i < strlen($arrangement); $i++) {
-            if($arrangement[$i] == "a")
+            if ($arrangement[$i] == "a")
                 $char = $alphabet[rand(0,25)];
-            else if($arrangement[$i] == "A")
+            else if ($arrangement[$i] == "A")
                 $char = strtoupper($alphabet[rand(0,(strlen($alphabet)-1))]);
-            else if($arrangement[$i] == "n")
+            else if ($arrangement[$i] == "n")
                 $char = rand(0,9);
-            if(rand(0,1) == 0)
+            if (rand(0,1) == 0)
                 $pass .= $char;
             else
                 $pass = $char.$pass;
@@ -435,9 +435,9 @@ class User extends Object {
      *   Whether the password was updated.
      */
     public function setPass($pass, $email='', $user_id = 0) {
-        if($email != '') {
+        if ($email != '') {
             $where['email'] = strtolower($email);
-        } elseif($user_id>0) {
+        } elseif ($user_id>0) {
             $where['user_id'] = $user_id;
         } else {
             $where['user_id'] = $this->id;
@@ -457,11 +457,11 @@ class User extends Object {
     public function admin_create($email, $first_name='', $last_name='') {
         $today = gregoriantojd(date('m'), date('d'), date('Y'));
         $user_info = Database::getInstance()->selectRow('user', array('email' => strtolower($email)));
-        if($user_info['password'] != '') {
+        if ($user_info['password'] != '') {
             // user exists with password
             // return user_id
             return $user_info['user_id'];
-        } else if(isset($user_info['password'])) {
+        } else if (isset($user_info['password'])) {
             // user exists without password
             // set password, send email
             $randomPass = $this->randomPass();
@@ -581,13 +581,13 @@ class User extends Object {
         $user = ClientUser::getInstance();
 
         // If a user is already logged in, cancel that user.
-        if($user->id > 0) {
+        if ($user->id > 0) {
             $user->destroy();
         }
 
-        if($temp_user = static::loadByEmail($email)) {
+        if ($temp_user = static::loadByEmail($email)) {
             // user found
-            if($temp_user->checkPass($password)) {
+            if ($temp_user->checkPass($password)) {
                 $temp_user->registerToSession($remember, $auth_only ?: Session::STATE_PASSWORD);
                 return true;
             } else {
@@ -611,8 +611,8 @@ class User extends Object {
         //  The session is blank
         //  The session user is not set to this user
         $session = Session::getInstance(false);
-        if((!is_object($session)) || ($session->id == 0) || ($session->user_id != $this->id && $session->user_id != 0)) {
-            if(is_object($session)) {
+        if ((!is_object($session)) || ($session->id == 0) || ($session->user_id != $this->id && $session->user_id != 0)) {
+            if (is_object($session)) {
                 // If there is some other session here, we can destroy it.
                 $session->destroy();
             }
@@ -633,10 +633,10 @@ class User extends Object {
      */
     public function logOut() {
         $session = Session::getInstance();
-        if($this->id > 0) {
+        if ($this->id > 0) {
             $this->data = NULL;
             $this->id = 0;
-            if(is_object($session)) {
+            if (is_object($session)) {
                 $session->destroy();
             }
         }
@@ -689,17 +689,17 @@ class User extends Object {
      *   A required authority level if they are logged in.
      */
     public function login_required($auth = 0) {
-        if($this->id == 0) {
+        if ($this->id == 0) {
             Navigation::redirect($this->login_url . urlencode($_SERVER['REQUEST_URI']));
         }
-        if($this->authority < $auth) {
+        if ($this->authority < $auth) {
             Navigation::redirect($this->unauthorized_url . urlencode($_SERVER['REQUEST_URI']));
         }
     }
 
     public function sendConfirmationEmail($email) {
         $acct_details = user::find_by_email($email);
-        if($acct_details['confirmed'] == "" || $acct_details['confirmed'] == "confirmed") {
+        if ($acct_details['confirmed'] == "" || $acct_details['confirmed'] == "confirmed") {
             $acct_details['confirmed'] = hash('sha256',microtime());
             Database::getInstance()->update('user',
                 array('confirmed' => $acct_details['confirmed']),
@@ -724,7 +724,7 @@ class User extends Object {
      */
     public function merge_users($anon_user) {
         // FIRST MAKE SURE THIS USER IS ANONYMOUS
-        if(Database::getInstance()->check('user', array('user_id' => $anon_user, 'email' => ''))) {
+        if (Database::getInstance()->check('user', array('user_id' => $anon_user, 'email' => ''))) {
             // TODO: Basic information should be moved here, but this function should be overriden.
             Database::getInstance()->delete('user', array('user_id' => $anon_user));
         }
@@ -757,7 +757,7 @@ class User extends Object {
             $user->subscribe(Configuration::get('mailer.default_list'));
 
             // Merge with a previous anon user if necessary.
-            if($previous_user != 0) {
+            if ($previous_user != 0) {
                 // TODO: This should only happen if the user is a placeholder.
                 $user->merge_users($previous_user);
             }

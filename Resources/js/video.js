@@ -20,7 +20,7 @@ lightning.video = {
                 $('#video_playlist_' + i).html(ul).on('click', 'ul', this.clickPlaylist);
             }
             if (video.call.beforeLoad) {
-                lightning.getMethodReference(video.call.beforeLoad)(i, function(){
+                lightning.getMethodReference(video.call.beforeLoad)(i, function() {
                     self.load(i);
                 });
             } else {
@@ -99,7 +99,7 @@ lightning.video = {
 
         if (video.call.onTime) {
             var self = this;
-            this.players[id].on('timeupdate', function(){
+            this.players[id].on('timeupdate', function() {
                 self.timeCallback(self.players[id], lightning.vars.videos[id].call.onTime);
             })
         }

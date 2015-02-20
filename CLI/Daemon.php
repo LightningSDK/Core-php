@@ -240,7 +240,7 @@ class Daemon extends CLI {
 
         // Make sure there are no threads
         foreach ($job['threads'] as $pid) {
-            if(!file_exists('/proc/' . $pid)) {
+            if (!file_exists('/proc/' . $pid)) {
                 unset($job['threads'][$pid]);
             }
         }
@@ -311,16 +311,16 @@ class Daemon extends CLI {
      */
     public function handlerSIGCHLD($signo, $pid=null, $status=null) {
         // If no pid is provided, Let's wait to figure out which child process ended
-        if(!$pid){
+        if (!$pid) {
             $pid = pcntl_waitpid(-1, $status, WNOHANG);
         }
 
         // Get all exited children
-        while($pid > 0){
-            if($pid && isset($this->threads[$pid])){
+        while($pid > 0) {
+            if ($pid && isset($this->threads[$pid])) {
                 unset($this->threads[$pid]);
             }
-            else if($pid){
+            else if ($pid) {
                 // Job finished before the parent process could record it as launched.
                 // Store it to handle when the parent process is ready
                 $this->signalQueue[$pid] = $status;

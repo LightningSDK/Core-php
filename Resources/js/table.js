@@ -16,8 +16,8 @@ lightning.table = {
      */
     click: function(event) {
         var id = event.currentTarget.id;
-        if(event.target.tagName != "INPUT" && table_data.rowClick != undefined){
-            switch(table_data.rowClick.type){
+        if (event.target.tagName != "INPUT" && table_data.rowClick != undefined) {
+            switch(table_data.rowClick.type) {
                 case 'url':
                     document.location = table_data.rowClick.url + id;
                     break;
@@ -32,10 +32,10 @@ lightning.table = {
         var vars = [];
         vars.push('action='+encodeURIComponent(action));
         vars.push('id='+encodeURIComponent(id));
-        if (table_data.table){
+        if (table_data.table) {
             vars.push('table='+encodeURIComponent(table_data.table));
         }
-        if (table_data.parent_link){
+        if (table_data.parent_link) {
             vars.push(table_data.parent_link + '=' + encodeURIComponent(table_data.parent_id));
         }
         if (table_data.vars) {
@@ -144,14 +144,14 @@ lightning.table = {
         $(event.target).closest('.selected_image_container').remove();
     },
 
-    autocomplete: function(){
+    autocomplete: function() {
         var field = $(this).attr('id');
-        if(!table_data.fields){
+        if (!table_data.fields) {
             table_data.fields = {};
             table_data.fields[field] = {};
         }
         var search = $(this).val();
-        if(search.length >= 2 && (!table_data.fields[field].last_fetch || table_data.fields[field].last_fetch != search)){
+        if (search.length >= 2 && (!table_data.fields[field].last_fetch || table_data.fields[field].last_fetch != search)) {
             table_data.fields[field].last_fetch = search;
             $.ajax({
                 url: table_data.action_file,
@@ -163,7 +163,7 @@ lightning.table = {
                     st: table_data.fields[field].last_fetch,
                 },
                 success: function(data) {
-                    if(search == table_data.fields[field].last_fetch) {
+                    if (search == table_data.fields[field].last_fetch) {
                         lightning.table.autocompleteDropdown(field, data.results);
                     }
                 },
@@ -174,9 +174,9 @@ lightning.table = {
         }
     },
 
-    autocompleteDropdown: function(field,list){
-        $('.table_container').each(function(){
-            if($(this).attr('id') != "table_container_" + field) {
+    autocompleteDropdown: function(field,list) {
+        $('.table_container').each(function() {
+            if ($(this).attr('id') != "table_container_" + field) {
                 $(this).remove();
             } else {
                 $('#list_' + field).empty();
@@ -193,7 +193,7 @@ lightning.table = {
         $('#list_' + field + ' span').click(lightning.table.setAutocompleteSelection);
     },
 
-    setAutocompleteSelection: function(event){
+    setAutocompleteSelection: function(event) {
         var id = $(this).attr('id').split('_');
         var value = id.pop();
         var field = id.join('_');
@@ -203,24 +203,24 @@ lightning.table = {
 
     /* TABLE SUBTABLE  */
 
-    deleteSubtable: function(button){
+    deleteSubtable: function(button) {
         var entry_id = $(button).closest("div").attr("id").replace("subtable_","");
         var entry_id_no = entry_id.split("_");
         entry_id_no = entry_id_no[entry_id_no.length-1];
         entry_id_table = entry_id.replace("_"+entry_id_no,"");
-        if(parseInt(entry_id_no) > 0)
+        if (parseInt(entry_id_no) > 0)
             $('#delete_subtable_'+entry_id_table).val($('#delete_subtable_'+entry_id_table).val()+entry_id_no+",");
-        else{
+        else {
             reg = new RegExp(Math.abs(entry_id_no)+',');
             $('#new_subtable_'+entry_id_table).val($('#new_subtable_'+entry_id_table).val().replace(reg,''));
         }
-        $('#subtable_'+entry_id_table+'_'+entry_id_no).fadeOut(function(){$(this).remove();});
+        $('#subtable_'+entry_id_table+'_'+entry_id_no).fadeOut(function() {$(this).remove();});
     },
 
-    newSubtable: function(table){
-        if(typeof new_subtables === "undefined")
+    newSubtable: function(table) {
+        if (typeof new_subtables === "undefined")
             new_subtables = Array();
-        if(typeof new_subtables[table] === "undefined")
+        if (typeof new_subtables[table] === "undefined")
             new_subtables[table] = 1;
         else
             new_subtables[table]++;
@@ -228,14 +228,14 @@ lightning.table = {
         $('#new_subtable_'+table).val($('#new_subtable_'+table).val()+new_subtables[table]+",");
     },
 
-    newPop: function(loc,pf,pfdf){
-        if(loc.indexOf("?")>-1)
+    newPop: function(loc,pf,pfdf) {
+        if (loc.indexOf("?")>-1)
             window.open(loc+"&action=pop&pf="+pf+"&pfdf="+pfdf+"&pop=1",'New','width=400,height=500');
         else
             window.open(loc+"?action=pop&pf="+pf+"&pfdf="+pfdf+"&pop=1",'New','width=400,height=500');
     },
 
-    returnPop: function(data){
+    returnPop: function(data) {
         window.opener.$('#' + data.pf + '_list').append("<option value='"+data.id+"'>"+data.pfdf+"</option>").val(data.id);
         window.close();
     }

@@ -142,7 +142,7 @@ class JS {
 
             // Include ready scripts.
             if (!empty(self::$startup_scripts)) {
-                $output .= '$(document).ready(function(){';
+                $output .= '$(document).ready(function() {';
                 foreach (self::$startup_scripts as &$script) {
                     if (empty($script['rendered'])) {
                         $output .= $script['script'] . ';';

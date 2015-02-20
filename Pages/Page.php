@@ -38,9 +38,9 @@ class Page extends PageView {
         $template->set('content', 'page');
 
         // LOAD PAGE DETAILS
-        if($full_page = $this->loadPage($content_locator)){
+        if ($full_page = $this->loadPage($content_locator)) {
             header('HTTP/1.0 200 OK');
-            if(Configuration::get('page.modification_date') && $full_page['last_update'] > 0) {
+            if (Configuration::get('page.modification_date') && $full_page['last_update'] > 0) {
                 header("Last-Modified: ".gmdate("D, d M Y H:i:s", $full_page['last_update'])." GMT");
             }
         } elseif ($this->new) {
@@ -101,7 +101,7 @@ class Page extends PageView {
             }
         }
 
-        if($full_page['url'] == "" && isset($_GET['page'])) {
+        if ($full_page['url'] == "" && isset($_GET['page'])) {
             $full_page['url'] = $_GET['page'];
         }
         else {
@@ -130,7 +130,7 @@ class Page extends PageView {
     public function postSave() {
         $user = ClientUser::getInstance();
 
-        if(!$user->isAdmin()){
+        if (!$user->isAdmin()) {
             return $this->get();
         }
 

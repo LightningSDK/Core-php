@@ -28,7 +28,7 @@ class User extends Page {
         parent::__construct();
         $user = ClientUser::getInstance();
         Template::getInstance()->set('redirect', Scrub::toURL(Request::get('redirect', 'string')));
-        if($user->id > 0){
+        if ($user->id > 0) {
             // USER IS LOGGED IN, REDIRECT TO THE DEFAULT PAGE
             $this->loginRedirect();
         }
@@ -223,9 +223,9 @@ class User extends Page {
         $template = Template::getInstance();
         $user = ClientUser::getInstance();
         $template->set('content', 'user_reset');
-        if($_POST['new_pass'] == $_POST['new_pass_conf']){
-            if(isset($_POST['new_pass'])){
-                if($user->change_temp_pass($_POST['email'], $_POST['new_pass'], $_POST['code']))
+        if ($_POST['new_pass'] == $_POST['new_pass_conf']) {
+            if (isset($_POST['new_pass'])) {
+                if ($user->change_temp_pass($_POST['email'], $_POST['new_pass'], $_POST['code']))
                     $template->set("password_changed", true);
             } else {
                 $template->set("change_password", true);

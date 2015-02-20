@@ -68,9 +68,9 @@ class BasicHTML {
     public static function setDefaultClass(&$attributes, $default) {
         if (empty($attributes['class'])) {
             $attributes['class'] = array($default);
-        } elseif(!is_array($attributes['class'])) {
+        } elseif (!is_array($attributes['class'])) {
             $attributes['class'] = array($attributes['class']);
-        } elseif(!in_array('datePop', $attributes['class'])) {
+        } elseif (!in_array('datePop', $attributes['class'])) {
             $attributes['class'][] = $default;
         }
     }

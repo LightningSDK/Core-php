@@ -37,7 +37,7 @@ class Client {
     /**
      * Initialize some vars.
      */
-    function __construct($server_address){
+    function __construct($server_address) {
         $this->serverAddress = $server_address;
         $this->vars['actions'] = array();
         $this->verbose = Configuration::get('debug', false);
@@ -52,7 +52,7 @@ class Client {
      *
      * @param $action
      */
-    function action($action){
+    function action($action) {
         $this->vars['actions'][] = $action;
     }
 
@@ -67,9 +67,9 @@ class Client {
      *   If this is set, then the variable passed is also expected to be returned and will automatically be added to the template.
      * @return void
      */
-    function set($var, $value, $auto_pass_to_template=false){
+    function set($var, $value, $auto_pass_to_template=false) {
         $this->vars[$var] = $value;
-        if($auto_pass_to_template)
+        if ($auto_pass_to_template)
             $this->auto_template[] = $var;
     }
 
@@ -79,8 +79,8 @@ class Client {
      * @param $var
      * @return null
      */
-    function get($var){
-        if(isset($this->results['data'][$var]))
+    function get($var) {
+        if (isset($this->results['data'][$var]))
             return $this->results['data'][$var];
         return NULL;
     }
@@ -99,7 +99,7 @@ class Client {
      *
      * @return mixed
      */
-    public function getResults(){
+    public function getResults() {
         return $this->results;
     }
 
@@ -108,8 +108,8 @@ class Client {
      *
      * @return bool
      */
-    function hasErrors(){
-        if(isset($this->results['errors']) && count($this->results['errors']) > 0)
+    function hasErrors() {
+        if (isset($this->results['errors']) && count($this->results['errors']) > 0)
             return true;
         return false;
     }
@@ -117,8 +117,8 @@ class Client {
     /**
      * If there was an action called at execution time, this will show it.
      */
-    function print_last_action(){
-        if($this->last_action) { echo $this->last_action; }
+    function print_last_action() {
+        if ($this->last_action) { echo $this->last_action; }
     }
 
     /**
@@ -127,7 +127,7 @@ class Client {
      *
      * @param $var
      */
-    public function load($var){
+    public function load($var) {
         if (is_array($var)) {
             $this->load = array_merge($this->load, $var);
         } else {
@@ -135,14 +135,14 @@ class Client {
         }
     }
 
-    function set_json($uses_json=true){
+    function set_json($uses_json=true) {
         $this->json = $uses_json;
     }
 
     /**
      * Connect to the URL and load the data.
      */
-    private function connect($vars){
+    private function connect($vars) {
 
         // Check if there is an xdebug request:
         if ($this->forwardCookies) {
@@ -180,12 +180,12 @@ class Client {
      * @return bool
      *   Returns true if no errors from the communicator server.
      */
-    public function call($action=NULL){
+    public function call($action=NULL) {
         try {
             // Compose all vars.
             $vars = $this->vars;
             // set the action
-            if($action) {
+            if ($action) {
                 $vars['actions'][] = $action;
                 $this->last_action = $action;
             }
@@ -195,9 +195,9 @@ class Client {
             // Connect to server.
             $this->connect($vars, $this->cookies);
 
-            if($this->raw){
+            if ($this->raw) {
                 $this->results = json_decode($this->raw, true);
-                switch($this->status){
+                switch($this->status) {
                     case 200:
                         // Complete success. Return result.
                         return $this->requestSuccess();
@@ -227,7 +227,7 @@ class Client {
         return $this->vars;
     }
 
-    public function getRaw(){
+    public function getRaw() {
         return $this->raw;
     }
 
@@ -239,7 +239,7 @@ class Client {
         $this->sendJSON = $set;
     }
 
-    function _die($message, $error_code = 200){
+    function _die($message, $error_code = 200) {
         // @todo - this should be done in the output function
         if($this->json){
             Output::jsonError($message);
@@ -248,8 +248,8 @@ class Client {
         }
     }
 
-    private function requestForbidden($status_code){
-        if(count($_POST) > 0){
+    private function requestForbidden($status_code) {
+        if (!empty($_POST) > 0) {
             // Temporary redirect to a page where there is no POST data.
             Navigation::redirect($_SERVER['REQUEST_URI'], 307);
         } else {
@@ -258,12 +258,12 @@ class Client {
         }
     }
 
-    protected function requestSuccess(){
-        if(is_array($this->results)){
+    protected function requestSuccess() {
+        if (is_array($this->results)) {
             // HEADERS
-            if(isset($this->results['cookies']) && is_array($this->results['cookies'])){
-                foreach($this->results['cookies'] as $cookie=>$params){
-                    if($cookie == '') continue;
+            if (isset($this->results['cookies']) && is_array($this->results['cookies'])) {
+                foreach ($this->results['cookies'] as $cookie=>$params) {
+                    if ($cookie == '') continue;
                     $params += array(
                         'value' => null,
                         'ttl' => null,
@@ -276,8 +276,8 @@ class Client {
                 }
             }
 
-            if(isset($this->results['redirect'])){
-                if(isset($this->results['set_redirect'])){
+            if (isset($this->results['redirect'])) {
+                if (isset($this->results['set_redirect'])) {
                     // bring them back to this page after
                     $qsa = strstr($this->results['redirect'], '?') ? '&' : '?';
                     $redirect = $this->results['redirect'].$qsa.'redirect='.urlencode($_SERVER['REQUEST_URI']);
@@ -288,12 +288,12 @@ class Client {
             }
 
             // STANDARD OUTPUT
-            if(isset($this->results['errors']) && is_array($this->results['errors'])){
+            if (isset($this->results['errors']) && is_array($this->results['errors'])) {
                 foreach ($this->results['errors'] as $error) {
                     Messenger::error($error);
                 }
             }
-            if(isset($this->results['messages']) && is_array($this->results['messages'])){
+            if (isset($this->results['messages']) && is_array($this->results['messages'])) {
                 foreach ($this->results['messages'] as $message) {
                     Messenger::message($message);
                 }
@@ -301,7 +301,7 @@ class Client {
 
             return $this->hasErrors() ? false : true;
         } else {
-            if($this->verbose){
+            if ($this->verbose) {
                 $this->_die("Error reading from application!\n{$this->raw}");
             } else {
                 $this->_die("Error reading from application!");

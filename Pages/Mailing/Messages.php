@@ -122,9 +122,9 @@ class Messages extends Table {
             );
 
             // See if any variables have been set.
-            foreach($criteria_list as $c){
+            foreach($criteria_list as $c) {
                 // If the criteria requires variables.
-                if(!empty($c['variables'])){
+                if (!empty($c['variables'])) {
                     // See what variables are required.
                     $vars = explode(',', $c['variables']);
                     $var_data = array();
@@ -150,8 +150,8 @@ class Messages extends Table {
         $output = array();
         if (!empty($cl)) {
             $fields = Database::getInstance()->select('message_criteria', array('message_criteria_id' => array('IN', $cl)));
-            foreach($fields as $f){
-                if(!empty($f['variables'])){
+            foreach($fields as $f) {
+                if (!empty($f['variables'])) {
                     $values = Database::getInstance()->selectRow(
                         'message_message_criteria',
                         array(

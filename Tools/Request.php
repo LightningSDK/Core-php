@@ -74,14 +74,14 @@ class Request {
      * @return mixed
      *   value or false if none.
      */
-    public static function get($var, $type = '', $subtype = '', $default = null){
-        if(isset($_POST[$var])) {
+    public static function get($var, $type = '', $subtype = '', $default = null) {
+        if (isset($_POST[$var])) {
             $args = func_get_args();
             $args[0] = $_POST[$var];
             return call_user_func_array('self::clean', $args);
         }
 
-        if(isset($_GET[$var])) {
+        if (isset($_GET[$var])) {
             $args = func_get_args();
             $args[0] = $_GET[$var];
             return call_user_func_array('self::clean', $args);
@@ -101,8 +101,8 @@ class Request {
      *
      * @return bool|float|int|string
      */
-    public static function cookie($var, $type='', $subtype='', $default = null){
-        if(!isset($_COOKIE[$var]))
+    public static function cookie($var, $type='', $subtype='', $default = null) {
+        if (!isset($_COOKIE[$var]))
             return $default;
 
         $args = func_get_args();
@@ -119,8 +119,8 @@ class Request {
      *
      * @return bool|float|int|string
      */
-    public static function post($var, $type='', $subtype='', $default = null){
-        if(!isset($_POST[$var]))
+    public static function post($var, $type='', $subtype='', $default = null) {
+        if (!isset($_POST[$var]))
             return $default;
 
         $args = func_get_args();
@@ -138,8 +138,8 @@ class Request {
      *
      * @return mixed
      */
-    public static function query($var, $type='', $subtype='', $default = null){
-        if(!isset($_GET[$var]))
+    public static function query($var, $type='', $subtype='', $default = null) {
+        if (!isset($_GET[$var]))
             return $default;
 
         $args = func_get_args();
@@ -162,7 +162,7 @@ class Request {
             self::$parsedInput = json_decode($json, true) ?: array();
         }
 
-        if(!isset(self::$parsedInput[$var])) {
+        if (!isset(self::$parsedInput[$var])) {
             return $default;
         }
         $args = func_get_args();
@@ -179,14 +179,14 @@ class Request {
      *
      * @return bool|float|int|string
      */
-    public static function getAny($var, $type='', $subtype=''){
-        if(isset($_REQUEST[$var])) {
+    public static function getAny($var, $type='', $subtype='') {
+        if (isset($_REQUEST[$var])) {
             $args = func_get_args();
             $args[0] = $_REQUEST[$var];
             return call_user_func_array('self::clean', $args);
         }
 
-        if(!isset($_COOKIE[$var])) {
+        if (!isset($_COOKIE[$var])) {
             $args = func_get_args();
             $args[0] = $_COOKIE[$var];
             return call_user_func_array('self::clean', $args);
@@ -224,7 +224,7 @@ class Request {
      *
      * @return bool|float|int|string
      */
-    private static function clean($data, $type = 'text'){
+    private static function clean($data, $type = 'text') {
         // Return the value.
         switch($type) {
             case 'int':
@@ -241,10 +241,10 @@ class Request {
             case 'array':
             case 'array_keys':
                 $args = func_get_args();
-                if(!is_array($data) || count($data) == 0)
+                if (!is_array($data) || count($data) == 0)
                     return false;
                 $output = array();
-                foreach($data as $k => $v){
+                foreach($data as $k => $v) {
                     $output[] = self::clean(
                         $type == 'array_keys' ? $k : $v,
                         !empty($args[2]) ? $args[2] : null
@@ -254,10 +254,10 @@ class Request {
                 break;
             case 'keyed_array':
                 $args = func_get_args();
-                if(!is_array($data) || count($data) == 0)
+                if (!is_array($data) || count($data) == 0)
                     return false;
                 $output = array();
-                foreach($data as $k => $v){
+                foreach($data as $k => $v) {
                     $output[$k] = self::clean(
                         $v,
                         !empty($args[2]) ? $args[2] : null
