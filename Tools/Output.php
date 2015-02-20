@@ -79,13 +79,17 @@ class Output {
         exit;
     }
 
-    public static function jsonData($data) {
-        echo json_encode(array(
+    public static function jsonData($data, $include_cookies = false) {
+        $output = array(
             'data' => $data,
             'status' => 'success',
             'errors' => Messenger::getErrors(),
             'messages' => Messenger::getMessages(),
-        ));
+        );
+        if ($include_cookies) {
+            $output['cookies'] = self::$cookies;
+        }
+        echo json_encode($output);
         exit;
     }
 
