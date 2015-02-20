@@ -221,9 +221,11 @@ class Database extends Singleton {
 
         // Show the stack trace.
         $backtrace = debug_backtrace();
-        foreach($backtrace as $call){
-            if(!preg_match('/class_database\.php$/', $call['file'])){
-                $errors[] = 'Called from: ' .$call['file'] . ' : ' . $call['line'];
+        foreach($backtrace as $call) {
+            if (empty($call['file'])) {
+                $errors[] = 'Called from: ' . $call['class'] . ' : ' . $call['function'];
+            } elseif (!preg_match('/class_database\.php$/', $call['file'])) {
+                $errors[] = 'Called from: ' . $call['file'] . ' : ' . $call['line'];
             }
         }
 
