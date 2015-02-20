@@ -55,6 +55,10 @@ class Messenger {
         }
     }
 
+    public static function hasErrors() {
+        return !empty(self::$errors);
+    }
+
     /**
      * Get a list of errors.
      *
