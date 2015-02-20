@@ -64,7 +64,11 @@ class Object {
     public function __get($var) {
         switch($var) {
             case 'id':
-                return $this->data[static::PRIMARY_KEY];
+                if (!empty($this->data[static::PRIMARY_KEY])) {
+                    return $this->data[static::PRIMARY_KEY];
+                } else {
+                    return false;
+                };
                 break;
             case 'data':
                 return $this->data;
