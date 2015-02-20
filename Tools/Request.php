@@ -209,6 +209,8 @@ class Request {
                 return empty($_SERVER['REMOTE_ADDR']) ? 0 : ip2long($_SERVER['REMOTE_ADDR']);
             case 'ip':
                 return empty($_SERVER['REMOTE_ADDR']) ? '' : $_SERVER['REMOTE_ADDR'];
+            default:
+                return $_SERVER[$var];
         }
     }
 
