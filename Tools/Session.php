@@ -49,6 +49,10 @@ class Session extends Singleton {
         return parent::getInstance($create_object, $create_session);
     }
 
+    protected static function loadRequestSessionKey() {
+        return Request::cookie(Configuration::get('session.cookie'), 'hex');
+    }
+
     /**
      * Create the session object.
      *
@@ -59,7 +63,7 @@ class Session extends Singleton {
      *   The current session.
      */
     public static function createInstance($create_session = true) {
-        if ($session_key = Request::cookie('session', 'hex')) {
+        if ($session_key = static::loadRequestSessionKey()) {
             $session_criteria = array(
                 'session_key' => array('LIKE', $session_key)
             );
