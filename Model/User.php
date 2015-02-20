@@ -135,7 +135,7 @@ class User extends Object {
      *   Whether the user is anonymous.
      */
     public function isAnonymous() {
-        return $this->user_id == 0;
+        return empty($this->id);
     }
 
     /**
