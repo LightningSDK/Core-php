@@ -46,8 +46,11 @@ class Bootstrap {
                 // Load an override class and override it.
                 $overridden_name = 'Overridden\\' . $classname;
                 self::$overrides[$overridden_name] = $overridden_name;
+                // Load the Lightning version in the Overridden namespace.
                 self::loadClassFile($classname);
+                // Load the overidden version in the Source namespace.
                 self::loadClassFile(self::$classes[$classname]);
+                // Alias the Lightning namespace to the Source namespace.
                 class_alias(self::$classes[$classname], $classname);
                 self::$loadedClasses[$classname] = $classname;
                 return;
