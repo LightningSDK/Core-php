@@ -10,6 +10,7 @@ use Lightning\Model\User;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Output;
 use Lightning\Tools\Singleton;
+use Lightning\Tools\Session as SessionTool;
 
 /**
  * A singleton for the global user.
@@ -36,7 +37,7 @@ class ClientUser extends Singleton {
      */
     public static function createInstance() {
         // If a session is found.
-        $session = Session::getInstance(true, false);
+        $session = SessionTool::getInstance(true, false);
         if ($session && $session->user_id > 0) {
             // If we are logged into someone elses account.
             if ($impersonate = $session->getSetting('impersonate')) {
