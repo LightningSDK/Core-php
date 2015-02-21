@@ -20,7 +20,7 @@ use Lightning\View\API;
 class Server extends API {
 
     protected $action_namespace;
-    protected $output = array();
+    protected $output;
     protected $verbose = false;
     protected $shutdown_function = '';
 
@@ -74,7 +74,10 @@ class Server extends API {
             try{
                 $class = $this->action_namespace . '\\Load';
                 $controller = new $class();
-                $this->$d = $controller->$d($this);
+                if ($result = $controller->$d($this)) {
+                    // The call can update the output or return the value.
+                    $this->$d = $result;
+                }
             } catch(Exception $e) {
                 $this->_die($e->getMessage());
             }
