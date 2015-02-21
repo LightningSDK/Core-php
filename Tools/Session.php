@@ -9,7 +9,6 @@ use Lightning\Tools\Messenger;
 use Lightning\Tools\Output;
 use Lightning\Tools\Security\Random;
 use Lightning\Tools\Singleton;
-use Lightning\View\JS;
 
 class Session extends Singleton {
 
@@ -177,7 +176,7 @@ class Session extends Singleton {
      */
     public function setState($state) {
         $this->state = $this->state | $state;
-        Database::getInstance()->query("UPDATE session SET state = (state | " . $state . ") WHERE session_id={$this->id}");
+        Database::getInstance()->update('session', ['state' => ['expression' => 'state | ' . $state]], ['session_id' => $this->id]);
     }
 
     /**
@@ -185,7 +184,7 @@ class Session extends Singleton {
      */
     public function unsetState($state) {
         $this->state = $this->state & ~$state;
-        Database::getInstance()->query("UPDATE session SET state = (state & ~".$state.") WHERE session_id={$this->id}");
+        Database::getInstance()->update('session', ['state' => ['expression' => 'state & ~ ' . $state]], ['session_id' => $this->id]);
     }
 
     /**
