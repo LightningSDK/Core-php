@@ -210,7 +210,7 @@ class Request {
             case 'ip':
                 return empty($_SERVER['REMOTE_ADDR']) ? '' : $_SERVER['REMOTE_ADDR'];
             default:
-                return $_SERVER[$var];
+                return isset($_SERVER[$var]) ? $_SERVER[$var] : null;
         }
     }
 
