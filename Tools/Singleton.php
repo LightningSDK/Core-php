@@ -37,7 +37,11 @@ class Singleton extends Object {
     public static function getInstance($create = true) {
         $class = static::getStaticName();
         if (empty(static::$instances[$class]) && $create) {
-            self::$instances[$class] = self::getNewInstance($class);
+            // There may be additional args passed to this function.
+            $args = func_get_args();
+            // Replace the first argument with the class name.
+            $args[0] = $class;
+            self::$instances[$class] = call_user_func_array('static::getNewInstance', $args);
         }
         return !empty(self::$instances[$class]) ? self::$instances[$class] : null;
     }
