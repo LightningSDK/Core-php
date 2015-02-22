@@ -4,7 +4,7 @@ lightning.stats = {
         var requestData = {
             sets: []
         };
-        $('#stats_controls select').not('#tracker_\\%').each(function() {
+        $('#stats_controls select').not('#tracker_\\%').each(function () {
             var id = $(this).attr('id').replace('tracker_', '');
             requestData.sets.push(
                 {
@@ -14,7 +14,7 @@ lightning.stats = {
             );
         });
 
-        this.getTrackerStats(requestData, this.updateStats)
+        this.getTrackerStats(requestData, this.updateStats);
     },
 
     drawData: function(id, data) {
@@ -101,9 +101,19 @@ lightning.stats = {
 
     init: function() {
         var self = this;
+        // Main initialization for all charts.
         $('.chart_controls input, .chart_controls select').change(function(e) {
             var id = $(e.target).closest('.chart_controls').attr('id').replace('chart_controls_', '');
             self.updateStats(id);
         });
+        // Init each of the charts.
+        for (var id in lightning.vars.chart) {
+            if (lightning.vars.chart[id].data) {
+                self.drawData(id, lightning.vars.chart[id].data);
+                self.updateTotals(id, lightning.vars.chart[id].data);
+            } else if (lightning.vars.chart[id].ajax) {
+                self.updateStats(id);
+            }
+        }
     }
 };

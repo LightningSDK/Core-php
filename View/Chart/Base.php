@@ -20,13 +20,15 @@ abstract class Base extends Page {
         parent::__construct();
         JS::add('/js/Chart.min.js');
         JS::startup('lightning.stats.init()');
-        JS::startup('lightning.stats.updateStats("' . $this->id . '")');
 
         // Prepare the JS.
         JS::set('chart.' . $this->id . '.renderer', $this->renderer);
         JS::set('chart.' . $this->id . '.url', '/' . Request::get('request'));
         JS::set('chart.' . $this->id . '.params.start', ['source' => 'start']);
         JS::set('chart.' . $this->id . '.params.number_format', $this->numberFormat);
+        if (!empty($this->data)) {
+            JS::set('chart.' . $this->id . '.data', $this->data);
+        }
     }
 
     public function get() {
