@@ -125,7 +125,7 @@ class Request {
 
         $args = func_get_args();
         $args[0] = $_POST[$var];
-        return call_user_func_array('self::clean', $args);
+        return call_user_func_array('static::clean', $args);
     }
 
     /**
@@ -224,7 +224,7 @@ class Request {
      *
      * @return bool|float|int|string
      */
-    private static function clean($data, $type = 'text') {
+    protected static function clean($data, $type = 'text') {
         // Return the value.
         switch($type) {
             case 'int':
