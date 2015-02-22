@@ -2,6 +2,7 @@
 
 namespace Lightning\Tools;
 
+use Exception;
 use Lightning\View\Field;
 use Lightning\View\Field\Hidden;
 
@@ -33,6 +34,15 @@ class Form {
         }
         $output = '</form>';
         return $output;
+    }
+
+    public static function validateToken() {
+        $expected = Session::getInstance()->getToken();
+        $actual = Request::post('token', 'base64');
+        if (empty($actual) || $actual != $expected) {
+            throw new Exception('Invalid Token.');
+        }
+        return true;
     }
 
     public function validate() {
