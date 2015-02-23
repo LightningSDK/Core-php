@@ -9,6 +9,7 @@ use Lightning\Tools\Messenger;
 use Lightning\Tools\Output;
 use Lightning\Tools\Security\Random;
 use Lightning\Tools\Singleton;
+use Lightning\Tools\Request as LightningRequest;
 
 class Session extends Singleton {
 
@@ -68,7 +69,7 @@ class Session extends Singleton {
             );
             // If the session is only allowed on one IP.
             if (Configuration::get('session.single_ip')) {
-                $session_criteria['session_ip'] = Request::server('ip_int');
+                $session_criteria['session_ip'] = LightningRequest::server('ip_int');
             }
 
             // See if the session exists.
@@ -76,23 +77,16 @@ class Session extends Singleton {
                 // Load the session.
                 $session = new static($session_details);
 
-                // If the password time has lapsed, remove password status.
-                if ($session->getState(Session::STATE_PASSWORD)) {
-                    if ($session_details['last_ping'] < time() - Configuration::get('session.password_ttl')) {
-                        if (!$session->unsetState(Session::STATE_PASSWORD)) {
-                            // The session does not want to be remembered and has been destroyed.
-                            return false;
-                        }
-                    } else {
-                        $session->state |= static::STATE_PASSWORD;
-                    }
+                if ($session->validateState()) {
+                    $session->ping();
+                    return $session;
+                } else {
+                    $session->destroy();
+                    return static::create();
                 }
-
-                $session->ping();
-                return $session;
             } else {
                 // Possible security issue.
-                Logger::logIP('Bad session', Logger::SEVERITY_MED);
+                Logger::security('Bad session', Logger::SEVERITY_MED);
                 // There is an old cookie that we should delete.
                 // Send a cookie to erase the users cookie, in case this is really a minor error.
                 static::clearCookie();
@@ -106,6 +100,25 @@ class Session extends Singleton {
         else {
             return null;
         }
+    }
+
+    public function validateState() {
+        // If the session has expired
+        if ($remember_ttl = Configuration::get('session.remember_ttl')) {
+            if ($this->last_ping < time() - $remember_ttl) {
+                return false;
+            }
+        }
+
+        // If the password time has lapsed, remove password status.
+        if ($this->last_ping < time() - Configuration::get('session.password_ttl')) {
+            if ($this->getState(static::STATE_REMEMBER)) {
+                $this->unsetState(static::STATE_PASSWORD);
+            } else {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -127,7 +140,7 @@ class Session extends Singleton {
         }
         $session_details['session_key'] = $new_sess_key;
         $session_details['last_ping'] = time();
-        $session_details['session_ip'] = Request::server('ip_int');
+        $session_details['session_ip'] = LightningRequest::server('ip_int');
         $session_details['user_id'] = $user_id;
         $session_details['state'] = 0 | ($remember ? static::STATE_REMEMBER : 0);
         $session_details['form_token'] = $new_token;
@@ -175,23 +188,31 @@ class Session extends Singleton {
      * This is called when the user enters their password and password access is now allowed.
      */
     public function setState($state) {
-        $this->state = $this->state | $state;
+        $this->state |= $state;
         Database::getInstance()->update('session', ['state' => ['expression' => 'state | ' . $state]], ['session_id' => $this->id]);
     }
 
     /**
-     * Drops the user out of the PIN approved state. This may still leave them with password access.
+     * Remove a state.
      */
     public function unsetState($state) {
-        $this->state = $this->state & ~$state;
+        $this->state ^= $state;
         Database::getInstance()->update('session', ['state' => ['expression' => 'state & ~ ' . $state]], ['session_id' => $this->id]);
+    }
+
+    /**
+     * Remove all states.
+     */
+    public function resetState() {
+        $this->state = 0;
+        Database::getInstance()->update('session', ['state' => 0], ['session_id' => $this->id]);
     }
 
     /**
      * Destroy the current session and remove it from the database.
      */
     public function destroy () {
-        if ($this->id) {
+        if (!empty($this->id)) {
             Database::getInstance()->delete('session', array('session_id' => $this->id));
             $this->data = null;
         }
@@ -221,7 +242,7 @@ class Session extends Singleton {
     static function clearCookie() {
         if (!headers_sent()) {
             unset($_COOKIE[Configuration::get('session.cookie')]);
-            Output::setCookie(Configuration::get('session.cookie'), '', -1, '', Configuration::get('cookie_domain'));
+            Output::clearCookie(Configuration::get('session.cookie'));
         }
     }
 
@@ -246,22 +267,23 @@ class Session extends Singleton {
      * @param int $exception
      *   A session ID that can be left as active.
      */
-    public function dump_sessions($exception=0) {
-        // Delete this session.
-        Database::getInstance()->delete('session',
-            array(
-                'user_id'=>$this->user_id,
-                'remember'=>0,
-                'session_id'=>array('!=', $exception)));
-        // Clean users other sessions.
+    public function dumpSessions($exception=0) {
+        // Remove password state for all other sessions.
         Database::getInstance()->update(
             'session',
             array(
-                'password_time' => 0,
-                'pin_time' => 0,
+                'state' => ['expression' => 'state & ' . self::STATE_REMEMBER],
             ),
             array(
                 'user_id' => $this->user_id,
+                'session_id' => array('!=', $exception),
+            )
+        );
+        // Delete sessions that are not in the remember state.
+        Database::getInstance()->delete('session',
+            array(
+                'user_id' => $this->user_id,
+                'state' => ['!&', self::STATE_REMEMBER],
                 'session_id' => array('!=', $exception),
             )
         );

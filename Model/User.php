@@ -591,10 +591,10 @@ class User extends Object {
                 $temp_user->registerToSession($remember, $auth_only ?: Session::STATE_PASSWORD);
                 return true;
             } else {
-                Logger::logIP('Bad Password', Logger::SEVERITY_HIGH);
+                Logger::security('Bad Password', Logger::SEVERITY_HIGH);
             }
         } else {
-            Logger::logIP('Bad Username', Logger::SEVERITY_MED);
+            Logger::security('Bad Username', Logger::SEVERITY_MED);
         }
         // Could not log in.
         return false;
@@ -602,6 +602,7 @@ class User extends Object {
 
     public function destroy() {
         // TODO: Remove the current user's session.
+        $this->data = array();
         Session::reset();
     }
 

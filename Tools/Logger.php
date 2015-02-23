@@ -2,14 +2,17 @@
 
 namespace Lightning\Tools;
 
+use Source\Overrides\Tools\Request as LightningRequest;
+
 class Logger extends Singleton {
 
     const SEVERITY_LOW = 1;
     const SEVERITY_MED = 2;
-    const SEVERITY_HIGH = 3;
+    const SEVERITY_HIGH = 4;
 
     protected static $log;
     protected static $logFile;
+    protected static $securityLogFile;
 
     protected static $errorTypes = array(
         E_ERROR           => 'error',
@@ -32,6 +35,8 @@ class Logger extends Singleton {
     public static function message($message) {
         if (!empty(self::$logFile)) {
             file_put_contents(self::$logFile, self::dateStamp() . ' ' . $message . "\n", FILE_APPEND | LOCK_EX);
+        } else {
+            error_log($message);
         }
     }
 
@@ -42,8 +47,15 @@ class Logger extends Singleton {
         }
     }
 
-    public static function logIP($error, $ip) {
-        // TODO: Fill this out.
+    public static function security($message, $severity) {
+        $severity_message = str_pad(str_repeat('*', $severity), 5, ' ');
+        $ip_message = $severity_message . '[' . str_pad(LightningRequest::server('ip'), 15, ' ') . '] '. $message;
+        if (!empty(self::$logFile)) {
+            file_put_contents(
+                self::$logFile, self::dateStamp() . ' ' . $ip_message . "\n", FILE_APPEND | LOCK_EX);
+        } else {
+            error_log($ip_message);
+        }
     }
 
     protected static function dateStamp() {
