@@ -1155,6 +1155,11 @@ class Database extends Singleton {
                         $values = array_merge($values, $v['vars']);
                     }
                 }
+                // If this is inserting a bit column.
+                if (!empty($v['bit'])) {
+                    $a2[] = "{$field} = b?";
+                    $values[] = $v['bit'];
+                }
                 // IN operator.
                 elseif (!empty($v[0]) && is_string($v[0])) {
                     switch (strtoupper($v[0])) {

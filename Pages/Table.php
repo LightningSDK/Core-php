@@ -2202,7 +2202,7 @@ abstract class Table extends Page {
                 $this->preset[$field['field']]['submit_function']($output);
                 continue;
             } else {
-                switch ($field['type']) {
+                switch (preg_replace('/\([0-9]+\)/', '', $field['type'])) {
                     case 'image':
                     case 'file':
                         if ($_FILES[$field['field']]['size'] > 0
@@ -2253,6 +2253,9 @@ abstract class Table extends Page {
                             $vals .= ($_POST[$field['form_field'].'_'.$i] == 1 || $_POST[$field['form_field'].'_'.$i] == "on") ? 1 : 0;
                         }
                         $val = bindec(strrev($vals));
+                        break;
+                    case 'bit':
+                        $val = ['bit' => decbin(Request::get($field['form_field'], 'int'))];
                         break;
                     case 'html':
                         $val = Request::get($field['form_field'],
