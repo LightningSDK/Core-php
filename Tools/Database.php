@@ -1193,8 +1193,20 @@ class Database extends Singleton {
                         case '>':
                         case '>=':
                         case 'LIKE':
-                            $values[] = $v[1];
                             $a2[] = "{$field} {$v[0]} ? ";
+                            $values[] = $v[1];
+                            break;
+                        // Where a specific bit us set.
+                        case '&':
+                            $a2[] = "{$field} & ? = ?";
+                            $values[] = $v[1];
+                            $values[] = $v[1];
+                            break;
+                        // Where a specific bit is not set.
+                        case '!&';
+                            $a2[] = "{$field} & ? != ?";
+                            $values[] = $v[1];
+                            $values[] = $v[1];
                             break;
                     }
                 }
