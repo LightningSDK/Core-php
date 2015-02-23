@@ -228,7 +228,13 @@ abstract class Table extends Page {
         if (isset($_POST['function'])) $this->function = $_POST['function'];
         if (isset($_REQUEST['id'])) $this->id = Request::get('id');
         if (isset($_REQUEST['p'])) $this->page_number = max(1, Request::get('p'));
-        $this->serial_update = Request::get('serialupdate', 'boolean');
+
+        /*
+         * serial_update can come as a GET parameter or with form POST processing,
+         * where it is a checkbox
+         */
+        $this->serial_update = (Request::get('serialupdate', 'boolean') OR (Request::get('serialupdate', 'string') == "on"));
+
         $this->refer_return = Request::get('refer_return');
 
         // load the sort fields
@@ -497,13 +503,18 @@ abstract class Table extends Page {
         }
 
         if ($this->enable_serial_update && $this->serial_update) {
-            // Store the next highest key (if existant)
-            $nextkey = NULL;
-            $nextkey = Database::getInstance()->selectfield(array('mykey' => ' MIN('.$this->getKey().')'), $this->table, array($this->getKey() => array(' > ', $this->id)));
+            // Get the next id in the table
+            $nextkey = Database::getInstance()->selectField(
+                array('nextkey' => array('expression' => "MIN({$this->getKey()})")), 
+                $this->table, 
+                array(
+                    $this->getKey() => array('>', $this->id)
+                )
+            );
             if ($nextkey) {
                 $this->id = $nextkey;
                 $this->get_row();
-                $this->action = 'edit';
+                $this->action_after['update'] = 'edit';
             } else {
                 // No higher key exists, drop back to the list
                 $this->serial_update = false;
@@ -536,7 +547,7 @@ abstract class Table extends Page {
         if ($return = Request::get('table_return')) {
             Navigation::redirect($return);
         }
-        
+
         if ($this->submit_redirect && $redirect = Request::get('redirect')) {
             Navigation::redirect($redirect);
         } elseif (!empty($this->redirectAfter[$this->action])) {
