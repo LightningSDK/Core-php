@@ -334,7 +334,7 @@ class Message extends Object {
 
         // Replace conditions.
         $conditions = array();
-        $conditional_search = '/{IF ([a-z_]+)}(.*) {ENDIF \1}/imU';
+        $conditional_search = '/{IF ([a-z_]+)}(.*){ENDIF \1}/imU';
         preg_match_all($conditional_search, $source, $conditions);
         foreach ($conditions[1] as $key => $var) {
             if (!empty($this->customVariables[$var]) || !empty($this->internalCustomVariables[$var])) {
