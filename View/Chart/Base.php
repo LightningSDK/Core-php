@@ -29,6 +29,7 @@ abstract class Base extends Page {
         if (!empty($this->data)) {
             JS::set('chart.' . $this->id . '.data', $this->data);
         }
+        JS::set('chart.' . $this->id . '.ajax', $this->ajax);
     }
 
     public function get() {
