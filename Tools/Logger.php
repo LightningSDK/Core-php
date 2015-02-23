@@ -2,8 +2,6 @@
 
 namespace Lightning\Tools;
 
-use Source\Overrides\Tools\Request as LightningRequest;
-
 class Logger extends Singleton {
 
     const SEVERITY_LOW = 1;
@@ -49,7 +47,7 @@ class Logger extends Singleton {
 
     public static function security($message, $severity) {
         $severity_message = str_pad(str_repeat('*', $severity), 5, ' ');
-        $ip_message = $severity_message . '[' . str_pad(LightningRequest::server('ip'), 15, ' ') . '] '. $message;
+        $ip_message = $severity_message . '[' . str_pad(Request::server('ip'), 15, ' ') . '] '. $message;
         if (!empty(self::$logFile)) {
             file_put_contents(
                 self::$logFile, self::dateStamp() . ' ' . $ip_message . "\n", FILE_APPEND | LOCK_EX);
@@ -79,9 +77,10 @@ class Logger extends Singleton {
         foreach (debug_backtrace() as $row) {
             if ($started || (!empty($row['file']) && $row['file'] == $errfile && $row['line'] == $errline)) {
                 $started = true;
-                error_log('    in ' . $row['file'] . ' on line ' . $row['line']);
+                $line = '    in ' . (!empty($row['file']) ? $row['file'] : '?') . ' on line ' . (!empty($row['line']) ? $row['line'] : '?');
+                error_log($line);
                 if ($output) {
-                    echo('    in ' . $row['file'] . ' on line ' . $row['line']);
+                    echo $line;
                 }
             }
         }
