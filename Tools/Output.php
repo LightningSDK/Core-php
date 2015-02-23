@@ -47,7 +47,7 @@ class Output {
      * @param array|integer $data
      *   The data to output as JSON.
      */
-    public static function json($data = array()) {
+    public static function json($data = array(), $suppress_status = false) {
         // Predefined outputs.
         if ($data == self::ACCESS_DENIED) {
             $data = array('status' => 'access_denied');
@@ -64,10 +64,14 @@ class Output {
         }
 
         // Add errors and messages.
-        $data['errors'] = Messenger::getErrors();
-        $data['messages'] = Messenger::getMessages();
+        if (Messenger::hasErrors()) {
+            $data['errors'] = Messenger::getErrors();
+        }
+        if (Messenger::hasMessages()) {
+            $data['messages'] = Messenger::getMessages();
+        }
 
-        if (empty($data['status']) && empty($data['errors'])) {
+        if (!$suppress_status && empty($data['status']) && empty($data['errors'])) {
             $data['status'] = self::$statusStrings[self::SUCCESS];
         }
 
