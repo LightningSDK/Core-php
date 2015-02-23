@@ -71,6 +71,19 @@ class Scrub {
     }
 
     /**
+     * Remove all characters that are not alphanumeric.
+     *
+     * @param string $value
+     *   A string.
+     *
+     * @return string
+     *   The adjusted string.
+     */
+    public static function compressAlphaNumeric($value){
+        return preg_replace("/[^a-zA-Z0-9]+/", "", $value);
+    }
+
+    /**
      * Validate an email address.
      *
      * @param string $email
