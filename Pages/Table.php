@@ -228,7 +228,12 @@ abstract class Table extends Page {
         if (isset($_POST['function'])) $this->function = $_POST['function'];
         if (isset($_REQUEST['id'])) $this->id = Request::get('id');
         if (isset($_REQUEST['p'])) $this->page_number = max(1, Request::get('p'));
-        $this->serial_update = Request::get('serialupdate', 'boolean');
+
+        /*
+         * serial_update comes as POST parameter
+         */
+        $this->serial_update = Request::post('serialupdate', 'boolean');
+        
         $this->refer_return = Request::get('refer_return');
 
         // load the sort fields
@@ -497,13 +502,18 @@ abstract class Table extends Page {
         }
 
         if ($this->enable_serial_update && $this->serial_update) {
-            // Store the next highest key (if existant)
-            $nextkey = NULL;
-            $nextkey = Database::getInstance()->selectfield(array('mykey' => ' MIN('.$this->getKey().')'), $this->table, array($this->getKey() => array(' > ', $this->id)));
+            // Get the next id in the table
+            $nextkey = Database::getInstance()->selectField(
+                array('nextkey' => array('expression' => "MIN({$this->getKey()})")), 
+                $this->table, 
+                array(
+                    $this->getKey() => array('>', $this->id)
+                )
+            );
             if ($nextkey) {
                 $this->id = $nextkey;
                 $this->get_row();
-                $this->action = 'edit';
+                $this->action_after['update'] = 'edit';
             } else {
                 // No higher key exists, drop back to the list
                 $this->serial_update = false;
@@ -536,7 +546,7 @@ abstract class Table extends Page {
         if ($return = Request::get('table_return')) {
             Navigation::redirect($return);
         }
-        
+
         if ($this->submit_redirect && $redirect = Request::get('redirect')) {
             Navigation::redirect($redirect);
         } elseif (!empty($this->redirectAfter[$this->action])) {
@@ -1379,7 +1389,7 @@ abstract class Table extends Page {
                 echo '<input type="hidden" name="refer_return" value="'.$this->refer_return.'" />';
             }
             if ($new_action == 'update' && $this->enable_serial_update) {
-                echo '<input type="checkbox" name="serialupdate" '.($this->serial_update ? 'checked="checked" ' : '').' /> Edit Next Record';
+                echo '<input type="checkbox" name="serialupdate" value="true" checked="checked" /> Edit Next Record';
             }
             echo $this->form_buttons_after;
             echo "</td></tr>";
