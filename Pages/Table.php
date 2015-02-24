@@ -230,11 +230,10 @@ abstract class Table extends Page {
         if (isset($_REQUEST['p'])) $this->page_number = max(1, Request::get('p'));
 
         /*
-         * serial_update can come as a GET parameter or with form POST processing,
-         * where it is a checkbox
+         * serial_update comes as POST parameter
          */
-        $this->serial_update = (Request::get('serialupdate', 'boolean') OR (Request::get('serialupdate', 'string') == "on"));
-
+        $this->serial_update = Request::post('serialupdate', 'boolean');
+        
         $this->refer_return = Request::get('refer_return');
 
         // load the sort fields
@@ -1390,7 +1389,7 @@ abstract class Table extends Page {
                 echo '<input type="hidden" name="refer_return" value="'.$this->refer_return.'" />';
             }
             if ($new_action == 'update' && $this->enable_serial_update) {
-                echo '<input type="checkbox" name="serialupdate" '.($this->serial_update ? 'checked="checked" ' : '').' /> Edit Next Record';
+                echo '<input type="checkbox" name="serialupdate" value="true" checked="checked" /> Edit Next Record';
             }
             echo $this->form_buttons_after;
             echo "</td></tr>";
