@@ -44,6 +44,18 @@ class Client extends RestClient {
     }
 
     /**
+     * Adds an additional action to call when connection is executed.
+     *
+     * @param $action
+     */
+    function action($action) {
+        if (!isset($this->vars)) {
+            $this->vars['actions'] = [];
+        }
+        $this->vars['actions'][] = $action;
+    }
+
+    /**
      * Adds a request for additional data.
      * @todo - can this be replaced now that action is an array?
      *

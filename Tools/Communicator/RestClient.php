@@ -37,21 +37,11 @@ class RestClient {
      */
     function __construct($server_address) {
         $this->serverAddress = $server_address;
-        $this->vars['actions'] = array();
         $this->verbose = Configuration::get('debug', false);
     }
 
     public function forwardCookies($forward = true) {
         $this->forwardCookies = $forward;
-    }
-
-    /**
-     * Adds an additional action to call when connection is executed.
-     *
-     * @param $action
-     */
-    function action($action) {
-        $this->vars['actions'][] = $action;
     }
 
     /**
@@ -132,7 +122,12 @@ class RestClient {
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_POST, (int) $post);
         if ($post) {
-            $content = $this->sendJSON ? json_encode($vars) : http_build_query($vars);
+            if ($this->sendJSON) {
+                $content = json_encode($vars);
+                curl_setopt($curl, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+            } else {
+                $content = http_build_query($vars);
+            }
             curl_setopt($curl, CURLOPT_POSTFIELDS, $content);
         }
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
@@ -153,12 +148,12 @@ class RestClient {
         return implode('; ', $a2);
     }
 
-    public function callGet($path) {
+    public function callGet($path = null) {
         $this->connect($this->vars, false, $path);
         return $this->processResponse();
     }
 
-    public function callPost($path) {
+    public function callPost($path = null) {
         $this->connect($this->vars, true, $path);
         return $this->processResponse();
     }
