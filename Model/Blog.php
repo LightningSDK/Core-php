@@ -191,7 +191,7 @@ class Blog extends Singleton {
                 'from' => static::BLOG_TABLE,
                 'join' => $this->joinAuthorCatTables()
             ),
-            array('blog_id' => $id),
+            array('mindpt_blog.blog_id' => $id),
             $this->blogFields()
         );
         $this->postProcessResults();
