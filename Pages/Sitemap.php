@@ -45,19 +45,20 @@ class Sitemap extends API {
             'changefreq' => 'weekly'
         );
 
-        $blogs = $db->select(
-            array(
+        $blogs = $db->select([
                 'from' => 'blog',
-                'join' => array(
-                    'LEFT JOIN', '( SELECT time, blog_id FROM blog_comment ORDER BY TIME DESC) AS blog_comment', 'USING ( blog_id )'
-                ),
-            ),
-            array(),
-            array(
-                array('blog_time' => array('expression' => 'blog.time')),
-                array('blog_comment_time' => array('expression' => 'blog_comment.time')),
+                'join' => [
+                    'LEFT JOIN', 
+                    ['from' => 'blog_comment', 'as' => 'blog_comment', 'fields' => ['time', 'blog_id'], 'order' => ['time' => 'DESC']],
+                    'USING ( blog_id )'
+                ],
+            ],
+            [],
+            [
+                ['blog' => ['blog_time' => 'time']],
+                ['blog_comment' => ['blog_comment_time' => 'time']],
                 'url',
-            ),
+            ],
             'GROUP BY blog_id'
         );
 
