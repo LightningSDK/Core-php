@@ -137,6 +137,7 @@ class RestClient {
 
         $this->raw = curl_exec($curl);
         $this->status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        curl_close($curl);
     }
 
     protected function cookieImplode($cookies) {
