@@ -82,8 +82,15 @@ class Page {
             $template->set('content', $this->page);
         }
 
-        foreach (array('title', 'keywords', 'description') as $meta_data) {
-            $template->set('page_' . $meta_data, Configuration::get('meta_data.' . $meta_data));
+        foreach (array('title', 'keywords', 'description', 'author') as $meta_data) {
+            
+            // Check if template already has these variables set
+            $var_name = 'page_'.$meta_data;
+            $var = $template->$var_name;
+            if (empty($var)) { 
+                // Set it by default from configuration if it's not defined earlier
+                $template->set('page_' . $meta_data, Configuration::get('meta_data.' . $meta_data));
+            }
         }
         $template->set('google_analytics_id', Configuration::get('google_analytics_id'));
 

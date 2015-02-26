@@ -71,11 +71,21 @@ class Blog extends Page {
         }
 
         if (count($blog->posts) == 1) {
-            foreach (array('title', 'keywords', 'description') as $meta_data) {
-                $value = $meta_data == 'description' ?
-                    Scrub::toHTML($blog->body($blog->posts[0]['body'],true)) :
-                    Scrub::toHTML($blog->body($blog->posts[0][$meta_data],true));
-                Configuration::set('page_' . $meta_data, str_replace("*", $value, Configuration::get('page_' . $meta_data)));
+            foreach (array('title', 'keywords', 'description', 'author') as $meta_data) {
+                switch ($meta_data) {
+                    case 'title' :
+                        $value = Configuration::get('page_' . $meta_data).' | '.Scrub::toHTML($blog->body($blog->posts[0]['author_name'],true));
+                        break;
+                    case 'description':
+                        $value = Scrub::toHTML($blog->body($blog->posts[0]['body'],true));
+                        break;
+                    case 'author' :
+                        $value = Scrub::toHTML($blog->body($blog->posts[0]['author_name'],true));
+                        break;
+                    default:
+                        $value = Scrub::toHTML($blog->body($blog->posts[0][$meta_data],true));
+                }
+                $template->set('page_'.$meta_data, $value);
             }
         }
 
