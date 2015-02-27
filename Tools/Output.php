@@ -41,6 +41,11 @@ class Output {
         3 => 'error',
     );
 
+    public static function isJSONRequest() {
+        $headers = apache_request_headers();
+        return strpos($headers['Accept'], 'json') > 0;
+    }
+
     /**
      * Output data as json and end the request.
      *
@@ -154,7 +159,11 @@ class Output {
 
     public static function error($error) {
         Messenger::error($error);
-        Template::getInstance()->render('');
+        if(static::isJSONRequest()) {
+            static::json();
+        } else {
+            Template::getInstance()->render('');
+        }
         exit;
     }
 
