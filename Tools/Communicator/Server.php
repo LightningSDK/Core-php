@@ -64,7 +64,7 @@ class Server extends API {
                 $controller = new $class();
                 $controller->$action($this);
             } catch(Exception $e) {
-                return Messenger::error($e->getMessage());
+                Messenger::error($e->getMessage());
             }
         }
     }
