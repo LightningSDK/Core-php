@@ -36,6 +36,10 @@ class Client extends RestClient {
         return NULL;
     }
 
+    function getAll() {
+        return $this->results['data'];
+    }
+
     /**
      * If there was an action called at execution time, this will show it.
      */
