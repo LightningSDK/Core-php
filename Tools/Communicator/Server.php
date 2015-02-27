@@ -58,7 +58,7 @@ class Server extends API {
 
     protected function executeActions($actions) {
         foreach($actions as $action) {
-            list ($class, $action) = explode(".",$action);
+            list ($class, $action) = explode('.', $action);
             try{
                 $class = $this->action_namespace . '\\' . $class;
                 $controller = new $class();
