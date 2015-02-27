@@ -121,6 +121,7 @@ class RestClient {
         }
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_POST, (int) $post);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array('Accept: application/json'));
         if ($post) {
             if ($this->sendJSON) {
                 $content = json_encode($vars);
