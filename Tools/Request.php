@@ -225,6 +225,10 @@ class Request {
      * @return bool|float|int|string
      */
     protected static function clean($data, $type = 'text') {
+        if (get_magic_quotes_gpc()) {
+            $data = stripslashes($data);
+        }
+
         // Return the value.
         switch($type) {
             case 'int':
