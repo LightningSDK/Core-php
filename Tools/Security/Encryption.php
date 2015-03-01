@@ -81,12 +81,33 @@ class Encryption {
         return Random::getInstance()->get(32, Random::BASE64);
     }
 
+    /**
+     * Encrypt some data with AES 256
+     *
+     * @param string $data
+     *   The data to encrypt.
+     * @param string $key
+     *   A base64 encoded encryption key.
+     *
+     * @return string
+     *   An IV and cypher text, both base64 encoded.
+     */
     public static function aesEncrypt($data, $key) {
         $iv = Random::getInstance()->get(16, Random::BIN);
         $key = base64_decode($key);
         return base64_encode($iv) . ':' . base64_encode(openssl_encrypt($data, 'AES-256-CBC', $key, true, $iv));
     }
 
+    /**
+     * Decrypt AES encrypted cyphertext.
+     *
+     * @param string $data
+     *   The base64 encoded IV and cypertext separated by ':'
+     * @param string $key
+     *   Te base64 encoded key.
+     *
+     * @return null|string
+     */
     public static function aesDecrypt($data, $key) {
         if (strpos($data, ':') === false) {
             return null;
