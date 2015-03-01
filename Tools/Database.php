@@ -473,7 +473,7 @@ class Database extends Singleton {
         $table = $this->parseTable($table, $vars);
         $ignore = $existing === TRUE ? 'IGNORE' : '';
         $set = $this->sqlImplode($data, $vars, ', ', true);
-        $duplicate = is_array($existing) ? ' ON DUPLICATE KEY UPDATE ' . $this->sqlImplode($existing, $vars) : '';
+        $duplicate = is_array($existing) ? ' ON DUPLICATE KEY UPDATE ' . $this->sqlImplode($existing, $vars, ', ', true) : '';
         $this->query('INSERT ' . $ignore . ' INTO ' . $table . ' SET ' . $set . $duplicate, $vars);
         $this->timerEnd();
         return $this->result->rowCount() == 0 ? false :
