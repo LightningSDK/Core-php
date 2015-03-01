@@ -151,7 +151,7 @@ class Mailer {
     /**
      * Add a to address.
      *
-     * @param string $email
+     * @param User|string $to
      *   The to address.
      * @param string $name
      *   The to name.
@@ -159,8 +159,15 @@ class Mailer {
      * @return Mailer
      *   Returns itself for method chaining.
      */
-    public function to($email, $name = null) {
+    public function to($to, $name = null) {
         try {
+            if (is_object($to)) {
+                // This is a user account.
+                $name = $to->fullName();
+                $email = $to->email;
+            } else {
+                $email = $to;
+            }
             $this->mailer->AddAddress($email, $name);
         } catch (\Exception $e) {
             Messenger::error($e->getMessage());
