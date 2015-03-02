@@ -181,6 +181,7 @@ abstract class Table extends Page {
      * Available custom button types
      */
     const CB_SUBMITANDREDIRECT = 1;
+    const CB_LINK = 2;
         
     protected $function_after = Array();
     protected $table_descriptions = "table_descriptions/";
@@ -1441,6 +1442,9 @@ abstract class Table extends Page {
                     // Submit & Redirect button
                     $this->renderSubmitAndRedirect($button, $button_id);
                     break;
+                case self::CB_LINK:
+                    $download = !empty($button['download']) ? 'download="' . $button['download'] . '"' : '';
+                    echo '<a href="' . $button['url'] . '" ' . $download . ' class="button">' . $button['text'] . '</a>';
             }
         }
     }
