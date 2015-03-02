@@ -326,7 +326,7 @@ class Blog extends Singleton {
         return Database::getInstance()->select(
             array(
                 'from' => static::BLOG_CATEGORY_TABLE,
-                'join' => array('LEFT JOIN', 'blog_category', 'USING (cat_id)'),
+                'join' => array('JOIN', static::CATEGORY_TABLE, 'USING (cat_id)'),
             ),
             array(),
             array(
