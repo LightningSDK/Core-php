@@ -26,6 +26,7 @@ abstract class Base extends Page {
         JS::set('chart.' . $this->id . '.url', '/' . Request::get('request'));
         JS::set('chart.' . $this->id . '.params.start', ['source' => 'start']);
         JS::set('chart.' . $this->id . '.params.number_format', $this->numberFormat);
+        JS::set('chart.' . $this->id . '.params.diff', !empty($this->diff));
         if (!empty($this->data)) {
             JS::set('chart.' . $this->id . '.data', $this->data);
         }

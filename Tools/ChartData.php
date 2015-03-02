@@ -94,11 +94,14 @@ class ChartData {
      *   A list of values keyed by the range point.
      * @param string $title
      *   The title of the set.
+     * @param integer $previous_period
+     *   The total amount of a previous period if showing a diff.
      */
-    public function addDataSet($data, $title = 'Unknown') {
+    public function addDataSet($data, $title = 'Unknown', $previous_period = 0) {
         $this->data[] = array(
             'data' => array_values($data),
             'label' => $title,
+            'previous' => $previous_period,
         );
     }
 

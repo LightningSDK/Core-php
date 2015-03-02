@@ -35,14 +35,29 @@ lightning.stats = {
             container.empty();
             if (data.datasets) {
                 for (var i in data.datasets) {
+                    // Calculate the sum of the current period.
                     var sum = 0;
                     for (var j in data.datasets[i].data) {
                         sum += parseInt(data.datasets[i].data[j]);
                     }
+
+                    // Calculate the diference since the last period.
+                    var diff = '';
+                    if (lightning.vars.chart[id].params.diff) {
+                        difference = sum - data.datasets[i].previous
+                        var color = difference < 0 ? 'red' : 'green';
+                        var indicator = difference < 0 ? '' : '+';
+                        var difference_percent = data.datasets[i].previous != 0 ? (100*difference/data.datasets[i].previous).toFixed(1) : 0;
+                        diff = '<span class="strong ' + color + '">' + indicator + difference + ' (' + difference_percent + '%)</span>';
+                    }
+
+                    // Add number formatting for currency.
                     if (lightning.vars.chart[id].params.number_format && lightning.vars.chart[id].params.number_format == 'money') {
                         sum = '$' + sum.toFixed(2);
                     }
-                    container.append($('<li>' + (data.datasets[i].label ? data.datasets[i].label : i) + ': ' + sum + '</li>'));
+
+                    // Output the total.
+                    container.append($('<li>' + (data.datasets[i].label ? data.datasets[i].label : i) + ': ' + sum + ' ' + diff + '</li>'));
                 }
             } else {
                 var total = 0;
