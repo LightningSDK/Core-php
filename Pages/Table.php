@@ -452,6 +452,15 @@ abstract class Table extends Page {
             $values[$this->singularity] = $this->singularityID;
         }
         $this->id = Database::getInstance()->insert($this->table, $values, $this->update_on_duplicate_key ? $values : true);
+        
+        /*
+         * Check if id is defined. If it's FALSE, there was an error 
+         * inserting the new row. Probably duplicating.
+         */
+        if ($this->id == FALSE) {
+            Output::error('There was a conflict with an existing entry.');
+        }
+        
         if (!empty($this->post_actions['after_insert'])) {
             $this->get_row();
             $this->post_actions['after_insert']($this->list);
