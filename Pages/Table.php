@@ -2313,8 +2313,9 @@ abstract class Table extends Page {
             // Sanitize the input.
             $sanitize_field = $this->action == 'insert' ? 'insert_sanitize' : 'modify_sanitize';
             if (
-                (!isset($field[$sanitize_field]) || $field[$sanitize_field] !== false)
-                || (!isset($field['sanitize']) || $field['sanitize'] !== false)
+                $sanitize &&
+                ((!isset($field[$sanitize_field]) || $field[$sanitize_field] !== false)
+                || (!isset($field['sanitize']) || $field['sanitize'] !== false))
             ) {
                 $val = $this->input_sanitize($val, $html);
             }
