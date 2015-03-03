@@ -39,6 +39,7 @@ class User extends Object {
     const TEMP_KEY_TTL = 86400;
 
     const PRIMARY_KEY = 'user_id';
+    const TABLE = 'user';
 
     /**
      * Load a user by their email.
