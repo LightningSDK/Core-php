@@ -202,7 +202,7 @@ abstract class Table extends Page {
     protected $rowClick;
     protected $update_on_duplicate_key = false;
     protected $post_actions;
-    protected $read_only;
+    protected $readOnly = false;
 
     /**
      * A list of rows that will always be at the start of the table.
@@ -585,13 +585,13 @@ abstract class Table extends Page {
     /**
      * Set this table to readonly mode.
      *
-     * @param boolean $read_only
+     * @param boolean $readOnly
      *   Whether this should be read only.
      */
-    public function setReadOnly ($read_only = true) {
-        $this->editable = !$read_only;
-        $this->deleteable = !$read_only;
-        $this->addable = !$read_only;
+    public function setReadOnly ($readOnly = true) {
+        $this->editable = !$readOnly;
+        $this->deleteable = !$readOnly;
+        $this->addable = !$readOnly;
     }
 
     /**
@@ -1345,7 +1345,7 @@ abstract class Table extends Page {
             if ($this->action == "edit") {
                 echo '<input type="hidden" name="id" id="id" value="' . $this->id . '" />';
             }
-            if ($this->action == "view" && !$this->read_only) {
+            if ($this->action == "view" && !$this->readOnly) {
                 if ($this->editable !== false) {
                     echo "<a href='".$this->createUrl('edit', $this->id)."'><img src='/images/lightning/edit.png' border='0' /></a>";
                 }
@@ -1382,16 +1382,20 @@ abstract class Table extends Page {
      *   Alternative name of the action processing
      */
     protected function renderButtons($new_action) {
-        if ($this->action != "view") {
-            /*
-             * Submit button has name parameter as 'sbmt' by purpose. 
-             * When it is 'submit', form doesn't get submitted by javascript
-             * submit() function.
-             */
-            echo "<tr><td colspan='2'><input type='submit' name='sbmt' value='{$this->button_names[$new_action]}' class='button'>";
-            
-            // If exist render all custom buttons
-            $this->renderCustomButtons();
+        /*
+         * Submit button has name parameter as 'sbmt' by purpose.
+         * When it is 'submit', form doesn't get submitted by javascript
+         * submit() function.
+         */
+        echo '<tr><td colspan="2">';
+        if ($this->action != 'view') {
+            echo '<input type="submit" name="sbmt" value="' . $this->button_names[$new_action] . '" class="button">';
+        }
+
+        // If exist render all custom buttons
+        $this->renderCustomButtons();
+
+        if ($this->action != 'view') {
             if ($this->cancel) {
                 echo "<input type='button' name='cancel' value='{$this->button_names['cancel']}' onclick='document.location=\"".$this->createUrl()."\";' />";
             }
@@ -1402,13 +1406,13 @@ abstract class Table extends Page {
                 echo '<input type="checkbox" name="serialupdate" value="true" checked="checked" /> Edit Next Record';
             }
             echo $this->form_buttons_after;
-            echo "</td></tr>";
         }
-        echo "</table>";
-        if ($this->action != "view") {
-            echo "</form>";
+        echo '</td></tr>';
+        echo '</table>';
+        if ($this->action != 'view') {
+            echo '</form>';
         }
-        if ($this->action == "view" && !$this->read_only) {
+        if ($this->action == "view" && !$this->readOnly) {
             if ($this->editable !== false)
                 echo "<a href='".$this->createUrl('edit', $this->id)."'><img src='/images/lightning/edit.png' border='0' /></a>";
             if ($this->deleteable !== false)
@@ -1434,6 +1438,9 @@ abstract class Table extends Page {
          */
         $button_id = 0;
         foreach ($this->custom_buttons as $button) {
+            if ($this->action == 'view' && empty($button['view'])) {
+                continue;
+            }
             // Id for a single button
             $button_id++;
             // Check the type and render
