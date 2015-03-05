@@ -326,10 +326,14 @@ class Message extends Object {
      *   The content with replaced variables.
      */
     public function replaceVariables($source) {
+        // Fix escaped curly brackets.
+        $source = preg_replace('/%7B/', '{', $source);
+        $source = preg_replace('/%7D/', '}', $source);
+
         // Replace variables.
         foreach($this->customVariables + $this->internalCustomVariables + $this->defaultVariables as $cv => $cvv) {
             // Replace simple variables as a string.
-            $source = str_replace("{".$cv."}", $cvv, $source);
+            $source = preg_replace('/\{' . $cv . '}/', $cvv, $source);
         }
 
         // Replace conditions.
@@ -343,6 +347,10 @@ class Message extends Object {
                 $source = preg_replace($conditional_search, '', $source);
             }
         }
+
+        // Re-escape any leftover curly brackets.
+        $source = preg_replace('/\{/', '%7B', $source);
+        $source = preg_replace('/}/', '%7D', $source);
 
         return $source;
     }
