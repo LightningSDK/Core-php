@@ -222,9 +222,12 @@ class Mailer {
      * @param $message_id
      */
     public function loadMessage($message_id) {
-        $this->message = new Message($message_id);
-        $this->subject($this->message->getSubject());
-        $this->message($this->message->getMessage());
+        // Only load if this is a different message than was used before.
+        if (empty($this->message->id) || $this->message->id != $message_id) {
+            $this->message = new Message($message_id);
+            $this->subject($this->message->getSubject());
+            $this->message($this->message->getMessage());
+        }
     }
 
     /**
@@ -338,6 +341,8 @@ class Mailer {
      *   The user object to send to.
      */
     function sendOne($message_id, $user) {
+        $this->built = false;
+        $this->clearAddresses();
         $this->loadMessage($message_id);
         $this->message->resetCustomVariables($this->customVariables);
         $this->message->setUser($user);
