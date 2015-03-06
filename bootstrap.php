@@ -78,7 +78,10 @@ class Bootstrap {
      */
     public static function loadClassFile($classname) {
         $class_path = str_replace('\\', DIRECTORY_SEPARATOR, $classname);
-        require_once HOME_PATH . DIRECTORY_SEPARATOR . $class_path . '.php';
+        $class_path_test = explode(DIRECTORY_SEPARATOR, $class_path);
+        if ($class_path_test[0] == 'Source' || $class_path_test[0] == 'Lightning') {
+            require_once HOME_PATH . DIRECTORY_SEPARATOR . $class_path . '.php';
+        }
     }
 
     public static function errorHandler($errno, $errstr, $errfile, $errline) {
