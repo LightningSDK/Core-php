@@ -186,7 +186,7 @@ class Request {
             return call_user_func_array('self::clean', $args);
         }
 
-        if (!isset($_COOKIE[$var])) {
+        if (isset($_COOKIE[$var])) {
             $args = func_get_args();
             $args[0] = $_COOKIE[$var];
             return call_user_func_array('self::clean', $args);
