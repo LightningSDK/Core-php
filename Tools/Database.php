@@ -1151,8 +1151,12 @@ class Database extends Singleton {
                         $a2[] = "{$field} = {$v['expression']}";
                     }
                     // Add any vars.
-                    if (!empty($v['vars']) && is_array($v['vars'])) {
-                        $values = array_merge($values, $v['vars']);
+                    if (isset($v['vars'])) {
+                        if (is_array($v['vars'])) {
+                            $values = array_merge($values, $v['vars']);
+                        } else {
+                            $values[] = $v['vars'];
+                        }
                     }
                 }
                 // If this is inserting a bit column.
