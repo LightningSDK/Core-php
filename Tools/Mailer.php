@@ -122,6 +122,7 @@ class Mailer {
     public function clearAddresses() {
         $this->mailer->ClearAddresses();
         $this->fromSet = false;
+        return $this;
     }
 
     /**
