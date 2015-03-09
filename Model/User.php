@@ -708,7 +708,6 @@ class User extends Object {
                 array('user_id' => $acct_details['user_id'])
             );
         }
-        global $mail_site_name,$email_domain_name,$site_contact_page;
         $mailer = new Mailer();
         $mailer->to($email, $acct_details['first']." ".$acct_details['last'])
             ->subject('Activate your account')
