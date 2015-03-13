@@ -41,12 +41,7 @@ class JS {
      *
      * A list of scripts to run when the page is ready.
      */
-    protected static $startup_scripts = array(
-        'coreInit' => array(
-            'script' => 'lightning.startup.init();',
-            'rendered' => false,
-        ),
-    );
+    protected static $startup_scripts = array();
 
     /**
      * Add a JS file to be included in the HTML.

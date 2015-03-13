@@ -64,7 +64,8 @@ class Page {
         JS::add('/js/foundation.min.js');
         JS::add('/js/lightning.min.js');
         JS::add('/js/jquery.validate.min.js');
-        JS::startup('$(document).foundation();');
+        JS::startup('lightning.startup.init()');
+        JS::startup('$(document).foundation()');
         CSS::add('/css/lightning.css');
         CSS::add('/css/site.css');
     }
