@@ -15,9 +15,10 @@ lightning.video = {
             if (video.playlist) {
                 var ul = $('<ul>');
                 for (var j in video.playlist) {
-                    ul.append('<li id="video_link_' + i + '_' + j + '">' + video.playlist[j].title + '</li>');
+                    ul.append('<li id="video_link_' + i + '_' + j + '" class="playlist_link">' + video.playlist[j].title + '</li>');
                 }
-                $('#video_playlist_' + i).html(ul).on('click', 'ul', this.clickPlaylist);
+                $('#video_playlist_' + i).html(ul);
+                $('.video_playlist').on('click', '.playlist_link', this.clickPlaylist);
             }
             if (video.call.beforeLoad) {
                 lightning.getMethodReference(video.call.beforeLoad)(i, function() {
@@ -30,7 +31,7 @@ lightning.video = {
     },
 
     clickPlaylist: function(event) {
-        var div_id = event.target.id.replace('video_link_', '');
+        var div_id = event.currentTarget.id.replace('video_link_', '');
         var playlist_id = div_id.match(/[0-9]+$/);
         var video_id = div_id.replace('_' + playlist_id, '');
         lightning.video.players[video_id].dispose();
@@ -48,8 +49,10 @@ lightning.video = {
         }
         var source = video.playlist ? video.playlist[playlist_id] : video;
         var showControls = source.controls || !source.hasOwnProperty('controls') && (!video.hasOwnProperty('controls') || video.controls);
+        var width = video.hasOwnProperty('width') ? video.width : 640;
+        var height = video.hasOwnProperty('height') ? video.width : 320;
         if (source.mp4 || source.ogg || source.webm) {
-            var video_tag = '<video id=video_player_' + id + ' class="video-js vjs-default-skin" width="640" height="360" poster="' + (source.still ? source.still : video.still ? video.still : '') + '" ' + (showControls ? 'controls' : '') + ' preload>';
+            var video_tag = '<video id=video_player_' + id + ' class="video-js vjs-default-skin" width="' + width + '" height="' + height + '" poster="' + (source.still ? source.still : video.still ? video.still : '') + '" ' + (showControls ? 'controls' : '') + ' preload>';
             for (var codec in {'mp4': 1, 'ogg': 1, 'webm': 1}) {
                 if (source[codec]) {
                     video_tag += '<source src="' + source[codec] + '" type="video/' + codec + ';">';
@@ -57,7 +60,7 @@ lightning.video = {
             }
             video_tag += '</video>';
         } else {
-            var video_tag = '<audio id=video_player_' + id + ' class="video-js vjs-default-skin" width="640" height="360"' + (showControls ? 'controls' : '') + ' preload>';
+            var video_tag = '<audio id=video_player_' + id + ' class="video-js vjs-default-skin" width="' + width + '" height="' + height + '" ' + (showControls ? 'controls' : '') + ' preload>';
             for (var codec in {'mp3': 1}) {
                 if (source[codec]) {
                     video_tag += '<source src="' + source[codec] + '" type="audio/' + codec + ';">';
