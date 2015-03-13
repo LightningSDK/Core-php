@@ -33,36 +33,7 @@ class Configuration {
             self::loadConfiguration();
         }
 
-        $path = explode('.', $variable);
-        return self::getSub($path, self::$configuration, $default);
-    }
-
-    /**
-     * Get a child element of a variable's value.
-     *
-     * @param array $path
-     *   The path to the value.
-     * @param array $content
-     *   The value of the current variable.
-     * @param mixed $default
-     *   The default value if it does not exist in the configuration.
-     *
-     * @return mixed
-     *   The value of the variable.
-     */
-    protected static function getSub($path, $content, $default = null) {
-        $next = array_shift($path);
-        if (!empty($content[$next])) {
-            $content = $content[$next];
-        } else {
-            return $default;
-        }
-
-        if (!empty($path)) {
-            $content = self::getSub($path, $content, $default);
-        }
-
-        return $content;
+        return Data::getFromPath($variable, self::$configuration, $default);
     }
 
     /**
@@ -75,7 +46,11 @@ class Configuration {
      *   The new value.
      */
     public static function set($variable, $value) {
-        self::$configuration[$variable] = $value;
+        if (empty(self::$configuration)) {
+            self::loadConfiguration();
+        }
+
+        Data::setInPath($variable, $value, self::$configuration);
     }
 
     /**

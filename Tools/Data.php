@@ -10,9 +10,11 @@ class Data {
      * will return
      * $dataset['this']['that']['test']
      *
-     * @param $var
-     * @param $content
-     * @param $default
+     * @param string $var
+     *   The name of the variable.
+     * @param array $content
+     *   The hierarchy of values to search.
+     * @param mixed $default
      *   A default value.
      *
      * @return mixed
@@ -32,5 +34,34 @@ class Data {
         } else {
             return $default;
         }
+    }
+
+    /**
+     * Set a variable in a data set using a path locator.
+     *
+     * $var = 'this.that.test'
+     * will set
+     * $dataset['this']['that']['test']
+     *
+     * @param string $var
+     *   The name of the variable.
+     * @param array $value
+     *   The new value to set.
+     * @param array $content
+     *   The hierarchy of values to fill.
+     */
+    public static function setInPath($var, $value, &$content) {
+        self::setInPathArray(explode('.', $var), $value, $content);
+    }
+
+    public static function setInPathArray($path, $value, &$content) {
+        $next = array_shift($path);
+        if (empty($path)) {
+            $content[$next] = $value;
+            return;
+        } elseif (!isset($content[$next]) || !is_array($content[$next])) {
+            $content[$next] = array();
+        }
+        self::setInPathArray($path, $value, $content[$next]);
     }
 }
