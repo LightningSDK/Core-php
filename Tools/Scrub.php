@@ -84,6 +84,36 @@ class Scrub {
     }
 
     /**
+     * Create an abbreviated number like 0.1, 3.5, 45, 12k, 14M, 'A LOT!'
+     *
+     * @param float $number
+     *   The number to convert.
+     * @param boolean $decimal
+     *   Whether to include a single decimal for numbers under 10.
+     *
+     * @return string
+     *   The abbreviated number.
+     */
+    public static function shortNumber($number, $decimal = false) {
+        $number = floatval($number);
+        if ($number < 10 && $decimal) {
+            return number_format($number, 1);
+        }
+        elseif ($number < 1000) {
+            return intval($number);
+        }
+        elseif ($number < 1000000) {
+            return intval($number/1000) . 'k';
+        }
+        elseif ($number < 1000000000) {
+            return intval($number/1000000) . 'M';
+        }
+        else {
+            return 'A LOT!';
+        }
+    }
+
+    /**
      * Validate an email address.
      *
      * @param string $email
