@@ -6,6 +6,7 @@
 
 namespace Lightning\Tools\Communicator;
 use Exception;
+use Lightning\Tools\Data;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Configuration;
@@ -31,9 +32,9 @@ class Client extends RestClient {
      * @return null
      */
     function get($var) {
-        if (isset($this->results['data'][$var]))
-            return $this->results['data'][$var];
-        return NULL;
+        if (!empty($this->results['data'])) {
+            return Data::getFromPath($var, $this->results['data']);
+        }
     }
 
     function getAll() {
@@ -103,9 +104,76 @@ class Client extends RestClient {
         }
     }
 
+    protected function requestSuccess() {
+        if (is_array($this->results)) {
+            // HEADERS
+            $this->outputCookies();
+
+            $this->redirect();
+
+            // STANDARD OUTPUT
+            if (isset($this->results['errors']) && is_array($this->results['errors'])) {
+                foreach ($this->results['errors'] as $error) {
+                    Messenger::error($error);
+                }
+            }
+            if (isset($this->results['messages']) && is_array($this->results['messages'])) {
+                foreach ($this->results['messages'] as $message) {
+                    Messenger::message($message);
+                }
+            }
+
+            return $this->hasErrors() ? false : true;
+        } else {
+            if ($this->verbose) {
+                Output::error("Error reading from application!\n{$this->raw}");
+            } else {
+                Output::error("Error reading from application!");
+            }
+        }
+    }
+
+    protected function requestForbidden($status_code) {
+        if (!empty($_POST) > 0) {
+            // Temporary redirect to a page where there is no POST data.
+            Navigation::redirect($_SERVER['REQUEST_URI'], 307);
+        } else {
+            // Output the access denied message.
+            Output::error($this->results['errors'][0], $status_code);
+        }
+    }
+
+    protected function outputCookies() {
+        if (isset($this->results['cookies']) && is_array($this->results['cookies'])) {
+            foreach ($this->results['cookies'] as $cookie=>$params) {
+                if ($cookie == '') continue;
+                $params += array(
+                    'value' => null,
+                    'ttl' => null,
+                    'path' => null,
+                    'domain' => null,
+                    'secure' => null,
+                    'httponly' => null,
+                );
+                Output::setCookie($cookie, $params['value'], $params['ttl'], $params['path'], $params['domain'], $params['secure'], $params['httponly']);
+            }
+        }
+    }
+
+    protected function redirect() {
+        if (!empty($this->results['redirect'])) {
+            if (!empty($this->results['set_redirect'])) {
+                // bring them back to this page after
+                $qsa = strstr($this->results['redirect'], '?') ? '&' : '?';
+                $redirect = $this->results['redirect'] . $qsa . 'redirect=' . urlencode($_SERVER['REQUEST_URI']);
+            } else {
+                $redirect = $this->results['redirect'];
+            }
+            Navigation::redirect($redirect);
+        }
+    }
 
     public function getAdditionalData() {
         return $this->load;
     }
-
 }

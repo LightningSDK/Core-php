@@ -165,14 +165,14 @@ class RestClient {
             $this->results = json_decode($this->raw, true);
             switch($this->status) {
                 case 200:
-                    // Complete success. Return result.
+                    // If there is a success callback.
                     return $this->requestSuccess();
                     break;
                 case 401:
                 case 402:
                 case 403:
-                    // If access denied.
-                    $this->requestForbidden($this->status);
+                    // If there is an error handler.
+                    return $this->requestForbidden($this->status);
                     break;
                 default:
                     // Unrecognized.
@@ -182,6 +182,14 @@ class RestClient {
                     throw new Exception('Unrecognized response code: ' . $this->status);
             }
         }
+        return false;
+    }
+
+    protected function requestSuccess() {
+        return true;
+    }
+
+    protected function requestForbidden($status) {
         return false;
     }
 
@@ -195,66 +203,5 @@ class RestClient {
 
     public function sendJSON($set = true) {
         $this->sendJSON = $set;
-    }
-
-    private function requestForbidden($status_code) {
-        if (!empty($_POST) > 0) {
-            // Temporary redirect to a page where there is no POST data.
-            Navigation::redirect($_SERVER['REQUEST_URI'], 307);
-        } else {
-            // Output the access denied message.
-            Output::error($this->results['errors'][0], $status_code);
-        }
-    }
-
-    protected function requestSuccess() {
-        if (is_array($this->results)) {
-            // HEADERS
-            if (isset($this->results['cookies']) && is_array($this->results['cookies'])) {
-                foreach ($this->results['cookies'] as $cookie=>$params) {
-                    if ($cookie == '') continue;
-                    $params += array(
-                        'value' => null,
-                        'ttl' => null,
-                        'path' => null,
-                        'domain' => null,
-                        'secure' => null,
-                        'httponly' => null,
-                    );
-                    setcookie($cookie, $params['value'], $params['ttl'], $params['path'], $params['domain'], $params['secure'], $params['httponly']);
-                }
-            }
-
-            if (isset($this->results['redirect'])) {
-                if (isset($this->results['set_redirect'])) {
-                    // bring them back to this page after
-                    $qsa = strstr($this->results['redirect'], '?') ? '&' : '?';
-                    $redirect = $this->results['redirect'].$qsa.'redirect='.urlencode($_SERVER['REQUEST_URI']);
-                } else {
-                    $redirect = $this->results['redirect'];
-                }
-                Navigation::redirect($redirect);
-            }
-
-            // STANDARD OUTPUT
-            if (isset($this->results['errors']) && is_array($this->results['errors'])) {
-                foreach ($this->results['errors'] as $error) {
-                    Messenger::error($error);
-                }
-            }
-            if (isset($this->results['messages']) && is_array($this->results['messages'])) {
-                foreach ($this->results['messages'] as $message) {
-                    Messenger::message($message);
-                }
-            }
-
-            return $this->hasErrors() ? false : true;
-        } else {
-            if ($this->verbose) {
-                Output::error("Error reading from application!\n{$this->raw}");
-            } else {
-                Output::error("Error reading from application!");
-            }
-        }
     }
 }
