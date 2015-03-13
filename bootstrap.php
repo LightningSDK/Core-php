@@ -35,7 +35,8 @@ class Bootstrap {
      * @param string $classname
      */
     public static function classAutoloader($classname) {
-        if (empty(self::$loadedClasses[$classname]) && $classname != 'Lightning\Tools\Configuration') {
+        // TODO: This can probably be optimized.
+        if (empty(self::$loadedClasses[$classname]) && $classname != 'Lightning\Tools\Configuration' && $classname != 'Lightning\Tools\Data') {
             if (!self::$loaded) {
                 // Load the class definitions.
                 self::$classes = Configuration::get('classes');
