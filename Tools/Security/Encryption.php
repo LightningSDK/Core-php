@@ -88,14 +88,21 @@ class Encryption {
      *   The data to encrypt.
      * @param string $key
      *   A base64 encoded encryption key.
+     * @param string $iv64
+     *   A base64 encoded 16 byte IV.
      *
      * @return string
      *   An IV and cypher text, both base64 encoded.
      */
-    public static function aesEncrypt($data, $key) {
-        $iv = Random::getInstance()->get(16, Random::BIN);
+    public static function aesEncrypt($data, $key, $iv64 = null) {
+        if (!empty($iv64)) {
+            $iv = base64_decode($iv64);
+        } else {
+            $iv = Random::getInstance()->get(16, Random::BIN);
+            $iv64 = base64_encode($iv);
+        }
         $key = base64_decode($key);
-        return base64_encode($iv) . ':' . base64_encode(openssl_encrypt($data, 'AES-256-CBC', $key, true, $iv));
+        return $iv64 . ':' . base64_encode(openssl_encrypt($data, 'AES-256-CBC', $key, true, $iv));
     }
 
     /**
