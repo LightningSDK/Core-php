@@ -15,6 +15,7 @@ abstract class Base extends Page {
     protected $width = 600;
     protected $height = 450;
     protected $page = 'chart';
+    protected $ajax = false;
 
     public function __construct() {
         parent::__construct();
