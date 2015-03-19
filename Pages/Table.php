@@ -43,6 +43,7 @@ use Lightning\Tools\Configuration;
 use Lightning\Tools\CSVIterator;
 use Lightning\Tools\Database;
 use Lightning\Tools\Form;
+use Lightning\Tools\Image;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Output;
@@ -2382,10 +2383,10 @@ abstract class Table extends Page {
             return false;
         }
 
-        $src_image = imagecreatefromstring(file_get_contents($file['tmp_name']));
+        $imageObj = Image::loadFromPost($field['field']);
 
-        if (!$src_image) {
-            return;
+        if (!$imageObj) {
+            return false;
         }
 
         if (empty($field['images'])) {
@@ -2407,10 +2408,10 @@ abstract class Table extends Page {
             }
 
             if (!empty($image['image_preprocess']) && is_callable($image['image_preprocess'])) {
-                $src_image = $image['image_preprocess']($src_image);
+                $imageObj->source = $image['image_preprocess']($imageObj->source);
             }
 
-            if (!$src_image) {
+            if (!$imageObj->source) {
                 // The image failed to load.
                 return false;
             }
@@ -2418,104 +2419,10 @@ abstract class Table extends Page {
             // Set the quality.
             $quality = !empty($image['quality']) ? $image['quality'] : 75;
 
-            // Initialized some parameters.
-            // The coordinates of the top left in the dest image where the src image will start.
-            $dest_x = 0;
-            $dest_y = 0;
-            // The coordinates of the source image where the copy will start.
-            $src_x = 0;
-            $src_y = 0;
-            // Src frame = The original image width/height
-            // Dest frame = The destination image width/height
-            // Dest w/h = The destination scaled image content size
-            // Src w/h = The source image copy size
-            $src_frame_w = $dest_frame_w = $dest_w = $src_w = imagesx($src_image);
-            $src_frame_h = $dest_frame_h = $dest_h = $src_h = imagesy($src_image);
-
-            if (!empty($image['max_size']) && empty($image['max_height'])) {
-                $image['max_height'] = $image['max_size'];
-            }
-            if (!empty($image['max_size']) && empty($image['max_width'])) {
-                $image['max_width'] = $image['max_size'];
-            }
-
-            // Set max sizes
-            if (!empty($image['max_width']) && $dest_frame_w > $image['max_width']) {
-                $dest_frame_w = $dest_w = $image['max_width'];
-                // Scale down the height.
-                $dest_frame_h = $dest_h = ($dest_w * $src_h/$src_w);
-            }
-            if (!empty($image['max_height']) && $dest_frame_w > $image['max_height']) {
-                $dest_frame_h = $dest_h = $image['max_height'];
-                // Scale down the width.
-                $dest_frame_w = $dest_w = ($dest_h * $src_w/$src_h);
-            }
-
-            // Set absolute width/height
-            if (!empty($image['width'])) {
-                $dest_frame_w = $dest_w = $image['width'];
-            }
-            if (!empty($image['height'])) {
-                $dest_frame_h = $dest_h = $image['height'];
-            }
-
-            // If the image can be cropped.
-            if (!empty($image['crop'])) {
-                if ($image['crop'] == 'x') {
-                    $scale = $dest_frame_h / $src_frame_h;
-                    // Get the width of the destination image if it were scaled.
-                    $dest_w = $scale * $src_frame_w;
-                    if ($dest_w > $dest_frame_w) {
-                        $dest_crop = $dest_w - $dest_frame_w;
-                        $dest_w = $dest_frame_w;
-                        $src_x = $dest_crop / $scale / 2;
-                        $src_w = $src_frame_w - ($src_x * 2);
-                    } else {
-                        $dest_border = $dest_frame_w - $dest_w;
-                        $dest_x = $dest_border / 2;
-                    }
-                }
-                if ($image['crop'] == 'y') {
-                    $scale = $src_frame_w / $src_frame_h;
-                    // Get the height of the destination image if it were scaled.
-                    $dest_h = ( int ) ($dest_frame_w / $scale);
-                    if ($dest_h > $dest_frame_h) {
-                        $dest_crop = $dest_h - $dest_frame_h;
-                        $dest_h = $dest_frame_h;
-                        $src_y = $dest_crop / $scale / 2;
-                        $src_h = $src_frame_h - ($src_y * 2);
-                    } else {
-                        $dest_border = $dest_frame_h - $dest_h;
-                        $dest_y = $dest_border / 2;
-                    }
-                }
-                if ($image['crop'] == 'bottom') {
-                    $scale = $src_frame_w / $src_frame_h;
-                    // Get the height of the destination image if it were scaled.
-                    $dest_h = ( int ) ($dest_frame_w / $scale);
-                    if ($dest_h < $dest_frame_h) {
-                        $dest_border = $dest_frame_h - $dest_h;
-                        $dest_y = $dest_border / 2;
-                    }
-                }
-            }
-
-            $dest_image = imagecreatetruecolor($dest_frame_w, $dest_frame_h);
-            if (!empty($field['alpha'])) {
-                $color = imagecolorallocatealpha($dest_image, 0, 0, 0, 127);
-                imagefill($dest_image, 0, 0, $color);
-                imagealphablending($dest_image, false);
-                imagesavealpha($dest_image, true);
-            }
-
-            imagecopyresampled(
-                $dest_image, $src_image,
-                $dest_x, $dest_y, $src_x, $src_y,
-                $dest_w, $dest_h, $src_w, $src_h
-            );
+            $imageObj->process($image);
 
             if (!empty($image['image_postprocess']) && is_callable($image['image_postprocess'])) {
-                $dest_image = $image['image_postprocess']($dest_image);
+                $dest_image = $image['image_postprocess']($imageObj->processed);
             }
 
             $path = pathinfo($output_location);
@@ -2525,11 +2432,11 @@ abstract class Table extends Page {
 
             switch ($output_format) {
                 case 'png':
-                    imagepng($dest_image, $output_location);
+                    $imageObj->writePNG($output_location);
                     break;
                 case 'jpg':
                 default:
-                    imagejpeg($dest_image, $output_location, $quality);
+                    $imageObj->writeJPG($output_location, $quality);
                     break;
             }
         }
