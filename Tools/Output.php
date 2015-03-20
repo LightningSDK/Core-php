@@ -43,6 +43,9 @@ class Output {
 
     public static function isJSONRequest() {
         $headers = apache_request_headers();
+        if (empty($headers['Accept'])) {
+            return false;
+        }
         return strpos($headers['Accept'], 'json') > 0;
     }
 
