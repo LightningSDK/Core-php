@@ -3,13 +3,14 @@
 namespace Lightning\Tools;
 
 use MongoClient;
+use MongoCollection;
 
 class Mongo extends Singleton {
 
     /**
      * Get the default database instance.
      *
-     * @return Database
+     * @return MongoClient
      *   The singleton Database object.
      */
     public static function getInstance($create = true) {
@@ -21,5 +22,15 @@ class Mongo extends Singleton {
      */
     public static function createInstance() {
         return new MongoClient();
+    }
+
+    /**
+     * @param $database
+     * @param $collection
+     *
+     * @return MongoCollection
+     */
+    public static function getConnection($database, $collection) {
+        return self::getInstance()->selectDB($database)->selectCollection($collection);
     }
 }

@@ -182,6 +182,12 @@ class Image {
         );
     }
 
+    /**
+     * Get the image reference to output. This will be the the processed image
+     * if there is one, otherwise it will be the original image.
+     *
+     * @return resource
+     */
     protected function &getOutputImage() {
         if (!empty($this->processed)) {
             $ref =& $this->processed;
@@ -191,6 +197,12 @@ class Image {
         return $ref;
     }
 
+    /**
+     * Get the data as a PNG binary string.
+     *
+     * @return string
+     *   binary string.
+     */
     public function getPNGData() {
         ob_start();
         imagepng($this->getOutputImage());
@@ -199,11 +211,42 @@ class Image {
         return $contents;
     }
 
+    /**
+     * Get the data as a JPG binary string.
+     *
+     * @param integer $quality
+     *   The image compression quality. (0 to 100)
+     *
+     * @return string
+     *   binary string.
+     */
+    public function getJPGData($quality = 80) {
+        ob_start();
+        imagejpeg($this->getOutputImage(), null, $quality);
+        $contents =  ob_get_contents();
+        ob_end_clean();
+        return $contents;
+    }
+
+    /**
+     * Write the image to a file as a PNG.
+     *
+     * @param string $file
+     *   The file name.
+     */
     public function writePNG($file) {
         imagepng($this->getOutputImage(), $file);
     }
 
-    public function writeJPG($file, $quality) {
+    /**
+     * Write the image to a file as a JPG.
+     *
+     * @param string $file
+     *   The file name.
+     * @param integer $quality
+     *   The image compression quality. (0 to 100)
+     */
+    public function writeJPG($file, $quality = 80) {
         imagejpeg($this->getOutputImage(), $file, $quality);
     }
 }

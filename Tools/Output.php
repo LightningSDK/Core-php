@@ -110,6 +110,9 @@ class Output {
      *
      * @param string $error
      *   The error message.
+     *
+     * @deprecated
+     *   The error() function will determine if json should be output based on the headers.
      */
     public static function jsonError($error = '') {
         $data = array(
