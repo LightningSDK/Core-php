@@ -8,7 +8,7 @@ define('HOME_PATH', __DIR__);
 
 require_once 'Lightning/bootstrap.php';
 
-if (!empty($_SERVER['TERM']) || !empty($_SERVER['SHELL'])) {
+if (PHP_SAPI == 'cli') {
     // Handle a command line request.
     $handler = Router::getInstance()->getRoute($argv[1], true);
 } else {
