@@ -132,7 +132,7 @@ class Message extends Object {
      */
     public function __construct($message_id = null, $unsubscribe = true, $auto = true) {
         $this->auto = $auto;
-        $this->data = Database::getInstance()->selectRow('message', array('message_id' => $message_id));
+        $this->__data = Database::getInstance()->selectRow('message', array('message_id' => $message_id));
         $this->loadTemplate();
         $this->unsubscribe = $unsubscribe;
 
@@ -155,10 +155,12 @@ class Message extends Object {
      * For db message it makes some replaces
      */
     protected function setCombinedMessageTemplate() {
-        if (empty($this->data)) {
-            $this->combinedMessageTemplate = $this->template['body'];
-        } else {
+        if (empty($this->__data)) {
+            $this->combinedMessageTemplate = $this->template['body'] . '{TRACKING_IMAGE}';
+        } elseif (!strpos($this->template['body'], '{UNSUBSCRIBE}')) {
             $this->combinedMessageTemplate = str_replace('{CONTENT_BODY}', $this->body . '{UNSUBSCRIBE}', $this->template['body']) . '{TRACKING_IMAGE}';
+        } else {
+            $this->combinedMessageTemplate = str_replace('{CONTENT_BODY}', $this->body, $this->template['body']) . '{TRACKING_IMAGE}';
         }
     }
 
