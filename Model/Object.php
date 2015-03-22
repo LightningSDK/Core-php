@@ -123,6 +123,23 @@ class Object {
     }
 
     /**
+     * Load a single element by the PK ID.
+     *
+     * @param integer $id
+     *   The ID of the object.
+     *
+     * @return boolean|Object
+     *   The new object
+     */
+    public static function loadByID($id) {
+        if ($data = Database::getInstance()->selectRow(static::TABLE, [static::PRIMARY_KEY => $id])) {
+            return new static($data);
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * Save any changed data.
      */
     public function save() {
