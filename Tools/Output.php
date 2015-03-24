@@ -153,7 +153,8 @@ class Output {
      */
     public static function accessDenied() {
         Messenger::error('Access Denied');
-        if (strpos($_SERVER['HTTP_ACCEPT'], 'json') !== false) {
+        // TODO : This can be simplified using the error function below.
+        if (static::isJSONRequest()) {
             Output::json();
         } else {
             Template::resetInstance();
@@ -173,10 +174,35 @@ class Output {
         exit;
     }
 
+    /**
+     * Queue a cookie to be deleted.
+     *
+     * @param string $cookie
+     *   The cookie name.
+     */
     public static function clearCookie($cookie) {
         self::setCookie($cookie, '');
     }
 
+    /**
+     * Queue a cookie for output.
+     *
+     * @param string $cookie
+     *   The name of the cookie.
+     * @param string $value
+     *   The value.
+     * @param integer $ttl
+     *   How long the cookie should last.
+     *   This is not an expiration date like the php setcookie() function.
+     * @param string $path
+     *   The cookie path.
+     * @param string $domain
+     *   The cookie domain.
+     * @param boolean $secure
+     *   Whether the cookie can only be used over https.
+     * @param boolean $httponly
+     *   Whether the cookie can only be used as an http header.
+     */
     public static function setCookie($cookie, $value, $ttl = null, $path = '/', $domain = null, $secure = null, $httponly = true) {
         $settings = array(
             'value' => $value,
@@ -193,12 +219,19 @@ class Output {
         }
     }
 
+    /**
+     * Set the cookie headers.
+     * Does not actually send data until the content begins.
+     */
     public static function sendCookies() {
         foreach (self::$cookies as $cookie => $settings) {
             setcookie($cookie, $settings['value'], $settings['ttl'], $settings['path'], $settings['domain'], $settings['secure'], $settings['httponly']);
         }
     }
 
+    /**
+     * Disable output buffering for streaming output.
+     */
     public static function disableBuffering() {
         if (function_exists('apache_setenv')) {
             apache_setenv('no-gzip', 1);
