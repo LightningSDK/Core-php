@@ -100,12 +100,43 @@ lightning.video = {
             this.players[id].on('ended', lightning.getMethodReference(video.call.onEnd));
         }
 
+        var self = this;
         if (video.call.onTime) {
-            var self = this;
             this.players[id].on('timeupdate', function() {
                 self.timeCallback(self.players[id], lightning.vars.videos[id].call.onTime);
             })
         }
+
+        if (!video.hasOwnProperty('analytics_events')) {
+            video.analytics_events = false;
+        }
+        var lastTimeUpdate = 0;
+        if (video.analytics_events) {
+            ;
+            this.players[id].on('ended', function(){
+                lightning.video.track(id, 'ended');
+            });
+            this.players[id].on('pause', function(){
+                lightning.video.track(id, 'paused', self.players[id].currentTime(), true);
+            });
+            this.players[id].on('play', function(){
+                lightning.video.track(id, 'played', self.players[id].currentTime(), true);
+            });
+            this.players[id].on('timeupdate', function(){
+                var time = parseInt(self.players[id].currentTime());
+                if (lastTimeUpdate != time && time % 10 == 0) {
+                    lastTimeUpdate = time;
+                    lightning.video.track(id, 'watching', time);
+                }
+            });
+        }
+    },
+
+    track: function(id, type, value, nonInteraction) {
+        if (nonInteraction == undefined) {
+            nonInteraction = false;
+        }
+        ga('send', 'event', 'video.' + id, type, 'time', value, {'nonInteraction' : nonInteraction ? 1 : 0});
     },
 
     timeCallback: function(video, events) {
