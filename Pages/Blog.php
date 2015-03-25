@@ -35,10 +35,10 @@ class Blog extends Page {
         $blog = BlogModel::getInstance();
 
         if (preg_match('/.*\.htm/', $path[0])) {
-            $blog->loadByURL($path[0]);
+            $blog->loadContentByURL($path[0]);
         }
         elseif ($blog_id) {
-            $blog->loadById($blog_id);
+            $blog->loadContentById($blog_id);
         }
         elseif (array_shift($path) == 'blog') {
             if (!empty($path)) {
@@ -53,7 +53,7 @@ class Blog extends Page {
                     $blog->loadList($page);
                 } else {
                     // Try to load a specific blog.
-                    $blog->loadByURL($path[0]);
+                    $blog->loadContentByURL($path[0]);
                 }
             }
         }

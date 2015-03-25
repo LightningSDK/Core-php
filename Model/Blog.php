@@ -172,7 +172,7 @@ class Blog extends Singleton {
         );
     }
 
-    public function loadByURL($url) {
+    public function loadContentByURL($url) {
         $url = preg_replace('/.htm$/', '', $url);
         $this->posts = Database::getInstance()->selectAll(
             array(
@@ -185,7 +185,7 @@ class Blog extends Singleton {
         $this->postProcessResults();
     }
 
-    public function loadByID($id) {
+    public function loadContentByID($id) {
         $this->posts = Database::getInstance()->selectAll(
             array(
                 'from' => static::BLOG_TABLE,
@@ -358,7 +358,7 @@ class Blog extends Singleton {
      *   The blog ID.
      */
     function fetch_blog_url($url) {
-        $this->loadByURL($url);
+        $this->loadContentByURL($url);
         if ($this->posts) {
             $this->id = $this->posts[0]['blog_id'];
             $this->loadComments();
@@ -378,7 +378,7 @@ class Blog extends Singleton {
      *   The blog ID.
      */
     function fetch_blog_id($id) {
-        $this->loadByID($id);
+        $this->loadContentByID($id);
         if ($this->posts) {
             $this->id = $this->posts[0]['blog_id'];
             $this->loadComments();
