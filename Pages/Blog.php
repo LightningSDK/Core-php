@@ -23,6 +23,7 @@ use Lightning\View\Page;
 class Blog extends Page {
 
     protected $nav = 'blog';
+    protected $page = 'blog';
 
     protected function hasAccess() {
         return true;
@@ -74,7 +75,9 @@ class Blog extends Page {
             foreach (array('title', 'keywords', 'description', 'author') as $meta_data) {
                 switch ($meta_data) {
                     case 'title' :
-                        $value = Configuration::get('page_' . $meta_data).' | '.Scrub::toHTML($blog->body($blog->posts[0]['author_name'],true));
+                        $value = $blog->posts[0]['title'] . ' | '
+                            . Configuration::get('meta_data.title') . ' | '
+                            . Scrub::toHTML($blog->body($blog->posts[0]['author_name'],true));
                         break;
                     case 'description':
                         $value = Scrub::toHTML($blog->body($blog->posts[0]['body'],true));
@@ -85,7 +88,7 @@ class Blog extends Page {
                     default:
                         $value = Scrub::toHTML($blog->body($blog->posts[0][$meta_data],true));
                 }
-                $template->set('page_'.$meta_data, $value);
+                $template->set('page_' . $meta_data, $value);
             }
         }
 
@@ -93,8 +96,6 @@ class Blog extends Page {
         if (count($blog->posts) == 1 && !empty($blog->posts[0]['header_image'])) {
             $template->set('og_image', $blog->posts[0]['header_image']);
         }
-
-        $template->set('content', 'blog');
     }
 
     public function post() {
