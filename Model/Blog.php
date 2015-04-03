@@ -2,6 +2,7 @@
 
 namespace Overridable\Lightning\Model;
 
+use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
 use Lightning\Tools\Scrub;
 use Lightning\Tools\Singleton;
@@ -396,5 +397,36 @@ class Blog extends Singleton {
             $conditions['approved'] = 1;
         }
         $this->posts[0]['comments'] = Database::getInstance()->selectAll(static::COMMENT_TABLE, $conditions);
+    }
+
+    public static function getSitemapUrls() {
+        $web_root = Configuration::get('web_root');
+        $blogs = Database::getInstance()->select([
+            'from' => static::BLOG_TABLE,
+            'join' => [
+                'LEFT JOIN',
+                ['from' => static::COMMENT_TABLE, 'as' => static::COMMENT_TABLE, 'fields' => ['time', 'blog_id'], 'order' => ['time' => 'DESC']],
+                'USING ( blog_id )'
+            ],
+        ],
+            [],
+            [
+                [static::BLOG_TABLE => ['blog_time' => 'time']],
+                [static::COMMENT_TABLE => ['blog_comment_time' => 'time']],
+                'url',
+            ],
+            'GROUP BY blog_id'
+        );
+
+        $urls = array();
+        foreach($blogs as $b) {
+            $urls[] = array(
+                'loc' => $web_root . "/{$b['url']}.htm",
+                'lastmod' => date("Y-m-d", max($b['blog_time'],$b['blog_comment_time']) ?: time()),
+                'changefreq' => 'yearly',
+                'priority' => .3,
+            );
+        }
+        return $urls;
     }
 }
