@@ -45,6 +45,16 @@ class User extends API {
             Output::jsonError($res['error']);
         }
     }
+
+    public function postReset() {
+        if (!$email = Request::get('email', 'email')) {
+            Output::error('Invalid email');
+        }
+        elseif (!$user = UserModel::loadByEmail($email)) {
+            Output::error('User does not exist.');
+        }
+        $user->sendResetLink();
+    }
     
     /**
      * Validates POST data (email, password and confirmation).

@@ -174,12 +174,10 @@ class User extends Page {
      */
     public function postReset() {
         if (!$email = Request::get('email', 'email')) {
-            Messenger::error('Invalid email');
-            return;
+            Output::error('Invalid email');
         }
         elseif (!$user = UserModel::loadByEmail($email)) {
-            Messenger::error('User does not exist.');
-            return;
+            Output::error('User does not exist.');
         }
         if ($user->sendResetLink()) {
             Navigation::redirect('message', array('msg' => 'reset'));
