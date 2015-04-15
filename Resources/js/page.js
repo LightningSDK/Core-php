@@ -1,6 +1,6 @@
 lightning.page = {
     edit: function() {
-        $(".page_edit").fadeIn();
+        $('.page_edit').fadeIn();
         $('.page_edit_links').fadeOut();
         $('#page_display').attr('contentEditable', 'true');
         lightning.ckeditors['page_editor'] = CKEDITOR.inline("page_display", {
@@ -33,15 +33,18 @@ lightning.page = {
             dataType:'json',
             data:send,
             success:function(data) {
-                if (data.status == 'OK') {
-                    $(".page_edit").fadeOut();
+                if (data.status == 'success') {
+                    // Hide the editing controls.
+                    $('.page_edit').fadeOut();
                     $('.page_edit_links').fadeIn();
                     $('#page_display').attr('contentEditable', 'false');
+                    // Update page specific data.
                     $('#page_id').val(data.page_id);
                     $('#page_url').val(data.url);
                     document.title = data.title;
-                    $("#page_title").val(data.title);
+                    $('#page_title').val(data.title);
                 } else {
+                    // Saving failed.
                     alert(data.error);
                     self.edit();
                 }
