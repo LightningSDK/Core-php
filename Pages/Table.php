@@ -554,7 +554,7 @@ abstract class Table extends Page {
         }
 
         // Redirect to the next page.
-        if ($return = Request::get('table_return')) {
+        if ($return = Request::get('table_return', 'url_encoded')) {
             Navigation::redirect($return);
         }
 
@@ -1338,7 +1338,7 @@ abstract class Table extends Page {
                 $multipart_header = $this->hasUploadfield() ? "enctype='multipart/form-data'" : '';
                 echo "<form action='".$this->createUrl()."' id='form_{$this->table}' method='POST' {$multipart_header}><input type='hidden' name='action' id='action' value='{$new_action}' />";
                 echo Form::renderTokenInput();
-                if ($return = Request::get('return')) {
+                if ($return = Request::get('return', 'urlencoded')) {
                     echo Hidden::render('table_return', $return);
                 }
             }
