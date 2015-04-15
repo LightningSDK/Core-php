@@ -26,11 +26,11 @@ elif [[ "$PLATFORM" == 'Linux' ]]; then
   curl -sL https://deb.nodesource.com/setup | sudo bash -
 
   # install ruby for compass and grunt
-  sudo apt-get -y install ruby-full rubygems python-software-properties python g++ make nodejs
+  sudo apt-get -y install ruby-full python-software-properties python g++ make nodejs
   if [[ -f /etc/debian_version ]]; then
-    sudo apt-get -y install bundler
+    sudo apt-get -y install bundler rubygems
   else
-    sudo apt-get -y install ruby-bundler
+    sudo apt-get -y install ruby-bundler ruby
   fi
 elif [[ "$PLATFORM" == 'Darwin' ]]; then
   # install ruby for mac
