@@ -1253,7 +1253,8 @@ class Database extends Singleton {
             $primary_column = $indexes['primary'];
         }
         elseif (!empty($indexes['primary']['columns'])) {
-            if (count($indexes['primary']['columns']) == 1) {
+            if (count($indexes['primary']['columns']) == 1
+                && (!isset($indexes['primary']['auto_increment']) || empty($indexes['primary']['auto_increment']))) {
                 $primary_column = $indexes['primary']['columns'][0];
             }
         }
