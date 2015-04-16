@@ -48,9 +48,11 @@ class JS {
      *
      * @param $file
      *   The relative path to the file from the current URL request.
+     * @param $async
+     *   Whether the script should be loaded asynchronously.
      */
-    public static function add($file) {
-        self::$included_scripts[$file] = array('file' => $file, 'rendered' => false);
+    public static function add($file, $async = true) {
+        self::$included_scripts[$file] = array('file' => $file, 'rendered' => false, 'async' => $async);
     }
 
     /**
@@ -120,7 +122,7 @@ class JS {
         // Include JS files.
         foreach (self::$included_scripts as &$file) {
             if (empty($file['rendered'])) {
-                $output .= '<script language="javascript" src="' . $file['file'] . '"></script>';
+                $output .= '<script language="javascript" src="' . $file['file'] . '" ' . (!empty($file['async']) ? 'async defer' : '') . '></script>';
                 $file['rendered'] = true;
             }
         }
