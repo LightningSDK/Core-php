@@ -37,3 +37,12 @@
 [submodule "Vendor/videojs"]
 	path = Vendor/videojs
 	url = https://github.com/videojs/video.js.git
+[submodule "Vendor/facebooksdk"]
+	path = Vendor/facebooksdk
+	url = git@github.com:facebook/facebook-php-sdk-v4.git
+[submodule "Vendor/googleapiclient"]
+	path = Vendor/googleapiclient
+	url = git@github.com:google/google-api-php-client.git
+[submodule "Vendor/twitterapiclient"]
+	path = Vendor/twitterapiclient
+	url = git@github.com:abraham/twitteroauth.git
