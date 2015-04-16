@@ -171,6 +171,6 @@ use Lightning\View\CSS;
         </section>
     </div>
 </div>
-<?= JS::render(); ?><?= CSS::render(); ?>
+<?= JS::render(); ?><?= CSS::render(); ?><?= $this->renderFooter(); ?>
 </body>
 </html>
