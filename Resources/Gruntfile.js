@@ -46,43 +46,24 @@ module.exports = function(grunt) {
                 files: [
                     {
                         src: [
-                            '../../Lightning/build/js/*',
-                            '../../Lightning/Vendor/build/*/*.js',
+                            '../Vendor/chartjs/Chart.min.js',
+                            '../Vendor/build/videojs/video-js.min.js'
                         ],
-                        dest: '../../js',
+                        dest: '../build/js',
                         expand: true,
                         flatten: true,
                         filter:'isFile'
                     },
-                    {
-                        src: [
-                            '../../Lightning/build/css/*',
-                            '../../Lightning/Vendor/build/*/*.css',
-                        ],
-                        dest: '../../css',
-                        expand: true,
-                        flatten: true,
-                        filter:'isFile'
-                    },
-                    {
-                        src: [
-                            '../../Lightning/Vendor/build/*/*.swf'
-                        ],
-                        dest: '../../swf',
-                        expand: true,
-                        flatten: true,
-                        filter:'isFile'
-                    }
                 ]
             }
         }
     });
 
-    grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-compass');
 
-    grunt.registerTask('build', ['compass', 'uglify', 'copy']);
-    grunt.registerTask('default', ['build', 'watch']);
+    grunt.registerTask('default', ['compass', 'uglify', 'copy']);
+    grunt.registerTask('watch', ['default','watch']);
 };
