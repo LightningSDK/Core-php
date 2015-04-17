@@ -28,7 +28,7 @@ use Lightning\View\CSS;
     <meta name="robots" content="ALL, INDEX, FOLLOW" />
     <meta name="description" content="<?= $page_description ?>">
     <meta name="author" content="<?= $page_author ?>">
-    <meta name="copyright" content="AccountableAuthority.com Copyright (c) 2014">
+    <meta name="copyright" content="LightningSDK.com Copyright (c) 2014">
     <? if (!empty($og_image)): ?>
         <meta property="og:image" content="<?=$og_image?>" />
     <? endif; ?>
