@@ -1696,7 +1696,7 @@ abstract class Table extends Page {
      * @return string
      */
     protected function render_linked_table_editable_image(&$link_settings) {
-        JS::add('/js/ckfinder/ckfinder.js');
+        CKEditor::init();
         JS::startup('lightning.table.init()');
         JS::set('table.links.' . $link_settings['table'], $link_settings);
         $output = '<span class="button add_image" id="add_image_' . $link_settings['table'] . '">Add Image</span>';
