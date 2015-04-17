@@ -61,7 +61,7 @@ class Page {
         JS::add('/js/jquery.cookie.min.js');
         JS::add('/js/modernizr.min.js');
         JS::add('/js/placeholder.min.js');
-        JS::add('/js/foundation.min.js');
+        JS::add('/js/foundation.min.js', false);
         JS::add('/js/lightning.min.js', false);
         JS::add('/js/jquery.validate.min.js');
         JS::startup('lightning.startup.init()');
