@@ -9,22 +9,25 @@ use Lightning\Tools\Singleton;
 
 class Blog extends Singleton {
 
-    var $id = 0;
-    var $posts = array();
-    var $shorten_body = false;
-    var $show_unapproved_comments = false;
-    var $y = 0;
-    var $m = 0;
-    var $category='';
-    var $list_per_page = 10;
-    var $page = 1;
-    var $post_count;
     const BLOG_TABLE = 'blog';
     const CATEGORY_TABLE = 'blog_category';
     const BLOG_CATEGORY_TABLE = 'blog_blog_category';
     const COMMENT_TABLE = 'blog_comment';
     const AUTHOR_TABLE = 'blog_author';
     const IMAGE_PATH = 'img/blog';
+
+    protected $post_count = 0;
+    protected $isList = false;
+
+    public $id = 0;
+    public $posts = array();
+    public $shorten_body = false;
+    public $show_unapproved_comments = false;
+    public $y = 0;
+    public $m = 0;
+    public $category='';
+    public $list_per_page = 10;
+    public $page = 1;
 
     /**
      * Overrides parent function.
@@ -67,41 +70,6 @@ class Blog extends Singleton {
         return $body;
     }
 
-    function list_post() {
-        $join = array();
-        $where = array();
-        if ($this->y != 0) {
-            if ($this->m > 0) // SELECT A MONTH
-                $where['time'] = array('BETWEEN', mktime(0,0,0,$this->m,1,$this->y), mktime(0,0,0,$this->m+1,1,$this->y));
-            else
-                $where['time'] = array('BETWEEN', mktime(0,0,0,1,1,$this->y), mktime(0,0,0,1,1,$this->y+1));
-        } elseif (!empty($this->category)) {
-            $cat_id = Database::getInstance()->selectField('cat_id', static::CATEGORY_TABLE, array('cat_url' => array('LIKE', $this->category)));
-            $join[] = array('JOIN', 'blog_blog_category', 'USING (blog_id)');
-            $where['cat_id'] = $cat_id;
-        }
-
-        if ($this->list_per_page > 0) {
-            $limit = " LIMIT ".intval(($this->page -1) * $this->list_per_page).", {$this->list_per_page}";
-        }
-        $this->posts = Database::getInstance()->selectAll(
-            array(
-                'from' => static::BLOG_TABLE,
-                'join' => array_merge($join, $this->joinAuthorCatTables()),
-            ),
-            $where,
-            $this->blogFields(),
-            'GROUP BY ' . static::BLOG_TABLE . '.blog_id ORDER BY time DESC ' . $limit
-        );
-        $this->post_count = Database::getInstance()->count(
-            array(
-                'from' => static::BLOG_TABLE,
-                'join' => $join,
-            ),
-            $where
-        );
-    }
-
     protected function getCategoryID($search_value) {
         return Database::getInstance()->selectField(
             'cat_id',
@@ -118,7 +86,12 @@ class Blog extends Singleton {
         );
     }
 
-    public function loadList($page, $search_field = null, $search_value = null) {
+    public function isList() {
+        return $this->isList;
+    }
+
+    public function loadList($search_field = null, $search_value = null) {
+        $this->isList = true;
         $join = array();
         $where = array();
         if ($this->y != 0) {
@@ -150,7 +123,7 @@ class Blog extends Singleton {
         }
 
         if ($this->list_per_page > 0) {
-            $limit = " LIMIT " . intval(($page -1) * $this->list_per_page) . ", {$this->list_per_page}";
+            $limit = " LIMIT " . intval(($this->page -1) * $this->list_per_page) . ", {$this->list_per_page}";
         }
 
         $this->posts = Database::getInstance()->selectAll(
@@ -174,6 +147,7 @@ class Blog extends Singleton {
     }
 
     public function loadContentByURL($url) {
+        $this->isList = false;
         $url = preg_replace('/.htm$/', '', $url);
         $this->posts = Database::getInstance()->selectAll(
             array(
@@ -187,6 +161,7 @@ class Blog extends Singleton {
     }
 
     public function loadContentByID($id) {
+        $this->isList = false;
         $this->posts = Database::getInstance()->selectAll(
             array(
                 'from' => static::BLOG_TABLE,
@@ -247,7 +222,7 @@ class Blog extends Singleton {
 
     function pagination() {
         // do noting if we don't have more than one page
-        if ($this->post_count <= $this->list_per_page) {
+        if (!$this->isList() || $this->post_count <= $this->list_per_page) {
             return false;
         }
 

@@ -4,17 +4,13 @@ use Lightning\Tools\Scrub;
 use Lightning\Tools\Configuration;
 
 $user = ClientUser::getInstance();
-if ($user->isAdmin()): ?>
-    <a href='/admin/blog/comments'>Approve Comments</a><br />
-    <a href='/table?table=categories' target="_blank">Edit categories</a><br /><br />
-<? endif; ?>
 
-<? if (count($blog->posts) > 0): ?>
+if (count($blog->posts) > 0): ?>
 
     <?=$blog->pagination()?>
     <? foreach ($blog->posts as $post): ?>
         <div class="IndiArticle">
-            <? if ( count($blog->posts) == 1): ?>
+            <? if (!$blog->isList()): ?>
                 <div class="blog-header-image" style="background-image:url(<?= ($post['header_image'])?: Configuration::get('blog.default_image'); ?>);"></div>
                 <h1><?=$post['title'];?></h1>
             <? else: ?>
@@ -36,17 +32,16 @@ if ($user->isAdmin()): ?>
                         </li>
                     <? endforeach; ?>
                 </ul>
-                <div class="blog_body" <? if ( count($blog->posts) == 1):?>id='blog_body'<? endif; ?>>
-                    <? if ($user->isAdmin()): ?><a href='/blog/edit?return=view&id=<?=$post['blog_id'];?>'>Edit this Post</a><br /><? endif; ?>
-                    <? if ( count($blog->posts) > 1):?>
+                <div class="blog_body" <? if (!$blog->isList()):?>id='blog_body'<? endif; ?>>
+                    <? if ($user->isAdmin()): ?><a href="/blog/edit?return=view&id=<?=$post['blog_id'];?>" class="button">Edit this Post</a><br /><? endif; ?>
+                    <? if ($blog->isList()): ?>
                         <?=$blog->shortBody($post['body'], 500)?>
                         <br><a href='/<?=$post['url']?>.htm' class="blkMore">read more</a>
                     <? else: ?>
                         <?=$blog->body($post['body'])?>
                     <? endif; ?>
                 </div>
-                <?
-                if(count($blog->posts) == 1):
+                <? if (!$blog->isList()):
                     $this->build('social_links');
                 endif;
                 ?>
