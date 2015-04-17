@@ -24,11 +24,15 @@ use Lightning\View\CSS;
     <!-- For non-Retina iPhone, iPod Touch, and Android 2.1+ devices: -->
     <link rel="apple-touch-icon-precomposed" href="img/icons/apple-touch-icon-precomposed.png">
 
-    <meta name="keywords" content="<?=Configuration::get('page_keywords');?>" />
+    <meta name="keywords" content="<?= $page_keywords ?>" />
     <meta name="robots" content="ALL, INDEX, FOLLOW" />
-    <meta name="description" content="<?=Configuration::get('page_description');?>">
-    <meta name="author" content="Dan B">
-    <meta name="copyright" content="LightningSDK.com Copyright (c) 2014">
+    <meta name="description" content="<?= $page_description ?>">
+    <meta name="author" content="<?= $page_author ?>">
+    <meta name="copyright" content="AccountableAuthority.com Copyright (c) 2014">
+    <? if (!empty($og_image)): ?>
+        <meta property="og:image" content="<?=$og_image?>" />
+    <? endif; ?>
+    <meta property="og:title" content="<?=$page_title?>" />
     <?= JS::render(); ?><?= CSS::render(); ?>
 </head>
 <body class="antialiased hide-extras">
