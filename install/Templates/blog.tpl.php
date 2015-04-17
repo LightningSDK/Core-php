@@ -26,11 +26,13 @@ if (count($blog->posts) > 0): ?>
                             <a href="/blog/author/<?=$post['author_url']?>"><?=$post['author_name']?></a>
                         </li>
                     <? endif; ?>
-                    <? foreach ($post['categories'] as $cat): ?>
-                        <li>
-                            <a href="/blog/category/<?= Scrub::toURL($cat); ?>"><?= $cat; ?></a>
-                        </li>
-                    <? endforeach; ?>
+                    <? if (!empty($post['categories'])):
+                        foreach ($post['categories'] as $cat): ?>
+                            <li>
+                                <a href="/blog/category/<?= Scrub::toURL($cat); ?>"><?= $cat; ?></a>
+                            </li>
+                        <? endforeach;
+                    endif; ?>
                 </ul>
                 <div class="blog_body" <? if (!$blog->isList()):?>id='blog_body'<? endif; ?>>
                     <? if ($user->isAdmin()): ?><a href="/blog/edit?return=view&id=<?=$post['blog_id'];?>" class="button">Edit this Post</a><br /><? endif; ?>
@@ -46,7 +48,7 @@ if (count($blog->posts) > 0): ?>
                 endif;
                 ?>
             </div>
-            <? if (count($blog->posts) == 1): ?>
+            <? if (!$blog->isList()): ?>
                 <? if(!empty($post['author_image'])): ?>
                     <div class="author">
                         <img src="/img/blog/<?= $post['author_image']; ?>">
