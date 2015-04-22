@@ -1,40 +1,82 @@
 <?
 use Lightning\Tools\ClientUser;
+use Lightning\Tools\Scrub;
 use Lightning\Tools\Configuration;
 
 $user = ClientUser::getInstance();
-
 if ($user->isAdmin()): ?>
     <a href='/admin/blog/comments'>Approve Comments</a><br />
-    <a href='/table.php?table=categories' target="_blank">Edit categories</a><br /><br />
+    <a href='/table?table=categories' target="_blank">Edit categories</a><br /><br />
 <? endif; ?>
 
 <? if (count($blog->posts) > 0): ?>
+
     <?=$blog->pagination()?>
     <? foreach ($blog->posts as $post): ?>
-        <? if ( count($blog->posts) == 1): ?>
-            <h1><?=$post['title'];?></h1>
-            <?= $this->build('social_links'); ?>
-        <? else: ?>
-            <h2><a href='/<?=$post['url'];?>.htm'><?=$post['title'];?></a></h2>
-        <? endif; ?>
-        <h4 class="blog_header_date">Posted on: <?=date('F j, Y \a\t g:iA',$post['time']);?></h4>
-        <div class="blog_body" <? if ( count($blog->posts) == 1):?>id='blog_body'<? endif; ?>>
-            <? if ($user->isAdmin()): ?><a href='/blog/edit?return=view&id=<?=$post['blog_id'];?>'>Edit this Post</a><br /><? endif; ?>
-            <?=$blog->body($post['body'])?><? if ( count($blog->posts) > 1):?> <a href='/<?=$post['url']?>.htm'>read more...</a><? endif; ?>
+        <div class="IndiArticle">
+            <? if ( count($blog->posts) == 1): ?>
+                <div class="blog-header-image" style="background-image:url(<?= ($post['header_image'])?: Configuration::get('blog.default_image'); ?>);"></div>
+                <h1><?=$post['title'];?></h1>
+            <? else: ?>
+                <a href='/<?=$post['url'];?>.htm'><div class="blog-header-image" style="background-image:url(<?= ($post['header_image']) ? : Configuration::get('blog.default_image'); ?>);"></div></a>
+                <h2><a href='/<?=$post['url'];?>.htm'><?=$post['title'];?></a></h2>
+            <? endif; ?>
+            <div class="blog-date">
+                <?= date('F j, Y', $post['time']) ?></div>
+            <div class="TextBlock">
+                <ul class="blog-meta">
+                    <? if (!empty($post['author_name']) && !empty($post['author_url'])): ?>
+                        <li>
+                            <a href="/blog/author/<?=$post['author_url']?>"><?=$post['author_name']?></a>
+                        </li>
+                    <? endif; ?>
+                    <? foreach ($post['categories'] as $cat): ?>
+                        <li>
+                            <a href="/blog/category/<?= Scrub::toURL($cat); ?>"><?= $cat; ?></a>
+                        </li>
+                    <? endforeach; ?>
+                </ul>
+                <div class="blog_body" <? if ( count($blog->posts) == 1):?>id='blog_body'<? endif; ?>>
+                    <? if ($user->isAdmin()): ?><a href='/blog/edit?return=view&id=<?=$post['blog_id'];?>'>Edit this Post</a><br /><? endif; ?>
+                    <? if ( count($blog->posts) > 1):?>
+                        <?=$blog->shortBody($post['body'], 500)?>
+                        <br><a href='/<?=$post['url']?>.htm' class="blkMore">read more</a>
+                    <? else: ?>
+                        <?=$blog->body($post['body'])?>
+                    <? endif; ?>
+                </div>
+                <?
+                if(count($blog->posts) == 1):
+                    $this->build('social_links');
+                endif;
+                ?>
+            </div>
+            <? if (count($blog->posts) == 1): ?>
+                <? if(!empty($post['author_image'])): ?>
+                    <div class="author">
+                        <img src="/img/blog/<?= $post['author_image']; ?>">
+                        <div class="info">
+                            <h4><?= $post['author_name']; ?></h4>
+                            <p><?= $post['author_description']; ?></p>
+                            <a href="/blog/author/<?= $post['author_url']; ?>">ALL FROM <?= $post['author_name']; ?> <i class="fa fa-angle-right"></i></a>
+                        </div>
+                    </div>
+                <? endif; ?>
+                <div id="fb-root"></div>
+                <script>(function(d, s, id) {
+                        var js, fjs = d.getElementsByTagName(s)[0];
+                        if (d.getElementById(id)) return;
+                        js = d.createElement(s); js.id = id;
+                        js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+                        fjs.parentNode.insertBefore(js, fjs);
+                    }(document, 'script', 'facebook-jssdk'));</script>
+                <div class="fb-comments" data-numposts="5" data-width="100%" data-colorscheme="light"></div>
+
+            <? endif; ?>
+
+            <div data-src="<?=$post['url']?>" class="OUTBRAIN" ></div>
+            <script type="text/javascript">(function(){window.OB_platformType=8;window.OB_langJS="http://widgets.outbrain.com/lang_en.js";window.OBITm="1394419150171";window.OB_recMode="brn_strip";var ob=document.createElement("script");ob.type="text/javascript";ob.async=true;ob.src="http"+("https:"===document.location.protocol?"s":"")+"://widgets.outbrain.com/outbrainLT.js";var h=document.getElementsByTagName("script")[0];h.parentNode.insertBefore(ob,h);})();</script>
         </div>
-        <br />
-        <?= $this->build('social_links'); ?>
-        <br />
-
-        <? if (count($blog->posts) == 1): ?>
-            <div class="fb-comments" data-href="http://<?=Configuration::get('site.domain')?>/<?=$blog->posts[0]['url']?>.htm" data-width="560" data-num-posts="10"></div>
-
-        <? endif; ?>
-
-        <div data-src="<?=$post['url']?>" class="OUTBRAIN" ></div>
-        <script type="text/javascript">(function(){window.OB_platformType=8;window.OB_langJS="http://widgets.outbrain.com/lang_en.js";window.OBITm="1394419150171";window.OB_recMode="brn_strip";var ob=document.createElement("script");ob.type="text/javascript";ob.async=true;ob.src="http"+("https:"===document.location.protocol?"s":"")+"://widgets.outbrain.com/outbrainLT.js";var h=document.getElementsByTagName("script")[0];h.parentNode.insertBefore(ob,h);})();</script>
-
     <? endforeach; ?>
     <?=$blog->pagination()?>
 <? elseif ($page_section == "blog"): ?>
