@@ -1616,7 +1616,7 @@ abstract class Table extends Page {
                         }
                         // THIS IS A MANY TO MANY RELATIONSHIP
                         // otherwise just list out all the fields
-                    } elseif ($link_settings['full_form'] === true) {
+                    } elseif (!empty($link_settings['full_form']) && $link_settings['full_form'] === true) {
                         // full form view
                         foreach($link_settings['active_list'] as $l) {
                             echo "<div class='subtable'><table>";
@@ -2788,8 +2788,8 @@ abstract class Table extends Page {
             }
         }
 
-        if (count($table_data) > 0 || $use_autocomplete || $js_startup) {
-            if (count($table_data) > 0 || $use_autocomplete) {
+        if (count($table_data) > 0 || !empty($use_autocomplete) || $js_startup) {
+            if (count($table_data) > 0 || !empty($use_autocomplete)) {
                 JS::inline('var table_data = ' . json_encode($table_data));
             }
             if ($js_startup) {
