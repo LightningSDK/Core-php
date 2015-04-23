@@ -21,11 +21,14 @@ class CKEditor {
     /**
      * Add the required JS to the page.
      */
-    public static function init() {
+    public static function init($initCKFinder = false) {
         if (!self::$inited) {
             JS::add('/js/ckeditor/ckeditor.js', false);
             JS::startup('lightning.ckeditors = {}');
             self::$inited = true;
+        }
+        if ($initCKFinder) {
+            JS::add('/js/ckeditor/ckeditor.js', false);
         }
     }
 
