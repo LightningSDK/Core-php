@@ -168,7 +168,7 @@ class Image {
         }
 
         $this->processed = imagecreatetruecolor($dest_frame_w, $dest_frame_h);
-        if (!empty($field['alpha'])) {
+        if (!empty($settings['alpha'])) {
             $color = imagecolorallocatealpha($this->processed, 0, 0, 0, 127);
             imagefill($this->processed, 0, 0, $color);
             imagealphablending($this->processed, false);

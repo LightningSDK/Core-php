@@ -2422,7 +2422,7 @@ abstract class Table extends Page {
             $imageObj->process($image);
 
             if (!empty($image['image_postprocess']) && is_callable($image['image_postprocess'])) {
-                $dest_image = $image['image_postprocess']($imageObj->processed);
+                $imageObj->processed = $image['image_postprocess']($imageObj->processed);
             }
 
             $path = pathinfo($output_location);
