@@ -2,6 +2,7 @@
 
 namespace Lightning\API;
 
+use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Output;
@@ -34,7 +35,7 @@ class User extends API {
         // Validate POST data
         if (!$this->validateData($email, $pass)) {
             // Immediately output all the errors
-            Output::jsonError();
+            Output::error("Invalid Data");
         }
         
         // Register user
@@ -42,7 +43,7 @@ class User extends API {
         if ($res['success']) {
             Output::json($res['data']);
         } else {
-            Output::jsonError($res['error']);
+            Output::error($res['error']);
         }
     }
 
@@ -54,6 +55,11 @@ class User extends API {
             Output::error('User does not exist.');
         }
         $user->sendResetLink();
+    }
+
+    public function postLogout() {
+        $user = ClientUser::getInstance();
+        $user->logOut();
     }
     
     /**
