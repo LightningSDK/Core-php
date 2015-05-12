@@ -14,6 +14,7 @@ use Lightning\Tools\Navigation;
 use Lightning\Tools\ReCaptcha;
 use Lightning\Tools\Request;
 use Lightning\View\Page;
+use Lightning\Model\User as UserModel;
 
 /**
  * A contact page handler.
@@ -72,9 +73,17 @@ Message:
         if (!$sent) {
             Messenger::error('Your message could not be sent. Please try again later');
             return $this->get();
-        }
-        else {
-            Navigation::redirect('/message?msg=1');
+        } else {
+            // Send an email to to have them test for spam.
+            if ($auto_responder = Configuration::get('contact.auto_responder')) {
+                $auto_responder_mailer = new Mailer();
+                $result = $auto_responder_mailer->sendOne($auto_responder, UserModel::loadByEmail($sender_email));
+                if ($result && Configuration::get('contact.spam_test')) {
+                    // Set the notice.
+                    Navigation::redirect('/message', array('msg' => 'spam_test'));
+                }
+            }
+            Navigation::redirect('/message', array('msg' => 'contact_sent'));
         }
     }
 }

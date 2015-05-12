@@ -278,3 +278,9 @@ $amber-low: rgb(255,205,1);
 .blog-meta li a {
   color: #60a9fd;
 }
+
+// Fix for captcha
+#recaptcha_area input[type="text"] {
+  display: inline-block;
+  height: auto;
+}

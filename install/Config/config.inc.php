@@ -24,6 +24,8 @@ $conf = array(
     ),
     'contact' => array(
         'subject' => 'Message from Website.com',
+        'auto_responder' => 0, // Change to this a message_id of an auto respond.
+        'spam_test' => false, // Whether to tell them to immediately look for the auto respond in their junk folder.
         'to' => array('youremail@gmail.com'),
         'cc' => array(),
         'bcc' => array(),

@@ -340,6 +340,9 @@ class Mailer {
      *   The message id.
      * @param User $user
      *   The user object to send to.
+     *
+     * @return boolean
+     *   Whether the message was sent successfully.
      */
     function sendOne($message_id, $user) {
         $this->built = false;
@@ -349,8 +352,12 @@ class Mailer {
         $this->message->setUser($user);
         $this->message->setDefaultVars();
         $this->to($user->email, $user->first . ' ' . $user->last);
-        $this->sendMessage();
-        Tracker::trackEvent('Email Sent', $message_id, $user->id);
+        if ($this->sendMessage()) {
+            Tracker::trackEvent('Email Sent', $message_id, $user->id);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
