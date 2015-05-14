@@ -6,6 +6,7 @@
 
 namespace Lightning\View;
 
+use Lightning\Tools\Data;
 use Lightning\Tools\Session;
 
 /**
@@ -34,6 +35,11 @@ class JS {
      */
     protected static $inline_scripts = array();
 
+    /**
+     * @var array
+     *
+     * A list of vars to be output as a JS object, accessible by JS.
+     */
     protected static $vars = array();
 
     /**
@@ -81,24 +87,21 @@ class JS {
         }
     }
 
+    /**
+     * Set a javascript variable.
+     *
+     * @param string $var
+     *   The name of the variable.
+     * @param mixed $value
+     *   The new value.
+     */
     public static function set($var, $value) {
-        $var = explode('.', $var);
-        self::setSubPath($var, $value, self::$vars);
+        Data::setInPath($var, $value, self::$vars);
     }
 
-    protected static function setSubPath($var, $value, &$container) {
-        if (count($var) == 1) {
-            $container[$var[0]] = $value;
-        } else {
-            $top_var = $var[0];
-            if (!isset($container[$top_var]) || !is_array($container[$top_var])) {
-                $container[$top_var] = array();
-            }
-            array_shift($var);
-            self::setSubPath($var, $value, $container[$top_var]);
-        }
-    }
-
+    /**
+     * Add the session token as a JS accessible variable.
+     */
     public static function addSessionToken() {
         self::set('token', Session::getInstance()->getToken());
     }
