@@ -120,6 +120,9 @@ class Template extends Singleton {
         }
     }
 
+    /**
+     * Set template metadata variables.
+     */
     protected function setTemplateMetaData() {
         foreach (array('title', 'keywords', 'description', 'author') as $meta_data) {
             // Check if template already has these variables set
