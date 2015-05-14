@@ -56,6 +56,7 @@ class Page {
     public function __construct() {
         // Load messages and errors from the query string.
         Messenger::loadFromQuery();
+        Messenger::loadFromSession();
         JS::add('/js/fastclick.min.js');
         JS::add('/js/jquery.min.js', false);
         JS::add('/js/jquery.cookie.min.js');
