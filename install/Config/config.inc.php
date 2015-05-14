@@ -10,6 +10,7 @@ $conf = array(
         'key' => 'o2sdxfGwHn2YGcQ3Xh2Z8p5y/BP0dHdbtdmU3ATdMwE=',
         'multiple_devices' => false,
         'min_password_length' => 6,
+        'requires_confirmation' => false,
     ),
     'session' => array(
         'single_ip' => true,
@@ -40,6 +41,7 @@ $conf = array(
         'default_template' => null,
         'default_list' => null,
         'mail_template' => null,
+        'confirm_message' => null, // Set a message_id here to enable double confirmation.
     ),
     'tracker' => array(
         'allow_unencrypted' => true,

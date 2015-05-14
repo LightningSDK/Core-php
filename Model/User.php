@@ -18,15 +18,16 @@ use Lightning\Tools\Tracker;
 use Lightning\View\Field\Time;
 
 class User extends Object {
+
     /**
-     * A default user with no privileges.
+     * A registered user who has not been confirmed.
      */
-    const TYPE_UNREGISTERED_USER = 0;
+    const UNCONFIRMED = 0;
 
     /**
      * A registered user with a confirmed status.
      */
-    const TYPE_REGISTERED_USER = 1;
+    const CONFIRMED = 1;
 
     /**
      * An admin user with all access.
@@ -259,19 +260,15 @@ class User extends Object {
         } elseif ($user_info = Database::getInstance()->selectRow('user', array('email' => strtolower($email), 'password' => ''))) {
             // EMAIL EXISTS IN MAILING LIST ONLY
             $updates = array();
-            if ($user_info['confirmed'] != 0) {
-                $updates['confirmed'] = rand(100000,9999999);
-            }
+            // Set the referrer.
             if ($ref = Request::cookie('ref', 'int')) {
                 $updates['referrer'] = $ref;
             }
-            $user = new self($user_info['user_id']);
+            $user = new self($user_info);
             $user->setPass($pass, '', $user_info['user_id']);
             $updates['registered'] = Time::today();
             Database::getInstance()->update('user', $updates, array('user_id' => $user_info['user_id']));
-            if ($user_info['confirmed'] != 0 && Configuration::get('user.requires_confirmation')) {
-                $user->sendConfirmationEmail($email);
-            }
+            $user->sendConfirmationEmail();
             return [
                 'success'   => true, 
                 'data'      => $user_info['user_id']
@@ -283,13 +280,10 @@ class User extends Object {
             if ($ref = Request::cookie('ref', 'int')) {
                 $updates['referrer'] = $ref;
             }
-            $updates['confirmed'] = rand(100000,9999999);
             $updates['type'] = 1;
             Database::getInstance()->update('user', $updates, array('user_id' => $user_id));
-            $user = new self($user_id);
-            if (Configuration::get('user.requires_confirmation')) {
-                $user->sendConfirmationEmail($email);
-            }
+            $user = static::loadById($user_id);
+            $user->sendConfirmationEmail();
             return [
                 'success'   => true, 
                 'data'      => $user_id
@@ -315,7 +309,7 @@ class User extends Object {
         $db = Database::getInstance();
         if ($user = $db->selectRow('user', $user_data)) {
             if ($update) {
-                $db->update('user', $update, $user_data);
+                $db->update('user', $user_data, $update);
             }
             $user_id = $user['user_id'];
             return static::loadById($user_id);
@@ -402,13 +396,13 @@ class User extends Object {
      * @return integer
      *   The new user's ID.
      */
-    public static function insertUser($email, $pass = NULL, $first_name = '', $last_name = '') {
+    protected static function insertUser($email, $pass = NULL, $first_name = '', $last_name = '') {
         $user_details = array(
             'email' => Scrub::email(strtolower($email)),
             'first' => $first_name,
             'last' => $last_name,
             'created' => Time::today(),
-            'confirmed' => rand(100000,9999999),
+            'confirmed' => static::requiresConfirmation() ? static::UNCONFIRMED : static::CONFIRMED,
             'type' => 0,
             // TODO: Need to get the referrer id.
             'referrer' => 0,
@@ -455,6 +449,9 @@ class User extends Object {
         );
     }
 
+    /**
+     * Has to be redone. Not currently in use.
+     */
     public function admin_create($email, $first_name='', $last_name='') {
         $today = gregoriantojd(date('m'), date('d'), date('Y'));
         $user_info = Database::getInstance()->selectRow('user', array('email' => strtolower($email)));
@@ -468,12 +465,16 @@ class User extends Object {
             $randomPass = $this->randomPass();
             $this->setPass($randomPass, $email);
             $mailer = new Mailer();
-            $mailer->to($email)->subject('New Account')->message("Your account has been created with a temporary password. Your temporary password is: {$randomPass}\n\nTo reset your password, log in with your temporary password and click 'my profile'. Follow the instructions to reset your new password.");
+            $mailer
+                ->to($email)
+                ->subject('New Account')
+                ->message("Your account has been created with a temporary password. Your temporary password is: {$randomPass}\n\nTo reset your password, log in with your temporary password and click 'my profile'. Follow the instructions to reset your new password.")
+                ->send();
             Database::getInstance()->update(
                 'user',
                 array(
                     'registered' => $today,
-                    'confirmed' => rand(100000,9999999),
+                    'confirmed' => static::requiresConfirmation() ? static::UNCONFIRMED : static::CONFIRMED,
                     'type' => 1,
                 ),
                 array(
@@ -487,12 +488,16 @@ class User extends Object {
             $randomPass = $this->randomPass();
             $user_id = $this->insertUser($email, $randomPass, $first_name, $last_name);
             $mailer = new Mailer();
-            $mailer->to($email)->subject('New Account')->message("Your account has been created with a temporary password. Your temporary password is: {$randomPass}\n\nTo reset your password, log in with your temporary password and click 'my profile'. Follow the instructions to reset your new password.");
+            $mailer
+                ->to($email)
+                ->subject('New Account')
+                ->message("Your account has been created with a temporary password. Your temporary password is: {$randomPass}\n\nTo reset your password, log in with your temporary password and click 'my profile'. Follow the instructions to reset your new password.")
+                ->send();
             Database::getInstance()->update(
                 'user',
                 array(
                     'registered' => $today,
-                    'confirmed' => rand(100000,9999999),
+                    'confirmed' => static::requiresConfirmation() ? static::UNCONFIRMED : static::CONFIRMED,
                     'type' => 1,
                 ),
                 array(
@@ -699,22 +704,41 @@ class User extends Object {
         }
     }
 
-    public function sendConfirmationEmail($email) {
-        $acct_details = user::find_by_email($email);
-        if ($acct_details['confirmed'] == "" || $acct_details['confirmed'] == "confirmed") {
-            $acct_details['confirmed'] = hash('sha256',microtime());
-            Database::getInstance()->update('user',
-                array('confirmed' => $acct_details['confirmed']),
-                array('user_id' => $acct_details['user_id'])
-            );
+    /**
+     * Check if a user has been confirmed.
+     *
+     * @return boolean
+     *   Whether the user is confirmed.
+     */
+    public function isConfirmed() {
+        return $this->confirmed == static::CONFIRMED || !static::requiresConfirmation();
+    }
+
+    /**
+     * Check if a user confirmation is required either for opt-ins or logins.
+     *
+     * @return boolean
+     *   Whether the user requires confirmation in general.
+     */
+    public static function requiresConfirmation() {
+        return Configuration::get('mailer.confirm_message') || Configuration::get('user.requires_confirmation');
+    }
+
+    /**
+     * Send a confirmation email for the user to validate their email address.
+     */
+    public function sendConfirmationEmail() {
+        if (static::requiresConfirmation() && $confirmation_message = Configuration::get('mailer.confirm_message')) {
+            $mailer = new Mailer();
+            $url = Configuration::get('web_root') . '/user?action=confirm&u=' . $this->getEncryptedUserReference();
+            $mailer->setCustomVariable('SUBSCRIPTION_CONFIRMATION_LINK', $url);
+            $mailer->sendOne($confirmation_message, $this);
         }
-        $mailer = new Mailer();
-        $mailer->to($email, $acct_details['first']." ".$acct_details['last'])
-            ->subject('Activate your account')
-            ->message("You new account has been created. To activate your account, <a href='http://{$email_domain_name}/user.php?confirm={$acct_details['user_id']}.{$acct_details['confirmed']}'>click here</a> or copy and paste this link into your browser:<br /><br />
-	http://{$email_domain_name}/user.php?confirm={$acct_details['user_id']}.{$acct_details['confirmed']}
-	<br /><br /> If you did not open an account with {$mail_site_name}, please let us know by contacting us at http://{$email_domain_name}/{$site_contact_page}")
-            ->send();
+    }
+
+    public function setConfirmed() {
+        $this->confirmed = static::CONFIRMED;
+        $this->save();
     }
 
     /**
