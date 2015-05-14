@@ -3,6 +3,7 @@
 namespace Overridable\Lightning\Tools;
 
 use Lightning\Tools\Configuration;
+use Lightning\Tools\Data;
 use Lightning\Tools\Database;
 use Lightning\Tools\Logger;
 use Lightning\Tools\Messenger;
@@ -337,16 +338,14 @@ class Session extends Singleton {
      *
      * @param string $field
      *   The name of the field.
+     * @param mixed $default
+     *   The default value if it's not set.
      *
      * @return mixed
      *   The set value.
      */
-    public function getSetting($field) {
-        if (!empty($this->content[$field])) {
-            return $this->content[$field];
-        } else {
-            return null;
-        }
+    public function getSetting($field, $default = null) {
+        return Data::getFromPath($field, $this->content, $default);
     }
 
     /**
@@ -358,7 +357,7 @@ class Session extends Singleton {
      *   The value for the field.
      */
     public function setSettings($field, $value) {
-        $this->content[$field] = $value;
+        Data::setInPath($field, $value, $this->content);
     }
 
     /**
@@ -368,7 +367,7 @@ class Session extends Singleton {
      *   The field name
      */
     public function unsetSetting($field) {
-        unset($this->content[$field]);
+        Data::removeFromPath($field, $this->content);
     }
 
     /**
