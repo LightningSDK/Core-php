@@ -23,6 +23,11 @@ class Messenger {
      */
     protected static $errors = array();
 
+    /**
+     * Whether messages should be output immediately, ie for CLI.
+     *
+     * @var boolean
+     */
     protected static $verbose = false;
 
     /**
@@ -55,10 +60,20 @@ class Messenger {
         }
     }
 
+    /**
+     * Whether there are errors set.
+     *
+     * @return boolean
+     */
     public static function hasErrors() {
         return !empty(self::$errors);
     }
 
+    /**
+     * Whether there are messages set.
+     *
+     * @return boolean
+     */
     public static function hasMessages() {
         return !empty(self::$messages);
     }
@@ -88,7 +103,6 @@ class Messenger {
      */
     public static function loadFromQuery() {
         $messages = Request::query('msg');
-        $errors = Request::query('err');
         if (!empty($messages)) {
             $lang = Language::getInstance();
             $messages = explode(',', $messages);
@@ -96,6 +110,7 @@ class Messenger {
                 self::message($lang->translate($message));
             }
         }
+        $errors = Request::query('err');
         if (!empty($errors)) {
             $lang = Language::getInstance();
             $errors = explode(',', $errors);
@@ -105,6 +120,40 @@ class Messenger {
         }
     }
 
+    /**
+     * Save the current messages and errors to the session.
+     */
+    public static function storeInSession() {
+        $session = Session::getInstance();
+        if (!empty(self::$messages)) {
+            $session->setSettings('messages.messages', self::$messages);
+        }
+        if (!empty(self::$errors)) {
+            $session->setSettings('messages.errors', self::$errors);
+        }
+        if (!empty(self::$messages) || !empty(self::$errors)) {
+            $session->saveData();
+        }
+    }
+
+    /**
+     * Load messages and errors from the session.
+     */
+    public static function loadFromSession() {
+        if ($session = Session::getInstance(false)) {
+            self::$messages = $session->getSetting('messages.messages');
+            self::$errors = $session->getSetting('messages.errors');
+            $session->unsetSetting('messages');
+            $session->saveData();
+        }
+    }
+
+    /**
+     * Set the verbose variable.
+     *
+     * @param boolean $verbose
+     *   Whether the verbose mode should be on.
+     */
     public static function setVerbose($verbose = true) {
         self::$verbose = $verbose;
     }
