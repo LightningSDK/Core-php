@@ -3,7 +3,9 @@
 namespace Lightning\View;
 
 class Video {
-
+    /**
+     * Initialize requires CSS and JS files.
+     */
     public static function initDisplay() {
         static $inited = false;
         if (!$inited) {
@@ -14,6 +16,15 @@ class Video {
         }
     }
 
+    /**
+     * Add a video's JS and CSS components.
+     * This does not create the video's required HTML components.
+     *
+     * @param string $video_id
+     *   The ID for the video.
+     * @param array $settings
+     *   The settings for the video.
+     */
     public static function add($video_id, $settings) {
         self::initDisplay();
         JS::set('videos.' . $video_id, $settings);
