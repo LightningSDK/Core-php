@@ -122,6 +122,14 @@ class User extends Page {
     }
 
     /**
+     * Show just the login form, and not the registration form.
+     */
+    public function getLogin() {
+        Template::getInstance()->set('action', 'login');
+        return $this->get();
+    }
+
+    /**
      * Handle the user attempting to log in.
      */
     public function postLogin() {
