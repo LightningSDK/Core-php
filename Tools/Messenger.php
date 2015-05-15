@@ -141,8 +141,8 @@ class Messenger {
      */
     public static function loadFromSession() {
         if ($session = Session::getInstance(false)) {
-            array_merge(self::$messages, $session->getSetting('messages.messages', array()));
-            array_merge(self::$errors, $session->getSetting('messages.errors', array()));
+            self::$messages = array_merge(self::$messages, $session->getSetting('messages.messages', array()));
+            self::$errors = array_merge(self::$errors, $session->getSetting('messages.errors', array()));
             $session->unsetSetting('messages');
             $session->saveData();
         }
