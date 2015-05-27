@@ -46,6 +46,7 @@ class BasicHTML {
                 if (
                     (is_numeric($value) && $value > 0 && $value == $default)
                     || $value === $default
+                    || (is_array($default) && in_array($value, $default))
                 ) {
                     $selected = 'SELECTED="selected"';
                 } else {
