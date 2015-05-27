@@ -401,8 +401,8 @@ class Database extends Singleton {
      * @return integer
      *   How many matching rows were found.
      */
-    public function count($table, $where = array(), $count_field = '*') {
-        return (integer) $this->selectField(array('count' => array('expression' => 'COUNT(' . $count_field . ')')), $table, $where);
+    public function count($table, $where = array(), $count_field = '*', $final = '') {
+        return (integer) $this->selectField(array('count' => array('expression' => 'COUNT(' . $count_field . ')')), $table, $where, $final);
     }
 
     /**
