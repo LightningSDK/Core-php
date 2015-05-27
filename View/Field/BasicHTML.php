@@ -26,7 +26,8 @@ class BasicHTML {
         }
 
         // Build the main tag.
-        $return = '<select name="' . $name . '" id="' . $name . '" ' . $attribute_string . '>';
+        $select_name = !empty($attribute['multiple']) ? $name . '[]' : $name;
+        $return = '<select name="' . $select_name . '" id="' . $name . '" ' . $attribute_string . '>';
         // Iterate over each option.
         $return .= self::renderSelectOptions($values, $default);
         $return .= '</select>';
