@@ -666,6 +666,9 @@ class Database extends Singleton {
         if (!empty($query['group_by'])) {
             $output .= ' GROUP BY ' . $this->implodeFields($query['group_by']);
         }
+        if (!empty($query['having'])) {
+            $output .= ' HAVING ' . $this->sqlImplode($query['having'], $values, ' AND ');
+        }
         if (!empty($query['order_by'])) {
             $output .= ' ORDER BY ' . $this->sqlImplode($query['order_by'][0], $values) . ' ' . $query['order_by'][1];
         }
