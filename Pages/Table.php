@@ -2944,6 +2944,7 @@ abstract class Table extends Page {
                             if (!empty($field['filter'])) {
                                 $filter += $field['filter'];
                             }
+                            // TODO: implement a cache or join in the main query to prevent multiple query execution.
                             $value = Database::getInstance()->selectRow(
                                 $field['lookuptable'],
                                 $filter,
@@ -3266,12 +3267,12 @@ abstract class Table extends Page {
             case 'state':
             case 'country':
             case 'select':
-                if ($field['type'] == "lookup") {
+                if ($field['type'] == 'lookup') {
                     $options = Database::getInstance()->selectColumn(
                         $field['lookuptable'],
                         $field['display_column'],
                         !empty($field['filter']) ? $field['filter'] : array(),
-                        $field['field']
+                        !empty($field['lookupkey']) ? $field['lookupkey'] : $field['field']
                     );
                 }
                 elseif ($field['type'] == "yesno")
@@ -3287,7 +3288,7 @@ abstract class Table extends Page {
                 }
 
                 if (!empty($field['allow_blank'])) {
-                    $options = array_merge(array('' => ''), $options);
+                    $options = array('' => '') + $options;
                 }
                 $output = BasicHTML::select($field['form_field'], $options, $field['Value']);
 
