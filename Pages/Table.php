@@ -3257,7 +3257,7 @@ abstract class Table extends Page {
             case 'date':
                 $return = Time::datePop(
                     $field['form_field'],
-                    $field['Value'],
+                    !empty($field['Value']) ? $field['Value'] : 0,
                     !empty($field['allow_blank']),
                     !empty($field['start_year']) ? $field['start_year'] : 0
                 );
