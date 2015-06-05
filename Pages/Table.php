@@ -1019,6 +1019,9 @@ abstract class Table extends Page {
                         case 'action':
                             JS::startup('$(".table_list").on("click", "tr", lightning.table.click)');
                             break;
+                        case 'none':
+                        default:
+                            break;
                     }
                 }
 
@@ -2735,8 +2738,9 @@ abstract class Table extends Page {
     }
 
     function check_default_rowClick() {
-        if (!isset($this->rowClick) && $this->editable)
-            $this->rowClick = Array("type"=>"action","action"=>"edit");
+        if (!isset($this->rowClick) && $this->editable) {
+            $this->rowClick = array('type' => 'action', 'action' => 'edit');
+        }
     }
 
     function js_init_calendar() {
