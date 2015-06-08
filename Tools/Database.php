@@ -402,6 +402,7 @@ class Database extends Singleton {
      *   How many matching rows were found.
      */
     public function count($table, $where = array(), $count_field = '*', $final = '') {
+        unset($table['limit']);
         return (integer) $this->selectField(array('count' => array('expression' => 'COUNT(' . $count_field . ')')), $table, $where, $final);
     }
 
@@ -670,7 +671,21 @@ class Database extends Singleton {
             $output .= ' HAVING ' . $this->sqlImplode($query['having'], $values, ' AND ');
         }
         if (!empty($query['order_by'])) {
-            $output .= ' ORDER BY ' . $this->sqlImplode($query['order_by'][0], $values) . ' ' . $query['order_by'][1];
+            $output .= ' ORDER BY ';
+            foreach ($query['order_by'] as $field => $order) {
+                $output .= $this->formatField($field) . ' ' . $order;
+            }
+        }
+        if (!empty($query['limit'])) {
+            if (is_array($query['limit'])) {
+                $output .= ' LIMIT ' . implode($query['limit']);
+            } else {
+                $output .= ' LIMIT ';
+                if (!empty($query['page'])) {
+                    $output .= (($query['page'] - 1) * $query['limit']) . ', ';
+                }
+                $output .= $query['limit'];
+            }
         }
 
         return $output;
@@ -797,6 +812,15 @@ class Database extends Singleton {
      */
     public function selectAll($table, $where = array(), $fields = array(), $final = '') {
         $this->_select($table, $where, $fields, null, $final);
+        $result = $this->result->fetchAll(PDO::FETCH_ASSOC);
+        $this->timerEnd();
+        return $result;
+    }
+
+    public function selectAllQuery($query) {
+        $values = array();
+        $parsed = $this->parseQuery($query, $values);
+        $this->query($parsed, $values);
         $result = $this->result->fetchAll(PDO::FETCH_ASSOC);
         $this->timerEnd();
         return $result;
