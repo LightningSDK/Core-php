@@ -402,7 +402,9 @@ class Database extends Singleton {
      *   How many matching rows were found.
      */
     public function count($table, $where = array(), $count_field = '*', $final = '') {
-        unset($table['limit']);
+        if (!empty($table['limit'])) {
+            unset($table['limit']);
+        }
         return (integer) $this->selectField(array('count' => array('expression' => 'COUNT(' . $count_field . ')')), $table, $where, $final);
     }
 
