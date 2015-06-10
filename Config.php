@@ -21,8 +21,9 @@ $conf = array(
         ),
     ),
     'session' => array(
-        'remember_ttl' => 2592000,
-        'password_ttl' => 432000,
+        'remember_ttl' => 2592000, // 30 Days
+        'password_ttl' => 432000, // 5 Days
+        'app_ttl' => 7776000, // 90 Days
         'cookie' => 'session',
     ),
     'user' => array(
