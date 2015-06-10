@@ -14,6 +14,7 @@ use Lightning\Tools\Request as LightningRequest;
 
 class Session extends Singleton {
 
+    const STATE_ANONYMOUS = 0;
     const STATE_REMEMBER = 1;
     const STATE_PASSWORD = 2;
     const STATE_APP = 4;
@@ -297,16 +298,27 @@ class Session extends Singleton {
      *   The number of sessions removed.
      */
     public static function clearExpiredSessions() {
-        $remember_ttl = Configuration::get('session.remember_ttl');
-        if (empty($remember_ttl)) {
-            return 0;
+        $timeouts = array();
+        $timeouts[static::STATE_ANONYMOUS] = Configuration::get('session.anonymous_ttl', 86400);
+        $timeouts[static::STATE_REMEMBER] = Configuration::get('session.remember_ttl', $timeouts[static::STATE_ANONYMOUS]);
+        $timeouts[static::STATE_PASSWORD] = Configuration::get('session.password_ttl', $timeouts[static::STATE_REMEMBER]);
+        $timeouts[static::STATE_APP] = Configuration::get('session.app_ttl', $timeouts[static::STATE_REMEMBER]);
+
+        arsort($timeouts);
+        $deletions = 0;
+        $aggregate_state = 0;
+        $db = Database::getInstance();
+        foreach ($timeouts as $state => $timeout) {
+            $deletions += $db->delete(
+                'session',
+                array(
+                    'last_ping' => array('<', time() - $timeout),
+                    'state' => array('&', $aggregate_state, 0),
+                )
+            );
+            $aggregate_state |= $state;
         }
-        return Database::getInstance()->delete(
-            'session',
-            array(
-                'last_ping' => array('<', time() - $remember_ttl)
-            )
-        );
+        return $deletions;
     }
 
     /**
