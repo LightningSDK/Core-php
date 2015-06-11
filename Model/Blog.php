@@ -241,8 +241,10 @@ class Blog extends Singleton {
         $output = '<ul class="pagination">';
 
         // Previous page link.
-        $output .= '<li class="arrow' . ($this->page != 1 ? ' unavailable' : '') . '">
+        if ($this->page > 1) {
+            $output .= '<li class="arrow' . ($this->page != 1 ? ' unavailable' : '') . '">
             <a href="' . str_replace('%%', $this->page - 1, $base_link) . '">&laquo;</a>';
+        }
 
         // Page numbers.
         for ($i = 1; $i <= $pages; $i++) {
@@ -254,8 +256,10 @@ class Blog extends Singleton {
         }
 
         // Next page.
-        $output .= '<li class="arrow' . ($pages <= $this->page ? ' unavailable' : '') . '">
+        if ($this->page < $pages) {
+            $output .= '<li class="arrow' . ($pages <= $this->page ? ' unavailable' : '') . '">
             <a href="' . str_replace('%%', $this->page + 1, $base_link) . '">&raquo;</a>';
+        }
 
         $output .= '</ul>';
         return $output;
