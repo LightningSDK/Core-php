@@ -141,7 +141,7 @@ class Scrub {
      */
     public static function hex($code) {
         $code = str_replace(' ', '', $code);
-        if (preg_match("/^[a-z0-9\.]+$/i", $code)) {
+        if (preg_match('/^[a-z0-9\.]+$/i', $code)) {
             return $code;
         }
         return false;
@@ -158,7 +158,7 @@ class Scrub {
      */
     public static function base64($string) {
         $string = str_replace(' ', '', $string);
-        if (preg_match("|^[a-z0-9+/]+={0,2}$|i", $string)) {
+        if (preg_match('|^[a-z0-9+/]+={0,2}$|i', $string)) {
             return $string;
         }
         return false;
@@ -168,7 +168,7 @@ class Scrub {
      * Validate a base64 encrypted string.
      *
      * This is the same as base64 except it includes a parenthesis
-     * do delimit the iv and the cyphertext.
+     * do delimit the iv and the cipher text.
      *
      * @param string $string
      *   The value to test.
@@ -178,7 +178,7 @@ class Scrub {
      */
     public static function encrypted($string) {
         $string = str_replace(' ', '', $string);
-        if (preg_match("|^[a-z0-9+/]+={0,2}:[a-z0-9+/]+={0,2}$|i", $string)) {
+        if (preg_match('|^[a-z0-9+/]+={0,2}:[a-z0-9+/]+={0,2}$|i', $string)) {
             return $string;
         }
         return false;
