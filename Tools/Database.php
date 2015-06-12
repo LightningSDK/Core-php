@@ -484,6 +484,22 @@ class Database extends Singleton {
             ($this->connection->lastInsertId() ?: true);
     }
 
+    /**
+     * Insert a list of values.
+     *
+     * @param string $table
+     *   The table to insert into.
+     * @param array $fields
+     *   A list of column names to associate the value sets.
+     * @param array $value_sets
+     *   A list of column values. Each value should either be an array of the same length
+     *   as all other arrays, or a string to have the same entry for each set.
+     * @param boolean|array $existing
+     *   Whether to ignore existing or an array of values to use for existing key entries.
+     *
+     * @return integer
+     *   The number of entries submitted.
+     */
     public function insertSets($table, $fields, $value_sets, $existing = FALSE) {
         $vars = array();
         $table = $this->parseTable($table, $vars);
@@ -491,11 +507,14 @@ class Database extends Singleton {
         $field_string = '`' . implode('`,`', $fields) . '`';
 
         $values = '(' . implode(',', array_fill(0, count($fields), '?')) . ')';
-        $set_count = count(current($value_sets));
-        $values = implode(',', array_fill(0, $set_count, $values));
+        $set_count = 0;
         foreach ($fields as $field) {
-            for ($i = 0; $i < $set_count; $i++) {
-                $vars[] = $value_sets[$field][$i];
+            $set_count = max($set_count, is_array($value_sets[$field]) ? count($value_sets[$field]) : 1);
+        }
+        $values = implode(',', array_fill(0, $set_count, $values));
+        for ($i = 0; $i < $set_count; $i++) {
+            foreach ($fields as $field) {
+                $vars[] = is_array($value_sets[$field]) ? $value_sets[$field][$i] : $value_sets[$field];
             }
         }
 
