@@ -77,7 +77,7 @@ Message:
             // Send an email to to have them test for spam.
             if ($auto_responder = Configuration::get('contact.auto_responder')) {
                 $auto_responder_mailer = new Mailer();
-                $result = $auto_responder_mailer->sendOne($auto_responder, UserModel::loadByEmail($sender_email));
+                $result = $auto_responder_mailer->sendOne($auto_responder, UserModel::loadByEmail($sender_email) ?: new UserModel(array('email' => $sender_email)));
                 if ($result && Configuration::get('contact.spam_test')) {
                     // Set the notice.
                     Navigation::redirect('/message', array('msg' => 'spam_test'));
