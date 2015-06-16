@@ -101,7 +101,7 @@ class User extends Page {
         
         // Is email correct?
         if ($email === FALSE) {
-            Messenger::error('Please enter a correct email');
+            Messenger::error('Please enter a valid email');
             $result = FALSE;
         }
         

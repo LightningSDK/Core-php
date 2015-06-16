@@ -35,6 +35,8 @@ class Output {
      */
     protected static $cookies = array();
 
+    protected static $jsonCookies = false;
+
     protected static $statusStrings = array(
         1 => 'access denied',
         2 => 'success',
@@ -83,12 +85,8 @@ class Output {
             $data['status'] = self::$statusStrings[self::SUCCESS];
         }
 
-        // Output the data.
-        header('Content-type: application/json');
-        echo json_encode($data);
-
-        // Terminate the script.
-        exit;
+        // Output and terminate.
+        self::jsonOut($data);
     }
 
     public static function jsonData($data, $include_cookies = false) {
@@ -101,8 +99,27 @@ class Output {
         if ($include_cookies) {
             $output['cookies'] = self::$cookies;
         }
+        // Output and terminate.
+        self::jsonOut($output);
+    }
+
+    protected static function jsonOut($output) {
+        // Send the cookies if enabled.
+        if (static::$jsonCookies) {
+            self::sendCookies();
+        }
+
+        // Output the data.
+        header('Content-type: application/json');
         echo json_encode($output);
         exit;
+    }
+
+    /**
+     * @param boolean $setCookies
+     */
+    public static function setJsonCookies($setCookies) {
+        static::$jsonCookies = $setCookies;
     }
 
     /**

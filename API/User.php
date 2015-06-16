@@ -24,8 +24,9 @@ class User extends API {
             $session = Session::getInstance();
             $session->setState(Session::STATE_APP);
             $data['cookies'] = array('session' => $session->session_key);
+            Output::setJsonCookies(true);
+            return $data;
         }
-        Output::json($data);
     }
 
     public function postRegister() {
@@ -82,7 +83,7 @@ class User extends API {
         
         // Is email correct?
         if ($email === FALSE) {
-            Messenger::error('Please enter a correct email');
+            Messenger::error('Please enter a valid email');
             $result = FALSE;
         }
 
