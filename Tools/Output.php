@@ -109,6 +109,15 @@ class Output {
             self::sendCookies();
         }
 
+        // Add debug data.
+        if (Configuration::get('debug')) {
+            $database = Database::getInstance();
+            $output['database'] = array(
+                'queries' => $database->getQueries(),
+                'time' => $database->timeReport(),
+            );
+        }
+
         // Output the data.
         header('Content-type: application/json');
         echo json_encode($output);
