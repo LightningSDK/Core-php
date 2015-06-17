@@ -16,6 +16,7 @@ class API extends Page {
 
     public function __construct() {
         // Override parent method.
+        Output::setJson(true);
     }
 
     public function execute() {
@@ -40,7 +41,7 @@ class API extends Page {
                 try {
                     $output = $this->$request_type();
                 } catch (Exception $e) {
-                    Output::jsonError($e->getMessage());
+                    Output::error($e->getMessage());
                 }
             } else {
                 Messenger::error('Method not available');

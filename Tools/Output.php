@@ -35,6 +35,8 @@ class Output {
      */
     protected static $cookies = array();
 
+    protected static $isJson = false;
+
     protected static $jsonCookies = false;
 
     protected static $statusStrings = array(
@@ -43,7 +45,17 @@ class Output {
         3 => 'error',
     );
 
+    /**
+     * Determine if the output should be json.
+     *
+     * @return boolean
+     *   Whether the output should be json.
+     */
     public static function isJSONRequest() {
+        if (static::$isJson) {
+            return true;
+        }
+
         $headers = apache_request_headers();
         if (empty($headers['Accept'])) {
             return false;
@@ -52,10 +64,22 @@ class Output {
     }
 
     /**
+     * Set whether the output should be explicitly JSON.
+     *
+     * @param boolean $isJson
+     *   Whether to force json output.
+     */
+    public static function setJson($isJson) {
+        static::$isJson = $isJson;
+    }
+
+    /**
      * Output data as json and end the request.
      *
      * @param array|integer $data
      *   The data to output as JSON.
+     * @param boolean $suppress_status
+     *   Whether to suppress the default success/error message.
      */
     public static function json($data = array(), $suppress_status = false) {
         // Predefined outputs.
