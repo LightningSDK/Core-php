@@ -217,7 +217,7 @@ class Output {
     public static function error($error) {
         Messenger::error($error);
         if(static::isJSONRequest()) {
-            static::json();
+            static::json(static::ERROR);
         } else {
             Template::getInstance()->render('');
         }

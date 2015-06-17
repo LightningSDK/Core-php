@@ -30,7 +30,7 @@ class API extends Page {
                 try {
                     $output = $this->{$method}();
                 } catch (Exception $e) {
-                    Output::jsonError($e->getMessage());
+                    Output::error($e->getMessage());
                 }
             }
             else {
