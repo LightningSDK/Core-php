@@ -17,13 +17,6 @@ class Router extends Singleton {
     protected static $routes = array();
 
     /**
-     * Load the configuration.
-     */
-    public function __construct() {
-        self::$routes = Configuration::get('routes');
-    }
-
-    /**
      * Get the page handler for the current URL.
      *
      * @param string $url
@@ -35,6 +28,10 @@ class Router extends Singleton {
      *   The namespace of the URL handler.
      */
     public static function parseRoute($url, $cli) {
+        if (empty(self::$routes)) {
+            self::$routes = Configuration::get('routes');
+        }
+
         $url = rtrim($url, '/');
         // If we are in CLI mode, and there is a command for cli only.
         if ($cli && isset(self::$routes['cli_only'][$url])) {
