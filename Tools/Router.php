@@ -34,7 +34,7 @@ class Router extends Singleton {
      * @return string
      *   The namespace of the URL handler.
      */
-    public function getRoute($url, $cli) {
+    public static function parseRoute($url, $cli) {
         $url = rtrim($url, '/');
         // If we are in CLI mode, and there is a command for cli only.
         if ($cli && isset(self::$routes['cli_only'][$url])) {
@@ -57,5 +57,20 @@ class Router extends Singleton {
         if (!empty(self::$routes['default'])) {
             return self::$routes['default'];
         }
+    }
+
+    public static function getRoute() {
+        global $argv;
+        if (static::isCLI()) {
+            // Handle a command line request.
+            return static::parseRoute($argv[1], true);
+        } else {
+            // Handle a web page request.
+            return static::parseRoute(Request::get('request', 'url_encoded'), false);
+        }
+    }
+
+    public static function isCLI() {
+        return !empty($_ENV['SHELL']);
     }
 }
