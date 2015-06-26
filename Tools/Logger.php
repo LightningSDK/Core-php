@@ -61,6 +61,11 @@ class Logger extends Singleton {
     }
 
     public static function errorLogStacktrace($errno, $errstr, $errfile, $errline) {
+        // This is required to skip errors caught with the @ symbol.
+        if (error_reporting() === 0) {
+            return;
+        }
+
         $server = !isset($_SERVER['SERVER_NAME']) ? '' : $_SERVER['SERVER_NAME'];
         $uri = !isset($_SERVER['REQUEST_URI']) ? '' : $_SERVER['REQUEST_URI'];
         $method = !isset($_SERVER['REQUEST_METHOD']) ? '' : $_SERVER['REQUEST_METHOD'];
