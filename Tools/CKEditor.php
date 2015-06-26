@@ -28,7 +28,7 @@ class CKEditor {
             self::$inited = true;
         }
         if ($initCKFinder) {
-            JS::add('/js/ckeditor/ckeditor.js', false);
+            JS::add('/js/ckfinder/ckfinder.js', false);
         }
     }
 
