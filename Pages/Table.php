@@ -706,6 +706,12 @@ abstract class Table extends Page {
 
         $output .= '</table><label><input type="checkbox" name="header" value="1" /> First row is a header, do not import.</label>';
 
+        if (method_exists($this, 'customImportFields')) {
+            $output .= $this->customImportFields();
+        } elseif (!empty($this->customImportFields)) {
+            $output .= $this->customImportFields;
+        }
+
         $output .= '<input type="submit" name="submit" value="Submit" class="button" />';
 
         $output .= '</form>';
@@ -756,9 +762,13 @@ abstract class Table extends Page {
                 $values[$field][] = $row[$column];
             }
 
-            if (count($values) > 100) {
+            if (count($values[$field]) >= 100) {
                 // Insert what we have so far and continue.
-                $database->insertSets($this->table, array_keys($fields), $values, true);
+                $last_id = $database->insertSets($this->table, array_keys($fields), $values, true);
+                if (method_exists($this, 'customImportPostProcess')) {
+                    $ids = $last_id ? range($last_id - $database->affectedRows() + 1, $last_id) : [];
+                    $this->customImportPostProcess($values, $ids);
+                }
                 $values = array();
             }
 
@@ -766,7 +776,11 @@ abstract class Table extends Page {
         }
 
         if (!empty($values)) {
-            $database->insertSets($this->table, array_keys($fields), $values, true);
+            $last_id = $database->insertSets($this->table, array_keys($fields), $values, true);
+            if (method_exists($this, 'customImportPostProcess')) {
+                $ids = $last_id ? range($last_id - $database->affectedRows() + 1, $last_id) : [];
+                $this->customImportPostProcess($values, $ids);
+            }
         }
     }
 
@@ -958,10 +972,13 @@ abstract class Table extends Page {
                 echo $this->load_template($this->custom_template_directory.$this->custom_templates[$this->action.'_action_header']);
         } else {
             if ($this->addable) {
-                echo "<a href='".$this->createUrl('new') . "'><img src='/images/lightning/new.png' border='0' title='Add New' /></a><br />";
+                echo "<a href='".$this->createUrl('new') . "'><img src='/images/lightning/new.png' border='0' title='Add New' /></a>";
             }
             if ($this->importable) {
-                echo "<a href='".$this->createUrl('import') . "'><img src='/images/lightning/import.png' border='0' title='Import' /></a><br />";
+                echo "<a href='".$this->createUrl('import') . "'><img src='/images/lightning/send_doc.png' border='0' title='Import' /></a><br />";
+            }
+            if ($this->addable || $this->importable) {
+                echo '<br />';
             }
         }
     }

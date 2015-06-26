@@ -5,8 +5,12 @@ namespace Lightning\Pages\Admin;
 use Lightning\Model\User;
 use Lightning\Pages\Table;
 use Lightning\Tools\ClientUser;
+use Lightning\Tools\Database;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Request;
+use Lightning\View\Field\BasicHTML;
+use Lightning\View\Field\Text;
+use Lightning\View\HTML;
 use Overridable\Lightning\Tools\Session;
 
 class Users extends Table {
@@ -64,6 +68,8 @@ class Users extends Table {
         ),
     );
 
+    protected $customImportFields;
+
     public function initSettings() {
         $this->preset['password']['submit_function'] = function(&$output) {
             if ($pass = Request::post('password')) {
@@ -78,6 +84,50 @@ class Users extends Table {
         $this->preset['password']['display_value'] = function(&$row) {
             return !empty($row['password']) ? 'Set' : '';
         };
+    }
+
+    /**
+     * Add mailing list option when importing users.
+     *
+     * @return string
+     */
+    protected function customImportFields() {
+        $all_lists = Database::getInstance()->selectColumn('message_list', 'name', [], 'message_list_id');
+        array_unshift($all_lists, '');
+        $output = 'Add all imported users to this mailing list: ' . BasicHTML::select('message_list_id', $all_lists);
+        $output .= 'Or add them to a new mailing list: ' . Text::textField('new_message_list', '');
+        return $output;
+    }
+
+    protected function customImportPostProcess(&$values, &$ids) {
+        static $mailing_list_id;
+        $db = Database::getInstance();
+
+        if (!isset($mailing_list_id)) {
+            if (!$mailing_list_id = Request::get('message_list_id', 'int')) {
+                // No default list was selected
+                if ($new_list = trim(Request::get('new_message_list'))) {
+                    $mailing_list_id = $db->insert('message_list', ['name' => $new_list]);
+                } else {
+                    $mailing_list_id = false;
+                }
+            }
+        }
+
+        $time = time();
+
+        // This will only update users that were just added.
+        $db->update('user', ['created' => $time], ['user_id' => ['IN', $ids]]);
+
+        // This will add all the users to the mailing list.
+        if (!empty($mailing_list_id)) {
+            $user_ids = $db->selectColumn('user', 'user_id', ['email' => ['IN', $values['email']]]);
+            $db->insertMultiple('message_list_user', [
+                'user_id' => $user_ids,
+                'message_list_id' => $mailing_list_id,
+                'time' => $time,
+            ], true);
+        }
     }
 
     public function getImpersonate() {
