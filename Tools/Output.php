@@ -214,6 +214,12 @@ class Output {
         exit;
     }
 
+    /**
+     * Terminate the script with an error.
+     *
+     * @param string $error
+     *   An error to output to the user.
+     */
     public static function error($error) {
         Messenger::error($error);
         if(static::isJSONRequest()) {
@@ -289,8 +295,26 @@ class Output {
         @ini_set('zlib.output_compression', "Off");
         @ini_set('implicit_flush', 1);
 
-        for ($i = 0; $i < ob_get_level(); $i++) { ob_end_flush(); }
+        for ($i = 0; $i < ob_get_level(); $i++) {
+            ob_end_flush();
+        }
         ob_implicit_flush(true);
         echo str_repeat(' ', 9000);
+    }
+
+    /**
+     * Prepare headers to output a downloaded file.
+     *
+     * @param string $file_name
+     *   The name that the browser should save the file as.
+     * @param int $size
+     *   The size of the content if known.
+     */
+    public static function download($file_name, $size = null) {
+        header('Content-disposition: attachment; filename=' . $file_name);
+        if ($size) {
+            header('Content-Length: ' . $size);
+        }
+        Output::disableBuffering();
     }
 }
