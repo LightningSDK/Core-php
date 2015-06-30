@@ -6,6 +6,7 @@
 
 namespace Lightning\View;
 
+use Lightning\Tools\Configuration;
 use Lightning\Tools\Data;
 use Lightning\Tools\Session;
 
@@ -124,8 +125,9 @@ class JS {
 
         // Include JS files.
         foreach (self::$included_scripts as &$file) {
+            $file_name = $file['file'] . '?v=' . Configuration::get('minified_version', 0);
             if (empty($file['rendered'])) {
-                $output .= '<script language="javascript" src="' . $file['file'] . '" ' . (!empty($file['async']) ? 'async defer' : '') . '></script>';
+                $output .= '<script language="javascript" src="' . $file_name . '" ' . (!empty($file['async']) ? 'async defer' : '') . '></script>';
                 $file['rendered'] = true;
             }
         }

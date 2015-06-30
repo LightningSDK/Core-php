@@ -2,6 +2,8 @@
 
 namespace Lightning\View;
 
+use Lightning\Tools\Configuration;
+
 class CSS {
     protected static $included_files = array();
     protected static $inline_styles = array();
@@ -25,8 +27,9 @@ class CSS {
 
         foreach (self::$included_files as &$file) {
             if (empty($file['rendered'])) {
+                $file_name = $file['file'] . '?v=' . Configuration::get('minified_version', 0);
                 // TODO: add $file[1] for media type. media="screen"
-                $output .= '<link rel="stylesheet" type="text/css" href="' . $file['file'] . '" />';
+                $output .= '<link rel="stylesheet" type="text/css" href="' . $file_name . '" />';
                 $file['rendered'] = true;
             }
         }
