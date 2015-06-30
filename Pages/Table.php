@@ -189,9 +189,21 @@ abstract class Table extends Page {
     protected $singularity = false;
     protected $singularityID = 0;
     protected $parentLink;
+    
+    /*
+     * Joined table
+     */
+    // Joined table name
     protected $accessTable;
+    // ON clause
     protected $accessTableJoinOn;
+    // extra WHERE condition
     protected $accessTableCondition;
+    // Selected columns
+    protected $accessTableColumns;
+    // JOIN schema
+    protected $accessTableSchema = "LEFT JOIN";
+    
     protected $cur_subset;
     protected $join_where;
     protected $header;
@@ -2585,8 +2597,9 @@ abstract class Table extends Page {
         }
 
         // build WHERE qualification
-        $where = array();
-        $join = array();
+        $where = [];
+        $join = [];
+        $fields = [];
         if ($this->parentLink && $this->parentId) {
             $where[$this->parentLink] = $this->parentId;
         }
@@ -2605,9 +2618,14 @@ abstract class Table extends Page {
             } else {
                 $join_condition = "ON ({$this->accessTable}.{$this->getKey()}={$this->table}.{$this->getKey()})";
             }
-            $join[] = array('LEFT JOIN', $this->accessTable, $join_condition);
+            $join[] = array($this->accessTableSchema, $this->accessTable, $join_condition);
             if ($this->accessTableCondition) {
                 $where = array_merge($this->accessTableCondition, $where);
+            }
+            if ($this->accessTableColumns) {
+                $fields[] = [$this->accessTable => $this->accessTableColumns];
+            } else {
+                $fields[] = [$this->accessTable => ['*']];
             }
         }
         if ($this->cur_subset) {
@@ -2638,7 +2656,6 @@ abstract class Table extends Page {
             $join[] = array('LEFT JOIN', $this->join_where['table']);
         }
 
-        $fields = array();
         if ($this->action == "autocomplete") {
             $fields[] = array($this->getKey() => "`{$_POST['field']}`,`{$this->getKey()}`");
             $sort = "ORDER BY `{$_POST['field']}` ASC";
