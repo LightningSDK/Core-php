@@ -64,7 +64,7 @@ class Page {
         JS::add('/js/placeholder.min.js');
         JS::add('/js/foundation.min.js', false);
         JS::add('/js/lightning.min.js', false);
-        JS::add('/js/jquery.validate.min.js');
+        JS::add('/js/jquery.validate.min.js', false);
         JS::startup('lightning.startup.init()');
         JS::startup('$(document).foundation()');
         CSS::add('/css/lightning.css');
