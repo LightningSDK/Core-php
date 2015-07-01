@@ -199,13 +199,12 @@ abstract class Table extends Page {
     protected $accessTableJoinOn;
     // extra WHERE condition
     protected $accessTableCondition;
-    // Selected columns
-    protected $accessTableColumns;
     // JOIN schema
     protected $accessTableSchema = "LEFT JOIN";
     
     protected $cur_subset;
-    protected $join_where;
+    // Tables (and conditions) has been joined to general one
+    protected $joins;
     protected $header;
     protected $table_url;
     protected $sort_fields;
@@ -2622,11 +2621,6 @@ abstract class Table extends Page {
             if ($this->accessTableCondition) {
                 $where = array_merge($this->accessTableCondition, $where);
             }
-            if ($this->accessTableColumns) {
-                $fields[] = [$this->accessTable => $this->accessTableColumns];
-            } else {
-                $fields[] = [$this->accessTable => ['*']];
-            }
         }
         if ($this->cur_subset) {
             if ($this->subset[$this->cur_subset]) {
@@ -2652,8 +2646,12 @@ abstract class Table extends Page {
         // validate the sort order
         $sort = !empty($this->sort) ? " ORDER BY " . $this->sort : '';
 
-        if ($this->join_where) {
-            $join[] = array('LEFT JOIN', $this->join_where['table']);
+        if ($this->joins) {
+            $join = array_merge($join, $this->joins);
+            foreach ($this->joins as $join) {
+                // set for every joined table
+                $fields[] = [$join[1] => ['*']];
+            }
         }
 
         if ($this->action == "autocomplete") {
