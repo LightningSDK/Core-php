@@ -69,6 +69,12 @@ class Page {
         JS::startup('$(document).foundation()');
         CSS::add('/css/lightning.css');
         CSS::add('/css/site.css');
+        if (!empty($this->css)) {
+            CSS::add($this->css);
+        }
+        if (!empty($this->js)) {
+            JS::add($this->js);
+        }
     }
 
     public function get() {}

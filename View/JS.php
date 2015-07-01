@@ -53,13 +53,21 @@ class JS {
     /**
      * Add a JS file to be included in the HTML.
      *
-     * @param $file
+     * @param string|array $files
      *   The relative path to the file from the current URL request.
-     * @param $async
+     * @param boolean $async
      *   Whether the script should be loaded asynchronously.
      */
-    public static function add($file, $async = true) {
-        self::$included_scripts[$file] = array('file' => $file, 'rendered' => false, 'async' => $async);
+    public static function add($files, $async = true) {
+        if (!is_array($files)) {
+            $files = [$files];
+        }
+
+        foreach ($files as $file) {
+            $path = is_array($file) ? $file['file'] : $file;
+            $async = isset($file['async']) ? $file['async'] : $async;
+            self::$included_scripts[$path] = array('file' => $path, 'rendered' => false, 'async' => $async);
+        }
     }
 
     /**
