@@ -68,6 +68,6 @@ class Router extends Singleton {
     }
 
     public static function isCLI() {
-        return !empty($_ENV['SHELL']);
+        return PHP_SAPI == 'cli';
     }
 }
