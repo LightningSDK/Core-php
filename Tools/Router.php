@@ -32,7 +32,7 @@ class Router extends Singleton {
             self::$routes = Configuration::get('routes');
         }
 
-        $url = rtrim($url, '/');
+        $url = trim($url, '/');
         // If we are in CLI mode, and there is a command for cli only.
         if ($cli && isset(self::$routes['cli_only'][$url])) {
             return self::$routes['cli_only'][$url];
