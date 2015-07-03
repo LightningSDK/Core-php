@@ -56,11 +56,19 @@ class Output {
             return true;
         }
 
-        $headers = apache_request_headers();
-        if (empty($headers['Accept'])) {
-            return false;
+        if (function_exists("apache_request_headers")) {
+            // Check for a JSON request header in apache.
+            $headers = apache_request_headers();
+            if (!empty($headers['Accept']) && strpos($headers['Accept'], 'json') > 0) {
+                return true;
+            }
+        } else {
+            // Check for a JSON request header in nginx.
+            if (!empty($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'json') > 0) {
+                return true;
+            }
         }
-        return strpos($headers['Accept'], 'json') > 0;
+        return false;
     }
 
     /**
