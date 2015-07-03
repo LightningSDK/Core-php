@@ -255,7 +255,7 @@ class User extends Object {
             // An account already exists with that email.
             return [
                 'success'   => false, 
-                'error'     => 'exists'
+                'error'     => 'A user with that email already exists.'
             ];
         } elseif ($user_info = Database::getInstance()->selectRow('user', array('email' => strtolower($email), 'password' => ''))) {
             // EMAIL EXISTS IN MAILING LIST ONLY
