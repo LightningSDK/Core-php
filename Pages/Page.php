@@ -29,7 +29,8 @@ class Page extends PageView {
         $user = ClientUser::getInstance();
         $template = Template::getInstance();
 
-        $content_locator = Request::getFromURL('/(.*)\.html$/') ?: 'index';
+        $request = Request::get('request');
+        $content_locator = empty($request) ? 'index' : Request::getFromURL('/(.*)\.html$/') ?: '404';
 
         // Determine if the user can edit this page.
         $template->set('editable', $user->isAdmin());
