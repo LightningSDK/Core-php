@@ -57,8 +57,10 @@ class JS {
      *   The relative path to the file from the current URL request.
      * @param boolean $async
      *   Whether the script should be loaded asynchronously.
+     * @param boolean $versioning
+     *   Whether to append a version string when including.
      */
-    public static function add($files, $async = true) {
+    public static function add($files, $async = true, $versioning = true) {
         if (!is_array($files)) {
             $files = [$files];
         }
@@ -66,7 +68,12 @@ class JS {
         foreach ($files as $file) {
             $path = is_array($file) ? $file['file'] : $file;
             $async = isset($file['async']) ? $file['async'] : $async;
-            self::$included_scripts[$path] = array('file' => $path, 'rendered' => false, 'async' => $async);
+            self::$included_scripts[$path] = array(
+                'file' => $path,
+                'rendered' => false,
+                'async' => $async,
+                'versioning' => $versioning,
+            );
         }
     }
 
@@ -133,7 +140,10 @@ class JS {
 
         // Include JS files.
         foreach (self::$included_scripts as &$file) {
-            $file_name = $file['file'] . '?v=' . Configuration::get('minified_version', 0);
+            $file_name = $file['file'];
+            if ($file['versioning']) {
+                $file_name .= '?v=' . Configuration::get('minified_version', 0);
+            }
             if (empty($file['rendered'])) {
                 $output .= '<script language="javascript" src="' . $file_name . '" ' . (!empty($file['async']) ? 'async defer' : '') . '></script>';
                 $file['rendered'] = true;

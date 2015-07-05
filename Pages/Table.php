@@ -36,7 +36,6 @@
 
 namespace Lightning\Pages;
 
-use Lightning\Tools\Cache\Cache;
 use Lightning\Tools\Cache\FileCache;
 use Lightning\Tools\CKEditor;
 use Lightning\Tools\Configuration;
@@ -44,13 +43,13 @@ use Lightning\Tools\CSVIterator;
 use Lightning\Tools\Database;
 use Lightning\Tools\Form;
 use Lightning\Tools\Image;
+use Lightning\Tools\IO\FileManager;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Output;
 use Lightning\Tools\Request;
 use Lightning\Tools\Scrub;
 use Lightning\Tools\Security\Encryption;
-use Lightning\Tools\Session;
 use Lightning\Tools\Template;
 use Lightning\View\Field;
 use Lightning\View\Field\BasicHTML;
@@ -2456,22 +2455,23 @@ abstract class Table extends Page {
                 $imageObj->processed = $image['image_postprocess']($imageObj->processed);
             }
 
-            $path = pathinfo($output_location);
-            if (!file_exists($path['dirname'])) {
-                mkdir($path['dirname'], 0777, true);
-            }
+            $fileHandler = $this->getFileHandler($field);
 
             switch ($output_format) {
                 case 'png':
-                    $imageObj->writePNG($output_location);
+                    $fileHandler->write($new_image, $imageObj->getPNGData());
                     break;
                 case 'jpg':
                 default:
-                    $imageObj->writeJPG($output_location, $quality);
+                    $fileHandler->write($new_image, $imageObj->getJPGData($quality));
                     break;
             }
         }
         return $new_image;
+    }
+
+    protected function getFileHandler($field) {
+        return FileManager::getFileHandler(empty($field['file_handler']) ? '' : $field['file_handler'], $field['location']);
     }
 
     function decode_bool_group($int) {
@@ -3145,10 +3145,10 @@ abstract class Table extends Page {
         if (!empty($field['file_name'])) {
             return $field['file_name'];
         }
-        $base = $this->getOutputPath($field);
+        $handler = $this->getFileHandler($field);
         do {
             $file = $this->getNewRandomImageName($output_format);
-        } while (file_exists($base . '/' . $file));
+        } while ($handler->exists($file));
         return $file;
     }
 
@@ -3174,7 +3174,8 @@ abstract class Table extends Page {
      *   The web location.
      */
     protected function getImageLocationWeb($field, $file = '') {
-        return $field['weblocation'] . '/' . $file;
+        $handler = $this->getFileHandler($field);
+        return $handler->getWebURL($file);
     }
 
     /**

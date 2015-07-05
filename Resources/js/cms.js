@@ -59,7 +59,7 @@ lightning.cms = {
     editImage: function(id) {
         var self = this;
         CKFinder.popup({
-            basePath: lightning.cms.basepath,
+            basePath: lightning.vars.cms.basepath,
             selectActionFunction: function(fileUrl) {
                 self.updateImage(id, fileUrl);
             }

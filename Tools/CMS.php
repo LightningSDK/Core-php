@@ -2,10 +2,14 @@
 
 namespace Lightning\Tools;
 
+use Lightning\Tools\IO\FileManager;
 use Lightning\View\JS;
 use Lightning\View\Field\Time;
 
 class CMS {
+
+    protected static $settings;
+
     public static function embed($name, $settings = array()) {
         $content = self::loadCMS($name);
         $content = (!empty($content) ? $content['content'] : (!empty($settings['default']) ? $settings : ''));
@@ -27,7 +31,17 @@ class CMS {
         }
     }
 
+    public static function initSettings() {
+        if (!isset(self::$settings)) {
+            self::$settings = Configuration::get('cms', []) + [
+                    'location' => 'images'
+                ];
+        }
+    }
+
     public static function image($name, $settings = array()) {
+        self::initSettings();
+        $settings += self::$settings;
         $content = self::loadCMS($name);
         if (empty($content)) {
             $content = array(
@@ -41,17 +55,21 @@ class CMS {
             $content['class'] .= ' ' . $settings['class'];
         }
 
+        // Needs a file prefix for rendering.
+        $handler = FileManager::getFileHandler(!empty($settings['file_handler']) ? $settings['file_handler'] : '', $settings['location']);
+
         if (ClientUser::getInstance()->isAdmin()) {
-            JS::add('/js/ckfinder/ckfinder.js');
+            JS::add('/js/ckfinder/ckfinder.js', false);
             JS::set('token', Session::getInstance()->getToken());
-            JS::set('cms.basepath', self::getBaseDir());
-            JS::startup('lightning.cms.initImage()');
+            // TODO: This will need extra slashes if using the File handler.
+            JS::set('cms.basepath', $settings['location']);
+            JS::startup('lightning.cms.initImage();');
             return '<a href="" class="button" onclick="javascript:lightning.cms.editImage(\'' . $name . '\'); return false;">Change</a>'
                 . '<a href="" class="button" onclick="javascript:lightning.cms.saveImage(\'' . $name . '\'); return false;">Save</a>'
                 . '<input type="text" id="cms_' . $name . '_class" class="imagesCSS" name="' . $forced_classes . '" value="' . $added_classes . '" />'
-                . '<img src="' . $content['content'] . '" id="cms_' . $name . '" class="' . $content['class'] .  '" />';
+                . '<img src="' . $handler->getWebURL($content['content']) . '" id="cms_' . $name . '" class="' . $content['class'] .  '" />';
         } else {
-            return '<img src="' . $content['content'] . '" class="' . $content['class'] .  '" />';
+            return '<img src="' . $handler->getWebURL($content['content']) . '" class="' . $content['class'] .  '" />';
         }
     }
 

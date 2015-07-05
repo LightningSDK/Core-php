@@ -28,7 +28,7 @@ class CKEditor {
             self::$inited = true;
         }
         if ($initCKFinder) {
-            JS::add('/js/ckfinder/ckfinder.js', false);
+            JS::add('/js/ckfinder/ckfinder.js', false, false);
         }
     }
 
@@ -48,7 +48,7 @@ class CKEditor {
         self::init();
 
         if (!empty($options['finder'])) {
-            JS::add('/js/ckfinder/ckfinder.js', false);
+            JS::add('/js/ckfinder/ckfinder.js', false, false);
         }
 
         if (empty($options['content'])) {
@@ -83,7 +83,7 @@ class CKEditor {
 
         JS::startup('lightning.ckeditors["' . $id . '"] = CKEDITOR.replace("' . $id . '", ' . json_encode($options) . ');');
         if (!empty($options['finder'])) {
-            JS::add('/js/ckfinder/ckfinder.js', false);
+            JS::add('/js/ckfinder/ckfinder.js', false, false);
             JS::startup('CKFinder.setupCKEditor(lightning.ckeditors["' . $id . '"], "/js/ckfinder/")');
         }
 
