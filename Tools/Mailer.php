@@ -92,6 +92,11 @@ class Mailer {
         $this->mailer = new \PHPMailer(true);
         $this->mailer->Sender = Configuration::get('mailer.bounce_address');
         $this->verbose = $verbose;
+        if ($smtpHost = Configuration::get('mailer.smtp')) {
+            require_once HOME_PATH . '/Lightning/Vendor/PHPMailer/class.smtp.php';
+            $this->mailer->Mailer = 'smtp';
+            $this->mailer->Host = $smtpHost;
+        }
     }
 
     /**
