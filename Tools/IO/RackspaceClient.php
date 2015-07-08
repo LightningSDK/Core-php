@@ -53,6 +53,7 @@ class RackspaceClient {
 
     protected static function getRemoteName($remoteName) {
         $remoteName = explode(':', $remoteName);
+        preg_replace('|^/|', '', $remoteName[1]);
         return $remoteName;
     }
 

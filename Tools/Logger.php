@@ -26,10 +26,26 @@ class Logger extends Singleton {
         E_USER_NOTICE     => 'user notice'
     );
 
+    public static function init() {
+        if (Configuration::get('errorlog') == 'stacktrace') {
+            set_error_handler(array('\\Lightning\\Bootstrap', 'errorHandler'));
+        }
+
+        if ($logfile = Configuration::get('site.log')) {
+            self::setLog($logfile);
+        }
+    }
+
     public static function error($error) {
         error_log($error);
     }
 
+    /**
+     * Write an unaltered message to the log.
+     *
+     * @param string $message
+     *   The message.
+     */
     public static function message($message) {
         if (!empty(self::$logFile)) {
             file_put_contents(self::$logFile, self::dateStamp() . ' ' . $message . "\n", FILE_APPEND | LOCK_EX);
@@ -38,22 +54,30 @@ class Logger extends Singleton {
         }
     }
 
-    public static function setLog($logFile = null) {
+    /**
+     * Set the log file for writing.
+     *
+     * @param string $logFile
+     *   Absolute or relative address to the log.
+     *   MUST HAVE WRITE PERMISSION FOR THE USER RUNNING PHP
+     */
+    public static function setLog($logFile) {
         self::$logFile = $logFile;
-        if (!empty(self::$logFile) && !preg_match('|^/|', self::$logFile)) {
+        if (!preg_match('|^/|', self::$logFile)) {
             self::$logFile = HOME_PATH . '/' . self::$logFile;
         }
     }
 
+    /**
+     * Log a security error.
+     *
+     * @param string $message
+     * @param integer $severity
+     */
     public static function security($message, $severity) {
         $severity_message = str_pad(str_repeat('*', $severity), 5, ' ');
         $ip_message = $severity_message . '[' . str_pad(Request::server('ip'), 15, ' ') . '] '. $message;
-        if (!empty(self::$logFile)) {
-            file_put_contents(
-                self::$logFile, self::dateStamp() . ' ' . $ip_message . "\n", FILE_APPEND | LOCK_EX);
-        } else {
-            error_log($ip_message);
-        }
+        self::message($ip_message);
     }
 
     protected static function dateStamp() {
@@ -66,15 +90,16 @@ class Logger extends Singleton {
             return;
         }
 
-        $server = !isset($_SERVER['SERVER_NAME']) ? '' : $_SERVER['SERVER_NAME'];
+        $server = !isset($_SERVER['HTTP_HOST']) ? '' : $_SERVER['HTTP_HOST'];
         $uri = !isset($_SERVER['REQUEST_URI']) ? '' : $_SERVER['REQUEST_URI'];
         $method = !isset($_SERVER['REQUEST_METHOD']) ? '' : $_SERVER['REQUEST_METHOD'];
         $protocol = !empty($_SERVER['HTTPS']) ? 'https://' : 'http://';
         $type = empty(self::$errorTypes[$errno]) ? 'Unknown Error Type' : self::$errorTypes[$errno];
         $output = (ini_get('display_errors') == 'On' || ini_get('display_errors') == 1);
 
-        error_log($method . ' ' . $protocol . $server . $uri);
-        error_log('    ' . $type . ': ' . $errstr);
+        self::message($method . ' ' . $protocol . $server . $uri);
+        self::message('    ' . $type . ': ' . $errstr);
+
         if ($output) {
             echo ('    ' . $type . ': ' . $errstr . ' in ' . $errfile . ' on line ' . $errline);
         }
@@ -83,7 +108,7 @@ class Logger extends Singleton {
             if ($started || (!empty($row['file']) && $row['file'] == $errfile && $row['line'] == $errline)) {
                 $started = true;
                 $line = '    in ' . (!empty($row['file']) ? $row['file'] : '?') . ' on line ' . (!empty($row['line']) ? $row['line'] : '?');
-                error_log($line);
+                self::message($line);
                 if ($output) {
                     echo $line;
                 }

@@ -23,8 +23,23 @@ class Request {
         return $_SERVER['REQUEST_METHOD'];
     }
 
+    /**
+     * Detect whether the current request was made over https.
+     *
+     * @return boolean
+     */
     public static function isHTTPS() {
         return !empty($_SERVER['HTTPS']);
+    }
+
+    /**
+     * Returns the current location, stripping any slashes.
+     *
+     * @return string
+     *   The location.
+     */
+    public static function getLocation() {
+        return trim(static::get('request'), '/');
     }
 
     /**

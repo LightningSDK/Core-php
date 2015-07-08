@@ -331,9 +331,9 @@ class Message extends Object {
         // Replace variables.
         foreach($this->customVariables + $this->internalCustomVariables + $this->defaultVariables as $cv => $cvv) {
             // Replace simple variables as a string.
-            $source = preg_replace('/\{' . $cv . '}/', $cvv, $source);
+            $source = str_replace('{' . $cv . '}', $cvv, $source);
             // Some curly brackets might be escaped if they are links.
-            $source = preg_replace('/%7B' . $cv . '%7D/', $cvv, $source);
+            $source = str_replace('%7B' . $cv . '%7D', $cvv, $source);
         }
 
         // Replace conditions.

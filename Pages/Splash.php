@@ -16,7 +16,7 @@ class Splash extends Page {
     }
 
     public function get() {
-        $page = Request::get('request');
+        $page = Request::getLocation();
 
         $template_page = Configuration::get('splash.pages.' . $page);
 
