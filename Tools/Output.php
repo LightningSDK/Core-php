@@ -256,7 +256,7 @@ class Output {
      * @param string $value
      *   The value.
      * @param integer $ttl
-     *   How long the cookie should last.
+     *   How long the cookie should last in seconds from the time it's created.
      *   This is not an expiration date like the php setcookie() function.
      * @param string $path
      *   The cookie path.
