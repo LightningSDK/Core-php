@@ -29,7 +29,7 @@ class Page extends PageView {
         $user = ClientUser::getInstance();
         $template = Template::getInstance();
 
-        $request = Request::get('request');
+        $request = Request::getLocation();
         $content_locator = empty($request) ? 'index' : Request::getFromURL('/(.*)\.html$/') ?: '404';
 
         // Determine if the user can edit this page.

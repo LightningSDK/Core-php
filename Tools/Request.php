@@ -39,7 +39,7 @@ class Request {
      *   The location.
      */
     public static function getLocation() {
-        return trim(static::get('request'), '/');
+        return trim(static::query('request'), '/');
     }
 
     /**
@@ -68,7 +68,7 @@ class Request {
      */
     public static function getFromURL($regex) {
         $args = func_get_args();
-        preg_match($regex, $_GET['request'], $matches);
+        preg_match($regex, static::getLocation(), $matches);
         if (isset($matches[1])) {
             $args[0] = $matches[1];
             return call_user_func_array('self::clean', $args);
