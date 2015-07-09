@@ -4,8 +4,8 @@ namespace Lightning\Tools\IO;
 
 include HOME_PATH . '/Source/Vendor/rackspace_client/vendor/autoload.php';
 
+use \Exception;
 use Lightning\Tools\Configuration;
-use Lightning\Tools\Singleton;
 use OpenCloud\Rackspace;
 
 class RackspaceClient {
@@ -72,7 +72,10 @@ class RackspaceClient {
         $fh = fopen($file, 'r');
         if ($fh) {
             $this->object = $container->uploadObject($remoteName[1], $fh);
+        } else {
+            throw new Exception('File not found.');
         }
+        return !empty($this->object);
     }
 
     public function getURL($remoteName) {
