@@ -38,5 +38,6 @@ $conf = array(
     ),
     'language' => 'en_us',
     'template_dir' => 'Source/Templates',
+    'temp_dir' => HOME_PATH . '/../tmp',
     'random_engine' => MCRYPT_DEV_URANDOM,
 );

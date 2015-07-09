@@ -92,8 +92,7 @@ class Users extends Table {
      * @return string
      */
     protected function customImportFields() {
-        $all_lists = Database::getInstance()->selectColumn('message_list', 'name', [], 'message_list_id');
-        array_unshift($all_lists, '');
+        $all_lists = ['' => ''] + Database::getInstance()->selectColumn('message_list', 'name', [], 'message_list_id');
         $output = 'Add all imported users to this mailing list: ' . BasicHTML::select('message_list_id', $all_lists);
         $output .= 'Or add them to a new mailing list: ' . Text::textField('new_message_list', '');
         return $output;

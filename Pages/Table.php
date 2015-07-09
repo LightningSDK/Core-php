@@ -59,6 +59,7 @@ use Lightning\View\Field\Text;
 use Lightning\View\Field\Time;
 use Lightning\View\JS;
 use Lightning\View\Page;
+use \Exception;
 
 abstract class Table extends Page {
 
@@ -699,6 +700,9 @@ abstract class Table extends Page {
     protected function renderAlignmentForm() {
         $csv = new CSVIterator($this->importCache->getFile());
         $header_row = $csv->current();
+        if (!$header_row) {
+            throw new Exception('No file uploaded');
+        }
         $output = '<form action="" method="POST">' . Form::renderTokenInput();
         $output .= '<input type="hidden" name="action" value="import-align">';
         $output .= '<input type="hidden" name="cache" value="' . $this->importCache->getReference() . '" />';
