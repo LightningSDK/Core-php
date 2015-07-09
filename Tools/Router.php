@@ -32,7 +32,6 @@ class Router extends Singleton {
             self::$routes = Configuration::get('routes');
         }
 
-        $url = trim($url, '/');
         // If we are in CLI mode, and there is a command for cli only.
         if ($cli && isset(self::$routes['cli_only'][$url])) {
             return self::$routes['cli_only'][$url];
@@ -63,7 +62,7 @@ class Router extends Singleton {
             return static::parseRoute($argv[1], true);
         } else {
             // Handle a web page request.
-            return static::parseRoute(Request::get('request', 'url_encoded'), false);
+            return static::parseRoute(Request::getLocation(), false);
         }
     }
 

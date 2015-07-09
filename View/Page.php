@@ -178,6 +178,6 @@ class Page {
                 $output_params[$param] = $this->$param;
             }
         }
-        Navigation::redirect('/' . Request::get('request'), $output_params);
+        Navigation::redirect('/' . Request::getLocation(), $output_params);
     }
 }
