@@ -54,7 +54,7 @@ class RackspaceClient {
     public function getWebURL($file) {
         $remoteName = self::getRemoteName($this->root . '/' . $file);
         $remoteName[0] = Configuration::get('containers.' . $remoteName[0] . '.url');
-        return $remoteName[0] . '/' . $remoteName[1];
+        return $remoteName[0] . (preg_match('|^/|', $remoteName[1]) ? '' : '/') . $remoteName[1];
     }
 
 
