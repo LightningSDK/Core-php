@@ -15,22 +15,29 @@ class RackspaceClient {
     protected $root;
 
     public function __construct($root) {
-        $configuration = Configuration::get('rackspace');
-        $this->client = new Rackspace(Rackspace::US_IDENTITY_ENDPOINT, array(
-            'username' => $configuration['username'],
-            'apiKey'   => $configuration['key']
-        ));
-        $this->service = $this->client->objectStoreService(null, 'DFW');
         $this->root = $root;
     }
 
+    protected function connect() {
+        if (empty($this->client)) {
+            $configuration = Configuration::get('rackspace');
+            $this->client = new Rackspace(Rackspace::US_IDENTITY_ENDPOINT, array(
+                'username' => $configuration['username'],
+                'apiKey'   => $configuration['key']
+            ));
+            $this->service = $this->client->objectStoreService(null, 'DFW');
+        }
+    }
+
     public function exists($file) {
+        $this->connect();
         $remoteName = self::getRemoteName($this->root . '/' . $file);
         $container = $this->service->getContainer($remoteName[0]);
         return $container->objectExists($remoteName[1]);
     }
 
     public function read($file) {
+        $this->connect();
         $remoteName = $this->getRemoteName($this->root . '/' . $file);
         $container = $this->service->getContainer($remoteName[0]);
         $this->object = $container->getObject($remoteName[1]);
@@ -38,6 +45,7 @@ class RackspaceClient {
     }
 
     public function write($file, $contents) {
+        $this->connect();
         $remoteName = self::getRemoteName($this->root . '/' . $file);
         $container = $this->service->getContainer($remoteName[0]);
         $this->object = $container->uploadObject($remoteName[1], $contents);
@@ -58,6 +66,7 @@ class RackspaceClient {
     }
 
     public function uploadFile($file, $remoteName) {
+        $this->connect();
         $remoteName = $this->getRemoteName($remoteName);
         $container = $this->service->getContainer($remoteName[0]);
         $fh = fopen($file, 'r');
