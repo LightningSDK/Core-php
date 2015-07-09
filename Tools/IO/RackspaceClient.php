@@ -83,6 +83,7 @@ class RackspaceClient {
     }
 
     public function getFileContents($remoteName) {
+        $this->connect();
         $remoteName = $this->getRemoteName($remoteName);
         $container = $this->service->getContainer($remoteName[0]);
         $this->object = $container->getObject($remoteName[1]);
