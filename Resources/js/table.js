@@ -127,8 +127,16 @@ lightning.table = {
         var link_table = event.target.id.replace('add_image_', '');
         CKFinder.popup({
             basePath: lightning.vars.table.links[link_table].web_location,
-            selectActionFunction: function(fileUrl) {
-                lightning.table.addImageCallback(link_table, fileUrl);
+            chooseFiles: true,
+            chooseFilesOnDblClick: true,
+            onInit: function( finder ) {
+                finder.on( 'files:choose', function( evt ) {
+                    var file = evt.data.files.first();
+                    lightning.table.addImageCallback(link_table, file.getUrl());
+                } );
+                finder.on( 'file:choose:resizedImage', function( evt ) {
+                    lightning.table.addImageCallback(link_table, evt.data.resizedUrl);
+                } );
             }
         });
     },

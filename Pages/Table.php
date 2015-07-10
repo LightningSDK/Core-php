@@ -1732,6 +1732,7 @@ abstract class Table extends Page {
     protected function render_linked_table_editable_image(&$link_settings) {
         CKEditor::init(true);
         JS::startup('lightning.table.init()');
+        $link_settings['web_location'] = $this->getImageLocationWeb($link_settings, '');
         JS::set('table.links.' . $link_settings['table'], $link_settings);
         $output = '<span class="button add_image" id="add_image_' . $link_settings['table'] . '">Add Image</span>';
         $output .= '<span class="linked_images" id="linked_images_' . $link_settings['table'] . '">';
@@ -1739,7 +1740,7 @@ abstract class Table extends Page {
             $output .= '<span class="selected_image_container">
                 <input type="hidden" name="linked_images_' . $link_settings['table'] . '[]" value="' . $image['image'] . '">
                 <span class="remove">X</span>
-                <img src="' . $image['image'] . '"></span>';
+                <img src="' . $this->getImageLocationWeb($link_settings, $image['image']) . '"></span>';
         }
         $output .= '</span>';
 
