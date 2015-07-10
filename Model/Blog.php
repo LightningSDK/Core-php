@@ -184,15 +184,9 @@ class Blog extends Singleton {
             if(empty($post['header_image'])) {
                 preg_match_all('/<img\s+.*?src=[\"\']?([^\"\' >]*)[\"\']?[^>]*>/i',$post['body'],$matches,PREG_SET_ORDER);
                 if(!empty($matches[0][1])) {
-                    $header_image = (file_exists(HOME_PATH.$matches[0][1]))?$matches[0][1]:NULL;
+                    $post['header_image'] = (file_exists(HOME_PATH.$matches[0][1]))?$matches[0][1]:NULL;
                 }
-            } else {
-                $header_image = file_exists(HOME_PATH . '/' . self::IMAGE_PATH . '/' . $post['header_image'])
-                    ? '/' . self::IMAGE_PATH . '/'.$post['header_image']
-                    : NULL;
             }
-
-            $post['header_image'] = $header_image;
         }
     }
 
