@@ -24,6 +24,7 @@ class Messages extends Table {
     protected $preset = array(
         'never_resend' => array(
             'type' => 'checkbox',
+            'default' => 1,
         ),
         'template_id' => array(
             'type' => 'lookup',
