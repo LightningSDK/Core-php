@@ -2879,6 +2879,10 @@ abstract class Table extends Page {
             if (!empty($link_settings['type']) && $link_settings['type'] == 'image') {
                 $filenames = Request::post('linked_images_' . $link_settings['table'], 'array', 'string');
                 // Insert new links.
+                $handler = $this->getFileHandler($link_settings);
+                foreach ($filenames as &$filename) {
+                    $filename = $handler->relativeFilename($filename);
+                }
                 Database::getInstance()->insertMultiple($link_settings['table'],
                     array(
                         $link_settings['key'] => $this->id,

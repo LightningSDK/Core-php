@@ -57,6 +57,11 @@ class RackspaceClient {
         return $remoteName[0] . (preg_match('|^/|', $remoteName[1]) ? '' : '/') . $remoteName[1];
     }
 
+    public function relativeFilename($absoluteUrl) {
+        $remoteName = self::getRemoteName($this->root);
+        $remoteName[0] = Configuration::get('containers.' . $remoteName[0] . '.url');
+        return str_replace($remoteName[0] . '/' . $remoteName[1] . '/', '', $absoluteUrl);
+    }
 
 
     protected static function getRemoteName($remoteName) {
