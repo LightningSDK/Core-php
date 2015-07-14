@@ -405,6 +405,7 @@ class Mailer {
         $this->sentCount = 0;
         foreach($this->users as $user) {
             if ($this->verbose && $this->sentCount % 100 == 0) {
+                set_time_limit(60);
                 echo '. ';
             }
             // Send message.

@@ -300,8 +300,11 @@ class Output {
         if (function_exists('apache_setenv')) {
             apache_setenv('no-gzip', 1);
         }
+        // For apache.
         @ini_set('zlib.output_compression', "Off");
         @ini_set('implicit_flush', 1);
+        // For nginx.
+        header('X-Accel-Buffering: no');
 
         for ($i = 0; $i < ob_get_level(); $i++) {
             ob_end_flush();
