@@ -47,16 +47,19 @@ class CMS {
             $content = array(
                 'class' => '',
                 'content' => !empty($settings['default']) ? $settings['default'] : '',
+                'url' => !empty($settings['defaultUrl']) ? $settings['defaultUrl'] : '',
             );
+        }
+        if (!empty($content['content']) && empty($content['url'])) {
+            // Needs a file prefix for rendering.
+            $handler = FileManager::getFileHandler(!empty($settings['file_handler']) ? $settings['file_handler'] : '', $settings['location']);
+            $content['url'] = $handler->getWebURL($content['content']);
         }
         $forced_classes = !empty($settings['class']) ? $settings['class'] : '';
         $added_classes = !empty($content['class']) ? $content['class'] : '';
         if (!empty($settings['class'])) {
             $content['class'] .= ' ' . $settings['class'];
         }
-
-        // Needs a file prefix for rendering.
-        $handler = FileManager::getFileHandler(!empty($settings['file_handler']) ? $settings['file_handler'] : '', $settings['location']);
 
         if (ClientUser::getInstance()->isAdmin()) {
             JS::add('/js/ckfinder/ckfinder.js', false);
@@ -67,9 +70,9 @@ class CMS {
             return '<a href="" class="button" onclick="javascript:lightning.cms.editImage(\'' . $name . '\'); return false;">Change</a>'
                 . '<a href="" class="button" onclick="javascript:lightning.cms.saveImage(\'' . $name . '\'); return false;">Save</a>'
                 . '<input type="text" id="cms_' . $name . '_class" class="imagesCSS" name="' . $forced_classes . '" value="' . $added_classes . '" />'
-                . '<img src="' . $handler->getWebURL($content['content']) . '" id="cms_' . $name . '" class="' . $content['class'] .  '" />';
+                . '<img src="' . $content['url'] . '" id="cms_' . $name . '" class="' . $content['class'] .  '" />';
         } else {
-            return '<img src="' . $handler->getWebURL($content['content']) . '" class="' . $content['class'] .  '" />';
+            return '<img src="' . $content['url'] . '" class="' . $content['class'] .  '" />';
         }
     }
 
