@@ -19,7 +19,7 @@ abstract class Base extends Page {
 
     public function __construct() {
         parent::__construct();
-        JS::add('/js/Chart.min.js');
+        JS::add('/js/Chart.min.js', false);
         JS::startup('lightning.stats.init()');
 
         // Prepare the JS.
