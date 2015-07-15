@@ -60,8 +60,16 @@ lightning.cms = {
         var self = this;
         CKFinder.popup({
             basePath: lightning.vars.cms.basepath,
-            selectActionFunction: function(fileUrl) {
-                self.updateImage(id, fileUrl);
+            chooseFiles: true,
+            chooseFilesOnDblClick: true,
+            onInit: function( finder ) {
+                finder.on( 'files:choose', function( evt ) {
+                    var file = evt.data.files.first();
+                    self.updateImage(id, file.getUrl());
+                } );
+                finder.on( 'file:choose:resizedImage', function( evt ) {
+                    self.updateImage(id, evt.data.resizedUrl);
+                } );
             }
         });
     },
