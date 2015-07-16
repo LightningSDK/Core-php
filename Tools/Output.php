@@ -238,6 +238,17 @@ class Output {
         exit;
     }
 
+    public static function notFound() {
+        Messenger::error('Not Found');
+        header('HTTP/1.0 404 NOT FOUND');
+        if(static::isJSONRequest()) {
+            static::json(static::ERROR);
+        } else {
+            Template::getInstance()->render('');
+        }
+        exit;
+    }
+
     /**
      * Queue a cookie to be deleted.
      *
