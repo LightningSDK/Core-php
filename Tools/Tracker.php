@@ -214,11 +214,13 @@ class Tracker extends Singleton {
      *   The tracker sub_id. -1 to include all.
      * @param integer $user_id
      *   The tracker user. -1 to include all.
+     * @param boolean $unique_users
+     *   Whether to conly count the number of unique users.
      *
      * @return array
      *   The result set.
      */
-    public static function getHistory($tracker_id, $start = -30, $end = 0, $sub_id = -1, $user_id = -1) {
+    public static function getHistory($tracker_id, $start = -30, $end = 0, $sub_id = -1, $user_id = -1, $unique_users = false) {
         // Start the criteria with tracker id.
         $criteria = array('tracker_id' => $tracker_id);
 
@@ -247,9 +249,25 @@ class Tracker extends Singleton {
             $criteria['user_id'] = $user_id;
         }
 
+        if ($unique_users) {
+            $table = ['te' => [
+                'from' => 'tracker_event',
+                'where' => $criteria,
+                'fields' => [
+                    'date' => ['expression' => 'MIN(date)'],
+                    'user_id',
+                    'tracker_id',
+                    'sub_id',
+                ],
+                'group_by' => 'user_id',
+            ]];
+        } else {
+            $table = 'tracker_event';
+        }
+
         // Run the query.
         $results = Database::getInstance()->countKeyed(
-            'tracker_event',
+            $table,
             'date',
             $criteria
         );
