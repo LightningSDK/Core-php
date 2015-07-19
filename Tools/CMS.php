@@ -66,6 +66,8 @@ class CMS {
             JS::set('token', Session::getInstance()->getToken());
             // TODO: This will need extra slashes if using the File handler.
             JS::set('cms.basepath', $settings['location']);
+            $fh = FileManager::getFileHandler($settings['file_handler'], $settings['location']);
+            JS::set('cms.baseUrl', $fh->getWebURL(''));
             JS::startup('lightning.cms.initImage();');
             return '<a href="" class="button" onclick="javascript:lightning.cms.editImage(\'' . $name . '\'); return false;">Change</a>'
                 . '<a href="" class="button" onclick="javascript:lightning.cms.saveImage(\'' . $name . '\'); return false;">Save</a>'

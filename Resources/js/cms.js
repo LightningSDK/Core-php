@@ -88,7 +88,7 @@ lightning.cms = {
                 class: $('#cms_' + id + '_class').val(),
                 token: lightning.vars.token,
                 action: "save-image",
-                content: $('#cms_' + id).attr('src')
+                content: $('#cms_' + id).attr('src').replace(lightning.vars.cms.baseUrl, '')
             },
             success:function(data) {
                 if (data.status != 'success') {
