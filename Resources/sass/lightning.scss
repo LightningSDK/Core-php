@@ -296,7 +296,8 @@ $amber-low: rgb(255,205,1);
   overflow: hidden;
   transition: all 200ms ease-out;
   cursor: pointer;
-  top: 0px;
+  top: 0;
+  left: 0;
 }
 
 // Thanks to Alexis Ulrich:
