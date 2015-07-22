@@ -60,7 +60,7 @@ class JS {
      * @param boolean $versioning
      *   Whether to append a version string when including.
      */
-    public static function add($files, $async = true, $versioning = true) {
+    public static function add($files, $async = true, $versioning = true, $id = '') {
         if (!is_array($files)) {
             $files = [$files];
         }
@@ -73,6 +73,7 @@ class JS {
                 'rendered' => false,
                 'async' => $async,
                 'versioning' => $versioning,
+                'id' => $id,
             );
         }
     }
@@ -142,10 +143,15 @@ class JS {
         foreach (self::$included_scripts as &$file) {
             $file_name = $file['file'];
             if ($file['versioning']) {
-                $file_name .= '?v=' . Configuration::get('minified_version', 0);
+                $concatenator = strpos($file['file'], '?') !== false ? '&' : '?';
+                $file_name .= $concatenator . 'v=' . Configuration::get('minified_version', 0);
             }
             if (empty($file['rendered'])) {
-                $output .= '<script language="javascript" src="' . $file_name . '" ' . (!empty($file['async']) ? 'async defer' : '') . '></script>';
+                $output .= '<script language="javascript" src="' . $file_name . '" ' . (!empty($file['async']) ? 'async defer' : '');
+                if (!empty($file['id'])) {
+                    $output .= ' id="' . $file['id'] . '"';
+                }
+                $output .= '></script>';
                 $file['rendered'] = true;
             }
         }
