@@ -1,13 +1,11 @@
 <?php
 
-namespace Lightning\View;
+namespace Lightning\View\Video;
 
-/**
- * Class Video
- * @package Lightning\View
- * @deprecated
- */
-class Video {
+use Lightning\View\CSS;
+use Lightning\View\JS;
+
+class HTML5 {
     /**
      * Initialize requires CSS and JS files.
      */
