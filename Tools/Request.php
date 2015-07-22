@@ -6,6 +6,9 @@ use Lightning\Tools\Scrub;
 
 class Request {
 
+    const X_FORWARDED_FOR = 'X-Forwarded-For';
+    const X_FORWARDED_PROTO = 'X-Forwarded-Proto';
+
     /**
      * The parsed input from a posted JSON string.
      *
@@ -29,7 +32,24 @@ class Request {
      * @return boolean
      */
     public static function isHTTPS() {
-        return !empty($_SERVER['HTTPS']);
+        return !empty($_SERVER['HTTPS']) || static::getHeader(static::X_FORWARDED_PROTO) == 'https';
+    }
+
+    public static function getHeader($header) {
+        $nginx_header = 'HTTP_' . strtoupper(preg_replace('/-/', '_', $header));
+        if (isset($_SERVER[$nginx_header])) {
+            return $_SERVER[$nginx_header];
+        } else {
+            if (function_exists('apache_request_headers')) {
+                if (empty(static::$headers)) {
+                    static::$headers = apache_request_headers();
+                    if (!empty(static::$headers[$header])) {
+                        return static::$headers[$header];
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /**
