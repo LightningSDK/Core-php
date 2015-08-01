@@ -395,7 +395,7 @@ abstract class Table extends Page {
 
     public function getDelete() {
         $this->action = 'delete';
-        if (!$this->editable || !$this->addable) {
+        if (!$this->editable || !$this->deleteable) {
             Messenger::error('Access Denied');
         }
     }
