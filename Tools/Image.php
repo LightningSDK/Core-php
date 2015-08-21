@@ -174,6 +174,10 @@ class Image {
             imagealphablending($this->processed, false);
             imagesavealpha($this->processed, true);
         }
+        elseif (!empty($settings['background'])) {
+            $color = imagecolorallocate($this->processed, $settings['background'][0], $settings['background'][1], $settings['background'][2]);
+            imagefill($this->processed, 0, 0, $color);
+        }
 
         imagecopyresampled(
             $this->processed, $this->source,
@@ -227,44 +231,4 @@ class Image {
         ob_end_clean();
         return $contents;
     }
-
-//    /**
-//     * Write the image to a file as a PNG.
-//     *
-//     * @param string $file
-//     *   The file name.
-//     */
-//    public function writePNG($file) {
-//        if (strpos($file, ':') > 0) {
-//            $rs = RackspaceClient::getInstance();
-//            $rs->uploadFile($this->getPNGData(), $file);
-//        } else {
-//            $path = pathinfo($file);
-//            if (!file_exists($path['dirname'])) {
-//                mkdir($path['dirname'], 0777, true);
-//            }
-//            imagepng($this->getOutputImage(), $file);
-//        }
-//    }
-//
-//    /**
-//     * Write the image to a file as a JPG.
-//     *
-//     * @param string $file
-//     *   The file name.
-//     * @param integer $quality
-//     *   The image compression quality. (0 to 100)
-//     */
-//    public function writeJPG($file, $quality = 80) {
-//        if (strpos($file, ':') > 0) {
-//            $rs = RackspaceClient::getInstance();
-//            $rs->uploadFile($this->getJPGData(), $file);
-//        } else {
-//            $path = pathinfo($file);
-//            if (!file_exists($path['dirname'])) {
-//                mkdir($path['dirname'], 0777, true);
-//            }
-//            imagejpeg($this->getOutputImage(), $file, $quality);
-//        }
-//    }
 }
