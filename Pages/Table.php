@@ -3007,10 +3007,8 @@ abstract class Table extends Page {
                     $field['options'] = Array(1=>'No',2=>'Yes');
                 case 'image':
                     $return   = '';
-                    $url = $this->getImageLocationWeb($field, $v);
-                    $headers  = @get_headers( $url );
-                    if ( !empty($v) AND strpos($headers[0],'404') === false ) {
-                        $return = '<img src="' . $url . '" class="table_edit_image" />';
+                    if ( !empty($v)) {
+                        $return = '<img src="' . $this->getImageLocationWeb($field, $v) . '" class="table_edit_image" />';
                     }
                     return $return;
                 case 'state':
