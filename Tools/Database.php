@@ -715,7 +715,7 @@ class Database extends Singleton {
     /**
      * Parse join data into a query string.
      *
-     * @param array $join
+     * @param array $joins
      *   The join data.
      * @param array $values
      *   The array to add variables to.
@@ -723,15 +723,15 @@ class Database extends Singleton {
      * @return string
      *   The rendered query portion.
      */
-    protected function parseJoin($join, &$values) {
+    protected function parseJoin($joins, &$values) {
         // If the first element of join is not an array, it's an actual join.
-        if (!is_array(current($join))) {
+        if (!is_array(current($joins))) {
             // Wrap it in an array so we can loop over it.
-            $join = array($join);
+            $joins = array($joins);
         }
         // Foreach join.
         $output = '';
-        foreach ($join as $alias => $join) {
+        foreach ($joins as $alias => $join) {
             $output .= $this->implodeJoin($join[0], $join[1], !empty($join[2]) ? $join[2] : '', $values, is_string($alias) ? $alias : null);
             // Add any extra replacement variables.
             if (isset($join[3])) {

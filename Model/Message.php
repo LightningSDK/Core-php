@@ -462,7 +462,14 @@ class Message extends Object {
                 if ($c_table = json_decode($criteria['join'], true)) {
                     // The entry is a full join array.
                     $this->replaceCriteriaVariables($c_table, $field_values);
-                    $table['join'][] = $c_table;
+                    reset($c_table);
+                    if (is_array(current($c_table))) {
+                        foreach ($c_table as $join) {
+                            $table['join'][] = $join;
+                        }
+                    } else {
+                        $table['join'][] = $c_table;
+                    }
                 } else {
                     // The entry is just a table name.
                     $table['join'][] = array(
@@ -482,9 +489,20 @@ class Message extends Object {
     }
 
     protected function replaceCriteriaVariables(&$test, $variables) {
-        array_walk_recursive($test, function(&$item) use ($variables) {
+        $next_is_array = false;
+        array_walk_recursive($test, function(&$item) use ($variables, &$next_is_array) {
             if (is_string($item)) {
                 foreach ($variables as $var => $value) {
+                    if ($item == 'IN') {
+                        $next_is_array = true;
+                        continue;
+                    }
+                    if (!empty($next_is_array)) {
+                        $item = explode(',', $value);
+                        $item = array_map('trim', $item);
+                        $next_is_array = false;
+                        continue;
+                    }
                     $item = preg_replace('/{' . $var . '}/', $value, $item);
                 }
             }
