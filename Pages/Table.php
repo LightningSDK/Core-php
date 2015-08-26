@@ -3006,9 +3006,9 @@ abstract class Table extends Page {
                 case 'yesno':
                     $field['options'] = Array(1=>'No',2=>'Yes');
                 case 'image':
-                    $return   = '';
-                    if ( !empty($v)) {
-                        $return = '<img src="' . $this->getImageLocationWeb($field, $v) . '" class="table_edit_image" />';
+                    $return = '';
+                    if (!empty($v)) {
+                        $return = '<img src="'.$this->getImageLocationWeb($field, $v).'" class="table_list_image" />';
                     }
                     return $return;
                 case 'state':
