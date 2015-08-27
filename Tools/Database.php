@@ -408,6 +408,20 @@ class Database extends Singleton {
         return (integer) $this->selectField(array('count' => array('expression' => 'COUNT(' . $count_field . ')')), $table, $where, $final);
     }
 
+    public function countQuery($query, $subquery = false) {
+        if ($subquery) {
+            // This performs slower, but might be necessary for some queries.
+            $query = [
+                'select' => ['count' => ['expression' => 'COUNT(*)']],
+                'from' => $query,
+            ];
+        } elseif (empty($query['select']['count'])) {
+            // Only set this if the developer has not already set a count column.
+            $query['select']['count'] = ['expression' => 'COUNT(*)'];
+        }
+        return (integer) $this->selectFieldQuery($query, 'count');
+    }
+
     /**
      * Get a list of counted groups, keyed by an index.
      *
@@ -896,6 +910,14 @@ class Database extends Singleton {
         return $this->result->fetch(PDO::FETCH_ASSOC);
     }
 
+    public function selectRowQuery($query) {
+        $values = array();
+        $parsed = $this->parseQuery($query, $values);
+        $this->query($parsed, $values);
+        $this->timerEnd();
+        return $this->result->fetch(PDO::FETCH_ASSOC);
+    }
+
     /**
      * Select a single column.
      *
@@ -951,6 +973,12 @@ class Database extends Singleton {
 
         reset($field);
         return $row[key($field)];
+    }
+
+    public function selectFieldQuery($query, $field) {
+        $row = $this->selectRowQuery($query);
+        reset($row);
+        return $row[$field];
     }
 
     /**
