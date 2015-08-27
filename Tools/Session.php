@@ -52,7 +52,7 @@ class Session extends Singleton {
     }
 
     protected static function loadRequestSessionKey() {
-        return Request::cookie(Configuration::get('session.cookie'), 'hex');
+        return Request::cookie(Configuration::get('session.cookie'), 'base64');
     }
 
     /**
@@ -136,7 +136,7 @@ class Session extends Singleton {
     public static function create($user_id=0, $remember=false) {
         $session_details = array();
         $new_sess_key = static::getNewSessionId();
-        $new_token = Random::getInstance()->get(64, Random::HEX);
+        $new_token = Random::getInstance()->get(64, Random::BASE64);
         if (empty($new_sess_key) || empty($new_token)) {
             Messenger::error('Session error.');
         }
@@ -255,7 +255,7 @@ class Session extends Singleton {
      */
     static function getNewSessionId() {
         do{
-            $key = Random::getInstance()->get(64, Random::HEX);
+            $key = Random::getInstance()->get(64, Random::BASE64);
             if (empty($key)) {
                 return FALSE;
             }
