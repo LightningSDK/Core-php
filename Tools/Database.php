@@ -1434,7 +1434,7 @@ class Database extends Singleton {
         // where field_1 like a or field_2 like a or field_3 like a
         // AND field_1 like b or field_2 like b or field_3 like b
         foreach ($values as $v) {
-            $wv = self::addWildCards($v, self::WILDCARD_AFTER);
+            $wv = self::addWildCards($v, $wildcard);
             $set = array('#OR' => array());
             foreach ($fields as $f) {
                 $set['#OR'][$f] = array('LIKE', $wv);
