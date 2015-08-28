@@ -156,7 +156,7 @@ abstract class Table extends Page {
     protected $searchWildcard = Database::WILDCARD_AFTER;
     protected $submit_redirect = true;
     protected $additional_action_vars = array();
-    
+
     /**
      * Button names according to action type
      * @var array
@@ -183,13 +183,13 @@ abstract class Table extends Page {
      */
     const CB_SUBMITANDREDIRECT = 1;
     const CB_LINK = 2;
-        
+
     protected $function_after = Array();
     protected $table_descriptions = "table_descriptions/";
     protected $singularity = false;
     protected $singularityID = 0;
     protected $parentLink;
-    
+
     /*
      * Joined table
      */
@@ -201,7 +201,7 @@ abstract class Table extends Page {
     protected $accessTableCondition;
     // JOIN schema
     protected $accessTableSchema = "LEFT JOIN";
-    
+
     protected $cur_subset;
     // Tables (and conditions) has been joined to general one
     protected $joins;
@@ -246,7 +246,7 @@ abstract class Table extends Page {
          * serial_update comes as POST parameter
          */
         $this->serial_update = Request::post('serialupdate', 'boolean');
-        
+
         $this->refer_return = Request::get('refer_return');
 
         // load the sort fields
@@ -465,7 +465,7 @@ abstract class Table extends Page {
             $values[$this->singularity] = $this->singularityID;
         }
         $this->id = Database::getInstance()->insert($this->table, $values, $this->update_on_duplicate_key ? $values : true);
-        
+
         /*
          * Check if id is defined. If it's FALSE, there was an error 
          * inserting the new row. Probably duplicating.
@@ -473,7 +473,7 @@ abstract class Table extends Page {
         if ($this->id == FALSE) {
             Output::error('There was a conflict with an existing entry.');
         }
-        
+
         if (!empty($this->post_actions['after_insert'])) {
             $this->get_row();
             $this->post_actions['after_insert']($this->list);
@@ -526,8 +526,8 @@ abstract class Table extends Page {
         if ($this->enable_serial_update && $this->serial_update) {
             // Get the next id in the table
             $nextkey = Database::getInstance()->selectField(
-                array('nextkey' => array('expression' => "MIN({$this->getKey()})")), 
-                $this->table, 
+                array('nextkey' => array('expression' => "MIN({$this->getKey()})")),
+                $this->table,
                 array(
                     $this->getKey() => array('>', $this->id)
                 )
@@ -550,7 +550,7 @@ abstract class Table extends Page {
     protected function afterUpdate() {}
 
     public function afterPostRedirect() {
-        
+
         // Run any scripts after execution.
         if (isset($this->function_after[$this->action])) {
             $this->function_after[$this->action]();
@@ -1410,7 +1410,7 @@ abstract class Table extends Page {
 
     /**
      * Renders all submission buttons of the form.
-     * Depending on action performing, it will output also 
+     * Depending on action performing, it will output also
      * other types of buttons, plus any needed fields and links
      *
      * @param string $new_action
@@ -1457,12 +1457,12 @@ abstract class Table extends Page {
 
     /**
      * Outputs custom buttons depending on its type
-     * 
+     *
      * @return boolean
      *   If there's no custom buttons, just exit the function
      */
     protected function renderCustomButtons() {
-        
+
         if (empty($this->custom_buttons)) {
             return FALSE;
         }
@@ -1492,9 +1492,9 @@ abstract class Table extends Page {
     }
 
     /**
-     * Renders button which submit the form and redirect user to a specified 
+     * Renders button which submit the form and redirect user to a specified
      * link
-     * 
+     *
      * @param array $button
      *   Button data
      * @param string $button_id
@@ -1504,7 +1504,7 @@ abstract class Table extends Page {
         // Output the button.
         echo "<input id='custombutton_{$button_id}' type='submit' name='submit' value='{$button['text']}' class='button'/>";
     }
-    
+
     function render_form_row(&$field, $row) {
         $output = '';
         if ($which_field = $this->which_field($field)) {
@@ -2358,7 +2358,7 @@ abstract class Table extends Page {
             if (
                 $sanitize &&
                 ((!isset($field[$sanitize_field]) || $field[$sanitize_field] !== false)
-                || (!isset($field['sanitize']) || $field['sanitize'] !== false))
+                    || (!isset($field['sanitize']) || $field['sanitize'] !== false))
             ) {
                 $val = $this->input_sanitize($val, $html);
             }
@@ -3005,6 +3005,12 @@ abstract class Table extends Page {
                     break;
                 case 'yesno':
                     $field['options'] = Array(1=>'No',2=>'Yes');
+                case 'image':
+                    $return = '';
+                    if (!empty($v)) {
+                        $return = '<img src="'.$this->getImageLocationWeb($field, $v).'" class="table_list_image" />';
+                    }
+                    return $return;
                 case 'state':
                     if ($field['type'] == "state") {
                         $field['options'] = Location::getStateOptions();
@@ -3286,7 +3292,7 @@ abstract class Table extends Page {
                 if (!empty($field['Value'])) {
                     $return .= '<img src="' . $this->getImageLocationWeb($field, $field['Value']) . '" class="table_edit_image" />';
                 }
-                // Fall through.
+            // Fall through.
             case 'file':
                 if (($field['Value'] != '' && (!isset($field['replaceable']) || empty($field['replaceable']))) || $field['Value'] == '') {
                     $return .= "<input type='file' name='{$field['form_field']}' id='{$field['form_field']}' />";
