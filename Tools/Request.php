@@ -88,6 +88,7 @@ class Request {
      */
     public static function getFromURL($regex) {
         $args = func_get_args();
+        $location = static::getLocation();
         preg_match($regex, static::getLocation(), $matches);
         if (isset($matches[1])) {
             $args[0] = $matches[1];
@@ -146,7 +147,7 @@ class Request {
     }
 
     /**
-     * Gets a variable only if it's in the $_GET global.
+     * Gets a variable only if it's in the $_POST global.
      *
      * @param $var
      * @param string $type
