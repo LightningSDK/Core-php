@@ -114,7 +114,26 @@ class CMS {
         } else {
             $value = '';
         }
-        if (ClientUser::getInstance()->isAdmin()) {
+
+        // check if current user can edit datra field
+        // set default
+        $letUserEdit = ClientUser::getInstance()->isAdmin();
+        if ( !empty($settings['permission'])) {
+            if (array_key_exists("user_id",$settings['permission'])) {
+                // if set user's id
+                $letUserEdit = ( ClientUser::getInstance()->user_id == $settings['permission']['user_id'] OR ClientUser::getInstance()->isAdmin() ) ? TRUE : FALSE ;
+            } elseif (array_key_exists("user_role",$settings['permission'])) {
+                // if set user's role
+                //TODO: for implement we need move USER::hasrole() to lightning
+                $letUserEdit = ( ClientUser::getInstance()->isAdmin() ) ? TRUE : FALSE ;
+            } elseif (array_key_exists("user_permission",$settings['permission'])) {
+                // if set user's permission
+                //TODO: for implement we need move USER::haspermission() to lightning
+                $letUserEdit = ( ClientUser::getInstance()->isAdmin() ) ? TRUE : FALSE ;
+            }
+        }
+
+        if ($letUserEdit) {
             JS::startup('lightning.cms.initDate()');
             JS::set('token', Session::getInstance()->getToken());
             return '<img src="/images/lightning/pencil.png" class="cms_edit_date icon-16" id="cms_edit_' . $settings['id'] . '">'
