@@ -115,7 +115,7 @@ class CMS {
             $value = '';
         }
 
-        // check if current user can edit datra field
+        // check if current user can edit data field
         // set default
         $letUserEdit = ClientUser::getInstance()->isAdmin();
         if ( !empty($settings['permission'])) {
@@ -125,11 +125,11 @@ class CMS {
             } elseif (array_key_exists("user_role",$settings['permission'])) {
                 // if set user's role
                 //TODO: for implement we need move USER::hasrole() to lightning
-                $letUserEdit = ( ClientUser::getInstance()->isAdmin() ) ? TRUE : FALSE ;
+                $letUserEdit = ClientUser::getInstance()->isAdmin();
             } elseif (array_key_exists("user_permission",$settings['permission'])) {
                 // if set user's permission
                 //TODO: for implement we need move USER::haspermission() to lightning
-                $letUserEdit = ( ClientUser::getInstance()->isAdmin() ) ? TRUE : FALSE ;
+                $letUserEdit = ClientUser::getInstance()->isAdmin();
             }
         }
 
