@@ -246,7 +246,7 @@ class User extends Object {
      *
      * @return Array
      *   When creation is successful:
-     *      [Status of creation, user id]      
+     *      [Status of creation, user id]
      *   When not:
      *      [Status of creation, Error short code]
      */
@@ -254,7 +254,7 @@ class User extends Object {
         if (Database::getInstance()->check('user', array('email' => strtolower($email), 'password' => array('!=', '')))) {
             // An account already exists with that email.
             return [
-                'success'   => false, 
+                'success'   => false,
                 'error'     => 'A user with that email already exists.'
             ];
         } elseif ($user_info = Database::getInstance()->selectRow('user', array('email' => strtolower($email), 'password' => ''))) {
@@ -270,7 +270,7 @@ class User extends Object {
             Database::getInstance()->update('user', $updates, array('user_id' => $user_info['user_id']));
             $user->sendConfirmationEmail();
             return [
-                'success'   => true, 
+                'success'   => true,
                 'data'      => $user_info['user_id']
             ];
         } else {
@@ -285,7 +285,7 @@ class User extends Object {
             $user = static::loadById($user_id);
             $user->sendConfirmationEmail();
             return [
-                'success'   => true, 
+                'success'   => true,
                 'data'      => $user_id
             ];
         }
@@ -757,7 +757,7 @@ class User extends Object {
 
     /**
      * Registers user
-     * 
+     *
      * @param string $email email
      * @param string $pass password
      * @return Array
@@ -786,18 +786,78 @@ class User extends Object {
                 // TODO: This should only happen if the user is a placeholder.
                 $user->merge_users($previous_user);
             }
-            
+
             // Success
             return [
-                'success'   => true, 
+                'success'   => true,
                 'data'      => ['user_id' => ClientUser::getInstance()->id]
             ];
         } else {
             // Error
             return [
-                'success'   => false, 
+                'success'   => false,
                 'error'     => $res['error']
             ];
         }
+    }
+
+    /**
+     * check if user has permission on this page
+     * @param $permissionID - id of permission
+     * @param $thisPermissionOnly - bool $thisPermissionOnly if we need check only current permission assigned.
+     *        f.e. only stats pages permission (user have only stats role) If FALSE - check also if user have admin permission
+     * @return bool
+     */
+    public function hasPermission( $permissionID, $thisPermissionOnly = FALSE ) {
+        // TODO: LATER when we will build structure of permissions, we should replace permission.ID with permission.name
+        // TODO: for call method in code by name without constants or ununderstandable numbers, f.e. hasPermission('all') or hasPermission ('view_stats')
+
+        // create WHERE cause for query
+        // if we don't need check only this role assigned - checking admin's permissions too ( ALL )
+        if ( $thisPermissionOnly ){
+            $where = array('permission.permission_id' => $permissionID);
+        } else {
+            $where = [
+                '#OR' => array(
+                    array('permission.permission_id' => $permissionID),
+                    array('permission.permission_id' => 1)
+                )
+            ];
+        }
+
+        $permissions = Database::getInstance()->selectAll(
+            array(
+                'from' => 'user',
+                'join' => array(
+                    array(
+                        'LEFT JOIN',
+                        'user_role',
+                        'ON user_role.user_id = user.user_id'
+                    ),
+                    array(
+                        'LEFT JOIN',
+                        'role_permission',
+                        'ON role_permission.role_id=user_role.role_id',
+                    ),
+                    array(
+                        'LEFT JOIN',
+                        'permission',
+                        'ON role_permission.permission_id=permission.permission_id',
+                    ),
+                    array(
+                        'JOIN',
+                        'role',
+                        'ON  user_role.role_id=role.role_id',
+                    )
+                )
+            ),
+            array(
+                array('user.user_id' => $this->id),
+                $where
+            ),
+            array('user.user_id', 'role.name', 'permission.name')
+        );
+
+        return (count($permissions) > 0 ) ?  TRUE :  FALSE;
     }
 }

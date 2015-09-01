@@ -122,14 +122,9 @@ class CMS {
             if (array_key_exists("user_id",$settings['permission'])) {
                 // if set user's id
                 $letUserEdit = ( ClientUser::getInstance()->user_id == $settings['permission']['user_id'] OR ClientUser::getInstance()->isAdmin() ) ? TRUE : FALSE ;
-            } elseif (array_key_exists("user_role",$settings['permission'])) {
-                // if set user's role
-                //TODO: for implement we need move USER::hasrole() to lightning
-                $letUserEdit = ClientUser::getInstance()->isAdmin();
-            } elseif (array_key_exists("user_permission",$settings['permission'])) {
+            } elseif (array_key_exists("permission_id",$settings['permission'])) {
                 // if set user's permission
-                //TODO: for implement we need move USER::haspermission() to lightning
-                $letUserEdit = ClientUser::getInstance()->isAdmin();
+                $letUserEdit = ClientUser::getInstance()->hasPermission($settings['permission']['permission_id']);
             }
         }
 
