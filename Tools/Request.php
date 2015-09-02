@@ -88,7 +88,7 @@ class Request {
      */
     public static function getFromURL($regex) {
         $args = func_get_args();
-        $location = static::getLocation();
+
         preg_match($regex, static::getLocation(), $matches);
         if (isset($matches[1])) {
             $args[0] = $matches[1];
