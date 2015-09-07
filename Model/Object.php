@@ -122,6 +122,15 @@ class Object {
         }
     }
 
+    public static function loadAll($where = [], $fields = [], $final = '') {
+        $objects = [];
+        $results = Database::getInstance()->select(static::TABLE, $where, $fields, $final);
+        foreach ($results as $row) {
+            $objects[] = new static($row);
+        }
+        return $objects;
+    }
+
     /**
      * Load a single element by the PK ID.
      *

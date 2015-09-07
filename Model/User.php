@@ -46,7 +46,7 @@ class User extends Object {
      * Load a user by their email.
      *
      * @param $email
-     * @return bool|User
+     * @return User|boolean
      */
     public static function loadByEmail($email) {
         if ($details = Database::getInstance()->selectRow('user', array('email' => array('LIKE', $email)))) {
@@ -59,7 +59,7 @@ class User extends Object {
      * Load a user by their ID.
      *
      * @param $user_id
-     * @return bool|User
+     * @return User|boolean
      */
     public static function loadById($user_id) {
         if ($details = Database::getInstance()->selectRow('user', array('user_id' => $user_id))) {
@@ -73,7 +73,7 @@ class User extends Object {
      *
      * @param string $key
      *   A temporary access key.
-     * @return bool|User
+     * @return User|boolean
      */
     public static function loadByTempKey($key) {
         if ($details = Database::getInstance()->selectRow(
