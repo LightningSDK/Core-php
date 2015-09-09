@@ -543,7 +543,7 @@ class Message extends Object {
      */
     public function getUsers() {
         $query = $this->getUsersQuery();
-        $query['select']['uid'] = 'DISTINCT(user.user_id)';
+        $query['select']['uid'] = ['expression' => 'DISTINCT(user.user_id)'];
         $query['select'][] = 'user.*';
         return Database::getInstance()->selectQuery($query);
     }
