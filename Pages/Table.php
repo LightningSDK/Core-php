@@ -619,6 +619,13 @@ abstract class Table extends Page {
     }
 
     /**
+     * Load a single entry.
+     */
+    protected function loadSingle() {
+        $this->list = Database::getInstance()->selectRow($this->table, array($this->getKey() => $this->id));
+    }
+
+    /**
      * Get the primary key for the table.
      *
      * @param boolean
