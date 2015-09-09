@@ -147,7 +147,7 @@ class Request {
     }
 
     /**
-     * Gets a variable only if it's in the $_POST global.
+     * Gets a variable only if it's in the $_GET global.
      *
      * @param $var
      * @param string $type

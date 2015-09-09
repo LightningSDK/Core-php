@@ -30,7 +30,7 @@ class Users extends Table {
 
     protected $table = 'user';
     protected $searchable = true;
-    protected $search_fields = array('email', 'first', 'last', 'user.user_id');
+    protected $search_fields = array('email', 'first', 'last', 'user_id');
     protected $preset = array(
         'salt' => array(
             'type' => 'hidden',
