@@ -830,6 +830,14 @@ class Database extends Singleton {
         return $this->result;
     }
 
+    public function selectQuery($query) {
+        $values = array();
+        $parsed = $this->parseQuery($query, $values);
+        $this->query($parsed, $values);
+        $this->timerEnd();
+        return $this->result;
+    }
+
     /**
      * Run a select query and return a result array.
      *
