@@ -707,9 +707,11 @@ class Database extends Singleton {
         }
         if (!empty($query['order_by'])) {
             $output .= ' ORDER BY ';
+            $orders = [];
             foreach ($query['order_by'] as $field => $order) {
-                $output .= $this->formatField($field) . ' ' . $order;
+                $orders[] = $this->formatField($field) . ' ' . $order;
             }
+            $output .= implode(',', $orders);
         }
         if (!empty($query['limit'])) {
             if (is_array($query['limit'])) {
