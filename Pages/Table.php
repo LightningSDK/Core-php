@@ -205,6 +205,8 @@ abstract class Table extends Page {
     protected $cur_subset;
     // Tables (and conditions) has been joined to general one
     protected $joins;
+    // Fields we need to grab from joined table
+    protected $joinFields;
     protected $header;
     protected $table_url;
     protected $sort_fields;
@@ -621,15 +623,24 @@ abstract class Table extends Page {
     /**
      * Get the primary key for the table.
      *
+     * @param boolean
+     *   Whether to use table name for quering
+     * 
      * @return string
      *   The primary key name.
      */
-    function getKey() {
+    function getKey($useTableName = FALSE) {
         if (empty($this->key) && !empty($this->table)) {
             $result = Database::getInstance()->query("SHOW KEYS FROM `{$this->table}` WHERE Key_name = 'PRIMARY'");
             $result = $result->fetch();
             $this->key = $result['Column_name'];
         }
+        
+        // When tables are joined we need to use table names to avoid key duplicating
+        if ($this->joins AND $useTableName) {
+            return "{$this->table}.{$this->key}";
+        }  
+        
         return $this->key;
     }
 
@@ -2564,7 +2575,11 @@ abstract class Table extends Page {
             $join = array_merge($join, $this->joins);
         } 
         
-        $where[$this->getKey()] = $this->id;
+        $where[$this->getKey(TRUE)] = $this->id;
+        
+        // fields we retrieve from the query
+        $fields = array_merge(["{$this->table}.*"], $this->joinFields);
+        
         if ($this->table) {
             $this->list = Database::getInstance()->selectRow(
                 [
@@ -2572,7 +2587,7 @@ abstract class Table extends Page {
                     'join' => $join,
                 ],
                 $where,
-                ["{$this->table}.*"]
+                $fields
             );
         }
     }
