@@ -633,11 +633,7 @@ class Database extends Singleton {
      */
     public function delete($table, $where) {
         $values = array();
-        $table = $this->parseTable($table, $values);
-        if (is_array($where)) {
-            $where = $this->sqlImplode($where, $values, ' AND ');
-        }
-        $this->query('DELETE FROM ' . $table . ' WHERE ' . $where, $values);
+        $this->query($this->parseQuery(['from' => $table, 'where' => $where, 'DELETE'], $values, 'DELETE'), $values);
 
         return $this->result->rowCount() ?: false;
     }
