@@ -319,7 +319,7 @@ abstract class Table extends Page {
             Messenger::error('Access Denied');
             return;
         }
-        $this->loadSingle();
+        $this->get_row();
     }
 
     public function getView() {
@@ -616,13 +616,6 @@ abstract class Table extends Page {
      */
     public function set($var, $val) {
         $this->$var = $val;
-    }
-
-    /**
-     * Load a single entry.
-     */
-    protected function loadSingle() {
-        $this->list = Database::getInstance()->selectRow($this->table, array($this->getKey() => $this->id));
     }
 
     /**
@@ -2566,14 +2559,20 @@ abstract class Table extends Page {
             $join[] = array('LEFT JOIN', $this->accessTable, $join_condition);
             $where .= " AND ".$this->accessTableCondition;
         }
+        
+        if ($this->joins) {
+            $join = array_merge($join, $this->joins);
+        } 
+        
         $where[$this->getKey()] = $this->id;
         if ($this->table) {
             $this->list = Database::getInstance()->selectRow(
-                array(
+                [
                     'from' => $this->table,
                     'join' => $join,
-                ),
-                $where
+                ],
+                $where,
+                ["{$this->table}.*"]
             );
         }
     }
