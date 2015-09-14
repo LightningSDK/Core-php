@@ -895,6 +895,19 @@ class Database extends Singleton {
         return $results;
     }
 
+    public function selectIndexedQuery($query, $key) {
+        $values = [];
+        $parsed = $this->parseQuery($query, $values);
+        $this->query($parsed, $values);
+        // TODO: This is built in to PDO.
+        $result = [];
+        while ($row = $this->result->fetch(PDO::FETCH_ASSOC)) {
+            $result[$row[$key]] = $row;
+        }
+        $this->timerEnd();
+        return $result;
+    }
+
     /**
      * Select just a single row.
      *
@@ -948,6 +961,19 @@ class Database extends Singleton {
         }
         $this->_select($table, $where, $fields, NULL, $final);
         if ($key) {
+            $output = $this->result->fetchAll(PDO::FETCH_KEY_PAIR);
+        } else {
+            $output = $this->result->fetchAll(PDO::FETCH_COLUMN);
+        }
+        $this->timerEnd();
+        return $output;
+    }
+
+    public function selectColumnQuery($query) {
+        $values = array();
+        $parsed = $this->parseQuery($query, $values);
+        $this->query($parsed, $values);
+        if (count($query['select']) == 2) {
             $output = $this->result->fetchAll(PDO::FETCH_KEY_PAIR);
         } else {
             $output = $this->result->fetchAll(PDO::FETCH_COLUMN);
