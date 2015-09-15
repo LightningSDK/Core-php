@@ -53,6 +53,7 @@ use Lightning\Tools\Security\Encryption;
 use Lightning\Tools\Template;
 use Lightning\View\Field;
 use Lightning\View\Field\BasicHTML;
+use Lightning\View\Field\Checkbox;
 use Lightning\View\Field\Hidden;
 use Lightning\View\Field\Location;
 use Lightning\View\Field\Text;
@@ -3377,7 +3378,11 @@ abstract class Table extends Page {
                 return $output;
                 break;
             case 'checkbox':
-                return "<input type='checkbox' name='{$field['form_field']}' id='{$field['form_field']}' value='1' ".(($field['Value']==1)?"checked":'')." />";
+                $attribtues = [];
+                if (!empty($field['disabled'])) {
+                    $attribtues['disabled'] = true;
+                }
+                return Checkbox::render($field['form_field'], 1, $field['Value']==1, $attribtues);
                 break;
             case 'note':
                 return $field['note'];
