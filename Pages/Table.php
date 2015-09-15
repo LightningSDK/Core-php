@@ -205,6 +205,8 @@ abstract class Table extends Page {
     protected $cur_subset;
     // Tables (and conditions) has been joined to general one
     protected $joins;
+    // Fields we need to grab from joined table
+    protected $joinFields;
     protected $header;
     protected $table_url;
     protected $sort_fields;
@@ -319,7 +321,7 @@ abstract class Table extends Page {
             Messenger::error('Access Denied');
             return;
         }
-        $this->loadSingle();
+        $this->get_row();
     }
 
     public function getView() {
@@ -619,24 +621,26 @@ abstract class Table extends Page {
     }
 
     /**
-     * Load a single entry.
-     */
-    protected function loadSingle() {
-        $this->list = Database::getInstance()->selectRow($this->table, array($this->getKey() => $this->id));
-    }
-
-    /**
      * Get the primary key for the table.
      *
+     * @param boolean
+     *   Whether to use table name for quering
+     * 
      * @return string
      *   The primary key name.
      */
-    function getKey() {
+    function getKey($useTableName = FALSE) {
         if (empty($this->key) && !empty($this->table)) {
             $result = Database::getInstance()->query("SHOW KEYS FROM `{$this->table}` WHERE Key_name = 'PRIMARY'");
             $result = $result->fetch();
             $this->key = $result['Column_name'];
         }
+        
+        // When tables are joined we need to use table names to avoid key duplicating
+        if ($this->joins AND $useTableName) {
+            return "{$this->table}.{$this->key}";
+        }  
+        
         return $this->key;
     }
 
@@ -2566,14 +2570,24 @@ abstract class Table extends Page {
             $join[] = array('LEFT JOIN', $this->accessTable, $join_condition);
             $where .= " AND ".$this->accessTableCondition;
         }
-        $where[$this->getKey()] = $this->id;
+        
+        if ($this->joins) {
+            $join = array_merge($join, $this->joins);
+        } 
+        
+        $where[$this->getKey(TRUE)] = $this->id;
+        
+        // fields we retrieve from the query
+        $fields = array_merge(["{$this->table}.*"], $this->joinFields);
+        
         if ($this->table) {
             $this->list = Database::getInstance()->selectRow(
-                array(
+                [
                     'from' => $this->table,
                     'join' => $join,
-                ),
-                $where
+                ],
+                $where,
+                $fields
             );
         }
     }
