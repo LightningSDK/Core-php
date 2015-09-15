@@ -206,7 +206,7 @@ abstract class Table extends Page {
     // Tables (and conditions) has been joined to general one
     protected $joins;
     // Fields we need to grab from joined table
-    protected $joinFields;
+    protected $joinFields = [];
     protected $header;
     protected $table_url;
     protected $sort_fields;
