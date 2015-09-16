@@ -114,7 +114,21 @@ class CMS {
         } else {
             $value = '';
         }
-        if (ClientUser::getInstance()->isAdmin()) {
+
+        // check if current user can edit data field
+        // set default
+        $letUserEdit = ClientUser::getInstance()->isAdmin();
+        if ( !empty($settings['permission'])) {
+            if (array_key_exists("user_id",$settings['permission'])) {
+                // if set user's id
+                $letUserEdit = ( ClientUser::getInstance()->user_id == $settings['permission']['user_id'] OR ClientUser::getInstance()->isAdmin() ) ? TRUE : FALSE ;
+            } elseif (array_key_exists("permission_id",$settings['permission'])) {
+                // if set user's permission
+                $letUserEdit = ClientUser::getInstance()->hasPermission($settings['permission']['permission_id']);
+            }
+        }
+
+        if ($letUserEdit) {
             JS::startup('lightning.cms.initDate()');
             JS::set('token', Session::getInstance()->getToken());
             return '<img src="/images/lightning/pencil.png" class="cms_edit_date icon-16" id="cms_edit_' . $settings['id'] . '">'

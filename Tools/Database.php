@@ -408,6 +408,20 @@ class Database extends Singleton {
         return (integer) $this->selectField(array('count' => array('expression' => 'COUNT(' . $count_field . ')')), $table, $where, $final);
     }
 
+    public function countQuery($query, $subquery = false) {
+        if ($subquery) {
+            // This performs slower, but might be necessary for some queries.
+            $query = [
+                'select' => ['count' => ['expression' => 'COUNT(*)']],
+                'from' => $query,
+            ];
+        } elseif (empty($query['select']['count'])) {
+            // Only set this if the developer has not already set a count column.
+            $query['select']['count'] = ['expression' => 'COUNT(*)'];
+        }
+        return (integer) $this->selectFieldQuery($query, 'count');
+    }
+
     /**
      * Get a list of counted groups, keyed by an index.
      *
@@ -619,11 +633,7 @@ class Database extends Singleton {
      */
     public function delete($table, $where) {
         $values = array();
-        $table = $this->parseTable($table, $values);
-        if (is_array($where)) {
-            $where = $this->sqlImplode($where, $values, ' AND ');
-        }
-        $this->query('DELETE FROM ' . $table . ' WHERE ' . $where, $values);
+        $this->query($this->parseQuery(['from' => $table, 'where' => $where, 'DELETE'], $values, 'DELETE'), $values);
 
         return $this->result->rowCount() ?: false;
     }
@@ -693,9 +703,11 @@ class Database extends Singleton {
         }
         if (!empty($query['order_by'])) {
             $output .= ' ORDER BY ';
+            $orders = [];
             foreach ($query['order_by'] as $field => $order) {
-                $output .= $this->formatField($field) . ' ' . $order;
+                $orders[] = $this->formatField($field) . ' ' . $order;
             }
+            $output .= implode(',', $orders);
         }
         if (!empty($query['limit'])) {
             if (is_array($query['limit'])) {
@@ -715,7 +727,7 @@ class Database extends Singleton {
     /**
      * Parse join data into a query string.
      *
-     * @param array $join
+     * @param array $joins
      *   The join data.
      * @param array $values
      *   The array to add variables to.
@@ -723,15 +735,15 @@ class Database extends Singleton {
      * @return string
      *   The rendered query portion.
      */
-    protected function parseJoin($join, &$values) {
+    protected function parseJoin($joins, &$values) {
         // If the first element of join is not an array, it's an actual join.
-        if (!is_array(current($join))) {
+        if (!is_array(current($joins))) {
             // Wrap it in an array so we can loop over it.
-            $join = array($join);
+            $joins = array($joins);
         }
         // Foreach join.
         $output = '';
-        foreach ($join as $alias => $join) {
+        foreach ($joins as $alias => $join) {
             $output .= $this->implodeJoin($join[0], $join[1], !empty($join[2]) ? $join[2] : '', $values, is_string($alias) ? $alias : null);
             // Add any extra replacement variables.
             if (isset($join[3])) {
@@ -816,6 +828,14 @@ class Database extends Singleton {
         return $this->result;
     }
 
+    public function selectQuery($query) {
+        $values = array();
+        $parsed = $this->parseQuery($query, $values);
+        $this->query($parsed, $values);
+        $this->timerEnd();
+        return $this->result;
+    }
+
     /**
      * Run a select query and return a result array.
      *
@@ -875,6 +895,19 @@ class Database extends Singleton {
         return $results;
     }
 
+    public function selectIndexedQuery($query, $key) {
+        $values = [];
+        $parsed = $this->parseQuery($query, $values);
+        $this->query($parsed, $values);
+        // TODO: This is built in to PDO.
+        $result = [];
+        while ($row = $this->result->fetch(PDO::FETCH_ASSOC)) {
+            $result[$row[$key]] = $row;
+        }
+        $this->timerEnd();
+        return $result;
+    }
+
     /**
      * Select just a single row.
      *
@@ -892,6 +925,14 @@ class Database extends Singleton {
      */
     public function selectRow($table, $where = array(), $fields = array(), $final = '') {
         $this->_select($table, $where, $fields, 1, $final);
+        $this->timerEnd();
+        return $this->result->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function selectRowQuery($query) {
+        $values = array();
+        $parsed = $this->parseQuery($query, $values);
+        $this->query($parsed, $values);
         $this->timerEnd();
         return $this->result->fetch(PDO::FETCH_ASSOC);
     }
@@ -928,6 +969,19 @@ class Database extends Singleton {
         return $output;
     }
 
+    public function selectColumnQuery($query) {
+        $values = array();
+        $parsed = $this->parseQuery($query, $values);
+        $this->query($parsed, $values);
+        if (count($query['select']) == 2) {
+            $output = $this->result->fetchAll(PDO::FETCH_KEY_PAIR);
+        } else {
+            $output = $this->result->fetchAll(PDO::FETCH_COLUMN);
+        }
+        $this->timerEnd();
+        return $output;
+    }
+
     /**
      * Select a single column from the first row.
      *
@@ -951,6 +1005,12 @@ class Database extends Singleton {
 
         reset($field);
         return $row[key($field)];
+    }
+
+    public function selectFieldQuery($query, $field) {
+        $row = $this->selectRowQuery($query);
+        reset($row);
+        return $row[$field];
     }
 
     /**
@@ -1434,7 +1494,7 @@ class Database extends Singleton {
         // where field_1 like a or field_2 like a or field_3 like a
         // AND field_1 like b or field_2 like b or field_3 like b
         foreach ($values as $v) {
-            $wv = self::addWildCards($v, self::WILDCARD_AFTER);
+            $wv = self::addWildCards($v, $wildcard);
             $set = array('#OR' => array());
             foreach ($fields as $f) {
                 $set['#OR'][$f] = array('LIKE', $wv);
