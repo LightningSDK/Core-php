@@ -6,6 +6,11 @@ lightning.table = {
     init: function() {
         $('.add_image').click(lightning.table.clickAddImage);
         $('.linked_images').on('click', '.remove', lightning.table.removeLinkedImage);
+        self = this;
+        var search = $('#table_search');
+        search.keyup(function(){
+            self.search(search);
+        });
     },
 
     /**
@@ -143,9 +148,9 @@ lightning.table = {
 
     addImageCallback: function(link_table, fileUrl) {
         $('#linked_images_' + link_table).append('<span class="selected_image_container">' +
-        '<input type="hidden" name="linked_images_' + link_table + '[]" value="' + fileUrl + '">' +
-        '<span class="remove">X</span>' +
-        '<img src="' + fileUrl + '" /></span>');
+            '<input type="hidden" name="linked_images_' + link_table + '[]" value="' + fileUrl + '">' +
+            '<span class="remove">X</span>' +
+            '<img src="' + fileUrl + '" /></span>');
     },
 
     removeLinkedImage: function(event) {

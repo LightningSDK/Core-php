@@ -808,7 +808,7 @@ abstract class Table extends Page {
     protected function renderSearchForm() {
         // @todo namespace this
         JS::inline('table_search_i=0;table_search_d=0;');
-        return 'Search: <input type="text" name="table_search" value="' . Scrub::toHTML(Request::get('ste')) . '" onkeyup="lightning.table.search(this);" />';
+        return 'Search: <input type="text" name="table_search" id="table_search" value="' . Scrub::toHTML(Request::get('ste')) . '" />';
     }
 
     function render_pop_return() {
@@ -2893,7 +2893,7 @@ abstract class Table extends Page {
     }
 
     function js_init_data() {
-        $table_data = array();
+        $table_data = ['vars' => []];
         if ($this->rowClick) {
             $table_data['rowClick'] = $this->rowClick;
             if (isset($this->table_url))
@@ -2910,13 +2910,11 @@ abstract class Table extends Page {
         foreach($this->fields as $f => $field) {
             if (!empty($field['autocomplete'])) {
                 $js_startup .= '$(".table_autocomplete").keyup(lightning.table.autocomplete);';
-                $use_autocomplete = true;
             }
             if (!empty($field['default_reset'])) {
                 $table_data['defaults'][$f] = $field['default'];
             }
             if (!empty($field['type']) && $field['type'] == "div") {
-                $include_ck = true;
                 $js_startup .= '$("#'.$f.'_div").attr("contentEditable", "true");
                 table_div_editors["'.$f.'"]=CKEDITOR.inline("'.$f.'_div",CKEDITOR.config.toolbar_Full);';
             }
@@ -2936,13 +2934,13 @@ abstract class Table extends Page {
             }
         }
 
-        if (count($table_data) > 0 || !empty($use_autocomplete) || $js_startup) {
-            if (count($table_data) > 0 || !empty($use_autocomplete)) {
-                JS::inline('var table_data = ' . json_encode($table_data));
-            }
-            if ($js_startup) {
-                JS::startup($js_startup);
-            }
+        if (!empty($this->search_fields)) {
+            JS::startup('lightning.table.init()');
+        }
+
+        JS::inline('var table_data = ' . json_encode($table_data));
+        if ($js_startup) {
+            JS::startup($js_startup);
         }
     }
 
