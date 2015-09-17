@@ -60,6 +60,12 @@ class Image {
         return $image;
     }
 
+    public static function createFromString($string) {
+        $image = new self();
+        $image->source = imagecreatefromstring($string);
+        return $image;
+    }
+
     public static function loadFromPostField($field) {
         $image = new self();
 

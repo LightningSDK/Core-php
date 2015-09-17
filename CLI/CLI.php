@@ -30,7 +30,8 @@ class CLI {
         global $argv;
         $func = Request::convertFunctionName('execute', $argv[2]);
         if (method_exists($this, $func)) {
-            $this->$func();
+            $args = count($argv) > 3 ? array_splice($argv, 3) : [];
+            call_user_func_array([$this, $func], $args);
         }
         else {
             $this->out('No handler found.');

@@ -101,7 +101,7 @@ class Logger extends Singleton {
         self::message('    ' . $type . ': ' . $errstr);
 
         if ($output) {
-            echo ('    ' . $type . ': ' . $errstr . ' in ' . $errfile . ' on line ' . $errline);
+            echo ('    ' . $type . ': ' . $errstr . ' in ' . $errfile . ' on line ' . $errline . "\n");
         }
         $started = false;
         foreach (debug_backtrace() as $row) {
@@ -110,7 +110,7 @@ class Logger extends Singleton {
                 $line = '    in ' . (!empty($row['file']) ? $row['file'] : '?') . ' on line ' . (!empty($row['line']) ? $row['line'] : '?');
                 self::message($line);
                 if ($output) {
-                    echo $line;
+                    echo $line . "\n";
                 }
             }
         }
