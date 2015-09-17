@@ -2443,11 +2443,15 @@ abstract class Table extends Page {
 
     protected function getCompositeImageArray($field) {
         $images = [];
-        foreach ($field['images'] as $image) {
-            $image = array_replace($field, $image);
-            $images[] = $image;
+        if (!empty($field['images'])) {
+            foreach ($field['images'] as $image) {
+                $image = array_replace($field, $image);
+                $images[] = $image;
+            }
+            return $images;
+        } else {
+            return [$field];
         }
-        return $images;
     }
 
     /**
