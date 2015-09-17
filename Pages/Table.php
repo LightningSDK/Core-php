@@ -3269,13 +3269,24 @@ abstract class Table extends Page {
      *   The web location.
      */
     protected function getImageLocationWeb($field, $file = '') {
+        $images = $this->getCompositeImageArray($field);
+        foreach ($images as $image) {
+            if (!empty($image['default'])) {
+                $image_data = $image;
+                break;
+            }
+        }
+        if (empty($image_data)) {
+            $image_data = $images[0];
+        }
+
         // Convert the file prefix to the actual file name.
         if (!empty($field['images'])) {
-            $field = array_replace($field, $field['images'][0]);
+            $image_data = array_replace($field, $image_data);
         }
-        $file = $this->getFullFileName($file, $field);
+        $file = $this->getFullFileName($file, $image_data);
 
-        $handler = $this->getFileHandler($field);
+        $handler = $this->getFileHandler($image_data);
         return $handler->getWebURL($file);
     }
 
