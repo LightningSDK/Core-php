@@ -70,6 +70,9 @@ class RackspaceClient {
         return $remoteName;
     }
 
+    /**
+     * @TODO: Can this be renamed to "copyFile"
+     */
     public function uploadFile($file, $remoteName) {
         $this->connect();
         $remoteName = $this->getRemoteName($remoteName);

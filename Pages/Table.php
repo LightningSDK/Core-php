@@ -270,7 +270,9 @@ abstract class Table extends Page {
             $this->sort = implode(",", $sort_strings);
         }
 
-        $this->action_file = preg_replace('/\?.*/','', $_SERVER['REQUEST_URI']);
+        if (!empty($_SERVER['REQUEST_URI'])) {
+            $this->action_file = preg_replace('/\?.*/','', $_SERVER['REQUEST_URI']);
+        }
 
         foreach ($options as $name => $value) {
             $this->$name = $value;
@@ -2433,17 +2435,46 @@ abstract class Table extends Page {
             $field['images'] = array($field);
         }
 
-        $new_image = '';
-        foreach ($field['images'] as $image) {
-            $image = array_replace($field, $image);
+        $images = $this->getCompositeImageArray($field);
+        $filename_base = $this->getNewImageFilenameBase($images, $file);
+        $this->createImages($filename_base, $field, $images, $imageObj, $file);
+        return $filename_base;
+    }
 
+    protected function getCompositeImageArray($field) {
+        $images = [];
+        if (!empty($field['images'])) {
+            foreach ($field['images'] as $image) {
+                $image = array_replace($field, $image);
+                $images[] = $image;
+            }
+            return $images;
+        } else {
+            return [$field];
+        }
+    }
+
+    /**
+     * @param string $filename_base
+     * @param array $field
+     * @param array $images
+     * @param Image $imageObj
+     * @param array $file
+     *   The uploaded file array if available.
+     * @return bool
+     */
+    public function createImages($filename_base, $field, $images, $imageObj, $file = null) {
+        $fileHandler = $this->getFileHandler($field);
+        foreach ($images as $image) {
             // Get the output file location.
             $output_format = $this->getOutputFormat($image, $file);
-            $new_image = $this->getNewImageLocation($image, $output_format);
-            $output_location = $this->getOutputPath($image) . '/' . $new_image;
+            $new_image = $this->getFullFileName($filename_base, $image, $file);
 
             if (!empty($image['original'])) {
-                copy($file['tmp_name'], $output_location);
+                if (!empty($file)) {
+                    // The file was just uploaded, so make sure to move it to the correct location.
+                    $fileHandler->uploadFile($file['tmp_name'], $new_image);
+                }
                 continue;
             }
 
@@ -2465,8 +2496,6 @@ abstract class Table extends Page {
                 $imageObj->processed = $image['image_postprocess']($imageObj->processed);
             }
 
-            $fileHandler = $this->getFileHandler($field);
-
             switch ($output_format) {
                 case 'png':
                     $fileHandler->write($new_image, $imageObj->getPNGData());
@@ -2477,7 +2506,70 @@ abstract class Table extends Page {
                     break;
             }
         }
-        return $new_image;
+    }
+
+    /**
+     * Upload all the images in the table.
+     */
+    public function updateImages() {
+        $this->loadFullListCursor();
+        $this->loadMainFields();
+        foreach ($this->fields as $f => $field) {
+            if (!empty($field['type']) && $field['type'] == 'image') {
+                $fileHandler = $this->getFileHandler($field);
+                $images = $this->getCompositeImageArray($field);
+                foreach ($this->list as $entry) {
+                    if (!empty($entry[$f])) {
+                        foreach ($images as $image) {
+                            if (!empty($image['original'])) {
+                                $source_image_data = $image;
+                                break;
+                            }
+                        }
+                        if (empty($source_image_data)) {
+                            $source_image_data = $images[0];
+                        }
+                        $source_image = $this->getFullFileName($entry[$f], $source_image_data);
+                        if ($fileHandler->exists($source_image)) {
+                            $image_resource = Image::createFromString($fileHandler->read($source_image));
+                            if ($image_resource) {
+                                $this->createImages($entry[$f], $field, $images, $image_resource);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    protected function getNewImageFilenameBase($images, $uploaded_file) {
+        do {
+            $random_file = rand(0, 999999);
+            $files_exist = false;
+            foreach ($images as $image) {
+                $handler = $this->getFileHandler($image);
+                $file = $this->getFullFileName($random_file, $image, $uploaded_file);
+                if ($handler->exists($file)) {
+                    $files_exist = true;
+                    break;
+                }
+            }
+        } while ($files_exist);
+        return $random_file;
+    }
+
+    protected function getFullFileName($file_name, $field, $uploaded_file = null) {
+        // Add developer specified prefix/suffix
+        if (!empty($field['file_prefix'])) {
+            $file_name = $field['file_prefix'] . $file_name;
+        }
+        if (!empty($field['file_suffix'])) {
+            $file_name .= $field['file_suffix'];
+        }
+        // Add the format suffix.
+        $file_name .= '.' . $this->getOutputFormat($field, $uploaded_file);
+
+        return $file_name;
     }
 
     protected function getFileHandler($field) {
@@ -2691,6 +2783,10 @@ abstract class Table extends Page {
             $fields,
             $sort . ' LIMIT ' . $start . ', ' . $this->maxPerPage
         );
+    }
+
+    function loadFullListCursor() {
+        $this->list = Database::getInstance()->select($this->table);
     }
 
     function executeTask() {
@@ -3147,7 +3243,12 @@ abstract class Table extends Page {
      *   The file name.
      */
     protected function getOutputFormat($field, $file) {
-        $uploadedFormat = $this->getUploadedFileFormat($file);
+        if (!empty($file)) {
+            $uploadedFormat = $this->getUploadedFileFormat($file);
+        } else {
+            // Default format.
+            $uploadedFormat = 'jpg';
+        }
 
         if (empty($field['format'])) {
             return $uploadedFormat;
@@ -3156,38 +3257,6 @@ abstract class Table extends Page {
             return in_array($uploadedFormat, $field['format']) ? $uploadedFormat : $field['format'][0];
         }
         return $field['format'];
-    }
-
-    /**
-     * Get the image location for a file name.
-     *
-     * @param array $field
-     *   The field settings.
-     * @param string $output_format
-     *   The file from the $_FILE array.
-     *
-     * @return string
-     *   The new absolute file location.
-     */
-    protected function getNewImageLocation($field, $output_format) {
-        if (!empty($field['file_name'])) {
-            return $field['file_name'];
-        }
-        $handler = $this->getFileHandler($field);
-        do {
-            $file = $this->getNewRandomImageName($output_format);
-        } while ($handler->exists($file));
-        return $file;
-    }
-
-    protected function getOutputPath($field) {
-        if (empty($field['location'])) {
-            return HOME_PATH;
-        } elseif (strpos($field['location'], '/') !== 0) {
-            return HOME_PATH . '/' . $field['location'];
-        } else {
-            return $field['location'];
-        }
     }
 
     /**
@@ -3202,7 +3271,24 @@ abstract class Table extends Page {
      *   The web location.
      */
     protected function getImageLocationWeb($field, $file = '') {
-        $handler = $this->getFileHandler($field);
+        $images = $this->getCompositeImageArray($field);
+        foreach ($images as $image) {
+            if (!empty($image['default'])) {
+                $image_data = $image;
+                break;
+            }
+        }
+        if (empty($image_data)) {
+            $image_data = $images[0];
+        }
+
+        // Convert the file prefix to the actual file name.
+        if (!empty($field['images'])) {
+            $image_data = array_replace($field, $image_data);
+        }
+        $file = $this->getFullFileName($file, $image_data);
+
+        $handler = $this->getFileHandler($image_data);
         return $handler->getWebURL($file);
     }
 
