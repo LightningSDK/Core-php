@@ -2523,6 +2523,7 @@ abstract class Table extends Page {
         if ($id) {
             $this->id = $id;
             $this->get_row();
+            $this->list = [$this->list];
         } else {
             $this->loadFullListCursor();
         }
@@ -2565,15 +2566,19 @@ abstract class Table extends Page {
                     // Check if the file exists.
                     $source_image = $this->getFullFileName($entry[$f], $source_image_data);
                     if (!$fileHandler->exists($source_image)) {
+                        $found = false;
                         // If not, try another one.
                         foreach ($images as $image) {
                             $source_image = $this->getFullFileName($entry[$f], $image);
                             if ($fileHandler->exists($source_image)) {
-                                break 2;
+                                $found = true;
+                                break;
                             }
                         }
                         // If there still isn't an image, continue to the next row.
-                        continue;
+                        if (!$found) {
+                            continue;
+                        }
                     }
 
                     $image_resource = Image::createFromString($fileHandler->read($source_image));
