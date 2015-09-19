@@ -252,10 +252,11 @@ lightning.table = {
      */
     export: function(link) {
         var searchStr = $('[name="table_search"]').val();
-        var url = $(link).attr('url');
+        var url = $(link).attr('href');
         if ( searchStr != '' ){
             url += '&ste='+searchStr;
         }
+        alert(url);
         window.location = url;
     }
 };
