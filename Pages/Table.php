@@ -465,7 +465,7 @@ abstract class Table extends Page {
         $this->action = 'list';
         $this->loadMainFields();
         $this->loadList();
-         Output::json(array('html' => $this->renderList(), 'd' => Request::get('i', 'int'), 'status' => 'success'));
+        Output::json(array('html' => $this->renderList(), 'd' => Request::get('i', 'int'), 'status' => 'success'));
     }
 
     public function getDelete() {
@@ -1939,7 +1939,6 @@ abstract class Table extends Page {
     }
 
     public function createUrl($action = '', $id = 0, $field = '', $other = array()) {
-        //var_dump($action);
         $vars = array();
         if ($action == 'list') $vars['p'] = $id;
         if ($action != '') $vars['action'] = $action;
@@ -1995,7 +1994,6 @@ abstract class Table extends Page {
 
         // Put it all together
         $vars = http_build_query($vars + $query);
-        //echo $this->action_file . ($vars != '' ? ('?' . $vars) : '');die;
         return $this->action_file . ($vars != '' ? ('?' . $vars) : '');
 
     }
@@ -2715,7 +2713,6 @@ abstract class Table extends Page {
         if ($this->action == 'list') {
             $this->additional_action_vars['ste'] = Request::get('ste');
             $where[] = Database::getMultiFieldSearch($this->search_fields, explode(' ', Request::get('ste')), $this->searchWildcard);
-            $this->list_where = $where;
         }
 
         // get the page count
