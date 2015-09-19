@@ -75,7 +75,7 @@ class RackspaceClient {
      */
     public function uploadFile($file, $remoteName) {
         $this->connect();
-        $remoteName = $this->getRemoteName($remoteName);
+        $remoteName = $this->getRemoteName($this->root . '/' . $remoteName);
         $container = $this->service->getContainer($remoteName[0]);
         $fh = fopen($file, 'r');
         if ($fh) {
@@ -87,7 +87,7 @@ class RackspaceClient {
     }
 
     public function getURL($remoteName) {
-        $remoteName = $this->getRemoteName($remoteName);
+        $remoteName = $this->getRemoteName($this->root . '/' . $remoteName);
         $container = $this->service->getContainer($remoteName[0]);
         $this->object = $container->getPartialObject($remoteName[1]);
         return $this->object->getPublicUrl();
@@ -95,7 +95,7 @@ class RackspaceClient {
 
     public function getFileContents($remoteName) {
         $this->connect();
-        $remoteName = $this->getRemoteName($remoteName);
+        $remoteName = $this->getRemoteName($this->root . '/' . $remoteName);
         $container = $this->service->getContainer($remoteName[0]);
         $this->object = $container->getObject($remoteName[1]);
         return $this->object->getContent();
