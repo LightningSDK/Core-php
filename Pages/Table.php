@@ -59,6 +59,7 @@ use Lightning\View\Field\Text;
 use Lightning\View\Field\Time;
 use Lightning\View\JS;
 use Lightning\View\Page;
+use Lightning\Tools\CSVWriter;
 use \Exception;
 
 abstract class Table extends Page {
@@ -134,6 +135,7 @@ abstract class Table extends Page {
     protected $addable = true;
     protected $cancel = false;
     protected $searchable = false;
+    protected $exportable = false; // ability to export table or search results to csv
 
     /**
      * Whether the table is sortable.
@@ -356,6 +358,79 @@ abstract class Table extends Page {
         $this->action = 'pop_return';
     }
 
+    public function getExport() {
+        $this->action = 'export';
+        if (!$this->exportable) {
+            Messenger::error('Access Denied');
+            exit;
+        }
+        $this->loadMainFields();
+        $fields = $this->fields;
+        $presets = $this->preset;
+
+        // getting the full list of table data
+        $this->maxPerPage = 1000;
+        $this->loadList();
+
+        // getting head row
+        $headrow = [];
+        foreach ( $fields as $field ){
+            // hide hiddens
+            if ( empty($presets[$field['field']]['type']) OR $presets[$field['field']]['type'] != 'hidden' ){
+                $headrow[] = ( !empty( $field['display_name'] ) ? $field['display_name'] : $field['field'] ) ;
+            }
+        }
+        // getting  data rows
+        $datarows = [];
+        foreach ($this->list as $row) {
+            $datarow = [];
+            foreach ( $fields as $field ){
+                // hide hiddens
+                if ( empty($presets[$field['field']]['type']) OR $presets[$field['field']]['type'] != 'hidden' ){
+                    switch ($field['type']) {
+                        case 'date':
+                            $datarow[] = Time::printDate($row[$field['field']]);
+                            break;
+                        case 'time':
+                            $datarow[] = Time::printTime($row[$field['field']]);
+                            break;
+                        case 'datetime':
+                            $datarow[] = Time::printDateTime($row[$field['field']]);
+                            break;
+                        case 'checkbox':
+                            $datarow[] = (integer) $row[$field['field']];
+                            break;
+                        case 'bit':
+                        case 'checklist':
+                        case 'html':
+                        case 'image':
+                        case 'file':
+                        case 'int':
+                        case 'float':
+                        case 'email':
+                        case 'url':
+                            $datarow[] = $row[$field['field']];
+                            break;
+                        default:
+                            $datarow[] = $row[$field['field']];
+                            break;
+                    }
+                }
+            }
+            $datarows[] = $datarow;
+        }
+
+        // write to file
+        Output::download($this->table.'_' . date('Y-m-d') . '.csv');
+        $file = new CSVWriter();
+        // header row
+        $file->writeRow($headrow);
+        // data rows
+        foreach ($datarows as $datarow){
+            $file->writeRow($datarow);
+        }
+        exit;
+    }
     public function getImport() {
         $this->action = 'import';
         if (!$this->editable || !$this->addable || !$this->importable) {
@@ -390,7 +465,7 @@ abstract class Table extends Page {
         $this->action = 'list';
         $this->loadMainFields();
         $this->loadList();
-        Output::json(array('html' => $this->renderList(), 'd' => Request::get('i', 'int'), 'status' => 'success'));
+         Output::json(array('html' => $this->renderList(), 'd' => Request::get('i', 'int'), 'status' => 'success'));
     }
 
     public function getDelete() {
@@ -686,7 +761,6 @@ abstract class Table extends Page {
                 echo $this->renderList();
                 echo '</div>';
                 break;
-
         }
         // TODO: update to use the JS class.
         // we shouldn't need to call this as long as we use the JS class.
@@ -989,9 +1063,12 @@ abstract class Table extends Page {
                 echo "<a href='".$this->createUrl('new') . "'><img src='/images/lightning/new.png' border='0' title='Add New' /></a>";
             }
             if ($this->importable) {
-                echo "<a href='".$this->createUrl('import') . "'><img src='/images/lightning/send_doc.png' border='0' title='Import' /></a><br />";
+                echo "<a href='".$this->createUrl('import') . "'><img src='/images/lightning/send_doc.png' border='0' title='Import' /></a>";
             }
-            if ($this->addable || $this->importable) {
+            if ($this->exportable) {
+                echo "<a href='".$this->createUrl('export') . "'><img src='/images/lightning/detach.png' border='0' title='Export' /></a><br />";
+            }
+            if ($this->addable || $this->importable || $this->exportable) {
                 echo '<br />';
             }
         }
@@ -1862,6 +1939,7 @@ abstract class Table extends Page {
     }
 
     public function createUrl($action = '', $id = 0, $field = '', $other = array()) {
+        //var_dump($action);
         $vars = array();
         if ($action == 'list') $vars['p'] = $id;
         if ($action != '') $vars['action'] = $action;
@@ -1917,7 +1995,9 @@ abstract class Table extends Page {
 
         // Put it all together
         $vars = http_build_query($vars + $query);
+        //echo $this->action_file . ($vars != '' ? ('?' . $vars) : '');die;
         return $this->action_file . ($vars != '' ? ('?' . $vars) : '');
+
     }
 
     function load_template($file) {
@@ -2635,6 +2715,7 @@ abstract class Table extends Page {
         if ($this->action == 'list') {
             $this->additional_action_vars['ste'] = Request::get('ste');
             $where[] = Database::getMultiFieldSearch($this->search_fields, explode(' ', Request::get('ste')), $this->searchWildcard);
+            $this->list_where = $where;
         }
 
         // get the page count
