@@ -1066,7 +1066,7 @@ abstract class Table extends Page {
                 echo "<a href='".$this->createUrl('import') . "'><img src='/images/lightning/send_doc.png' border='0' title='Import' /></a>";
             }
             if ($this->exportable) {
-                echo "<a  onclick='lightning.table.export(\"{$this->createUrl('export')}\")'><img src='/images/lightning/detach.png' border='0' title='Export' /></a><br />";
+                echo "<a href='#' url='{$this->createUrl('export')}' onclick='lightning.table.export(this)'><img src='/images/lightning/detach.png' border='0' title='Export' /></a><br />";
             }
             if ($this->addable || $this->importable || $this->exportable) {
                 echo '<br />';

@@ -249,17 +249,13 @@ lightning.table = {
     },
     /**
      * add to export button's url search string for export search results
-     * @param url - export url
-     * @param $('[name="table_search"]').val() - value from search field
      */
-    export: function(url) {
+    export: function(link) {
         var searchStr = $('[name="table_search"]').val();
-
+        var url = $(link).attr('url');
         if ( searchStr != '' ){
             url += '&ste='+searchStr;
         }
-
-        window.location = url
+        window.location = url;
     }
-
 };
