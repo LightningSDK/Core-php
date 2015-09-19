@@ -2463,19 +2463,27 @@ abstract class Table extends Page {
      *   The uploaded file array if available.
      * @return bool
      */
-    public function createImages($filename_base, $field, $images, $imageObj, $file = null) {
+    public function createImages($filename_base, $field, $images, $imageObj, $file = null, $replace_existing = true) {
         $fileHandler = $this->getFileHandler($field);
         foreach ($images as $image) {
             // Get the output file location.
             $output_format = $this->getOutputFormat($image, $file);
             $new_image = $this->getFullFileName($filename_base, $image, $file);
 
+            // If we are not going to replace existing and this already exists, continue to the next.
+            if (!$replace_existing && $fileHandler->exists($new_image)) {
+                continue;
+            }
+
             if (!empty($image['original'])) {
                 if (!empty($file)) {
                     // The file was just uploaded, so make sure to move it to the correct location.
                     $fileHandler->uploadFile($file['tmp_name'], $new_image);
                 }
-                continue;
+                // If the 'original' does not exist, we still need to create it.
+                if ($fileHandler->exists($new_image)) {
+                    continue;
+                }
             }
 
             if (!empty($image['image_preprocess']) && is_callable($image['image_preprocess'])) {
@@ -2511,31 +2519,66 @@ abstract class Table extends Page {
     /**
      * Upload all the images in the table.
      */
-    public function updateImages() {
-        $this->loadFullListCursor();
+    public function updateImages($missing_only = false, $id = null) {
+        if ($id) {
+            $this->id = $id;
+            $this->get_row();
+        } else {
+            $this->loadFullListCursor();
+        }
+
+        // Figure out which fields to apply.
         $this->loadMainFields();
+        $image_fields = [];
         foreach ($this->fields as $f => $field) {
             if (!empty($field['type']) && $field['type'] == 'image') {
+                $image_fields[$f] = $field;
+            }
+        }
+
+        // There are no image fields.
+        if (empty($image_fields)) {
+            return;
+        }
+
+        // Update the images.
+        foreach ($this->list as $entry) {
+            foreach ($image_fields as $f => $field) {
                 $fileHandler = $this->getFileHandler($field);
                 $images = $this->getCompositeImageArray($field);
-                foreach ($this->list as $entry) {
-                    if (!empty($entry[$f])) {
+
+                if (!empty($entry[$f])) {
+                    $source_image_data = null;
+                    foreach ($images as $image) {
+                        if (!empty($image['original'])) {
+                            $source_image_data = $image;
+                            break;
+                        }
+                    }
+
+                    // If there is no defined original image.
+                    if (empty($source_image_data)) {
+                        // Try the first image.
+                        $source_image_data = $images[0];
+                    }
+
+                    // Check if the file exists.
+                    $source_image = $this->getFullFileName($entry[$f], $source_image_data);
+                    if (!$fileHandler->exists($source_image)) {
+                        // If not, try another one.
                         foreach ($images as $image) {
-                            if (!empty($image['original'])) {
-                                $source_image_data = $image;
-                                break;
+                            $source_image = $this->getFullFileName($entry[$f], $image);
+                            if ($fileHandler->exists($source_image)) {
+                                break 2;
                             }
                         }
-                        if (empty($source_image_data)) {
-                            $source_image_data = $images[0];
-                        }
-                        $source_image = $this->getFullFileName($entry[$f], $source_image_data);
-                        if ($fileHandler->exists($source_image)) {
-                            $image_resource = Image::createFromString($fileHandler->read($source_image));
-                            if ($image_resource) {
-                                $this->createImages($entry[$f], $field, $images, $image_resource);
-                            }
-                        }
+                        // If there still isn't an image, continue to the next row.
+                        continue;
+                    }
+
+                    $image_resource = Image::createFromString($fileHandler->read($source_image));
+                    if ($image_resource) {
+                        $this->createImages($entry[$f], $field, $images, $image_resource, [], !$missing_only);
                     }
                 }
             }
