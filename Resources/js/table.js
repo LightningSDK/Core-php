@@ -246,5 +246,20 @@ lightning.table = {
     returnPop: function(data) {
         window.opener.$('#' + data.pf + '_list').append("<option value='"+data.id+"'>"+data.pfdf+"</option>").val(data.id);
         window.close();
+    },
+    /**
+     * add to export button's url search string for export search results
+     * @param url - export url
+     * @param $('[name="table_search"]').val() - value from search field
+     */
+    export: function(url) {
+        var searchStr = $('[name="table_search"]').val();
+
+        if ( searchStr != '' ){
+            url += '&ste='+searchStr;
+        }
+
+        window.location = url
     }
+
 };

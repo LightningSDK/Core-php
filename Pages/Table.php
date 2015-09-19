@@ -1066,7 +1066,7 @@ abstract class Table extends Page {
                 echo "<a href='".$this->createUrl('import') . "'><img src='/images/lightning/send_doc.png' border='0' title='Import' /></a>";
             }
             if ($this->exportable) {
-                echo "<a href='".$this->createUrl('export') . "'><img src='/images/lightning/detach.png' border='0' title='Export' /></a><br />";
+                echo "<a  onclick='lightning.table.export(\"{$this->createUrl('export')}\")'><img src='/images/lightning/detach.png' border='0' title='Export' /></a><br />";
             }
             if ($this->addable || $this->importable || $this->exportable) {
                 echo '<br />';
@@ -2710,7 +2710,7 @@ abstract class Table extends Page {
                 $where = array_merge($this->subset[$this->cur_subset], $where);
             }
         }
-        if ($this->action == 'list') {
+        if ($this->action == 'list' OR $this->action == 'export') {
             $this->additional_action_vars['ste'] = Request::get('ste');
             $where[] = Database::getMultiFieldSearch($this->search_fields, explode(' ', Request::get('ste')), $this->searchWildcard);
         }
