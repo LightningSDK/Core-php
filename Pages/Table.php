@@ -1739,10 +1739,12 @@ abstract class Table extends Page {
     protected function render_linked_table_editable_image(&$link_settings) {
         CKEditor::init(true);
         JS::startup('lightning.table.init()');
+        // TODO: This doesn't return anything valuable. Is it used anywhere?
         $link_settings['web_location'] = $this->getImageLocationWeb($link_settings, '');
         JS::set('table.links.' . $link_settings['table'], $link_settings);
         $output = '<span class="button add_image" id="add_image_' . $link_settings['table'] . '">Add Image</span>';
         $output .= '<span class="linked_images" id="linked_images_' . $link_settings['table'] . '">';
+        $link_settings['conform_name'] = false;
         foreach ($link_settings['active_list'] as $image) {
             $output .= '<span class="selected_image_container">
                 <input type="hidden" name="linked_images_' . $link_settings['table'] . '[]" value="' . $image['image'] . '">
@@ -3334,7 +3336,10 @@ abstract class Table extends Page {
         if (!empty($field['images'])) {
             $image_data = array_replace($field, $image_data);
         }
-        $file = $this->getFullFileName($file, $image_data);
+
+        if (!isset($image_data['conform_name']) || $image_data['conform_name'] !== false) {
+            $file = $this->getFullFileName($file, $image_data);
+        }
 
         $handler = $this->getFileHandler($image_data);
         return $handler->getWebURL($file);
