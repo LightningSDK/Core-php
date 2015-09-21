@@ -60,6 +60,7 @@ use Lightning\View\Field\Text;
 use Lightning\View\Field\Time;
 use Lightning\View\JS;
 use Lightning\View\Page;
+use Lightning\Tools\CSVWriter;
 use \Exception;
 
 abstract class Table extends Page {
@@ -135,6 +136,7 @@ abstract class Table extends Page {
     protected $addable = true;
     protected $cancel = false;
     protected $searchable = false;
+    protected $exportable = false; // ability to export table or search results to csv
 
     /**
      * Whether the table is sortable.
@@ -357,6 +359,85 @@ abstract class Table extends Page {
         }
     }
 
+    /**
+     * Export csv file with a list of current rows (including search results)
+     */
+    public function getExport() {
+        $this->action = 'export';
+        if (!$this->exportable) {
+            Messenger::error('Access Denied');
+            exit;
+        }
+
+        // getting the full list of table data
+        $this->loadMainFields();
+        $fields = $this->fields;
+        $presets = $this->preset;
+        $this->maxPerPage = 10000;
+        $this->loadList();
+
+        // getting head row
+        $headrow = [];
+        foreach ( $fields as $field ){
+            // hide hiddens
+            if ( empty($presets[$field['field']]['type']) OR $presets[$field['field']]['type'] != 'hidden' ){
+                $headrow[] = ( !empty( $field['display_name'] ) ? $field['display_name'] : $field['field'] ) ;
+            }
+        }
+        // getting  data rows
+        $datarows = [];
+        foreach ($this->list as $row) {
+            $datarow = [];
+            foreach ( $fields as $field ){
+                // hide hiddens
+                if ( empty($presets[$field['field']]['type']) OR $presets[$field['field']]['type'] != 'hidden' ){
+                    // saving from empty fields
+                    $value = ( !empty($row[$field['field']]) ) ? $row[$field['field']] : 0;
+                    switch ($field['type']) {
+                        case 'date':
+                            $datarow[] = Time::printDate($value);
+                            break;
+                        case 'time':
+                            $datarow[] = Time::printTime($value);
+                            break;
+                        case 'datetime':
+                            $datarow[] = Time::printDateTime($value);
+                            break;
+                        case 'checkbox':
+                            $datarow[] = (integer) $value;
+                            break;
+                        case 'bit':
+                        case 'checklist':
+                        case 'html':
+                        case 'image':
+                        case 'file':
+                        case 'int':
+                        case 'float':
+                        case 'email':
+                        case 'url':
+                            $datarow[] = $value;
+                            break;
+                        default:
+                            $datarow[] = $value;
+                            break;
+                    }
+                }
+            }
+            $datarows[] = $datarow;
+        }
+
+        // write to file
+        Output::download($this->table.'_' . date('Y-m-d') . '.csv');
+        $file = new CSVWriter();
+        // header row
+        $file->writeRow($headrow);
+        // data rows
+        foreach ($datarows as $datarow){
+            $file->writeRow($datarow);
+        }
+        exit;
+    }
+    
     public function getPopReturn() {
         $this->action = 'pop_return';
     }
@@ -996,11 +1077,14 @@ abstract class Table extends Page {
                 echo "<a href='".$this->createUrl('new') . "'><img src='/images/lightning/new.png' border='0' title='Add New' /></a>";
             }
             if ($this->importable) {
-                echo "<a href='".$this->createUrl('import') . "'><img src='/images/lightning/send_doc.png' border='0' title='Import' /></a><br />";
+                echo "<a href='".$this->createUrl('import') . "'><img src='/images/lightning/send_doc.png' border='0' title='Import' /></a>";
             }
-            if ($this->addable || $this->importable) {
-                echo '<br />';
+            if ($this->exportable) {
+                echo "<a href='{$this->createUrl('export')}' onclick='event.preventDefault(); lightning.table.export(this)'><img src='/images/lightning/detach.png' border='0' title='Export' /></a><br />";
             }
+        }
+        if ($this->addable || $this->importable || $this->exportable) {
+            echo '<br />';
         }
     }
 
@@ -2787,7 +2871,7 @@ abstract class Table extends Page {
                 $where = array_merge($this->subset[$this->cur_subset], $where);
             }
         }
-        if ($this->action == 'list') {
+        if ($this->action == 'list' OR $this->action == 'export') {
             $this->additional_action_vars['ste'] = Request::get('ste');
             $where[] = Database::getMultiFieldSearch($this->search_fields, explode(' ', Request::get('ste')), $this->searchWildcard);
         }
