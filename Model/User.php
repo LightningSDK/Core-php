@@ -16,6 +16,7 @@ use Lightning\Tools\Scrub;
 use Lightning\Tools\Session;
 use Lightning\Tools\Tracker;
 use Lightning\View\Field\Time;
+use Source\Model\Permissions;
 
 class User extends Object {
 
@@ -820,7 +821,7 @@ class User extends Object {
             $where = [
                 '#OR' => array(
                     array('permission.permission_id' => $permissionID),
-                    array('permission.permission_id' => 1)
+                    array('permission.permission_id' => Permissions::ALL)
                 )
             ];
         }
