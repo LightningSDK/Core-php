@@ -8,6 +8,8 @@ class Request {
 
     const X_FORWARDED_FOR = 'X-Forwarded-For';
     const X_FORWARDED_PROTO = 'X-Forwarded-Proto';
+    const IP = 'ip';
+    const IP_INT = 'ip_int';
 
     /**
      * The parsed input from a posted JSON string.
@@ -241,9 +243,9 @@ class Request {
      */
     public static function server($var) {
         switch ($var) {
-            case 'ip_int':
+            case self::IP_INT:
                 return empty($_SERVER['REMOTE_ADDR']) ? 0 : ip2long($_SERVER['REMOTE_ADDR']);
-            case 'ip':
+            case self::IP:
                 return empty($_SERVER['REMOTE_ADDR']) ? '' : $_SERVER['REMOTE_ADDR'];
             default:
                 return isset($_SERVER[$var]) ? $_SERVER[$var] : null;
