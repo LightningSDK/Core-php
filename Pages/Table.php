@@ -392,7 +392,9 @@ abstract class Table extends Page {
                 // hide hiddens
                 if ( empty($presets[$field['field']]['type']) OR $presets[$field['field']]['type'] != 'hidden' ){
                     // saving from empty fields
-                    $value = ( !empty($row[$field['field']]) ) ? $row[$field['field']] : 0;
+                    // TODO: Default should change based on field type
+                    // TODO: This should be managed in a function that is also used for printing list values.
+                    $value = ( !empty($row[$field['field']]) ) ? $row[$field['field']] : '';
                     switch ($field['type']) {
                         case 'date':
                             $datarow[] = Time::printDate($value);
