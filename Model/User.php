@@ -122,6 +122,17 @@ class User extends Object {
     }
 
     /**
+     * If the current user is impersonating another user, this will return the
+     * impersonating admin user's id.
+     */
+    public function impersonatingParentUser() {
+        if ($this->isImpersonating()) {
+            return Session::getInstance()->user_id;
+        }
+        return null;
+    }
+
+    /**
      * Check if a user is a site admin.
      *
      * @return boolean
