@@ -12,7 +12,7 @@ class CMS {
 
     public static function embed($name, $settings = array()) {
         $content = self::loadCMS($name);
-        $content = (!empty($content) ? $content['content'] : (!empty($settings['default']) ? $settings : ''));
+        $content = (!empty($content) ? $content['content'] : (!empty($settings['default']) ? $settings['default'] : ''));
         if (ClientUser::getInstance()->isAdmin()) {
             JS::set('token', Session::getInstance()->getToken());
             return
