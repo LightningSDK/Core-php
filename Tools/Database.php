@@ -744,10 +744,34 @@ class Database extends Singleton {
         // Foreach join.
         $output = '';
         foreach ($joins as $alias => $join) {
-            $output .= $this->implodeJoin($join[0], $join[1], !empty($join[2]) ? $join[2] : '', $values, is_string($alias) ? $alias : null);
-            // Add any extra replacement variables.
-            if (isset($join[3])) {
-                $values = array_merge($values, $join[3]);
+            // This format is deprecated.
+            if (is_numeric(key($join))) {
+                $output .= $this->implodeJoin($join[0], $join[1], !empty($join[2]) ? $join[2] : '', $values, is_string($alias) ? $alias : null);
+                // Add any extra replacement variables.
+                if (isset($join[3])) {
+                    $values = array_merge($values, $join[3]);
+                }
+            }
+            else {
+                if (!empty($join['left_join'])) {
+                    $output .= ' LEFT JOIN ' . $this->parseTable($join['left_join'], $values);
+                }
+                elseif (!empty($join['right_join'])) {
+                    $output .= ' RIGHT JOIN ' . $this->parseTable($join['right_join'], $values);
+                }
+                elseif (!empty($join['join'])) {
+                    $output .= ' JOIN ' . $this->parseTable($join['join'], $values);
+                }
+                elseif (!empty($join['inner_join'])) {
+                    $output .= ' INNER JOIN ' . $this->parseTable($join['inner_join'], $values);
+                }
+
+                if (!empty($join['on'])) {
+                    $output .= ' ON ' . $this->sqlImplode($join['on'], $values, 'AND');
+                }
+                elseif (!empty($join['using'])) {
+                    $output .= ' USING(' . $this->implodeFields($join['using']) . ')';
+                }
             }
         }
         return $output;
@@ -1320,6 +1344,8 @@ class Database extends Singleton {
                             $values[] = $v[1];
                             $values[] = $v[1];
                             break;
+                        default:
+                            $a2[] = $field . '=' . $this->formatField($v[0]);
                     }
                 }
             }
