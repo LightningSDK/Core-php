@@ -28,6 +28,7 @@ class Pie extends Base {
             -30 => 'Last 30 Days',
             -60 => 'Last 60 Days',
             -90 => 'Last 90 Days',
+            -180 => 'Last 180 Days',
         ]);
     }
 }
