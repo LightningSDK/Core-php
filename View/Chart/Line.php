@@ -29,6 +29,7 @@ class Line extends Base {
             -60 => 'Last 60 Days',
             -90 => 'Last 90 Days',
             -180 => 'Last 180 Days',
+            -365 => 'Last 365 Days',
         ]);
     }
 }
