@@ -296,6 +296,10 @@ abstract class Table extends Page {
                 $link_settings['table'] = $table;
             }
         }
+
+        foreach ($this->search_fields as &$field) {
+            $field = $this->fullField($field);
+        }
     }
 
     public function get() {
@@ -723,11 +727,15 @@ abstract class Table extends Page {
         }
         
         // When tables are joined we need to use table names to avoid key duplicating
-        if ($this->joins AND $useTableName) {
-            return "{$this->table}.{$this->key}";
-        }  
-        
-        return $this->key;
+        return $useTableName ? $this->fullField($this->key) : $this->key;
+    }
+
+    protected function fullField($field) {
+        if (strpos($field, '.')) {
+            return $field;
+        } else {
+            return $this->table . '.' . $field;
+        }
     }
 
     function render() {
@@ -2095,6 +2103,13 @@ abstract class Table extends Page {
             }
         }
 
+        // Normalize string presets as type.
+        foreach ($preset as &$p) {
+            if (is_string($p)) {
+                $p = ['type' => $p];
+            }
+        }
+
         $return_fields = array_replace_recursive($return_fields, $preset);
         //make sure there is a 'field' element and 'display_name' for each $field
         foreach ($return_fields as $f => &$field) {
@@ -2821,7 +2836,6 @@ abstract class Table extends Page {
         }
     }
 
-
     /**
      * loadList() obtains all the rows from the table
 
@@ -2857,7 +2871,7 @@ abstract class Table extends Page {
             $where = array_merge($this->accessControl, $where);
         }
         if ($this->action == "autocomplete" && $field = Request::post('field')) {
-            $this->accessControl[$field] = array('LIKE', Request::post('st') . '%');
+            $this->accessControl[$this->fullField($field)] = array('LIKE', Request::post('st') . '%');
         }
         if ($this->accessTable) {
             if ($this->accessTableJoinOn) {
@@ -2896,9 +2910,14 @@ abstract class Table extends Page {
 
         if ($this->joins) {
             $join = array_merge($join, $this->joins);
-            foreach ($this->joins as $join) {
-                // set for every joined table
-                $fields[] = [$join[1] => ['*']];
+            if (!empty($this->joinFields)) {
+                $fields = array_merge($fields, $this->joinFields);
+            } else {
+                foreach ($this->joins as $join) {
+                    // set for every joined table
+                    $table = isset($join[1]) ? $join[1] : isset($join['join']) ? $join['join'] : isset($join['left_join']) ? $join['left_join'] : '';
+                    $fields[] = [$table => ['*']];
+                }
             }
         }
 
