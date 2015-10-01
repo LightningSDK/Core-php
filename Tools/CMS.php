@@ -15,6 +15,7 @@ class CMS {
         $content = (!empty($content) ? $content['content'] : (!empty($settings['default']) ? $settings['default'] : ''));
         if (ClientUser::getInstance()->isAdmin()) {
             JS::set('token', Session::getInstance()->getToken());
+            JS::set('cms.cms_' . $name . '.config', !empty($settings['config']) ? $settings['config'] : []);
             return
                 '<a href="javascript:lightning.cms.edit(\'cms_' . $name . '\')" class="button" id="cms_edit_' . $name . '">Edit</a>'
                 . '<a href="javascript:lightning.cms.save(\'cms_' . $name . '\')" class="button hide" id="cms_save_' . $name . '">Save</a>'
@@ -24,6 +25,7 @@ class CMS {
                         'content' => $content,
                         'finder' => true,
                         'edit_border' => !empty($settings['edit_border']),
+                        'config' => !empty($settings['config']) ? $settings['config'] : [],
                     )
                 );
         } else {

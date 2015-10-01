@@ -3495,11 +3495,11 @@ abstract class Table extends Page {
                 $config = array();
                 $editor = (!empty($field['editor'])) ? strtolower($field['editor']) : 'default';
                 switch($editor) {
-                    case 'full':		$config['toolbar']="CKEDITOR.config.toolbar_Full";        break;
-                    case 'print':		$config['toolbar']="CKEDITOR.config.toolbar_Print";       break;
-                    case 'basic_image':	$config['toolbar']="CKEDITOR.config.toolbar_Basic_Image"; break;
+                    case 'full':		$config['toolbar'] = CKEDITOR::TYPE_FULL;        break;
+                    case 'print':		$config['toolbar'] = CKEDITOR::TYPE_PRINT;       break;
+                    case 'basic_image':	$config['toolbar'] = CKEDITOR::TYPE_BASIC_IMAGE; break;
                     case 'basic':
-                    default:			$config['toolbar']="CKEDITOR.config.toolbar_Basic";       break;
+                    default:			$config['toolbar'] = CKEDITOR::TYPE_BASIC;       break;
                 }
                 if (!empty($field['full_page'])) {
                     $config['fullPage'] = true;

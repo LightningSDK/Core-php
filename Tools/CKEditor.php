@@ -16,6 +16,11 @@ use Lightning\View\JS;
  */
 class CKEditor {
 
+    const TYPE_BASIC = "CKEDITOR.config.toolbar_Basic";
+    const TYPE_BASIC_IMAGE = "CKEDITOR.config.toolbar_Basic_Image";
+    const TYPE_PRINT = "CKEDITOR.config.toolbar_Print";
+    const TYPE_FULL = "CKEDITOR.config.toolbar_Full";
+
     protected static $inited = false;
 
     /**
@@ -28,7 +33,7 @@ class CKEditor {
             self::$inited = true;
         }
         if ($initCKFinder) {
-            JS::add('/js/ckfinder/ckfinder.js', false, false);
+            JS::add('/js/ckfinder/ckfinder.js', false);
         }
     }
 

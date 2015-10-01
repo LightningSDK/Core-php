@@ -1,8 +1,9 @@
 lightning.cms = {
     edit: function(editor) {
+        var config = lightning.vars.cms && lightning.vars.cms[editor] && lightning.vars.cms[editor].config ? lightning.vars.cms[editor].config : {};
         $('#' + editor).attr('contentEditable', 'true');
         lightning.ckeditors[editor] = CKEDITOR.inline(editor, {
-                toolbar: CKEDITOR.config.toolbar_Full,
+                toolbar: config.toolbar ? eval(config.toolbar) : CKEDITOR.config.toolbar_Full,
                 allowedContent: true
             }
         );
