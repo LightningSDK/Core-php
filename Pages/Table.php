@@ -2915,7 +2915,7 @@ abstract class Table extends Page {
             } else {
                 foreach ($this->joins as $join) {
                     // set for every joined table
-                    $table = isset($join[1]) ? $join[1] : isset($join['join']) ? $join['join'] : isset($join['left_join']) ? $join['left_join'] : '';
+                    $table = isset($join[1]) ? $join[1] : (isset($join['join']) ? $join['join'] : (isset($join['left_join']) ? $join['left_join'] : ''));
                     $fields[] = [$table => ['*']];
                 }
             }
