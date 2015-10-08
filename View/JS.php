@@ -113,9 +113,6 @@ class JS {
      *   The new value.
      */
     public static function set($var, $value) {
-        if (is_array($value) || is_object($value)) {
-            $value = json_encode($value);
-        }
         Data::setInPath($var, $value, self::$vars);
     }
 
