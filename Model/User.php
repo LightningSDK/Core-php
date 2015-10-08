@@ -139,7 +139,7 @@ class User extends Object {
      *   Whether the user is a site admin.
      */
     public function isAdmin() {
-        return $this->type == static::TYPE_ADMIN;
+        return $this->hasPermission(Permissions::ALL);
     }
 
     /**
