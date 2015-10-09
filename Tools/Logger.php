@@ -46,9 +46,9 @@ class Logger extends Singleton {
      * @param string $message
      *   The message.
      */
-    public static function message($message) {
+    public static function message($message, $explicit_log = null) {
         if (!empty(self::$logFile)) {
-            file_put_contents(self::$logFile, self::dateStamp() . ' ' . $message . "\n", FILE_APPEND | LOCK_EX);
+            file_put_contents($explicit_log ?: self::$logFile, self::dateStamp() . ' ' . $message . "\n", FILE_APPEND | LOCK_EX);
         } else {
             error_log($message);
         }
