@@ -813,6 +813,10 @@ class User extends Object {
         }
     }
 
+    public function addRole($role_id) {
+        Database::getInstance()->insert('user_role', ['user_id' => $this->id, 'role_id' => $role_id], true);
+    }
+
     /**
      * check if user has permission on this page
      * @param $permissionID - id of permission
@@ -821,9 +825,6 @@ class User extends Object {
      * @return bool
      */
     public function hasPermission( $permissionID, $thisPermissionOnly = FALSE ) {
-        // TODO: LATER when we will build structure of permissions, we should replace permission.ID with permission.name
-        // TODO: for call method in code by name without constants or ununderstandable numbers, f.e. hasPermission('all') or hasPermission ('view_stats')
-
         // create WHERE cause for query
         // if we don't need check only this role assigned - checking admin's permissions too ( ALL )
         if ( $thisPermissionOnly ){
