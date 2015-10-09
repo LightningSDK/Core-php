@@ -16,7 +16,7 @@ use Lightning\Tools\Scrub;
 use Lightning\Tools\Session;
 use Lightning\Tools\Tracker;
 use Lightning\View\Field\Time;
-use Source\Model\Permissions;
+use Lightning\Model\Permissions;
 
 class User extends Object {
 
