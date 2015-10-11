@@ -2128,17 +2128,6 @@ abstract class Table extends Page {
                 }
             }
         }
-//        if (is_array($this->links)) {
-//            foreach($this->links as $l=>&$s) {
-//                // Add missing defaults.
-//                $s += array(
-//                    'display_name' => ucwords(str_replace("_"," ", $l)),
-//                    'add_name' => 'Add Item',
-//                    'delete_name' => 'Delete Item',
-//                    'list' => false,
-//                );
-//            }
-//        }
 
         return $return_fields;
     }
