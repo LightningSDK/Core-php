@@ -520,24 +520,31 @@ abstract class Table extends Page {
         Output::json(array('results' => $results));
     }
 
-    public function postDelconf() {
+    public function postDelete() {
         $this->action = 'delconf';
-        if (!$this->editable || !$this->addable) {
-            Output::error('Access Denied');
-        }
 
-        // loop through and delete any files
-        $this->loadMainFields();
-        $this->get_row();
-        foreach($this->fields as $f=>$field) {
-            if ($field['type'] == 'file' || $field['type'] == 'image') {
-                if (file_exists($this->get_full_file_location($field['location'], $this->list[$f]))) {
-                    unlink($this->get_full_file_location($field['location'], $this->list[$f]));
+        if ($_POST['submit'] == 'Yes') {
+            // Make sure they have access.
+            if (!$this->editable || !$this->addable) {
+                Output::error('Access Denied');
+            }
+
+            // Loop through and delete any files.
+            $this->loadMainFields();
+            $this->get_row();
+            foreach($this->fields as $f=>$field) {
+                if ($field['type'] == 'file' || $field['type'] == 'image') {
+                    if (file_exists($this->get_full_file_location($field['location'], $this->list[$f]))) {
+                        unlink($this->get_full_file_location($field['location'], $this->list[$f]));
+                    }
                 }
             }
-        }
-        Database::getInstance()->delete($this->table, array($this->getKey() => $this->id));
 
+            // Delete the entry.
+            Database::getInstance()->delete($this->table, array($this->getKey() => $this->id));
+        }
+
+        // Redirect.
         $this->afterPostRedirect();
     }
 
@@ -750,42 +757,48 @@ abstract class Table extends Page {
             Output::error('Access Denied');
         }
 
-        switch($this->action) {
-            case 'pop_return':
-                $this->render_pop_return();
-                break;
-            case 'view':
-            case 'edit':
-                $this->render_action_header();
-            case 'new':
-                $this->render_form();
-                break;
-            // DELETE CONFIRMATION
-            case 'delete':
-                if (!$this->deleteable) {
-                    Output::error('Access Denied');
+        if (!empty($this->renderHandler)) {
+            echo $this->{$this->renderHandler}();
+        } else {
+            switch($this->action) {
+                case 'pop_return':
+                    $this->render_pop_return();
                     break;
-                }
-                echo $this->render_del_conf();
-                break;
-            case 'import':
-                echo $this->renderImportFile();
-                break;
-            case 'import-align':
-                echo $this->renderAlignmentForm();
-                break;
-            case 'list':
-            default:
-                if ($this->searchable)
-                    echo $this->renderSearchForm();
-                $this->loadList();
-                $this->render_action_header();
-                echo '<div class="table_list">';
-                echo $this->renderList();
-                echo '</div>';
-                break;
+                case 'view':
+                case 'edit':
+                    $this->render_action_header();
+                case 'new':
+                    $this->render_form();
+                    break;
+                // DELETE CONFIRMATION
+                case 'delete':
+                    if (!$this->deleteable) {
+                        Output::error('Access Denied');
+                        break;
+                    }
+                    $this->confirmMessage = 'Are you sure you want to delete this?';
+                    echo $this->renderConfirmation();
+                    break;
+                case 'import':
+                    echo $this->renderImportFile();
+                    break;
+                case 'import-align':
+                    echo $this->renderAlignmentForm();
+                    break;
+                case 'list':
+                default:
+                    if ($this->searchable)
+                        echo $this->renderSearchForm();
+                    $this->loadList();
+                    $this->render_action_header();
+                    echo '<div class="table_list">';
+                    echo $this->renderList();
+                    echo '</div>';
+                    break;
 
+            }
         }
+
         // TODO: update to use the JS class.
         // we shouldn't need to call this as long as we use the JS class.
         $this->js_init_data();
@@ -1035,14 +1048,14 @@ abstract class Table extends Page {
         return $ret_str;
     }
 
-    function render_del_conf() {
+    function renderConfirmation() {
         // get delete confirmation
-        $output = "<br /><br />Are you sure you want to delete this?<br /><br /><form action='' method='POST'>";
+        $output = "<br /><br />{$this->confirmMessage}<br /><br /><form action='' method='POST'>";
         $output .= Form::renderTokenInput();
         $output .= "<input type='hidden' name='id' value='{$this->id}' />
-            <input type='hidden' name='action' value='delconf' />
-            <input type='submit' name='delconf' value='Yes' class='button'/>
-            <input type='submit' name='delconf' value='No' class='button' />";
+            <input type='hidden' name='action' value='{$this->action}' />
+            <input type='submit' name='submit' value='Yes' class='button'/>
+            <input type='submit' name='submit' value='No' class='button' />";
         if ($this->refer_return) {
             $output .= '<input type="hidden" name="refer_return" value="'.$this->refer_return.'" />';
         } else {
@@ -1079,23 +1092,45 @@ abstract class Table extends Page {
     }
 
     public function render_action_header() {
+        $output = '';
         if (isset($this->custom_templates[$this->action.'_action_header'])) {
             if ($this->custom_templates[$this->action.'_action_header'] != '')
-                echo $this->load_template($this->custom_template_directory.$this->custom_templates[$this->action.'_action_header']);
+                $output .= $this->load_template($this->custom_template_directory.$this->custom_templates[$this->action.'_action_header']);
         } else {
             if ($this->addable) {
-                echo "<a href='".$this->createUrl('new') . "'><img src='/images/lightning/new.png' border='0' title='Add New' /></a>";
+                $output .= "<a href='".$this->createUrl('new') . "'><img src='/images/lightning/new.png' border='0' title='Add New' /></a>";
             }
             if ($this->importable) {
-                echo "<a href='".$this->createUrl('import') . "'><img src='/images/lightning/send_doc.png' border='0' title='Import' /></a>";
+                $output .= "<a href='".$this->createUrl('import') . "'><img src='/images/lightning/send_doc.png' border='0' title='Import' /></a>";
             }
             if ($this->exportable) {
-                echo "<a href='{$this->createUrl('export')}' onclick='event.preventDefault(); lightning.table.export(this)'><img src='/images/lightning/detach.png' border='0' title='Export' /></a><br />";
+                $output .= "<a href='{$this->createUrl('export')}' onclick='event.preventDefault(); lightning.table.export(this)'><img src='/images/lightning/detach.png' border='0' title='Export' /></a><br />";
+            }
+            $output .= $this->renderCustomHeaderButtons();
+        }
+        if (!empty($output)) {
+            $output .= '<br />';
+        }
+        echo $output;
+    }
+
+    protected function renderCustomHeaderButtons() {
+        $output = '';
+        if (!empty($this->customHeaderButtons)) {
+            foreach ($this->customHeaderButtons as $b => $data) {
+                if (!empty($data['action'])) {
+                    $url = $this->createUrl($data['action']);
+                } elseif (!empty($data['url'])) {
+                    $url = $data['url'];
+                }
+
+                if (!empty($data['content'])) {
+                    $content = $data['content'];
+                }
+                $output .= "<a href='{$url}'>{$content}</a>";
             }
         }
-        if ($this->addable || $this->importable || $this->exportable) {
-            echo '<br />';
-        }
+        return $output;
     }
 
     public function renderList() {
