@@ -5,23 +5,18 @@ namespace Lightning\Model;
 use Lightning\Tools\Database;
 
 class Object {
+    use ObjectDataStorage {
+        __isset as __parent__isset;
+        __get as __parent__get;
+        __set as __parent__set;
+    }
+
     /**
      * The primary key form the database.
      */
     const PRIMARY_KEY = '';
 
     const TABLE = '';
-
-    /**
-     * A row from the database.
-     *
-     * @var array
-     */
-    protected $__data = array();
-    
-    protected $__changed = array();
-    
-    protected $__changed_all = false;
 
     /**
      * Build an object from a data array.
@@ -42,16 +37,10 @@ class Object {
      *   Whether the variable is set.
      */
     public function __isset($var) {
-        switch($var) {
-            case 'id':
-                return !empty($this->__data[static::PRIMARY_KEY]);
-                break;
-            case 'data':
-                return true;
-                break;
-            default:
-                return isset($this->__data[$var]);
-                break;
+        if ($var == 'id') {
+            return !empty($this->__data[static::PRIMARY_KEY]);
+        } else {
+            return $this->__parent__isset($var);
         }
     }
 
@@ -70,23 +59,14 @@ class Object {
      *   The variable value.
      */
     public function __get($var) {
-        switch($var) {
-            case 'id':
-                if (!empty($this->__data[static::PRIMARY_KEY])) {
-                    return $this->__data[static::PRIMARY_KEY];
-                } else {
-                    return false;
-                };
-                break;
-            case 'data':
-                return $this->__data;
-                break;
-            default:
-                if (isset($this->__data[$var]))
-                    return $this->__data[$var];
-                else
-                    return NULL;
-                break;
+        if ($var == 'id') {
+            if (!empty($this->__data[static::PRIMARY_KEY])) {
+                return $this->__data[static::PRIMARY_KEY];
+            } else {
+                return false;
+            };
+        } else {
+            return $this->__parent__get($var);
         }
     }
 
@@ -107,18 +87,10 @@ class Object {
      *   The variable value.
      */
     public function __set($var, $value) {
-        switch($var) {
-            case 'id':
-                $this->__data[static::PRIMARY_KEY] = $value;
-                break;
-            case 'data':
-                $this->__changed_all = true;
-                $this->__data = $value;
-                break;
-            default:
-                $this->__changed[] = $var;
-                $this->__data[$var] = $value;
-                break;
+        if ($var == 'id') {
+            $this->__data[static::PRIMARY_KEY] = $value;
+        } else {
+            $this->__parent__set($var, $value);
         }
     }
 
@@ -168,6 +140,10 @@ class Object {
         } else {
             $db->update(static::TABLE, $values, [static::PRIMARY_KEY => $this->id]);
         }
+    }
+
+    public function delete() {
+        static::getDatabase()->delete(static::TABLE, [static::PRIMARY_KEY => $this->id]);
     }
 
     /**
