@@ -217,6 +217,7 @@ class Session extends Singleton {
         if (!empty($this->id)) {
             Database::getInstance()->delete('session', array('session_id' => $this->id));
             $this->data = null;
+            $this->id = 0;
         }
         $this->clearCookie();
     }

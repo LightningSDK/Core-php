@@ -5,11 +5,7 @@ namespace Lightning\Model;
 use Lightning\Tools\Database;
 
 class Object {
-    use ObjectDataStorage {
-        __isset as __parent__isset;
-        __get as __parent__get;
-        __set as __parent__set;
-    }
+    use ObjectDataStorage;
 
     /**
      * The primary key form the database.
@@ -25,73 +21,6 @@ class Object {
      */
     public function __construct($data = array()) {
         $this->__data = $data;
-    }
-
-    /**
-     * Assist the getter function by checking for isset()
-     *
-     * @param string $var
-     *   The name of the variable.
-     *
-     * @return boolean
-     *   Whether the variable is set.
-     */
-    public function __isset($var) {
-        if ($var == 'id') {
-            return !empty($this->__data[static::PRIMARY_KEY]);
-        } else {
-            return $this->__parent__isset($var);
-        }
-    }
-
-    /**
-     * A getter function.
-     *
-     * This works for:
-     *   ->id
-     *   ->data
-     *   ->{primary_key} (item inside ->data)
-     *
-     * @param string $var
-     *   The name of the requested variable.
-     *
-     * @return mixed
-     *   The variable value.
-     */
-    public function __get($var) {
-        if ($var == 'id') {
-            if (!empty($this->__data[static::PRIMARY_KEY])) {
-                return $this->__data[static::PRIMARY_KEY];
-            } else {
-                return false;
-            };
-        } else {
-            return $this->__parent__get($var);
-        }
-    }
-
-    /**
-     * A setter function.
-     *
-     * This works for:
-     *   ->id
-     *   ->data
-     *   ->user_id (item inside ->data)
-     *
-     * @param string $var
-     *   The name of the variable to set.
-     * @param mixed $value
-     *   The value to set.
-     *
-     * @return mixed
-     *   The variable value.
-     */
-    public function __set($var, $value) {
-        if ($var == 'id') {
-            $this->__data[static::PRIMARY_KEY] = $value;
-        } else {
-            $this->__parent__set($var, $value);
-        }
     }
 
     public static function loadAll($where = [], $fields = [], $final = '') {

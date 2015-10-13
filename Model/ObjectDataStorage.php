@@ -30,6 +30,9 @@ trait ObjectDataStorage {
      */
     public function __isset($var) {
         switch($var) {
+            case 'id':
+                return !empty($this->__data[static::PRIMARY_KEY]);
+                break;
             case 'data':
                 return true;
                 break;
@@ -55,6 +58,13 @@ trait ObjectDataStorage {
      */
     public function __get($var) {
         switch($var) {
+            case 'id':
+                if (!empty($this->__data[static::PRIMARY_KEY])) {
+                    return $this->__data[static::PRIMARY_KEY];
+                } else {
+                    return false;
+                };
+                break;
             case 'data':
                 return $this->__data;
                 break;
@@ -85,6 +95,9 @@ trait ObjectDataStorage {
      */
     public function __set($var, $value) {
         switch($var) {
+            case 'id':
+                $this->__data[static::PRIMARY_KEY] = $value;
+                break;
             case 'data':
                 $this->__changed_all = true;
                 $this->__data = $value;
