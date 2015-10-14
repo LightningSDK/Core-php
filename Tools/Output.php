@@ -237,6 +237,22 @@ class Output {
         }
         exit;
     }
+    
+    /**
+     * Terminate the script with a success message.
+     *
+     * @param string $message
+     *   A message to output to the user.
+     */
+    public static function success($message) {
+        Messenger::message($message);
+        if(static::isJSONRequest()) {
+            static::json(static::SUCCESS);
+        } else {
+            Template::getInstance()->render('');
+        }
+        exit;
+    }
 
     public static function notFound() {
         Messenger::error('Not Found');
