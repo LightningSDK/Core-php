@@ -21,13 +21,17 @@ class Splash extends Page {
         $template_page = Configuration::get('splash.pages.' . $page);
 
         // No template found.
-        if (empty($template_page) || (is_array($template_page) && empty($template_page['template']))) {
+        if (empty($template_page) || (is_array($template_page) && empty($template_page['page']))) {
             Output::error('Page not found.');
         }
 
         // Set the template.
         else {
-            $this->page = is_array($template_page) ? $template_page['template'] : $template_page;
+            $this->page = is_array($template_page) ? $template_page['page'] : $template_page;
+        }
+
+        if (!empty($template_page['template'])) {
+            $this->template = $template_page['template'];
         }
 
         // Add any CSS or JS files.
