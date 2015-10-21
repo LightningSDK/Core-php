@@ -73,6 +73,15 @@ class Image {
         return $image->source ? $image : false;
     }
 
+    /**
+     * Process an image for scale and cropping.
+     *
+     * @param array $settings
+     *   The image transformation settings.
+     *
+     * @return boolean
+     *   Whether the image size was changed.
+     */
     public function process($settings) {
         // Initialized some parameters.
         // The coordinates of the top left in the dest image where the src image will start.
@@ -190,6 +199,9 @@ class Image {
             $dest_x, $dest_y, $src_x, $src_y,
             $dest_w, $dest_h, $src_w, $src_h
         );
+
+        // Return whether the dimensions have changed.
+        return $dest_x != $src_x || $dest_y != $src_y || $dest_w != $src_w || $dest_h != $src_h;
     }
 
     /**
