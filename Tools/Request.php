@@ -244,12 +244,24 @@ class Request {
     public static function server($var) {
         switch ($var) {
             case self::IP_INT:
-                return empty($_SERVER['REMOTE_ADDR']) ? 0 : ip2long($_SERVER['REMOTE_ADDR']);
+                $ip = self::getIP();
+                return $ip ? ip2long($ip) : 0;
             case self::IP:
-                return empty($_SERVER['REMOTE_ADDR']) ? '' : $_SERVER['REMOTE_ADDR'];
+                return self::getIP() ?: '';
             default:
                 return isset($_SERVER[$var]) ? $_SERVER[$var] : null;
         }
+    }
+
+    /**
+     * Get the client IP address.
+     *
+     * @return string
+     *   IP address.
+     */
+    protected static function getIP() {
+        $forwarded_header = self::getHeader(self::X_FORWARDED_FOR);
+        return $forwarded_header ?: $_SERVER['REMOTE_ADDR'];
     }
 
     /**
