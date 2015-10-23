@@ -5,6 +5,9 @@ namespace Lightning\View\Video;
 use Lightning\View\JS;
 
 class YouTube {
+    /**
+     * Call this before the template loads to make sure the JS is initted as soon as possible.
+     */
     public static function init() {
         JS::startup('lightning.video.initYouTube()');
     }
@@ -20,7 +23,7 @@ class YouTube {
      *   The rendered HTML.
      */
     public static function render($video_id) {
+        JS::startup('lightning.video.initYouTube()');
         return '<div class="youtube" id="' . $video_id . '" ></div>';
-        JS::startup('lightning.video.init()');
     }
 }
