@@ -448,6 +448,20 @@ class Database extends Singleton {
         return $results;
     }
 
+    public function countKeyedQuery($query, $key) {
+        $values = [];
+        $query['select'] = [
+            $key,
+            'count' => ['expression' => 'COUNT(*)'],
+        ];
+        $query['group_by'] = $key;
+        $parsed = $this->parseQuery($query, $values);
+        $this->query($parsed, $values);
+        $result = $this->result->fetchAll(PDO::FETCH_KEY_PAIR);
+        $this->timerEnd();
+        return $result;
+    }
+
     /**
      * Update a row.
      *
