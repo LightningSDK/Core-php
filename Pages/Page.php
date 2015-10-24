@@ -71,27 +71,28 @@ class Page extends PageView {
         }
 
         // Replace special tags.
-        if (!$user->isAdmin()) {
-            $matches = array();
-
-            preg_match_all('|{{.*}}|', $full_page['body'], $matches);
-
-            foreach ($matches as $match) {
-                if (!empty($match)) {
-                    $match_clean = trim($match[0], '{} ');
-                    $match_clean = explode('=', $match_clean);
-                    switch ($match_clean[0]) {
-                        case 'template':
-                            $sub_template = new Template();
-                            $full_page['body'] = str_replace(
-                                $match[0],
-                                $sub_template->render($match_clean[1], true),
-                                $full_page['body']
-                            );
-                            break;
-                    }
+        $full_page['body_rendered'] = $full_page['body'];
+        $matches = array();
+        preg_match_all('|{{.*}}|', $full_page['body_rendered'], $matches);
+        foreach ($matches as $match) {
+            if (!empty($match)) {
+                $match_clean = trim($match[0], '{} ');
+                $match_clean = explode('=', $match_clean);
+                switch ($match_clean[0]) {
+                    case 'template':
+                        $sub_template = new Template();
+                        $full_page['body_rendered'] = str_replace(
+                            $match[0],
+                            $sub_template->render($match_clean[1], true),
+                            $full_page['body_rendered']
+                        );
+                        break;
                 }
             }
+        }
+
+        if ($user->isAdmin()) {
+            JS::set('page.source', $full_page['body']);
         }
 
         // PREPARE FORM DATA CONTENTS

@@ -7,6 +7,7 @@ lightning.page = {
                 toolbar:CKEDITOR.config.toolbar_Full
             }
         );
+        lightning.ckeditors['page_editor'].setData(lightning.vars.page.source);
         CKFinder.setupCKEditor(lightning.ckeditors['page_editor'], '/js/ckfinder/');
     },
 
