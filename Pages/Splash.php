@@ -22,7 +22,7 @@ class Splash extends Page {
 
         // No template found.
         if (empty($template_page) || (is_array($template_page) && empty($template_page['page']))) {
-            Output::error('Page not found.');
+            $this->page = $page;
         }
 
         // Set the template.
