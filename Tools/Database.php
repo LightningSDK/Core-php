@@ -385,7 +385,7 @@ class Database extends Singleton {
     public function check($table, $where = array()) {
         $fields = empty($fields) ? '*' : implode($fields);
         $values = array();
-        $where = empty($where) ? '' : ' WHERE ' . $this->sqlImplode($where, $values, 'AND');
+        $where = empty($where) ? '' : ' WHERE ' . $this->sqlImplode($where, $values, ' AND ');
         $this->query('SELECT ' . $fields . ' FROM ' . $this->parseTable($table, $values) . $where . ' LIMIT 1', $values);
         return $this->result->rowCount() > 0;
     }
@@ -781,7 +781,7 @@ class Database extends Singleton {
                 }
 
                 if (!empty($join['on'])) {
-                    $output .= ' ON ' . $this->sqlImplode($join['on'], $values, 'AND');
+                    $output .= ' ON ' . $this->sqlImplode($join['on'], $values, ' AND ');
                 }
                 elseif (!empty($join['using'])) {
                     $output .= ' USING(' . $this->implodeFields($join['using']) . ')';
