@@ -22,7 +22,7 @@ class Scrub {
      *
      * @todo enable align|allowfullscreen for iframe
      */
-    const SCRUB_ADVANCED_HTML = 'input[type|value|checked|src],select,option[value],form[target|action|method],textarea,iframe[frameborder|src|height|width]';
+    const SCRUB_ADVANCED_HTML = 'input[type|value|checked|src],select,option[value],form[target|action|method],textarea,iframe[frameborder|src|height|width],a[target]';
 
     /**
      * Allowed CSS rules.
@@ -232,6 +232,7 @@ class Scrub {
             $config->set('CSS.Trusted', true);
             $config->set('HTML.Trusted', true);
             $config->set('Attr.EnableID', true);
+            $config->set('Attr.AllowedFrameTargets', array('_blank'));
             $allowed_tags = self::SCRUB_BASIC_HTML . ',' . self::SCRUB_ADVANCED_HTML;
         } else {
             $config->set('CSS.Trusted', false);
