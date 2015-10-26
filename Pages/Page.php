@@ -29,7 +29,8 @@ class Page extends PageView {
         $user = ClientUser::getInstance();
         $template = Template::getInstance();
 
-        $content_locator = Request::getFromURL('/(.*)\.html$/') ?: 'index';
+        $request = Request::getLocation();
+        $content_locator = empty($request) ? 'index' : Request::getFromURL('/(.*)\.html$/') ?: '404';
 
         // Determine if the user can edit this page.
         $template->set('editable', $user->isAdmin());
@@ -70,27 +71,28 @@ class Page extends PageView {
         }
 
         // Replace special tags.
-        if (!$user->isAdmin()) {
-            $matches = array();
-
-            preg_match_all('|{{.*}}|', $full_page['body'], $matches);
-
-            foreach ($matches as $match) {
-                if (!empty($match)) {
-                    $match_clean = trim($match[0], '{} ');
-                    $match_clean = explode('=', $match_clean);
-                    switch ($match_clean[0]) {
-                        case 'template':
-                            $sub_template = new Template();
-                            $full_page['body'] = str_replace(
-                                $match[0],
-                                $sub_template->render($match_clean[1], true),
-                                $full_page['body']
-                            );
-                            break;
-                    }
+        $full_page['body_rendered'] = $full_page['body'];
+        $matches = array();
+        preg_match_all('|{{.*}}|', $full_page['body_rendered'], $matches);
+        foreach ($matches as $match) {
+            if (!empty($match)) {
+                $match_clean = trim($match[0], '{} ');
+                $match_clean = explode('=', $match_clean);
+                switch ($match_clean[0]) {
+                    case 'template':
+                        $sub_template = new Template();
+                        $full_page['body_rendered'] = str_replace(
+                            $match[0],
+                            $sub_template->render($match_clean[1], true),
+                            $full_page['body_rendered']
+                        );
+                        break;
                 }
             }
+        }
+
+        if ($user->isAdmin()) {
+            JS::set('page.source', $full_page['body']);
         }
 
         // PREPARE FORM DATA CONTENTS
@@ -158,7 +160,6 @@ class Page extends PageView {
         }
 
         $output = array();
-        $output['status'] = "OK";
         $output['url'] = $new_values['url'];
         $output['page_id'] = $page_id;
         $output['title'] = $title;

@@ -6,6 +6,11 @@ lightning.table = {
     init: function() {
         $('.add_image').click(lightning.table.clickAddImage);
         $('.linked_images').on('click', '.remove', lightning.table.removeLinkedImage);
+        self = this;
+        var search = $('#table_search');
+        search.keyup(function(){
+            self.search(search);
+        });
     },
 
     /**
@@ -127,17 +132,25 @@ lightning.table = {
         var link_table = event.target.id.replace('add_image_', '');
         CKFinder.popup({
             basePath: lightning.vars.table.links[link_table].web_location,
-            selectActionFunction: function(fileUrl) {
-                lightning.table.addImageCallback(link_table, fileUrl);
+            chooseFiles: true,
+            chooseFilesOnDblClick: true,
+            onInit: function( finder ) {
+                finder.on( 'files:choose', function( evt ) {
+                    var file = evt.data.files.first();
+                    lightning.table.addImageCallback(link_table, file.getUrl());
+                } );
+                finder.on( 'file:choose:resizedImage', function( evt ) {
+                    lightning.table.addImageCallback(link_table, evt.data.resizedUrl);
+                } );
             }
         });
     },
 
     addImageCallback: function(link_table, fileUrl) {
         $('#linked_images_' + link_table).append('<span class="selected_image_container">' +
-        '<input type="hidden" name="linked_images_' + link_table + '[]" value="' + fileUrl + '">' +
-        '<span class="remove">X</span>' +
-        '<img src="' + fileUrl + '" /></span>');
+            '<input type="hidden" name="linked_images_' + link_table + '[]" value="' + fileUrl + '">' +
+            '<span class="remove">X</span>' +
+            '<img src="' + fileUrl + '" /></span>');
     },
 
     removeLinkedImage: function(event) {
@@ -238,5 +251,17 @@ lightning.table = {
     returnPop: function(data) {
         window.opener.$('#' + data.pf + '_list').append("<option value='"+data.id+"'>"+data.pfdf+"</option>").val(data.id);
         window.close();
+    },
+    /**
+     * add to export button's url search string for export search results
+     */
+    export: function(link) {
+        var searchStr = $('[name="table_search"]').val();
+        console.log(link);
+        var url = $(link).attr('href');
+        if ( searchStr != '' ){
+            url += '&ste='+searchStr;
+        }
+        window.location = url;
     }
 };

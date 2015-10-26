@@ -29,7 +29,7 @@
             </div>
         <? endif; ?>
         <?= \Lightning\Tools\CKEditor::editableDiv('page_display',
-            array('spellcheck' => true, 'content' => $full_page['body'], 'finder' => true)
+            array('spellcheck' => true, 'content' => $full_page['body_rendered'], 'finder' => true)
         ); ?>
         <? if ($editable):?>
             <input type="button" name="submit" class='button page_edit' onclick="lightning.page.save();" value="Save" <? if (empty($action) || $action != 'new'):?>style="display:none;"<? endif; ?> /><br />

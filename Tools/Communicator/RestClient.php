@@ -19,6 +19,7 @@ use Lightning\Tools\Output;
 class RestClient {
 
     protected $vars = array();
+    protected $headers = array();
     protected $results;
     protected $debug = false;
     protected $auto_template = array();
@@ -27,6 +28,7 @@ class RestClient {
     protected $status;
     protected $cookies = array();
     protected $sendJSON = false;
+    protected $sendData;
 
     protected $serverAddress;
     protected $forwardCookies = false;
@@ -54,10 +56,18 @@ class RestClient {
      *   If this is set, then the variable passed is also expected to be returned and will automatically be added to the template.
      * @return void
      */
-    function set($var, $value, $auto_pass_to_template=false) {
+    public function set($var, $value, $auto_pass_to_template=false) {
         $this->vars[$var] = $value;
         if ($auto_pass_to_template)
             $this->auto_template[] = $var;
+    }
+
+    public function setHeader($header, $value) {
+        $this->headers[$header] = $value;
+    }
+
+    public function setBody($data) {
+        $this->sendData = $data;
     }
 
     /**
@@ -122,10 +132,15 @@ class RestClient {
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_POST, (int) $post);
         curl_setopt($curl, CURLOPT_HTTPHEADER, array('Accept: application/json'));
+        foreach ($this->headers as $h => $v) {
+            curl_setopt($curl, CURLOPT_HTTPHEADER, array($h . ': ' . $v));
+        }
         if ($post) {
             if ($this->sendJSON) {
                 $content = json_encode($vars);
                 curl_setopt($curl, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+            } elseif (!empty($this->sendData)) {
+                $content =& $this->sendData;
             } else {
                 $content = http_build_query($vars);
             }

@@ -4,7 +4,6 @@ namespace Overridable\Lightning\View;
 
 use Lightning\Model\Blog;
 use Lightning\Tools\Configuration;
-use Lightning\Tools\Logger;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Output;
@@ -56,18 +55,25 @@ class Page {
     public function __construct() {
         // Load messages and errors from the query string.
         Messenger::loadFromQuery();
+        Messenger::loadFromSession();
         JS::add('/js/fastclick.min.js');
-        JS::add('/js/jquery.min.js');
+        JS::add('/js/jquery.min.js', false);
         JS::add('/js/jquery.cookie.min.js');
         JS::add('/js/modernizr.min.js');
         JS::add('/js/placeholder.min.js');
-        JS::add('/js/foundation.min.js');
-        JS::add('/js/lightning.min.js');
-        JS::add('/js/jquery.validate.min.js');
+        JS::add('/js/foundation.min.js', false);
+        JS::add('/js/lightning.min.js', false);
+        JS::add('/js/jquery.validate.min.js', false);
         JS::startup('lightning.startup.init()');
         JS::startup('$(document).foundation()');
         CSS::add('/css/lightning.css');
         CSS::add('/css/site.css');
+        if (!empty($this->css)) {
+            CSS::add($this->css);
+        }
+        if (!empty($this->js)) {
+            JS::add($this->js);
+        }
     }
 
     public function get() {}
@@ -109,8 +115,6 @@ class Page {
      * rest method.
      */
     public function execute() {
-        Logger::setLog(Configuration::get('site.log'));
-
         $request_type = strtolower(Request::type());
 
         if (!$this->hasAccess()) {
@@ -151,7 +155,7 @@ class Page {
     public function validateToken() {
         // If this is a post request, there must be a valid token.
         if (!$this->ignoreToken && strtolower(Request::type()) == 'post') {
-            $token = Request::post('token', 'hex');
+            $token = Request::post('token', 'base64');
             return !empty($token) && $token == Session::getInstance()->getToken();
         } else {
             // This is not a POST request so it's not required.
@@ -174,6 +178,6 @@ class Page {
                 $output_params[$param] = $this->$param;
             }
         }
-        Navigation::redirect('/' . Request::get('request'), $output_params);
+        Navigation::redirect('/' . Request::getLocation(), $output_params);
     }
 }

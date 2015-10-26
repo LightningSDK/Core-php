@@ -18,6 +18,13 @@ class Time extends Field {
         return gregoriantojd(date('m'), date('d'), date('Y'));
     }
 
+    public static function jdtounix($jd) {
+        $tz = new DateTimeZone(date_default_timezone_get() ?: 'UTC');
+        $time = jdtounix($jd);
+        $offset = $tz->getOffset(new DateTime("now", $tz));
+        return $time + $offset;
+    }
+
     /**
      * Create a string like 2 hours, 4 minutes, and 21 seconds.
      *

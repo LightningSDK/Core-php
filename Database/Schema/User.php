@@ -22,7 +22,7 @@ class User extends Schema {
             'last_active' => $this->int(true),
             'type' => $this->int(true, Schema::TINYINT),
             'referrer' => $this->int(true),
-            'confirmed' => $this->int(true),
+            'confirmed' => $this->int(true, Schema::TINYINT),
         );
     }
 

@@ -2,6 +2,8 @@
 
 namespace Lightning\Tools\Cache;
 
+use Lightning\Tools\Configuration;
+
 class FileCache extends BaseCache {
 
     protected $fileName;
@@ -11,7 +13,7 @@ class FileCache extends BaseCache {
     protected $ttl = INF;
 
     public function __construct() {
-        $this->directory = HOME_PATH . '/cache';
+        $this->directory = Configuration::get('temp_dir');
         parent::__construct();
     }
 

@@ -30,6 +30,30 @@ lightning.video = {
         }
     },
 
+    initYouTube: function() {
+        $('.youtube:not(.initted)').each(function() {
+            // Based on the YouTube ID, we can easily find the thumbnail image
+            $(this).css('background-image', 'url(//i.ytimg.com/vi/' + this.id + '/maxresdefault.jpg)');
+
+            // Overlay the Play icon to make it look like a video player
+            $(this).append($('<div/>', {'class': 'play'}));
+
+            $(document).delegate('#'+this.id, 'click', function() {
+                // Create an iFrame with autoplay set to true
+                var iframe_url = 'https://www.youtube.com/embed/' + this.id + '?autoplay=1&autohide=1&modestbranding=0&showinfo=0&rel=0';
+                if ($(this).data('params')) iframe_url+='&'+$(this).data('params');
+
+                // The height and width of the iFrame should be the same as parent
+                var iframe = $('<iframe/>', {'frameborder': '0', 'src': iframe_url, 'width': '100%', 'height': '100%' });
+
+                // Replace the YouTube thumbnail with YouTube HTML5 Player
+                $(this).replaceWith(iframe);
+            });
+
+            $(this).addClass('initted');
+        });
+    },
+
     clickPlaylist: function(event) {
         var div_id = event.currentTarget.id.replace('video_link_', '');
         var playlist_id = div_id.match(/[0-9]+$/);
@@ -100,12 +124,43 @@ lightning.video = {
             this.players[id].on('ended', lightning.getMethodReference(video.call.onEnd));
         }
 
+        var self = this;
         if (video.call.onTime) {
-            var self = this;
             this.players[id].on('timeupdate', function() {
                 self.timeCallback(self.players[id], lightning.vars.videos[id].call.onTime);
             })
         }
+
+        if (!video.hasOwnProperty('analytics_events')) {
+            video.analytics_events = false;
+        }
+        var lastTimeUpdate = 0;
+        if (video.analytics_events) {
+            ;
+            this.players[id].on('ended', function(){
+                lightning.video.track(id, 'ended');
+            });
+            this.players[id].on('pause', function(){
+                lightning.video.track(id, 'paused', self.players[id].currentTime(), true);
+            });
+            this.players[id].on('play', function(){
+                lightning.video.track(id, 'played', self.players[id].currentTime(), true);
+            });
+            this.players[id].on('timeupdate', function(){
+                var time = parseInt(self.players[id].currentTime());
+                if (lastTimeUpdate != time && time % 10 == 0) {
+                    lastTimeUpdate = time;
+                    lightning.video.track(id, 'watching', time);
+                }
+            });
+        }
+    },
+
+    track: function(id, type, value, nonInteraction) {
+        if (nonInteraction == undefined) {
+            nonInteraction = false;
+        }
+        ga('send', 'event', 'video.' + id, type, 'time', value, {'nonInteraction' : nonInteraction ? 1 : 0});
     },
 
     timeCallback: function(video, events) {

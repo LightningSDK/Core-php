@@ -52,5 +52,15 @@ class BlogTable extends Table {
             'location' => BlogModel::IMAGE_PATH,
             'weblocation' => '/' . BlogModel::IMAGE_PATH,
         );
+
+        $this->action_fields = array(
+            'view' => array(
+                'display_name' => 'View',
+                'type' => 'html',
+                'html' => function($row) {
+                    return '<a href="/' . $row['url'] . '.htm"><img src="/images/lightning/resume.png" /></a>';
+                }
+            ),
+        );
     }
 }

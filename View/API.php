@@ -2,6 +2,7 @@
 
 namespace Overridable\Lightning\View;
 
+use Exception;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Output;
 use Lightning\Tools\Request;
@@ -15,6 +16,7 @@ class API extends Page {
 
     public function __construct() {
         // Override parent method.
+        Output::setJson(true);
     }
 
     public function execute() {
@@ -25,14 +27,22 @@ class API extends Page {
         if ($action = Request::get('action')) {
             $method = Request::convertFunctionName($request_type, $action);
             if (method_exists($this, $method)) {
-                $output = $this->{$method}();
+                try {
+                    $output = $this->{$method}();
+                } catch (Exception $e) {
+                    Output::error($e->getMessage());
+                }
             }
             else {
                 Messenger::error('Method not available');
             }
         } else {
             if (method_exists($this, $request_type)) {
-                $output = $this->$request_type();
+                try {
+                    $output = $this->$request_type();
+                } catch (Exception $e) {
+                    Output::error($e->getMessage());
+                }
             } else {
                 Messenger::error('Method not available');
             }

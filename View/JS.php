@@ -6,6 +6,8 @@
 
 namespace Lightning\View;
 
+use Lightning\Tools\Configuration;
+use Lightning\Tools\Data;
 use Lightning\Tools\Session;
 
 /**
@@ -34,6 +36,11 @@ class JS {
      */
     protected static $inline_scripts = array();
 
+    /**
+     * @var array
+     *
+     * A list of vars to be output as a JS object, accessible by JS.
+     */
     protected static $vars = array();
 
     /**
@@ -46,11 +53,29 @@ class JS {
     /**
      * Add a JS file to be included in the HTML.
      *
-     * @param $file
+     * @param string|array $files
      *   The relative path to the file from the current URL request.
+     * @param boolean $async
+     *   Whether the script should be loaded asynchronously.
+     * @param boolean $versioning
+     *   Whether to append a version string when including.
      */
-    public static function add($file) {
-        self::$included_scripts[$file] = array('file' => $file, 'rendered' => false);
+    public static function add($files, $async = true, $versioning = true, $id = '') {
+        if (!is_array($files)) {
+            $files = [$files];
+        }
+
+        foreach ($files as $file) {
+            $path = is_array($file) ? $file['file'] : $file;
+            $async = isset($file['async']) ? $file['async'] : $async;
+            self::$included_scripts[$path] = array(
+                'file' => $path,
+                'rendered' => false,
+                'async' => $async,
+                'versioning' => $versioning,
+                'id' => $id,
+            );
+        }
     }
 
     /**
@@ -79,24 +104,21 @@ class JS {
         }
     }
 
+    /**
+     * Set a javascript variable.
+     *
+     * @param string $var
+     *   The name of the variable.
+     * @param mixed $value
+     *   The new value.
+     */
     public static function set($var, $value) {
-        $var = explode('.', $var);
-        self::setSubPath($var, $value, self::$vars);
+        Data::setInPath($var, $value, self::$vars);
     }
 
-    protected static function setSubPath($var, $value, &$container) {
-        if (count($var) == 1) {
-            $container[$var[0]] = $value;
-        } else {
-            $top_var = $var[0];
-            if (!isset($container[$top_var]) || !is_array($container[$top_var])) {
-                $container[$top_var] = array();
-            }
-            array_shift($var);
-            self::setSubPath($var, $value, $container[$top_var]);
-        }
-    }
-
+    /**
+     * Add the session token as a JS accessible variable.
+     */
     public static function addSessionToken() {
         self::set('token', Session::getInstance()->getToken());
     }
@@ -119,8 +141,17 @@ class JS {
 
         // Include JS files.
         foreach (self::$included_scripts as &$file) {
+            $file_name = $file['file'];
+            if ($file['versioning']) {
+                $concatenator = strpos($file['file'], '?') !== false ? '&' : '?';
+                $file_name .= $concatenator . 'v=' . Configuration::get('minified_version', 0);
+            }
             if (empty($file['rendered'])) {
-                $output .= '<script language="javascript" src="' . $file['file'] . '"></script>';
+                $output .= '<script language="javascript" src="' . $file_name . '" ' . (!empty($file['async']) ? 'async defer' : '');
+                if (!empty($file['id'])) {
+                    $output .= ' id="' . $file['id'] . '"';
+                }
+                $output .= '></script>';
                 $file['rendered'] = true;
             }
         }

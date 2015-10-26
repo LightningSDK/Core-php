@@ -1,8 +1,9 @@
 lightning.cms = {
     edit: function(editor) {
+        var config = lightning.vars.cms && lightning.vars.cms[editor] && lightning.vars.cms[editor].config ? lightning.vars.cms[editor].config : {};
         $('#' + editor).attr('contentEditable', 'true');
         lightning.ckeditors[editor] = CKEDITOR.inline(editor, {
-                toolbar: CKEDITOR.config.toolbar_Full,
+                toolbar: config.toolbar ? eval(config.toolbar) : CKEDITOR.config.toolbar_Full,
                 allowedContent: true
             }
         );
@@ -59,9 +60,17 @@ lightning.cms = {
     editImage: function(id) {
         var self = this;
         CKFinder.popup({
-            basePath: lightning.cms.basepath,
-            selectActionFunction: function(fileUrl) {
-                self.updateImage(id, fileUrl);
+            basePath: lightning.vars.cms.basepath,
+            chooseFiles: true,
+            chooseFilesOnDblClick: true,
+            onInit: function( finder ) {
+                finder.on( 'files:choose', function( evt ) {
+                    var file = evt.data.files.first();
+                    self.updateImage(id, file.getUrl());
+                } );
+                finder.on( 'file:choose:resizedImage', function( evt ) {
+                    self.updateImage(id, evt.data.resizedUrl);
+                } );
             }
         });
     },
@@ -80,7 +89,7 @@ lightning.cms = {
                 class: $('#cms_' + id + '_class').val(),
                 token: lightning.vars.token,
                 action: "save-image",
-                content: $('#cms_' + id).attr('src')
+                content: $('#cms_' + id).attr('src').replace(lightning.vars.cms.baseUrl, '')
             },
             success:function(data) {
                 if (data.status != 'success') {

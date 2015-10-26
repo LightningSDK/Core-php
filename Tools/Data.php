@@ -64,4 +64,27 @@ class Data {
         }
         self::setInPathArray($path, $value, $content[$next]);
     }
+
+    /**
+     * Remove a variable from the data structure.
+     *
+     * @param string $var
+     *   The name of the variable.
+     * @param array $content
+     *   The hierarchy of values to fill.
+     */
+    public static function removeFromPath($var, &$content) {
+        self::removeFromPathArray(explode('.', $var), $content);
+    }
+
+    public static function removeFromPathArray($path, &$content) {
+        $next = array_shift($path);
+        if (isset($content[$next])) {
+            if (!empty($path)) {
+                self::removeFromPathArray($path, $content[$next]);
+            } else {
+                unset($content[$next]);
+            }
+        }
+    }
 }

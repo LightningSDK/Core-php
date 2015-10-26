@@ -132,7 +132,7 @@ class Message extends Object {
      */
     public function __construct($message_id = null, $unsubscribe = true, $auto = true) {
         $this->auto = $auto;
-        $this->data = Database::getInstance()->selectRow('message', array('message_id' => $message_id));
+        $this->__data = Database::getInstance()->selectRow('message', array('message_id' => $message_id));
         $this->loadTemplate();
         $this->unsubscribe = $unsubscribe;
 
@@ -155,10 +155,12 @@ class Message extends Object {
      * For db message it makes some replaces
      */
     protected function setCombinedMessageTemplate() {
-        if (empty($this->data)) {
-            $this->combinedMessageTemplate = $this->template['body'];
-        } else {
+        if (empty($this->__data)) {
+            $this->combinedMessageTemplate = $this->template['body'] . '{TRACKING_IMAGE}';
+        } elseif (!strpos($this->template['body'], '{UNSUBSCRIBE}')) {
             $this->combinedMessageTemplate = str_replace('{CONTENT_BODY}', $this->body . '{UNSUBSCRIBE}', $this->template['body']) . '{TRACKING_IMAGE}';
+        } else {
+            $this->combinedMessageTemplate = str_replace('{CONTENT_BODY}', $this->body, $this->template['body']) . '{TRACKING_IMAGE}';
         }
     }
 
@@ -326,14 +328,12 @@ class Message extends Object {
      *   The content with replaced variables.
      */
     public function replaceVariables($source) {
-        // Fix escaped curly brackets.
-        $source = preg_replace('/%7B/', '{', $source);
-        $source = preg_replace('/%7D/', '}', $source);
-
         // Replace variables.
         foreach($this->customVariables + $this->internalCustomVariables + $this->defaultVariables as $cv => $cvv) {
             // Replace simple variables as a string.
-            $source = preg_replace('/\{' . $cv . '}/', $cvv, $source);
+            $source = str_replace('{' . $cv . '}', $cvv, $source);
+            // Some curly brackets might be escaped if they are links.
+            $source = str_replace('%7B' . $cv . '%7D', $cvv, $source);
         }
 
         // Replace conditions.
@@ -347,10 +347,6 @@ class Message extends Object {
                 $source = preg_replace($conditional_search, '', $source);
             }
         }
-
-        // Re-escape any leftover curly brackets.
-        $source = preg_replace('/\{/', '%7B', $source);
-        $source = preg_replace('/}/', '%7D', $source);
 
         return $source;
     }
@@ -431,31 +427,30 @@ class Message extends Object {
      *   An array of users.
      */
     protected function getUsersQuery() {
+        $query = [];
         $this->loadLists();
         if (empty($this->lists)) {
             Messenger::error('Your message does not have any mailing lists selected.');
-            return array('table' => 'user', 'where' => array('false' => array('expression' => 'false')));
+            return ['from' => 'user', 'where' => ['false' => ['expression' => 'false']]];
         }
 
         // Start with a list of users in the messages selected lists.
-        $table = array(
-            'from' => 'message_list_user',
-            'join' => array(array(
-                'JOIN',
-                'user',
-                'ON user.user_id = message_list_user.user_id',
-            )),
-        );
-        $where = array('message_list_id' => array('IN', $this->lists));
+        $query['from'] = 'message_list_user';
+        $query['join'] = [[
+            'JOIN',
+            'user',
+            'ON user.user_id = message_list_user.user_id',
+        ]];
+        $query['where'] = ['message_list_id' => ['IN', $this->lists]];
 
         // Make sure the message is never resent.
         if ($this->auto || !empty($this->never_resend)) {
-            $table['join'][] = array(
+            $query['join'][] = array(
                 'LEFT JOIN',
                 'tracker_event',
                 'ON tracker_event.user_id = user.user_id AND tracker_event.tracker_id = ' . self::$message_sent_id . ' AND tracker_event.sub_id = ' . $this->message_id,
             );
-            $where['tracker_event.user_id'] = null;
+            $query['where']['tracker_event.user_id'] = null;
         }
 
         // Make sure the user matches a criteria.
@@ -466,30 +461,75 @@ class Message extends Object {
                 if ($c_table = json_decode($criteria['join'], true)) {
                     // The entry is a full join array.
                     $this->replaceCriteriaVariables($c_table, $field_values);
-                    $table['join'][] = $c_table;
+                    reset($c_table);
+                    if (is_array(current($c_table))) {
+                        foreach ($c_table as $join) {
+                            $query['join'][] = $join;
+                        }
+                    } else {
+                        $query['join'][] = $c_table;
+                    }
                 } else {
                     // The entry is just a table name.
-                    $table['join'][] = array(
+                    $query['join'][] = array(
                         'LEFT JOIN',
                         $criteria['join'],
                         'ON ' . $criteria['join'] . '.user_id = user.user_id',
                     );
                 }
             }
-            if ($test = json_decode($criteria['test'], true)) {
-                $this->replaceCriteriaVariables($test, $field_values);
-                $where[] = $test;
+            if ($where = json_decode($criteria['where'], true)) {
+                $this->replaceCriteriaVariables($where, $field_values);
+                $query['where'][] = $where;
+            }
+
+            // Add fields, group by, and having clauses
+            foreach (['select', 'group_by', 'having'] as $type) {
+                if (!empty($criteria[$type])) {
+                    if ($fields = json_decode($criteria[$type], true)) {
+                        if (!isset($query[$type])) {
+                            $query[$type] = [];
+                        }
+                        $query[$type] += $fields;
+                    } else {
+                        $query[$type][] = $criteria[$type];
+                    }
+                }
             }
         }
 
-        return array('table' => $table, 'where' => $where);
+        return $query;
     }
 
-    protected function replaceCriteriaVariables(&$test, $variables) {
-        array_walk_recursive($test, function(&$item) use ($variables) {
+    protected function replaceCriteriaVariables(&$query_segment, $variables) {
+        if (empty($variables)) {
+            return;
+        }
+        $next_is_array = false;
+        array_walk_recursive($query_segment, function(&$item) use ($variables, &$next_is_array) {
             if (is_string($item)) {
                 foreach ($variables as $var => $value) {
-                    $item = preg_replace('/{' . $var . '}/', $value, $item);
+                    if ($item == 'IN') {
+                        $next_is_array = true;
+                        continue;
+                    }
+                    if ($decoded = json_decode($value)) {
+                        $value = $decoded;
+                    }
+                    if (!empty($next_is_array)) {
+                        if (is_array($value)) {
+                            $item = $value;
+                        } else {
+                            $item = explode(',', $value);
+                            $item = array_map('trim', $item);
+                        }
+                        $next_is_array = false;
+                    }
+                    if (is_array($value)) {
+                        $item = preg_replace('/{{' . $var . '}}/', '"' . implode($value, '", "') . '"', $item);
+                    } else {
+                        $item = preg_replace('/{' . $var . '}/', $value, $item);
+                    }
                 }
             }
         });
@@ -503,7 +543,9 @@ class Message extends Object {
      */
     public function getUsers() {
         $query = $this->getUsersQuery();
-        return Database::getInstance()->select($query['table'], $query['where'], array('uid' => array('expression' => 'DISTINCT(user.user_id)'), 'user.*'));
+        $query['select']['uid'] = ['expression' => 'DISTINCT(user.user_id)'];
+        $query['select'][] = 'user.*';
+        return Database::getInstance()->selectQuery($query);
     }
 
     /**
@@ -514,7 +556,18 @@ class Message extends Object {
      */
     public function getUsersCount() {
         $query = $this->getUsersQuery();
-        return Database::getInstance()->count($query['table'], $query['where'], 'DISTINCT(user.user_id)');
+        if (!empty($query['group_by'])) {
+            // Count as a subquery if there are group by clauses.
+            $query['select']['user_id'] = 'user.user_id';
+            $query = [
+                'select' => ['count' => ['expression' => 'COUNT(DISTINCT(user_id))']],
+                'from' => ['subtable' => $query]
+            ];
+        } else {
+            // Otherwise just count distinct users.
+            $query['select']['count'] = ['expression' => 'COUNT(DISTINCT(user.user_id))'];
+        }
+        return Database::getInstance()->countQuery($query);
     }
     
     public function setTemplate($template_id) {

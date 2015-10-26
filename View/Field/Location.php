@@ -7,35 +7,63 @@ use Lightning\View\Field;
 
 class Location {
     /**
-     * Create a query condition that will select all zipcodes within a distance of another zip code.
+     * Create a query condition that will select all latitudes and longitudes within a range.
      *
      * @param string $zip
      *   A US zip code.
-     * @param $distance
+     * @param $miles
      *   The distance to search in miles.
      *
      * @return string
      *   The query condition.
      */
-    public static function zipQuery($zip, $distance) {
-        if ($start = Database::getInstance()->selectRow('zipcode', array('zip' => $zip))) {
-            $lat1 = $start['lat'];
-            $lon1 = $start['long'];
-            //earth's radius in miles
-            $r = 3959;
-
-            //compute max and min latitudes / longitudes for search square
-            $latN = rad2deg(asin(sin(deg2rad($lat1)) * cos($distance / $r) + cos(deg2rad($lat1)) * sin($distance / $r) * cos(deg2rad(0))));
-            $latS = rad2deg(asin(sin(deg2rad($lat1)) * cos($distance / $r) + cos(deg2rad($lat1)) * sin($distance / $r) * cos(deg2rad(180))));
-            $lonE = rad2deg(deg2rad($lon1) + atan2(sin(deg2rad(90)) * sin($distance / $r) * cos(deg2rad($lat1)), cos($distance / $r) - sin(deg2rad($lat1)) * sin(deg2rad($latN))));
-            $lonW = rad2deg(deg2rad($lon1) + atan2(sin(deg2rad(270)) * sin($distance / $r) * cos(deg2rad($lat1)), cos($distance / $r) - sin(deg2rad($lat1)) * sin(deg2rad($latN))));
-
-            return array(
-                'lat' => array('BETWEEN', $latS, $latN),
-                'long' => array('BETWEEN', $lonW, $lonE),
-            );
+    public static function zipQuery($zip, $miles) {
+        if ($start = self::zipToCoordinates($zip)) {
+            return self::areaQuery($start['lat'], $start['long'], $miles);
         }
-        return "";
+        return array();
+    }
+
+    /**
+     * Convert a zipcode to a long/lat array.
+     *
+     * @param string $zip
+     *   The zip code.
+     *
+     * @return array
+     *   The longitude and latitude.
+     */
+    public static function zipToCoordinates($zip) {
+        return Database::getInstance()->selectRow('zipcode', array('zip' => $zip));
+    }
+
+    /**
+     * Create a query in a range of longitudes and latitudes within a distance from a point.
+     *
+     * @param float $lat
+     *   Starting latitude
+     * @param float $long
+     *   Starting longitude
+     * @param float $miles
+     *   Number of miles to search
+     *
+     * @return array
+     *   The query condition.
+     */
+    public static function areaQuery($lat, $long, $miles) {
+        //earth's radius in miles
+        $r = 3959;
+
+        //compute max and min latitudes / longitudes for search square
+        $latN = rad2deg(asin(sin(deg2rad($lat)) * cos($miles / $r) + cos(deg2rad($lat)) * sin($miles / $r) * cos(deg2rad(0))));
+        $latS = rad2deg(asin(sin(deg2rad($lat)) * cos($miles / $r) + cos(deg2rad($lat)) * sin($miles / $r) * cos(deg2rad(180))));
+        $lonE = rad2deg(deg2rad($long) + atan2(sin(deg2rad(90)) * sin($miles / $r) * cos(deg2rad($lat)), cos($miles / $r) - sin(deg2rad($lat)) * sin(deg2rad($latN))));
+        $lonW = rad2deg(deg2rad($long) + atan2(sin(deg2rad(270)) * sin($miles / $r) * cos(deg2rad($lat)), cos($miles / $r) - sin(deg2rad($lat)) * sin(deg2rad($latN))));
+
+        return array(
+            'lat' => array('BETWEEN', $latS, $latN),
+            'long' => array('BETWEEN', $lonW, $lonE),
+        );
     }
 
     /**

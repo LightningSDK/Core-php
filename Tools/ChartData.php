@@ -96,13 +96,15 @@ class ChartData {
      *   The title of the set.
      * @param integer $previous_period
      *   The total amount of a previous period if showing a diff.
+     * @param array $additional_params
+     *   Additional values to add to the main dataset parameters.
      */
-    public function addDataSet($data, $title = 'Unknown', $previous_period = 0) {
-        $this->data[] = array(
+    public function addDataSet($data, $title = 'Unknown', $previous_period = 0, $additional_params = []) {
+        $this->data[] = $additional_params + [
             'data' => array_values($data),
             'label' => $title,
             'previous' => $previous_period,
-        );
+        ];
     }
 
     public function setXLabels($labels) {

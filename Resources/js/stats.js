@@ -37,11 +37,17 @@ lightning.stats = {
                 for (var i in data.datasets) {
                     // Calculate the sum of the current period.
                     var sum = 0;
-                    for (var j in data.datasets[i].data) {
-                        sum += parseInt(data.datasets[i].data[j]);
+                    if (data.datasets[i].total_average) {
+                        // If this is an average, we don't want to add the averages.
+                        sum = data.datasets[i].total_average;
+                    } else {
+                        // This is a normal sum of all points.
+                        for (var j in data.datasets[i].data) {
+                            sum += parseInt(data.datasets[i].data[j]);
+                        }
                     }
 
-                    // Calculate the diference since the last period.
+                    // Calculate the difference since the last period.
                     var diff = '';
                     if (lightning.vars.chart[id].params.diff) {
                         difference = sum - data.datasets[i].previous

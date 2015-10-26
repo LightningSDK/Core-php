@@ -37,33 +37,10 @@ module.exports = function(grunt) {
             dist: {
                 files: [
                     {
-                        src: [
-                            '../../Lightning/build/js/*',
-                            '../../Lightning/Vendor/build/*/*.js',
-                        ],
-                        dest: '../../js',
-                        expand: true,
-                        flatten: true,
-                        filter:'isFile'
-                    },
-                    {
-                        src: [
-                            '../../Lightning/build/css/*',
-                            '../../Lightning/Vendor/build/*/*.css'
-                        ],
-                        dest: '../../css',
-                        expand: true,
-                        flatten: true,
-                        filter:'isFile'
-                    },
-                    {
-                        src: [
-                            '../../Lightning/Vendor/build/*/*.swf'
-                        ],
-                        dest: '../../swf',
-                        expand: true,
-                        flatten: true,
-                        filter:'isFile'
+                        cwd: '../../Lightning/build',
+                        src: '**',
+                        dest: '../../',
+                        expand: true
                     }
                 ]
             }

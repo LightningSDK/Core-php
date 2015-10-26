@@ -70,7 +70,7 @@ class ClientUser extends Singleton {
             }
 
             // Set the redirect parameter.
-            $query['redirect'] = Request::get('request');
+            $query['redirect'] = Request::getLocation();
             // Add the current query string.
             $redirect_query = $_GET;
             unset($redirect_query['request']);

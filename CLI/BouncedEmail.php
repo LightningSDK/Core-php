@@ -21,7 +21,7 @@ class BouncedEmail extends CLI {
 
             $user = User::loadByEmail($email);
             if (!$user) {
-                // Bounced from an unknown sender, ignore this.
+                // Bounced from an unknown recipient, ignore this.
                 Tracker::trackEvent('Email Bounced', 0, 0);
                 return;
             }

@@ -11,6 +11,7 @@ class Random extends Singleton {
     const HEX = 2;
     const BIN = 3;
     const BASE64 = 4;
+    const LONG = 5;
 
     protected $engine;
 
@@ -47,7 +48,11 @@ class Random extends Singleton {
         // Format the random data.
         switch ($format) {
             case self::INT:
-                return bindec($random);
+                $val = unpack('I', $random);
+                return $val[1];
+            case self::LONG:
+                $val = unpack('L', $random);
+                return $val[1];
             case self::BIN:
                 return $random;
             case self::HEX:
