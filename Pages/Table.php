@@ -2601,6 +2601,9 @@ abstract class Table extends Page {
     public function createImages($filename_base, $field, $images, $imageObj, $file = null, $replace_existing = true) {
         $fileHandler = $this->getFileHandler($field);
         foreach ($images as $image) {
+            // If the image is never modified, we can copy it as if it's the original.
+            $modified = false;
+
             // Get the output file location.
             $output_format = $this->getOutputFormat($image, $file);
             $new_image = $this->getFullFileName($filename_base, $image, $file);
@@ -2623,6 +2626,7 @@ abstract class Table extends Page {
 
             if (!empty($image['image_preprocess']) && is_callable($image['image_preprocess'])) {
                 $imageObj->source = $image['image_preprocess']($imageObj->source);
+                $modified = true;
             }
 
             if (!$imageObj->source) {
@@ -2633,20 +2637,29 @@ abstract class Table extends Page {
             // Set the quality.
             $quality = !empty($image['quality']) ? $image['quality'] : 75;
 
-            $imageObj->process($image);
+            if ($imageObj->process($image)) {
+                $modified = true;
+            }
 
             if (!empty($image['image_postprocess']) && is_callable($image['image_postprocess'])) {
                 $imageObj->processed = $image['image_postprocess']($imageObj->processed);
+                $modified = true;
             }
 
-            switch ($output_format) {
-                case 'png':
-                    $fileHandler->write($new_image, $imageObj->getPNGData());
-                    break;
-                case 'jpg':
-                default:
-                    $fileHandler->write($new_image, $imageObj->getJPGData($quality));
-                    break;
+            if (!$modified && !empty($file) && $this->getUploadedFileFormat($file) == $output_format && !empty($field['keep_unprocessed'])) {
+                // The file was just uploaded, not modified, and destined for the same format. Just upload it.
+                $fileHandler->uploadFile($file['tmp_name'], $new_image);
+            }
+            else {
+                switch ($output_format) {
+                    case 'png':
+                        $fileHandler->write($new_image, $imageObj->getPNGData());
+                        break;
+                    case 'jpg':
+                    default:
+                        $fileHandler->write($new_image, $imageObj->getJPGData($quality));
+                        break;
+                }
             }
         }
     }
