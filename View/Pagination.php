@@ -66,6 +66,10 @@ class Pagination {
         }
         $output = '';
         $concatenator = strpos($this->basePath, '?') !== false ? '&' : '?';
+        if (!empty($this->parameters)) {
+            $this->basePath .= $concatenator . http_build_query($this->parameters);
+            $concatenator = '&';
+        }
         if ($this->pages > 1) {
             $output .= '<ul class="pagination">';
             $output .= '<li class="arrow ' . ($this->currentPage > 1 ? '' : 'unavailable') . '"><a href="' . $this->basePath . $concatenator . $this->parameter . '=' . 1 . '">&laquo; First</a></li>';
