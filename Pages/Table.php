@@ -2217,8 +2217,12 @@ abstract class Table extends Page {
             return false;
         if ($field['field'] == $this->parentLink)
             return false;
-        if (!empty($field['editable']) && $field['editable'] === false)
+        if (isset($field['insertable']) && $field['insertable'] == false) {
             return false;
+        }
+        if (!empty($field['editable']) && $field['editable'] === false) {
+            return false;
+        }
         if (!empty($field['list_only']))
             return false;
         return true;
@@ -2245,8 +2249,12 @@ abstract class Table extends Page {
     }
 
     function userDisplayNew(&$field) {
-        if (!empty($field['list_only']))
+        if (!empty($field['list_only'])) {
             return false;
+        }
+        if (isset($field['insertable']) && $field['insertable'] == false) {
+            return false;
+        }
         // TODO: This should be replaced by an overriding method in the child class.
         if (
             (!empty($field['display_value']) && is_callable($field['display_value']))
@@ -2322,6 +2330,8 @@ abstract class Table extends Page {
         if ((!empty($field['type']) && $field['type'] == 'hidden') || !empty($field['hidden']))
             return false;
         if (isset($field['editable']) && $field['editable'] === false)
+            return false;
+        if (isset($field['insertable']) && $field['insertable'] === false)
             return false;
         if (!empty($field['list_only']))
             return false;
@@ -3286,7 +3296,7 @@ abstract class Table extends Page {
         if (!empty($field['render_'.$this->action.'_field']) && is_callable($field['render_'.$this->action.'_field'])) {
             return $field['render_'.$this->action.'_field']($row);
         } elseif (!empty($field['display_value']) && is_callable($field['display_value'])) {
-            return $field['display_value']($row);
+            return call_user_func($field['display_value'], $row);
         } else {
             switch(preg_replace('/\([0-9]+\)/', '', $field['type'])) {
                 case 'lookup':
