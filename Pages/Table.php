@@ -1976,10 +1976,13 @@ abstract class Table extends Page {
      *   The rendered HTML output.
      */
     protected function getPagination() {
+        $params = $this->getUrlParameters($this->action);
+        unset($params['page']);
         return new Pagination([
             'rows' => $this->listCount,
             'rows_per_page' => $this->maxPerPage,
-            'base_path' => $this->createUrl($this->action),
+            'base_path' => $this->action_file,
+            'parameters' => $params,
         ]);
     }
 
@@ -1992,7 +1995,16 @@ abstract class Table extends Page {
         return $string;
     }
 
-    public function createUrl($action = '', $id = 0, $field = '', $other = array()) {
+    /**
+     * Get all of the request parameters for forwarding links.
+     *
+     * @param string $action
+     * @param int $id
+     * @param string $field
+     * @param array $other
+     * @return array
+     */
+    public function getUrlParameters($action = '', $id = 0, $field = '', $other = array()) {
         $vars = array();
         if ($action == 'list') {
             $vars['page'] = $id;
@@ -2004,10 +2016,10 @@ abstract class Table extends Page {
         if (isset($this->parentLink)) $vars[$this->parentLink] = $this->parentId;
         if ($field != '') $vars['f'] = $field;
         if ($this->cur_subset && $this->cur_subset != $this->subset_default) $vars['ss'] = $this->cur_subset;
-        if (count($this->additional_action_vars) > 0) {
+        if (!empty($this->additional_action_vars)) {
             $vars = array_merge($this->additional_action_vars, $vars);
         }
-        if (count($other) > 0) {
+        if (!empty($other)) {
             $vars = array_merge($vars, $other);
         }
 
@@ -2039,19 +2051,19 @@ abstract class Table extends Page {
                     case 'D': $sort[] = $f . ':D'; break;
 
                     case 'A':
-                    default:	 $sort[] = $f; break;
+                    default:  $sort[] = $f; break;
                 }
             }
             $vars['sort']=implode(';', $sort);
         }
 
-        $query = $_GET;
-        unset($query['request']);
-        unset($query['id']);
-
         // Put it all together
-        $vars = http_build_query($vars + $query);
-        return $this->action_file . ($vars != '' ? ('?' . $vars) : '');
+        return $vars;
+    }
+
+    public function createUrl($action = '', $id = 0, $field = '', $other = array()) {
+        $parameters = $this->getUrlParameters($action, $id, $field, $other);
+        return $this->action_file . (!empty($parameters) ? ('?' . http_build_query($parameters)) : '');
     }
 
     function load_template($file) {
