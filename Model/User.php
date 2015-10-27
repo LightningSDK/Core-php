@@ -815,25 +815,12 @@ class User extends Object {
 
     /**
      * check if user has permission on this page
-     * @param $permissionID - id of permission
-     * @param $thisPermissionOnly - bool $thisPermissionOnly if we need check only current permission assigned.
-     *        f.e. only stats pages permission (user have only stats role) If FALSE - check also if user have admin permission
-     * @return bool
+     * @param integer $permissionID
+     *   id of permission
+     *
+     * @return boolean
      */
-    public function hasPermission( $permissionID, $thisPermissionOnly = FALSE ) {
-        // create WHERE cause for query
-        // if we don't need check only this role assigned - checking admin's permissions too ( ALL )
-        if ( $thisPermissionOnly ){
-            $where = array('permission.permission_id' => $permissionID);
-        } else {
-            $where = [
-                '#OR' => array(
-                    array('permission.permission_id' => $permissionID),
-                    array('permission.permission_id' => Permissions::ALL)
-                )
-            ];
-        }
-
+    public function hasPermission($permissionID) {
         $permissions = Database::getInstance()->selectAll(
             array(
                 'from' => 'user',
@@ -862,7 +849,10 @@ class User extends Object {
             ),
             array(
                 array('user.user_id' => $this->id),
-                $where
+                '#OR' => array(
+                    array('permission.permission_id' => $permissionID),
+                    array('permission.permission_id' => Permissions::ALL)
+                )
             ),
             array('user.user_id', 'role.name', 'permission.name')
         );
