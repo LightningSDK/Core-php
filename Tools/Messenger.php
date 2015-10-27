@@ -124,6 +124,11 @@ class Messenger {
      * Save the current messages and errors to the session.
      */
     public static function storeInSession() {
+        // If there is nothing to save, return to prevent session creation.
+        if (empty(self::$messages) && empty(self::$messages)) {
+            return;
+        }
+
         $session = Session::getInstance();
         if (!empty(self::$messages)) {
             $session->setSettings('messages.messages', self::$messages);
@@ -131,9 +136,7 @@ class Messenger {
         if (!empty(self::$errors)) {
             $session->setSettings('messages.errors', self::$errors);
         }
-        if (!empty(self::$messages) || !empty(self::$errors)) {
-            $session->saveData();
-        }
+        $session->saveData();
     }
 
     /**

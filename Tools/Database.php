@@ -137,13 +137,8 @@ class Database extends Singleton {
             $this->connection = @new PDO($url, $username, $password);
         } catch (PDOException $e) {
             // Error handling.
-            syslog(LOG_EMERG, 'Connection failed: ' . $e->getMessage());
-            if ($this->verbose) {
-                die('Connection failed: ' . $e->getMessage());
-            }
-            else {
-                die('Connection Failed.');
-            }
+            Logger::error('Connection failed: ' . $e->getMessage());
+            Output::error('Connection failed: ' . $e->getMessage());
         }
     }
 
