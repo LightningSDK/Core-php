@@ -61,7 +61,7 @@ use Lightning\View\Field\Time;
 use Lightning\View\JS;
 use Lightning\View\Page;
 use Lightning\Tools\CSVWriter;
-use \Exception;
+use Lightning\View\Pagination;
 
 abstract class Table extends Page {
 
@@ -245,7 +245,7 @@ abstract class Table extends Page {
         }
         if (isset($_POST['function'])) $this->function = $_POST['function'];
         if (isset($_REQUEST['id'])) $this->id = Request::get('id');
-        if (isset($_REQUEST['p'])) $this->page_number = max(1, Request::get('p'));
+        if (isset($_REQUEST['page'])) $this->page_number = max(1, Request::get('page'));
 
         /*
          * serial_update comes as POST parameter
@@ -1159,7 +1159,8 @@ abstract class Table extends Page {
             return $output;
         } else {
             // show pagination
-            $output .= $this->pagination();
+            $pagination = $this->getPagination();
+            $output .= $pagination->render();
             // if there is something to list
             if (count($this->list) > 0 || !empty($this->prefixRows)) {
 
@@ -1207,7 +1208,7 @@ abstract class Table extends Page {
                 $output.= "</table></div>";
                 if ($this->action_fields_requires_submit())
                     $output.= "</form>";
-                $output.= $this->pagination();
+                $output .= $pagination->render();
             }
             return $output;
         }
@@ -1958,8 +1959,11 @@ abstract class Table extends Page {
         }
     }
 
-    // this loads all possible optiosn for a link to be joined
-    // used in a many to many
+    /**
+     * Load all possible options for a linked table (Many to many).
+     *
+     * @param array $link_settings
+     */
     protected function loadAllLinkOptions(&$link_settings) {
         $where = !empty($link_settings['accessControl']) ? $link_settings['accessControl'] : array();
         $link_settings['options'] = Database::getInstance()->selectAll($link_settings['table'], $where, array(), 'ORDER BY ' . $link_settings['display_column']);
@@ -1971,23 +1975,12 @@ abstract class Table extends Page {
      * @return string
      *   The rendered HTML output.
      */
-    function pagination() {
-        $output = '';
-        $pages = ceil($this->listCount / $this->maxPerPage);
-        if ($pages > 1) {
-            $output .= '<ul class="pagination">';
-            $output .= '<li class="arrow ' . ($this->page_number > 1 ? '' : 'unavailable') . '"><a href="' . $this->createUrl($this->action, 1) . '">&laquo; First</a></li>';
-            for($i = max(1, $this->page_number - 10); $i <= min($pages, $this->page_number+10); $i++) {
-                if ($this->page_number == $i) {
-                    $output.= '<li class="current">' . $i . '</li>';
-                } else {
-                    $output.= "<li><a href='".$this->createUrl($this->action, $i)."'>{$i}</a></li>";
-                }
-            }
-            $output .= '<li class="arrow ' . ($this->page_number == $pages ? 'unavailable' : '') . '"><a href="' . $this->createUrl($this->action, $pages) . '">Last &raquo;</a></li>';
-            $output .= '</ul>';
-        }
-        return $output;
+    protected function getPagination() {
+        return new Pagination([
+            'rows' => $this->listCount,
+            'rows_per_page' => $this->maxPerPage,
+            'base_path' => $this->createUrl($this->action),
+        ]);
     }
 
     function set_preset($new_preset) {
@@ -2001,9 +1994,12 @@ abstract class Table extends Page {
 
     public function createUrl($action = '', $id = 0, $field = '', $other = array()) {
         $vars = array();
-        if ($action == 'list') $vars['p'] = $id;
+        if ($action == 'list') {
+            $vars['page'] = $id;
+        } elseif ($id > 0) {
+            $vars['id'] = $id;
+        }
         if ($action != '') $vars['action'] = $action;
-        if ($id > 0) $vars['id'] = $id;
         if ($this->table_url) $vars['table'] = $this->table;
         if (isset($this->parentLink)) $vars[$this->parentLink] = $this->parentId;
         if ($field != '') $vars['f'] = $field;
