@@ -39,6 +39,7 @@ namespace Lightning\Pages;
 use Lightning\Tools\Cache\FileCache;
 use Lightning\Tools\CKEditor;
 use Lightning\Tools\Configuration;
+use Lightning\Tools\CSVImport;
 use Lightning\Tools\CSVIterator;
 use Lightning\Tools\Database;
 use Lightning\Tools\Form;
@@ -102,6 +103,7 @@ abstract class Table extends Page {
      * @var FileCache
      */
     protected $importCache;
+    protected $importSettings = [];
 
     /**
      * Criteria of elements editable by this object.
@@ -450,6 +452,7 @@ abstract class Table extends Page {
 
     public function getImport() {
         $this->action = 'import';
+        $this->CSVImporter = new CSVImport();
         if (!$this->editable || !$this->addable || !$this->importable) {
             Messenger::error('Access Denied');
         }
@@ -457,7 +460,11 @@ abstract class Table extends Page {
 
     public function postImport() {
         $this->action = 'import-align';
-        $this->cacheImportFile();
+        $this->CSVImporter = new CSVImport();
+        $fields = $this->get_fields($this->table, $this->preset);
+        $this->CSVImporter->setPrimaryKey($this->getKey());
+        $this->CSVImporter->setFields($fields);
+        $this->CSVImporter->cacheImportFile();
         if (!$this->editable || !$this->addable || !$this->importable) {
             Messenger::error('Access Denied');
         }
@@ -780,10 +787,10 @@ abstract class Table extends Page {
                     echo $this->renderConfirmation();
                     break;
                 case 'import':
-                    echo $this->renderImportFile();
+                    echo $this->CSVImporter->renderImportFile();
                     break;
                 case 'import-align':
-                    echo $this->renderAlignmentForm();
+                    echo $this->CSVImporter->renderAlignmentForm();
                     break;
                 case 'list':
                 default:
@@ -802,111 +809,6 @@ abstract class Table extends Page {
         // TODO: update to use the JS class.
         // we shouldn't need to call this as long as we use the JS class.
         $this->js_init_data();
-    }
-
-    protected function renderImportFile() {
-        return '<form action="' . $this->getRedirectURL() . '" method="post" enctype="multipart/form-data">' . Form::renderTokenInput() . '<input type="hidden" name="action" value="import"><input type="file" name="import-file" /><input type="submit" name="submit" value="Submit" class="button"></form>';
-    }
-
-    protected function renderAlignmentForm() {
-        $csv = new CSVIterator($this->importCache->getFile());
-        $header_row = $csv->current();
-        if (!$header_row) {
-            throw new Exception('No file uploaded');
-        }
-        $output = '<form action="" method="POST">' . Form::renderTokenInput();
-        $output .= '<input type="hidden" name="action" value="import-align">';
-        $output .= '<input type="hidden" name="cache" value="' . $this->importCache->getReference() . '" />';
-        $output .= '<table><thead><tr><td>Field</td><td>From CSV Column</td></tr></thead>';
-
-        $input_select = BasicHTML::select('%%', array('-1' => '') + $header_row);
-
-        $fields = $this->get_fields($this->table, $this->preset);
-        foreach ($fields as $field) {
-            if ($field['field'] != $this->getKey()) {
-                $output .= '<tr><td>' . $field['display_name'] . '</td><td>'
-                    . preg_replace('/%%/', 'alignment[' . $field['field'] . ']', $input_select) . '</td></tr>';
-            }
-        }
-
-        $output .= '</table><label><input type="checkbox" name="header" value="1" /> First row is a header, do not import.</label>';
-
-        if (method_exists($this, 'customImportFields')) {
-            $output .= $this->customImportFields();
-        } elseif (!empty($this->customImportFields)) {
-            $output .= $this->customImportFields;
-        }
-
-        $output .= '<input type="submit" name="submit" value="Submit" class="button" />';
-
-        $output .= '</form>';
-        return $output;
-    }
-
-    /**
-     * Load the uploaded import file into cache and parse it for input variables.
-     */
-    protected function cacheImportFile() {
-        // Cache the uploaded file.
-        $this->importCache = new FileCache();
-        $this->importCache->setName('table import ' . microtime());
-        $this->importCache->moveFile('import-file');
-    }
-
-    /**
-     * Process the data and import it based on alignment fields.
-     */
-    protected function importDataFile() {
-        $cache = new FileCache();
-        $cache->loadReference(Request::post('cache'));
-        if (!$cache->isValid()) {
-            Output::error('Invalid reference. Please try again.');
-        }
-
-        // Load the CSV, skip the first row if it's a header.
-        $csv = new CSVIterator($cache->getFile());
-        if (Request::post('header', 'int')) {
-            $csv->next();
-        }
-
-        // Process the alignment so we know which fields to import.
-        $alignment = Request::get('alignment', 'keyed_array', 'int');
-        $fields = array();
-        foreach ($alignment as $field => $column) {
-            if ($column != -1) {
-                $fields[$field] = $column;
-            }
-        }
-
-        $database = Database::getInstance();
-
-        $values = array();
-        while ($csv->valid()) {
-            $row = $csv->current();
-            foreach ($fields as $field => $column) {
-                $values[$field][] = $row[$column];
-            }
-
-            if (count($values[$field]) >= 100) {
-                // Insert what we have so far and continue.
-                $last_id = $database->insertSets($this->table, array_keys($fields), $values, true);
-                if (method_exists($this, 'customImportPostProcess')) {
-                    $ids = $last_id ? range($last_id - $database->affectedRows() + 1, $last_id) : [];
-                    $this->customImportPostProcess($values, $ids);
-                }
-                $values = array();
-            }
-
-            $csv->next();
-        }
-
-        if (!empty($values)) {
-            $last_id = $database->insertSets($this->table, array_keys($fields), $values, true);
-            if (method_exists($this, 'customImportPostProcess')) {
-                $ids = $last_id ? range($last_id - $database->affectedRows() + 1, $last_id) : [];
-                $this->customImportPostProcess($values, $ids);
-            }
-        }
     }
 
     protected function renderSearchForm() {

@@ -84,6 +84,10 @@ class Users extends Table {
         $this->preset['password']['display_value'] = function(&$row) {
             return !empty($row['password']) ? 'Set' : '';
         };
+        $this->importSettings = [
+            'customImportFields' => [$this, 'customImportFields'],
+            'importPostProcess' => [$this, 'importPostProcess'],
+        ];
     }
 
     /**
@@ -91,14 +95,14 @@ class Users extends Table {
      *
      * @return string
      */
-    protected function customImportFields() {
+    public function customImportFields() {
         $all_lists = ['' => ''] + Database::getInstance()->selectColumn('message_list', 'name', [], 'message_list_id');
         $output = 'Add all imported users to this mailing list: ' . BasicHTML::select('message_list_id', $all_lists);
         $output .= 'Or add them to a new mailing list: ' . Text::textField('new_message_list', '');
         return $output;
     }
 
-    protected function customImportPostProcess(&$values, &$ids) {
+    public function importPostProcess(&$values, &$ids) {
         static $mailing_list_id;
         $db = Database::getInstance();
 
