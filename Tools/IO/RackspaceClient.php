@@ -10,7 +10,15 @@ use OpenCloud\Rackspace;
 
 class RackspaceClient {
     protected $client;
+
+    /**
+     * @var \OpenCloud\ObjectStore\Resource\DataObject
+     */
     protected $object;
+
+    /**
+     * @var \OpenCloud\ObjectStore\Service
+     */
     protected $service;
     protected $root;
 
@@ -99,6 +107,14 @@ class RackspaceClient {
         $container = $this->service->getContainer($remoteName[0]);
         $this->object = $container->getObject($remoteName[1]);
         return $this->object->getContent();
+    }
+
+    public function getFileSize($remoteName) {
+        $this->connect();
+        $remoteName = $this->getRemoteName($this->root . '/' . $remoteName);
+        $container = $this->service->getContainer($remoteName[0]);
+        $this->object = $container->getPartialObject($remoteName[1]);
+        return $this->object->getContentLength();
     }
 
     public function getModificationDate() {
