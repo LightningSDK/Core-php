@@ -39,6 +39,7 @@ namespace Lightning\Pages;
 use Lightning\Tools\Cache\FileCache;
 use Lightning\Tools\CKEditor;
 use Lightning\Tools\Configuration;
+use Lightning\Tools\CSVImport;
 use Lightning\Tools\CSVIterator;
 use Lightning\Tools\Database;
 use Lightning\Tools\Form;
@@ -61,7 +62,7 @@ use Lightning\View\Field\Time;
 use Lightning\View\JS;
 use Lightning\View\Page;
 use Lightning\Tools\CSVWriter;
-use \Exception;
+use Lightning\View\Pagination;
 
 abstract class Table extends Page {
 
@@ -102,6 +103,7 @@ abstract class Table extends Page {
      * @var FileCache
      */
     protected $importCache;
+    protected $importSettings = [];
 
     /**
      * Criteria of elements editable by this object.
@@ -245,7 +247,7 @@ abstract class Table extends Page {
         }
         if (isset($_POST['function'])) $this->function = $_POST['function'];
         if (isset($_REQUEST['id'])) $this->id = Request::get('id');
-        if (isset($_REQUEST['p'])) $this->page_number = max(1, Request::get('p'));
+        if (isset($_REQUEST['page'])) $this->page_number = max(1, Request::get('page'));
 
         /*
          * serial_update comes as POST parameter
@@ -450,6 +452,7 @@ abstract class Table extends Page {
 
     public function getImport() {
         $this->action = 'import';
+        $this->CSVImporter = new CSVImport();
         if (!$this->editable || !$this->addable || !$this->importable) {
             Messenger::error('Access Denied');
         }
@@ -457,7 +460,11 @@ abstract class Table extends Page {
 
     public function postImport() {
         $this->action = 'import-align';
-        $this->cacheImportFile();
+        $this->CSVImporter = new CSVImport();
+        $fields = $this->get_fields($this->table, $this->preset);
+        $this->CSVImporter->setPrimaryKey($this->getKey());
+        $this->CSVImporter->setFields($fields);
+        $this->CSVImporter->cacheImportFile();
         if (!$this->editable || !$this->addable || !$this->importable) {
             Messenger::error('Access Denied');
         }
@@ -780,10 +787,10 @@ abstract class Table extends Page {
                     echo $this->renderConfirmation();
                     break;
                 case 'import':
-                    echo $this->renderImportFile();
+                    echo $this->CSVImporter->renderImportFile();
                     break;
                 case 'import-align':
-                    echo $this->renderAlignmentForm();
+                    echo $this->CSVImporter->renderAlignmentForm();
                     break;
                 case 'list':
                 default:
@@ -802,111 +809,6 @@ abstract class Table extends Page {
         // TODO: update to use the JS class.
         // we shouldn't need to call this as long as we use the JS class.
         $this->js_init_data();
-    }
-
-    protected function renderImportFile() {
-        return '<form action="' . $this->getRedirectURL() . '" method="post" enctype="multipart/form-data">' . Form::renderTokenInput() . '<input type="hidden" name="action" value="import"><input type="file" name="import-file" /><input type="submit" name="submit" value="Submit" class="button"></form>';
-    }
-
-    protected function renderAlignmentForm() {
-        $csv = new CSVIterator($this->importCache->getFile());
-        $header_row = $csv->current();
-        if (!$header_row) {
-            throw new Exception('No file uploaded');
-        }
-        $output = '<form action="" method="POST">' . Form::renderTokenInput();
-        $output .= '<input type="hidden" name="action" value="import-align">';
-        $output .= '<input type="hidden" name="cache" value="' . $this->importCache->getReference() . '" />';
-        $output .= '<table><thead><tr><td>Field</td><td>From CSV Column</td></tr></thead>';
-
-        $input_select = BasicHTML::select('%%', array('-1' => '') + $header_row);
-
-        $fields = $this->get_fields($this->table, $this->preset);
-        foreach ($fields as $field) {
-            if ($field['field'] != $this->getKey()) {
-                $output .= '<tr><td>' . $field['display_name'] . '</td><td>'
-                    . preg_replace('/%%/', 'alignment[' . $field['field'] . ']', $input_select) . '</td></tr>';
-            }
-        }
-
-        $output .= '</table><label><input type="checkbox" name="header" value="1" /> First row is a header, do not import.</label>';
-
-        if (method_exists($this, 'customImportFields')) {
-            $output .= $this->customImportFields();
-        } elseif (!empty($this->customImportFields)) {
-            $output .= $this->customImportFields;
-        }
-
-        $output .= '<input type="submit" name="submit" value="Submit" class="button" />';
-
-        $output .= '</form>';
-        return $output;
-    }
-
-    /**
-     * Load the uploaded import file into cache and parse it for input variables.
-     */
-    protected function cacheImportFile() {
-        // Cache the uploaded file.
-        $this->importCache = new FileCache();
-        $this->importCache->setName('table import ' . microtime());
-        $this->importCache->moveFile('import-file');
-    }
-
-    /**
-     * Process the data and import it based on alignment fields.
-     */
-    protected function importDataFile() {
-        $cache = new FileCache();
-        $cache->loadReference(Request::post('cache'));
-        if (!$cache->isValid()) {
-            Output::error('Invalid reference. Please try again.');
-        }
-
-        // Load the CSV, skip the first row if it's a header.
-        $csv = new CSVIterator($cache->getFile());
-        if (Request::post('header', 'int')) {
-            $csv->next();
-        }
-
-        // Process the alignment so we know which fields to import.
-        $alignment = Request::get('alignment', 'keyed_array', 'int');
-        $fields = array();
-        foreach ($alignment as $field => $column) {
-            if ($column != -1) {
-                $fields[$field] = $column;
-            }
-        }
-
-        $database = Database::getInstance();
-
-        $values = array();
-        while ($csv->valid()) {
-            $row = $csv->current();
-            foreach ($fields as $field => $column) {
-                $values[$field][] = $row[$column];
-            }
-
-            if (count($values[$field]) >= 100) {
-                // Insert what we have so far and continue.
-                $last_id = $database->insertSets($this->table, array_keys($fields), $values, true);
-                if (method_exists($this, 'customImportPostProcess')) {
-                    $ids = $last_id ? range($last_id - $database->affectedRows() + 1, $last_id) : [];
-                    $this->customImportPostProcess($values, $ids);
-                }
-                $values = array();
-            }
-
-            $csv->next();
-        }
-
-        if (!empty($values)) {
-            $last_id = $database->insertSets($this->table, array_keys($fields), $values, true);
-            if (method_exists($this, 'customImportPostProcess')) {
-                $ids = $last_id ? range($last_id - $database->affectedRows() + 1, $last_id) : [];
-                $this->customImportPostProcess($values, $ids);
-            }
-        }
     }
 
     protected function renderSearchForm() {
@@ -1159,7 +1061,8 @@ abstract class Table extends Page {
             return $output;
         } else {
             // show pagination
-            $output .= $this->pagination();
+            $pagination = $this->getPagination();
+            $output .= $pagination->render();
             // if there is something to list
             if (count($this->list) > 0 || !empty($this->prefixRows)) {
 
@@ -1207,7 +1110,7 @@ abstract class Table extends Page {
                 $output.= "</table></div>";
                 if ($this->action_fields_requires_submit())
                     $output.= "</form>";
-                $output.= $this->pagination();
+                $output .= $pagination->render();
             }
             return $output;
         }
@@ -1958,8 +1861,11 @@ abstract class Table extends Page {
         }
     }
 
-    // this loads all possible optiosn for a link to be joined
-    // used in a many to many
+    /**
+     * Load all possible options for a linked table (Many to many).
+     *
+     * @param array $link_settings
+     */
     protected function loadAllLinkOptions(&$link_settings) {
         $where = !empty($link_settings['accessControl']) ? $link_settings['accessControl'] : array();
         $link_settings['options'] = Database::getInstance()->selectAll($link_settings['table'], $where, array(), 'ORDER BY ' . $link_settings['display_column']);
@@ -1971,23 +1877,15 @@ abstract class Table extends Page {
      * @return string
      *   The rendered HTML output.
      */
-    function pagination() {
-        $output = '';
-        $pages = ceil($this->listCount / $this->maxPerPage);
-        if ($pages > 1) {
-            $output .= '<ul class="pagination">';
-            $output .= '<li class="arrow ' . ($this->page_number > 1 ? '' : 'unavailable') . '"><a href="' . $this->createUrl($this->action, 1) . '">&laquo; First</a></li>';
-            for($i = max(1, $this->page_number - 10); $i <= min($pages, $this->page_number+10); $i++) {
-                if ($this->page_number == $i) {
-                    $output.= '<li class="current">' . $i . '</li>';
-                } else {
-                    $output.= "<li><a href='".$this->createUrl($this->action, $i)."'>{$i}</a></li>";
-                }
-            }
-            $output .= '<li class="arrow ' . ($this->page_number == $pages ? 'unavailable' : '') . '"><a href="' . $this->createUrl($this->action, $pages) . '">Last &raquo;</a></li>';
-            $output .= '</ul>';
-        }
-        return $output;
+    protected function getPagination() {
+        $params = $this->getUrlParameters($this->action);
+        unset($params['page']);
+        return new Pagination([
+            'rows' => $this->listCount,
+            'rows_per_page' => $this->maxPerPage,
+            'base_path' => $this->action_file,
+            'parameters' => $params,
+        ]);
     }
 
     function set_preset($new_preset) {
@@ -1999,19 +1897,31 @@ abstract class Table extends Page {
         return $string;
     }
 
-    public function createUrl($action = '', $id = 0, $field = '', $other = array()) {
+    /**
+     * Get all of the request parameters for forwarding links.
+     *
+     * @param string $action
+     * @param int $id
+     * @param string $field
+     * @param array $other
+     * @return array
+     */
+    public function getUrlParameters($action = '', $id = 0, $field = '', $other = array()) {
         $vars = array();
-        if ($action == 'list') $vars['p'] = $id;
+        if ($action == 'list') {
+            $vars['page'] = $id;
+        } elseif ($id > 0) {
+            $vars['id'] = $id;
+        }
         if ($action != '') $vars['action'] = $action;
-        if ($id > 0) $vars['id'] = $id;
         if ($this->table_url) $vars['table'] = $this->table;
         if (isset($this->parentLink)) $vars[$this->parentLink] = $this->parentId;
         if ($field != '') $vars['f'] = $field;
         if ($this->cur_subset && $this->cur_subset != $this->subset_default) $vars['ss'] = $this->cur_subset;
-        if (count($this->additional_action_vars) > 0) {
+        if (!empty($this->additional_action_vars)) {
             $vars = array_merge($this->additional_action_vars, $vars);
         }
-        if (count($other) > 0) {
+        if (!empty($other)) {
             $vars = array_merge($vars, $other);
         }
 
@@ -2043,19 +1953,19 @@ abstract class Table extends Page {
                     case 'D': $sort[] = $f . ':D'; break;
 
                     case 'A':
-                    default:	 $sort[] = $f; break;
+                    default:  $sort[] = $f; break;
                 }
             }
             $vars['sort']=implode(';', $sort);
         }
 
-        $query = $_GET;
-        unset($query['request']);
-        unset($query['id']);
-
         // Put it all together
-        $vars = http_build_query($vars + $query);
-        return $this->action_file . ($vars != '' ? ('?' . $vars) : '');
+        return $vars;
+    }
+
+    public function createUrl($action = '', $id = 0, $field = '', $other = array()) {
+        $parameters = $this->getUrlParameters($action, $id, $field, $other);
+        return $this->action_file . (!empty($parameters) ? ('?' . http_build_query($parameters)) : '');
     }
 
     function load_template($file) {
@@ -2209,8 +2119,12 @@ abstract class Table extends Page {
             return false;
         if ($field['field'] == $this->parentLink)
             return false;
-        if (!empty($field['editable']) && $field['editable'] === false)
+        if (isset($field['insertable']) && $field['insertable'] == false) {
             return false;
+        }
+        if (!empty($field['editable']) && $field['editable'] === false) {
+            return false;
+        }
         if (!empty($field['list_only']))
             return false;
         return true;
@@ -2237,8 +2151,12 @@ abstract class Table extends Page {
     }
 
     function userDisplayNew(&$field) {
-        if (!empty($field['list_only']))
+        if (!empty($field['list_only'])) {
             return false;
+        }
+        if (isset($field['insertable']) && $field['insertable'] == false) {
+            return false;
+        }
         // TODO: This should be replaced by an overriding method in the child class.
         if (
             (!empty($field['display_value']) && is_callable($field['display_value']))
@@ -2314,6 +2232,8 @@ abstract class Table extends Page {
         if ((!empty($field['type']) && $field['type'] == 'hidden') || !empty($field['hidden']))
             return false;
         if (isset($field['editable']) && $field['editable'] === false)
+            return false;
+        if (isset($field['insertable']) && $field['insertable'] === false)
             return false;
         if (!empty($field['list_only']))
             return false;
@@ -2593,6 +2513,9 @@ abstract class Table extends Page {
     public function createImages($filename_base, $field, $images, $imageObj, $file = null, $replace_existing = true) {
         $fileHandler = $this->getFileHandler($field);
         foreach ($images as $image) {
+            // If the image is never modified, we can copy it as if it's the original.
+            $modified = false;
+
             // Get the output file location.
             $output_format = $this->getOutputFormat($image, $file);
             $new_image = $this->getFullFileName($filename_base, $image, $file);
@@ -2615,6 +2538,7 @@ abstract class Table extends Page {
 
             if (!empty($image['image_preprocess']) && is_callable($image['image_preprocess'])) {
                 $imageObj->source = $image['image_preprocess']($imageObj->source);
+                $modified = true;
             }
 
             if (!$imageObj->source) {
@@ -2625,20 +2549,29 @@ abstract class Table extends Page {
             // Set the quality.
             $quality = !empty($image['quality']) ? $image['quality'] : 75;
 
-            $imageObj->process($image);
+            if ($imageObj->process($image)) {
+                $modified = true;
+            }
 
             if (!empty($image['image_postprocess']) && is_callable($image['image_postprocess'])) {
                 $imageObj->processed = $image['image_postprocess']($imageObj->processed);
+                $modified = true;
             }
 
-            switch ($output_format) {
-                case 'png':
-                    $fileHandler->write($new_image, $imageObj->getPNGData());
-                    break;
-                case 'jpg':
-                default:
-                    $fileHandler->write($new_image, $imageObj->getJPGData($quality));
-                    break;
+            if (!$modified && !empty($file) && $this->getUploadedFileFormat($file) == $output_format && !empty($field['keep_unprocessed'])) {
+                // The file was just uploaded, not modified, and destined for the same format. Just upload it.
+                $fileHandler->uploadFile($file['tmp_name'], $new_image);
+            }
+            else {
+                switch ($output_format) {
+                    case 'png':
+                        $fileHandler->write($new_image, $imageObj->getPNGData());
+                        break;
+                    case 'jpg':
+                    default:
+                        $fileHandler->write($new_image, $imageObj->getJPGData($quality));
+                        break;
+                }
             }
         }
     }
@@ -3265,7 +3198,7 @@ abstract class Table extends Page {
         if (!empty($field['render_'.$this->action.'_field']) && is_callable($field['render_'.$this->action.'_field'])) {
             return $field['render_'.$this->action.'_field']($row);
         } elseif (!empty($field['display_value']) && is_callable($field['display_value'])) {
-            return $field['display_value']($row);
+            return call_user_func($field['display_value'], $row);
         } else {
             switch(preg_replace('/\([0-9]+\)/', '', $field['type'])) {
                 case 'lookup':

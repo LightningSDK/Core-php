@@ -160,8 +160,16 @@ class User extends Page {
      * Unsubscribe the user from all mailing lists.
      */
     public function getUnsubscribe() {
+        $this->page = 'unsubscribe_confirm';
+        Template::getInstance()->set('user_token', Request::get('u', 'encrypted'));
+    }
+
+    public function postConfirmUnsubscribe() {
         if ($cyphserstring = Request::get('u', 'encrypted')) {
             $user = UserModel::loadByEncryptedUserReference($cyphserstring);
+            if (empty($user)) {
+                Output::error('Invalid request');
+            }
             $user->unsubscribeAll();
             Messenger::message('Your email ' . $user->email . ' has been removed from all mailing lists.');
         } else {
