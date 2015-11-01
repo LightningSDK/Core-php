@@ -1,4 +1,4 @@
-<?
+<?php
 /**
  * @file
  * A class for managing output.
