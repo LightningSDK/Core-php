@@ -235,6 +235,10 @@ class Output {
         if(static::isJSONRequest()) {
             static::json(static::ERROR);
         } else {
+            $template = Template::getInstance();
+            if ($error_template = Configuration::get('template.error')) {
+                $template->setTemplate($error_template);
+            }
             Template::getInstance()->render('');
         }
         exit;
