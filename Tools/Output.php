@@ -143,11 +143,13 @@ class Output {
 
         // Add debug data.
         if (Configuration::get('debug')) {
-            $database = Database::getInstance();
-            $output['database'] = array(
-                'queries' => $database->getQueries(),
-                'time' => $database->timeReport(),
-            );
+            $database = Database::getInstance(false);
+            if ($database) {
+                $output['database'] = array(
+                    'queries' => $database->getQueries(),
+                    'time' => $database->timeReport(),
+                );
+            }
         }
 
         // Output the data.
