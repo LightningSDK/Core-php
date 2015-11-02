@@ -12,6 +12,13 @@ class Request {
     const IP_INT = 'ip_int';
 
     /**
+     * A list of request headers.
+     *
+     * @var array
+     */
+    protected static $headers = [];
+
+    /**
      * The parsed input from a posted JSON string.
      *
      * @var array
