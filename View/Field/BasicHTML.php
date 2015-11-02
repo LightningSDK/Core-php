@@ -2,6 +2,9 @@
 
 namespace Lightning\View\Field;
 
+use Lightning\Tools\Scrub;
+use Lightning\View\HTML;
+
 class BasicHTML {
     /**
      * Build a select/option field.
@@ -26,7 +29,8 @@ class BasicHTML {
         }
 
         // Build the main tag.
-        $return = '<select name="' . $name . '" id="' . $name . '" ' . $attribute_string . '>';
+        $select_name = !empty($attributes['multiple']) ? $name . '[]' : $name;
+        $return = '<select name="' . $select_name . '" id="' . $name . '" ' . $attribute_string . '>';
         // Iterate over each option.
         $return .= self::renderSelectOptions($values, $default);
         $return .= '</select>';
@@ -46,6 +50,7 @@ class BasicHTML {
                 if (
                     (is_numeric($value) && $value > 0 && $value == $default)
                     || $value === $default
+                    || (is_array($default) && in_array($value, $default))
                 ) {
                     $selected = 'SELECTED="selected"';
                 } else {
@@ -55,6 +60,34 @@ class BasicHTML {
             }
         }
         return $return;
+    }
+
+    public static function radioGroup($name, $options, $default = null, $attributes = array()) {
+        $output = '<div ' . HTML::implodeAttributes($attributes) . '>';
+
+        foreach ($options as $value => $label) {
+            $output .= '<label><input type="radio" name="' . $name . '" value="' . $value . '" /> ' . $label . '</label>';
+        }
+
+        return $output . '</div>';
+    }
+
+    public static function password($id, $value, $options = array()) {
+        if (empty($options['max_length']) && !empty($options['size'])) {
+            $options['max_length'] = $options['size'];
+        }
+        $options['name'] = !empty($options['name']) ? $options['name'] : $id;
+        $options['id'] = !empty($options['id']) ? $options['id'] : $id;
+        $options['value'] = $value;
+        $options['type'] = 'password';
+        $options['autocomplete'] = 'off';
+        return '<input ' . HTML::implodeAttributes($options) . ' />';
+    }
+
+    public static function textarea($id, $value, $attributes) {
+        $attributes['name'] = !empty($options['name']) ? $attributes['name'] : $id;
+        $attributes['id'] = !empty($options['id']) ? $attributes['id'] : $id;
+        return '<textarea ' . HTML::implodeAttributes($attributes) . ' >' . Scrub::toHTML($value) . '</textarea>';
     }
 
     /**

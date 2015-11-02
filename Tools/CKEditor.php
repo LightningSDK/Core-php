@@ -16,16 +16,24 @@ use Lightning\View\JS;
  */
 class CKEditor {
 
+    const TYPE_BASIC = "CKEDITOR.config.toolbar_Basic";
+    const TYPE_BASIC_IMAGE = "CKEDITOR.config.toolbar_Basic_Image";
+    const TYPE_PRINT = "CKEDITOR.config.toolbar_Print";
+    const TYPE_FULL = "CKEDITOR.config.toolbar_Full";
+
     protected static $inited = false;
 
     /**
      * Add the required JS to the page.
      */
-    public static function init() {
+    public static function init($initCKFinder = false) {
         if (!self::$inited) {
-            JS::add('/js/ckeditor/ckeditor.js');
+            JS::add('/js/ckeditor/ckeditor.js', false);
             JS::startup('lightning.ckeditors = {}');
             self::$inited = true;
+        }
+        if ($initCKFinder) {
+            JS::add('/js/ckfinder/ckfinder.js', false);
         }
     }
 
@@ -45,7 +53,7 @@ class CKEditor {
         self::init();
 
         if (!empty($options['finder'])) {
-            JS::add('/js/ckfinder/ckfinder.js');
+            JS::add('/js/ckfinder/ckfinder.js', false, false);
         }
 
         if (empty($options['content'])) {
@@ -80,7 +88,7 @@ class CKEditor {
 
         JS::startup('lightning.ckeditors["' . $id . '"] = CKEDITOR.replace("' . $id . '", ' . json_encode($options) . ');');
         if (!empty($options['finder'])) {
-            JS::add('/js/ckfinder/ckfinder.js');
+            JS::add('/js/ckfinder/ckfinder.js', false, false);
             JS::startup('CKFinder.setupCKEditor(lightning.ckeditors["' . $id . '"], "/js/ckfinder/")');
         }
 

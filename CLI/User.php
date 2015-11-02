@@ -6,6 +6,7 @@
 
 namespace Lightning\CLI;
 
+use Lightning\Model\Role;
 use Lightning\Tools\Scrub;
 use Lightning\Model\User as UserModel;
 
@@ -33,7 +34,7 @@ class User extends CLI {
         $res = UserModel::create($email, $password);
         if ($res['success']) {
             $user = UserModel::loadById($res['data']);
-            $user->setType(UserModel::TYPE_ADMIN);
+            $user->addRole(Role::ADMIN);
         } else {
             $this->out('Failed to create user.');
         }

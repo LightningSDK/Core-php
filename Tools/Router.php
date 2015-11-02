@@ -17,13 +17,6 @@ class Router extends Singleton {
     protected static $routes = array();
 
     /**
-     * Load the configuration.
-     */
-    public function __construct() {
-        self::$routes = Configuration::get('routes');
-    }
-
-    /**
      * Get the page handler for the current URL.
      *
      * @param string $url
@@ -34,8 +27,11 @@ class Router extends Singleton {
      * @return string
      *   The namespace of the URL handler.
      */
-    public function getRoute($url, $cli) {
-        $url = rtrim($url, '/');
+    public static function parseRoute($url, $cli) {
+        if (empty(self::$routes)) {
+            self::$routes = Configuration::get('routes');
+        }
+
         // If we are in CLI mode, and there is a command for cli only.
         if ($cli && isset(self::$routes['cli_only'][$url])) {
             return self::$routes['cli_only'][$url];
@@ -57,5 +53,20 @@ class Router extends Singleton {
         if (!empty(self::$routes['default'])) {
             return self::$routes['default'];
         }
+    }
+
+    public static function getRoute() {
+        global $argv;
+        if (static::isCLI()) {
+            // Handle a command line request.
+            return static::parseRoute($argv[1], true);
+        } else {
+            // Handle a web page request.
+            return static::parseRoute(Request::getLocation(), false);
+        }
+    }
+
+    public static function isCLI() {
+        return PHP_SAPI == 'cli';
     }
 }

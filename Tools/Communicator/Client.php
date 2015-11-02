@@ -99,8 +99,7 @@ class Client extends RestClient {
 
             return $this->processResponse();
         } catch (Exception $e) {
-            print_r($e->getMessage());
-            $this->_die("There was an error processing your request. Please try again later. (2)");
+            Output::error('There was an error processing your request. Please try again later. (2): ' . $e->getMessage());
         }
     }
 

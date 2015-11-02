@@ -3,6 +3,7 @@
 namespace Overridable\Lightning\Tools;
 
 use Lightning\Tools\Configuration;
+use Lightning\Tools\Data;
 use Lightning\Tools\Database;
 use Lightning\Tools\Logger;
 use Lightning\Tools\Messenger;
@@ -13,6 +14,7 @@ use Lightning\Tools\Request as LightningRequest;
 
 class Session extends Singleton {
 
+    const STATE_ANONYMOUS = 0;
     const STATE_REMEMBER = 1;
     const STATE_PASSWORD = 2;
     const STATE_APP = 4;
@@ -50,7 +52,7 @@ class Session extends Singleton {
     }
 
     protected static function loadRequestSessionKey() {
-        return Request::cookie(Configuration::get('session.cookie'), 'hex');
+        return Request::cookie(Configuration::get('session.cookie'), 'base64');
     }
 
     /**
@@ -134,7 +136,7 @@ class Session extends Singleton {
     public static function create($user_id=0, $remember=false) {
         $session_details = array();
         $new_sess_key = static::getNewSessionId();
-        $new_token = Random::getInstance()->get(64, Random::HEX);
+        $new_token = Random::getInstance()->get(64, Random::BASE64);
         if (empty($new_sess_key) || empty($new_token)) {
             Messenger::error('Session error.');
         }
@@ -215,6 +217,7 @@ class Session extends Singleton {
         if (!empty($this->id)) {
             Database::getInstance()->delete('session', array('session_id' => $this->id));
             $this->data = null;
+            $this->id = 0;
         }
         $this->clearCookie();
     }
@@ -253,7 +256,7 @@ class Session extends Singleton {
      */
     static function getNewSessionId() {
         do{
-            $key = Random::getInstance()->get(64, Random::HEX);
+            $key = Random::getInstance()->get(64, Random::BASE64);
             if (empty($key)) {
                 return FALSE;
             }
@@ -296,16 +299,27 @@ class Session extends Singleton {
      *   The number of sessions removed.
      */
     public static function clearExpiredSessions() {
-        $remember_ttl = Configuration::get('session.remember_ttl');
-        if (empty($remember_ttl)) {
-            return 0;
+        $timeouts = array();
+        $timeouts[static::STATE_ANONYMOUS] = Configuration::get('session.anonymous_ttl', 86400);
+        $timeouts[static::STATE_REMEMBER] = Configuration::get('session.remember_ttl', $timeouts[static::STATE_ANONYMOUS]);
+        $timeouts[static::STATE_PASSWORD] = Configuration::get('session.password_ttl', $timeouts[static::STATE_REMEMBER]);
+        $timeouts[static::STATE_APP] = Configuration::get('session.app_ttl', $timeouts[static::STATE_REMEMBER]);
+
+        arsort($timeouts);
+        $deletions = 0;
+        $aggregate_state = 0;
+        $db = Database::getInstance();
+        foreach ($timeouts as $state => $timeout) {
+            $deletions += $db->delete(
+                'session',
+                array(
+                    'last_ping' => array('<', time() - $timeout),
+                    'state' => array('&', $aggregate_state, 0),
+                )
+            );
+            $aggregate_state |= $state;
         }
-        return Database::getInstance()->delete(
-            'session',
-            array(
-                'last_ping' => array('<', time() - $remember_ttl)
-            )
-        );
+        return $deletions;
     }
 
     /**
@@ -337,16 +351,14 @@ class Session extends Singleton {
      *
      * @param string $field
      *   The name of the field.
+     * @param mixed $default
+     *   The default value if it's not set.
      *
      * @return mixed
      *   The set value.
      */
-    public function getSetting($field) {
-        if (!empty($this->content[$field])) {
-            return $this->content[$field];
-        } else {
-            return null;
-        }
+    public function getSetting($field, $default = null) {
+        return Data::getFromPath($field, $this->content, $default);
     }
 
     /**
@@ -358,7 +370,7 @@ class Session extends Singleton {
      *   The value for the field.
      */
     public function setSettings($field, $value) {
-        $this->content[$field] = $value;
+        Data::setInPath($field, $value, $this->content);
     }
 
     /**
@@ -368,7 +380,7 @@ class Session extends Singleton {
      *   The field name
      */
     public function unsetSetting($field) {
-        unset($this->content[$field]);
+        Data::removeFromPath($field, $this->content);
     }
 
     /**

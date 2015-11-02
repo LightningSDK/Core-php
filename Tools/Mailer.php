@@ -92,6 +92,11 @@ class Mailer {
         $this->mailer = new \PHPMailer(true);
         $this->mailer->Sender = Configuration::get('mailer.bounce_address');
         $this->verbose = $verbose;
+        if ($smtpHost = Configuration::get('mailer.smtp')) {
+            require_once HOME_PATH . '/Lightning/Vendor/PHPMailer/class.smtp.php';
+            $this->mailer->Mailer = 'smtp';
+            $this->mailer->Host = $smtpHost;
+        }
     }
 
     /**
@@ -340,6 +345,9 @@ class Mailer {
      *   The message id.
      * @param User $user
      *   The user object to send to.
+     *
+     * @return boolean
+     *   Whether the message was sent successfully.
      */
     function sendOne($message_id, $user) {
         $this->built = false;
@@ -349,8 +357,12 @@ class Mailer {
         $this->message->setUser($user);
         $this->message->setDefaultVars();
         $this->to($user->email, $user->first . ' ' . $user->last);
-        $this->sendMessage();
-        Tracker::trackEvent('Email Sent', $message_id, $user->id);
+        if ($this->sendMessage()) {
+            Tracker::trackEvent('Email Sent', $message_id, $user->id);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -393,6 +405,7 @@ class Mailer {
         $this->sentCount = 0;
         foreach($this->users as $user) {
             if ($this->verbose && $this->sentCount % 100 == 0) {
+                set_time_limit(60);
                 echo '. ';
             }
             // Send message.

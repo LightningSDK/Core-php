@@ -2,6 +2,7 @@
 
 namespace Lightning\API;
 
+use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Output;
@@ -23,8 +24,9 @@ class User extends API {
             $session = Session::getInstance();
             $session->setState(Session::STATE_APP);
             $data['cookies'] = array('session' => $session->session_key);
+            Output::setJsonCookies(true);
+            return $data;
         }
-        Output::json($data);
     }
 
     public function postRegister() {
@@ -34,7 +36,7 @@ class User extends API {
         // Validate POST data
         if (!$this->validateData($email, $pass)) {
             // Immediately output all the errors
-            Output::jsonError();
+            Output::error("Invalid Data");
         }
         
         // Register user
@@ -42,8 +44,23 @@ class User extends API {
         if ($res['success']) {
             Output::json($res['data']);
         } else {
-            Output::jsonError($res['error']);
+            Output::error($res['error']);
         }
+    }
+
+    public function postReset() {
+        if (!$email = Request::get('email', 'email')) {
+            Output::error('Invalid email');
+        }
+        elseif (!$user = UserModel::loadByEmail($email)) {
+            Output::error('User does not exist.');
+        }
+        $user->sendResetLink();
+    }
+
+    public function postLogout() {
+        $user = ClientUser::getInstance();
+        $user->logOut();
     }
     
     /**
@@ -66,7 +83,7 @@ class User extends API {
         
         // Is email correct?
         if ($email === FALSE) {
-            Messenger::error('Please enter a correct email');
+            Messenger::error('Please enter a valid email');
             $result = FALSE;
         }
 

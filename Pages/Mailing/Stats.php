@@ -14,6 +14,8 @@ use Lightning\View\JS;
 
 class Stats extends Line {
 
+    protected $ajax = true;
+
     protected function hasAccess() {
         ClientUser::requireAdmin();
         return true;

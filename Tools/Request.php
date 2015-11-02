@@ -6,6 +6,18 @@ use Lightning\Tools\Scrub;
 
 class Request {
 
+    const X_FORWARDED_FOR = 'X-Forwarded-For';
+    const X_FORWARDED_PROTO = 'X-Forwarded-Proto';
+    const IP = 'ip';
+    const IP_INT = 'ip_int';
+
+    /**
+     * A list of request headers.
+     *
+     * @var array
+     */
+    protected static $headers = [];
+
     /**
      * The parsed input from a posted JSON string.
      *
@@ -23,8 +35,40 @@ class Request {
         return $_SERVER['REQUEST_METHOD'];
     }
 
+    /**
+     * Detect whether the current request was made over https.
+     *
+     * @return boolean
+     */
     public static function isHTTPS() {
-        return !empty($_SERVER['HTTPS']);
+        return !empty($_SERVER['HTTPS']) || static::getHeader(static::X_FORWARDED_PROTO) == 'https';
+    }
+
+    public static function getHeader($header) {
+        $nginx_header = 'HTTP_' . strtoupper(preg_replace('/-/', '_', $header));
+        if (isset($_SERVER[$nginx_header])) {
+            return $_SERVER[$nginx_header];
+        } else {
+            if (function_exists('apache_request_headers')) {
+                if (empty(static::$headers)) {
+                    static::$headers = apache_request_headers();
+                    if (!empty(static::$headers[$header])) {
+                        return static::$headers[$header];
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns the current location, stripping any slashes.
+     *
+     * @return string
+     *   The location.
+     */
+    public static function getLocation() {
+        return trim(static::query('request'), '/');
     }
 
     /**
@@ -53,7 +97,8 @@ class Request {
      */
     public static function getFromURL($regex) {
         $args = func_get_args();
-        preg_match($regex, $_GET['request'], $matches);
+
+        preg_match($regex, static::getLocation(), $matches);
         if (isset($matches[1])) {
             $args[0] = $matches[1];
             return call_user_func_array('self::clean', $args);
@@ -111,7 +156,7 @@ class Request {
     }
 
     /**
-     * Gets a variable only if it's in the $_GET global.
+     * Gets a variable only if it's in the $_POST global.
      *
      * @param $var
      * @param string $type
@@ -205,13 +250,25 @@ class Request {
      */
     public static function server($var) {
         switch ($var) {
-            case 'ip_int':
-                return empty($_SERVER['REMOTE_ADDR']) ? 0 : ip2long($_SERVER['REMOTE_ADDR']);
-            case 'ip':
-                return empty($_SERVER['REMOTE_ADDR']) ? '' : $_SERVER['REMOTE_ADDR'];
+            case self::IP_INT:
+                $ip = self::getIP();
+                return $ip ? ip2long($ip) : 0;
+            case self::IP:
+                return self::getIP() ?: '';
             default:
                 return isset($_SERVER[$var]) ? $_SERVER[$var] : null;
         }
+    }
+
+    /**
+     * Get the client IP address.
+     *
+     * @return string
+     *   IP address.
+     */
+    protected static function getIP() {
+        $forwarded_header = self::getHeader(self::X_FORWARDED_FOR);
+        return $forwarded_header ?: $_SERVER['REMOTE_ADDR'];
     }
 
     /**

@@ -1,4 +1,4 @@
-<?
+<?php
 /**
  * @file
  * A class for managing output.
@@ -35,15 +35,50 @@ class Output {
      */
     protected static $cookies = array();
 
+    protected static $isJson = false;
+
+    protected static $jsonCookies = false;
+
     protected static $statusStrings = array(
         1 => 'access denied',
         2 => 'success',
         3 => 'error',
     );
 
+    /**
+     * Determine if the output should be json.
+     *
+     * @return boolean
+     *   Whether the output should be json.
+     */
     public static function isJSONRequest() {
-        $headers = apache_request_headers();
-        return strpos($headers['Accept'], 'json') > 0;
+        if (static::$isJson) {
+            return true;
+        }
+
+        if (function_exists("apache_request_headers")) {
+            // Check for a JSON request header in apache.
+            $headers = apache_request_headers();
+            if (!empty($headers['Accept']) && strpos($headers['Accept'], 'json') > 0) {
+                return true;
+            }
+        } else {
+            // Check for a JSON request header in nginx.
+            if (!empty($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'json') > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Set whether the output should be explicitly JSON.
+     *
+     * @param boolean $isJson
+     *   Whether to force json output.
+     */
+    public static function setJson($isJson) {
+        static::$isJson = $isJson;
     }
 
     /**
@@ -51,6 +86,8 @@ class Output {
      *
      * @param array|integer $data
      *   The data to output as JSON.
+     * @param boolean $suppress_status
+     *   Whether to suppress the default success/error message.
      */
     public static function json($data = array(), $suppress_status = false) {
         // Predefined outputs.
@@ -80,12 +117,8 @@ class Output {
             $data['status'] = self::$statusStrings[self::SUCCESS];
         }
 
-        // Output the data.
-        header('Content-type: application/json');
-        echo json_encode($data);
-
-        // Terminate the script.
-        exit;
+        // Output and terminate.
+        self::jsonOut($data);
     }
 
     public static function jsonData($data, $include_cookies = false) {
@@ -98,8 +131,38 @@ class Output {
         if ($include_cookies) {
             $output['cookies'] = self::$cookies;
         }
+        // Output and terminate.
+        self::jsonOut($output);
+    }
+
+    protected static function jsonOut($output) {
+        // Send the cookies if enabled.
+        if (static::$jsonCookies) {
+            self::sendCookies();
+        }
+
+        // Add debug data.
+        if (Configuration::get('debug')) {
+            $database = Database::getInstance(false);
+            if ($database) {
+                $output['database'] = array(
+                    'queries' => $database->getQueries(),
+                    'time' => $database->timeReport(),
+                );
+            }
+        }
+
+        // Output the data.
+        header('Content-type: application/json');
         echo json_encode($output);
         exit;
+    }
+
+    /**
+     * @param boolean $setCookies
+     */
+    public static function setJsonCookies($setCookies) {
+        static::$jsonCookies = $setCookies;
     }
 
     /**
@@ -107,6 +170,9 @@ class Output {
      *
      * @param string $error
      *   The error message.
+     *
+     * @deprecated
+     *   The error() function will determine if json should be output based on the headers.
      */
     public static function jsonError($error = '') {
         $data = array(
@@ -147,7 +213,8 @@ class Output {
      */
     public static function accessDenied() {
         Messenger::error('Access Denied');
-        if (strpos($_SERVER['HTTP_ACCEPT'], 'json') !== false) {
+        // TODO : This can be simplified using the error function below.
+        if (static::isJSONRequest()) {
             Output::json();
         } else {
             Template::resetInstance();
@@ -157,20 +224,82 @@ class Output {
         exit;
     }
 
+    /**
+     * Terminate the script with an error.
+     *
+     * @param string $error
+     *   An error to output to the user.
+     */
     public static function error($error) {
         Messenger::error($error);
         if(static::isJSONRequest()) {
-            static::json();
+            static::json(static::ERROR);
+        } else {
+            $template = Template::getInstance();
+            if ($error_template = Configuration::get('template.error')) {
+                $template->setTemplate($error_template);
+            }
+            Template::getInstance()->render('');
+        }
+        exit;
+    }
+    
+    /**
+     * Terminate the script with a success message.
+     *
+     * @param string $message
+     *   A message to output to the user.
+     */
+    public static function success($message) {
+        Messenger::message($message);
+        if(static::isJSONRequest()) {
+            static::json(static::SUCCESS);
         } else {
             Template::getInstance()->render('');
         }
         exit;
     }
 
+    public static function notFound() {
+        Messenger::error('Not Found');
+        header('HTTP/1.0 404 NOT FOUND');
+        if(static::isJSONRequest()) {
+            static::json(static::ERROR);
+        } else {
+            Template::getInstance()->render('');
+        }
+        exit;
+    }
+
+    /**
+     * Queue a cookie to be deleted.
+     *
+     * @param string $cookie
+     *   The cookie name.
+     */
     public static function clearCookie($cookie) {
         self::setCookie($cookie, '');
     }
 
+    /**
+     * Queue a cookie for output.
+     *
+     * @param string $cookie
+     *   The name of the cookie.
+     * @param string $value
+     *   The value.
+     * @param integer $ttl
+     *   How long the cookie should last in seconds from the time it's created.
+     *   This is not an expiration date like the php setcookie() function.
+     * @param string $path
+     *   The cookie path.
+     * @param string $domain
+     *   The cookie domain.
+     * @param boolean $secure
+     *   Whether the cookie can only be used over https.
+     * @param boolean $httponly
+     *   Whether the cookie can only be used as an http header.
+     */
     public static function setCookie($cookie, $value, $ttl = null, $path = '/', $domain = null, $secure = null, $httponly = true) {
         $settings = array(
             'value' => $value,
@@ -187,21 +316,49 @@ class Output {
         }
     }
 
+    /**
+     * Set the cookie headers.
+     * Does not actually send data until the content begins.
+     */
     public static function sendCookies() {
         foreach (self::$cookies as $cookie => $settings) {
             setcookie($cookie, $settings['value'], $settings['ttl'], $settings['path'], $settings['domain'], $settings['secure'], $settings['httponly']);
         }
     }
 
+    /**
+     * Disable output buffering for streaming output.
+     */
     public static function disableBuffering() {
         if (function_exists('apache_setenv')) {
             apache_setenv('no-gzip', 1);
         }
+        // For apache.
         @ini_set('zlib.output_compression', "Off");
         @ini_set('implicit_flush', 1);
+        // For nginx.
+        header('X-Accel-Buffering: no');
 
-        for ($i = 0; $i < ob_get_level(); $i++) { ob_end_flush(); }
+        for ($i = 0; $i < ob_get_level(); $i++) {
+            ob_end_flush();
+        }
         ob_implicit_flush(true);
         echo str_repeat(' ', 9000);
+    }
+
+    /**
+     * Prepare headers to output a downloaded file.
+     *
+     * @param string $file_name
+     *   The name that the browser should save the file as.
+     * @param int $size
+     *   The size of the content if known.
+     */
+    public static function download($file_name, $size = null) {
+        header('Content-disposition: attachment; filename=' . $file_name);
+        if ($size) {
+            header('Content-Length: ' . $size);
+        }
+        Output::disableBuffering();
     }
 }

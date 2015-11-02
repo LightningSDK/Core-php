@@ -7,7 +7,7 @@ In your web folder, run the following:
 git init
 
 # Add the Lightning repo
-git submodule add git@github.com:macdabby/lightning.git Lightning
+git submodule add git@github.com:macdabby/Lightning.git
 
 # Download the dependencies
 cd Lightning

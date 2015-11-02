@@ -15,7 +15,7 @@ lightning.dialog = {
             '<div class="messenger message"><ul></ul></div>'+
             '<div class="content"><ul></ul></div>'+
             '</div>'+
-            '<div class="inner" id="dialog_box_loader"><p align="center"><img src="/images/coganim2.gif" class="loader_image"></p></div>'+
+            '<div class="inner" id="dialog_box_loader"><p align="center"><img src="/images/lightning/cog-spinner.gif" class="loader_image"></p></div>'+
             '</div>'+
             '</div>').prependTo('body');
             $('#veil').click(lightning.dialog.hide);

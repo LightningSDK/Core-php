@@ -5,7 +5,6 @@ namespace Lightning\Pages;
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Output;
-use Lightning\Tools\Form;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Request;
@@ -25,7 +24,6 @@ class User extends Page {
     }
 
     public function get() {
-        parent::__construct();
         $user = ClientUser::getInstance();
         Template::getInstance()->set('redirect', Scrub::toURL(Request::get('redirect', 'string')));
         if ($user->id > 0) {
@@ -103,7 +101,7 @@ class User extends Page {
         
         // Is email correct?
         if ($email === FALSE) {
-            Messenger::error('Please enter a correct email');
+            Messenger::error('Please enter a valid email');
             $result = FALSE;
         }
         
@@ -121,6 +119,14 @@ class User extends Page {
         }
         
         return $result;
+    }
+
+    /**
+     * Show just the login form, and not the registration form.
+     */
+    public function getLogin() {
+        Template::getInstance()->set('action', 'login');
+        return $this->get();
     }
 
     /**
@@ -154,10 +160,32 @@ class User extends Page {
      * Unsubscribe the user from all mailing lists.
      */
     public function getUnsubscribe() {
+        $this->page = 'unsubscribe_confirm';
+        Template::getInstance()->set('user_token', Request::get('u', 'encrypted'));
+    }
+
+    public function postConfirmUnsubscribe() {
         if ($cyphserstring = Request::get('u', 'encrypted')) {
             $user = UserModel::loadByEncryptedUserReference($cyphserstring);
+            if (empty($user)) {
+                Output::error('Invalid request');
+            }
             $user->unsubscribeAll();
             Messenger::message('Your email ' . $user->email . ' has been removed from all mailing lists.');
+        } else {
+            Messenger::error('Invalid request');
+        }
+    }
+
+    /**
+     * Confirm the user account via the confirmation link.
+     */
+    public function getConfirm() {
+        if ($cyphserstring = Request::get('u', 'encrypted')) {
+            $user = UserModel::loadByEncryptedUserReference($cyphserstring);
+            $user->setConfirmed();
+            Messenger::message('Your account ' . $user->email . ' has been confirmed.');
+            $this->loginRedirect();
         } else {
             Messenger::error('Invalid request');
         }
@@ -174,12 +202,10 @@ class User extends Page {
      */
     public function postReset() {
         if (!$email = Request::get('email', 'email')) {
-            Messenger::error('Invalid email');
-            return;
+            Output::error('Invalid email');
         }
         elseif (!$user = UserModel::loadByEmail($email)) {
-            Messenger::error('User does not exist.');
-            return;
+            Output::error('User does not exist.');
         }
         if ($user->sendResetLink()) {
             Navigation::redirect('message', array('msg' => 'reset'));
@@ -236,16 +262,14 @@ class User extends Page {
         }
     }
 
-    public function loginRedirect($page = null) {
+    public function loginRedirect($page = null, $params = array()) {
         $redirect = Request::post('redirect', 'urlencoded') ?: Request::query('redirect');
         if ($redirect && !preg_match('|^[/?]user|', $redirect)) {
-            Navigation::redirect($redirect);
-        }
-        elseif (!empty($page)) {
-            Navigation::redirect($page);
-        }
-        else {
-            Navigation::redirect(Configuration::get('user.login_url'));
+            Navigation::redirect($redirect, $params);
+        } elseif (!empty($page)) {
+            Navigation::redirect($page, $params);
+        } else {
+            Navigation::redirect(Configuration::get('user.login_url'), $params);
         }
     }
 

@@ -19,9 +19,7 @@ use Exception;
 spl_autoload_register(array('\\Lightning\\Bootstrap', 'classAutoloader'));
 
 // Set the error handler.
-if (Configuration::get('errorlog') == 'stacktrace') {
-    set_error_handler(array('\\Lightning\\Bootstrap', 'errorHandler'));
-}
+Logger::init();
 
 class Bootstrap {
     protected static $loaded = false;

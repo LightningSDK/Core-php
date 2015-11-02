@@ -4,6 +4,7 @@ namespace Lightning\Tools;
 
 use Lightning\Bootstrap;
 use Lightning\Model\Object;
+use Lightning\Model\ObjectDataStorage;
 use ReflectionClass;
 
 /**
@@ -11,7 +12,8 @@ use ReflectionClass;
  *
  * A base class for singleton tools.
  */
-class Singleton extends Object {
+class Singleton {
+    use ObjectDataStorage;
 
     /**
      * A static instance of the singleton.

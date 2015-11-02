@@ -25,6 +25,13 @@ class Template extends Singleton {
     protected $cache = array();
 
     /**
+     * Footer html content.
+     *
+     * @var string
+     */
+    protected $footer = '';
+
+    /**
      * The main template file.
      *
      * @var string
@@ -113,6 +120,9 @@ class Template extends Singleton {
         }
     }
 
+    /**
+     * Set template metadata variables.
+     */
     protected function setTemplateMetaData() {
         foreach (array('title', 'keywords', 'description', 'author') as $meta_data) {
             // Check if template already has these variables set
@@ -185,6 +195,22 @@ class Template extends Singleton {
             'ttl' => $ttl,
             'size' => $size,
         );
+    }
+
+    /**
+     * Add footer content to output before closing body tag.
+     *
+     * @param string $content
+     */
+    public function addFooter($content) {
+        $this->footer .= $content;
+    }
+
+    /**
+     * Display the footer content.
+     */
+    public function renderFooter() {
+        return $this->footer;
     }
 
     /**

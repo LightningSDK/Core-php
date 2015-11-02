@@ -15,15 +15,16 @@ abstract class Base extends Page {
     protected $width = 600;
     protected $height = 450;
     protected $page = 'chart';
+    protected $ajax = false;
 
     public function __construct() {
         parent::__construct();
-        JS::add('/js/Chart.min.js');
+        JS::add('/js/Chart.min.js', false);
         JS::startup('lightning.stats.init()');
 
         // Prepare the JS.
         JS::set('chart.' . $this->id . '.renderer', $this->renderer);
-        JS::set('chart.' . $this->id . '.url', '/' . Request::get('request'));
+        JS::set('chart.' . $this->id . '.url', '/' . Request::getLocation());
         JS::set('chart.' . $this->id . '.params.start', ['source' => 'start']);
         JS::set('chart.' . $this->id . '.params.number_format', $this->numberFormat);
         JS::set('chart.' . $this->id . '.params.diff', !empty($this->diff));

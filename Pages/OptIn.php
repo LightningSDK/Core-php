@@ -20,11 +20,20 @@ class OptIn extends Page {
     }
 
     public function post() {
-        // Add the user to the system.
-        $name = array(
-            'first' => Request::post('first'),
-            'last' => Request::post('last'),
-        );
+        if ($name = Request::post('name', '', '', '')) {
+            $name_parts = explode(' ', $name, 2);
+            $name = array('first' => $name_parts[0]);
+            if (!empty($name_parts[1])) {
+                $name['last'] = $name_parts[1];
+            }
+        } else {
+            // Add the user to the system.
+            $name = array(
+                'first' => Request::post('first', '', '', ''),
+                'last' => Request::post('last', '', '', ''),
+            );
+        }
+
         $email = Request::post('email', 'email');
         $user = User::addUser($email, $name);
 

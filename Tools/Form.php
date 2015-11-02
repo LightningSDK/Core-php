@@ -1,20 +1,30 @@
-<?
+<?php
 
 namespace Lightning\Tools;
 
 use Exception;
 use Lightning\View\Field;
+use Lightning\View\Field\BasicHTML;
 use Lightning\View\Field\Hidden;
+use Lightning\View\Field\Text;
 
 class Form {
-    protected $id;
-    protected $fields;
-    protected $settings;
+    protected $id = 'form';
+    protected $fields = array();
+    protected $settings = array();
+    protected $submittedValues = array();
+    protected $valid;
 
-    public function __construct($id, $fields = array(), $settings = array()) {
-        $this->id = $id;
-        $this->fields = $fields;
-        $this->settings = $settings;
+    public function __construct($id = null, $fields = null, $settings = null) {
+        if (!empty($id)) {
+            $this->id = $id;
+        }
+        if (!empty($fields)) {
+            $this->fields = $fields;
+        }
+        if (!empty($settings)) {
+            $this->settings = $settings;
+        }
     }
 
     /**
@@ -28,12 +38,54 @@ class Form {
      *   custom form template, and elements with custom types.
      */
     public function render() {
-        $output = '<form method="post" action="' . (!empty($this->settings['action']) ? $this->settings['action'] : '') . '">';
-        foreach ($this->fields as $field) {
-            $output .= self::renderTokenInput($field);
-        }
+        $output = $this->open();
+        // TODO: Iterate over all fields here.
         $output = '</form>';
         return $output;
+    }
+
+    public function open() {
+        $output = '<form method="post" action="' . (!empty($this->settings['action']) ? $this->settings['action'] : '') . '">';
+        $output .= self::renderTokenInput();
+        return $output;
+    }
+
+    public function renderField($field) {
+        // Make sure the field exists.
+        if (!isset($this->fields[$field])) {
+            throw new Exception('Invalid Field');
+        }
+
+        // Set the default type.
+        if (!isset($this->fields[$field]['type'])) {
+            $this->fields[$field]['type'] = 'text';
+        }
+        // Get the right default value.
+        if (!empty($this->submittedValues)) {
+            $default = !empty($this->submittedValues[$field]) ? $this->submittedValues[$field] : '';
+        } else {
+            $default = !empty($this->fields[$field]['default']) ? $this->fields[$field]['default'] : '';
+        }
+        // See if there are any additional attributes.
+        $attributes = !empty($this->fields[$field]['attributes']) ? $this->fields[$field]['attributes'] : array();
+
+        // Make sure the name and id exist.
+        switch ($this->fields[$field]['type']) {
+            case 'select':
+                return BasicHTML::select($field, $this->fields[$field]['options'], $default, $attributes);
+                break;
+            case 'radio':
+                return BasicHTML::radioGroup($field, $this->fields[$field]['options'], $default, $attributes);
+            case 'password':
+                // Passwords should not be directly republished, but might be cached on the server.
+                $default = !empty($this->fields[$field]['cached']) ? str_repeat('*', strlen($default)) : '';
+                return BasicHTML::password($field, $default, $attributes);
+            case 'textarea':
+                return BasicHTML::textarea($field, $default, $attributes);
+            case 'text':
+            default:
+                return Text::textField($field, $default, $attributes);
+        }
     }
 
     public static function validateToken() {
@@ -45,8 +97,54 @@ class Form {
         return true;
     }
 
-    public function validate() {
+    /**
+     * Fill the post array. For setting defaults without overwriting the actual defaults.
+     *
+     * @param array $data
+     */
+    public function setPostedValues($data) {
+        $this->submittedValues = $data + $this->submittedValues;
+    }
 
+    public function getPostedValues() {
+        return $this->submittedValues;
+    }
+
+    public function validate() {
+        $this->valid = true;
+        foreach ($this->fields as $field => $settings) {
+            $field_name = !empty($settings['name']) ? $settings['name'] : $field;
+            if (!empty($settings['validation'])) {
+                if (is_callable($settings['validation'])) {
+                    // This field uses a custom validation method.
+                    $sanitized_value = null;
+                    $this->valid &= call_user_func($settings['validation'], $sanitized_value);
+                    $this->submittedValues[$field] = $sanitized_value;
+                    continue;
+                }
+                $type = !empty($settings['validation']['type']) ? $settings['validation']['type'] : '';
+                $posted_value = Request::post($field, $type);
+                // Make sure the field is present if required.
+                if (!empty($settings['validation']['required']) && empty($_POST[$field])) {
+                    Messenger::error('The field ' . $field_name . ' is required.');
+                    $this->submittedValues[$field] = Request::post($field);
+                    $this->valid = false;
+                    continue;
+                }
+                // Make sure the value is the right format.
+                if (empty($posted_value) && !empty($_POST[$field])) {
+                    Messenger::error('Please enter a valid ' . $field_name . '.');
+                    $this->submittedValues[$field] = Request::post($field);
+                    $this->valid = false;
+                    continue;
+                } else {
+                    $this->submittedValues[$field] = $posted_value;
+                }
+            } else {
+                $this->submittedValues[$field] = Request::post($field);
+            }
+        }
+        return $this->valid;
     }
 
     /**

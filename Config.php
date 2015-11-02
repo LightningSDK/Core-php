@@ -8,10 +8,12 @@ $conf = array(
         'Lightning\\View\\Page' => 'Overridable\\Lightning\\View\\Page',
         'Lightning\\View\\API' => 'Overridable\\Lightning\\View\\API',
         'Lightning\\Model\\Blog' => 'Overridable\\Lightning\\Model\\Blog',
+        'Lightning\\Model\\Token' => 'Overridable\\Lightning\\Model\\Token',
         'Lightning\\Model\\User' => 'Overridable\\Lightning\\Model\\User',
         'Lightning\\Tools\\Session' => 'Overridable\\Lightning\\Tools\\Session',
         'Lightning\\Tools\\Request' => 'Overridable\\Lightning\\Tools\\Request',
         'Lightning\\Tools\\ClientUser' => 'Overridable\\Lightning\\Tools\\ClientUser',
+        'Lightning\\Model\\Permissions' => 'Overridable\\Lightning\\Model\\Permissions',
     ),
     'routes' => array(
         'cli_only' => array(
@@ -21,8 +23,9 @@ $conf = array(
         ),
     ),
     'session' => array(
-        'remember_ttl' => 2592000,
-        'password_ttl' => 432000,
+        'remember_ttl' => 2592000, // 30 Days
+        'password_ttl' => 432000, // 5 Days
+        'app_ttl' => 7776000, // 90 Days
         'cookie' => 'session',
     ),
     'user' => array(
@@ -37,5 +40,6 @@ $conf = array(
     ),
     'language' => 'en_us',
     'template_dir' => 'Source/Templates',
+    'temp_dir' => HOME_PATH . '/../tmp',
     'random_engine' => MCRYPT_DEV_URANDOM,
 );
