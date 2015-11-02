@@ -13,6 +13,7 @@ if (!defined('CONFIG_PATH')) {
 
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Logger;
+use Exception;
 
 // Set the autoloader to the Lightning autoloader.
 spl_autoload_register(array('\\Lightning\\Bootstrap', 'classAutoloader'));
@@ -23,11 +24,15 @@ if (Configuration::get('errorlog') == 'stacktrace') {
 }
 
 class Bootstrap {
-    static $loaded = false;
-    static $classes;
-    static $overrides = array();
-    static $overridable = array();
-    static $loadedClasses = array();
+    protected static $loaded = false;
+    protected static $classes;
+    protected static $overrides = array();
+    protected static $overridable = array();
+    protected static $loadedClasses = array(
+        'Lightning\\Tools\\Configuration' => 'Lightning\\Tools\\Configuration',
+        'Lightning\\Tools\\Data' => 'Lightning\\Tools\\Data',
+    );
+    protected static $classLoader = array();
 
     /**
      * A custom class loader.
@@ -35,14 +40,17 @@ class Bootstrap {
      * @param string $classname
      */
     public static function classAutoloader($classname) {
-        // TODO: This can probably be optimized.
-        if (empty(self::$loadedClasses[$classname]) && $classname != 'Lightning\Tools\Configuration' && $classname != 'Lightning\Tools\Data') {
+        if (empty(self::$loadedClasses[$classname])) {
+            // Make sure the configuration is loaded.
             if (!self::$loaded) {
                 // Load the class definitions.
                 self::$classes = Configuration::get('classes');
                 self::$overridable = Configuration::get('overridable');
+                self::$classLoader = Configuration::get('class_loader');
                 self::$loaded = true;
             }
+
+            // If the class is explicitly set as an override.
             if (!empty(self::$classes[$classname])) {
                 // Load an override class and override it.
                 $overridden_name = 'Overridden\\' . $classname;
@@ -56,9 +64,13 @@ class Bootstrap {
                 self::$loadedClasses[$classname] = $classname;
                 return;
             }
+
+            // If the class is already loaded as an override, do nothing.
             if (isset(self::$overrides[$classname])) {
                 return;
             }
+
+            // Load the overridable class.
             $class_file = str_replace('Overridable\\', '', $classname);
             if (isset(self::$overridable[$classname]) || isset(self::$overridable[$class_file])) {
                 self::loadClassFile($class_file);
@@ -67,6 +79,8 @@ class Bootstrap {
                 return;
             }
         }
+
+        // No special tricks, just load the file.
         self::$loadedClasses[$classname] = $classname;
         self::loadClassFile($classname);
     }
@@ -76,13 +90,26 @@ class Bootstrap {
      *
      * @param string $classname
      *   The name of the class.
+     *
+     * @throws Exception
+     *   If the class file can't be found.
      */
     public static function loadClassFile($classname) {
         $class_path = str_replace('\\', DIRECTORY_SEPARATOR, $classname);
-        $class_path_test = explode(DIRECTORY_SEPARATOR, $class_path);
-        if ($class_path_test[0] == 'Source' || $class_path_test[0] == 'Lightning') {
+        if (file_exists(HOME_PATH . DIRECTORY_SEPARATOR . $class_path . '.php')) {
             require_once HOME_PATH . DIRECTORY_SEPARATOR . $class_path . '.php';
+            return;
         }
+        if (!empty(self::$classLoader['prefix'])) {
+            foreach (self::$classLoader['prefix'] as $prefix => $directory) {
+                $path_prefix = str_replace('\\', DIRECTORY_SEPARATOR, $prefix);
+                if (preg_match('|^' . $path_prefix . '|', $class_path)) {
+                    require_once preg_replace('|^' . $path_prefix . '|', HOME_PATH . DIRECTORY_SEPARATOR . $directory, $class_path) . '.php';
+                    return;
+                }
+            }
+        }
+        throw new Exception('Class file not found: ' . $classname);
     }
 
     public static function errorHandler($errno, $errstr, $errfile, $errline) {
