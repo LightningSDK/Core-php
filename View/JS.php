@@ -1,4 +1,4 @@
-<?
+<?php
 /**
  * @file
  * Includes a class for managing JS files.

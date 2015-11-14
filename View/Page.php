@@ -1,4 +1,4 @@
-<?
+<?php
 
 namespace Overridable\Lightning\View;
 
@@ -59,7 +59,7 @@ class Page {
         JS::add('/js/fastclick.min.js');
         JS::add('/js/jquery.min.js', false);
         JS::add('/js/jquery.cookie.min.js');
-        JS::add('/js/modernizr.min.js');
+        JS::add('/js/modernizr.min.js', false);
         JS::add('/js/placeholder.min.js');
         JS::add('/js/foundation.min.js', false);
         JS::add('/js/lightning.min.js', false);

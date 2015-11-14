@@ -189,15 +189,13 @@ class RestClient {
                     // If there is an error handler.
                     return $this->requestForbidden($this->status);
                     break;
-                default:
-                    // Unrecognized.
-                    if ($this->verbose) {
-                        echo $this->raw;
-                    }
-                    throw new Exception('Unrecognized response code: ' . $this->status);
             }
         }
-        return false;
+        // Unrecognized.
+        if ($this->verbose) {
+            echo $this->raw;
+        }
+        throw new Exception('Unrecognized response code: ' . $this->status);
     }
 
     protected function requestSuccess() {
