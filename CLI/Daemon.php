@@ -3,6 +3,7 @@
 namespace Lightning\CLI;
 
 use DateTime;
+use Exception;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Logger;
 
@@ -155,6 +156,9 @@ class Daemon extends CLI {
             }
         }
         $jobs = Configuration::get('jobs');
+        if (empty($jobs[$job])) {
+            throw new Exception('Job not found');
+        }
         $job = $jobs[$job];
         // This would normally be set to the last job run time.
         $job['last_start'] = time() - $job['interval'];
