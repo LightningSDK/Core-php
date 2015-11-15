@@ -57,16 +57,12 @@ class Router extends Singleton {
 
     public static function getRoute() {
         global $argv;
-        if (static::isCLI()) {
+        if (Request::isCLI()) {
             // Handle a command line request.
             return static::parseRoute($argv[1], true);
         } else {
             // Handle a web page request.
             return static::parseRoute(Request::getLocation(), false);
         }
-    }
-
-    public static function isCLI() {
-        return PHP_SAPI == 'cli';
     }
 }
