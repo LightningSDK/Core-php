@@ -107,7 +107,6 @@ class Bootstrap {
                 }
             }
         }
-        throw new Exception('Class file not found: ' . $classname);
     }
 
     public static function errorHandler($errno, $errstr, $errfile, $errline) {
