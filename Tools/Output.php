@@ -6,6 +6,7 @@
 
 namespace Lightning\Tools;
 use Lightning\Pages\Message;
+use Lightning\Pages\Page;
 
 /**
  * Class Output
@@ -360,5 +361,26 @@ class Output {
             header('Content-Length: ' . $size);
         }
         Output::disableBuffering();
+    }
+
+    public static function http($reponse_code) {
+        // Attempt to load from ###.html
+        http_response_code($reponse_code);
+        $page = new Page();
+        if ($full_page = $page->loadPage($reponse_code)) {
+            $full_page['url'] = Request::get('page');
+        } else {
+            $full_page['title'] = 'Lightning';
+            $full_page['keywords'] = 'Lightning';
+            $full_page['description'] = 'Lightning';
+            $full_page['url'] = '';
+            $full_page['body'] = 'Your site has not been set up.';
+            $full_page['layout'] = 0;
+            $full_page['site_map'] = 1;
+        }
+        $page->setPage($full_page);
+        $page->prepare();
+        $page->output();
+        exit;
     }
 }
