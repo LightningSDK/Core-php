@@ -133,7 +133,9 @@ class RestClient {
      */
     protected function connect($vars, $post = true, $path = null) {
 
-        // Check if there is an xdebug request:
+        $headers = [];
+
+        // This is useful for forwarding an XDEBUG request to another server for debugging.
         if ($this->forwardCookies) {
             $this->cookies += $_COOKIE;
         }
@@ -148,9 +150,9 @@ class RestClient {
         }
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_POST, (int) $post);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, array('Accept: application/json'));
+        $headers[] = 'Accept: application/json';
         foreach ($this->headers as $h => $v) {
-            curl_setopt($curl, CURLOPT_HTTPHEADER, array($h . ': ' . $v));
+            $headers[] = $h . ': ' . $v;
         }
 
         // Options for basic authentication.
@@ -162,7 +164,7 @@ class RestClient {
         if ($post) {
             if ($this->sendJSON) {
                 $content = json_encode($vars);
-                curl_setopt($curl, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+                $headers[] = 'Content-Type: application/json';
             } elseif (!empty($this->sendData)) {
                 $content =& $this->sendData;
             } else {
@@ -175,6 +177,7 @@ class RestClient {
             curl_setopt($curl, CURLOPT_COOKIE, $this->cookieImplode($this->cookies));
         }
 
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
         $this->raw = curl_exec($curl);
         $this->status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         curl_close($curl);
@@ -204,6 +207,9 @@ class RestClient {
             $this->results = json_decode($this->raw, true);
             switch($this->status) {
                 case 200:
+                case 201:
+                case 202:
+                case 203:
                     // If there is a success callback.
                     return $this->requestSuccess();
                     break;
