@@ -1,6 +1,7 @@
 <?php
 
 use Lightning\Tools\Messenger;
+use Lightning\Tools\Output;
 use Lightning\Tools\Request;
 use Lightning\Tools\Router;
 
@@ -11,8 +12,11 @@ require_once 'Lightning/bootstrap.php';
 $handler = Router::getRoute();
 
 if (empty($handler)) {
-    // TODO: show 404;
-    echo "No handler found.\n";
+    if (Request::isCLI()) {
+        echo "No handler found.\n";
+    } else {
+        Output::http(404);
+    }
     exit;
 }
 
