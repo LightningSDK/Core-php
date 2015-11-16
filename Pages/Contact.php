@@ -26,6 +26,8 @@ class Contact extends Page {
     protected $page = 'contact';
     protected $nav = 'contact';
 
+    protected $sender_email;
+
     protected function hasAccess() {
         return true;
     }
@@ -42,7 +44,7 @@ class Contact extends Page {
      */
     public function postSendMessage() {
         // Make sure the sender's email address is valid.
-        if (!$sender_email = Request::post('email', 'email')) {
+        if (!$this->sender_email = Request::post('email', 'email')) {
             Messenger::error('Please enter a valid email address.');
             return $this->get();
         }
@@ -53,11 +55,6 @@ class Contact extends Page {
         }
 
         $subject = Configuration::get('contact.subject');
-        $body = "
-Name: {$_POST['name']}
-Email: {$sender_email}
-Message:
-{$_POST['message']}";
         $to_addresses = Configuration::get('contact.to');
 
         $mailer = new Mailer();
@@ -65,9 +62,9 @@ Message:
             $mailer->to($to);
         }
         $sent = $mailer
-            ->from($sender_email)
+            ->from($this->sender_email)
             ->subject($subject)
-            ->message($body)
+            ->message($this->getMessageBody())
             ->send();
 
         if (!$sent) {
@@ -77,7 +74,7 @@ Message:
             // Send an email to to have them test for spam.
             if ($auto_responder = Configuration::get('contact.auto_responder')) {
                 $auto_responder_mailer = new Mailer();
-                $result = $auto_responder_mailer->sendOne($auto_responder, UserModel::loadByEmail($sender_email) ?: new UserModel(array('email' => $sender_email)));
+                $result = $auto_responder_mailer->sendOne($auto_responder, UserModel::loadByEmail($this->sender_email) ?: new UserModel(array('email' => $this->sender_email)));
                 if ($result && Configuration::get('contact.spam_test')) {
                     // Set the notice.
                     Navigation::redirect('/message', array('msg' => 'spam_test'));
@@ -85,5 +82,14 @@ Message:
             }
             Navigation::redirect('/message', array('msg' => 'contact_sent'));
         }
+    }
+
+    protected function getMessageBody() {
+        return '
+Name: ' . Request::post('name') . '<br>
+Email: ' . $this->sender_email . '<br>
+IP: ' . Request::server(Request::IP) . '<br>
+Message:<br>
+' . Request::post('message');
     }
 }

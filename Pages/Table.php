@@ -2377,6 +2377,10 @@ abstract class Table extends Page {
                     case 'bit':
                         $val = ['bit' => decbin(Request::get($field['form_field'], 'int'))];
                         break;
+                    case 'text':
+                    case 'mediumtext':
+                    case 'longtext':
+                    case 'div':
                     case 'html':
                         $val = Request::get($field['form_field'],
                             'html',

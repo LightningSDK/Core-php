@@ -44,6 +44,18 @@ class Request {
         return !empty($_SERVER['HTTPS']) || static::getHeader(static::X_FORWARDED_PROTO) == 'https';
     }
 
+    /**
+     * Determine if the request is made from the command line.
+     * This can be either CLI routes or Jobs.
+     *
+     * @return boolean
+     *
+     * @TODO need a more accurate way to determine this on other systems.
+     */
+    public static function isCLI() {
+        return PHP_SAPI == 'cli';
+    }
+
     public static function getHeader($header) {
         $nginx_header = 'HTTP_' . strtoupper(preg_replace('/-/', '_', $header));
         if (isset($_SERVER[$nginx_header])) {
@@ -298,7 +310,11 @@ class Request {
                 return intval(Scrub::boolean($data));
                 break;
             case 'explode':
-                $data = explode(',', trim($data, ','));
+                $data = trim($data, ',');
+                if ($data === "") {
+                    return [];
+                }
+                $data = explode(',', $data);
             case 'array':
             case 'array_keys':
                 $args = func_get_args();
