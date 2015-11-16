@@ -916,7 +916,14 @@ class Database extends Singleton {
         $values = array();
         $parsed = $this->parseQuery($query, $values);
         $this->query($parsed, $values);
-        $result = $this->result->fetchAll(PDO::FETCH_ASSOC);
+        if (!empty($query['indexed_by'])) {
+            $result = [];
+            while ($row = $this->result->fetch(PDO::FETCH_ASSOC)) {
+                $result[$row[$query['indexed_by']]] = $row;
+            }
+        } else {
+            $result = $this->result->fetchAll(PDO::FETCH_ASSOC);
+        }
         $this->timerEnd();
         return $result;
     }
@@ -949,17 +956,16 @@ class Database extends Singleton {
         return $results;
     }
 
+    /**
+     * @deprecated
+     *
+     * @param $query
+     * @param $key
+     * @return array
+     */
     public function selectIndexedQuery($query, $key) {
-        $values = [];
-        $parsed = $this->parseQuery($query, $values);
-        $this->query($parsed, $values);
-        // TODO: This is built in to PDO.
-        $result = [];
-        while ($row = $this->result->fetch(PDO::FETCH_ASSOC)) {
-            $result[$row[$key]] = $row;
-        }
-        $this->timerEnd();
-        return $result;
+        $query['indexed_by'] = $key;
+        return $this->selectAllQuery($query);
     }
 
     /**
