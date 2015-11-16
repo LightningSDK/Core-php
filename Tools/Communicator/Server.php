@@ -83,32 +83,9 @@ class Server extends API {
                     $this->$d = $result;
                 }
             } catch(Exception $e) {
-                Messenger::error($e->getMessage());
+                Messenger::error($this->verbose ? $e->getMessage() : 'There was an error processing your request.');
             }
         }
-    }
-
-    /**
-     * Terminate the program and send any current errors or messages.
-     *
-     * @param string $error
-     *   An optional error message to add at fail time.
-     */
-    protected function _die($error='') {
-        // These must be global to send to the foot file.
-        // @todo fire some final callback
-
-        if ($this->verbose) {
-            Messenger::error($error);
-        }
-
-        // Call the shutdown function.
-        if (!empty($this->shutdown_function) && is_callable($this->shutdown_function)) {
-            call_user_func($this->shutdown_function, $this->output, FALSE, FALSE);
-        }
-
-        $this->finalize();
-        Output::jsonData($this->output);
     }
 
     protected function finalize() {
