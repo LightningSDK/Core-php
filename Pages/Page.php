@@ -21,59 +21,85 @@ class Page extends PageView {
 
     protected $new = false;
 
+    protected $fullPage;
+
     protected function hasAccess() {
         return true;
     }
 
     public function get() {
-        $user = ClientUser::getInstance();
-        $template = Template::getInstance();
-
         $request = Request::getLocation();
         $content_locator = empty($request) ? 'index' : Request::getFromURL('/(.*)\.html$/') ?: '404';
 
+        // LOAD PAGE DETAILS
+        if ($this->fullPage = $this->loadPage($content_locator)) {
+            header('HTTP/1.0 200 OK');
+            if (Configuration::get('page.modification_date') && $this->fullPage['last_update'] > 0) {
+                header("Last-Modified: ".gmdate("D, d M Y H:i:s", $this->fullPage['last_update'])." GMT");
+            }
+        } elseif ($this->new) {
+            $this->fullPage['title'] = '';
+            $this->fullPage['keywords'] = '';
+            $this->fullPage['description'] = '';
+            $this->fullPage['url'] = '';
+            $this->fullPage['body'] = 'This is your new page.';
+            $this->fullPage['layout'] = 0;
+            $this->fullPage['site_map'] = 1;
+            CKEditor::init();
+            JS::startup('lightning.page.edit();');
+        } elseif ($this->fullPage = $this->loadPage('404')) {
+            header('HTTP/1.0 404 NOT FOUND');
+            $this->fullPage['url'] = Request::get('page');
+        } else {
+            Output::http('404');
+        }
+
+        $this->prepare();
+    }
+
+    public function prepare() {
+        $user = ClientUser::getInstance();
+        $template = Template::getInstance();
+
+        // Replace special tags.
+        $this->fullPage['body_rendered'] = $this->renderContent($this->fullPage['body']);
+
         // Determine if the user can edit this page.
-        $template->set('editable', $user->isAdmin());
+        if ($user->isAdmin()) {
+            JS::set('page.source', $this->fullPage['body']);
+            $template->set('editable', $user->isAdmin());
+        }
 
         // Set the page template.
         $template->set('content', 'page');
 
-        // LOAD PAGE DETAILS
-        if ($full_page = $this->loadPage($content_locator)) {
-            header('HTTP/1.0 200 OK');
-            if (Configuration::get('page.modification_date') && $full_page['last_update'] > 0) {
-                header("Last-Modified: ".gmdate("D, d M Y H:i:s", $full_page['last_update'])." GMT");
+        // PREPARE FORM DATA CONTENTS
+        foreach (array('title', 'keywords', 'description') as $meta_data) {
+            $this->fullPage[$meta_data] = Scrub::toHTML($this->fullPage[$meta_data]);
+            if (!empty($this->fullPage[$meta_data])) {
+                Configuration::set('page_' . $meta_data, str_replace("*", Configuration::get('page_' . $meta_data), $this->fullPage[$meta_data]));
             }
-        } elseif ($this->new) {
-            $full_page['title'] = '';
-            $full_page['keywords'] = '';
-            $full_page['description'] = '';
-            $full_page['url'] = '';
-            $full_page['body'] = 'This is your new page.';
-            $full_page['layout'] = 0;
-            $full_page['site_map'] = 1;
-            CKEditor::init();
-            JS::startup('lightning.page.edit();');
-        } elseif ($full_page = $this->loadPage('404')) {
-            header('HTTP/1.0 404 NOT FOUND');
-            $full_page['url'] = Request::get('page');
-            $template->set('page_blank',true);
-        } else {
-            header('HTTP/1.0 404 NOT FOUND');
-            $full_page['title'] = 'Lightning';
-            $full_page['keywords'] = 'Lightning';
-            $full_page['description'] = 'Lightning';
-            $full_page['url'] = '';
-            $full_page['body'] = 'Your site has not been set up.';
-            $full_page['layout'] = 0;
-            $full_page['site_map'] = 1;
-            $template->set('page_blank',true);
         }
 
-        // Replace special tags.
-        $full_page['body_rendered'] = $full_page['body'];
+        if ($this->fullPage['url'] == "" && isset($_GET['page'])) {
+            $this->fullPage['url'] = $_GET['page'];
+        }
+        else {
+            $this->fullPage['url'] = Scrub::toHTML($this->fullPage['url']);
+        }
+
+        $template->set('page_header', $this->fullPage['title']);
+        $template->set('full_page', $this->fullPage);
+        $template->set('full_width', $this->fullPage['layout'] == 1);
+    }
+
+    public function setPage($page) {
+        $this->fullPage = $page;
+    }
+
+    protected function renderContent($content) {
         $matches = array();
-        preg_match_all('|{{.*}}|', $full_page['body_rendered'], $matches);
+        preg_match_all('|{{.*}}|', $content, $matches);
         foreach ($matches as $match) {
             if (!empty($match)) {
                 $match_clean = trim($match[0], '{} ');
@@ -81,38 +107,16 @@ class Page extends PageView {
                 switch ($match_clean[0]) {
                     case 'template':
                         $sub_template = new Template();
-                        $full_page['body_rendered'] = str_replace(
+                        $content = str_replace(
                             $match[0],
                             $sub_template->render($match_clean[1], true),
-                            $full_page['body_rendered']
+                            $content
                         );
                         break;
                 }
             }
         }
-
-        if ($user->isAdmin()) {
-            JS::set('page.source', $full_page['body']);
-        }
-
-        // PREPARE FORM DATA CONTENTS
-        foreach (array('title', 'keywords', 'description') as $meta_data) {
-            $full_page[$meta_data] = Scrub::toHTML($full_page[$meta_data]);
-            if (!empty($full_page[$meta_data])) {
-                Configuration::set('page_' . $meta_data, str_replace("*", Configuration::get('page_' . $meta_data), $full_page[$meta_data]));
-            }
-        }
-
-        if ($full_page['url'] == "" && isset($_GET['page'])) {
-            $full_page['url'] = $_GET['page'];
-        }
-        else {
-            $full_page['url'] = Scrub::toHTML($full_page['url'],ENT_QUOTES);
-        }
-
-        $template->set('page_header', $full_page['title']);
-        $template->set('full_page', $full_page);
-        $template->set('full_width', $full_page['layout'] == 1);
+        return $content;
     }
 
     public function loadPage($content_locator) {
