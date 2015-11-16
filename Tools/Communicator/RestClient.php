@@ -74,6 +74,10 @@ class RestClient {
             $this->auto_template[] = $var;
     }
 
+    public function setMultiple($vars) {
+        $this->vars = $vars + $this->vars;
+    }
+
     public function setHeader($header, $value) {
         $this->headers[$header] = $value;
     }
