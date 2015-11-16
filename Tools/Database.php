@@ -366,6 +366,14 @@ class Database extends Singleton {
         return $this->result;
     }
 
+    public function queryArray($query) {
+        $values = array();
+        $parsed = $this->parseQuery($query, $values);
+        $this->query($parsed, $values);
+        $this->timerEnd();
+        return $this->result;
+    }
+
     /**
      * Checks if at least one entry exists.
      *
@@ -691,7 +699,15 @@ class Database extends Singleton {
      * @todo This should be protected.
      */
     public function parseQuery($query, &$values, $type = 'SELECT') {
+        // Update can be implicit if doing UPDATE SELECT.
+        if (!empty($query['update'])) {
+            $type = 'UPDATE';
+        }
         $output = $type . ' ';
+
+        if ($type == 'UPDATE') {
+            $output .= ' ' . $this->parseTable($query['update'], $values);
+        }
         if ($type == 'SELECT') {
             $output .= $this->implodeFields(!empty($query['select']) ? $query['select'] : '*');
         }
@@ -701,7 +717,12 @@ class Database extends Singleton {
         if (!empty($query['join'])) {
             $output .= $this->parseJoin($query['join'], $values);
         }
+        if (!empty($query['set'])) {
+            // For INSERT and UPDATE queries.
+            $output .= ' SET ' . $this->sqlImplode($query['set'], $values, ', ', true);
+        }
         if (!empty($query['where'])) {
+            // For ALL queries.
             $output .= ' WHERE ' . $this->sqlImplode($query['where'], $values, ' AND ');
         }
         if (!empty($query['group_by'])) {
