@@ -1375,9 +1375,15 @@ class Database extends Singleton {
                             $values[] = isset($v[2]) ? $v[2] : $v[1];
                             break;
                         // Where a specific bit is not set.
-                        case '!&';
+                        case '!&':
                             $a2[] = "{$field} & ? != ?";
                             $values[] = $v[1];
+                            $values[] = $v[1];
+                            break;
+                        case '-=':
+                            $v[1] = -$v[1];
+                        case '+=':
+                            $a2[] = "{$field} = {$field} + ?";
                             $values[] = $v[1];
                             break;
                         default:
