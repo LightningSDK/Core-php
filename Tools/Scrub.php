@@ -281,4 +281,12 @@ class Scrub {
     public static function float($val) {
         return floatval(str_replace(',', '', $val));
     }
+
+    public static function decimal($val) {
+        $string = str_replace(' ', '', $val);
+        if (preg_match('|^-?[0-9]*.?[0-9]*$|', $string)) {
+            return $string;
+        }
+        return false;
+    }
 }
