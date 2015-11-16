@@ -6,6 +6,7 @@ use Lightning\Tools\Scrub;
 use Lightning\View\HTML;
 
 class BasicHTML {
+
     /**
      * Build a select/option field.
      *
@@ -23,10 +24,7 @@ class BasicHTML {
      */
     public static function select($name, $values, $default = null, $attributes = array()) {
         // Add any attributes.
-        $attribute_string = '';
-        foreach ($attributes as $key => $attribute) {
-            $attribute_string .= ' ' . $key . '="' . (is_array($attribute) ? implode(' ', $attribute) : $attribute) . '"';
-        }
+        $attribute_string = HTML::implodeAttributes($attributes);
 
         // Build the main tag.
         $select_name = !empty($attributes['multiple']) ? $name . '[]' : $name;
@@ -70,6 +68,18 @@ class BasicHTML {
         }
 
         return $output . '</div>';
+    }
+
+    public static function text($id, $value, $attributes = array()) {
+        // This only applies to text fields.
+        if (empty($attributes['max_length']) && !empty($attributes['size'])) {
+            $attributes['max_length'] = $attributes['size'];
+        }
+        $attributes['name'] = $id;
+        $attributes['id'] = $id;
+        $attributes['value'] = $value;
+        $attributes['type'] = 'text';
+        return '<input ' . HTML::implodeAttributes($attributes) . ' />';
     }
 
     public static function password($id, $value, $options = array()) {

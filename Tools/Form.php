@@ -84,7 +84,7 @@ class Form {
                 return BasicHTML::textarea($field, $default, $attributes);
             case 'text':
             default:
-                return Text::textField($field, $default, $attributes);
+                return BasicHTML::text($field, $default, $attributes);
         }
     }
 
