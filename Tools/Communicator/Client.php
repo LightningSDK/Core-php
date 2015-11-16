@@ -9,7 +9,6 @@ use Exception;
 use Lightning\Tools\Data;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
-use Lightning\Tools\Configuration;
 use Lightning\Tools\Output;
 
 /**
@@ -99,7 +98,10 @@ class Client extends RestClient {
 
             return $this->processResponse();
         } catch (Exception $e) {
-            Output::error('There was an error processing your request. Please try again later. (2): ' . $e->getMessage());
+            if ($this->verbose) {
+                Output::error($e->getMessage());
+            }
+            Output::error("There was an error processing your request. Please try again later. (2)");
         }
     }
 
