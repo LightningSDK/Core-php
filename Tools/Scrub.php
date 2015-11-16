@@ -138,6 +138,8 @@ class Scrub {
      *
      * @return string|boolean
      *   The valid hex string or false if this is not a valid hex string.
+     *
+     * TODO: this should be a-f and should not include a dot.
      */
     public static function hex($code) {
         $code = str_replace(' ', '', $code);
