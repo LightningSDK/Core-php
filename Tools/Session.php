@@ -328,7 +328,7 @@ class Session extends Singleton {
     public function scramble() {
         $new_sess_id = static::getNewSessionId();
         if (empty($new_sess_id)) {
-            _die('Session error.');
+            Output::error('Session error.');
         }
         Database::getInstance()->update('session', array('session_key'=>$new_sess_id), array('session_id'=>$this->id));
         $this->session_key = $new_sess_id;
