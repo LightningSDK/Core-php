@@ -48,10 +48,9 @@ class Page extends PageView {
             CKEditor::init();
             JS::startup('lightning.page.edit();');
         } elseif ($this->fullPage = $this->loadPage('404')) {
-            header('HTTP/1.0 404 NOT FOUND');
-            $this->fullPage['url'] = Request::get('page');
+            http_response_code(404);
         } else {
-            Output::http('404');
+            Output::http(404);
         }
 
         $this->prepare();
@@ -66,8 +65,11 @@ class Page extends PageView {
 
         // Determine if the user can edit this page.
         if ($user->isAdmin()) {
-            JS::set('page.source', $this->fullPage['body']);
-            $template->set('editable', $user->isAdmin());
+            $this->fullPage['url'] = Request::getFromURL('/(.*)\.html$/');
+            if (!empty($this->fullPage['url'])) {
+                JS::set('page.source', $this->fullPage['body']);
+                $template->set('editable', $user->isAdmin());
+            }
         }
 
         // Set the page template.
