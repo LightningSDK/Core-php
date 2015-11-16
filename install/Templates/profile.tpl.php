@@ -1,4 +1,4 @@
-<?
+<?php
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Form;
 use Lightning\View\Field\Checkbox;
@@ -65,7 +65,7 @@ use Lightning\View\Field\Checkbox;
                     <td>List</td>
                     <td>Subscribed</td>
                 </tr>
-                <?
+                <?php
                 $subscribe_other_active = false;
                 foreach ($all_lists as $list):
                     if (!empty($list['name']) && !empty($list['visible'])): ?>

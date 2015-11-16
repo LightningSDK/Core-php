@@ -1,5 +1,5 @@
 <!doctype html>
-<?
+<?php
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
@@ -116,7 +116,7 @@ use Lightning\View\CSS;
                     <div class="medium-8 columns">
                         <? if (!empty($page_header)): ?>
                             <h1 id="page_header"><?=$page_header?></h1>
-                        <?
+                        <?php
                         endif;
                         $errors = Messenger::getErrors();
                         if (count($errors) > 0): ?>
@@ -129,7 +129,7 @@ use Lightning\View\CSS;
                             <div class="messenger message">
                                 <ul><? foreach ($messages as $message): ?><li><?=$message?></li><? endforeach; ?></ul>
                             </div>
-                        <?
+                        <?php
                         endif;
                         if (!empty($content)) :
                             $this->build($content);
@@ -142,7 +142,7 @@ use Lightning\View\CSS;
                     <div class="large-12 columns">
                         <? if (!empty($page_header)): ?>
                             <h1 id="page_header"><?=$page_header?></h1>
-                        <?
+                        <?php
                         endif;
                         $errors = Messenger::getErrors();
                         if (count($errors) > 0): ?>
@@ -155,7 +155,7 @@ use Lightning\View\CSS;
                             <div class="messenger message">
                                 <ul><? foreach ($messages as $message): ?><li><?=$message?></li><? endforeach; ?></ul>
                             </div>
-                        <?
+                        <?php
                         endif;
                         if (!empty($content)) :
                             $this->build($content);
@@ -164,7 +164,7 @@ use Lightning\View\CSS;
                 <? endif; ?>
             </div>
             <pre>
-            <?
+            <?php
             if (ClientUser::getInstance()->isAdmin()) {
                 $database = Database::getInstance();
                 print_r($database->getQueries());
