@@ -2,13 +2,13 @@
     <div id='inner-content'>
         <? use Lightning\Pages\Page;
 
-        if ($editable): ?>
+        if (!empty($editable)): ?>
             <div class="page_edit_links">
                 <a href='/page?action=new'>New Page</a> | <a href='#' onclick='lightning.page.edit();return false;'>Edit This Page</a>
             </div>
         <? endif; ?>
 
-        <? if ($editable): ?>
+        <? if (!empty($editable)): ?>
             <div class='page_edit' <? if (empty($action) || $action != 'new'): ?>style="display:none;"<? endif; ?>>
                 <input type="button" name="submit" class='button' onclick="lightning.page.save()" value="Save" /><br />
                 <? if (!empty($action) && $action == 'new'): ?>
@@ -31,7 +31,7 @@
         <?= \Lightning\Tools\CKEditor::editableDiv('page_display',
             array('spellcheck' => true, 'content' => $full_page['body_rendered'], 'finder' => true)
         ); ?>
-        <? if ($editable):?>
+        <? if (!empty($editable)):?>
             <input type="button" name="submit" class='button page_edit' onclick="lightning.page.save();" value="Save" <? if (empty($action) || $action != 'new'):?>style="display:none;"<? endif; ?> /><br />
         <? endif; ?>
 

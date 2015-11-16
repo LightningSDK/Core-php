@@ -33,8 +33,10 @@ class Router extends Singleton {
         }
 
         // If we are in CLI mode, and there is a command for cli only.
-        if ($cli && isset(self::$routes['cli_only'][$url])) {
-            return self::$routes['cli_only'][$url];
+        if ($cli) {
+            return isset(self::$routes['cli_only'][$url])
+                ? self::$routes['cli_only'][$url]
+                : null;
         }
         // If this is listed in the static url list.
         if (isset(self::$routes['static'][$url])) {
@@ -48,25 +50,16 @@ class Router extends Singleton {
                 }
             }
         }
-
-        // Nothing found, use the default route.
-        if (!empty(self::$routes['default'])) {
-            return self::$routes['default'];
-        }
     }
 
     public static function getRoute() {
         global $argv;
-        if (static::isCLI()) {
+        if (Request::isCLI()) {
             // Handle a command line request.
             return static::parseRoute($argv[1], true);
         } else {
             // Handle a web page request.
             return static::parseRoute(Request::getLocation(), false);
         }
-    }
-
-    public static function isCLI() {
-        return PHP_SAPI == 'cli';
     }
 }

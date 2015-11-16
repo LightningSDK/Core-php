@@ -7,6 +7,7 @@
 namespace Lightning\Tools\Communicator;
 use Exception;
 use Lightning\Tools\Configuration;
+use Lightning\Tools\Logger;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Output;
 use Lightning\Tools\Request;
@@ -31,7 +32,7 @@ class Server extends API {
         parent::__construct();
         $this->action_namespace = Configuration::get('communicator.server.action_namespace', 'Source\\Actions');
         $this->verbose = Configuration::get('communicator.server.debug', false);
-        $this->shutdown_function = Configuration::get('communicator.server.debug');
+        $this->shutdown_function = Configuration::get('communicator.server.shutdown_function');
     }
 
     public function __set($var, $value) {
@@ -70,6 +71,7 @@ class Server extends API {
     }
 
     protected function handleException($exception) {
+        Logger::exception($exception);
         Messenger::error($exception->getMessage());
     }
 

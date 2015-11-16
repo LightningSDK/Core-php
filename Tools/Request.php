@@ -12,6 +12,13 @@ class Request {
     const IP_INT = 'ip_int';
 
     /**
+     * A list of request headers.
+     *
+     * @var array
+     */
+    protected static $headers = [];
+
+    /**
      * The parsed input from a posted JSON string.
      *
      * @var array
@@ -35,6 +42,18 @@ class Request {
      */
     public static function isHTTPS() {
         return !empty($_SERVER['HTTPS']) || static::getHeader(static::X_FORWARDED_PROTO) == 'https';
+    }
+
+    /**
+     * Determine if the request is made from the command line.
+     * This can be either CLI routes or Jobs.
+     *
+     * @return boolean
+     *
+     * @TODO need a more accurate way to determine this on other systems.
+     */
+    public static function isCLI() {
+        return PHP_SAPI == 'cli';
     }
 
     public static function getHeader($header) {
@@ -291,7 +310,11 @@ class Request {
                 return intval(Scrub::boolean($data));
                 break;
             case 'explode':
-                $data = explode(',', trim($data, ','));
+                $data = trim($data, ',');
+                if ($data === "") {
+                    return [];
+                }
+                $data = explode(',', $data);
             case 'array':
             case 'array_keys':
                 $args = func_get_args();

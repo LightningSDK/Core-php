@@ -19,9 +19,6 @@
 [submodule "Vendor/ckeditor"]
 	path = Vendor/ckeditor
 	url = https://github.com/ckeditor/ckeditor-releases.git
-[submodule "Vendor/ckfinder"]
-	path = Vendor/ckfinder
-	url = https://github.com/jonlil/ckfinder.git
 [submodule "Vendor/plancakeEmailParser"]
 	path = Vendor/plancakeEmailParser
 	url = https://github.com/macdabby/official-library-php-email-parser.git

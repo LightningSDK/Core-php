@@ -211,13 +211,22 @@ class Session extends Singleton {
     }
 
     /**
+     * When the instance is removed, make sure to destroy the session also.
+     */
+    public static function destroyInstance() {
+        if ($session = self::getInstance(false)) {
+            $session->destroy();
+        }
+        parent::destroyInstance();
+    }
+
+    /**
      * Destroy the current session and remove it from the database.
      */
     public function destroy () {
         if (!empty($this->id)) {
             Database::getInstance()->delete('session', array('session_id' => $this->id));
-            $this->data = null;
-            $this->id = 0;
+            $this->__data = [];
         }
         $this->clearCookie();
     }

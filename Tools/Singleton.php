@@ -70,6 +70,14 @@ class Singleton {
     }
 
     /**
+     * Remove the static instance from memory.
+     */
+    protected static function destroyInstance() {
+        $class = static::getStaticName();
+        unset(self::$instances[$class]);
+    }
+
+    /**
      * Set the singleton instance.
      *
      * @param string $object

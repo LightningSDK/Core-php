@@ -338,13 +338,13 @@ class Message extends Object {
 
         // Replace conditions.
         $conditions = array();
-        $conditional_search = '/{IF ([a-z_]+)}(.*){ENDIF \1}/imU';
+        $conditional_search = '/{IF ([a-z_]+)}(.*){ENDIF \1}/imsU';
         preg_match_all($conditional_search, $source, $conditions);
         foreach ($conditions[1] as $key => $var) {
             if (!empty($this->customVariables[$var]) || !empty($this->internalCustomVariables[$var])) {
-                $source = preg_replace($conditional_search, $conditions[2][$key], $source);
+                $source = str_replace($conditions[0][$key], $conditions[2][$key], $source);
             } else {
-                $source = preg_replace($conditional_search, '', $source);
+                $source = str_replace($conditions[0][$key], '', $source);
             }
         }
 
@@ -396,11 +396,8 @@ class Message extends Object {
             
             // Replace standard variables.
             $this->defaultVariables = [
-                'USER_ID' => $this->user->id,
                 'MESSAGE_ID' => $this->message_id,
-                'FULL_NAME' => (!empty($this->user->first) ? $this->user->fullName() : $this->default_name),
                 'URL_KEY' => !empty($this->user->id) ? User::urlKey($this->user->id, $this->user->salt) : '',
-                'EMAIL' => $this->user->email,
 
                 // Add the unsubscribe link.
                 'UNSUBSCRIBE' => $this->unsubscribe && !empty($this->user->user_id) ? $this->getUnsubscribeString() : '',
@@ -410,13 +407,23 @@ class Message extends Object {
             ];
         } else {
             $this->defaultVariables = [
-                // Add the unsubscribe link.
-                'UNSUBSCRIBE' => $this->unsubscribe && !empty($this->user->user_id) ? $this->getUnsubscribeString() : '',
                 'TRACKING_IMAGE' => '',
             ];
             if (!empty($vars)) {
                 $this->defaultVariables += $vars;
             }
+        }
+
+        if (!empty($this->user)) {
+            // Add per user variables.
+            $this->defaultVariables += [
+                'FULL_NAME' => (!empty($this->user->first) ? $this->user->fullName() : $this->default_name),
+                'FIRST_NAME' => $this->user->first,
+                'LAST_NAME' => $this->user->last,
+                'USER_ID' => $this->user->id,
+                'EMAIL' => $this->user->email,
+                'UNSUBSCRIBE' => $this->unsubscribe && !empty($this->user->user_id) ? $this->getUnsubscribeString() : '',
+            ];
         }
     }
     
