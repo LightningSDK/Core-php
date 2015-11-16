@@ -35,6 +35,14 @@ class RestClient {
     protected $verbose = false;
 
     /**
+     * Parameteres for basic authentication.
+     *
+     * @var string
+     */
+    protected $user = null;
+    protected $password = '';
+
+    /**
      * Initialize some vars.
      */
     function __construct($server_address) {
@@ -44,6 +52,10 @@ class RestClient {
 
     public function forwardCookies($forward = true) {
         $this->forwardCookies = $forward;
+    }
+
+    public function setCookie($cookie, $value) {
+        $this->cookies[$cookie] = $value;
     }
 
     /**
@@ -68,6 +80,11 @@ class RestClient {
 
     public function setBody($data) {
         $this->sendData = $data;
+    }
+
+    public function setBasicAuth($user, $password) {
+        $this->user = $user;
+        $this->password = $password;
     }
 
     /**
@@ -135,6 +152,13 @@ class RestClient {
         foreach ($this->headers as $h => $v) {
             curl_setopt($curl, CURLOPT_HTTPHEADER, array($h . ': ' . $v));
         }
+
+        // Options for basic authentication.
+        if (!empty($this->user)) {
+            curl_setopt($curl, CURLOPT_USERPWD, $this->user . ':' . $this->password);
+        }
+
+        // Options for posting data.
         if ($post) {
             if ($this->sendJSON) {
                 $content = json_encode($vars);
@@ -189,13 +213,15 @@ class RestClient {
                     // If there is an error handler.
                     return $this->requestForbidden($this->status);
                     break;
+                default:
+                    // Unrecognized.
+                    if ($this->verbose) {
+                        echo $this->raw;
+                    }
+                    throw new Exception('Unrecognized response code: ' . $this->status);
             }
         }
-        // Unrecognized.
-        if ($this->verbose) {
-            echo $this->raw;
-        }
-        throw new Exception('Unrecognized response code: ' . $this->status);
+        return false;
     }
 
     protected function requestSuccess() {
