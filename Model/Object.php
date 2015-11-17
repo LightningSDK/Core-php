@@ -12,6 +12,9 @@ class Object {
      */
     const PRIMARY_KEY = '';
 
+    /**
+     * The table where the object is stored.
+     */
     const TABLE = '';
 
     /**
@@ -21,8 +24,18 @@ class Object {
      */
     public function __construct($data = array()) {
         $this->__data = $data;
+        $this->initJSONEncodedFields();
     }
 
+    /**
+     * Load an array of objects.
+     *
+     * @param array $where
+     * @param array $fields
+     * @param string $final
+     *
+     * @return array
+     */
     public static function loadAll($where = [], $fields = [], $final = '') {
         $objects = [];
         $results = Database::getInstance()->select(static::TABLE, $where, $fields, $final);
@@ -55,23 +68,33 @@ class Object {
     public function save() {
         $db = static::getDatabase();
 
-        if ($this->__changed_all || empty($this->id)) {
-            $values = $this->__data;
-        } else {
-            $values = array();
-            foreach ($this->__changed as $val) {
-                $values[$val] = $this->__data[$val];
-            }
+        $values = $this->getModifiedValues();
+
+        if (empty($values)) {
+            return;
         }
 
-        if (empty($this->id)) {
+        if ($this->__forceNewOverwrite) {
+            // A new object was created with a hard coded ID.
+            $db->delete(static::TABLE, [static::PRIMARY_KEY => $this->id]);
+            $db->insert(static::TABLE, $values);
+        } elseif (empty($this->id)) {
+            // A new object was created, PK will be created with auto increment.
             $this->id = $db->insert(static::TABLE, $values);
         } else {
+            // An existing object was loaded with a primary key.
             $db->update(static::TABLE, $values, [static::PRIMARY_KEY => $this->id]);
         }
     }
 
+    /**
+     * Delete the object from the database.
+     */
     public function delete() {
+        if (empty($this->id)) {
+            // The object was never saved.
+            return;
+        }
         static::getDatabase()->delete(static::TABLE, [static::PRIMARY_KEY => $this->id]);
     }
 
