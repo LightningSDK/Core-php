@@ -39,7 +39,7 @@ trait ObjectDataStorage {
      *
      * @var boolean
      */
-    protected $__forceNewOverwrite = false;
+    protected $__createNew = false;
 
     /**
      * Assist the getter function by checking for isset()
@@ -118,7 +118,7 @@ trait ObjectDataStorage {
     public function __set($var, $value) {
         switch($var) {
             case 'id':
-                $this->__forceNewOverwrite = true;
+                $this->__createNew = true;
                 $this->__changed[static::PRIMARY_KEY] = static::PRIMARY_KEY;
                 $this->__data[static::PRIMARY_KEY] = $value;
                 break;

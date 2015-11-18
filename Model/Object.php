@@ -74,13 +74,12 @@ class Object {
             return;
         }
 
-        if ($this->__forceNewOverwrite) {
+        if ($this->__createNew) {
             // A new object was created with a hard coded ID.
-            $db->delete(static::TABLE, [static::PRIMARY_KEY => $this->id]);
             $db->insert(static::TABLE, $values);
         } elseif (empty($this->id)) {
             // A new object was created, PK will be created with auto increment.
-            $this->id = $db->insert(static::TABLE, $values);
+            $this->__data[static::PRIMARY_KEY] = $db->insert(static::TABLE, $values);
         } else {
             // An existing object was loaded with a primary key.
             $db->update(static::TABLE, $values, [static::PRIMARY_KEY => $this->id]);
