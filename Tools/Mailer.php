@@ -126,7 +126,6 @@ class Mailer {
      */
     public function clearAddresses() {
         $this->mailer->ClearAddresses();
-        $this->fromSet = false;
         return $this;
     }
 
@@ -190,6 +189,7 @@ class Mailer {
     public function setUser($user) {
         $this->message->setUser($user);
         $this->message->setDefaultVars();
+        $this->clearAddresses();
         $this->to($user->email, $user->first . ' ' . $user->last);
         $this->built = false;
     }
@@ -372,21 +372,8 @@ class Mailer {
     public function send() {
         
         // Need to create a Message object to use a template
-        $this->message = new Message(NULL, FALSE);
         $this->message->resetCustomVariables($this->customVariables);
-        
-        // Assuming the to address is the only one
-        $to = $this->mailer->getToAddresses();
-        $toName = $to[0][1];
-        
-        // Set custom variables
-        $vars = [
-            'FULL_NAME'     => $toName,
-            'CONTENT_BODY'  => $this->mailer->Body,
-            'SUBJECT'       => $this->mailer->Subject,
-        ];
-        $this->message->setDefaultVars($vars);
-        
+
         // Set subject and message body. They are applied to a template already
         // TODO: If the message chain is called twice (eg, creating the mail, setting the to address,
         // setting the subject, sending, setting another to address, sending again, this could cause
