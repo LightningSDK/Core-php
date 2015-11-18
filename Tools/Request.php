@@ -310,7 +310,11 @@ class Request {
                 return intval(Scrub::boolean($data));
                 break;
             case 'explode':
-                $data = explode(',', trim($data, ','));
+                $data = trim($data, ',');
+                if ($data === "") {
+                    return [];
+                }
+                $data = explode(',', $data);
             case 'array':
             case 'array_keys':
                 $args = func_get_args();
