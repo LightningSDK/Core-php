@@ -251,7 +251,7 @@ class Mailer {
             );
         }
 
-        if (!$this->built) {
+        if ($this->message && !$this->built) {
             // Rebuild with the new custom variables.
             $this->message->resetCustomVariables($this->customVariables);
             $this->subject($this->message->getSubject());
@@ -370,17 +370,20 @@ class Mailer {
      * etc.
      */
     public function send() {
-        
-        // Need to create a Message object to use a template
-        $this->message->resetCustomVariables($this->customVariables);
 
-        // Set subject and message body. They are applied to a template already
-        // TODO: If the message chain is called twice (eg, creating the mail, setting the to address,
-        // setting the subject, sending, setting another to address, sending again, this could cause
-        // the subject and message to nest recursively, or not render correctly the second time around.
-        $this->subject($this->message->getSubject());
-        $this->message($this->message->getMessage());
-        
+        // If we are sending a message object, it needs to be built.
+        if ($this->message) {
+            // Need to create a Message object to use a template
+            $this->message->resetCustomVariables($this->customVariables);
+
+            // Set subject and message body. They are applied to a template already
+            // TODO: If the message chain is called twice (eg, creating the mail, setting the to address,
+            // setting the subject, sending, setting another to address, sending again, this could cause
+            // the subject and message to nest recursively, or not render correctly the second time around.
+            $this->subject($this->message->getSubject());
+            $this->message($this->message->getMessage());
+        }
+
         // Actual send
         return $this->sendMessage();
    }
