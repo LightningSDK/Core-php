@@ -89,5 +89,21 @@ class ClientUser extends Singleton {
         if (!self::getInstance()->isAdmin()) {
             Output::accessDenied();
         }
+        return true;
+    }
+
+    /**
+     * Require to log in if not, and to have the supplied permission or give an access denied page.
+     *
+     * @param integer $permission
+     *
+     * @return boolean
+     */
+    public static function requirePermission($permission) {
+        self::requireLogin();
+        if (!self::getInstance()->hasPermission($permission)) {
+            Output::accessDenied();
+        }
+        return true;
     }
 }
