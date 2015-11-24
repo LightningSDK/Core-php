@@ -183,6 +183,9 @@ class RestClient {
             $this->results = json_decode($this->raw, true);
             switch($this->status) {
                 case 200:
+                case 201:
+                case 202:
+                case 203:
                     // If there is a success callback.
                     return $this->requestSuccess();
                     break;
