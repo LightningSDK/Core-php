@@ -653,7 +653,7 @@ class User extends Object {
     public function logOut() {
         $session = Session::getInstance();
         if ($this->id > 0 && is_object($session)) {
-            $session->destroy();
+            $session::destroyInstance();
         }
     }
 
