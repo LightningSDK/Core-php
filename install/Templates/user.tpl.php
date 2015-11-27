@@ -1,4 +1,4 @@
-<?
+<?php
 
 use Lightning\Tools\Form;
 
@@ -17,7 +17,7 @@ use Lightning\Tools\Form;
     };
 
 </script>
-<?
+<?php
 if (empty($action) || $action == 'join' || $action == 'register'): ?>
     <fieldset>
         <legend>Create a username and password</legend>

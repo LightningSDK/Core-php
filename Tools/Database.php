@@ -366,6 +366,14 @@ class Database extends Singleton {
         return $this->result;
     }
 
+    public function queryArray($query) {
+        $values = array();
+        $parsed = $this->parseQuery($query, $values);
+        $this->query($parsed, $values);
+        $this->timerEnd();
+        return $this->result;
+    }
+
     /**
      * Checks if at least one entry exists.
      *
@@ -691,7 +699,15 @@ class Database extends Singleton {
      * @todo This should be protected.
      */
     public function parseQuery($query, &$values, $type = 'SELECT') {
+        // Update can be implicit if doing UPDATE SELECT.
+        if (!empty($query['update'])) {
+            $type = 'UPDATE';
+        }
         $output = $type . ' ';
+
+        if ($type == 'UPDATE') {
+            $output .= ' ' . $this->parseTable($query['update'], $values);
+        }
         if ($type == 'SELECT') {
             $output .= $this->implodeFields(!empty($query['select']) ? $query['select'] : '*');
         }
@@ -701,7 +717,12 @@ class Database extends Singleton {
         if (!empty($query['join'])) {
             $output .= $this->parseJoin($query['join'], $values);
         }
+        if (!empty($query['set'])) {
+            // For INSERT and UPDATE queries.
+            $output .= ' SET ' . $this->sqlImplode($query['set'], $values, ', ', true);
+        }
         if (!empty($query['where'])) {
+            // For ALL queries.
             $output .= ' WHERE ' . $this->sqlImplode($query['where'], $values, ' AND ');
         }
         if (!empty($query['group_by'])) {
@@ -895,7 +916,14 @@ class Database extends Singleton {
         $values = array();
         $parsed = $this->parseQuery($query, $values);
         $this->query($parsed, $values);
-        $result = $this->result->fetchAll(PDO::FETCH_ASSOC);
+        if (!empty($query['indexed_by'])) {
+            $result = [];
+            while ($row = $this->result->fetch(PDO::FETCH_ASSOC)) {
+                $result[$row[$query['indexed_by']]] = $row;
+            }
+        } else {
+            $result = $this->result->fetchAll(PDO::FETCH_ASSOC);
+        }
         $this->timerEnd();
         return $result;
     }
@@ -928,17 +956,16 @@ class Database extends Singleton {
         return $results;
     }
 
+    /**
+     * @deprecated
+     *
+     * @param $query
+     * @param $key
+     * @return array
+     */
     public function selectIndexedQuery($query, $key) {
-        $values = [];
-        $parsed = $this->parseQuery($query, $values);
-        $this->query($parsed, $values);
-        // TODO: This is built in to PDO.
-        $result = [];
-        while ($row = $this->result->fetch(PDO::FETCH_ASSOC)) {
-            $result[$row[$key]] = $row;
-        }
-        $this->timerEnd();
-        return $result;
+        $query['indexed_by'] = $key;
+        return $this->selectAllQuery($query);
     }
 
     /**
@@ -1348,9 +1375,15 @@ class Database extends Singleton {
                             $values[] = isset($v[2]) ? $v[2] : $v[1];
                             break;
                         // Where a specific bit is not set.
-                        case '!&';
+                        case '!&':
                             $a2[] = "{$field} & ? != ?";
                             $values[] = $v[1];
+                            $values[] = $v[1];
+                            break;
+                        case '-=':
+                            $v[1] = -$v[1];
+                        case '+=':
+                            $a2[] = "{$field} = {$field} + ?";
                             $values[] = $v[1];
                             break;
                         default:

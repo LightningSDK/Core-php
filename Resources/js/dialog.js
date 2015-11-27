@@ -23,6 +23,7 @@ lightning.dialog = {
             this.dialogBox = $('#dialog_box');
             this.dialogBoxLoader = $('#dialog_box_loader');
             this.dialogBoxInner = $('#dialog_box_inner');
+            this.clear();
         }
     },
 

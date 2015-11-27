@@ -1,4 +1,4 @@
-<?
+<?php
 /**
  * @file
  * Contains Lightning\Tools\Recaptcha

@@ -1,4 +1,4 @@
-<?
+<?php
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Scrub;
 use Lightning\Tools\Configuration;

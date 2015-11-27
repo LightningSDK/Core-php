@@ -6,13 +6,23 @@ use Lightning\Tools\Scrub;
 
 class HTML {
     public static function implodeAttributes($attributes) {
-        $output = '';
-        foreach ($attributes as $name => &$value) {
+        // Normalize some basic attributes.
+        if (!empty($attributes['classes'])) {
+            $attributes['class'] = $attributes['classes'];
+            unset($attributes['classes']);
+        }
+        if (isset($attributes['autocomplete'])) {
+            $attributes['autocomplete'] = empty($options['autocomplete']) ? 'off' : 'on';
+        }
+
+        $attribute_string = '';
+        foreach ($attributes as $key => $value) {
             if (is_array($value)) {
                 $value = implode(' ', $value);
             }
-            $output .= $name . '="' . Scrub::toHTML($value) . '" ';
+            $attribute_string .= $key . '="' . Scrub::toHTML($value) . '" ';
         }
-        return $output;
+
+        return $attribute_string;
     }
 }
