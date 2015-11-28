@@ -64,7 +64,8 @@ class BasicHTML {
         $output = '<div ' . HTML::implodeAttributes($attributes) . '>';
 
         foreach ($options as $value => $label) {
-            $output .= '<label><input type="radio" name="' . $name . '" value="' . $value . '" /> ' . $label . '</label>';
+            $checked = $default === $value ? 'CHECKED="checked"' : '';
+            $output .= '<label><input type="radio" name="' . $name . '" value="' . $value . '" ' . $checked . ' /> ' . $label . '</label>';
         }
 
         return $output . '</div>';

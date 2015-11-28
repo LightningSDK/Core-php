@@ -300,12 +300,6 @@ class Request {
 
         // Return the value.
         switch($type) {
-            case 'int':
-                return Scrub::int($data);
-                break;
-            case 'float':
-                return Scrub::float($data);
-                break;
             case 'boolean-int':
                 return intval(Scrub::boolean($data));
                 break;
@@ -346,6 +340,9 @@ class Request {
             case 'email':
             case 'boolean':
             case 'hex':
+            case 'int':
+            case 'float':
+            case 'decimal':
             case 'base64':
             case 'encrypted':
             case 'html':
