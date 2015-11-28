@@ -246,6 +246,10 @@ class RestClient {
         return $this->vars;
     }
 
+    public function clearRequestVars() {
+        $this->vars = [];
+    }
+
     public function getRaw() {
         return $this->raw;
     }
