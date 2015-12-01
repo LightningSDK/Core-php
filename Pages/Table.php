@@ -103,7 +103,12 @@ abstract class Table extends Page {
      * @var FileCache
      */
     protected $importCache;
-    protected $importSettings = [];
+    protected $importHandlers = [];
+
+    /**
+     * @var CSVImport
+     */
+    protected $CSVImporter;
 
     /**
      * Criteria of elements editable by this object.
@@ -460,10 +465,7 @@ abstract class Table extends Page {
 
     public function postImport() {
         $this->action = 'import-align';
-        $this->CSVImporter = new CSVImport();
-        $fields = $this->get_fields($this->table, $this->preset);
-        $this->CSVImporter->setPrimaryKey($this->getKey());
-        $this->CSVImporter->setFields($fields);
+        $this->initCSVImporter();
         $this->CSVImporter->cacheImportFile();
         if (!$this->editable || !$this->addable || !$this->importable) {
             Messenger::error('Access Denied');
@@ -471,11 +473,25 @@ abstract class Table extends Page {
     }
 
     public function postImportAlign() {
-        $this->importDataFile();
+        $this->initCSVImporter();
+        $this->CSVImporter->importDataFile();
         if (!$this->editable || !$this->addable || !$this->importable) {
             Messenger::error('Access Denied');
+        } else {
+            Messenger::message('Import successful!');
         }
         Navigation::redirect();
+    }
+
+    protected function initCSVImporter() {
+        $this->CSVImporter = new CSVImport();
+        $this->CSVImporter->setTable($this->table);
+        $fields = $this->get_fields($this->table, $this->preset);
+        $this->CSVImporter->setPrimaryKey($this->getKey());
+        $this->CSVImporter->setFields($fields);
+        foreach ($this->importHandlers as $name => $handler) {
+            $this->CSVImporter->setHandler($name, $handler);
+        }
     }
 
     public function getList() {
