@@ -40,6 +40,10 @@ class Logger extends Singleton {
         error_log($error);
     }
 
+    public static function exception($exception) {
+        self::errorLogStacktrace($exception->getCode(), $exception->getMessage(), $exception->getFile(), $exception->getLine(), $exception->getTrace());
+    }
+
     /**
      * Write an unaltered message to the log.
      *
@@ -84,7 +88,7 @@ class Logger extends Singleton {
         return '[' . date('Y-m-d H:i:s') . ']';
     }
 
-    public static function errorLogStacktrace($errno, $errstr, $errfile, $errline) {
+    public static function errorLogStacktrace($errno, $errstr, $errfile, $errline, $trace = null) {
         // This is required to skip errors caught with the @ symbol.
         if (error_reporting() === 0) {
             return;
@@ -104,7 +108,12 @@ class Logger extends Singleton {
             echo ('    ' . $type . ': ' . $errstr . ' in ' . $errfile . ' on line ' . $errline . "\n");
         }
         $started = false;
-        foreach (debug_backtrace() as $row) {
+
+        // If a stacktrace was not supplied (from an exception) get the current stack trace.
+        if ($trace === null) {
+            $trace = debug_backtrace();
+        }
+        foreach ($trace as $row) {
             if ($started || (!empty($row['file']) && $row['file'] == $errfile && $row['line'] == $errline)) {
                 $started = true;
                 $line = '    in ' . (!empty($row['file']) ? $row['file'] : '?') . ' on line ' . (!empty($row['line']) ? $row['line'] : '?');

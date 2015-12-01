@@ -290,6 +290,9 @@ class Output {
         Messenger::error($error);
         if(static::isJSONRequest()) {
             static::json(static::ERROR);
+        } elseif (Request::isCLI()) {
+            $errors = Messenger::getErrors();
+            echo implode($errors, "\n") . "\n";
         } else {
             $template = Template::getInstance();
             if ($error_template = Configuration::get('template.error')) {

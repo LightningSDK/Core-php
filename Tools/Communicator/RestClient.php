@@ -35,6 +35,14 @@ class RestClient {
     protected $verbose = false;
 
     /**
+     * Parameteres for basic authentication.
+     *
+     * @var string
+     */
+    protected $user = null;
+    protected $password = '';
+
+    /**
      * Initialize some vars.
      */
     function __construct($server_address) {
@@ -44,6 +52,10 @@ class RestClient {
 
     public function forwardCookies($forward = true) {
         $this->forwardCookies = $forward;
+    }
+
+    public function setCookie($cookie, $value) {
+        $this->cookies[$cookie] = $value;
     }
 
     /**
@@ -62,12 +74,21 @@ class RestClient {
             $this->auto_template[] = $var;
     }
 
+    public function setMultiple($vars) {
+        $this->vars = $vars + $this->vars;
+    }
+
     public function setHeader($header, $value) {
         $this->headers[$header] = $value;
     }
 
     public function setBody($data) {
         $this->sendData = $data;
+    }
+
+    public function setBasicAuth($user, $password) {
+        $this->user = $user;
+        $this->password = $password;
     }
 
     /**
@@ -137,6 +158,13 @@ class RestClient {
         foreach ($this->headers as $h => $v) {
             $headers[] = $h . ': ' . $v;
         }
+
+        // Options for basic authentication.
+        if (!empty($this->user)) {
+            curl_setopt($curl, CURLOPT_USERPWD, $this->user . ':' . $this->password);
+        }
+
+        // Options for posting data.
         if ($post) {
             if ($this->sendJSON) {
                 $content = json_encode($vars);
@@ -157,6 +185,10 @@ class RestClient {
         $this->raw = curl_exec($curl);
         $this->status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         curl_close($curl);
+
+        if ($this->raw === false) {
+            throw new Exception(curl_error($curl));
+        }
     }
 
     protected function cookieImplode($cookies) {
@@ -195,13 +227,15 @@ class RestClient {
                     // If there is an error handler.
                     return $this->requestForbidden($this->status);
                     break;
+                default:
+                    // Unrecognized.
+                    if ($this->verbose) {
+                        echo $this->raw;
+                    }
+                    throw new Exception('Unrecognized response code: ' . $this->status);
             }
         }
-        // Unrecognized.
-        if ($this->verbose) {
-            echo $this->raw;
-        }
-        throw new Exception('Unrecognized response code: ' . $this->status);
+        return false;
     }
 
     protected function requestSuccess() {
@@ -214,6 +248,10 @@ class RestClient {
 
     public function getRequestVars() {
         return $this->vars;
+    }
+
+    public function clearRequestVars() {
+        $this->vars = [];
     }
 
     public function getRaw() {

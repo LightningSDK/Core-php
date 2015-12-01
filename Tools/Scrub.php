@@ -123,11 +123,28 @@ class Scrub {
      *   A valid email address if found or false.
      */
     public static function email($email) {
-        $email = str_replace(" ", '', strtolower($email));
-        if (!preg_match('/^[_a-zA-Z0-9-]+([_\.\-+][a-zA-Z0-9]+)*@[a-zA-Z0-9\-]+\.[a-zA-Z0-9\-\.]+$/',$email))
+        $email = trim($email);
+        if (!preg_match('/^[_a-z0-9-]+([_\.\-+][a-z0-9]+)*@[a-z0-9\-]+\.[a-z0-9\-\.]+$/i',$email)) {
             return false;
-        else
+        } else {
             return $email;
+        }
+    }
+
+    /**
+     * Validate a bitcoin address.
+     *
+     * @param string $bitcoin_address
+     *
+     * @return boolean|string
+     */
+    public static function bitcoinAddress($bitcoin_address) {
+        $bitcoin_address = trim($bitcoin_address);
+        if (preg_match('/^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/', $bitcoin_address)) {
+            return $bitcoin_address;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -138,6 +155,8 @@ class Scrub {
      *
      * @return string|boolean
      *   The valid hex string or false if this is not a valid hex string.
+     *
+     * TODO: this should be a-f and should not include a dot.
      */
     public static function hex($code) {
         $code = str_replace(' ', '', $code);
@@ -278,5 +297,13 @@ class Scrub {
 
     public static function float($val) {
         return floatval(str_replace(',', '', $val));
+    }
+
+    public static function decimal($val) {
+        $string = str_replace(' ', '', $val);
+        if (preg_match('|^-?[0-9]*.?[0-9]*$|', $string)) {
+            return $string;
+        }
+        return false;
     }
 }

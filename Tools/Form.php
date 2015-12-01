@@ -84,7 +84,7 @@ class Form {
                 return BasicHTML::textarea($field, $default, $attributes);
             case 'text':
             default:
-                return Text::textField($field, $default, $attributes);
+                return BasicHTML::text($field, $default, $attributes);
         }
     }
 
@@ -103,7 +103,9 @@ class Form {
      * @param array $data
      */
     public function setPostedValues($data) {
-        $this->submittedValues = $data + $this->submittedValues;
+        if (is_array($data)) {
+            $this->submittedValues = $data + $this->submittedValues;
+        }
     }
 
     public function getPostedValues() {
@@ -117,13 +119,33 @@ class Form {
             if (!empty($settings['validation'])) {
                 if (is_callable($settings['validation'])) {
                     // This field uses a custom validation method.
-                    $sanitized_value = null;
+                    $sanitized_value = $_POST[$field];
                     $this->valid &= call_user_func($settings['validation'], $sanitized_value);
                     $this->submittedValues[$field] = $sanitized_value;
                     continue;
                 }
                 $type = !empty($settings['validation']['type']) ? $settings['validation']['type'] : '';
                 $posted_value = Request::post($field, $type);
+
+                // Check other constraints.
+                if (in_array($type, ['float', 'int', 'decimal'])) {
+                    if (isset($settings['validation']['positive']) && $settings['validation']['positive'] == false) {
+                        if ($posted_value > 0) {
+                            $posted_value = null;
+                        }
+                    }
+                    if (isset($settings['validation']['negative']) && $settings['validation']['negative'] == false) {
+                        if ($posted_value < 0) {
+                            $posted_value = null;
+                        }
+                    }
+                    if (isset($settings['validation']['zero']) && $settings['validation']['zero'] == false) {
+                        if ($posted_value == 0) {
+                            $posted_value = null;
+                        }
+                    }
+                }
+
                 // Make sure the field is present if required.
                 if (!empty($settings['validation']['required']) && empty($_POST[$field])) {
                     Messenger::error('The field ' . $field_name . ' is required.');
@@ -131,8 +153,9 @@ class Form {
                     $this->valid = false;
                     continue;
                 }
+
                 // Make sure the value is the right format.
-                if (empty($posted_value) && !empty($_POST[$field])) {
+                if ($posted_value === null && !empty($_POST[$field])) {
                     Messenger::error('Please enter a valid ' . $field_name . '.');
                     $this->submittedValues[$field] = Request::post($field);
                     $this->valid = false;

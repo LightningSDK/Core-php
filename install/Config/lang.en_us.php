@@ -1,4 +1,4 @@
-<?
+<?php
 $language = array(
     'contact_sent' => 'Your message has been sent.',
     'unsubscribe' => 'You&rsquo;re receiving this as you previously enquired with us about a product or business or you&rsquo;re a friend through social media. To stop receiving these emails, '
