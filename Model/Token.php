@@ -10,7 +10,7 @@ use Lightning\Tools\Database;
 use Lightning\Tools\Request;
 use Lightning\Tools\Session;
 use Lightning\Tools\Singleton;
-use Source\Servers\RemoteEncryption;
+use Source\Overrides\Tools\Security\Random;
 
 class Token extends Singleton {
 
@@ -74,7 +74,7 @@ class Token extends Singleton {
         $user = ClientUser::getInstance();
         $db = Database::getInstance();
         do{
-            $token = RemoteEncryption::random(32);
+            $token = Random::get(32, Random::BASE64);
         } while ($db->check('action_token', array('key' => $token)));
         // MAKE SURE THERE IS A SESSION
         if (!is_object($session) || !$session->id) {
