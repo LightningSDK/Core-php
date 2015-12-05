@@ -90,7 +90,7 @@ class Token extends Singleton {
             'key' => $token
         ))) {
             // SET MY DETAILS
-            return new self(array(
+            return new static(array(
                 'token_id' => $id,
                 'time' => $time,
                 'user_id' => $user_id,
@@ -116,7 +116,7 @@ class Token extends Singleton {
         $key = Request::post('token', 'base64');
 
         if (!empty($key) && $data = Database::getInstance()->selectRow('action_token', ['key' => $key])) {
-            if ($data['time'] < time() - self::EXPIRE_TIME && !$ignore_expiration) {
+            if ($data['time'] < time() - static::EXPIRE_TIME && !$ignore_expiration) {
                 if ($new_if_not_found) {
                     return static::create();
                 } else {
