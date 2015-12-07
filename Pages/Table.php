@@ -625,6 +625,7 @@ abstract class Table extends Page {
 
         // Update the record.
         $this->loadMainFields();
+        $this->get_row();
         $new_values = $this->getFieldValues($this->fields);
         if ($new_values === false) {
             return $this->getEdit();
@@ -2151,8 +2152,6 @@ abstract class Table extends Page {
             return true;
         if ($field['type'] == "note")
             return true;
-        if ((!empty($field['type']) && $field['type'] == 'hidden') || !empty($field['hidden']))
-            return false;
         if ($field['field'] == $this->getKey())
             return false;
         if ($field['field'] == $this->parentLink)
@@ -2188,8 +2187,6 @@ abstract class Table extends Page {
 
     function userDisplayEdit(&$field) {
         if (!empty($field['list_only']))
-            return false;
-        if ((!empty($field['type']) && $field['type'] == 'hidden') || !empty($field['hidden']))
             return false;
         // TODO: This should be replaced by an overriding method in the child class.
         if (
@@ -2438,7 +2435,8 @@ abstract class Table extends Page {
             }
 
             // If this value is required.
-            if (!empty($field['required']) && empty($val)) {
+            // This is allowed to be empty if it's an encrypted field and there is already and entry with a value.
+            if (!empty($field['required']) && empty($val) && empty($field['encrypted']) && empty($this->list[$f])) {
                 Messenger::error('The field ' . $this->fields[$f]['display_name'] . ' is required.');
                 $dependenciesMet = false;
             }
