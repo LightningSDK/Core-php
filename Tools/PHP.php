@@ -16,7 +16,7 @@ class PHP {
     public static function getArrayPropertyValues(&$array, $property) {
         $values = [];
         foreach ($array as $item) {
-            $values[] = $item['property'];
+            $values[] = $item[$property];
         }
         return $values;
     }
