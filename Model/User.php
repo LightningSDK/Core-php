@@ -813,6 +813,10 @@ class User extends Object {
         Database::getInstance()->insert('user_role', ['user_id' => $this->id, 'role_id' => $role_id], true);
     }
 
+    public function removeRole($role_id) {
+        Database::getInstance()->delete('user_role', ['user_id' => $this->id, 'role_id' => $role_id]);
+    }
+
     /**
      * check if user has permission on this page
      * @param integer $permissionID
