@@ -1,6 +1,6 @@
 <?php
 
-namespace Lightning\Tools\Security;
+namespace Overridable\Lightning\Tools\Security;
 
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Singleton;
@@ -13,17 +13,20 @@ class Random extends Singleton {
     const BASE64 = 4;
     const LONG = 5;
 
-    protected $engine;
-
-    public function __construct() {
-        $this->engine = Configuration::get('random_engine');
-    }
+    protected static $engine = null;
 
     /**
      * @return Random
      */
     public static function getInstance($create = true) {
         return parent::getInstance($create);
+    }
+
+    protected static function getEngine() {
+        if (self::$engine == null) {
+            self::$engine = Configuration::get('random_engine');
+        }
+        return self::$engine;
     }
 
     /**
@@ -33,12 +36,12 @@ class Random extends Singleton {
      *
      * @return string|int
      */
-    public function get($size = 4, $format = self::INT) {
+    public static function get($size = 4, $format = self::INT) {
         // Generate the random data.
-        switch ($this->engine) {
+        switch (self::getEngine()) {
             case MCRYPT_DEV_URANDOM:
             case MCRYPT_DEV_RANDOM:
-                $random = mcrypt_create_iv($size, $this->engine);
+                $random = mcrypt_create_iv($size, self::$engine);
                 break;
             default:
                 $random = mt_rand();

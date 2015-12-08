@@ -1,6 +1,6 @@
 <?php
 
-namespace Lightning\Tools\Security;
+namespace Overridable\Lightning\Tools\Security;
 
 class Encryption {
     public static function generateKeyPair($bits = 1024, $type = OPENSSL_KEYTYPE_RSA, $digest = 'sha512') {
@@ -126,8 +126,13 @@ class Encryption {
         return openssl_decrypt($data, 'AES-256-CBC', $key, true, $iv);
     }
 
+    public static function saltAndHash($data) {
+        $salt = Random::getInstance()->get(32, Random::BASE64);
+        return $salt . ':' . base64_encode(hash('sha256', $data . base64_decode($salt), true));
+    }
+
     public static function checkSaltHash($data, $salt_hash) {
         list($salt, $hash) = explode(':', $salt_hash);
-        return $hash == hash('sha256', $data . pack('H*', $salt));
+        return $hash == base64_encode(hash('sha256', $data . base64_decode($salt), true));
     }
 }

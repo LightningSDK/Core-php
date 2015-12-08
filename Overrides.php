@@ -21,3 +21,8 @@ namespace Lightning\Tools;
 class Session extends \Overridable\Lightning\Tools\Session {}
 class Request extends \Overridable\Lightning\Tools\Request {}
 class ClientUser extends \Overridable\Lightning\Tools\ClientUser {}
+
+namespace Lightning\Tools\Security;
+
+class Encryption extends \Overridable\Lightning\Tools\Security\Encryption {}
+class Random extends \Overridable\Lightning\Tools\Security\Random {}
