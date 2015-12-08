@@ -45,7 +45,7 @@ class RestClient {
     /**
      * Initialize some vars.
      */
-    function __construct($server_address) {
+    public function __construct($server_address) {
         $this->serverAddress = $server_address;
         $this->verbose = Configuration::get('debug', false);
     }

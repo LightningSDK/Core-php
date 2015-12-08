@@ -121,9 +121,7 @@ class Page {
             Output::accessDenied();
         }
 
-        if (!$this->validateToken()) {
-            Navigation::redirect('/message?err=invalid_token');
-        }
+        $this->requireToken();
 
         // If there is a requested action.
         if ($action = Request::get('action')) {
@@ -143,6 +141,12 @@ class Page {
                 // TODO: show 302
                 Output::error('Method not available');
             }
+        }
+    }
+
+    public function requireToken() {
+        if (!$this->validateToken()) {
+            Output::error('You submitted a form with an invalid token. Your requested has been ignored as a security precaution.');
         }
     }
 
