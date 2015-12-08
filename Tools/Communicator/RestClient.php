@@ -27,6 +27,7 @@ class RestClient {
     protected $raw;
     protected $status;
     protected $cookies = array();
+    protected $CAInfo;
     protected $sendJSON = false;
     protected $sendData;
 
@@ -56,6 +57,10 @@ class RestClient {
 
     public function setCookie($cookie, $value) {
         $this->cookies[$cookie] = $value;
+    }
+
+    public function setCAInfo($path) {
+        $this->CAInfo = $path;
     }
 
     /**
@@ -179,6 +184,10 @@ class RestClient {
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         if (!empty($this->cookies)) {
             curl_setopt($curl, CURLOPT_COOKIE, $this->cookieImplode($this->cookies));
+        }
+
+        if (!empty($CAInfo)) {
+            curl_setopt($curl, CURLOPT_CAINFO, $this->CAInfo);
         }
 
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
