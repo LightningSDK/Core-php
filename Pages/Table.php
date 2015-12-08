@@ -103,7 +103,12 @@ abstract class Table extends Page {
      * @var FileCache
      */
     protected $importCache;
-    protected $importSettings = [];
+    protected $importHandlers = [];
+
+    /**
+     * @var CSVImport
+     */
+    protected $CSVImporter;
 
     /**
      * Criteria of elements editable by this object.
@@ -460,10 +465,7 @@ abstract class Table extends Page {
 
     public function postImport() {
         $this->action = 'import-align';
-        $this->CSVImporter = new CSVImport();
-        $fields = $this->get_fields($this->table, $this->preset);
-        $this->CSVImporter->setPrimaryKey($this->getKey());
-        $this->CSVImporter->setFields($fields);
+        $this->initCSVImporter();
         $this->CSVImporter->cacheImportFile();
         if (!$this->editable || !$this->addable || !$this->importable) {
             Messenger::error('Access Denied');
@@ -471,11 +473,25 @@ abstract class Table extends Page {
     }
 
     public function postImportAlign() {
-        $this->importDataFile();
+        $this->initCSVImporter();
+        $this->CSVImporter->importDataFile();
         if (!$this->editable || !$this->addable || !$this->importable) {
             Messenger::error('Access Denied');
+        } else {
+            Messenger::message('Import successful!');
         }
         Navigation::redirect();
+    }
+
+    protected function initCSVImporter() {
+        $this->CSVImporter = new CSVImport();
+        $this->CSVImporter->setTable($this->table);
+        $fields = $this->get_fields($this->table, $this->preset);
+        $this->CSVImporter->setPrimaryKey($this->getKey());
+        $this->CSVImporter->setFields($fields);
+        foreach ($this->importHandlers as $name => $handler) {
+            $this->CSVImporter->setHandler($name, $handler);
+        }
     }
 
     public function getList() {
@@ -609,6 +625,7 @@ abstract class Table extends Page {
 
         // Update the record.
         $this->loadMainFields();
+        $this->get_row();
         $new_values = $this->getFieldValues($this->fields);
         if ($new_values === false) {
             return $this->getEdit();
@@ -2135,8 +2152,6 @@ abstract class Table extends Page {
             return true;
         if ($field['type'] == "note")
             return true;
-        if ((!empty($field['type']) && $field['type'] == 'hidden') || !empty($field['hidden']))
-            return false;
         if ($field['field'] == $this->getKey())
             return false;
         if ($field['field'] == $this->parentLink)
@@ -2172,8 +2187,6 @@ abstract class Table extends Page {
 
     function userDisplayEdit(&$field) {
         if (!empty($field['list_only']))
-            return false;
-        if ((!empty($field['type']) && $field['type'] == 'hidden') || !empty($field['hidden']))
             return false;
         // TODO: This should be replaced by an overriding method in the child class.
         if (
@@ -2422,7 +2435,8 @@ abstract class Table extends Page {
             }
 
             // If this value is required.
-            if (!empty($field['required']) && empty($val)) {
+            // This is allowed to be empty if it's an encrypted field and there is already and entry with a value.
+            if (!empty($field['required']) && empty($val) && empty($field['encrypted']) && empty($this->list[$f])) {
                 Messenger::error('The field ' . $this->fields[$f]['display_name'] . ' is required.');
                 $dependenciesMet = false;
             }
@@ -3483,6 +3497,9 @@ abstract class Table extends Page {
                 }
                 if (!empty($field['full_page'])) {
                     $config['fullPage'] = true;
+                }
+
+                if (!empty($field['full_page']) || $editor == 'full') {
                     $config['allowedContent'] = true;
                 }
 

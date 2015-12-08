@@ -469,7 +469,7 @@ class Message extends Object {
                     // The entry is a full join array.
                     $this->replaceCriteriaVariables($c_table, $field_values);
                     reset($c_table);
-                    if (is_array(current($c_table))) {
+                    if (is_array(current($c_table)) && is_numeric(key($c_table))) {
                         foreach ($c_table as $join) {
                             $query['join'][] = $join;
                         }
