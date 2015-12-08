@@ -480,9 +480,9 @@ class Database extends Singleton {
      */
     public function update($table, $data, $where) {
         $vars = array();
-        $query = 'UPDATE ' . $this->parseTable($table, $vars) . ' SET ' . $this->sqlImplode($data, $vars, ', ', true) . ' WHERE ';
-        if (is_array($where)) {
-            $query .= $this->sqlImplode($where, $vars, ' AND ');
+        $query = 'UPDATE ' . $this->parseTable($table, $vars) . ' SET ' . $this->sqlImplode($data, $vars, ', ', true);
+        if (!empty($where)) {
+            $query .= ' WHERE ' . $this->sqlImplode($where, $vars, ' AND ');
         }
         $this->query($query, $vars);
         $this->timerEnd();

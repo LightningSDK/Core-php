@@ -58,7 +58,7 @@ class Singleton {
      *   The new instance.
      */
     private static function getNewInstance($class) {
-        Bootstrap::classAutoloader($class);
+        ClassLoader::classAutoloader($class);
         // There may be additional args passed to this function.
         $args = func_get_args();
         array_shift($args);
