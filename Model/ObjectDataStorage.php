@@ -140,7 +140,7 @@ trait ObjectDataStorage {
         foreach ($this->__json_encoded_fields as $field) {
             if (!empty($this->__data[$field])) {
                 $this->__json_encoded_source[$field] = $this->__data[$field];
-                $this->__data[$field] = json_decode($this->__data[$field]);
+                $this->__data[$field] = json_decode($this->__data[$field]) ?: new stdClass();
             } else {
                 $this->__data[$field] = new stdClass();
             }
