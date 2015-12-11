@@ -101,6 +101,10 @@ class BasicHTML {
         return '<textarea ' . HTML::implodeAttributes($attributes) . ' >' . Scrub::toHTML($value) . '</textarea>';
     }
 
+    public static function hidden($name, $value = '') {
+        return '<input type="hidden" name="' . $name . '" id="' . $name . '" value="' . $value . '" />';
+    }
+
     /**
      * Set the default class for a set of attributes.
      *
