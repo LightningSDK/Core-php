@@ -218,7 +218,7 @@ class Mailer {
      *   Returns itself for method chaining.
      */
     public function message($message) {
-        $this->mailer->MsgHTML($message);
+        $this->mailer->MsgHTML($message, '', true);
         return $this;
     }
 
