@@ -107,21 +107,33 @@ class Logger extends Singleton {
         if ($output) {
             echo ('    ' . $type . ': ' . $errstr . ' in ' . $errfile . ' on line ' . $errline . "\n");
         }
-        $started = false;
 
+        $formatted_stack = self::formatStacktrace($trace, $errfile, $errline);
+
+        foreach ($formatted_stack as $line) {
+            self::message($line);
+            if ($output) {
+                echo $line . "\n";
+            }
+        }
+    }
+
+    public static function formatStacktrace($trace = null, $errfile = null, $errline = null) {
         // If a stacktrace was not supplied (from an exception) get the current stack trace.
         if ($trace === null) {
             $trace = debug_backtrace();
         }
+
+        $started = false;
+        $output = [];
         foreach ($trace as $row) {
-            if ($started || (!empty($row['file']) && $row['file'] == $errfile && $row['line'] == $errline)) {
+            if ($started || (!empty($row['file']) && !empty($errfile) && $row['file'] == $errfile && $row['line'] == $errline)) {
                 $started = true;
                 $line = '    in ' . (!empty($row['file']) ? $row['file'] : '?') . ' on line ' . (!empty($row['line']) ? $row['line'] : '?');
-                self::message($line);
-                if ($output) {
-                    echo $line . "\n";
-                }
+                $output[] = $line;
             }
         }
+
+        return $output;
     }
 }
