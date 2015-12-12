@@ -45,7 +45,7 @@ class Token extends Singleton {
      * @return Token
      *   The token object.
      */
-    public static function getInstance($create = true) {
+    public static function getInstance($create = true, $reset_time = false, $ignore_expiration = false, $new_if_not_found = false) {
         return call_user_func_array('parent::getInstance', func_get_args());
     }
 
@@ -181,6 +181,10 @@ class Token extends Singleton {
         } else {
             return $this->token_data[$key];
         }
+    }
+
+    public function getAll() {
+        return $this->token_data;
     }
 
     /**
