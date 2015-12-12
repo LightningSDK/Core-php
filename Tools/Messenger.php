@@ -125,7 +125,7 @@ class Messenger {
      */
     public static function storeInSession() {
         // If there is nothing to save, return to prevent session creation.
-        if (empty(self::$messages) && empty(self::$messages)) {
+        if (empty(self::$messages) && empty(self::$errors)) {
             return;
         }
 
