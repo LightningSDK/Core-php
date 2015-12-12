@@ -185,7 +185,7 @@ class RestClient {
             curl_setopt($curl, CURLOPT_COOKIE, $this->cookieImplode($this->cookies));
         }
 
-        if (!empty($CAInfo)) {
+        if (!empty($this->CAInfo)) {
             curl_setopt($curl, CURLOPT_CAINFO, $this->CAInfo);
         }
 
