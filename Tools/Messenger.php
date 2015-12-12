@@ -143,7 +143,7 @@ class Messenger {
      * Load messages and errors from the session.
      */
     public static function loadFromSession() {
-        if ($session = Session::getInstance(false)) {
+        if ($session = Session::getInstance(true, false)) {
             self::$messages = array_merge(self::$messages, $session->getSetting('messages.messages', array()));
             self::$errors = array_merge(self::$errors, $session->getSetting('messages.errors', array()));
             $session->unsetSetting('messages');
