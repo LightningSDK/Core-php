@@ -6,6 +6,7 @@
 
 namespace Lightning\Tools\Communicator;
 use Exception;
+use Lightning\Tools\Data;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Configuration;
@@ -103,9 +104,7 @@ class RestClient {
      * @return null
      */
     function get($var) {
-        if (isset($this->results[$var]))
-            return $this->results[$var];
-        return NULL;
+        return Data::getFromPath($var, $this->results);
     }
 
     function getErrors() {
