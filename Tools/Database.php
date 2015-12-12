@@ -783,17 +783,21 @@ class Database extends Singleton {
                 }
             }
             else {
-                if (!empty($join['left_join'])) {
-                    $output .= ' LEFT JOIN ' . $this->parseTable($join['left_join'], $values);
-                }
-                elseif (!empty($join['right_join'])) {
-                    $output .= ' RIGHT JOIN ' . $this->parseTable($join['right_join'], $values);
-                }
-                elseif (!empty($join['join'])) {
-                    $output .= ' JOIN ' . $this->parseTable($join['join'], $values);
-                }
-                elseif (!empty($join['inner_join'])) {
-                    $output .= ' INNER JOIN ' . $this->parseTable($join['inner_join'], $values);
+                // Parse joins
+                foreach ([
+                             'left_join' => ' LEFT JOIN ',
+                             'right_join' => ' RIGHT JOIN ',
+                             'join' => ' JOIN ',
+                             'inner_join' => ' INNER JOIN ',
+                        ] as $type => $format) {
+                    // Rewrite old queries for backwards compatibility.
+                    if (!empty($join[$format])) {
+                        $output .= $this->parseJoin($join, $values);
+                    }
+                    if (!empty($join[$type])) {
+                        $output .= $format . $this->parseTable($join[$type], $values);
+                        break;
+                    }
                 }
 
                 if (!empty($join['on'])) {
@@ -825,40 +829,35 @@ class Database extends Singleton {
             if (!empty($alias)) {
                 $output .= 'AS `' . $alias . '`';
             }
-            return $output;
         }
         else {
-            if (!empty($table['from'])) {
-                $output = $this->parseTable($table['from'], $values);
-            }
-            if (!empty($table['join'])) {
-                $output .= $this->parseJoin($table['join'], $values);
-            }
-            // If this join is a subquery, wrap it.
-            if (is_array($table)) {
-                if (isset($table['as'])) {
-                    if (!empty($table['fields'])) {
-                        $output = $this->implodeFields($table['fields']) . ' FROM ' . $output;
-                    } else {
-                        $output = ' * FROM ' . $output;
-                    }
-                    if (!empty($table['order'])) {
-                        $output .= $this->implodeOrder($table['order'], $values);
-                    }
-                    $output = '( SELECT ' . $output . ') AS `' . $table['as'] . '`';
-                } elseif (count($table) == 1 && empty($table['from'])) {
-                    $alias = key($table);
-                    $table = current($table);
-                    if (is_array($table)) {
-                        // This must be the new experimental format.
-                        $output = '(' . $this->parseQuery($table, $values) . ') AS `' . $alias . '`';
-                    } else {
-                        $output = '`' . $table . '` AS `' . $alias . '`';
-                    }
+            // If this is a 1 item array with an alias as a key:
+            if (count($table) == 1 && empty($table['from'])) {
+                $alias = key($table);
+                $table = current($table);
+                if (is_array($table)) {
+                    // This must be the new experimental format.
+                    $output = '(' . $this->parseQuery($table, $values) . ') AS `' . $alias . '`';
+                } else {
+                    $output = '`' . $table . '` AS `' . $alias . '`';
                 }
             }
-            return $output;
+
+            // If there is an alias, then it's a subquery that needs to be wrapped.
+            elseif(isset($table['as'])) {
+                $output = $this->parseQuery($table, $values);
+                $output = '(' . $output . ') AS `' . $table['as'] . '`';
+            }
+
+            // If this is a full array without an alais.
+            else {
+                $output = $this->parseTable($table['from'], $values);
+                if (!empty($table['join'])) {
+                    $output .= ' ' . $this->parseJoin($table['join'], $values);
+                }
+            }
         }
+        return $output;
     }
 
     /**

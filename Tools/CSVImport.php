@@ -25,6 +25,10 @@ class CSVImport extends Page {
         $this->fields = $fields;
     }
 
+    public function setTable($table) {
+        $this->table = $table;
+    }
+
     public function setPrimaryKey($key) {
         $this->key = $key;
     }
@@ -149,10 +153,10 @@ class CSVImport extends Page {
     protected function processImportBatch() {
         if (!empty($this->table)) {
             // This is a direct import to a database table.
-            $last_id = $this->database->insertSets($this->table, array_keys($this->fields), $this->values, true);
+            $last_id = $this->database->insertSets($this->table, array_keys($this->values), $this->values, true);
             if (is_callable($this->handlers['importPostProcess'])) {
                 $ids = $last_id ? range($last_id - $this->database->affectedRows() + 1, $last_id) : [];
-                call_user_func_array($this->handlers['importProcess'], [&$this->values, &$ids]);
+                call_user_func_array($this->handlers['importPostProcess'], [&$this->values, &$ids]);
             }
         }
         elseif (!empty($this->handlers['importProcess']) && is_callable($this->handlers['importProcess'])) {

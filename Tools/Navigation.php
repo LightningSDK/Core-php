@@ -11,9 +11,9 @@ class Navigation {
      * @param array $query
      *   Additional query parameters to add.
      */
-    public static function redirect($url = null, $query = array()) {
+    public static function redirect($url = null, $query = []) {
         if (empty($url)) {
-            $url = $_SERVER['REQUEST_URI'];
+            $url = '/' . Request::getLocation();
         }
         if (!empty($query)) {
             $url .= '?' . http_build_query($query);

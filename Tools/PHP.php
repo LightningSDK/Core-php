@@ -3,6 +3,9 @@
 namespace Lightning\Tools;
 
 class PHP {
+
+    protected static $property;
+
     public static function arrayPropertySum(&$array, $property) {
         $value = 0;
         foreach ($array as $a) {
@@ -16,7 +19,7 @@ class PHP {
     public static function getArrayPropertyValues(&$array, $property) {
         $values = [];
         foreach ($array as $item) {
-            $values[] = $item['property'];
+            $values[] = $item[$property];
         }
         return $values;
     }

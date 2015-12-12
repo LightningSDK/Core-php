@@ -45,7 +45,7 @@ class RestClient {
     /**
      * Initialize some vars.
      */
-    function __construct($server_address) {
+    public function __construct($server_address) {
         $this->serverAddress = $server_address;
         $this->verbose = Configuration::get('debug', false);
     }
@@ -184,10 +184,11 @@ class RestClient {
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
         $this->raw = curl_exec($curl);
         $this->status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        $error = curl_error($curl);
         curl_close($curl);
 
         if ($this->raw === false) {
-            throw new Exception(curl_error($curl));
+            throw new Exception($error);
         }
     }
 
@@ -224,8 +225,9 @@ class RestClient {
                 case 401:
                 case 402:
                 case 403:
+                case 500:
                     // If there is an error handler.
-                    return $this->requestForbidden($this->status);
+                    return $this->requestFailed($this->status);
                     break;
                 default:
                     // Unrecognized.
@@ -242,12 +244,16 @@ class RestClient {
         return true;
     }
 
-    protected function requestForbidden($status) {
+    protected function requestFailed($status) {
         return false;
     }
 
     public function getRequestVars() {
         return $this->vars;
+    }
+
+    public function clearRequestVars() {
+        $this->vars = [];
     }
 
     public function getRaw() {

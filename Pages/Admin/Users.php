@@ -84,7 +84,7 @@ class Users extends Table {
         $this->preset['password']['display_value'] = function(&$row) {
             return !empty($row['password']) ? 'Set' : '';
         };
-        $this->importSettings = [
+        $this->importHandlers = [
             'customImportFields' => [$this, 'customImportFields'],
             'importPostProcess' => [$this, 'importPostProcess'],
         ];

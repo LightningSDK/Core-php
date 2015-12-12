@@ -153,17 +153,6 @@ class User extends Object {
     }
 
     /**
-     * Assign a new user type to this user.
-     *
-     * @param integer $type
-     *   The new type.
-     */
-    public function setType($type) {
-        $this->type = $type;
-        Database::getInstance()->update('user', array('type' => $type), array('user_id' => $this->id));
-    }
-
-    /**
      * Check if the supplied password is correct.
      *
      * @param string $pass
@@ -292,7 +281,6 @@ class User extends Object {
             if ($ref = Request::cookie('ref', 'int')) {
                 $updates['referrer'] = $ref;
             }
-            $updates['type'] = 1;
             Database::getInstance()->update('user', $updates, array('user_id' => $user_id));
             $user = static::loadById($user_id);
             $user->sendConfirmationEmail();
@@ -415,7 +403,6 @@ class User extends Object {
             'last' => $last_name,
             'created' => Time::today(),
             'confirmed' => static::requiresConfirmation() ? static::UNCONFIRMED : static::CONFIRMED,
-            'type' => 0,
             // TODO: Need to get the referrer id.
             'referrer' => 0,
         );
@@ -487,7 +474,6 @@ class User extends Object {
                 array(
                     'registered' => $today,
                     'confirmed' => static::requiresConfirmation() ? static::UNCONFIRMED : static::CONFIRMED,
-                    'type' => 1,
                 ),
                 array(
                     'user_id' => $user_info['user_id'],
@@ -510,7 +496,6 @@ class User extends Object {
                 array(
                     'registered' => $today,
                     'confirmed' => static::requiresConfirmation() ? static::UNCONFIRMED : static::CONFIRMED,
-                    'type' => 1,
                 ),
                 array(
                     'user_id' => $user_id,
@@ -811,6 +796,10 @@ class User extends Object {
 
     public function addRole($role_id) {
         Database::getInstance()->insert('user_role', ['user_id' => $this->id, 'role_id' => $role_id], true);
+    }
+
+    public function removeRole($role_id) {
+        Database::getInstance()->delete('user_role', ['user_id' => $this->id, 'role_id' => $role_id]);
     }
 
     /**
