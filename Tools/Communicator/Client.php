@@ -80,6 +80,8 @@ class Client extends RestClient {
      *   Shortcut to add an additional action to post at call time.
      * @return bool
      *   Returns true if no errors from the communicator server.
+     *
+     * @throws Exception
      */
     public function call($action=NULL) {
         try {
@@ -99,9 +101,9 @@ class Client extends RestClient {
             return $this->processResponse();
         } catch (Exception $e) {
             if ($this->verbose) {
-                Output::error($e->getMessage());
+                throw new Exception($e->getMessage());
             }
-            Output::error("There was an error processing your request. Please try again later. (2)");
+            throw new Exception("There was an error processing your request. Please try again later. (2)");
         }
     }
 
@@ -127,9 +129,9 @@ class Client extends RestClient {
             return $this->hasErrors() ? false : true;
         } else {
             if ($this->verbose) {
-                Output::error("Error reading from application!\n{$this->raw}");
+                throw new Exception("Error reading from application!\n{$this->raw}");
             } else {
-                Output::error("Error reading from application!");
+                throw new Exception("Error reading from application!");
             }
         }
     }
@@ -140,7 +142,7 @@ class Client extends RestClient {
             Navigation::redirect($_SERVER['REQUEST_URI'], 307);
         } else {
             // Output the access denied message.
-            Output::error($this->results['errors'][0], $status_code);
+            throw new Exception($this->results['errors'][0], $status_code);
         }
     }
 
