@@ -6,6 +6,7 @@
 
 namespace Lightning\Tools\Communicator;
 use Exception;
+use Lightning\Tools\Data;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Configuration;
@@ -27,6 +28,7 @@ class RestClient {
     protected $raw;
     protected $status;
     protected $cookies = array();
+    protected $CAInfo;
     protected $sendJSON = false;
     protected $sendData;
 
@@ -56,6 +58,10 @@ class RestClient {
 
     public function setCookie($cookie, $value) {
         $this->cookies[$cookie] = $value;
+    }
+
+    public function setCAInfo($path) {
+        $this->CAInfo = $path;
     }
 
     /**
@@ -98,9 +104,7 @@ class RestClient {
      * @return null
      */
     function get($var) {
-        if (isset($this->results[$var]))
-            return $this->results[$var];
-        return NULL;
+        return Data::getFromPath($var, $this->results);
     }
 
     function getErrors() {
@@ -179,6 +183,10 @@ class RestClient {
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         if (!empty($this->cookies)) {
             curl_setopt($curl, CURLOPT_COOKIE, $this->cookieImplode($this->cookies));
+        }
+
+        if (!empty($this->CAInfo)) {
+            curl_setopt($curl, CURLOPT_CAINFO, $this->CAInfo);
         }
 
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);

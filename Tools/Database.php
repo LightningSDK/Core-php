@@ -990,6 +990,7 @@ class Database extends Singleton {
 
     public function selectRowQuery($query) {
         $values = array();
+        $query['limit'] = 1;
         $parsed = $this->parseQuery($query, $values);
         $this->query($parsed, $values);
         $this->timerEnd();

@@ -770,9 +770,10 @@ abstract class Table extends Page {
     }
 
     function render() {
+        $output = '';
         $this->loadMainFields();
         $this->check_default_rowClick();
-        $this->renderHeader();
+        $output .= $this->renderHeader();
 
         if ($this->action == "new" && !$this->addable) {
             Output::error('Access Denied');
@@ -782,7 +783,7 @@ abstract class Table extends Page {
         }
 
         if (!empty($this->renderHandler)) {
-            echo $this->{$this->renderHandler}();
+            $output .= $this->{$this->renderHandler}();
         } else {
             switch($this->action) {
                 case 'pop_return':
@@ -790,9 +791,9 @@ abstract class Table extends Page {
                     break;
                 case 'view':
                 case 'edit':
-                    $this->render_action_header();
+                    $output .= $this->render_action_header();
                 case 'new':
-                    $this->render_form();
+                    $output .= $this->render_form();
                     break;
                 // DELETE CONFIRMATION
                 case 'delete':
@@ -801,23 +802,24 @@ abstract class Table extends Page {
                         break;
                     }
                     $this->confirmMessage = 'Are you sure you want to delete this?';
-                    echo $this->renderConfirmation();
+                    $output .= $this->renderConfirmation();
                     break;
                 case 'import':
-                    echo $this->CSVImporter->renderImportFile();
+                    $output .= $this->CSVImporter->renderImportFile();
                     break;
                 case 'import-align':
-                    echo $this->CSVImporter->renderAlignmentForm();
+                    $output .= $this->CSVImporter->renderAlignmentForm();
                     break;
                 case 'list':
                 default:
-                    if ($this->searchable)
-                        echo $this->renderSearchForm();
+                    if ($this->searchable) {
+                        $output .= $this->renderSearchForm();
+                    }
                     $this->loadList();
-                    $this->render_action_header();
-                    echo '<div class="table_list">';
-                    echo $this->renderList();
-                    echo '</div>';
+                    $output .= $this->render_action_header();
+                    $output .= '<div class="table_list">';
+                    $output .= $this->renderList();
+                    $output .= '</div>';
                     break;
 
             }
@@ -826,6 +828,8 @@ abstract class Table extends Page {
         // TODO: update to use the JS class.
         // we shouldn't need to call this as long as we use the JS class.
         $this->js_init_data();
+
+        return $output;
     }
 
     protected function renderSearchForm() {
@@ -989,12 +993,6 @@ abstract class Table extends Page {
     }
 
     protected function renderHeader() {
-        if (is_array($this->template_vars)) {
-            foreach ($this->template_vars as $row) {
-
-            }
-        }
-
         if (isset($this->custom_templates[$this->action.'_header'])) {
             $template = $this->load_template($this->custom_template_directory.$this->custom_templates[$this->action.'_header']);
             $template = $this->template_item_vars($template, $this->id);
@@ -1003,11 +1001,11 @@ abstract class Table extends Page {
         }
 
         if (is_array($this->template_vars)) {
-            foreach ($this->template_vars as $key=>$val) {
-                $template = str_replace('{'.$key.'}', $val, $template);
+            foreach ($this->template_vars as $key => $val) {
+                $template = str_replace('{' . $key . '}', $val, $template);
             }
         }
-        echo !empty($template) ? $template : '';
+        return !empty($template) ? $template : '';
     }
 
     public function render_action_header() {
@@ -1030,7 +1028,7 @@ abstract class Table extends Page {
         if (!empty($output)) {
             $output .= '<br />';
         }
-        echo $output;
+        return $output;
     }
 
     protected function renderCustomHeaderButtons() {
@@ -1387,14 +1385,12 @@ abstract class Table extends Page {
     /**
      * Render the entire edit/create form.
      *
-     * @param boolean $return
-     *   Whether to return the ouptut or send it to the user.
-     *
-     * @return null|string
+     * @return string
      *   The fully rendered HTML content.
      */
-    function render_form($return = false) {
+    function render_form() {
         if (isset($this->custom_templates[$this->action.'_item'])) {
+            // Render the form using HTML templates.
             $template = $this->load_template($this->custom_template_directory.$this->custom_templates[$this->action.'_item']);
             foreach($this->fields as $field) {
                 switch($this->which_field($field)) {
@@ -1409,58 +1405,64 @@ abstract class Table extends Page {
                 }
             }
             $template = $this->template_item_vars($template, $this->id);
-            if ($return)
-                return $template;
-            else
-                echo $template;
+            return $template;
         } else {
+            // Render the form in a table as basic HTML.
+            $output = '';
 
-            // show form
-            if ($this->action == "view") {
-
-            }
-            if ($this->action == "new") {
-                $new_action = "insert";
+            if ($this->action == 'new') {
+                $new_action = 'insert';
             } else {
-                $new_action = "update";
+                $new_action = 'update';
             }
-            if ($this->action != "view") {
-                $multipart_header = $this->hasUploadfield() ? "enctype='multipart/form-data'" : '';
-                echo "<form action='".$this->createUrl()."' id='form_{$this->table}' method='POST' {$multipart_header}><input type='hidden' name='action' id='action' value='{$new_action}' />";
-                echo Form::renderTokenInput();
+            if ($this->action != 'view') {
+                $multipart_header = $this->hasUploadfield() ? 'enctype="multipart/form-data"' : '';
+                $output .= '<form action="' . $this->createUrl() . '" id="form_' . $this->table . '" method="POST" ' . $multipart_header . '><input type="hidden" name="action" id="action" value="' . $new_action . '" />';
+                $output .= Form::renderTokenInput();
                 if ($return = Request::get('return', 'urlencoded')) {
-                    echo Hidden::render('table_return', $return);
+                    $output .= Hidden::render('table_return', $return);
                 }
             }
             // use the ID if we are editing a current one
             if ($this->action == "edit") {
-                echo '<input type="hidden" name="id" id="id" value="' . $this->id . '" />';
+                $output .= '<input type="hidden" name="id" id="id" value="' . $this->id . '" />';
             }
             if ($this->action == "view" && !$this->readOnly) {
                 if ($this->editable !== false) {
-                    echo "<a href='".$this->createUrl('edit', $this->id)."'><img src='/images/lightning/edit.png' border='0' /></a>";
+                    $output .= "<a href='".$this->createUrl('edit', $this->id)."'><img src='/images/lightning/edit.png' border='0' /></a>";
                 }
                 if ($this->deleteable !== false) {
-                    echo "<a href='".$this->createUrl('delete', $this->id)."'><img src='/images/lightning/remove.png' border='0' /></a>";
+                    $output .= "<a href='".$this->createUrl('delete', $this->id)."'><img src='/images/lightning/remove.png' border='0' /></a>";
                 }
             }
             $style = !empty($this->styles['form_table']) ? "style='{$this->styles['form_table']}'" : '';
-            echo "<table class='table_form_table' {$style}>";
-            unset ($style);
-            if (is_array($this->field_order)) {
-                foreach($this->field_order as $f) {
-                    echo $this->render_form_row($this->fields[$f], $this->list);
-                }
-            } else {
-                foreach($this->fields as $f=>$field) {
-                    echo $this->render_form_row($this->fields[$f], $this->list);
+            $output .= '<table class="table_form_table" '. $style . '>';
+
+            $hidden_fields = [];
+            $field_order = is_array($this->field_order) && !empty($this->field_order) ? $this->field_order : array_keys($this->fields);
+            foreach($field_order as $f) {
+                if (!empty($this->fields[$f]['type']) && $this->fields[$f]['type'] == 'hidden') {
+                    if (!empty($this->fields[$f]['Value'])) {
+                        $hidden_fields[] = BasicHTML::hidden($f, $this->fields[$f]['Value']);
+                    }
+                } else {
+                    $output .= $this->render_form_row($this->fields[$f], $this->list);
                 }
             }
 
-            $this->render_form_linked_tables();
+            $output .= $this->render_form_linked_tables();
 
             // Render all submission buttons
-            $this->renderButtons($new_action);
+            $output .= $this->renderButtons($new_action);
+
+            $output .= implode('', $hidden_fields);
+
+            $output .= '</td></tr></table>';
+            if ($this->action != 'view') {
+                $output .= '</form>';
+            }
+
+            return $output;
         }
     }
 
@@ -1471,6 +1473,8 @@ abstract class Table extends Page {
      *
      * @param string $new_action
      *   Alternative name of the action processing
+     *
+     * #return string
      */
     protected function renderButtons($new_action) {
         /*
@@ -1478,37 +1482,36 @@ abstract class Table extends Page {
          * When it is 'submit', form doesn't get submitted by javascript
          * submit() function.
          */
-        echo '<tr><td colspan="2">';
+        $output = '';
+
+        $output .= '<tr><td colspan="2">';
         if ($this->action != 'view') {
-            echo '<input type="submit" name="sbmt" value="' . $this->button_names[$new_action] . '" class="button">';
+            $output .= '<input type="submit" name="sbmt" value="' . $this->button_names[$new_action] . '" class="button">';
         }
 
         // If exist render all custom buttons
-        $this->renderCustomButtons();
+        $output .= $this->renderCustomButtons();
 
         if ($this->action != 'view') {
             if ($this->cancel) {
-                echo "<input type='button' name='cancel' value='{$this->button_names['cancel']}' onclick='document.location=\"".$this->createUrl()."\";' />";
+                $output .= "<input type='button' name='cancel' value='{$this->button_names['cancel']}' onclick='document.location=\"".$this->createUrl()."\";' />";
             }
             if ($this->refer_return) {
-                echo '<input type="hidden" name="refer_return" value="'.$this->refer_return.'" />';
+                $output .= '<input type="hidden" name="refer_return" value="'.$this->refer_return.'" />';
             }
             if ($new_action == 'update' && $this->enable_serial_update) {
-                echo '<input type="checkbox" name="serialupdate" value="true" checked="checked" /> Edit Next Record';
+                $output .= '<input type="checkbox" name="serialupdate" value="true" checked="checked" /> Edit Next Record';
             }
-            echo $this->form_buttons_after;
-        }
-        echo '</td></tr>';
-        echo '</table>';
-        if ($this->action != 'view') {
-            echo '</form>';
+            $output .= $this->form_buttons_after;
         }
         if ($this->action == "view" && !$this->readOnly) {
             if ($this->editable !== false)
-                echo "<a href='".$this->createUrl('edit', $this->id)."'><img src='/images/lightning/edit.png' border='0' /></a>";
+                $output .= "<a href='".$this->createUrl('edit', $this->id)."'><img src='/images/lightning/edit.png' border='0' /></a>";
             if ($this->deleteable !== false)
-                echo "<a href='".$this->createUrl('delete', $this->id)."'><img src='/images/lightning/remove.png' border='0' /></a>";
+                $output .= "<a href='".$this->createUrl('delete', $this->id)."'><img src='/images/lightning/remove.png' border='0' /></a>";
         }
+
+        return $output;
     }
 
     /**
@@ -1518,6 +1521,7 @@ abstract class Table extends Page {
      *   If there's no custom buttons, just exit the function
      */
     protected function renderCustomButtons() {
+        $output = '';
 
         if (empty($this->custom_buttons)) {
             return FALSE;
@@ -1538,13 +1542,14 @@ abstract class Table extends Page {
             switch ($button['type']) {
                 case self::CB_SUBMITANDREDIRECT:
                     // Submit & Redirect button
-                    $this->renderSubmitAndRedirect($button, $button_id);
+                    $output .= $this->renderSubmitAndRedirect($button, $button_id);
                     break;
                 case self::CB_LINK:
                     $download = !empty($button['download']) ? 'download="' . $button['download'] . '"' : '';
-                    echo '<a href="' . $button['url'] . '" ' . $download . ' class="button">' . $button['text'] . '</a>';
+                    $output .= '<a href="' . $button['url'] . '" ' . $download . ' class="button">' . $button['text'] . '</a>';
             }
         }
+        return $output;
     }
 
     /**
@@ -1555,18 +1560,17 @@ abstract class Table extends Page {
      *   Button data
      * @param string $button_id
      *   Button id which would be used and postfix in html id parameter
+     *
+     * @return string
      */
     protected function renderSubmitAndRedirect($button, $button_id) {
         // Output the button.
-        echo "<input id='custombutton_{$button_id}' type='submit' name='submit' value='{$button['text']}' class='button'/>";
+        return "<input id='custombutton_{$button_id}' type='submit' name='submit' value='{$button['text']}' class='button'/>";
     }
 
     function render_form_row(&$field, $row) {
         $output = '';
         if ($which_field = $this->which_field($field)) {
-            if (isset($f['type'])) {
-                $field['type'] = $this->fields[$field['field']]['type'];
-            }
             // double column width row
             if ($field['type'] == "note") {
                 if ($field['note'] != '') {
@@ -1613,6 +1617,7 @@ abstract class Table extends Page {
     // THIS IS CALLED TO RENDER LINKED TABLES IN view/edit/new MODE
     // (full form)
     function render_form_linked_tables() {
+        $output = '';
         foreach($this->links as $link => &$link_settings) {
             if (empty($link_settings['table'])) {
                 $link_settings['table'] = $link;
@@ -1648,9 +1653,9 @@ abstract class Table extends Page {
             } else {
                 // DISPLAY NAME ON THE LEFT
                 if (isset($link_settings['display_name'])) {
-                    echo "<tr><td>{$link_settings['display_name']}</td><td>";
+                    $output .= "<tr><td>{$link_settings['display_name']}</td><td>";
                 } else {
-                    echo "<tr><td>{$link}</td><td>";
+                    $output .= "<tr><td>{$link}</td><td>";
                 }
 
                 // LOAD THE LINKED ROWS
@@ -1674,13 +1679,13 @@ abstract class Table extends Page {
                     // IN EDIT MODE WITH THE full_form OPTION, SHOW THE FORM WITH ADD/REMOVE LINKS
                     if (!empty($link_settings['full_form'])) {
                         // editable forms (1 to many)
-                        echo $this->render_full_linked_table_editable($link_settings);
+                        $output .= $this->render_full_linked_table_editable($link_settings);
                     } else {
                         // drop down menu (many to many)
                         if (!empty($link_settings['type']) && $link_settings['type'] == 'image') {
-                            echo $this->render_linked_table_editable_image($link_settings);
+                            $output .= $this->render_linked_table_editable_image($link_settings);
                         } else {
-                            echo $this->render_linked_table_editable_select($link_settings);
+                            $output .= $this->render_linked_table_editable_select($link_settings);
                         }
                     }
                 }
@@ -1700,8 +1705,8 @@ abstract class Table extends Page {
                                     $display = str_replace('{'.$f.'}', $this->print_field_value($link_settings['fields'][$f], $l), $display);
                                 }
                             }
-                            echo $display;
-                            echo $link_settings['seperator'];
+                            $output .= $display;
+                            $output .= $link_settings['seperator'];
                             // insert break here?
                         }
                         // THIS IS A MANY TO MANY RELATIONSHIP
@@ -1709,29 +1714,26 @@ abstract class Table extends Page {
                     } elseif (!empty($link_settings['full_form']) && $link_settings['full_form'] === true) {
                         // full form view
                         foreach($link_settings['active_list'] as $l) {
-                            echo "<div class='subtable'><table>";
+                            $output .= "<div class='subtable'><table>";
                             // SHOW FORM FIELDS
                             foreach($link_settings['fields'] as $f=>&$s) {
                                 $s['field'] = $f;
                                 $s['form_field'] = "st_{$link}_{$f}_{$l[$link_settings['key']]}";
                                 if ($this->which_field($s) == "display") {
-                                    echo "<tr><td>{$s['display_name']}</td><td>";
-                                    echo $this->print_field_value($s, $l);
+                                    $output .= "<tr><td>{$s['display_name']}</td><td>";
+                                    $output .= $this->print_field_value($s, $l);
                                 }
                             }
                             // ADD REMOVE LINKS
-                            echo "</table></div>";
+                            $output .= "</table></div>";
                         }
-                    } else {
-                        // list
-                        echo 2;
                     }
                     // LIST MODE
-                } elseif ($this->action == "list") {
-
                 }
             }
         }
+
+        return $output;
     }
 
 
@@ -2974,7 +2976,7 @@ abstract class Table extends Page {
             case "autocomplete":
                 $this->loadList();
                 $output = Array("list"=>$this->list,"search"=>$_POST['st']);
-                echo json_encode($output);
+                Output::json($output);
                 exit;
                 break;
             case "file":
