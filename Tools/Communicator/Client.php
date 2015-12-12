@@ -7,6 +7,7 @@
 namespace Lightning\Tools\Communicator;
 use Exception;
 use Lightning\Tools\Data;
+use Lightning\Tools\Logger;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Output;
@@ -61,16 +62,10 @@ class Client extends RestClient {
 
     /**
      * Adds a request for additional data.
-     * @todo - can this be replaced now that action is an array?
-     *
-     * @param $var
      */
-    public function load($var) {
-        if (is_array($var)) {
-            $this->load = array_merge($this->load, $var);
-        } else {
-            $this->load[] = $var;
-        }
+    public function load() {
+        $args = func_get_args();
+        $this->load = array_merge($this->load, $args);
     }
 
     /**
@@ -127,9 +122,18 @@ class Client extends RestClient {
             return $this->hasErrors() ? false : true;
         } else {
             if ($this->verbose) {
-                Output::error("Error reading from application!\n{$this->raw}");
+                if (function_exists('xdebug_print_function_stack')) {
+                    ob_start();
+                    xdebug_print_function_stack();
+                    $stack_trace = ob_get_contents();
+                    ob_end_clean();
+                } else {
+                    $stack_trace = implode('<br>', Logger::formatStacktrace());
+                }
+
+                Output::error('Error reading from application!' . "\n" . $stack_trace . "\n" . $this->raw);
             } else {
-                Output::error("Error reading from application!");
+                Output::error('Error reading from application!');
             }
         }
     }
