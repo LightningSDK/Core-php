@@ -177,8 +177,9 @@ class Request {
      * @return bool|float|int|string
      */
     public static function post($var, $type='', $subtype='', $default = null) {
-        if (!isset($_POST[$var]))
+        if (!isset($_POST[$var])) {
             return $default;
+        }
 
         $args = func_get_args();
         $args[0] = $_POST[$var];
@@ -196,8 +197,9 @@ class Request {
      * @return mixed
      */
     public static function query($var, $type='', $subtype='', $default = null) {
-        if (!isset($_GET[$var]))
+        if (!isset($_GET[$var])) {
             return $default;
+        }
 
         $args = func_get_args();
         $args[0] = $_GET[$var];
