@@ -2,6 +2,7 @@
 
 namespace Overridable\Lightning\View;
 
+use Exception;
 use Lightning\Model\Blog;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Messenger;
@@ -115,32 +116,36 @@ class Page {
      * rest method.
      */
     public function execute() {
-        $request_type = strtolower(Request::type());
+        try {
+            $request_type = strtolower(Request::type());
 
-        if (!$this->hasAccess()) {
-            Output::accessDenied();
-        }
-
-        $this->requireToken();
-
-        // If there is a requested action.
-        if ($action = Request::get('action')) {
-            $method = Request::convertFunctionName($request_type, $action);
-            if (method_exists($this, $method)) {
-                $this->{$method}();
-                $this->output();
+            if (!$this->hasAccess()) {
+                Output::accessDenied();
             }
-            else {
-                Output::error('There was an error processing your submission.');
-            }
-        } else {
-            if (method_exists($this, $request_type)) {
-                $this->$request_type();
-                $this->output();
+
+            $this->requireToken();
+
+            // If there is a requested action.
+            if ($action = Request::get('action')) {
+                $method = Request::convertFunctionName($request_type, $action);
+                if (method_exists($this, $method)) {
+                    $this->{$method}();
+                    $this->output();
+                }
+                else {
+                    Output::error('There was an error processing your submission.');
+                }
             } else {
-                // TODO: show 302
-                Output::error('Method not available');
+                if (method_exists($this, $request_type)) {
+                    $this->$request_type();
+                    $this->output();
+                } else {
+                    // TODO: show 302
+                    Output::error('Method not available');
+                }
             }
+        } catch (Exception $e) {
+            Output::error($e->getMessage());
         }
     }
 
