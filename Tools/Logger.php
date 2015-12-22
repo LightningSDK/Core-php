@@ -41,7 +41,7 @@ class Logger extends Singleton {
     }
 
     public static function exception($exception) {
-        self::errorLogStacktrace($exception->getCode(), $exception->getMessage(), $exception->getFile(), $exception->getLine(), $exception->getTrace());
+        self::errorLogStacktrace($exception->getCode(), $exception->getMessage(), $exception->getFile(), $exception->getLine(), null, $exception->getTrace());
     }
 
     /**
@@ -88,7 +88,7 @@ class Logger extends Singleton {
         return '[' . date('Y-m-d H:i:s') . ']';
     }
 
-    public static function errorLogStacktrace($errno, $errstr, $errfile, $errline, $trace = null) {
+    public static function errorLogStacktrace($errno, $errstr, $errfile, $errline, $context = null, $trace = null) {
         // This is required to skip errors caught with the @ symbol.
         if (error_reporting() === 0) {
             return;
