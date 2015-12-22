@@ -385,11 +385,12 @@ class Database extends Singleton {
      * @return boolean
      *   Whether there is at least one matching entry.
      */
-    public function check($table, $where = array()) {
-        $fields = empty($fields) ? '*' : implode($fields);
-        $values = array();
-        $where = empty($where) ? '' : ' WHERE ' . $this->sqlImplode($where, $values, ' AND ');
-        $this->query('SELECT ' . $fields . ' FROM ' . $this->parseTable($table, $values) . $where . ' LIMIT 1', $values);
+    public function check($table, $where = []) {
+        $query = [
+            'from' => $table,
+            'where' => $where,
+        ];
+        $this->queryArray($query);
         return $this->result->rowCount() > 0;
     }
 
