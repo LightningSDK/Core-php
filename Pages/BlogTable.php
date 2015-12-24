@@ -27,7 +27,7 @@ class BlogTable extends Table {
 
     protected $preset = array(
         'user_id' => array('type' => 'hidden'),
-        'time' => array('type' => 'datetime', 'unlisted' => true),
+        'time' => array('type' => 'datetime'),
         'url' => array('type' => 'url', 'unlisted' => true),
         'body' => array('editor' => 'full', 'upload' => true),
     );
