@@ -75,9 +75,6 @@ if (count($blog->posts) > 0): ?>
                 <div class="fb-comments" data-numposts="5" data-width="100%" data-colorscheme="light"></div>
 
             <? endif; ?>
-
-            <div data-src="<?=$post['url']?>" class="OUTBRAIN" ></div>
-            <script type="text/javascript">(function(){window.OB_platformType=8;window.OB_langJS="http://widgets.outbrain.com/lang_en.js";window.OBITm="1394419150171";window.OB_recMode="brn_strip";var ob=document.createElement("script");ob.type="text/javascript";ob.async=true;ob.src="http"+("https:"===document.location.protocol?"s":"")+"://widgets.outbrain.com/outbrainLT.js";var h=document.getElementsByTagName("script")[0];h.parentNode.insertBefore(ob,h);})();</script>
         </div>
     <? endforeach; ?>
     <?=$blog->pagination()?>
