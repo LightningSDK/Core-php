@@ -51,6 +51,7 @@ class BlogTable extends Table {
             'type' => 'image',
             'location' => BlogModel::IMAGE_PATH,
             'weblocation' => '/' . BlogModel::IMAGE_PATH,
+            'format' => 'jpg',
         );
 
         $this->action_fields = array(

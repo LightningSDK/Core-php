@@ -94,7 +94,7 @@ class Blog extends Page {
 
         //meta facebook image
         if (count($blog->posts) == 1 && !empty($blog->posts[0]['header_image'])) {
-            $template->set('og_image', Configuration::get('web_root') . $blog->posts[0]['header_image']);
+            $template->set('og_image', Configuration::get('web_root') . $blog->getImage($blog->posts[0]));
         } elseif ($default_image = Configuration::get('blog.default_image')) {
             $template->set('og_image', Configuration::get('web_root') . $default_image);
         }
