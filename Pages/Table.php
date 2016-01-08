@@ -400,7 +400,7 @@ abstract class Table extends Page {
         foreach ($this->list as $row) {
             $datarow = [];
             foreach ( $fields as $field ){
-                // hide hiddens
+                // Hide hidden fields.
                 if ( empty($presets[$field['field']]['type']) OR $presets[$field['field']]['type'] != 'hidden' ){
                     // saving from empty fields
                     // TODO: Default should change based on field type
@@ -440,8 +440,8 @@ abstract class Table extends Page {
         }
 
         // write to file
-        Output::download($this->table.'_' . date('Y-m-d') . '.csv');
         $file = new CSVWriter();
+        $file->setFilename($this->table.'_' . date('Y-m-d') . '.csv');
         // header row
         $file->writeRow($headrow);
         // data rows
@@ -2988,11 +2988,11 @@ abstract class Table extends Page {
                     if (!file_exists($file)) die("No File Uploaded");
                     switch($this->list[$this->fields[$field]['extension']]) {
                         case '.pdf':
-                            header("Content-Type: application/pdf"); break;
+                            Output::setContentType('application/pdf'); break;
                         case '.jpg': case '.jpeg':
-                        header("Content-Type: image/jpeg"); break;
+                            Output::setContentType('image/jpeg'); break;
                         case '.png':
-                            header("Content-Type: image/png"); break;
+                            Output::setContentType('image/png'); break;
                     }
                     readfile($file);
                 } else die ('config error');

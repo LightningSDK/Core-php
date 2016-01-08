@@ -20,8 +20,14 @@ class CSVWriter {
     /**
      *
      */
-    public function __construct() {
-        $this->file = fopen('php://output', 'w');
+    public function __construct($file = null) {
+        if ($file == null) {
+            // This will go to the stdout.
+            $file = 'php://output';
+            // We need an additional header.
+            Output::setContentType('text/csv');
+        }
+        $this->file = fopen($file, 'w');
     }
 
     /**
@@ -31,5 +37,14 @@ class CSVWriter {
      */
     public function writeRow($values) {
         fputcsv($this->file, $values);
+    }
+
+    /**
+     * Initializes the file for downloading.
+     *
+     * @param $filename
+     */
+    public function setFilename($filename) {
+        Output::download($filename);
     }
 }

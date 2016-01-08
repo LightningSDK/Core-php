@@ -209,7 +209,7 @@ class Output {
         }
 
         // Output the data.
-        header('Content-type: application/json');
+        static::setContentType('application/json');
         echo json_encode($output);
         exit;
     }
@@ -242,7 +242,7 @@ class Output {
         }
 
         // Output the data.
-        header('Content-type: application/json');
+        static::setContentType('application/json');
         echo json_encode($data);
 
         // Terminate the script.
@@ -419,6 +419,16 @@ class Output {
             header('Content-Length: ' . $size);
         }
         Output::disableBuffering();
+    }
+
+    /**
+     * Set the content type header.
+     *
+     * @param string $content_type
+     *   The formatted content type, such as text/html.
+     */
+    public static function setContentType($content_type) {
+        header('Content-Type: ' . $content_type);
     }
 
     public static function http($reponse_code) {

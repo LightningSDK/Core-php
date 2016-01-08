@@ -42,7 +42,7 @@ class Track extends Page {
         }
 
         // Output a single pixel image.
-        header('Content-Type: image/png');
+        Output::setContentType('image/png');
         echo base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUAAACnej3aAAAAAXRSTlMAQObYZgAAAApJREFUCNdjYAAAAAIAAeIhvDMAAAAASUVORK5CYII=');
         exit;
     }
