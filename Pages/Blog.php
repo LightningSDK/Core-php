@@ -75,18 +75,26 @@ class Blog extends Page {
             foreach (array('title', 'keywords', 'description', 'author') as $meta_data) {
                 switch ($meta_data) {
                     case 'title' :
-                        $value = $blog->posts[0]['title'] . ' | '
-                            . Configuration::get('meta_data.title') . ' | '
-                            . Scrub::toHTML($blog->body($blog->posts[0]['author_name'],true));
+                        $titles = [];
+                        if (!empty($blog->posts[0]['title'])) {
+                            $titles[] = $blog->posts[0]['title'];
+                        }
+                        if ($title = Configuration::get('meta_data.title')) {
+                            $titles[] = $title;
+                        }
+                        if ($title = Scrub::toHTML($blog->body($blog->posts[0]['author_name'], true))) {
+                            $titles[] = $title;
+                        }
+                        $value = implode(' | ', $titles);
                         break;
                     case 'description':
-                        $value = Scrub::toHTML($blog->body($blog->posts[0]['body'],true));
+                        $value = Scrub::toHTML($blog->body($blog->posts[0]['body'], true));
                         break;
                     case 'author' :
-                        $value = Scrub::toHTML($blog->body($blog->posts[0]['author_name'],true));
+                        $value = Scrub::toHTML($blog->body($blog->posts[0]['author_name'], true));
                         break;
                     default:
-                        $value = Scrub::toHTML($blog->body($blog->posts[0][$meta_data],true));
+                        $value = Scrub::toHTML($blog->body($blog->posts[0][$meta_data], true));
                 }
                 $template->set('page_' . $meta_data, $value);
             }
@@ -94,7 +102,7 @@ class Blog extends Page {
 
         //meta facebook image
         if (count($blog->posts) == 1 && !empty($blog->posts[0]['header_image'])) {
-            $template->set('og_image', Configuration::get('web_root') . $blog->posts[0]['header_image']);
+            $template->set('og_image', Configuration::get('web_root') . $blog->getImage($blog->posts[0]));
         } elseif ($default_image = Configuration::get('blog.default_image')) {
             $template->set('og_image', Configuration::get('web_root') . $default_image);
         }

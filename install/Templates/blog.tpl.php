@@ -2,6 +2,7 @@
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Scrub;
 use Lightning\Tools\Configuration;
+use Lightning\Model\Blog;
 
 $user = ClientUser::getInstance();
 
@@ -11,10 +12,14 @@ if (count($blog->posts) > 0): ?>
     <? foreach ($blog->posts as $post): ?>
         <div class="IndiArticle">
             <? if (!$blog->isList()): ?>
-                <div class="blog-header-image" style="background-image:url(<?= ($post['header_image'])?: Configuration::get('blog.default_image'); ?>);"></div>
+                <?php if ($image = $blog->getImage($post)): ?>
+                    <div class="blog-header-image" style="background-image:url(<?=$image;?>);"></div>
+                <?php endif; ?>
                 <h1><?=$post['title'];?></h1>
             <? else: ?>
-                <a href='/<?=$post['url'];?>.htm'><div class="blog-header-image" style="background-image:url(<?= ($post['header_image']) ? : Configuration::get('blog.default_image'); ?>);"></div></a>
+                <?php if ($image = $blog->getImage($post)): ?>
+                    <a href='/<?=$post['url'];?>.htm'><div class="blog-header-image" style="background-image:url(<?=$image;?>);"></div></a>
+                <?php endif; ?>
                 <h2><a href='/<?=$post['url'];?>.htm'><?=$post['title'];?></a></h2>
             <? endif; ?>
             <div class="blog-date">
@@ -50,15 +55,15 @@ if (count($blog->posts) > 0): ?>
             </div>
             <? if (!$blog->isList()): ?>
                 <? if(!empty($post['author_image'])): ?>
-                    <div class="author">
-                        <img src="/img/blog/<?= $post['author_image']; ?>">
-                        <div class="info">
-                            <h4><?= $post['author_name']; ?></h4>
-                            <p><?= $post['author_description']; ?></p>
-                            <a href="/blog/author/<?= $post['author_url']; ?>">ALL FROM <?= $post['author_name']; ?> <i class="fa fa-angle-right"></i></a>
-                        </div>
+                <div class="author">
+                    <img src="/img/blog/<?= $post['author_image']; ?>">
+                    <div class="info">
+                        <h4><?= $post['author_name']; ?></h4>
+                        <p><?= $post['author_description']; ?></p>
+                        <a href="/blog/author/<?= $post['author_url']; ?>">ALL FROM <?= $post['author_name']; ?> <i class="fa fa-angle-right"></i></a>
                     </div>
-                <? endif; ?>
+                </div>
+            <? endif; ?>
                 <div id="fb-root"></div>
                 <script>(function(d, s, id) {
                         var js, fjs = d.getElementsByTagName(s)[0];
@@ -70,9 +75,6 @@ if (count($blog->posts) > 0): ?>
                 <div class="fb-comments" data-numposts="5" data-width="100%" data-colorscheme="light"></div>
 
             <? endif; ?>
-
-            <div data-src="<?=$post['url']?>" class="OUTBRAIN" ></div>
-            <script type="text/javascript">(function(){window.OB_platformType=8;window.OB_langJS="http://widgets.outbrain.com/lang_en.js";window.OBITm="1394419150171";window.OB_recMode="brn_strip";var ob=document.createElement("script");ob.type="text/javascript";ob.async=true;ob.src="http"+("https:"===document.location.protocol?"s":"")+"://widgets.outbrain.com/outbrainLT.js";var h=document.getElementsByTagName("script")[0];h.parentNode.insertBefore(ob,h);})();</script>
         </div>
     <? endforeach; ?>
     <?=$blog->pagination()?>

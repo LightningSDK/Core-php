@@ -174,6 +174,14 @@ class Blog extends Singleton {
         }
     }
 
+    public function getImage($post) {
+        if (!empty($post['header_image'])) {
+            return '/' . Blog::IMAGE_PATH . '/' . $post['header_image'] . '.jpg';
+        } else {
+            return Configuration::get('blog.default_image');
+        }
+    }
+
     protected function joinAuthorCatTables() {
         return array(
             // Join categories
