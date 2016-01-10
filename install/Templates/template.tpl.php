@@ -15,14 +15,6 @@ use Lightning\View\CSS;
 
     <title><?=Configuration::get('page_title');?></title>
     <link rel="icon" href="/favicon.png" type="image/x-icon">
-    <!-- For third-generation iPad with high-resolution Retina display: -->
-    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="img/icons/apple-touch-icon-144x144-precomposed.png">
-    <!-- For iPhone with high-resolution Retina display: -->
-    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="img/icons/apple-touch-icon-114x114-precomposed.png">
-    <!-- For first- and second-generation iPad: -->
-    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="img/icons/apple-touch-icon-72x72-precomposed.png">
-    <!-- For non-Retina iPhone, iPod Touch, and Android 2.1+ devices: -->
-    <link rel="apple-touch-icon-precomposed" href="img/icons/apple-touch-icon-precomposed.png">
 
     <meta name="keywords" content="<?= $page_keywords ?>" />
     <meta name="robots" content="ALL, INDEX, FOLLOW" />
