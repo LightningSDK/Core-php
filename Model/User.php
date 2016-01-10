@@ -268,7 +268,7 @@ class User extends Object {
             $user = new self($user_info);
             $user->setPass($pass, '', $user_info['user_id']);
             $updates['registered'] = Time::today();
-            Database::getInstance()->update('user', $updates, array('user_id' => $user_info['user_id']));
+            Database::getInstance()->update('user', $updates, ['user_id' => $user_info['user_id']]);
             $user->sendConfirmationEmail();
             return [
                 'success'   => true,
@@ -281,7 +281,9 @@ class User extends Object {
             if ($ref = Request::cookie('ref', 'int')) {
                 $updates['referrer'] = $ref;
             }
-            Database::getInstance()->update('user', $updates, array('user_id' => $user_id));
+            if (!empty($updates)) {
+                Database::getInstance()->update('user', $updates, array('user_id' => $user_id));
+            }
             $user = static::loadById($user_id);
             $user->sendConfirmationEmail();
             return [
