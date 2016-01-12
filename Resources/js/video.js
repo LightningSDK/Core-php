@@ -33,7 +33,23 @@ lightning.video = {
     initYouTube: function() {
         $('.youtube:not(.initted)').each(function() {
             // Based on the YouTube ID, we can easily find the thumbnail image
-            $(this).css('background-image', 'url(//i.ytimg.com/vi/' + this.id + '/maxresdefault.jpg)');
+            var maxres = '//i.ytimg.com/vi/' + this.id + '/maxresdefault.jpg';
+            var defaultres = '//i.ytimg.com/vi/' + this.id + '/hqdefault.jpg';
+            var image = new Image();
+            var container = this;
+            image.onerror = function() {
+                // Downgrade to default res.
+                $(this).css('background-image', 'url(' + defaultres + ')');
+            };
+            image.onload = function() {
+                // Show the max res.
+                if (this.width <= 120) {
+                    $(container).css('background-image', 'url(' + defaultres + ')');
+                } else {
+                    $(container).css('background-image', 'url(' + maxres + ')');
+                }
+            };
+            image.src = maxres;
 
             // Overlay the Play icon to make it look like a video player
             $(this).append($('<div/>', {'class': 'play'}));
