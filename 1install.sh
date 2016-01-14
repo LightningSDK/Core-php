@@ -98,7 +98,7 @@ if [ ! -d $DIR/../js/ckfinder ]; then
   rm ckfinder_php_3.2.0.zip
 
   # Config files.
-  cp $DIR/Vendor/ckfinder/config.js $DIR/../Source/Resources/js/ckfinder_config.js
+  cp $DIR/../js/ckfinder/config.js $DIR/../Source/Resources/js/ckfinder_config.js
   # This may still ask for confirmation
   cp $DIR/install/ckfinder_config_ref.php $DIR/../js/ckfinder/config.php -f
 fi
