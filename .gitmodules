@@ -43,3 +43,6 @@
 [submodule "Vendor/twitterapiclient"]
 	path = Vendor/twitterapiclient
 	url = https://github.com/abraham/twitteroauth.git
+[submodule "Vendor/Font-Awesome"]
+	path = Vendor/Font-Awesome
+	url = git@github.com:FortAwesome/Font-Awesome.git
