@@ -83,6 +83,10 @@ class Request {
         return trim(static::query('request'), '/');
     }
 
+    public static function getDomain() {
+        return !empty($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
+    }
+
     /**
      * Convert a requested action to a controller method name.
      *
