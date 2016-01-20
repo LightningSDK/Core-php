@@ -160,4 +160,24 @@ class Messenger {
     public static function setVerbose($verbose = true) {
         self::$verbose = $verbose;
     }
+
+    public static function renderErrorsAndMessages() {
+        $output = '';
+        if (!empty(self::$errors)) {
+            $output .= '<div class="messenger error">';
+            foreach (self::$errors as $error) {
+                $output .= '<li>' . Scrub::toHTML($error) . '</li>';
+            }
+            $output .= '</div>';
+        }
+        if (!empty(self::$messages)) {
+            $output .= '<div class="messenger message">';
+            foreach (self::$messages as $message) {
+                $output .= '<li>' . Scrub::toHTML($message) . '</li>';
+            }
+            $output .= '</div>';
+        }
+
+        return $output;
+    }
 }
