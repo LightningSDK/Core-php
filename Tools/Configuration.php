@@ -58,14 +58,15 @@ class Configuration {
      */
     protected static function loadConfiguration() {
         if (empty(self::$configuration)) {
-            foreach (self::getConfigurations() as $config_file)
-            if (file_exists($config_file)) {
-                self::$configuration = array_replace_recursive(
-                    self::getConfigurationData($config_file),
-                    self::$configuration
-                );
-            } else {
-                echo "not found $config_file";
+            foreach (self::getConfigurations() as $config_file) {
+                if (file_exists($config_file)) {
+                    self::$configuration = array_replace_recursive(
+                        self::getConfigurationData($config_file),
+                        self::$configuration
+                    );
+                } else {
+                    echo "not found $config_file";
+                }
             }
         }
     }
