@@ -11,11 +11,18 @@ class Time extends Field {
     /**
      * Get today's date on the JD calendar.
      *
+     * @param DateTime $time
+     *   A time object that might have a timezone set to return a different date time.
+     *
      * @return integer
      *   The JD date of the server.
      */
-    public static function today() {
-        return gregoriantojd(date('m'), date('d'), date('Y'));
+    public static function today(DateTime $time = null) {
+        if ($time) {
+            return gregoriantojd($time->format('m'), $time->format('d'), $time->format('Y'));
+        } else {
+            return gregoriantojd(date('m'), date('d'), date('Y'));
+        }
     }
 
     public static function jdtounix($jd) {
@@ -62,6 +69,41 @@ class Time extends Field {
         }
     }
 
+    public static function printWeekday($day) {
+        static $days = [
+            0 => 'Sunday',
+            1 => 'Monday',
+            2 => 'Tuesday',
+            3 => 'Wednesday',
+            4 => 'Thursday',
+            5 => 'Friday',
+            6 => 'Saturday',
+            7 => 'Sunday',
+        ];
+
+        return $days[$day];
+    }
+
+    /**
+     * Get the number of minutes into the day.
+     *
+     * @param integer $hours
+     * @param integer $minutes
+     * @param string $ap
+     *
+     * @return integer
+     *   The number of minutes into the current day.
+     */
+    public static function getMinutes($hours, $minutes = 0, $ap = 'AM') {
+        if ($hours == 12) {
+            $hours = 0;
+        }
+        if (strtoupper($ap) == 'PM') {
+            $hours += 12;
+        }
+        return ($hours * 60) + $minutes;
+    }
+
     public static function getTime($id, $allow_blank = true) {
         $h = Request::get($id .'_h', 'int');
         $i = Request::get($id .'_i');
@@ -76,10 +118,7 @@ class Time extends Field {
                 $a = $time[2];
             }
         }
-        if ($a == "PM") {
-            $h += 12;
-        }
-        return ($h * 60) + $i;
+        return self::getSeconds($h, $i, $a);
     }
 
     public static function getDateTime($id, $allow_blank = true) {
@@ -144,7 +183,7 @@ class Time extends Field {
         return $output;
     }
 
-    public static function timePop($field, $value, $allow_zero) {
+    public static function timePop($field, $value = null, $allow_zero = false) {
         if (!$allow_zero && empty($value)) {
             $time = explode("/", date("h/i/a", time()));
             $h = $time[0];
