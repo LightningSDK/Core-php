@@ -131,10 +131,10 @@ class Messenger {
 
         $session = Session::getInstance();
         if (!empty(self::$messages)) {
-            $session->setSettings('messages.messages', self::$messages);
+            $session->setSetting('messages.messages', self::$messages);
         }
         if (!empty(self::$errors)) {
-            $session->setSettings('messages.errors', self::$errors);
+            $session->setSetting('messages.errors', self::$errors);
         }
         $session->saveData();
     }

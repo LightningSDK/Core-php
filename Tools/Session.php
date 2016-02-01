@@ -378,7 +378,7 @@ class Session extends Singleton {
      * @param mixed $value
      *   The value for the field.
      */
-    public function setSettings($field, $value) {
+    public function setSetting($field, $value) {
         Data::setInPath($field, $value, $this->content);
     }
 
