@@ -352,6 +352,8 @@ class Request {
             case 'base64':
             case 'encrypted':
             case 'html':
+            case 'json':
+            case 'json_string':
                 $args = func_get_args();
                 // It's possible that a + was changed to a space in URL decoding.
                 if ($type == 'base64' || $type == 'encrypted') {
