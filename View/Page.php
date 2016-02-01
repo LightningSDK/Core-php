@@ -68,6 +68,7 @@ class Page {
         JS::startup('lightning.startup.init()');
         JS::startup('$(document).foundation()');
         CSS::add('/css/lightning.css');
+        CSS::add('/css/font-awesome.min.css');
         CSS::add('/css/site.css');
         if (!empty($this->css)) {
             CSS::add($this->css);

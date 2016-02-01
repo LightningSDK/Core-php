@@ -53,6 +53,20 @@ module.exports = function(grunt) {
                         flatten: true,
                         filter:'isFile'
                     },
+                    {
+                        src: '../Vendor/Font-Awesome/css/font-awesome.min.css',
+                        dest: '../build/css',
+                        expand: true,
+                        flatten: true,
+                        filter:'isFile'
+                    },
+                    {
+                        src: '../Vendor/Font-Awesome/fonts/*',
+                        dest: '../build/fonts',
+                        expand: true,
+                        flatten: true,
+                        filter:'isFile'
+                    }
                 ]
             }
         }
