@@ -9,6 +9,11 @@ use Lightning\Tools\Output;
 use Lightning\Tools\Request;
 use Lightning\Tools\Session;
 use Lightning\Model\User as UserModel;
+use Lightning\Tools\SocialDrivers\Facebook;
+use Lightning\Tools\SocialDrivers\Google;
+use Lightning\Tools\SocialDrivers\SocialMediaApi;
+use Lightning\Tools\SocialDrivers\SocialMediaApiInterface;
+use Lightning\Tools\SocialDrivers\Twitter;
 use Lightning\View\API;
 
 class User extends API {
@@ -27,6 +32,46 @@ class User extends API {
             Output::setJsonCookies(true);
             return $data;
         }
+    }
+
+    public function postFacebookLogin() {
+        if ($token = SocialMediaApi::getToken()) {
+            $fb = Facebook::getInstance(true, $token['token'], $token['auth']);
+            $this->finishSocialLogin($fb);
+            exit;
+        }
+        Output::error('Invalid Token');
+    }
+
+    public function postGoogleLogin() {
+        if ($token = SocialMediaApi::getToken()) {
+            $google = Google::getInstance(true, $token['token'], $token['auth']);
+            $this->finishSocialLogin($google);
+            exit;
+        }
+        Output::error('Invalid Token');
+    }
+
+    public function postTwitterLogin() {
+        if ($token = Twitter::getAccessToken()) {
+            $twitter = Twitter::getInstance(true, $token);
+            $this->finishSocialLogin($twitter);
+            exit;
+        }
+        Output::error('Invalid Token');
+    }
+
+    /**
+     * @param SocialMediaApiInterface $social_api
+     */
+    protected function finishSocialLogin($social_api) {
+        $social_api->setupUser();
+        $social_api->activateUser();
+        $social_api->afterLogin();
+
+        // Output the new cookie.
+        $data['cookies'] = array('session' => Session::getInstance()->session_key);
+        Output::json($data);
     }
 
     public function postRegister() {

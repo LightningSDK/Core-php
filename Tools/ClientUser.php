@@ -49,6 +49,7 @@ class ClientUser extends Singleton {
         }
 
         if (!empty($user)) {
+            $user->initSocialMediaApi();
             return $user;
         } else {
             // No user was found.

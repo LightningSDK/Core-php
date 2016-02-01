@@ -9,10 +9,14 @@ use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Request;
 use Lightning\Tools\Scrub;
+use Lightning\Tools\Session;
+use Lightning\Tools\SocialDrivers\Facebook;
+use Lightning\Tools\SocialDrivers\Google;
+use Lightning\Tools\SocialDrivers\SocialMediaApi;
+use Lightning\Tools\SocialDrivers\SocialMediaApiInterface;
 use Lightning\Tools\Template;
 use Lightning\View\Page;
 use Lightning\Model\User as UserModel;
-use Source\Tools\Session;
 
 class User extends Page {
 
@@ -145,6 +149,36 @@ class User extends Page {
             $this->loginRedirect();
             exit;
         }
+    }
+
+    public function postFacebookLogin() {
+        if ($token = SocialMediaApi::getToken()) {
+            $fb = Facebook::getInstance(true, $token['token'], $token['auth']);
+            $this->finishSocialLogin($fb);
+        }
+        Messenger::error('Login Failed');
+        return $this->get();
+    }
+
+    public function postGoogleLogin() {
+        if ($token = SocialMediaApi::getToken()) {
+            $google = Google::getInstance(true, $token['token'], $token['auth']);
+            $this->finishSocialLogin($google);
+        }
+        Messenger::error('Login Failed');
+        return $this->get();
+    }
+
+    /**
+     * @param SocialMediaApiInterface $social_api
+     */
+    public function finishSocialLogin($social_api) {
+        $social_api->setupUser();
+        $social_api->activateUser();
+        $social_api->afterLogin();
+
+        // Output the new cookie.
+        $this->loginRedirect();
     }
 
     /**

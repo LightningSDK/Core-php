@@ -317,3 +317,43 @@ $amber-low: rgb(255,205,1);
   opacity: 1;
   filter: alpha(opacity=100);
 }
+
+.social-signin {
+  display: inline-block;
+  width: 300px;
+  border: 1px solid grey;
+  border-radius: 5px;
+  height: 42px;
+  color: white;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  &.google {
+    background-color: #f32e06;
+  }
+  &.facebook {
+    background-color: #3c5c9a;
+  }
+  &.twitter {
+    background-color: #28aae1;
+  }
+  i {
+    width: 40px;
+    font-size: 30px;
+    line-height: 40px;
+    border-right: 1px solid grey;
+    height: 40px;
+    position: absolute;
+    text-align: center;
+  }
+  span {
+    width: 249px;
+    height: 40px;
+    font-size: 20px;
+    line-height: 40px;
+    vertical-align: middle;
+    position: absolute;
+    left: 41px;
+    text-align: center;
+  }
+}
