@@ -1,14 +1,22 @@
 <?php
 
-namespace Lightning\Model;
+namespace Overridable\Lightning\Model;
 
+use Lightning\Model\Object;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
 
 class Page extends Object {
 
+    const PRIMARY_KEY = 'page_id';
+    const TABLE = 'page';
+
+    public static function loadPage($url) {
+        return Database::getInstance()->selectRow(self::TABLE, array('url' => array('LIKE', $url)));
+    }
+
     public static function selectAllPages() {
-        return Database::getInstance()->select('page', array('site_map' => 1));
+        return Database::getInstance()->select(self::TABLE, array('site_map' => 1));
     }
 
     public static function getSitemapUrls() {

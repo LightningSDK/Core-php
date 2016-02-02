@@ -32,7 +32,7 @@ class Page extends PageView {
         $content_locator = empty($request) ? 'index' : Request::getFromURL('/(.*)\.html$/') ?: '404';
 
         // LOAD PAGE DETAILS
-        if ($this->fullPage = $this->loadPage($content_locator)) {
+        if ($this->fullPage = Page::loadByUrl($content_locator)) {
             header('HTTP/1.0 200 OK');
             if (Configuration::get('page.modification_date') && $this->fullPage['last_update'] > 0) {
                 header("Last-Modified: ".gmdate("D, d M Y H:i:s", $this->fullPage['last_update'])." GMT");
@@ -119,10 +119,6 @@ class Page extends PageView {
             }
         }
         return $content;
-    }
-
-    public function loadPage($content_locator) {
-        return Database::getInstance()->selectRow('page', array('url' => array('LIKE', $content_locator)));
     }
 
     public function getNew() {

@@ -8,6 +8,7 @@ $conf = array(
         'Lightning\\View\\Page' => 'Overridable\\Lightning\\View\\Page',
         'Lightning\\View\\API' => 'Overridable\\Lightning\\View\\API',
         'Lightning\\Model\\Blog' => 'Overridable\\Lightning\\Model\\Blog',
+        'Lightning\\Model\\Page' => 'Overridable\\Lightning\\Model\\Page',
         'Lightning\\Model\\Token' => 'Overridable\\Lightning\\Model\\Token',
         'Lightning\\Model\\User' => 'Overridable\\Lightning\\Model\\User',
         'Lightning\\Tools\\Session' => 'Overridable\\Lightning\\Tools\\Session',
