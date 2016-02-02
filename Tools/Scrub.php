@@ -177,7 +177,7 @@ class Scrub {
      */
     public static function base64($string) {
         $string = str_replace(' ', '', $string);
-        if (preg_match('|^[a-z0-9+/]+={0,2}$|i', $string)) {
+        if (preg_match('|^[a-z0-9+/_\-\.]+={0,2}$|i', $string)) {
             return $string;
         }
         return false;
@@ -305,5 +305,17 @@ class Scrub {
             return $string;
         }
         return false;
+    }
+
+    public static function json($string) {
+        return json_decode($string);
+    }
+
+    public static function json_string($string) {
+        if (null !== json_decode($string)) {
+            return $string;
+        } else {
+            return null;
+        }
     }
 }

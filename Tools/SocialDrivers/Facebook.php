@@ -2,39 +2,76 @@
 
 namespace Lightning\Tools\SocialDrivers;
 
+use Facebook\Entities\SignedRequest;
 use Facebook\FacebookRequest;
 use Facebook\FacebookSession;
 use Lightning\Tools\Configuration;
+use Lightning\Tools\Session;
 use Lightning\Tools\Template;
 use Lightning\View\JS;
 
 class Facebook extends SocialMediaApi {
 
-    public static function createInstance($token = null) {
-        include HOME_PATH . '/Source/Vendor/facebooksdk/autoload.php';
-        $appId = Configuration::get('social.facebook.appid');
-        $secret = Configuration::get('social.facebook.secret');
-        FacebookSession::setDefaultApplication($appId, $secret);
+    const EMAIL_SUFFIX = 'facebook.com';
+
+    protected $service;
+
+    public static function createInstance($token = null, $authorize = false) {
+        include HOME_PATH . '/Lightning/Vendor/facebooksdk/autoload.php';
         $fb = new static();
         if (!empty($token)) {
-            $fb->setToken($token);
+            $fb->setToken($token, $authorize);
+        } elseif ($token = Session::getInstance(true, false)->getSetting('facebook.token')) {
+            $fb->setToken($token, $authorize);
         }
         return $fb;
     }
 
-    public function setToken($token) {
-        $this->session = new FacebookSession($token);
+    public function loadProfile() {
+        if (empty($this->profile)) {
+            $request = new FacebookRequest($this->service, 'GET', '/me');
+            $this->profile = $request->execute()->getGraphObject()->asArray();
+        }
     }
 
-    public function myProfile() {
-        $request = new FacebookRequest($this->session, 'GET', '/me');
-        $me = $request->execute()->getGraphObject()->asArray();
-        $this->myUserId = $me['id'];
-        return $me;
+    public function getLightningUserData() {
+        $this->loadProfile();
+        return [
+            'first' => $this->profile['first_name'],
+            'last' => $this->profile['last_name'],
+            'alt_email' => $this->profile['email'],
+        ];
+    }
+
+    public function getSocialId() {
+        $this->loadProfile();
+        return $this->profile['id'];
+    }
+
+    public function setToken($token, $authorize = false) {
+        $this->token = $token;
+        $this->authorize = $authorize;
+
+        $appId = Configuration::get('social.facebook.appid');
+        $secret = Configuration::get('social.facebook.secret');
+        FacebookSession::setDefaultApplication($appId, $secret);
+
+        if ($authorize) {
+            $this->service = new FacebookSession($token);
+        } else {
+            $this->service = FacebookSession::newSessionFromSignedRequest(new SignedRequest($token));
+            $this->profile = $this->loadProfile();
+            $this->social_id = $this->service->getUserID();
+        }
+    }
+
+    public function storeSessionData() {
+        $session = Session::getInstance();
+        $session->setSetting('facebook.token', $this->token);
     }
 
     public function myImageURL() {
-        $request = new FacebookRequest($this->session, 'GET', '/me/picture?redirect=0');
+        $request = new FacebookRequest($this->service, 'GET', '/me/picture?redirect=0');
         $response = $request->execute()->getGraphObject()->asArray();
         return $response['url'];
     }
@@ -43,10 +80,15 @@ class Facebook extends SocialMediaApi {
         return file_get_contents($this->myImageURL());
     }
 
-    public function myFriends() {
-        $request = new FacebookRequest($this->session, 'GET', '/me/friends');
+    public function getFriends() {
+        $request = new FacebookRequest($this->service, 'GET', '/me/friends');
         $response = $request->execute()->getGraphObject()->asArray();
         return $response;
+    }
+
+    public function getFriendIDs() {
+        $friends = $this->getFriends();
+        return $friends;
     }
 
     /**
@@ -72,5 +114,14 @@ class Facebook extends SocialMediaApi {
             }
             return $output;
         }
+    }
+
+    public static function loginButton($authorize = false) {
+        JS::set('token', Session::getInstance()->getToken());
+        JS::set('social.authorize', $authorize);
+        JS::set('social.facebook.appid', Configuration::get('social.facebook.appid'));
+        JS::startup('lightning.social.initLogin()');
+
+        return '<span class="social-signin facebook"><i class="fa fa-facebook"></i><span> Sign in with Facebook</span></span>';
     }
 }

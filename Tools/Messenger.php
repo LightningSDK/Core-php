@@ -131,10 +131,10 @@ class Messenger {
 
         $session = Session::getInstance();
         if (!empty(self::$messages)) {
-            $session->setSettings('messages.messages', self::$messages);
+            $session->setSetting('messages.messages', self::$messages);
         }
         if (!empty(self::$errors)) {
-            $session->setSettings('messages.errors', self::$errors);
+            $session->setSetting('messages.errors', self::$errors);
         }
         $session->saveData();
     }
@@ -144,10 +144,21 @@ class Messenger {
      */
     public static function loadFromSession() {
         if ($session = Session::getInstance(true, false)) {
-            self::$messages = array_merge(self::$messages, $session->getSetting('messages.messages', array()));
-            self::$errors = array_merge(self::$errors, $session->getSetting('messages.errors', array()));
-            $session->unsetSetting('messages');
-            $session->saveData();
+            $session_messages = $session->getSetting('messages.messages', array());
+            $session_errors = $session->getSetting('messages.errors', array());
+            $reset = false;
+            if (!empty($session_messages)) {
+                self::$messages = array_merge(self::$messages, $session->getSetting('messages.messages', array()));
+                $reset = true;
+            }
+            if (!empty($session_errors)) {
+                self::$errors = array_merge(self::$errors, $session->getSetting('messages.errors', array()));
+                $reset = true;
+            }
+            if ($reset) {
+                $session->unsetSetting('messages');
+                $session->saveData();
+            }
         }
     }
 

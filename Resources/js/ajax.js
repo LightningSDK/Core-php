@@ -33,27 +33,29 @@ lightning.ajax = {
             }
         }
         // Add standard messages to the dialog.
-        if (data.messages) {
+        if (data && data.messages) {
             for(var i in data.messages) {
                 lightning.dialog.add(data.messages[i], 'message');
             }
         }
         // Add standard error messages.
-        if (data.errors && data.errors.length) {
+        if (data && data.errors && data.errors.length) {
             // TODO: make this more graceful.
             lightning.ajax.error(settings, data);
         }
 
         // Process success handling.
-        if (data.status == 'success') {
+        if (data && data.status == 'success') {
             if (settings.user_success) {
                 settings.user_success(data);
             } else {
                 lightning.dialog.hide();
             }
-        } else if (data.status == 'redirect') {
+        } else if (data && data.status == 'redirect') {
             // TODO: check for redirect cookie
             document.location = data.location;
+        } else if (settings.user_success) {
+            settings.user_success(data);
         }
     },
 

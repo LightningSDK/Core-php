@@ -16,6 +16,7 @@ $conf = array(
         'Lightning\\Tools\\ClientUser' => 'Overridable\\Lightning\\Tools\\ClientUser',
         'Lightning\\Tools\\Security\\Encryption' => 'Overridable\\Lightning\\Tools\\Security\\Encryption',
         'Lightning\\Tools\\Security\\Random' => 'Overridable\\Lightning\\Tools\\Security\\Random',
+        'Lightning\\Tools\\SocialDrivers\\SocialMediaApi' => 'Overridable\\Lightning\\Tools\\SocialDrivers\\SocialMediaApi',
         'Lightning\\Model\\Permissions' => 'Overridable\\Lightning\\Model\\Permissions',
     ),
     'routes' => array(

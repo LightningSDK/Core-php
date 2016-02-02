@@ -27,3 +27,7 @@ namespace Lightning\Tools\Security;
 
 class Encryption extends \Overridable\Lightning\Tools\Security\Encryption {}
 class Random extends \Overridable\Lightning\Tools\Security\Random {}
+
+namespace Lightning\Tools\SocialDrivers;
+
+abstract class SocialMediaApi extends \Overridable\Lightning\Tools\SocialDrivers\SocialMediaApi {}

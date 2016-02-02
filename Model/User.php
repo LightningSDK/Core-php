@@ -14,6 +14,7 @@ use Lightning\Tools\Security\Random;
 use Lightning\Tools\Request;
 use Lightning\Tools\Scrub;
 use Lightning\Tools\Session;
+use Lightning\Tools\SocialDrivers\SocialMediaApi;
 use Lightning\Tools\Tracker;
 use Lightning\View\Field\Time;
 use Lightning\Model\Permissions;
@@ -849,5 +850,15 @@ class User extends Object {
         );
 
         return (count($permissions) > 0 ) ?  TRUE :  FALSE;
+    }
+
+    public function initSocialMediaApi() {
+        if (!Request::isCLI()) {
+
+            if (strpos($this->email, '@@')) {
+                $social_suffix = preg_replace('/.*@@/', '', $this->email);
+                SocialMediaApi::initJS($social_suffix);
+            }
+        }
     }
 }
