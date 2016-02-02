@@ -84,7 +84,7 @@ class Blog extends Singleton {
             else
                 $where['time'] = array('BETWEEN', mktime(0,0,0,1,1,$this->y), mktime(0,0,0,1,1,$this->y+1));
         } elseif (!empty($this->category)) {
-            $cat_id = Database::getInstance()->selectField('cat_id', static::CATEGORY_TABLE, array('cat_url' => array('LIKE', $this->category)));
+            $cat_id = $this->getCategoryID($this->category);
             $join[] = array('JOIN', 'blog_blog_category', 'USING (blog_id)');
             $where['cat_id'] = $cat_id;
         }
@@ -110,15 +110,7 @@ class Blog extends Singleton {
             $limit = " LIMIT " . intval(($this->page -1) * $this->list_per_page) . ", {$this->list_per_page}";
         }
 
-        $this->posts = Database::getInstance()->selectAll(
-            array(
-                'from' => static::BLOG_TABLE,
-                'join' => array_merge($join, $this->joinAuthorCatTables()),
-            ),
-            $where,
-            $this->blogFields(),
-            'GROUP BY ' . static::BLOG_TABLE . '.blog_id ORDER BY time DESC ' . $limit
-        );
+        $this->loadPosts($where, $join, $limit);
         $this->postProcessResults();
 
         $this->post_count = Database::getInstance()->count(
@@ -130,30 +122,28 @@ class Blog extends Singleton {
         );
     }
 
-    public function loadContentByURL($url) {
-        $this->isList = false;
-        $url = preg_replace('/.htm$/', '', $url);
+    protected function loadPosts($where = [], $join = [], $limit = '') {
         $this->posts = Database::getInstance()->selectAll(
             array(
                 'from' => static::BLOG_TABLE,
-                'join' => $this->joinAuthorCatTables()
+                'join' => array_merge($join, $this->joinAuthorCatTables()),
             ),
-            array('url' => $url),
-            $this->blogFields()
+            $where,
+            $this->blogFields(),
+            'GROUP BY ' . static::BLOG_TABLE . '.blog_id ORDER BY time DESC ' . $limit
         );
+    }
+
+    public function loadContentByURL($url) {
+        $this->isList = false;
+        $url = preg_replace('/.htm$/', '', $url);
+        $this->loadPosts(['url' => $url]);
         $this->postProcessResults();
     }
 
     public function loadContentByID($id) {
         $this->isList = false;
-        $this->posts = Database::getInstance()->selectAll(
-            array(
-                'from' => static::BLOG_TABLE,
-                'join' => $this->joinAuthorCatTables()
-            ),
-            array(static::BLOG_TABLE.'.blog_id' => $id),
-            $this->blogFields()
-        );
+        $this->loadPosts([static::BLOG_TABLE.'.blog_id' => $id]);
         $this->postProcessResults();
     }
 
