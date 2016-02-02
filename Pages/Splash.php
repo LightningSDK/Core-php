@@ -3,7 +3,6 @@
 namespace Lightning\Pages;
 
 use Lightning\Tools\Configuration;
-use Lightning\Tools\Output;
 use Lightning\Tools\Request;
 use Lightning\View\CSS;
 use Lightning\View\JS;
