@@ -25,7 +25,7 @@ if (count($blog->posts) > 0): ?>
             <div class="blog-date">
                 <?= date('F j, Y', $post['time']) ?></div>
             <div class="TextBlock">
-                <ul class="blog-meta">
+                <ul class="tags">
                     <? if (!empty($post['author_name']) && !empty($post['author_url'])): ?>
                         <li>
                             <a href="/blog/author/<?=$post['author_url']?>"><?=$post['author_name']?></a>
@@ -40,7 +40,7 @@ if (count($blog->posts) > 0): ?>
                     endif; ?>
                 </ul>
                 <div class="blog_body" <? if (!$blog->isList()):?>id='blog_body'<? endif; ?>>
-                    <? if ($user->isAdmin()): ?><a href="/blog/edit?return=view&id=<?=$post['blog_id'];?>" class="button">Edit this Post</a><br /><? endif; ?>
+                    <? if ($user->isAdmin()): ?><a href="/admin/blog/edit?return=view&id=<?=$post['blog_id'];?>" class="button">Edit this Post</a><br /><? endif; ?>
                     <? if ($blog->isList()): ?>
                         <?=$blog->shortBody($post['body'], 500)?>
                         <br><a href='/<?=$post['url']?>.htm' class="blkMore">read more</a>

@@ -79,11 +79,10 @@ use Lightning\View\CSS;
                         <section class="top-bar-section">
                             <ul class="right">
                                 <li class="has-dropdown not-click">
-                                    <a href="/blog/edit">Blog</a>
+                                    <a href="/admin/blog/edit">Blog</a>
                                     <ul class="dropdown">
-                                        <li><a href="/blog/edit">Blog Posts</a></li>
-                                        <li><a href="/blog/comments">Blog Comments</a></li>
-                                        <li><a href="/blog/categories">Blog Categories</a></li>
+                                        <li><a href="/admin/blog/edit">Blog Posts</a></li>
+                                        <li><a href="/admin/blog/categories">Blog Categories</a></li>
                                     </ul>
                                 </li>
                                 <li><a href="/admin/pages">Pages</a></li>

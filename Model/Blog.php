@@ -2,6 +2,7 @@
 
 namespace Overridable\Lightning\Model;
 
+use Lightning\View\Pagination;
 use Lightning\View\Text;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
@@ -13,7 +14,6 @@ class Blog extends Singleton {
     const BLOG_TABLE = 'blog';
     const CATEGORY_TABLE = 'blog_category';
     const BLOG_CATEGORY_TABLE = 'blog_blog_category';
-    const COMMENT_TABLE = 'blog_comment';
     const AUTHOR_TABLE = 'blog_author';
     const IMAGE_PATH = 'img/blog';
 
@@ -23,10 +23,11 @@ class Blog extends Singleton {
     public $id = 0;
     public $posts = array();
     public $shorten_body = false;
-    public $show_unapproved_comments = false;
     public $y = 0;
     public $m = 0;
     public $category='';
+    public $category_url = '';
+    protected $categories;
     public $list_per_page = 10;
     public $page = 1;
 
@@ -42,7 +43,7 @@ class Blog extends Singleton {
         return parent::getInstance($create);
     }
 
-    function body($body, $force_short = false) {
+    public function body($body, $force_short = false) {
         if ($this->shorten_body || $force_short) {
             return $this->shortBody($body);
         } else {
@@ -50,15 +51,14 @@ class Blog extends Singleton {
         }
     }
 
-    function shortBody($body, $length = 250) {
-        Text::shorten($body, $length);
+    public function shortBody($body, $length = 250) {
+        return Text::shorten($body, $length);
     }
 
-    protected function getCategoryID($search_value) {
-        return Database::getInstance()->selectField(
-            'cat_id',
+    protected function getCategory($search_value) {
+        return Database::getInstance()->selectRow(
             static::CATEGORY_TABLE,
-            array('cat_url' => $search_value)
+            ['cat_url' => ['LIKE', $search_value]]
         );
     }
 
@@ -66,7 +66,7 @@ class Blog extends Singleton {
         return Database::getInstance()->selectField(
             'user_id',
             static::AUTHOR_TABLE,
-            array('author_url' => $search_value)
+            ['author_url' => ['LIKE', $search_value]]
         );
     }
 
@@ -76,36 +76,35 @@ class Blog extends Singleton {
 
     public function loadList($search_field = null, $search_value = null) {
         $this->isList = true;
-        $join = array();
-        $where = array();
+        $join = [];
+        $where = [];
         if ($this->y != 0) {
             if ($this->m > 0) // SELECT A MONTH
                 $where['time'] = array('BETWEEN', mktime(0,0,0,$this->m,1,$this->y), mktime(0,0,0,$this->m+1,1,$this->y));
             else
                 $where['time'] = array('BETWEEN', mktime(0,0,0,1,1,$this->y), mktime(0,0,0,1,1,$this->y+1));
-        } elseif (!empty($this->category)) {
-            $cat_id = $this->getCategoryID($this->category);
-            $join[] = array('JOIN', 'blog_blog_category', 'USING (blog_id)');
-            $where['cat_id'] = $cat_id;
         }
 
-        if ($search_field == 'category') {
-            if ($cat_id = $this->getCategoryID($search_value)) {
-                $join[] = array(
+        elseif ($search_field == 'category') {
+            if ($cat = $this->getCategory($search_value)) {
+                $this->category = $search_value;
+                $this->category_url = $cat['cat_url'];
+                $join[] = [
                     'JOIN',
                     array('cat_search' => static::BLOG_TABLE . '_blog_category'),
                     'ON cat_search.blog_id = ' . static::BLOG_TABLE . '.blog_id'
-                );
-                $where['cat_search.cat_id'] = $cat_id;
+                ];
+                $where['cat_search.cat_id'] = $cat['cat_id'];
             }
         }
 
-        if ($search_field == 'author') {
+        elseif ($search_field == 'author') {
             if ($author_id = $this->getAuthorID($search_value)) {
                 $where[static::BLOG_TABLE . '.user_id'] = $author_id;
             }
         }
 
+        $limit = '';
         if ($this->list_per_page > 0) {
             $limit = " LIMIT " . intval(($this->page -1) * $this->list_per_page) . ", {$this->list_per_page}";
         }
@@ -120,6 +119,20 @@ class Blog extends Singleton {
             ),
             $where
         );
+    }
+
+    protected function loadCategories($force = false) {
+        if ($force || empty($this->categories)) {
+            $this->categories = Database::getInstance()->selectColumnQuery([
+                'select' => ['category', 'cat_url'],
+                'from' => 'blog_category',
+            ]);
+        }
+    }
+
+    public function getCatURL($category) {
+        $this->loadCategories();
+        return !empty($this->categories[$category]) ? $this->categories[$category] : null;
     }
 
     protected function loadPosts($where = [], $join = [], $limit = '') {
@@ -155,11 +168,8 @@ class Blog extends Singleton {
         //Header images
         foreach($this->posts as &$post) {
             $header_image = NULL;
-            if(empty($post['header_image'])) {
-                preg_match_all('/<img\s+.*?src=[\"\']?([^\"\' >]*)[\"\']?[^>]*>/i',$post['body'],$matches,PREG_SET_ORDER);
-                if(!empty($matches[0][1])) {
-                    $post['header_image'] = (file_exists(HOME_PATH.$matches[0][1]))?$matches[0][1]:NULL;
-                }
+            if(empty($post['header_image']) && $img = $this->getFirstImage($post['body'])) {
+                $post['header_image'] = $img;
             }
         }
     }
@@ -205,14 +215,23 @@ class Blog extends Singleton {
         // set up some variables
         $pages = ceil($this->post_count / $this->list_per_page);
 
-        if ($this->m > 0)
+        if ($this->m > 0) {
             $base_link = "/archive/{$this->y}/{$this->m}-%%.htm";
-        else if ($this->y > 0)
+        } else if ($this->y > 0) {
             $base_link = "/archive/{$this->y}-%%.htm";
-        else if ($this->category != "")
-            $base_link = "/category/".$this->create_url($r['category']).".htm";
-        else
+        } else if (!empty($this->category)) {
+            $base_link = '/category/' . $this->category_url . '.htm';
+        } else {
             $base_link = '/blog/page/%%';
+        }
+
+        $pagination = new Pagination([
+            'page' => $this->page,
+            'pages' => $pages,
+            'base_path_replace' => $base_link,
+        ]);
+
+        return $pagination->render();
 
         $output = '<ul class="pagination">';
 
@@ -253,31 +272,6 @@ class Blog extends Singleton {
         }
     }
 
-    function recent_comment_list($remote=false) {
-        $list = Database::getInstance()->select(
-            array(
-                'from' => static::COMMENT_TABLE,
-                'join' => array('LEFT JOIN', 'blog', 'USING (blog_id)'),
-            ),
-            array(
-                'approved' => array('>', 0),
-            ),
-            array(
-                'url',
-                'title',
-                array('time' => array('expression' => 'blog_comment.time')),
-                'comment',
-            )
-        );
-        $target = $remote ? "target='_blank'" : '';
-        if ($list->rowCount() > 0) {
-            echo "<ul>";
-            foreach($list as $r)
-                echo "<li><a href='/{$r['url']}.htm' {$target}>".$this->shortBody($r['comment'],50)."...</a> in <a href='/{$r['url']}.htm'>{$r['title']}</a></li>";
-            echo "</ul>";
-        }
-    }
-
     public function allCategories($order = 'count', $sort_direction = 'DESC') {
         return Database::getInstance()->select(
             array(
@@ -299,7 +293,7 @@ class Blog extends Singleton {
         if ($list->rowCount() > 0) {
             echo "<ul>";
             foreach($list as $r)
-                echo "<li><a href='/category/". Scrub::url($r['category']) . ".htm'>{$r['category']}</a> ({$r['count']})</li>";
+                echo "<li><a href='/blog/category/". Scrub::url($r['category']) . ".htm'>{$r['category']}</a> ({$r['count']})</li>";
             echo "</ul>";
         }
     }
@@ -317,7 +311,6 @@ class Blog extends Singleton {
         $this->loadContentByURL($url);
         if ($this->posts) {
             $this->id = $this->posts[0]['blog_id'];
-            $this->loadComments();
         } else {
             $this->id = 0;
         }
@@ -337,37 +330,19 @@ class Blog extends Singleton {
         $this->loadContentByID($id);
         if ($this->posts) {
             $this->id = $this->posts[0]['blog_id'];
-            $this->loadComments();
         } else {
             $this->id = 0;
         }
-    }
-
-    /**
-     * Load the current blog's comments.
-     */
-    protected function loadComments() {
-        $conditions = array('blog_id' => $this->id);
-        if (!$this->show_unapproved_comments) {
-            $conditions['approved'] = 1;
-        }
-        $this->posts[0]['comments'] = Database::getInstance()->selectAll(static::COMMENT_TABLE, $conditions);
     }
 
     public static function getSitemapUrls() {
         $web_root = Configuration::get('web_root');
         $blogs = Database::getInstance()->select([
             'from' => static::BLOG_TABLE,
-            'join' => [
-                'LEFT JOIN',
-                ['from' => static::COMMENT_TABLE, 'as' => static::COMMENT_TABLE, 'fields' => ['time', 'blog_id'], 'order' => ['time' => 'DESC']],
-                'USING ( blog_id )'
-            ],
         ],
             [],
             [
                 [static::BLOG_TABLE => ['blog_time' => 'time']],
-                [static::COMMENT_TABLE => ['blog_comment_time' => 'time']],
                 'url',
             ],
             'GROUP BY blog_id'
@@ -377,11 +352,49 @@ class Blog extends Singleton {
         foreach($blogs as $b) {
             $urls[] = array(
                 'loc' => $web_root . "/{$b['url']}.htm",
-                'lastmod' => date("Y-m-d", max($b['blog_time'],$b['blog_comment_time']) ?: time()),
+                'lastmod' => date("Y-m-d", $b['blog_time'] ?: time()),
                 'changefreq' => 'yearly',
                 'priority' => .3,
             );
         }
         return $urls;
+    }
+
+    public function post_to_facebook($blog_data) {
+        // @todo: this doesn't work'
+        require_once HOME_PATH . '/include/facebook/facebook.php';
+
+        $facebook = new Facebook(array(
+            'appId'  => FACEBOOK_APP_ID,
+            'secret' => FACEBOOK_APP_SECRET,
+            'cookie' => true,
+            'scope' => 'manage_pages',
+        ));
+
+        $user_id = $facebook->getUser();
+        print_r($user_id);
+        $access_token = $facebook->getAccessToken();
+        print_r($access_token);
+
+        $attachment = array(
+            'access_token' => $access_token,
+            'message' => 'this is my message',
+            'name' => 'name',
+            'link' => ROOT_URL . $blog_data['url'] . '.htm',
+            'caption' => $blog_data['title'],
+            'description' => $blog_data['title'],
+        );
+        if ($image = $this->getFirstImage($blog_data['body'])) {
+            $attachment['picture'] = $image;
+        }
+        $facebook->api(FACEBOOK_BLOG_PAGE . '/feed', 'post', $attachment);
+    }
+
+    public function getFirstImage($source) {
+        preg_match_all('/<img\s+.*?src=[\"\']?([^\"\' >]*)[\"\']?[^>]*>/i', $source, $matches, PREG_SET_ORDER);
+        if(!empty($matches[0][1])) {
+            return (file_exists(HOME_PATH.$matches[0][1])) ? $matches[0][1] : NULL;
+        }
+        return null;
     }
 }

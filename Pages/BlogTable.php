@@ -6,6 +6,7 @@ use Lightning\Tools\Navigation;
 use Lightning\Tools\Request;
 use Lightning\Tools\ClientUser;
 use Lightning\Model\Blog as BlogModel;
+use Lightning\Tools\Template;
 
 class BlogTable extends Table {
     protected $trusted = true;
@@ -38,6 +39,7 @@ class BlogTable extends Table {
     }
 
     protected function initSettings() {
+        Template::getInstance()->set('full_width', true);
         if (Request::get('return') == 'view') {
             $this->post_actions['after_post'] = function($row) {
                 Navigation::redirect('/' . $row['url'] . '.htm');
