@@ -11,7 +11,7 @@ class Page extends Object {
     const PRIMARY_KEY = 'page_id';
     const TABLE = 'page';
 
-    public static function loadPage($url) {
+    public static function loadByURL($url) {
         return Database::getInstance()->selectRow(self::TABLE, array('url' => array('LIKE', $url)));
     }
 

@@ -6,7 +6,8 @@
 
 namespace Lightning\Tools;
 use Lightning\Pages\Message;
-use Lightning\Pages\Page;
+use Lightning\Pages\Page as PageView;
+use Lightning\Model\Page as PageModel;
 
 /**
  * Class Output
@@ -436,10 +437,10 @@ class Output {
         http_response_code($reponse_code);
 
         // Use the Page handler for output.
-        $page = new Page();
+        $page = new PageView();
 
         // Attempt to load a page from the database.
-        if ($full_page = $page->loadPage($reponse_code)) {
+        if ($full_page = PageModel::loadByURL($reponse_code)) {
             $full_page['url'] = Request::get('page');
         } else {
             // If the page doesn't exist, fill it with default content.

@@ -16,6 +16,7 @@ use Lightning\Tools\ClientUser;
 use Lightning\View\Field\BasicHTML;
 use Lightning\View\JS;
 use Lightning\View\Page as PageView;
+use Lightning\Model\Page as PageModel;
 
 class Page extends PageView {
 
@@ -32,7 +33,7 @@ class Page extends PageView {
         $content_locator = empty($request) ? 'index' : Request::getFromURL('/(.*)\.html$/') ?: '404';
 
         // LOAD PAGE DETAILS
-        if ($this->fullPage = Page::loadByUrl($content_locator)) {
+        if ($this->fullPage = PageModel::loadByUrl($content_locator)) {
             header('HTTP/1.0 200 OK');
             if (Configuration::get('page.modification_date') && $this->fullPage['last_update'] > 0) {
                 header("Last-Modified: ".gmdate("D, d M Y H:i:s", $this->fullPage['last_update'])." GMT");
@@ -47,7 +48,7 @@ class Page extends PageView {
             $this->fullPage['site_map'] = 1;
             CKEditor::init();
             JS::startup('lightning.page.edit();');
-        } elseif ($this->fullPage = $this->loadPage('404')) {
+        } elseif ($this->fullPage = PageModel::loadByUrl('404')) {
             http_response_code(404);
         } else {
             Output::http(404);
