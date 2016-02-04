@@ -86,6 +86,13 @@ class Object {
         }
     }
 
+    public static function insertOrUpdate($update_values, $new_values) {
+        return Database::getInstance()->insert(static::TABLE,
+            $update_values,
+            $new_values
+        );
+    }
+
     /**
      * Delete the object from the database.
      */
