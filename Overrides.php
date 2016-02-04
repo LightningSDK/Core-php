@@ -12,6 +12,7 @@ class API extends \Overridable\Lightning\View\API {}
 namespace Lightning\Model;
 
 class Blog extends \Overridable\Lightning\Model\Blog {}
+class CMS extends \Overridable\Lightning\Model\CMS {}
 class Page extends \Overridable\Lightning\Model\Page {}
 class Token extends \Overridable\Lightning\Model\Token {}
 class User extends \Overridable\Lightning\Model\User {}

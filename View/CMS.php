@@ -1,18 +1,22 @@
 <?php
 
-namespace Lightning\Tools;
+namespace Lightning\View;
 
+use Lightning\Tools\CKEditor;
+use Lightning\Tools\ClientUser;
+use Lightning\Tools\Configuration;
 use Lightning\Tools\IO\FileManager;
-use Lightning\View\JS;
+use Lightning\Tools\Session;
 use Lightning\View\Field\Time;
+use Lightning\Model\CMS as CMSModel;
 
 class CMS {
 
     protected static $settings;
 
     public static function embed($name, $settings = array()) {
-        $content = self::loadCMS($name);
-        $content = (!empty($content) ? $content['content'] : (!empty($settings['default']) ? $settings['default'] : ''));
+        $content = CMSModel::loadByName($name);
+        $content = (!empty($content) ? $content->content : (!empty($settings['default']) ? $settings['default'] : ''));
         if (ClientUser::getInstance()->isAdmin()) {
             JS::set('token', Session::getInstance()->getToken());
             JS::set('cms.cms_' . $name . '.config', !empty($settings['config']) ? $settings['config'] : []);
@@ -99,10 +103,6 @@ class CMS {
         } else {
             return $value;
         }
-    }
-
-    protected static function loadCMS($name) {
-        return $content = Database::getInstance()->selectRow('cms', array('name' => $name));
     }
 
     protected static function getBaseDir() {
