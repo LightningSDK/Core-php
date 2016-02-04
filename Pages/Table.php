@@ -22,12 +22,12 @@
 	$myTableObject->sort = 'ORDER BY changeme_sort_column ASC, changeme_secondary_sort_column DESC';
 	// set a (m-n) relationship between the table and another table, allowing the joining table to be managed
 	// The foreign keys in the joining table must be named the same as in the joined tables' columns
-	$myTableObject->link[changeme_related_table_name] = array('index'=>'changeme_join_table_name', 'key'=>'changeme_related_table_foreign_key_name', "display_name"=>"changeme_display_column_from_related_table", "list"=>true);
+	$myTableObject->link[changeme_related_table_name] = ['index'=>'changeme_join_table_name', 'key'=>'changeme_related_table_foreign_key_name', "display_name"=>"changeme_display_column_from_related_table", "list"=>true);
 	// the relationship can even span to another database
-	$myTableObject->link[changeme_related_table_name] = array('database'=>'changeme_related_table_database', 'index'=>'changeme_join_table_name', 'key'=>'changeme_related_table_foreign_key_name', "display_name"=>"changeme_display_column_from_related_table", "list"=>true);
+	$myTableObject->link[changeme_related_table_name] = ['database'=>'changeme_related_table_database', 'index'=>'changeme_join_table_name', 'key'=>'changeme_related_table_foreign_key_name', "display_name"=>"changeme_display_column_from_related_table", "list"=>true);
 	// set a column to be a lookup from another table (1-n relationship)
 	// the lookuptable key column must be named the same as the table's column
- 	$myTableObject->preset['changeme_table_foreign_key'] = array('type'=>'lookup', 'lookuptable'=>'changeme_related_table_name', 'display_name'=>'changeme_display_column_from_related_table');
+ 	$myTableObject->preset['changeme_table_foreign_key'] = ['type'=>'lookup', 'lookuptable'=>'changeme_related_table_name', 'display_name'=>'changeme_display_column_from_related_table');
 
 	// set this to true to allow for serial updates
 	$myTableObject->enable_serial_update = 1;
@@ -40,7 +40,6 @@ use Lightning\Tools\Cache\FileCache;
 use Lightning\Tools\CKEditor;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\CSVImport;
-use Lightning\Tools\CSVIterator;
 use Lightning\Tools\Database;
 use Lightning\Tools\Form;
 use Lightning\Tools\Image;
@@ -75,27 +74,63 @@ abstract class Table extends Page {
     protected $list;
 
     /**
+     * A list of field definitions, to override the defaults read from the database.
+     *
+     * The array will be keyed by the field name. The value will either be a string
+     * representing the field type, or an array with multiple options.
+     *
+     *   - type string - The type of the field. Options are:
+     *     - date - 3 popups, m/d/y that are saved as a JD int
+     *     - datetime - 6 popups, m/d/y h:m ap, saved as a unix timestamp
+     *     - string - a single text input
+     *     - html - an html input box
+     *   - hidden boolean - Will hide the field from all views
+     *   - default mixed - Will use this as the default value when inserting. Will not be used if a value is supplied unless force_default_new is set to true. When creating a new entry, the field is visible, editable, and populated with this value.
+     *   - force_default_new boolean - Forces new entries to use the default value. Prevents tampering with a field that has hidden and default set.
+     *
+     * @var array
+     */
+    protected $preset = [];
+
+    /**
      * Used when you want to set a value in the header (array).
      *
      * @var array
      */
     protected $template_vars;	//
-    protected $preset = array();
     protected $trusted = false;
     protected $key;
     protected $delconf = true;
     protected $action_file;
     protected $defaultAction = 'list';
     protected $defaultIdAction = 'view';
-    protected $fields = array();
-    protected $links = array();
-    protected $styles = array();
+    protected $fields = [];
+
+    /**
+     * A list of many to many relationships.
+     *
+     * The array keys can be for reference only. There will be an intermediate table in the 'index' field
+     * and the list of options will be referred to as the foreign table.
+     *
+     *   - accessControl - Injection into the $where query for available options for linking.
+     *   - index - the name of a table for making many to many joins
+     *   - table - the name of the table with the foriegn data. if left empty, the key for this array will be used
+     *   - key - the primary key of the foreign table
+     *   - index_fkey - if the columns on the index table and foriegn table have different names, 'key' is the name of the column on the index table and 'index_fkey' is the name of column on the foreign table.
+     *   - display_column - the column in the foreign table to display as the value
+     *   - list - the way that the selected values should be displayed in list view
+     *     - compact
+     *
+     * @var array
+     */
+    protected $links = [];
+    protected $styles = [];
     protected $sort;
     protected $maxPerPage = 25;
     protected $listCount = 0;
     protected $page_number = 1;
-    protected $action_fields=array();
-    protected $custom_templates=array();
+    protected $action_fields = [];
+    protected $custom_templates = [];
     protected $list_where;
 
     protected $importable = false;
@@ -161,32 +196,32 @@ abstract class Table extends Page {
     protected $new_td_key = '';
     protected $calendar_month = 1;
     protected $calendar_year = '';
-    protected $subset = Array();
-    protected $search_fields = array();
+    protected $subset = [];
+    protected $search_fields = [];
     protected $searchWildcard = Database::WILDCARD_AFTER;
     protected $submit_redirect = true;
-    protected $additional_action_vars = array();
+    protected $additional_action_vars = [];
 
     /**
      * Button names according to action type
      * @var array
      */
-    protected $button_names = Array("insert"=>"Insert","cancel"=>"Cancel","update"=>"Update");
+    protected $button_names = ['insert' => 'Insert', 'cancel' => 'Cancel' , 'update' => 'Update'];
 
     /**
      * The list of actions perform after post request depending on type of the request
      * @var array
      */
-    protected $action_after = Array("insert"=>"list","update"=>"list");
+    protected $action_after = ['insert' => 'list', 'update' => 'list'];
 
     /**
      * Extra buttons added to from. Array structure:
      * - type (type of the button out of available ones);
      * - text (text on the button);
      * - data (custom data);
-     * @var Array
+     * @var array
      */
-    protected $custom_buttons = Array();
+    protected $custom_buttons = [];
 
     /**
      * Available custom button types
@@ -194,7 +229,7 @@ abstract class Table extends Page {
     const CB_SUBMITANDREDIRECT = 1;
     const CB_LINK = 2;
 
-    protected $function_after = Array();
+    protected $function_after = [];
     protected $table_descriptions = "table_descriptions/";
     protected $singularity = false;
     protected $singularityID = 0;
@@ -235,7 +270,7 @@ abstract class Table extends Page {
      */
     protected $prefixRows;
 
-    public function __construct($options = array()) {
+    public function __construct($options = []) {
         $this->calendar_year = date('Y');
         $this->calendar_month = date('m');
         // TODO: Action is not set yet. Is any of this necessary?
@@ -247,7 +282,7 @@ abstract class Table extends Page {
             if (isset($_REQUEST['backlinkvalue'])) $backlinkvalue = $_REQUEST['backlinkvalue'];
             // must have both
             if ($backlinkname && $backlinkvalue) {
-                $this->preset[$backlinkname] = array('default' => $backlinkvalue);
+                $this->preset[$backlinkname] = ['default' => $backlinkvalue];
             }
         }
         if (isset($_POST['function'])) $this->function = $_POST['function'];
@@ -264,8 +299,8 @@ abstract class Table extends Page {
         // load the sort fields
         if ($sort = Request::get('sort')) {
             $field = explode(";", $sort);
-            $this->sort_fields = array();
-            $sort_strings = array();
+            $this->sort_fields = [];
+            $sort_strings = [];
             foreach($field as $f) {
                 $f = explode(":", $f);
                 if (!empty($f[1]) && $f[1] == "D") {
@@ -522,10 +557,10 @@ abstract class Table extends Page {
         $string = Request::get('st');
         $autocomplete = $this->fields[$field]['autocomplete'];
 
-        $where = array();
+        $where = [];
         if (!empty($autocomplete['search'])) {
             if (!is_array($autocomplete['search'])) {
-                $autocomplete['search'] = array($autocomplete['search']);
+                $autocomplete['search'] = [$autocomplete['search']];
             }
             $where = Database::getMultiFieldSearch($autocomplete['search'], explode(' ', $string));
         }
@@ -533,7 +568,7 @@ abstract class Table extends Page {
             $this->fields[$field]['autocomplete']['table'],
             $autocomplete['field'],
             $where,
-            array(),
+            [],
             'LIMIT 50'
         );
 
@@ -564,7 +599,7 @@ abstract class Table extends Page {
             }
 
             // Delete the entry.
-            Database::getInstance()->delete($this->table, array($this->getKey() => $this->id));
+            Database::getInstance()->delete($this->table, [$this->getKey() => $this->id]);
         }
 
         // Redirect.
@@ -632,7 +667,7 @@ abstract class Table extends Page {
         }
 
         if (!empty($new_values)) {
-            Database::getInstance()->update($this->table, $new_values, array($this->getKey() => $this->id));
+            Database::getInstance()->update($this->table, $new_values, [$this->getKey() => $this->id]);
         }
         $this->update_accessTable();
         $this->set_posted_links();
@@ -649,11 +684,11 @@ abstract class Table extends Page {
         if ($this->enable_serial_update && $this->serial_update) {
             // Get the next id in the table
             $nextkey = Database::getInstance()->selectField(
-                array('nextkey' => array('expression' => "MIN({$this->getKey()})")),
+                ['nextkey' => ['expression' => "MIN({$this->getKey()})"]],
                 $this->table,
-                array(
-                    $this->getKey() => array('>', $this->id)
-                )
+                [
+                    $this->getKey() => ['>', $this->id]
+                ]
             );
             if ($nextkey) {
                 $this->id = $nextkey;
@@ -840,11 +875,11 @@ abstract class Table extends Page {
 
     function render_pop_return() {
         $this->get_row();
-        $send_data = array(
+        $send_data = [
             'pf' => Request::get('pf'),
             'id' => $this->id,
             'pfdf' => $this->list[Request::get('pfdf')]
-        );
+        ];
         JS::startup('lightning.table.returnPop('.json_encode($send_data).')');
     }
 
@@ -892,10 +927,10 @@ abstract class Table extends Page {
 
 
         // create index for fast access
-        $date_index = array();
+        $date_index = [];
         foreach($this->list as $li) {
             if (!is_array($date_index[$li['date']]))
-                $date_index[$li['date']] = Array();
+                $date_index[$li['date']] = [];
             $date_index[$li['date']][] = $li;
         }
 
@@ -904,11 +939,11 @@ abstract class Table extends Page {
             $calendar_year = $this->calendar_year;
 
             echo "<table border='0' class='table_calendar' cellpadding='0' cellspacing='0'><tr class='header_row'><td>Sunday</td><td>Monday</td><td>Tuesday</td><td>Wednesday</td><td>Thursday</td><td>Friday</td><td>Saturday</td></tr>\n<tr>";
-            $all_month_days = array(31, 28+date("L", mktime(0, 0, 0, 2, $this->calendar_year)), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
+            $all_month_days = [31, 28+date("L", mktime(0, 0, 0, 2, $this->calendar_year)), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
             $num_days = $all_month_days[$this->calendar_month - 1];
 
 
-            $all_month_days = array(31, 28+date("L", mktime(0, 0, 0, 1, 1, $calendar_year)), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
+            $all_month_days = [31, 28+date("L", mktime(0, 0, 0, 1, 1, $calendar_year)), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
             $num_days = $all_month_days[$calendar_month - 1];
 
 
@@ -1227,11 +1262,11 @@ abstract class Table extends Page {
                     $links = $this->load_all_active_list($link_settings, $row[$this->getKey()]);
                 }
                 else {
-                    $links = Database::getInstance()->select($link, array($this->getKey() => $row[$this->getKey()]));
+                    $links = Database::getInstance()->select($link, [$this->getKey() => $row[$this->getKey()]]);
                 }
 
                 $output .= '<td>';
-                $displays = array();
+                $displays = [];
                 if (isset($link_settings['list']) == 'compact') {
                     foreach($links as $l)
                         if (!empty($link_settings['fields']) && is_array($link_settings['fields'])) {
@@ -1474,7 +1509,7 @@ abstract class Table extends Page {
      * @param string $new_action
      *   Alternative name of the action processing
      *
-     * #return string
+     * @return string
      */
     protected function renderButtons($new_action) {
         /*
@@ -1669,7 +1704,7 @@ abstract class Table extends Page {
                     $link_settings['active_list'] = $this->load_all_active_list($link_settings, $local_id );
                 } elseif (empty($local_id)) {
                     // If there is no local ID, this is probably a new item, so the list should be blank.
-                    $link_settings['active_list'] = array();
+                    $link_settings['active_list'] = [];
                 }
 
                 $link_settings['row_count'] = count($link_settings['active_list']);
@@ -1767,7 +1802,7 @@ abstract class Table extends Page {
         foreach($link_settings['fields'] as $f=>&$s) {
             $link_settings['fields'][$f]['field'] = $f;
             $link_settings['fields'][$f]['form_field'] = "st_{$link_settings['table']}_{$f}__N_";
-            $output .= $this->render_form_row($s,array());
+            $output .= $this->render_form_row($s,[]);
         }
 
         // ADD REMOVE LINKS
@@ -1827,7 +1862,7 @@ abstract class Table extends Page {
             //DEFAULT VIEW MODE
         } else {
             $this->loadAllLinkOptions($link_settings);
-            $options = array('');
+            $options = [''];
             foreach($link_settings['options'] as $l) {
                 $key = !empty($link_settings['index_fkey']) ? $link_settings['index_fkey'] : $link_settings['key'];
                 $options[$l[$key]] = $l[$link_settings['display_column']];
@@ -1862,21 +1897,34 @@ abstract class Table extends Page {
         $local_key = isset($link_settings['local_key']) ? $link_settings['local_key'] : $this->getKey();
         if (!empty($link_settings['index'])) {
             // many to many - there will be an index table linking the two tables together
-            $table = array('from' => $link_settings['index']);
+            $table = $link_settings['index'];
+            $join = [];
             if (!empty($link_settings['index_fkey'])) {
-                $table['join'] = array('JOIN', $link_settings['table'], 'ON `' . $link_settings['index'] . '`.`' . $link_settings['key'] . '` = `' . $link_settings['table'] . '`.`' . $link_settings['index_fkey'] . '`');
+                $join[] = [
+                    'join' => $link_settings['table'],
+                    'on' =>  [$link_settings['index'] . '.' . $link_settings['key']
+                        => ['expression' => $link_settings['table'] . '.' . $link_settings['index_fkey']]]
+                ];
             } else {
-                $table['join'] = array('JOIN', $link_settings['table'], "USING (`$link_settings[key]`)");
+                $join[] = [
+                    'join' => $link_settings['table'],
+                    'using' => $link_settings[key],
+                ];
             }
-            return Database::getInstance()->selectAll(
-                $table,
-                array($link_settings['index'].'.'.$local_key => $row_id),
-                array(),
-                'ORDER BY ' . $link_settings['display_column']
-            );
+            $where = [$link_settings['index'] . '.' . $local_key => $row_id];
+            if (!empty($link_settings['accessControl'])) {
+                $where += $link_settings['accessControl'];
+            }
+            return Database::getInstance()->selectAllQuery([
+                'from' => $table,
+                'join' => $join,
+                'where' => $where,
+                'order_by' => [$link_settings['display_column'] => 'ASC'],
+            ]);
         } else {
+            // @TODO: remove this, it should be a 'lookup' type instead.
             // 1 to many - each remote table will have a column linking it back to this table
-            return Database::getInstance()->selectAll($link_settings['table'], array($local_key => $row_id));
+            return Database::getInstance()->selectAll($link_settings['table'], [$local_key => $row_id]);
         }
     }
 
@@ -1886,8 +1934,8 @@ abstract class Table extends Page {
      * @param array $link_settings
      */
     protected function loadAllLinkOptions(&$link_settings) {
-        $where = !empty($link_settings['accessControl']) ? $link_settings['accessControl'] : array();
-        $link_settings['options'] = Database::getInstance()->selectAll($link_settings['table'], $where, array(), 'ORDER BY ' . $link_settings['display_column']);
+        $where = !empty($link_settings['accessControl']) ? $link_settings['accessControl'] : [];
+        $link_settings['options'] = Database::getInstance()->selectAll($link_settings['table'], $where, [], 'ORDER BY ' . $link_settings['display_column']);
     }
 
     /**
@@ -1925,8 +1973,8 @@ abstract class Table extends Page {
      * @param array $other
      * @return array
      */
-    public function getUrlParameters($action = '', $id = 0, $field = '', $other = array()) {
-        $vars = array();
+    public function getUrlParameters($action = '', $id = 0, $field = '', $other = []) {
+        $vars = [];
         if ($action == 'list') {
             $vars['page'] = $id;
         } elseif ($id > 0) {
@@ -1945,7 +1993,7 @@ abstract class Table extends Page {
         }
 
         // Search.
-        $sort = array();
+        $sort = [];
         if (is_array($this->sort_fields) && count($this->sort_fields) > 0) {
             $sort_fields = $this->sort_fields;
             if (!empty($other['sort'])) {
@@ -1966,7 +2014,7 @@ abstract class Table extends Page {
             }
             $vars['sort']=implode(';', $sort);
         } elseif (!empty($other['sort'])) {
-            $sort = array();
+            $sort = [];
             foreach($other['sort'] as $f=>$d) {
                 switch($d) {
                     case 'D': $sort[] = $f . ':D'; break;
@@ -1982,7 +2030,7 @@ abstract class Table extends Page {
         return $vars;
     }
 
-    public function createUrl($action = '', $id = 0, $field = '', $other = array()) {
+    public function createUrl($action = '', $id = 0, $field = '', $other = []) {
         $parameters = $this->getUrlParameters($action, $id, $field, $other);
         return $this->action_file . (!empty($parameters) ? ('?' . http_build_query($parameters)) : '');
     }
@@ -2055,13 +2103,13 @@ abstract class Table extends Page {
         if (!empty($table)) {
             $fields = Database::getInstance()->query("SHOW COLUMNS FROM `{$table}`")->fetchAll(Database::FETCH_ASSOC);
         } else {
-            $fields = array();
+            $fields = [];
         }
 
-        $return_fields = array();
+        $return_fields = [];
         foreach ($fields as $column => $field) {
             $column = !empty($field['Field']) ? $field['Field'] : $column;
-            $return_fields[$column] = array();
+            $return_fields[$column] = [];
             foreach ($field as $key => $value) {
                 $return_fields[$column][strtolower($key)] = $value;
             }
@@ -2234,7 +2282,7 @@ abstract class Table extends Page {
         return true;
     }
 
-    // sould we even consider the posted/function value on insert? -- implemented
+    // Should we even consider the posted/function value on insert? -- implemented
     function get_value_on_new(&$field) {
         if (isset($field['insert_function']))
             return true;
@@ -2278,13 +2326,13 @@ abstract class Table extends Page {
         if (isset($this->accessTable)) {
             $accessTable_values = $this->getFieldValues($this->fields, true);
             if (!empty($accessTable_values)) {
-                Database::getInstance()->update($this->accessTable, $accessTable_values, array_merge($this->accessTableCondition, array($this->getKey() => $this->id)));
+                Database::getInstance()->update($this->accessTable, $accessTable_values, array_merge($this->accessTableCondition, [$this->getKey() => $this->id]));
             }
         }
     }
 
     protected function getFieldValues(&$field_list, $accessTable=false) {
-        $output = array();
+        $output = [];
         $dependenciesMet = true;
         foreach($field_list as $f => $field) {
             // check for settings that override user input
@@ -2499,7 +2547,7 @@ abstract class Table extends Page {
         }
 
         if (empty($field['images'])) {
-            $field['images'] = array($field);
+            $field['images'] = [$field];
         }
 
         $images = $this->getCompositeImageArray($field);
@@ -2766,7 +2814,7 @@ abstract class Table extends Page {
             return false;
         }
 
-        $where = array();
+        $where = [];
         $this->getKey();
 
         if ($this->parentLink && $this->parentId) {
@@ -2781,14 +2829,14 @@ abstract class Table extends Page {
         if ($this->singularity) {
             $where[$this->singularity] = $this->singularityID;
         }
-        $join = array();
+        $join = [];
         if ($this->accessTable) {
             if ($this->accessTableJoinOn) {
                 $join_condition = "ON ".$this->accessTableJoinOn;
             } else {
                 $join_condition = "ON ({$this->accessTable}.{$this->getKey()}={$this->table}.{$this->getKey()})";
             }
-            $join[] = array('LEFT JOIN', $this->accessTable, $join_condition);
+            $join[] = ['LEFT JOIN', $this->accessTable, $join_condition];
             $where .= " AND ".$this->accessTableCondition;
         }
         
@@ -2848,7 +2896,7 @@ abstract class Table extends Page {
             $where = array_merge($this->accessControl, $where);
         }
         if ($this->action == "autocomplete" && $field = Request::post('field')) {
-            $this->accessControl[$this->fullField($field)] = array('LIKE', Request::post('st') . '%');
+            $this->accessControl[$this->fullField($field)] = ['LIKE', Request::post('st') . '%'];
         }
         if ($this->accessTable) {
             if ($this->accessTableJoinOn) {
@@ -2856,7 +2904,7 @@ abstract class Table extends Page {
             } else {
                 $join_condition = "ON ({$this->accessTable}.{$this->getKey()}={$this->table}.{$this->getKey()})";
             }
-            $join[] = array($this->accessTableSchema, $this->accessTable, $join_condition);
+            $join[] = [$this->accessTableSchema, $this->accessTable, $join_condition];
             if ($this->accessTableCondition) {
                 $where = array_merge($this->accessTableCondition, $where);
             }
@@ -2873,10 +2921,10 @@ abstract class Table extends Page {
 
         // get the page count
         $this->listCount = Database::getInstance()->count(
-            array(
+            [
                 'from' => $this->table,
                 'join' => $join,
-            ),
+            ],
             $where
         );
 
@@ -2899,17 +2947,17 @@ abstract class Table extends Page {
         }
 
         if ($this->action == "autocomplete") {
-            $fields[] = array($this->getKey() => "`{$_POST['field']}`,`{$this->getKey()}`");
+            $fields[] = [$this->getKey() => "`{$_POST['field']}`,`{$this->getKey()}`"];
             $sort = "ORDER BY `{$_POST['field']}` ASC";
         } else {
-            $fields[] = array($this->table => array('*'));
+            $fields[] = [$this->table => ['*']];
         }
 
         $this->list = Database::getInstance()->selectIndexed(
-            array(
+            [
                 'from' => $this->table,
                 'join' => $join,
-            ),
+            ],
             $this->getKey(),
             $where,
             $fields,
@@ -2923,8 +2971,11 @@ abstract class Table extends Page {
 
     function executeTask() {
         // do we load a subset or ss vars?
-        if (isset($_REQUEST['ss'])) $this->cur_subset = Scrub::variable($_REQUEST['ss']);
-        elseif ($this->subset_default) $this->cur_subset = $this->subset_default;
+        if (isset($_REQUEST['ss'])) {
+            $this->cur_subset = Scrub::variable($_REQUEST['ss']);
+        } elseif ($this->subset_default) {
+            $this->cur_subset = $this->subset_default;
+        }
 
         // if the table is not set explicitly, look for one in the url
         if (!isset($this->table)) {
@@ -2951,7 +3002,7 @@ abstract class Table extends Page {
 
         // check for a singularity, only allow edit/update (this means a user only has access to one of these entries, so there is no list view)
         if ($this->singularity) {
-            $row = Database::getInstance()->selectRow($this->table, array($this->singularity => $this->singularityID));
+            $row = Database::getInstance()->selectRow($this->table, [$this->singularity => $this->singularityID]);
             if (count($row) > 0) $singularity_exists = true;
             if ($singularity_exists) $this->id = $row[$this->getKey()];
             // there can be no "new", "delete", "delconf", "list"
@@ -2972,14 +3023,14 @@ abstract class Table extends Page {
 
         $this->getKey();
         switch($this->action) {
-            case "pop_return": break;
-            case "autocomplete":
+            case 'pop_return': break;
+            case 'autocomplete':
                 $this->loadList();
-                $output = Array("list"=>$this->list,"search"=>$_POST['st']);
+                $output = ['list' => $this->list, 'search' => Request::post('st')];
                 Output::json($output);
                 exit;
                 break;
-            case "file":
+            case 'file':
                 $this->loadMainFields();
                 $field = $_GET['f'];
                 $this->get_row();
@@ -2997,19 +3048,19 @@ abstract class Table extends Page {
                     readfile($file);
                 } else die ('config error');
                 exit;
-            case "delete":
+            case 'delete':
                 if (!$this->deleteable) // FAILSAFE
                     break;
                 if ($this->delconf)
                     break;
                 $_POST['delconf'] = "Yes";
-            case "delconf":
+            case 'delconf':
                 if (!$this->deleteable) // FAILSAFE
                     break;
                 if ($_POST['delconf'] == "Yes") {
                 }
-            case "list_action":
-            case "list":
+            case 'list_action':
+            case 'list':
             case '':
             default:
                 $this->action = "list";
@@ -3019,12 +3070,12 @@ abstract class Table extends Page {
 
     function check_default_rowClick() {
         if (!isset($this->rowClick) && $this->editable) {
-            $this->rowClick = array('type' => 'action', 'action' => 'edit');
+            $this->rowClick = ['type' => 'action', 'action' => 'edit'];
         }
     }
 
     function js_init_calendar() {
-        $jsvars = array('action_file'=>$this->action_file);
+        $jsvars = ['action_file' => $this->action_file];
         JS::inline('calendar_data=".json_encode($jsvars).";');
     }
 
@@ -3125,18 +3176,18 @@ abstract class Table extends Page {
                     $filename = $handler->relativeFilename($filename);
                 }
                 Database::getInstance()->insertMultiple($link_settings['table'],
-                    array(
+                    [
                         $link_settings['key'] => $this->id,
                         $link_settings['display_column'] => $filenames,
-                    ),
+                    ],
                     true
                 );
                 // Remove old links.
                 Database::getInstance()->delete($link_settings['table'],
-                    array(
+                    [
                         $link_settings['key'] => $this->id,
-                        $link_settings['display_column'] => array('NOT IN', $filenames),
-                    )
+                        $link_settings['display_column'] => ['NOT IN', $filenames],
+                    ]
                 );
             }
             elseif (!empty($link_settings['full_form'])) {
@@ -3152,18 +3203,18 @@ abstract class Table extends Page {
                     if ($deleteable != '') {
                         Database::getInstance()->delete(
                             $link,
-                            array($link_settings['key'] => array('IN', $deleteable), $local_key => $local_id)
+                            [$link_settings['key'] => ['IN', $deleteable], $local_key => $local_id]
                         );
                     }
                     // update
-                    $list = Database::getInstance()->selectAll($link, array($local_key => $local_id), array());
+                    $list = Database::getInstance()->selectAll($link, [$local_key => $local_id], []);
                     foreach($list as $l) {
                         foreach($link_settings['fields'] as $f=>$field) {
                             $link_settings['fields'][$f]['field'] = $f;
                             $link_settings['fields'][$f]['form_field'] = "st_{$link}_{$f}_{$l[$link_settings['key']]}";
                         }
                         $field_values = $this->getFieldValues($link_settings['fields']);
-                        Database::getInstance()->update($link, $field_values, array($local_key => $local_id, $link_settings['key'] => $l[$link_settings['key']]));
+                        Database::getInstance()->update($link, $field_values, [$local_key => $local_id, $link_settings['key'] => $l[$link_settings['key']]]);
                     }
                 }
                 // insert new
@@ -3174,14 +3225,14 @@ abstract class Table extends Page {
                         $link_settings['fields'][$f]['form_field'] = "st_{$link}_{$f}_-{$i}";
                     }
                     $field_values = $this->getFieldValues($link_settings['fields']);
-                    Database::getInstance()->insert($link, $field_values, array($local_key => $local_id));
+                    Database::getInstance()->insert($link, $field_values, [$local_key => $local_id]);
                 }
             }
             elseif ($link_settings['index']) {
                 // CLEAR OUT OLD SETTINGS
                 Database::getInstance()->delete(
                     $link_settings['index'],
-                    array($this->getKey() => $this->id)
+                    [$this->getKey() => $this->id]
                 );
 
                 // GET INPUT ARRAY
@@ -3189,10 +3240,10 @@ abstract class Table extends Page {
                 foreach($list as $l) {
                     Database::getInstance()->insert(
                         $link_settings['index'],
-                        array(
+                        [
                             $this->getKey() => $this->id,
                             $link_settings['key'] => $l,
-                        )
+                        ]
                     );
                 }
             }
@@ -3226,7 +3277,7 @@ abstract class Table extends Page {
                     if ($field['lookuptable'] && $field['display_column']) {
                         if ($v) {
                             $fk = isset($field['lookupkey']) ? $field['lookupkey'] : $field['field'];
-                            $filter = array($fk => $v);
+                            $filter = [$fk => $v];
                             if (!empty($field['filter'])) {
                                 $filter += $field['filter'];
                             }
@@ -3234,9 +3285,9 @@ abstract class Table extends Page {
                             $value = Database::getInstance()->selectRow(
                                 $field['lookuptable'],
                                 $filter,
-                                array(
+                                [
                                     $field['display_column'], $fk
-                                )
+                                ]
                             );
                             return $value[$field['display_column']];
                         }
@@ -3251,7 +3302,7 @@ abstract class Table extends Page {
                     }
                     return $return;
                 case 'yesno':
-                    $field['options'] = Array(1=>'No',2=>'Yes');
+                    $field['options'] = [1=>'No',2=>'Yes'];
                 case 'state':
                     if ($field['type'] == "state") {
                         $field['options'] = Location::getStateOptions();
@@ -3438,7 +3489,7 @@ abstract class Table extends Page {
      * @return string
      *   The rendered HTML.
      */
-    protected function renderEditField($field, &$row = array()) {
+    protected function renderEditField($field, &$row = []) {
         // Make sure the form_field is set.
         if (!isset($field['form_field'])) {
             $field['form_field'] = $field['field'];
@@ -3481,14 +3532,14 @@ abstract class Table extends Page {
         }
 
         // Print form input.
-        $options = array();
+        $options = [];
         $return = '';
         switch(preg_replace('/\([0-9]+\)/', '', $field['type'])) {
             case 'text':
             case 'mediumtext':
             case 'longtext':
             case 'html':
-                $config = array();
+                $config = [];
                 $editor = (!empty($field['editor'])) ? strtolower($field['editor']) : 'default';
                 switch($editor) {
                     case 'full':		$config['toolbar'] = CKEDITOR::TYPE_FULL;        break;
@@ -3560,12 +3611,12 @@ abstract class Table extends Page {
                     $options = Database::getInstance()->selectColumn(
                         $field['lookuptable'],
                         $field['display_column'],
-                        !empty($field['filter']) ? $field['filter'] : array(),
+                        !empty($field['filter']) ? $field['filter'] : [],
                         !empty($field['lookupkey']) ? $field['lookupkey'] : $field['field']
                     );
                 }
                 elseif ($field['type'] == "yesno")
-                    $options = Array(1=>'No', 2=>'Yes');
+                    $options = [1=>'No', 2=>'Yes'];
                 elseif ($field['type'] == "state")
                     $options = Location::getStateOptions();
                 elseif ($field['type'] == "country")
@@ -3577,7 +3628,7 @@ abstract class Table extends Page {
                 }
 
                 if (!empty($field['allow_blank'])) {
-                    $options = array('' => '') + $options;
+                    $options = ['' => ''] + $options;
                 }
                 $output = BasicHTML::select($field['form_field'], $options, $field['Value']);
 
@@ -3630,7 +3681,7 @@ abstract class Table extends Page {
                 $options['size'] = $array[2];
             default:
                 if (!empty($field['autocomplete'])) {
-                    $options['classes'] = array('table_autocomplete');
+                    $options['classes'] = ['table_autocomplete'];
                     $options['autocomplete'] = false;
                 }
                 return Text::textfield($field['form_field'], $field['Value'], $options);
