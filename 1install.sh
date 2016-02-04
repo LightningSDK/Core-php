@@ -8,7 +8,6 @@ echo "Installing git submodules"
 # Only download the ones that are required for php to run.
 git submodule update --init Vendor/BounceHandler
 git submodule update --init Vendor/ckeditor
-git submodule update --init Vendor/ckfinder
 git submodule update --init Vendor/compass
 git submodule update --init Vendor/foundation
 git submodule update --init Vendor/htmlpurifier
@@ -93,7 +92,7 @@ fi
 if [ ! -d $DIR/../js/ckfinder ]; then
   echo "Copying ckfinder files to web directory"
   cd $DIR/../js
-  wget https://download.cksource.com/CKFinder/CKFinder%20for%20PHP/3.2.0/ckfinder_php_3.2.0.zip
+  wget https://download.cksource.com/CKFinder/CKFinder%20for%20PHP/3.2.0/ckfinder_php_3.2.1.zip
   unzip ckfinder_php_3.2.0.zip
   rm ckfinder_php_3.2.0.zip
 
