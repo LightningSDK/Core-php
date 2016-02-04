@@ -124,19 +124,7 @@ use Lightning\View\CSS;
                             <h1 id="page_header"><?=$page_header?></h1>
                         <?php
                         endif;
-                        $errors = Messenger::getErrors();
-                        if (count($errors) > 0): ?>
-                            <div class="messenger error">
-                                <ul><? foreach ($errors as $error): ?><li><?=$error?></li><? endforeach; ?></ul>
-                            </div>
-                        <? endif;
-                        $messages = Messenger::getMessages();
-                        if (count($messages) > 0): ?>
-                            <div class="messenger message">
-                                <ul><? foreach ($messages as $message): ?><li><?=$message?></li><? endforeach; ?></ul>
-                            </div>
-                        <?php
-                        endif;
+                        echo Messenger::renderErrorsAndMessages();
                         if (!empty($content)) :
                             $this->build($content);
                         endif; ?>
