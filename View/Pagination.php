@@ -11,6 +11,8 @@ class Pagination {
     protected $currentPage = 0;
     protected $parameter = 'page';
     protected $parameters = [];
+    protected $basePath;
+    protected $basePathReplace;
 
     public function __construct($params = []) {
         if (!empty($params['page'])) {
@@ -33,6 +35,8 @@ class Pagination {
         }
         if (!empty($params['base_path'])) {
             $this->basePath = $params['base_path'];
+        } elseif (!empty($params['base_path_replace'])) {
+            $this->basePathReplace = $params['base_path_replace'];
         } else {
             $this->basePath = '/' . Request::getLocation();
         }
@@ -71,16 +75,27 @@ class Pagination {
             $concatenator = '&';
         }
         if ($this->pages > 1) {
+            if (!empty($this->basePathReplace)) {
+                list($prefix, $suffix) = explode('%%', $this->basePathReplace);
+            } else {
+                $prefix = $this->basePath . $concatenator . $this->parameter . '=';
+                $suffix = '';
+            }
+
             $output .= '<ul class="pagination">';
-            $output .= '<li class="arrow ' . ($this->currentPage > 1 ? '' : 'unavailable') . '"><a href="' . $this->basePath . $concatenator . $this->parameter . '=' . 1 . '">&laquo; First</a></li>';
+            if ($this->currentPage > 1) {
+                $output .= '<li class="arrow ' . ($this->currentPage > 1 ? '' : 'unavailable') . '"><a href="' . $prefix . 1 . $suffix . '">&laquo; First</a></li>';
+            }
             for($i = max(1, $this->currentPage - 10); $i <= min($this->pages, $this->currentPage + 10); $i++) {
                 if ($this->currentPage == $i) {
-                    $output.= '<li class="current">' . $i . '</li>';
+                    $output.= '<li class="current"><a>' . $i . '</a></li>';
                 } else {
-                    $output.= "<li><a href='". $this->basePath . $concatenator . $this->parameter . '=' . $i ."'>{$i}</a></li>";
+                    $output.= "<li><a href='". $prefix . $i . $suffix ."'>{$i}</a></li>";
                 }
             }
-            $output .= '<li class="arrow ' . ($this->currentPage == $this->pages ? 'unavailable' : '') . '"><a href="' . $this->basePath . $concatenator . $this->parameter . '=' . $this->pages . '">Last &raquo;</a></li>';
+            if ($this->currentPage < $this->pages) {
+                $output .= '<li class="arrow ' . ($this->currentPage == $this->pages ? 'unavailable' : '') . '"><a href="' . $prefix . $this->pages . $suffix . '">Last &raquo;</a></li>';
+            }
             $output .= '</ul>';
         }
         return $output;
