@@ -87,6 +87,7 @@ abstract class Table extends Page {
      *   - hidden boolean - Will hide the field from all views
      *   - default mixed - Will use this as the default value when inserting. Will not be used if a value is supplied unless force_default_new is set to true. When creating a new entry, the field is visible, editable, and populated with this value.
      *   - force_default_new boolean - Forces new entries to use the default value. Prevents tampering with a field that has hidden and default set.
+     *   - note string - Adds text under the field to help the user understand the input.
      *
      * @var array
      */
@@ -187,15 +188,6 @@ abstract class Table extends Page {
      */
     protected $sortable = true;
 
-    /**
-     * when generating a table (i.e. calendar table)
-     * this key tells us what field is the trigger for creating a new TD
-     *
-     * @var string
-     */
-    protected $new_td_key = '';
-    protected $calendar_month = 1;
-    protected $calendar_year = '';
     protected $subset = [];
     protected $search_fields = [];
     protected $searchWildcard = Database::WILDCARD_AFTER;
@@ -231,7 +223,19 @@ abstract class Table extends Page {
 
     protected $function_after = [];
     protected $table_descriptions = "table_descriptions/";
+
+    /**
+     * If true, the user is only allowed to edit one row.
+     *
+     * @var boolean
+     */
     protected $singularity = false;
+
+    /**
+     * The PK id of the row they can edit.
+     *
+     * @var integer
+     */
     protected $singularityID = 0;
     protected $parentLink;
 
@@ -254,9 +258,20 @@ abstract class Table extends Page {
     protected $joinFields = [];
     protected $header;
     protected $table_url;
+
+    /**
+     * Used when this table is editing child contents of a parent table.
+     */
     protected $sort_fields;
     protected $parentId;
-    protected $field_order;
+
+    /**
+     * To explicitly set the field order displayed. If this is set, all other fields will be ignored
+     * when inserting/updating unless a behavior is explicitly set.
+     *
+     * @var array
+     */
+    protected $fieldOrder;
     protected $form_buttons_after;
     protected $rowClick;
     protected $update_on_duplicate_key = false;
@@ -270,9 +285,10 @@ abstract class Table extends Page {
      */
     protected $prefixRows;
 
+    protected $updatedMessage;
+    protected $createdMessage;
+
     public function __construct($options = []) {
-        $this->calendar_year = date('Y');
-        $this->calendar_month = date('m');
         // TODO: Action is not set yet. Is any of this necessary?
         if ($this->action == 'new') {
             $backlinkname = '';
@@ -372,7 +388,7 @@ abstract class Table extends Page {
             Messenger::error('Access Denied');
             return;
         }
-        $this->get_row();
+        $this->getRow();
     }
 
     public function getView() {
@@ -380,7 +396,7 @@ abstract class Table extends Page {
         if (!$this->editable) {
             Messenger::error('Access Denied');
         }
-        $this->get_row();
+        $this->getRow();
     }
 
     public function getNew() {
@@ -530,6 +546,9 @@ abstract class Table extends Page {
     }
 
     public function getList() {
+        if ($this->singularity) {
+            $this->redirect();
+        }
         $this->action = 'list';
     }
 
@@ -589,7 +608,7 @@ abstract class Table extends Page {
 
             // Loop through and delete any files.
             $this->loadMainFields();
-            $this->get_row();
+            $this->getRow();
             foreach($this->fields as $f=>$field) {
                 if ($field['type'] == 'file' || $field['type'] == 'image') {
                     if (file_exists($this->get_full_file_location($field['location'], $this->list[$f]))) {
@@ -622,6 +641,9 @@ abstract class Table extends Page {
             $values[$this->singularity] = $this->singularityID;
         }
         $this->id = Database::getInstance()->insert($this->table, $values, $this->update_on_duplicate_key ? $values : true);
+        if ($this->createdMessage !== false) {
+            Messenger::message($this->createdMessage ?: 'The ' . $this->table . ' has been created.');
+        }
 
         /*
          * Check if id is defined. If it's FALSE, there was an error 
@@ -632,10 +654,10 @@ abstract class Table extends Page {
         }
 
         if (!empty($this->post_actions['after_insert'])) {
-            $this->get_row();
+            $this->getRow();
             $this->post_actions['after_insert']($this->list);
         } elseif (!empty($this->post_actions['after_post'])) {
-            $this->get_row();
+            $this->getRow();
             $this->post_actions['after_post']($this->list);
         }
         $this->set_posted_links();
@@ -660,7 +682,7 @@ abstract class Table extends Page {
 
         // Update the record.
         $this->loadMainFields();
-        $this->get_row();
+        $this->getRow();
         $new_values = $this->getFieldValues($this->fields);
         if ($new_values === false) {
             return $this->getEdit();
@@ -671,13 +693,18 @@ abstract class Table extends Page {
         }
         $this->update_accessTable();
         $this->set_posted_links();
+
+        if ($this->updatedMessage !== false) {
+            Messenger::message($this->updatedMessage ?: 'The ' . $this->table . ' has been updated.');
+        }
+
         // If serial update is set, set the next action to be an edit of the next higest key,
         // otherwise, go back to the list.
         if (!empty($this->post_actions['after_update'])) {
-            $this->get_row();
+            $this->getRow();
             $this->post_actions['after_update']($this->list);
         } elseif (!empty($this->post_actions['after_post'])) {
-            $this->get_row();
+            $this->getRow();
             $this->post_actions['after_post']($this->list);
         }
 
@@ -692,7 +719,7 @@ abstract class Table extends Page {
             );
             if ($nextkey) {
                 $this->id = $nextkey;
-                $this->get_row();
+                $this->getRow();
                 $this->action_after['update'] = 'edit';
             } else {
                 // No higher key exists, drop back to the list
@@ -874,136 +901,13 @@ abstract class Table extends Page {
     }
 
     function render_pop_return() {
-        $this->get_row();
+        $this->getRow();
         $send_data = [
             'pf' => Request::get('pf'),
             'id' => $this->id,
             'pfdf' => $this->list[Request::get('pfdf')]
         ];
         JS::startup('lightning.table.returnPop('.json_encode($send_data).')');
-    }
-
-    function render_calendar_list() {
-        $this->js_init_calendar();
-        $this->loadMainFields();
-        $this->renderHeader();
-        $last_date = 0;
-        foreach($this->list as $l) {
-            if ($last_date != $l['date']) {
-                $last_date = $l['date'];
-                echo "<div class='list_date_header'>".$this->print_nice_date($l['date'])."</div>";
-            }
-            echo "<div class='list_cal_item' class='office_calendar {item_color}'>";
-            if ($l['evt_type'] == 1) {
-                $this_item_output = $this->load_template($this->custom_template_directory.$this->custom_templates[$this->action.'_item_t']);
-            } elseif ($l['evt_type'] == 2) {
-                $this_item_output = $this->load_template($this->custom_template_directory.$this->custom_templates[$this->action.'_item_d']);
-            } else {
-                $this_item_output = $this->load_template($this->custom_template_directory.$this->custom_templates[$this->action.'_item_c']);
-            }
-            foreach($this->fields as $field) {
-                $this_item_output = str_replace('{'.$field['field'].'}', $this->print_field_value($field, $l), $this_item_output);
-            }
-            echo $this_item_output;
-            echo "</div>";
-        }
-    }
-
-    function print_nice_date($jd) {
-        // format of Thursday, Septemeber 22nd 2012
-        if ($jd == 0) return '';
-        $date = explode("/",JDToGregorian($jd));
-        $output = jddayofweek($jd,1).", ".jdmonthname($jd,3)." {$date[1]}, {$date[2]}";
-        return $output;
-    }
-
-    function render_calendar_table($get_new_list = true) {
-        $this->js_init_calendar();
-        if ($get_new_list)
-            $this->loadList();
-        $this->loadMainFields();
-        $this->renderHeader();
-        $today = GregorianToJD(date("m"), date("d"), date("Y"));
-
-
-        // create index for fast access
-        $date_index = [];
-        foreach($this->list as $li) {
-            if (!is_array($date_index[$li['date']]))
-                $date_index[$li['date']] = [];
-            $date_index[$li['date']][] = $li;
-        }
-
-        if (isset($this->custom_templates[$this->action.'_item_t'])) {
-            $calendar_month = $this->calendar_month;
-            $calendar_year = $this->calendar_year;
-
-            echo "<table border='0' class='table_calendar' cellpadding='0' cellspacing='0'><tr class='header_row'><td>Sunday</td><td>Monday</td><td>Tuesday</td><td>Wednesday</td><td>Thursday</td><td>Friday</td><td>Saturday</td></tr>\n<tr>";
-            $all_month_days = [31, 28+date("L", mktime(0, 0, 0, 2, $this->calendar_year)), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-            $num_days = $all_month_days[$this->calendar_month - 1];
-
-
-            $all_month_days = [31, 28+date("L", mktime(0, 0, 0, 1, 1, $calendar_year)), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-            $num_days = $all_month_days[$calendar_month - 1];
-
-
-            $day_in_week = date("w", mktime(0, 0, 0, $calendar_month, 1, $calendar_year));
-
-            // fill in start blanks
-            for ($i = 0; $i < $day_in_week; $i++) {
-                echo "\n<td>&nbsp;</td>";
-            }
-
-
-            // loop through each date and print output
-            $i = 1;
-            while ($i <= $num_days) {
-                $day_in_week = ($day_in_week + 1) % 7;
-
-                $t = mktime(0, 0, 0, $calendar_month, $i, $calendar_year);
-                $today_class = ($today == GregorianToJD($calendar_month, $i, $calendar_year)) ? 'today' : '';
-
-                echo "\n<td class='actv {$today_class}'><p class='date'>$i";
-                if ($this->editable)
-                    echo "<a href='".$this->createUrl("new",0,'',array("date"=>gregoriantojd($calendar_month, $i, $calendar_year))).
-                        "' /><img src='/images/lightning/new.png' border='0' /></a>";
-                echo "</p><div class='events'>"
-                    . $this->render_calendar_items($date_index[GregorianToJD($calendar_month, $i, $calendar_year)])
-                    . "</div></td>";
-                if ($day_in_week == 0) {
-                    echo "\n</tr>\n<tr>";
-                }
-
-                $i++;
-            }
-            echo "\n</tr>\n</table>";
-        }
-    }
-
-    function render_calendar_items(&$list) {
-        $template_t = $this->load_template($this->custom_template_directory.$this->custom_templates[$this->action.'_item_t']);
-        $template_c = $this->load_template($this->custom_template_directory.$this->custom_templates[$this->action.'_item_c']);
-        $template_d = $this->load_template($this->custom_template_directory.$this->custom_templates[$this->action.'_item_d']);
-        $ret_str = '';
-
-        if (!is_array($list)) return;
-        foreach($list as $row) {
-            // load the template
-            if ($row['evt_type'] == 1)
-                $this_item_output = $template_t;
-            elseif ($row['evt_type'] == 2)
-                $this_item_output = $template_d;
-            else
-                $this_item_output = $template_c;
-
-            // replace variables
-            foreach($this->fields as $field) {
-                $this_item_output = str_replace('{'.$field['field'].'}', $this->print_field_value($field, $row), $this_item_output);
-            }
-            $this_item_output = $this->template_item_vars($this_item_output, $row[$this->getKey()]);
-            $ret_str .= $this_item_output;
-        }
-        return $ret_str;
     }
 
     function renderConfirmation() {
@@ -1049,7 +953,7 @@ abstract class Table extends Page {
             if ($this->custom_templates[$this->action.'_action_header'] != '')
                 $output .= $this->load_template($this->custom_template_directory.$this->custom_templates[$this->action.'_action_header']);
         } else {
-            if ($this->addable) {
+            if ($this->addable && empty($this->singularity)) {
                 $output .= "<a href='".$this->createUrl('new') . "'><img src='/images/lightning/new.png' border='0' title='Add New' /></a>";
             }
             if ($this->importable) {
@@ -1169,8 +1073,8 @@ abstract class Table extends Page {
     function renderListHeader() {
         $output = '';
         // If the field order is specified.
-        if (is_array($this->field_order)) {
-            foreach($this->field_order as $f) {
+        if (is_array($this->fieldOrder)) {
+            foreach($this->fieldOrder as $f) {
                 if (isset($this->fields[$f])) {
                     if ($this->which_field($this->fields[$f])) {
                         if ($this->sortable)
@@ -1474,8 +1378,8 @@ abstract class Table extends Page {
             $output .= '<table class="table_form_table" '. $style . '>';
 
             $hidden_fields = [];
-            $field_order = is_array($this->field_order) && !empty($this->field_order) ? $this->field_order : array_keys($this->fields);
-            foreach($field_order as $f) {
+            $fieldOrder = is_array($this->fieldOrder) && !empty($this->fieldOrder) ? $this->fieldOrder : array_keys($this->fields);
+            foreach($fieldOrder as $f) {
                 if (!empty($this->fields[$f]['type']) && $this->fields[$f]['type'] == 'hidden') {
                     if (!empty($this->fields[$f]['Value'])) {
                         $hidden_fields[] = BasicHTML::hidden($f, $this->fields[$f]['Value']);
@@ -2041,7 +1945,6 @@ abstract class Table extends Page {
         $template = str_replace('{table_link_new}', $this->createUrl("new"), $template);
         $template = str_replace('{table_header}', $this->header, $template);
         $template = str_replace('{parentId}', intval($this->parentId), $template);
-        $template = str_replace('{calendar_mode}', $this->calendar_mode, $template);
 
         // additional action vars
         foreach($this->additional_action_vars as $f=>$v)
@@ -2063,20 +1966,6 @@ abstract class Table extends Page {
             if ($this->fields[$m]['type'] == 'file') {
                 $template = str_replace('{table_link_file.'.$m.'}', $this->createUrl("file", $id, $m), $template);
             }
-        }
-
-        // if calendar
-        if ($this->type=='calendar') {
-            $prev_year = $next_year = $this->calendar_year;
-
-            $prev_month = $this->calendar_month - 1;
-            if ($prev_month < 1) { $prev_month += 12; $prev_year--;}
-
-            $next_month = $this->calendar_month + 1;
-            if ($next_month > 12) { $next_month -= 12; $next_year++;}
-
-            $template = str_replace('{prev_month_link}', $this->createUrl('',0,'',array('month'=>$prev_month,'year'=>$prev_year)), $template);
-            $template = str_replace('{next_month_link}', $this->createUrl('',0,'',array('month'=>$next_month,'year'=>$next_year)), $template);
         }
 
         return $template;
@@ -2265,6 +2154,13 @@ abstract class Table extends Page {
         return true;
     }
 
+    /**
+     * Check if we should display this field in view mode.
+     *
+     * @param array $field
+     *
+     * @return boolean
+     */
     function displayView(&$field) {
         if (
             (!empty($field['display_value']) && is_callable($field['display_value']))
@@ -2282,8 +2178,14 @@ abstract class Table extends Page {
         return true;
     }
 
-    // Should we even consider the posted/function value on insert? -- implemented
-    function get_value_on_new(&$field) {
+    /**
+     * Check if we should insert a value on this field.
+     *
+     * @param array $field
+     *
+     * @return boolean
+     */
+    function setValueOnNew(&$field) {
         if (isset($field['insert_function']))
             return true;
         if (isset($field['submit_function']))
@@ -2300,11 +2202,19 @@ abstract class Table extends Page {
             return false;
         if (!empty($field['list_only']))
             return false;
+        if (!empty($this->fieldOrder) && !in_array($field['field'], $this->fieldOrder))
+            return false;
         return true;
     }
 
-    // should we even consider the posted/function value on update? -- implemented
-    function get_value_on_update(&$field) {
+    /**
+     * Check if we should update the value on this field.
+     *
+     * @param array $field
+     *
+     * @return boolean
+     */
+    function setValueOnUpdate(&$field) {
         if (isset($field['modified_function']))
             return true;
         if (isset($field['submit_function']))
@@ -2318,6 +2228,8 @@ abstract class Table extends Page {
         if (!empty($field['list_only']))
             return false;
         if ($field['field'] == $this->getKey())
+            return false;
+        if (!empty($this->fieldOrder) && !in_array($field['field'], $this->fieldOrder))
             return false;
         return true;
     }
@@ -2336,9 +2248,9 @@ abstract class Table extends Page {
         $dependenciesMet = true;
         foreach($field_list as $f => $field) {
             // check for settings that override user input
-            if ($this->action == "insert" && !$this->get_value_on_new($field)) {
+            if ($this->action == "insert" && !$this->setValueOnNew($field)) {
                 continue;
-            } elseif ($this->action == "update" && !$this->get_value_on_update($field)) {
+            } elseif ($this->action == "update" && !$this->setValueOnUpdate($field)) {
                 continue;
             }
             if ($field['type'] == 'note') {
@@ -2399,7 +2311,7 @@ abstract class Table extends Page {
                             )
                         ) {
                             // delete previous file
-                            $this->get_row();
+                            $this->getRow();
 
                             if ($field['type'] == 'file') {
                                 $val = $this->saveFile($field, $_FILES[$field['field']]);
@@ -2650,7 +2562,7 @@ abstract class Table extends Page {
     public function updateImages($missing_only = false, $id = null) {
         if ($id) {
             $this->id = $id;
-            $this->get_row();
+            $this->getRow();
             $this->list = [$this->list];
         } else {
             $this->loadFullListCursor();
@@ -2792,7 +2704,7 @@ abstract class Table extends Page {
     }
 
     /**
-     * get_row() gets a single entry from the table based on $this->id
+     * getRow() gets a single entry from the table based on $this->id
 
      * Constructs a database query based on the following class variables:
      * @param string $table->table			the table to query
@@ -2802,7 +2714,7 @@ abstract class Table extends Page {
      * @return stores result in $list class variable (no actual return result from the method)
 
      */
-    function get_row($force=true) {
+    function getRow($force=true) {
         if (!empty($this->prefixRows[$this->id])) {
             // If it's a fixed value.
             $this->editable = false;
@@ -2826,9 +2738,6 @@ abstract class Table extends Page {
         if ($this->accessControl != '') {
             $where = array_merge($this->accessControl, $where);
         }
-        if ($this->singularity) {
-            $where[$this->singularity] = $this->singularityID;
-        }
         $join = [];
         if ($this->accessTable) {
             if ($this->accessTableJoinOn) {
@@ -2844,20 +2753,18 @@ abstract class Table extends Page {
             $join = array_merge($join, $this->joins);
         } 
         
-        $where[$this->getKey(TRUE)] = $this->id;
+        $where[$this->getKey(true)] = $this->singularity ? $this->singularityID : $this->id;
         
         // fields we retrieve from the query
         $fields = array_merge(["{$this->table}.*"], $this->joinFields);
         
         if ($this->table) {
-            $this->list = Database::getInstance()->selectRow(
-                [
-                    'from' => $this->table,
-                    'join' => $join,
-                ],
-                $where,
-                $fields
-            );
+            $this->list = Database::getInstance()->selectRowQuery([
+                'from' => $this->table,
+                'join' => $join,
+                'where' => $where,
+                'select' => $fields
+            ]);
         }
     }
 
@@ -2992,7 +2899,7 @@ abstract class Table extends Page {
             switch($this->action_fields[$_GET['f']]['type']) {
                 case "function":
                     $this->id = intval($_GET['id']);
-                    $this->get_row();
+                    $this->getRow();
                     $this->action_fields[$_GET['f']]['function']($this->list);
                     header("Location: ".$this->createUrl($_GET['ra'], $row[$this->getKey()]));
                     exit;
@@ -3033,7 +2940,7 @@ abstract class Table extends Page {
             case 'file':
                 $this->loadMainFields();
                 $field = $_GET['f'];
-                $this->get_row();
+                $this->getRow();
                 if ($this->fields[$field]['type'] == 'file' && count($this->list)>0) {
                     $file = $this->get_full_file_location($this->fields[$field]['location'], $this->list[$field]);
                     if (!file_exists($file)) die("No File Uploaded");
@@ -3072,11 +2979,6 @@ abstract class Table extends Page {
         if (!isset($this->rowClick) && $this->editable) {
             $this->rowClick = ['type' => 'action', 'action' => 'edit'];
         }
-    }
-
-    function js_init_calendar() {
-        $jsvars = ['action_file' => $this->action_file];
-        JS::inline('calendar_data=".json_encode($jsvars).";');
     }
 
     function js_init_data() {
@@ -3192,7 +3094,7 @@ abstract class Table extends Page {
             }
             elseif (!empty($link_settings['full_form'])) {
                 if (!isset($this->list)) {
-                    $this->get_row();
+                    $this->getRow();
                 }
                 $local_key = isset($link_settings['local_key']) ? $link_settings['local_key'] : $this->getKey();
                 $local_id = isset($this->list[$local_key]) ? $this->list[$local_key] : $this->id;
@@ -3514,7 +3416,7 @@ abstract class Table extends Page {
         }
 
         if (isset($this->preset[$field['field']]['render_'.$this->action.'_field'])) {
-            $this->get_row(false);
+            $this->getRow(false);
             return $this->preset[$field['field']]['render_'.$this->action.'_field']($this->list);
         }
 
