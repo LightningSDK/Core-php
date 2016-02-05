@@ -86,10 +86,21 @@ class Object {
         }
     }
 
-    public static function insertOrUpdate($update_values, $new_values) {
+    /**
+     * Save a new object or update if it already exists.
+     *
+     * @param array $new_values
+     *   An array of values for a new object.
+     * @param array $update_values
+     *   An array of values to update. This should exclude the primary key.
+     *
+     * @return integer
+     *   The new ID
+     */
+    public static function insertOrUpdate($new_values, $update_values) {
         return Database::getInstance()->insert(static::TABLE,
-            $update_values,
-            $new_values
+            $new_values,
+            $update_values
         );
     }
 
