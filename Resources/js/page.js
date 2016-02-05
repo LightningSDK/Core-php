@@ -1,7 +1,7 @@
 lightning.page = {
     edit: function() {
-        $('.page_edit').fadeIn();
-        $('.page_edit_links').fadeOut();
+        $('.page_edit').show();
+        $('.page_edit_links').hide();
         $('#page_display').attr('contentEditable', 'true');
         lightning.ckeditors['page_editor'] = CKEDITOR.inline("page_display", {
                 toolbar:CKEDITOR.config.toolbar_Full
@@ -12,7 +12,7 @@ lightning.page = {
     },
 
     save: function() {
-        $('#save_button').fadeOut();
+        $('#save_button').hide();
         lightning.ckeditors['page_editor'].destroy();
         delete lightning.ckeditors['page_editor'];
         var send = {
@@ -36,8 +36,8 @@ lightning.page = {
             success:function(data) {
                 if (data.status == 'success') {
                     // Hide the editing controls.
-                    $('.page_edit').fadeOut();
-                    $('.page_edit_links').fadeIn();
+                    $('.page_edit').hide();
+                    $('.page_edit_links').show();
                     $('#page_display').attr('contentEditable', 'false');
                     // Update page specific data.
                     $('#page_id').val(data.page_id);
@@ -56,4 +56,4 @@ lightning.page = {
             }
         });
     }
-}
+};
