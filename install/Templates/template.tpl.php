@@ -68,36 +68,34 @@ use Lightning\View\CSS;
             </nav>
             <? if (ClientUser::getInstance()->isAdmin()): ?>
                 <nav class="top-bar" data-topbar>
+                    <ul class="title-area">
+                        <li class="name">
+                            <h1><a href="/">Admin Menu</a></h1>
+                        </li>
+                        <!-- Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone -->
+                        <li class="toggle-topbar menu-icon"><a href="#"><span>Admin Menu</span></a></li>
+                    </ul>
                     <section class="top-bar-section">
-                        <ul class="title-area">
-                            <li class="name">
-                                <h1><a href="/">Admin Menu</a></h1>
+                        <ul class="right">
+                            <li class="has-dropdown not-click">
+                                <a href="/admin/blog/edit">Blog</a>
+                                <ul class="dropdown">
+                                    <li><a href="/admin/blog/edit">Blog Posts</a></li>
+                                    <li><a href="/admin/blog/categories">Blog Categories</a></li>
+                                </ul>
                             </li>
-                            <!-- Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone -->
-                            <li class="toggle-topbar menu-icon"><a href="#"><span>Admin Menu</span></a></li>
+                            <li><a href="/admin/pages">Pages</a></li>
+                            <li><a href="/admin/users">Users</a></li>
+                            <li class="has-dropdown not-click">
+                                <a href="/admin/mailing/lists">Mailing</a>
+                                <ul class="dropdown">
+                                    <li><a href="/admin/mailing/lists">Mailing Lists</a></li>
+                                    <li><a href="/admin/mailing/templates">Templates</a></li>
+                                    <li><a href="/admin/mailing/messages">Messages</a></li>
+                                    <li><a href="/admin/mailing/stats">Stats</a></li>
+                                </ul>
+                            </li>
                         </ul>
-                        <section class="top-bar-section">
-                            <ul class="right">
-                                <li class="has-dropdown not-click">
-                                    <a href="/admin/blog/edit">Blog</a>
-                                    <ul class="dropdown">
-                                        <li><a href="/admin/blog/edit">Blog Posts</a></li>
-                                        <li><a href="/admin/blog/categories">Blog Categories</a></li>
-                                    </ul>
-                                </li>
-                                <li><a href="/admin/pages">Pages</a></li>
-                                <li><a href="/admin/users">Users</a></li>
-                                <li class="has-dropdown not-click">
-                                    <a href="/admin/mailing/lists">Mailing</a>
-                                    <ul class="dropdown">
-                                        <li><a href="/admin/mailing/lists">Mailing Lists</a></li>
-                                        <li><a href="/admin/mailing/templates">Templates</a></li>
-                                        <li><a href="/admin/mailing/messages">Messages</a></li>
-                                        <li><a href="/admin/mailing/stats">Stats</a></li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </section>
                     </section>
                 </nav>
             <? endif; ?>
