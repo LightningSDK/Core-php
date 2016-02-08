@@ -101,8 +101,13 @@ class BasicHTML {
         return '<textarea ' . HTML::implodeAttributes($attributes) . ' >' . Scrub::toHTML($value) . '</textarea>';
     }
 
-    public static function hidden($name, $value = '') {
-        return '<input type="hidden" name="' . $name . '" id="' . $name . '" value="' . $value . '" />';
+    public static function hidden($name, $value = '', $attributes = []) {
+        // This only applies to text fields.
+        $attributes['name'] = $name;
+        $attributes['id'] = $name;
+        $attributes['value'] = $value;
+        $attributes['type'] = 'hidden';
+        return '<input ' . HTML::implodeAttributes($attributes) . ' />';
     }
 
     /**

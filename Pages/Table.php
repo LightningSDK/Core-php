@@ -54,7 +54,6 @@ use Lightning\Tools\Template;
 use Lightning\View\Field;
 use Lightning\View\Field\BasicHTML;
 use Lightning\View\Field\Checkbox;
-use Lightning\View\Field\Hidden;
 use Lightning\View\Field\Location;
 use Lightning\View\Field\Text;
 use Lightning\View\Field\Time;
@@ -751,13 +750,13 @@ abstract class Table extends Page {
 
         // Redirect to the next page.
         if ($return = Request::get('table_return', 'url_encoded')) {
-            Navigation::redirect($return);
+            Navigation::redirect($this->createUrl($return));
         }
 
         if ($this->submit_redirect && $redirect = Request::get('redirect')) {
             Navigation::redirect($redirect);
         } elseif (!empty($this->redirectAfter[$this->action])) {
-            Navigation::redirect($this->redirectAfter[$this->action]);
+            Navigation::redirect($this->createUrl($this->redirectAfter[$this->action]));
         } elseif ($this->submit_redirect && isset($this->action_after[$this->action])) {
             Navigation::redirect($this->createUrl(
                 $this->action_after[$this->action],
@@ -1359,7 +1358,7 @@ abstract class Table extends Page {
                 $output .= '<form action="' . $this->createUrl() . '" id="form_' . $this->table . '" method="POST" ' . $multipart_header . '><input type="hidden" name="action" id="action" value="' . $new_action . '" />';
                 $output .= Form::renderTokenInput();
                 if ($return = Request::get('return', 'urlencoded')) {
-                    $output .= Hidden::render('table_return', $return);
+                    $output .= BasicHTML::hidden('table_return', $return);
                 }
             }
             // use the ID if we are editing a current one
@@ -1883,6 +1882,8 @@ abstract class Table extends Page {
             $vars['page'] = $id;
         } elseif ($id > 0) {
             $vars['id'] = $id;
+        } elseif ($this->id > 0) {
+            $vars['id'] = $this->id;
         }
         if ($action != '') $vars['action'] = $action;
         if ($this->table_url) $vars['table'] = $this->table;
@@ -2361,7 +2362,7 @@ abstract class Table extends Page {
                             'html',
                             !empty($field['allowed_html']) ? $field['allowed_html'] : '',
                             !empty($field['allowed_css']) ? $field['allowed_css'] : '',
-                            !empty($field['trusted']),
+                            !empty($field['trusted']) || $this->trusted,
                             !empty($field['full_page'])
                         );
                         break;
@@ -3454,7 +3455,7 @@ abstract class Table extends Page {
                     $config['fullPage'] = true;
                 }
 
-                if (!empty($field['full_page']) || $editor == 'full') {
+                if (!empty($field['full_page']) || $editor == 'full' || !empty($field['trusted']) || $this->trusted) {
                     $config['allowedContent'] = true;
                 }
 

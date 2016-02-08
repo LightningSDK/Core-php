@@ -5,8 +5,6 @@ namespace Lightning\Tools;
 use Exception;
 use Lightning\View\Field;
 use Lightning\View\Field\BasicHTML;
-use Lightning\View\Field\Hidden;
-use Lightning\View\Field\Text;
 
 class Form {
     protected $id = 'form';
@@ -40,7 +38,7 @@ class Form {
     public function render() {
         $output = $this->open();
         // TODO: Iterate over all fields here.
-        $output = '</form>';
+        $output .= '</form>';
         return $output;
     }
 
@@ -184,6 +182,6 @@ class Form {
      *   The full HTML.
      */
     public static function renderTokenInput() {
-        return Hidden::render('token', Session::getInstance()->getToken());
+        return BasicHTML::hidden('token', Session::getInstance()->getToken());
     }
 }
