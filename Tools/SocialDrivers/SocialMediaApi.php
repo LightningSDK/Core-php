@@ -14,6 +14,10 @@ use Lightning\View\JS;
 
 abstract class SocialMediaApi extends Singleton implements SocialMediaApiInterface {
 
+    const COUNT_NONE = 0;
+    const COUNT_HORIZONTAL = 1;
+    const COUNT_VERTICAL = 2;
+
     /**
      * @var User
      */

@@ -483,3 +483,25 @@ ul.tags{
     text-align: center;
   }
 }
+.social-share {
+  div {
+    display: inline-block;
+    color: white;
+    padding: 10px 15px;
+    &.google {
+      background-color: #f32e06;
+    }
+    &.facebook {
+      background-color: #3c5c9a;
+    }
+    &.twitter {
+      background-color: #28aae1;
+    }
+    &.email {
+      background-color: #2f6fad;
+      a {
+        color: white;
+      }
+    }
+  }
+}

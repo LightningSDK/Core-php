@@ -29,6 +29,18 @@ use Lightning\View\CSS;
     <?= JS::render(); ?><?= CSS::render(); ?>
 </head>
 <body class="antialiased hide-extras">
+<?php if ($analytics_id = Configuration::get('google_analytics_id')): ?>
+    <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+        ga('create', '<?=$analytics_id;?>', 'auto');
+        ga('send', 'pageview');
+
+    </script>
+<?php endif; ?>
 <div class="marketing off-canvas-wrap" data-offcanvas>
     <div class="inner-wrap">
 
@@ -113,7 +125,7 @@ use Lightning\View\CSS;
                             $this->build($content);
                         endif; ?>
                     </div>
-                    <div class="small-12 medium-4 columns">
+                    <div class="small-12 medium-4 columns right-column">
                         <? $this->build('right_column'); ?>
                     </div>
                 <? else: ?>

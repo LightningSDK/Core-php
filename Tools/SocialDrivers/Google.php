@@ -129,14 +129,38 @@ class Google extends SocialMediaApi {
         return $ids;
     }
 
-    public static function renderLinks() {
-        $settings = Configuration::get('social.google');
-        if (!empty($settings['like'])) {
-            JS::add('https://apis.google.com/js/platform.js', true);
-            $output = '<g:plusone size="medium" annotation="none"></g:plusone>';
+    public static function renderLike() {
+        JS::add('https://apis.google.com/js/platform.js', true);
+        return '<div class="g-plusone" ' . self::getLayout() . '></div>';
+    }
 
-            return $output;
+    public static function renderShare($url) {
+        JS::add('https://apis.google.com/js/platform.js', true);
+        return '<div class="g-plus" ' . self::getLayout() . ' data-action="share" data-href="' . $url . '"></div>';
+    }
+
+    public static function renderFollow() {
+        if ($url = Configuration::get('social.google.url')) {
+            JS::add('https://apis.google.com/js/platform.js', true);
+            return '<div class="g-follow" ' . self::getLayout() . ' data-href="' . $url . '" data-rel="publisher"></div>';
         }
+    }
+
+    protected static function getLayout() {
+        $count = Configuration::get('social.share_count');
+        switch ($count) {
+            case SocialMediaApi::COUNT_HORIZONTAL:
+                $layout = 'data-annotation="bubble"';
+                break;
+            case SocialMediaApi::COUNT_VERTICAL:
+                $layout = 'data-annotation="vertical-bubble"';
+                break;
+            case SocialMediaApi::COUNT_NONE:
+            default:
+                $layout = 'data-annotation="none" data-height="20"';
+                break;
+        }
+        return $layout;
     }
 
     public static function loginButton($authorize = false) {

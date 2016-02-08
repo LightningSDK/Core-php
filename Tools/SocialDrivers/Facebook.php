@@ -8,6 +8,7 @@ use Facebook\FacebookSession;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Session;
 use Lightning\Tools\Template;
+use Lightning\View\Facebook\SDK;
 use Lightning\View\JS;
 
 class Facebook extends SocialMediaApi {
@@ -91,29 +92,51 @@ class Facebook extends SocialMediaApi {
         return $friends;
     }
 
+    public static function renderLike() {
+        SDK::init();
+        return '<div class="fb-like" data-layout="standard" data-action="like" data-show-faces="true" data-share="true"></div>';
+    }
+
     /**
-     * Render the like and share links.
+     * Render the share link.
      */
-    public static function renderLinks() {
-        $settings = Configuration::get('social.facebook');
-        if (!empty($settings['share']) || !empty($settings['like'])) {
-            JS::startup("!function(d, s, id) {
-  var js, fjs = d.getElementsByTagName(s)[0];
-  if (d.getElementById(id)) return;
-  js = d.createElement(s); js.id = id;
-  js.src = '//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.3';
-  fjs.parentNode.insertBefore(js, fjs);
-}(document, 'script', 'facebook-jssdk');");
-            Template::getInstance()->addFooter('<div id="fb-root"></div>');
-            $output = '';
-            if (!empty($settings['share'])) {
-                $output .= '<div class="fb-share-button" data-layout="button"></div>';
-            }
-            if (!empty($settings['like']) && !empty($settings['page'])) {
-                $output .= '<div class="fb-like" data-href="https://facebook.com/' . $settings['page'] . '" data-layout="button" data-action="like" data-show-faces="false" data-share="false"></div>';
-            }
-            return $output;
+    public static function renderShare($url) {
+        SDK::init();
+        $count = Configuration::get('social.share_count');
+        switch ($count) {
+            case SocialMediaApi::COUNT_HORIZONTAL:
+                $layout = 'button_count';
+                break;
+            case SocialMediaApi::COUNT_VERTICAL:
+                $layout = 'box_count';
+                break;
+            case SocialMediaApi::COUNT_NONE:
+            default:
+                $layout = 'button';
+                break;
         }
+        return '<div class="fb-share-button" href="' . $url . '" data-layout="' . $layout . '"></div>';
+    }
+
+    public static function renderFollow() {
+        if ($fb_page = Configuration::get('social.facebook.url')) {
+            SDK::init();
+            $count = Configuration::get('social.share_count');
+            switch ($count) {
+                case SocialMediaApi::COUNT_HORIZONTAL:
+                    $layout = 'button_count';
+                    break;
+                case SocialMediaApi::COUNT_VERTICAL:
+                    $layout = 'box_count';
+                    break;
+                case SocialMediaApi::COUNT_NONE:
+                default:
+                    $layout = 'button';
+                    break;
+            }
+            return '<div class="fb-like" data-href="' . $fb_page . '" data-layout="' . $layout . '" ></div>';
+        }
+        return '';
     }
 
     public static function loginButton($authorize = false) {

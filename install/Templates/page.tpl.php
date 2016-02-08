@@ -1,6 +1,8 @@
-<div id='content'>
-    <div id='inner-content'>
+<div id='content' class="row">
+    <div id='inner-content' class="content_panel padding">
         <? use Lightning\Pages\Page;
+        use Lightning\Tools\Configuration;
+        use Lightning\View\SocialLinks;
 
         if (!empty($editable)): ?>
             <div class="page_edit_links">
@@ -35,6 +37,6 @@
             <input type="button" name="submit" class='button page_edit' onclick="lightning.page.save();" value="Save" <? if (empty($action) || $action != 'new'):?>style="display:none;"<? endif; ?> /><br />
         <? endif; ?>
 
-        <?= $this->build('social_links'); ?>
+        <div class="social-share"><?= SocialLinks::render(Configuration::get('web_root') . '/' . (!empty($full_page['url']) ? $full_page['url'] . '.html' : '')); ?></div>
     </div>
 </div>

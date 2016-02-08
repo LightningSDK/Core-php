@@ -121,6 +121,22 @@ class Twitter extends SocialMediaApi {
         return $this->getFriends();
     }
 
+    public static function renderShare($url) {
+        JS::add('https://platform.twitter.com/widgets.js');
+        $via = Configuration::get('social.twitter.url');
+        if ($via) {
+            $via = 'via="' . $via . '"';
+        }
+        return '<a class="twitter-share-button" ' . $via . ' rel="canonical" href="https://twitter.com/intent/tweet" url="' . $url . '">Tweet</a>';
+    }
+
+    public static function renderFollow() {
+        if ($url = Configuration::get('social.twitter.url')) {
+            JS::add('https://platform.twitter.com/widgets.js');
+            return '<a class="twitter-follow-button"  href="https://twitter.com/' . $url . '">Follow @' . $url . '</a>';
+        }
+    }
+
     /**
      * Render the follow and tweet links.
      */
@@ -128,7 +144,6 @@ class Twitter extends SocialMediaApi {
         $settings = Configuration::get('social.twitter');
         if (!empty($settings['follow']) || !empty($settings['share'])) {
             // Add the initialization script.
-            JS::startup("!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');");
 
             $return = '';
             if (!empty($settings['share'])) {

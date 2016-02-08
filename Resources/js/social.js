@@ -105,6 +105,25 @@ lightning.social = {
         }
     },
 
+    initShare: function() {
+        $('.social-share').on('click', 'div', lightning.social.shareClick);
+    },
+    shareClick: function() {
+        var el = $(this);
+        var url = el.closest('.social-share').data('url');
+        var winHeight = 350;
+        var winWidth = 520;
+        var winTop = (screen.height / 2) - (winHeight / 2);
+        var winLeft = (screen.width / 2) - (winWidth / 2);
+        if (el.is('.facebook')) {
+            window.open('http://www.facebook.com/sharer.php?s=100&p[url]=' + url, 'sharer', 'top=' + winTop + ',left=' + winLeft + ',toolbar=0,status=0,width=' + winWidth + ',height=' + winHeight);
+        } else if (el.is('.twitter')) {
+            window.open('https://twitter.com/intent/tweet?url=' + url + '&via=' + lightning.vars.social.twitter.url + '', 'sharer', 'top=' + winTop + ',left=' + winLeft + ',toolbar=0,status=0,width=' + winWidth + ',height=' + winHeight);
+        } else if (el.is('.google')) {
+            window.open('https://plus.google.com/share?url=' + url, 'sharer', 'top=' + winTop + ',left=' + winLeft + ',toolbar=0,status=0,width=' + winWidth + ',height=' + winHeight);
+        }
+    },
+
     initLogout: function(site) {
         $('.logout_button').click(function(event){
             event.preventDefault();
