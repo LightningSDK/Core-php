@@ -19,7 +19,7 @@ class BlogCategories extends Table {
         Template::getInstance()->set('full_width', true);
         $this->preset['cat_url'] = [
             'submit_function' => function(&$output){
-                $output['cat_url'] = Request::post('cat_url') ?: Scrub::toURL(Request::post('category'));
+                $output['cat_url'] = Request::post('cat_url', 'cat_url') ?: Request::post('category', 'url');
             }
         ];
     }
