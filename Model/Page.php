@@ -12,11 +12,11 @@ class Page extends Object {
     const TABLE = 'page';
 
     public static function loadByURL($url) {
-        return Database::getInstance()->selectRow(self::TABLE, array('url' => array('LIKE', $url)));
+        return Database::getInstance()->selectRow(self::TABLE, ['url' => ['LIKE', $url]]);
     }
 
     public static function selectAllPages() {
-        return Database::getInstance()->select(self::TABLE, array('site_map' => 1));
+        return Database::getInstance()->select(self::TABLE, ['site_map' => 1]);
     }
 
     public static function getSitemapUrls() {
