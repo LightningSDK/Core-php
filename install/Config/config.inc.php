@@ -30,6 +30,7 @@ $conf = array(
         'to' => array('youremail@gmail.com'),
         'cc' => array(),
         'bcc' => array(),
+        'optin' => false,
     ),
     'mailer' => array(
         'test' => array(),
