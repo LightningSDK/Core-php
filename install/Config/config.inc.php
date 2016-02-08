@@ -51,9 +51,16 @@ $conf = array(
         // **** THIS KEY IS INCLUDED WITH THE DISTRIBUTION AND IS NOT SECURE ****
         'key' => '0Xx+v7xGDanBpTgDoIqwlA==:JPJdzm5ifvePYztVj1ICrQ==',
     ),
-    'ckfinder' => array(
-        'content' => '/images/'
-    ),
+    'imageBrowser' => [
+        'containers' => [
+            'images' => [
+                // Relative to the home directory
+                'storage' => 'images',
+                // Will be prefixed to an image file. Include the trailing slash.
+                'url' => '/images/',
+            ],
+        ]
+    ],
     'meta_data' => array(
         'title' => '',
         'keywords' => '',
@@ -112,6 +119,7 @@ $conf = array(
             'landing' => 'Lightning\\Pages\\OptIn',
             'optin' => 'Lightning\\Pages\\OptIn',
             'profile' => 'Lightning\\Pages\\Profile',
+            'imageBrowser' => 'Source\\SiteAdmin\\ImageBrowser',
         ),
         'cli_only' => array(
             'bounce' => 'Lightning\\CLI\\BouncedEmail',

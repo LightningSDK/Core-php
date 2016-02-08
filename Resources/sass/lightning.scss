@@ -505,3 +505,50 @@ ul.tags{
     }
   }
 }
+
+.image-browser {
+  min-height: 100px;
+  height: 100%;
+  .folders {
+    height: 100%;
+    width: 20%;
+    float: left;
+  }
+  .images {
+    height: 100%;
+    width: 80%;
+    float: left;
+    .thumb-container {
+      float: left;
+      height: 150px;
+      width: 150px;
+      position: relative;
+      overflow: hidden;
+      margin: 5px;
+      border: 4px solid white;
+      transition: border .5s linear;
+      &:hover {
+        border-color: #2f6fad;
+      }
+      img {
+        position: absolute;
+        max-height: 100%;
+        max-width: 100%;
+      }
+      div.data {
+        background-color: rgba(144, 209, 249, 0.7);
+        position: absolute;
+        overflow: hidden;
+        bottom: 0;
+        margin: 0;
+        padding: 5px;
+        font-size: 12px;
+        width: 100%;
+        span {
+          display: block;
+          white-space: nowrap;
+        }
+      }
+    }
+  }
+}

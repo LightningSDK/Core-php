@@ -85,12 +85,13 @@ class CKEditor {
      */
     public static function iframe($id, $value, $options = array()) {
         self::init();
-
-        JS::startup('lightning.ckeditors["' . $id . '"] = CKEDITOR.replace("' . $id . '", ' . json_encode($options) . ');');
         if (!empty($options['finder'])) {
-            JS::add('/js/ckfinder/ckfinder.js', false, false);
-            JS::startup('CKFinder.setupCKEditor(lightning.ckeditors["' . $id . '"], "/js/ckfinder/")');
+            $options['filebrowserBrowseUrl'] = '/imageBrowser?container=images';
+            $options['filebrowserUploadUrl'] = '/imageBrowser?container=images&action=upload';
+            $options['extraPlugins'] = 'uploadimage';
+            $options['uploadUrl'] = '/imageBrowser?container=images&action=upload';
         }
+        JS::startup('lightning.ckeditors["' . $id . '"] = CKEDITOR.replace("' . $id . '", ' . json_encode($options) . ');');
 
         return '<textarea name="' . $id . '" id="' . $id . '">' . Scrub::toHTML($value) . '</textarea>';
     }

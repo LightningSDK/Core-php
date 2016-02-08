@@ -88,28 +88,4 @@ if [ ! -d $DIR/../js/ckeditor ]; then
   cp -r Vendor/ckeditor/contents.css ../js/ckeditor/
 fi
 
-# Install CKFinder
-if [ ! -d $DIR/../js/ckfinder ]; then
-  echo "Copying ckfinder files to web directory"
-  cd $DIR/../js
-  wget https://download.cksource.com/CKFinder/CKFinder%20for%20PHP/3.2.0/ckfinder_php_3.2.1.zip
-  unzip ckfinder_php_3.2.0.zip
-  rm ckfinder_php_3.2.0.zip
-
-  # Config files.
-  cp $DIR/../js/ckfinder/config.js $DIR/../Source/Resources/js/ckfinder_config.js
-  # This may still ask for confirmation
-  cp $DIR/install/ckfinder_config_ref.php $DIR/../js/ckfinder/config.php -f
-fi
-
-# Setup CKFinder content directory.
-if [ ! -d $DIR/../content ]; then
-  mkdir $DIR/../content
-  OWNER=`stat -c '%U' $DIR`
-  GROUP=`stat -c '%G' $DIR`
-  # This might not work if web runs as nobody.
-  chown $OWNER:$GROUP $DIR/../content
-  chmod 775 $DIR/../content
-fi
-
 echo "Complete."
