@@ -12,6 +12,7 @@ $conf = array(
         'Lightning\\Model\\CMS' => 'Overridable\\Lightning\\Model\\CMS',
         'Lightning\\Model\\Token' => 'Overridable\\Lightning\\Model\\Token',
         'Lightning\\Model\\User' => 'Overridable\\Lightning\\Model\\User',
+        'Lightning\\Model\\Message' => 'Overridable\\Lightning\\Model\\Message',
         'Lightning\\Tools\\Session' => 'Overridable\\Lightning\\Tools\\Session',
         'Lightning\\Tools\\Request' => 'Overridable\\Lightning\\Tools\\Request',
         'Lightning\\Tools\\ClientUser' => 'Overridable\\Lightning\\Tools\\ClientUser',
