@@ -4,8 +4,9 @@
  * Contains Lightning\Model\Message
  */
 
-namespace Lightning\Model;
+namespace Overridable\Lightning\Model;
 
+use Lightning\Model\Object;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
 use Lightning\Tools\Language;
@@ -253,7 +254,7 @@ class Message extends Object {
             if ($this->template_id > 0) {
                 $this->template = Database::getInstance()->selectRow(
                     'message_template',
-                    array('template_id' => $this->template_id)
+                    ['template_id' => $this->template_id]
                 );
             } else {
                 $this->setDefaultTemplate();
@@ -261,10 +262,12 @@ class Message extends Object {
         }
     }
 
-
+    /**
+     * Load the lists that this message can be sent to.
+     */
     protected function loadLists() {
         if ($this->lists === null) {
-            $this->lists = Database::getInstance()->selectColumn('message_message_list', 'message_list_id', array('message_id' => $this->message_id));
+            $this->lists = Database::getInstance()->selectColumn('message_message_list', 'message_list_id', ['message_id' => $this->message_id]);
         }
     }
 
@@ -274,17 +277,17 @@ class Message extends Object {
     protected function loadCriteria() {
         if ($this->criteria === null) {
             $this->criteria = Database::getInstance()->selectAll(
-                array(
+                [
                     'from' => 'message_message_criteria',
-                    'join' => array(
+                    'join' => [
                         'LEFT JOIN',
                         'message_criteria',
                         'USING (message_criteria_id)',
-                    ),
-                ),
-                array(
+                    ],
+                ],
+                [
                     'message_id' => $this->message_id,
-                )
+                ]
             );
         }
     }
@@ -312,9 +315,9 @@ class Message extends Object {
      *   Outputs the unsubscribe string.
      */
     protected function getUnsubscribeString() {
-        return Language::getInstance()->translate('unsubscribe', array(
+        return Language::translate('unsubscribe', [
                 '{LINK}' => $this->user->getUnsubscribeLink()
-            )
+            ]
         );
     }
 

@@ -104,18 +104,16 @@ class Messenger {
     public static function loadFromQuery() {
         $messages = Request::query('msg');
         if (!empty($messages)) {
-            $lang = Language::getInstance();
             $messages = explode(',', $messages);
             foreach ($messages as $message) {
-                self::message($lang->translate($message));
+                self::message(Language::translate($message));
             }
         }
         $errors = Request::query('err');
         if (!empty($errors)) {
-            $lang = Language::getInstance();
             $errors = explode(',', $errors);
             foreach ($errors as $error) {
-                self::error($lang->translate($error));
+                self::error(Language::translate($error));
             }
         }
     }
