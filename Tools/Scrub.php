@@ -65,8 +65,10 @@ class Scrub {
      *   The url safe string.
      */
     public static function url($value) {
-        $url = preg_replace("/(&[#a-z0-9]+;)/i", "_", $value);
-        $url = preg_replace("/[^a-z0-9]/i", "_", $url);
+        $url = preg_replace('/[^a-z0-9-_ ]/i', '', $value);
+        $url = preg_replace('/[^a-z0-9-_]/i', '-', $url);
+        $url = trim($url, '-_');
+        $url = preg_replace('/-+/', '-', $url);
         return $url;
     }
 
