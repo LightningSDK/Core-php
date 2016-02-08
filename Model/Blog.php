@@ -112,11 +112,15 @@ class Blog extends Singleton {
         $this->loadPosts($where, $join, $limit);
         $this->postProcessResults();
 
+        $this->loadPostCount($where, $join);
+    }
+
+    protected function loadPostCount($where, $join) {
         $this->post_count = Database::getInstance()->count(
-            array(
+            [
                 'from' => static::BLOG_TABLE,
                 'join' => $join,
-            ),
+            ],
             $where
         );
     }
@@ -167,17 +171,23 @@ class Blog extends Singleton {
 
         //Header images
         foreach($this->posts as &$post) {
-            $header_image = NULL;
-            if(empty($post['header_image']) && $img = $this->getFirstImage($post['body'])) {
-                $post['header_image'] = $img;
-            }
+            $post['header_image'] = $this->getImage($post);
         }
     }
 
-    public function getImage($post) {
+    public function getImage(&$post) {
+        $header_image = NULL;
         if (!empty($post['header_image'])) {
+            // Image from upload.
             return '/' . Blog::IMAGE_PATH . '/' . $post['header_image'] . '.jpg';
-        } else {
+        }
+        elseif (empty($post['header_image']) && $img = $this->getFirstImage($post['body'])) {
+            // Image from post.
+            $post['header_from_source'] = true;
+            return $img;
+        }
+        else {
+            // Default image.
             return Configuration::get('blog.default_image');
         }
     }
