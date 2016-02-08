@@ -41,15 +41,15 @@ class Blog extends Page {
         elseif ($blog_id) {
             $blog->loadContentById($blog_id);
         }
-        elseif (array_shift($path) == 'blog') {
+        else {
             if (!empty($path)) {
-                $blog->page = is_numeric($path[count($path) - 1]) ? $path[count($path) - 1] : 1;
-                if ($path[0] == 'category') {
+                $blog->page = is_numeric($path[count($path)]) ? $path[count($path)] : 1;
+                if ($path[1] == 'category') {
                     // Load category roll
-                    $blog->loadList('category', preg_replace('/\.htm$/', '', $path[1]));
-                } elseif ($path[0] == 'author') {
+                    $blog->loadList('category', preg_replace('/\.htm$/', '', $path[2]));
+                } elseif ($path[1] == 'author') {
                     // Load an author roll.
-                    $blog->loadList('author', preg_replace('/\.htm$/', '', $path[1]));
+                    $blog->loadList('author', preg_replace('/\.htm$/', '', $path[2]));
                 } elseif (!empty($blog->page)) {
                     $blog->loadList();
                 } else {
