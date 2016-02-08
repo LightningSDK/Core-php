@@ -1,3 +1,20 @@
+lightning.format = {
+    sizes: ['B', 'KB', 'MB', 'GB', 'TB', 'PB'],
+    dataSize: function(bytes) {
+        var output = bytes;
+        var size = 0;
+        while (output >= 1000) {
+            output /= 1024;
+            size++;
+        }
+        if (this.sizes[0] == undefined) {
+            return 'Really Big';
+        } else {
+            return output.toPrecision(3) + this.sizes[size];
+        }
+    }
+};
+
 lightning.startup = {
     init: function() {
         this.initForms();
@@ -46,48 +63,3 @@ lightning.startup = {
         });
     }
 };
-
-function json_to_ul (jsondata, target) {
-    if (typeof(jsondata) == 'undefined' || typeof(target) == 'undefined') {
-        return false;
-    }
-
-    var items = [];
-
-    $.each(jsondata, function(key, val) {
-        items.push('<li class="blogpost"><a href="' + val.url + '">' + val.title + '</a></li>');
-    });
-
-    $('<ul/>', {
-        'class': 'blogpostlist',
-        html: items.join('')
-    }).appendTo(target);
-
-}
-
-function json_on_id (jsonreq, target) {
-    $.ajax({
-        type: "GET",
-        url: jsonreq,
-        data: "json=1",
-        dataType: "jsonp",
-        jsonpCallback: target,
-        cache: true,
-        success: function (data) {
-            json_to_ul(data, "#"+target);
-        }
-    });
-}
-
-function reset_field_value(field) {
-    // check for ckeditor
-    if (typeof CKEDITOR.instances[field] !== "undefined")
-        CKEDITOR.instances[field].setData(table_data.defaults[field]);
-
-    // other fields
-    else if (typeof ("#"+field).val !== "undefined")
-        $('#'+field).val(table_data.defaults[field]);
-    else
-        $('#'+field).html(table_data.defaults[field]);
-
-}

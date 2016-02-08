@@ -265,3 +265,17 @@ lightning.table = {
         window.location = url;
     }
 };
+
+
+function reset_field_value(field) {
+    // check for ckeditor
+    if (typeof CKEDITOR.instances[field] !== "undefined")
+        CKEDITOR.instances[field].setData(table_data.defaults[field]);
+
+    // other fields
+    else if (typeof ("#"+field).val !== "undefined")
+        $('#'+field).val(table_data.defaults[field]);
+    else
+        $('#'+field).html(table_data.defaults[field]);
+
+}
