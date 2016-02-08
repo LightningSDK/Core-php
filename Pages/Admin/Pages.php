@@ -4,6 +4,7 @@ namespace Lightning\Pages\Admin;
 
 use Lightning\Pages\Table;
 use Lightning\Tools\ClientUser;
+use Lightning\Tools\Request;
 
 class Pages extends Table {
 
@@ -18,6 +19,7 @@ class Pages extends Table {
     protected $nav = 'admin_pages';
     protected $table = 'page';
     protected $sortable = true;
+    protected $trusted = true;
     protected $preset = array(
         'page_id' => array(
             'type' => 'hidden',
@@ -40,4 +42,10 @@ class Pages extends Table {
             'type' => 'datetime',
         )
     );
+
+    public function initSettings() {
+        $this->preset['url']['submit_function'] = function(&$output) {
+            $output['url'] = Request::post('url', 'url') ?: Request::post('title', 'url');
+        };
+    }
 }
