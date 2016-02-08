@@ -4,22 +4,23 @@ namespace Lightning\Pages;
 
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
+use Lightning\Tools\Language;
+use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Request;
 use Lightning\Tools\Template;
 use Lightning\Model\User;
 
 class OptIn extends Page {
+
+    protected $page = 'optin';
+
     protected function hasAccess() {
-        ClientUser::requireAdmin();
         return true;
     }
 
-    public function get() {
-        Template::getInstance()->set('content', 'landing');
-    }
-
     public function post() {
+
         if ($name = Request::post('name', '', '', '')) {
             $name_parts = explode(' ', $name, 2);
             $name = array('first' => $name_parts[0]);
@@ -27,13 +28,13 @@ class OptIn extends Page {
                 $name['last'] = $name_parts[1];
             }
         } else {
-            // Add the user to the system.
             $name = array(
                 'first' => Request::post('first', '', '', ''),
                 'last' => Request::post('last', '', '', ''),
             );
         }
 
+        // Add the user to the database.
         $email = Request::post('email', 'email');
         $user = User::addUser($email, $name);
 
@@ -44,6 +45,13 @@ class OptIn extends Page {
             $user->subscribe($mailing_list);
         }
 
-        Navigation::redirect(Request::post('redirect') ?: '/message?msg=optin');
+        // Send out an email.
+        if (Configuration::get('contact.optin')) {
+            $contact = new Contact();
+            $contact->sendMessage();
+        }
+
+        Messenger::message(Language::translate('optin.success'));
+        Navigation::redirect(Request::post('redirect') ?: '/message');
     }
 }
