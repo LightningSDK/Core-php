@@ -49,5 +49,15 @@ class Pages extends Table {
         $this->preset['url']['submit_function'] = function(&$output) {
             $output['url'] = Request::post('url', 'url') ?: Request::post('title', 'url');
         };
+
+        $this->action_fields = array(
+            'view' => array(
+                'display_name' => 'View',
+                'type' => 'html',
+                'html' => function($row) {
+                    return '<a href="/' . $row['url'] . '.html"><img src="/images/lightning/resume.png" /></a>';
+                }
+            ),
+        );
     }
 }
