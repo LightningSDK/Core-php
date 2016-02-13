@@ -1,13 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: dab
- * Date: 9/3/14
- * Time: 9:06 PM
- */
 
 namespace Lightning\Pages\Mailing;
-
 
 use Lightning\Pages\Table;
 use Lightning\Tools\ClientUser;
@@ -55,13 +48,13 @@ class ListUsers extends Table {
         $list_id = Request::get('list', 'int');
         if ($list_id === 0) {
             Template::getInstance()->set('title', 'Users not on any mailing list.');
-            $this->accessTableCondition = array(
+            $this->accessTableWhere = array(
                 'message_list_id' => array('IS NULL'),
             );
         } elseif ($list_id > 0) {
             $list = Database::getInstance()->selectField('name', 'message_list', array('message_list_id' => $list_id));
             Template::getInstance()->set('title', "Users on list {$list}.");
-            $this->accessTableCondition = array(
+            $this->accessTableWhere = array(
                 'message_list_id' => $list_id,
             );
         } else {
@@ -70,6 +63,4 @@ class ListUsers extends Table {
 
         parent::__construct();
     }
-
-
 }

@@ -249,12 +249,8 @@ abstract class Table extends Page {
      */
     // Joined table name
     protected $accessTable;
-    // ON clause
-    protected $accessTableJoinOn;
-    // extra WHERE condition
-    protected $accessTableCondition;
-    // JOIN schema
-    protected $accessTableSchema = "LEFT JOIN";
+    protected $accessTableJoin;
+    protected $accessTableWhere;
 
     protected $cur_subset;
     // Tables (and conditions) has been joined to general one
@@ -1156,7 +1152,7 @@ abstract class Table extends Page {
     }
 
     function action_fields_requires_submit() {
-        foreach($this->action_fields as $a=>$action) {
+        foreach($this->action_fields as $a => $action) {
             if ($action['type'] == "checkbox") return true;
         }
     }
@@ -2245,7 +2241,7 @@ abstract class Table extends Page {
         if (isset($this->accessTable)) {
             $accessTable_values = $this->getFieldValues($this->fields, true);
             if (!empty($accessTable_values)) {
-                Database::getInstance()->update($this->accessTable, $accessTable_values, array_merge($this->accessTableCondition, [$this->getKey() => $this->id]));
+                Database::getInstance()->update($this->accessTable, $accessTable_values, array_merge($this->accessTableWhere, [$this->getKey() => $this->id]));
             }
         }
     }
@@ -2749,17 +2745,8 @@ abstract class Table extends Page {
         if ($this->accessControl != '') {
             $where = array_merge($this->accessControl, $where);
         }
-        $join = [];
-        if ($this->accessTable) {
-            if ($this->accessTableJoinOn) {
-                $join_condition = "ON ".$this->accessTableJoinOn;
-            } else {
-                $join_condition = "ON ({$this->accessTable}.{$this->getKey()}={$this->table}.{$this->getKey()})";
-            }
-            $join[] = ['LEFT JOIN', $this->accessTable, $join_condition];
-            $where .= " AND ".$this->accessTableCondition;
-        }
-        
+        $join = $this->getAccessTableJoins();
+
         if ($this->joins) {
             $join = array_merge($join, $this->joins);
         } 
@@ -2777,6 +2764,21 @@ abstract class Table extends Page {
                 'select' => $fields
             ]);
         }
+    }
+
+    protected function getAccessTableJoins() {
+        $join = [];
+        if ($this->accessTable) {
+            if ($this->accessTableJoin) {
+                $join[] = $this->accessTableJoin;
+            } else {
+                $join[] = [
+                    'join' => $this->accessTable,
+                    'using' => $this->getKey()
+                ];
+            }
+        }
+        return $join;
     }
 
     /**
@@ -2800,10 +2802,11 @@ abstract class Table extends Page {
             return;
         }
 
-        // build WHERE qualification
+        // Build the query.
         $where = [];
-        $join = [];
         $fields = [];
+        $join = $this->getAccessTableJoins();
+
         if ($this->parentLink && $this->parentId) {
             $where[$this->parentLink] = $this->parentId;
         }
@@ -2816,17 +2819,7 @@ abstract class Table extends Page {
         if ($this->action == "autocomplete" && $field = Request::post('field')) {
             $this->accessControl[$this->fullField($field)] = ['LIKE', Request::post('st') . '%'];
         }
-        if ($this->accessTable) {
-            if ($this->accessTableJoinOn) {
-                $join_condition = "ON (".$this->accessTableJoinOn . ")";
-            } else {
-                $join_condition = "ON ({$this->accessTable}.{$this->getKey()}={$this->table}.{$this->getKey()})";
-            }
-            $join[] = [$this->accessTableSchema, $this->accessTable, $join_condition];
-            if ($this->accessTableCondition) {
-                $where = array_merge($this->accessTableCondition, $where);
-            }
-        }
+
         if ($this->cur_subset) {
             if ($this->subset[$this->cur_subset]) {
                 $where = array_merge($this->subset[$this->cur_subset], $where);
@@ -3532,23 +3525,30 @@ abstract class Table extends Page {
             case 'yesno':
             case 'state':
             case 'country':
+            case 'radios':
             case 'select':
                 if ($field['type'] == 'lookup') {
                     $options = Database::getInstance()->selectColumn(
+                        // todo: rename these for consistency.
                         $field['lookuptable'],
                         $field['display_column'],
                         !empty($field['filter']) ? $field['filter'] : [],
                         !empty($field['lookupkey']) ? $field['lookupkey'] : $field['field']
                     );
                 }
-                elseif ($field['type'] == "yesno")
-                    $options = [1=>'No', 2=>'Yes'];
-                elseif ($field['type'] == "state")
+                elseif ($field['type'] == 'yesno') {
+                    $options = [1 => 'No', 2 => 'Yes'];
+                }
+                elseif ($field['type'] == 'state') {
                     $options = Location::getStateOptions();
-                elseif ($field['type'] == "country")
+                }
+                elseif ($field['type'] == 'country') {
                     $options = Location::getCountryOptions();
-                else
+                }
+                else {
                     $options = $field['options'];
+                }
+
                 if (!is_array($options)) {
                     return false;
                 }
@@ -3556,9 +3556,15 @@ abstract class Table extends Page {
                 if (!empty($field['allow_blank'])) {
                     $options = ['' => ''] + $options;
                 }
-                $output = BasicHTML::select($field['form_field'], $options, $field['Value']);
+
+                if ($field['type'] == 'radios') {
+                    $output = BasicHTML::radioGroup($field['form_field'], $options, $field['Value']);
+                } else {
+                    $output = BasicHTML::select($field['form_field'], $options, $field['Value']);
+                }
 
                 if (!empty($field['pop_add'])) {
+                    // todo: this needs to require an explicit URL
                     if ($field['table_url']) $location = $field['table_url'];
                     else $location = "table.php?table=".$field['lookuptable'];
                     $output .= "<a onclick='lightning.table.newPop(\"{$location}\",\"{$field['form_field']}\",\"{$field['display_column']}\")'>Add New Item</a>";
