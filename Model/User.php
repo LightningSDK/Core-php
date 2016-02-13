@@ -44,6 +44,8 @@ class User extends Object {
     const PRIMARY_KEY = 'user_id';
     const TABLE = 'user';
 
+    protected $permissions;
+
     /**
      * Load a user by their email.
      *
@@ -805,6 +807,42 @@ class User extends Object {
         Database::getInstance()->delete('user_role', ['user_id' => $this->id, 'role_id' => $role_id]);
     }
 
+    public function loadPermissions($force = false) {
+        if (!$force && isset($this->permissions)) {
+            return;
+        }
+        $this->permissions = Database::getInstance()->selectColumnQuery([
+            'from' => 'user',
+            'join' => array(
+                array(
+                    'LEFT JOIN',
+                    'user_role',
+                    'ON user_role.user_id = user.user_id'
+                ),
+                array(
+                    'LEFT JOIN',
+                    'role_permission',
+                    'ON role_permission.role_id=user_role.role_id',
+                ),
+                array(
+                    'LEFT JOIN',
+                    'permission',
+                    'ON role_permission.permission_id=permission.permission_id',
+                ),
+                array(
+                    'JOIN',
+                    'role',
+                    'ON  user_role.role_id=role.role_id',
+                )
+            ),
+            'where' => array(
+                array('user.user_id' => $this->id),
+                array('user_role.site_id' => ['IN', [0, Site::getInstance()->id]]),
+            ),
+            'select' => ['permission.permission_id', 'permission.permission_id'],
+        ]);
+    }
+
     /**
      * check if user has permission on this page
      * @param integer $permissionID
@@ -813,43 +851,8 @@ class User extends Object {
      * @return boolean
      */
     public function hasPermission($permissionID) {
-        $permissions = Database::getInstance()->selectAll(
-            array(
-                'from' => 'user',
-                'join' => array(
-                    array(
-                        'LEFT JOIN',
-                        'user_role',
-                        'ON user_role.user_id = user.user_id'
-                    ),
-                    array(
-                        'LEFT JOIN',
-                        'role_permission',
-                        'ON role_permission.role_id=user_role.role_id',
-                    ),
-                    array(
-                        'LEFT JOIN',
-                        'permission',
-                        'ON role_permission.permission_id=permission.permission_id',
-                    ),
-                    array(
-                        'JOIN',
-                        'role',
-                        'ON  user_role.role_id=role.role_id',
-                    )
-                )
-            ),
-            array(
-                array('user.user_id' => $this->id),
-                '#OR' => array(
-                    array('permission.permission_id' => $permissionID),
-                    array('permission.permission_id' => Permissions::ALL)
-                )
-            ),
-            array('user.user_id', 'role.name', 'permission.name')
-        );
-
-        return (count($permissions) > 0 ) ?  TRUE :  FALSE;
+        $this->loadPermissions();
+        return !empty($this->permissions[$permissionID]) || !empty($this->permissions[Permissions::ALL]);
     }
 
     public function initSocialMediaApi() {
