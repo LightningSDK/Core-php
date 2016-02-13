@@ -2,6 +2,8 @@
 
 namespace Lightning\View;
 
+use Lightning\Tools\Request;
+
 abstract class JSONEditor extends Page {
     public $page = 'json_editor';
 
@@ -15,11 +17,30 @@ abstract class JSONEditor extends Page {
         JS::startup('lightning.jsoneditor.init()');
     }
 
+    /**
+     * Default value for the json editor.
+     *
+     * @return array
+     */
     protected function getJSONData() {
         return [];
     }
 
+    /**
+     * Default settings for the json editor.
+     *
+     * @return array
+     */
     protected function getSettings() {
         return [];
+    }
+
+    /**
+     * Get the posted data as a JSON string.
+     *
+     * @return string
+     */
+    protected function postedData() {
+        return Request::post('json', 'json_string');
     }
 }

@@ -3,6 +3,7 @@
 namespace Lightning\Pages;
 
 use Lightning\Tools\Configuration;
+use Lightning\Tools\Form;
 use Lightning\Tools\Request;
 use Lightning\View\CSS;
 use Lightning\View\JS;
@@ -17,31 +18,34 @@ class Splash extends Page {
     public function get() {
         $page = Request::getLocation();
 
-        $template_page = Configuration::get('splash.pages.' . $page);
+        $splash_settings = Configuration::get('splash.pages.' . $page);
 
         // No template found.
-        if (empty($template_page) || (is_array($template_page) && empty($template_page['page']))) {
+        if (empty($splash_settings) || (is_array($splash_settings) && empty($splash_settings['page']))) {
             $this->page = $page;
         }
 
         // Set the template.
         else {
-            $this->page = is_array($template_page) ? $template_page['page'] : $template_page;
+            $this->page = is_array($splash_settings) ? $splash_settings['page'] : $splash_settings;
         }
 
-        if (!empty($template_page['template'])) {
-            $this->template = $template_page['template'];
+        if (!empty($splash_settings['template'])) {
+            $this->template = $splash_settings['template'];
         }
 
         // Add any CSS or JS files.
-        if (is_array($template_page)) {
-            if (!empty($template_page['css'])) {
-                CSS::add($template_page['css']);
+        if (is_array($splash_settings)) {
+            if (!empty($splash_settings['css'])) {
+                CSS::add($splash_settings['css']);
             }
-            if (!empty($template_page['js'])) {
-                JS::add($template_page['js']);
+            if (!empty($splash_settings['js'])) {
+                JS::add($splash_settings['js']);
             }
         }
-    }
 
+        if (!empty($splash_settings['token'])) {
+            Form::requiresToken();
+        }
+    }
 }

@@ -7,7 +7,6 @@
 namespace Lightning\Tools;
 
 use Lightning\Tools\Cache\Cache;
-use Lightning\Tools\Configuration;
 use stdClass;
 
 /**
