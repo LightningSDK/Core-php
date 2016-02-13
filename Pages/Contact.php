@@ -11,10 +11,12 @@ use Lightning\Tools\Form;
 use Lightning\Tools\Mailer;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
+use Lightning\Tools\Output;
 use Lightning\Tools\ReCaptcha;
 use Lightning\Tools\Request;
 use Lightning\View\Page as PageView;
 use Lightning\Model\User as UserModel;
+use Source\Model\Message;
 
 /**
  * A contact page handler.
@@ -26,7 +28,20 @@ class Contact extends PageView {
     protected $page = 'contact';
     protected $nav = 'contact';
 
-    protected $sender_email;
+    /**
+     * @var UserModel
+     */
+    protected $user;
+
+    /**
+     * @var array
+     */
+    protected $settings;
+
+    public function __construct() {
+        parent::__construct();
+        Form::requiresToken();
+    }
 
     protected function hasAccess() {
         return true;
@@ -35,37 +50,112 @@ class Contact extends PageView {
     /**
      * Send a posted contact request to the site admin.
      */
-    public function postSendMessage() {
+    public function post() {
+        $this->settings = Configuration::get('contact');
+
+        // Check captcha if required.
+        $request_contact = Request::post('contact', 'boolean');
+        if (($this->settings['require_captcha'] === true || ($this->settings['require_captcha'] == 'contact_only' && $request_contact)) && !ReCaptcha::verify()) {
+            Messenger::error('You did not correctly enter the captcha code.');
+            return $this->get();
+        }
+
         // Make sure the sender's email address is valid.
         if (!$this->getSender()) {
             Messenger::error('Please enter a valid email address.');
             return $this->get();
         }
 
-        if (!ReCaptcha::verify()) {
-            Messenger::error('You did not correctly enter the captcha code.');
-            return $this->get();
+        // Optin the user.
+        if ($list = Request::get('list', 'int')) {
+            if (!Message::validateListID($list)) {
+                $list = Message::getDefaultListID();
+            }
+        }
+        if (empty($list) && Request::get('optin', 'boolean')) {
+            $list = Message::getDefaultListID();
+        }
+        if (!empty($list)) {
+            $this->user->subscribe($list);
         }
 
-        $sent = $this->sendMessage();
-
-        if (!$sent) {
-            Messenger::error('Your message could not be sent. Please try again later');
-            return $this->get();
-        } else {
-            // Send an email to to have them test for spam.
-            if ($auto_responder = Configuration::get('contact.auto_responder')) {
-                $auto_responder_mailer = new Mailer();
-                $result = $auto_responder_mailer->sendOne($auto_responder, UserModel::loadByEmail($this->getSender()) ?: new UserModel(array('email' => $this->getSender())));
-                if ($result && Configuration::get('contact.spam_test')) {
-                    // Set the notice.
-                    Navigation::redirect('/message', array('msg' => 'spam_test'));
+        // Send a message.
+        if ($this->settings['always_notify'] || ($request_contact || $this->settings['contact'])) {
+            $sent = $this->sendMessage();
+            if (!$sent) {
+                Output::error('Your message could not be sent. Please try again later');
+            } else {
+                $this->customMessage();
+                // Send an email to to have them test for spam.
+                if (!empty($this->settings['auto_responder'])) {
+                    $auto_responder_mailer = new Mailer();
+                    $result = $auto_responder_mailer->sendOne($this->settings['auto_responder'], UserModel::loadByEmail($this->getSender()) ?: new UserModel(array('email' => $this->getSender())));
+                    if ($result && $this->settings['spam_test']) {
+                        // Set the notice.
+                        Navigation::redirect('/message', array('msg' => 'spam_test'));
+                    }
                 }
+                Navigation::redirect('/message', array('msg' => 'contact_sent'));
             }
-            Navigation::redirect('/message', array('msg' => 'contact_sent'));
+        } else {
+            $this->customMessage();
         }
     }
 
+    /**
+     * Add a custom message from the form input.
+     */
+    protected function customMessage() {
+        if ($this->settings['custom_message'] && $message = Request::post('success')) {
+            Messenger::message($message);
+        }
+    }
+
+    /**
+     * Load the user data and save it into a user entry.
+     *
+     * @return UserModel|boolean
+     */
+    protected function getSender() {
+        if ($name = Request::post('name', '', '', '')) {
+            $name_parts = explode(' ', $name, 2);
+            $name = array('first' => $name_parts[0]);
+            if (!empty($name_parts[1])) {
+                $name['last'] = $name_parts[1];
+            }
+        } else {
+            $name = array(
+                'first' => Request::post('first', '', '', ''),
+                'last' => Request::post('last', '', '', ''),
+            );
+        }
+
+        // Add the user to the database.
+        $email = Request::post('email', 'email');
+        if (empty($email)) {
+            return false;
+        }
+        $this->user = UserModel::addUser($email, $name);
+        return true;
+    }
+
+    public function sendMessage() {
+        $mailer = new Mailer();
+        foreach ($this->settings['to'] as $to) {
+            $mailer->to($to);
+        }
+        return $mailer
+            ->from($this->user->email)
+            ->subject($this->settings['subject'])
+            ->message($this->getMessageBody())
+            ->send();
+    }
+
+    /**
+     * Create the message body to the site contact.
+     *
+     * @return string
+     */
     protected function getMessageBody() {
         $fields = array_combine(array_keys($_POST), array_keys($_POST));
         $values = [
@@ -90,27 +180,5 @@ class Contact extends PageView {
         }
         $output .= "Message: <br>\n" . $message;
         return $output;
-    }
-
-    protected function getSender() {
-        if (empty($this->sender_email)) {
-            $this->sender_email = Request::post('email', 'email');
-        }
-        return $this->sender_email;
-    }
-
-    public function sendMessage() {
-        $subject = Configuration::get('contact.subject');
-        $to_addresses = Configuration::get('contact.to');
-
-        $mailer = new Mailer();
-        foreach ($to_addresses as $to) {
-            $mailer->to($to);
-        }
-        return $mailer
-            ->from($this->getSender())
-            ->subject($subject)
-            ->message($this->getMessageBody())
-            ->send();
     }
 }
