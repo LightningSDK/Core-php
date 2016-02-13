@@ -377,33 +377,67 @@ ul.tags{
   border-radius: 5px !important;
   text-shadow:0 -1px 0 rgba(0,0,0,0.15);
   &.orange {
-    color: black !important;
+    color: white !important;
     background-color: #f8af00;
-    @include background(linear-gradient(#f8af00, #f38800));
-    box-shadow: inset 0px -.25em 0 0 #ab4000;
     &:hover {
       background-color: #f9bb00;
-      @include background(linear-gradient(#f9bb00, #f07700));
-      box-shadow: inset 0px -.25em 0 0 #a92e00;
     }
     &:active{
       background-color: #f38800;
+    }
+    &.bevel {
+      @include background(linear-gradient(#f8af00, #f38800));
+      box-shadow: inset 0px -.25em 0 0 #ab4000;
+    }
+    &.bevel:hover {
+      @include background(linear-gradient(#f9bb00, #f07700));
+      box-shadow: inset 0px -.25em 0 0 #a92e00;
+    }
+    &.bevel:active {
       @include background(linear-gradient(#f38800, #f8af00));
       box-shadow: inset 0 .25em 3px 0 #a92e00;
+    }
+  }
+  &.red {
+    color: white !important;
+    background-color: #c80000;
+    &:hover {
+      background-color: #8b0000;
+    }
+    &:active{
+      background-color: #690000;
+    }
+    &.bevel {
+      @include background(linear-gradient(#c80000, #8b0000));
+      box-shadow: inset 0px -.25em 0 0 #690000;
+    }
+    &.bevel:hover {
+      @include background(linear-gradient(#c80000, #8b0000));
+      box-shadow: inset 0px -.25em 0 0 #690000;
+    }
+    &.bevel:active {
+      @include background(linear-gradient(#8b0000, #c80000));
+      box-shadow: inset 0 .25em 3px 0 #690000;
     }
   }
   &.blue {
     color: white !important;
     background-color: #26C7FD;
-    @include background(linear-gradient(#26C7FD, #4b5cc0));
-    box-shadow: inset 0px -.25em 0 0 #1a295d;
     &:hover {
       background-color: #26C7FD;
-      @include background(linear-gradient(#26C7FD, #4b5cc0));
-      box-shadow: inset 0px -.25em 0 0 #1a295d;
     }
     &:active{
       background-color: #4b5cc0;
+    }
+    &.bevel {
+      @include background(linear-gradient(#26C7FD, #4b5cc0));
+      box-shadow: inset 0px -.25em 0 0 #1a295d;
+    }
+    &.bevel:hover {
+      @include background(linear-gradient(#26C7FD, #4b5cc0));
+      box-shadow: inset 0px -.25em 0 0 #1a295d;
+    }
+    &.bevel:active {
       @include background(linear-gradient(#4b5cc0, #26C7FD));
       box-shadow: inset 0 .25em 3px 0 #1a295d;
     }
@@ -411,15 +445,21 @@ ul.tags{
   &.green {
     color: white !important;
     background-color: #2eae1c;
-    @include background(linear-gradient(#2eae1c, #247417));
-    box-shadow: inset 0px -.25em 0 0 #154811;
     &:hover {
       background-color: #2eae1c;
-      @include background(linear-gradient(#2eae1c, #247417));
-      box-shadow: inset 0px -.25em 0 0 #154811;
     }
     &:active{
       background-color: #247417;
+    }
+    &.bevel {
+      @include background(linear-gradient(#2eae1c, #247417));
+      box-shadow: inset 0px -.25em 0 0 #154811;
+    }
+    &.bevel:hover {
+      @include background(linear-gradient(#2eae1c, #247417));
+      box-shadow: inset 0px -.25em 0 0 #154811;
+    }
+    &.bevel:active {
       @include background(linear-gradient(#247417, #2eae1c));
       box-shadow: inset 0 .25em 3px 0 #154811;
     }
@@ -427,6 +467,12 @@ ul.tags{
   &.small {
     padding: .5rem;
     font-size: .75rem;
+    display: inline;
+    font-weight: 500;
+  }
+  &.medium {
+    padding: 1rem;
+    font-size: 1rem;
     display: inline;
     font-weight: 500;
   }
@@ -484,10 +530,13 @@ ul.tags{
   }
 }
 .social-share {
-  div {
+  width: 100%;
+  text-align: center;
+  div.share {
     display: inline-block;
     color: white;
-    padding: 10px 15px;
+    padding: 10px 0;
+    width: 25%;
     &.google {
       background-color: #f32e06;
     }
@@ -512,6 +561,10 @@ ul.tags{
   .folders {
     height: 100%;
     width: 20%;
+    float: left;
+  }
+  .upload {
+    width: 80%;
     float: left;
   }
   .images {
