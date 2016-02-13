@@ -35,7 +35,8 @@ class Output {
      *
      * @var array
      */
-    protected static $cookies = array();
+    protected static $cookies = [];
+    protected static $sentCookies = [];
 
     protected static $isJson = false;
 
@@ -369,6 +370,7 @@ class Output {
             'secure' => $secure !== null ? $secure : (!empty($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] == 1 || strtolower($_SERVER['HTTPS']) == 'on')),
             'httponly' => $httponly,
         );
+
         if (isset(self::$cookies[$cookie])) {
             self::$cookies[$cookie] = $settings + self::$cookies[$cookie];
         } else {
@@ -384,6 +386,8 @@ class Output {
         foreach (self::$cookies as $cookie => $settings) {
             setcookie($cookie, $settings['value'], $settings['ttl'], $settings['path'], $settings['domain'], $settings['secure'], $settings['httponly']);
         }
+        self::$sentCookies = self::$cookies;
+        self::$cookies = [];
     }
 
     /**
