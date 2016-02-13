@@ -271,6 +271,23 @@ class Message extends Object {
         }
     }
 
+    public static function getAllLists() {
+        return Database::getInstance()->selectColumn('message_list', 'name', [], 'message_list_id');
+    }
+
+    public static function validateListID($id) {
+        return Database::getInstance()->check('message_list', ['message_list_id' => $id]);
+    }
+
+    public static function getDefaultListID() {
+        $db = Database::getInstance();
+        $list = $db->selectField('message_list_id', 'message_list', ['name' => 'Default']);
+        if (!$list) {
+            $list = $db->insert('message_list_id', 'message_list', ['name' => 'Default']);
+        }
+        return $list;
+    }
+
     /**
      * Loads sending criteria and specific message variables.
      */
