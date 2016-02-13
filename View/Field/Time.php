@@ -8,6 +8,17 @@ use Lightning\Tools\Request;
 use Lightning\View\Field;
 
 class Time extends Field {
+
+    protected static $days = [
+        1 => 'Monday',
+        2 => 'Tuesday',
+        3 => 'Wednesday',
+        4 => 'Thursday',
+        5 => 'Friday',
+        6 => 'Saturday',
+        7 => 'Sunday',
+    ];
+
     /**
      * Get today's date on the JD calendar.
      *
@@ -69,19 +80,12 @@ class Time extends Field {
         }
     }
 
-    public static function printWeekday($day) {
-        static $days = [
-            0 => 'Sunday',
-            1 => 'Monday',
-            2 => 'Tuesday',
-            3 => 'Wednesday',
-            4 => 'Thursday',
-            5 => 'Friday',
-            6 => 'Saturday',
-            7 => 'Sunday',
-        ];
+    public static function getDays() {
+        return self::$days;
+    }
 
-        return $days[$day];
+    public static function printWeekday($day) {
+        return self::$days[$day];
     }
 
     /**
@@ -118,7 +122,7 @@ class Time extends Field {
                 $a = $time[2];
             }
         }
-        return self::getSeconds($h, $i, $a);
+        return self::getMinutes($h, $i, $a);
     }
 
     public static function getDateTime($id, $allow_blank = true) {
