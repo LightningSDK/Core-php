@@ -104,7 +104,6 @@ use Lightning\View\CSS;
                                     <li><a href="/admin/mailing/lists">Mailing Lists</a></li>
                                     <li><a href="/admin/mailing/templates">Templates</a></li>
                                     <li><a href="/admin/mailing/messages">Messages</a></li>
-                                    <li><a href="/admin/mailing/stats">Stats</a></li>
                                 </ul>
                             </li>
                         </ul>

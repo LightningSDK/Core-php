@@ -91,10 +91,11 @@ trait ObjectDataStorage {
                 return $this->__data;
                 break;
             default:
-                if (isset($this->__data[$var]))
+                if (isset($this->__data[$var])) {
                     return $this->__data[$var];
-                else
+                } else {
                     return NULL;
+                }
                 break;
         }
     }
