@@ -1,19 +1,12 @@
 lightning.cms = {
     edit: function(editor) {
-        var config = lightning.vars.cms && lightning.vars.cms[editor] && lightning.vars.cms[editor].config ? lightning.vars.cms[editor].config : {};
-        $('#' + editor).attr('contentEditable', 'true');
-        lightning.ckeditors[editor] = CKEDITOR.inline(editor, {
-                toolbar: config.toolbar ? eval(config.toolbar) : CKEDITOR.config.toolbar_Full,
-                allowedContent: true
-            }
-        );
-        CKFinder.setupCKEditor(lightning.ckeditors[editor], '/js/ckfinder/');
+        lightning.tinymce.initEditor(editor);
         $('#' + editor.replace(/^cms_/, 'cms_edit_')).hide();
-        $('#' + editor.replace(/^cms_/, 'cms_save_')).removeClass('hide').show();
+        $('#' + editor.replace(/^cms_/, 'cms_save_')).show();
     },
 
     save: function (editor) {
-        lightning.ckeditors[editor].destroy();
+        lightning.tinymce.destroyEditor(editor);
         var self = this;
         $.ajax({
             url: '/admin/cms',

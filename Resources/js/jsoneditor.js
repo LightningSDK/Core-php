@@ -12,5 +12,12 @@ lightning.jsoneditor = {
             lightning.vars.jsoneditor[i].editor = new JSONEditor(container, options);
             lightning.vars.jsoneditor[i].editor.set(lightning.vars.jsoneditor[i].json)
         }
+    },
+    save: function(editor, submit_form) {
+        var field = $('#' + editor + '_data');
+        field.val(JSON.stringify(lightning.vars.jsoneditor[editor].editor.get()));
+        if (submit_form) {
+            field.closest('form').submit();
+        }
     }
 };

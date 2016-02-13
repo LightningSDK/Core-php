@@ -43,3 +43,9 @@
 [submodule "Vendor/Font-Awesome"]
 	path = Vendor/Font-Awesome
 	url = git@github.com:FortAwesome/Font-Awesome.git
+[submodule "Vendor/tinymce"]
+	path = Vendor/tinymce
+	url = https://github.com/tinymce/tinymce
+[submodule "Vendor/elfinder"]
+	path = Vendor/elfinder
+	url = https://github.com/Studio-42/elFinder.git

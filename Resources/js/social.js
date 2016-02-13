@@ -1,45 +1,39 @@
 lightning.social = {
     google: {
         signin: function() {
-            if (typeof gapi == 'undefined') {
-                $('body').append($('<script src="https://apis.google.com/js/platform.js"></script>'));
-                setTimeout(lightning.social.google.signin, 500);
-                return;
-            }
-            gapi.load('auth2', function() {
-                var auth2 = gapi.auth2.getAuthInstance() || gapi.auth2.init({
-                        client_id: lightning.vars.social.google.client_id,
-                    });
-                response = auth2.signIn().then(function(token_data){
-                    if (lightning.vars.social.authorize) {
-                        for (var i in token_data) {
-                            if (typeof token_data[i] == 'object' && token_data[i].hasOwnProperty('access_token')) {
-                                var token = {
-                                    access_token: token_data[i].access_token,
-                                    created: token_data[i].first_issued_at,
-                                    expires_in: token_data[i].expires_in,
-                                };
-                                lightning.social.signinComplete('google', 'auth', JSON.stringify(token));
-                                return;
+            lightning.require('https://apis.google.com/js/platform.js', function(){
+                gapi.load('auth2', function() {
+                    var auth2 = gapi.auth2.getAuthInstance() || gapi.auth2.init({
+                            client_id: lightning.vars.social.google.client_id,
+                        });
+                    response = auth2.signIn().then(function(token_data){
+                        if (lightning.vars.social.authorize) {
+                            for (var i in token_data) {
+                                if (typeof token_data[i] == 'object' && token_data[i].hasOwnProperty('access_token')) {
+                                    var token = {
+                                        access_token: token_data[i].access_token,
+                                        created: token_data[i].first_issued_at,
+                                        expires_in: token_data[i].expires_in,
+                                    };
+                                    lightning.social.signinComplete('google', 'auth', JSON.stringify(token));
+                                    return;
+                                }
                             }
+                        } else {
+                            lightning.social.signinComplete('google', 'id', token_data.getAuthResponse().id_token);
                         }
-                    } else {
-                        lightning.social.signinComplete('google', 'id', token_data.getAuthResponse().id_token);
-                    }
+                    });
                 });
             });
         },
         signout: function() {
-            if (typeof gapi == 'undefined') {
-                $('body').append($('<script src="https://apis.google.com/js/platform.js"></script>'));
-                setTimeout(lightning.social.google.signout, 500);
-                return;
-            }
-            gapi.load('auth2', function() {
-                var auth2 = gapi.auth2.getAuthInstance() || gapi.auth2.init({
-                        client_id: lightning.vars.social.google.client_id,
-                    });
-                lightning.social.google.finalizeLogout();
+            lightning.require('https://apis.google.com/js/platform.js', function() {
+                gapi.load('auth2', function () {
+                    var auth2 = gapi.auth2.getAuthInstance() || gapi.auth2.init({
+                            client_id: lightning.vars.social.google.client_id,
+                        });
+                    lightning.social.google.finalizeLogout();
+                });
             });
         },
         finalizeLogout: function() {

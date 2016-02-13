@@ -63,3 +63,16 @@ lightning.startup = {
         });
     }
 };
+lightning.require = function(url, callback) {
+    var script = document.createElement('script');
+    script.src = url;
+    script.type = 'text/javascript';
+    script.async = 'true';
+    script.onload = script.onreadystatechange = function() {
+        var rs = this.readyState;
+        if (rs && rs != 'complete' && rs != 'loaded') return;
+        try { callback() } catch (e) {}
+    };
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(script, s);
+};

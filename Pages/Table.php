@@ -54,6 +54,7 @@ use Lightning\Tools\Template;
 use Lightning\View\Field;
 use Lightning\View\Field\BasicHTML;
 use Lightning\View\Field\Checkbox;
+use Lightning\View\Field\FileBrowser;
 use Lightning\View\Field\Location;
 use Lightning\View\Field\Text;
 use Lightning\View\Field\Time;
@@ -61,6 +62,7 @@ use Lightning\View\JS;
 use Lightning\View\Page;
 use Lightning\Tools\CSVWriter;
 use Lightning\View\Pagination;
+use Lightning\View\TinyMCE;
 
 abstract class Table extends Page {
 
@@ -87,6 +89,10 @@ abstract class Table extends Page {
      *   - default mixed - Will use this as the default value when inserting. Will not be used if a value is supplied unless force_default_new is set to true. When creating a new entry, the field is visible, editable, and populated with this value.
      *   - force_default_new boolean - Forces new entries to use the default value. Prevents tampering with a field that has hidden and default set.
      *   - note string - Adds text under the field to help the user understand the input.
+     *   - edit_value mixed - A value or callable. If a callable, the entire row will be passed as a parameter.
+     *   - unlisted boolean - if set to true, this field will not appear on the list view
+     *   - render_list_field - Will render the field in the list view.
+     *   - render_edit_field - Will render the edit field. Must also render form fields if necessary.
      *
      * @var array
      */
@@ -609,7 +615,7 @@ abstract class Table extends Page {
             $this->loadMainFields();
             $this->getRow();
             foreach($this->fields as $f=>$field) {
-                if ($field['type'] == 'file' || $field['type'] == 'image') {
+                if (($field['type'] == 'file' || $field['type'] == 'image') && empty($field['browser'])) {
                     if (file_exists($this->get_full_file_location($field['location'], $this->list[$f]))) {
                         unlink($this->get_full_file_location($field['location'], $this->list[$f]));
                     }
@@ -2301,26 +2307,30 @@ abstract class Table extends Page {
                 switch (preg_replace('/\([0-9]+\)/', '', $field['type'])) {
                     case 'image':
                     case 'file':
-                        if ($_FILES[$field['field']]['size'] > 0
-                            && $_FILES[$field['field']]['error'] == UPLOAD_ERR_OK
-                            && (
-                                (
-                                    (!isset($field['replaceable']) || $field['replaceable'] === false)
-                                    && $this->action == 'update'
-                                )
-                                || $this->action == 'insert'
-                            )
-                        ) {
-                            // delete previous file
-                            $this->getRow();
-
-                            if ($field['type'] == 'file') {
-                                $val = $this->saveFile($field, $_FILES[$field['field']]);
-                            } else {
-                                $val = $this->saveImage($field, $_FILES[$field['field']]);
-                            }
+                        if (!empty($field['browser'])) {
+                            $val = Request::get($field['field']);
                         } else {
-                            $ignore = true;
+                            if ($_FILES[$field['field']]['size'] > 0
+                                && $_FILES[$field['field']]['error'] == UPLOAD_ERR_OK
+                                && (
+                                    (
+                                        (!isset($field['replaceable']) || $field['replaceable'] === false)
+                                        && $this->action == 'update'
+                                    )
+                                    || $this->action == 'insert'
+                                )
+                            ) {
+                                // delete previous file
+                                $this->getRow();
+
+                                if ($field['type'] == 'file') {
+                                    $val = $this->saveFile($field, $_FILES[$field['field']]);
+                                } else {
+                                    $val = $this->saveImage($field, $_FILES[$field['field']]);
+                                }
+                            } else {
+                                $ignore = true;
+                            }
                         }
                         break;
                     case 'date':
@@ -3463,9 +3473,15 @@ abstract class Table extends Page {
                     $config['height'] = $field['height'];
                 }
                 if (!empty($field['upload'])) {
-                    $config['finder'] = true;
+                    $config['browser'] = true;
                 }
-                return CKEditor::iframe($field['form_field'], $field['Value'], $config);
+                $config['content'] = $field['Value'];
+                $config['startup'] = true;
+                if (!empty($field['div'])) {
+                    return TinyMCE::editableDiv($field['form_field'], $config);
+                } else {
+                    return TinyMCE::iframe($field['form_field'], $config);
+                }
                 break;
             case 'div':
                 if ($field['Value'] == '')
@@ -3485,7 +3501,14 @@ abstract class Table extends Page {
                 }
             // Fall through.
             case 'file':
-                if (($field['Value'] != '' && (!isset($field['replaceable']) || empty($field['replaceable']))) || $field['Value'] == '') {
+                if (!empty($field['browser'])) {
+                    $return = FileBrowser::render($field['form_field'], [
+                        'image' => $field['Value'] ?: '',
+                        'image_class' => 'table_edit_image',
+                        'container' => $field['container'],
+                    ]);
+                }
+                else if (($field['Value'] != '' && (!isset($field['replaceable']) || empty($field['replaceable']))) || $field['Value'] == '') {
                     $return .= "<input type='file' name='{$field['form_field']}' id='{$field['form_field']}' />";
                 }
                 return $return;

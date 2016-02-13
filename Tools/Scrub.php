@@ -27,7 +27,7 @@ class Scrub {
     /**
      * Allowed CSS rules.
      */
-    const SCRUB_BASIC_CSS = 'height,width,color,background-color,vertical-align,text-align,margin,margin-left,margin-right,margin-top,margin-bottom,padding,padding-left,margin-right,margin-top,margin-bottom,border,border-left,border-right,border-top,border-bottom,float,font-size';
+    const SCRUB_BASIC_CSS = 'height,width,color,background-color,vertical-align,text-align,margin,margin-left,margin-right,margin-top,margin-bottom,padding,padding-left,margin-right,margin-top,margin-bottom,border,border-left,border-right,border-top,border-bottom,float,font-size,display';
 
     /**
      * Convert text to HTML safe output.
@@ -251,6 +251,7 @@ class Scrub {
             return $html;
         } elseif ($trusted) {
             $config->set('CSS.Trusted', true);
+            $config->set('CSS.AllowTricky', true);
             $config->set('HTML.Trusted', true);
             $config->set('Attr.EnableID', true);
             $config->set('Attr.AllowedFrameTargets', array('_blank'));
@@ -266,7 +267,7 @@ class Scrub {
             }
         }
 
-        if (empty($allowed_css) || $allowed_css[0] == '.') {
+        if (!empty($allowed_css) || $allowed_css[0] == '.') {
             $allowed_css = self::SCRUB_BASIC_CSS . ',' . substr($allowed_css, 1);
         }
         elseif ($allowed_css == '') {

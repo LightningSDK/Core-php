@@ -17,20 +17,31 @@ class BlogTable extends Table {
 
     protected $sort = 'time DESC';
 
-    protected $links = array(
-        BlogModel::CATEGORY_TABLE => array(
+    protected $links = [
+        BlogModel::CATEGORY_TABLE => [
             'index' => BlogModel::BLOG_CATEGORY_TABLE,
             'key' => 'cat_id',
             'display_column' => 'category',
             'list' => 'compact'
-        )
-    );
+        ]
+    ];
 
     protected $preset = array(
-        'user_id' => array('type' => 'hidden'),
-        'time' => array('type' => 'datetime'),
-        'url' => array('type' => 'url', 'unlisted' => true),
-        'body' => array('editor' => 'full', 'upload' => true),
+        'user_id' => [
+            'type' => 'hidden'
+        ],
+        'time' => [
+            'type' => 'datetime'
+        ],
+        'url' => [
+            'type' => 'url',
+            'unlisted' => true
+        ],
+        'body' => [
+            'upload' => true,
+            'type' => 'html',
+            'div' => true,
+        ],
     );
 
     protected function hasAccess() {
@@ -51,8 +62,8 @@ class BlogTable extends Table {
         };
         $this->preset['header_image'] = array(
             'type' => 'image',
-            'location' => BlogModel::IMAGE_PATH,
-            'weblocation' => '/' . BlogModel::IMAGE_PATH,
+            'browser' => true,
+            'container' => 'images',
             'format' => 'jpg',
         );
 

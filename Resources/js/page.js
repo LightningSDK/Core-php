@@ -2,20 +2,13 @@ lightning.page = {
     edit: function() {
         $('.page_edit').show();
         $('.page_edit_links').hide();
-        $('#page_display').attr('contentEditable', 'true');
-        lightning.ckeditors['page_editor'] = CKEDITOR.inline("page_display", {
-                toolbar:CKEDITOR.config.toolbar_Full
-            }
-        );
-        lightning.ckeditors['page_editor'].setData(lightning.vars.page.source);
-        CKFinder.setupCKEditor(lightning.ckeditors['page_editor'], '/js/ckfinder/');
+        lightning.tinymce.initEditor('page_display');
     },
 
     save: function() {
         $('#save_button').hide();
-        lightning.ckeditors['page_editor'].destroy();
-        delete lightning.ckeditors['page_editor'];
-        var send = {
+        lightning.tinymce.destroyEditor('page_display');
+        var data = {
             page_id: $('#page_id').val(),
             token: $('#token').val(),
             action: "save",
@@ -32,7 +25,7 @@ lightning.page = {
             url:'/page',
             type:'POST',
             dataType:'json',
-            data:send,
+            data: data,
             success:function(data) {
                 if (data.status == 'success') {
                     // Hide the editing controls.

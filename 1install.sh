@@ -7,13 +7,14 @@ DIR=$PWD
 echo "Installing git submodules"
 # Only download the ones that are required for php to run.
 git submodule update --init Vendor/BounceHandler
-git submodule update --init Vendor/ckeditor
 git submodule update --init Vendor/compass
 git submodule update --init Vendor/foundation
 git submodule update --init Vendor/htmlpurifier
 git submodule update --init Vendor/PHPMailer
 git submodule update --init Vendor/plancakeEmailParser
 git submodule update --init Vendor/recaptcha
+git submodule update --init Vendor/tinymce
+git submodule update --init Vendor/elfinder
 
 if [ ! -f $DIR/../index.php ]; then
   echo "Copying index.php to webroot"
@@ -74,18 +75,13 @@ if [ ! -f $DIR/../Source/Config/config.inc.php ]; then
 fi
 
 # Install CKEditor
-if [ ! -d $DIR/../js/ckeditor ]; then
+if [ ! -d $DIR/../js/tinymce ]; then
   if [ ! -d $DIR/../js ]; then
     echo "Making /js directory"
     mkdir $DIR/../js
   fi
-  echo "Copying ckeditor files to web directory"
-  mkdir $DIR/../js/ckeditor
-  cp -r Vendor/ckeditor/ckeditor.js ../js/ckeditor/
-  cp -r Vendor/ckeditor/skins ../js/ckeditor/
-  cp -r Vendor/ckeditor/plugins ../js/ckeditor/
-  cp -r Vendor/ckeditor/lang ../js/ckeditor/
-  cp -r Vendor/ckeditor/contents.css ../js/ckeditor/
+  echo "TODO: TinyMCE Needs to be installed"
+  echo "TODO: elFinder Needs to be installed"
 fi
 
 echo "Complete."

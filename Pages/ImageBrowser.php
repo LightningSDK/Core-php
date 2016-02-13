@@ -173,16 +173,17 @@ class ImageBrowser extends Page {
         move_uploaded_file($_FILES['upload']['tmp_name'], $absolute_file);
         $this->ensureThumbnail($absolute_file);
 
+        $url = str_replace(
+            HOME_PATH . '/' . $this->containers[$container]['storage'] . '/',
+            $this->containers[$container]['url'],
+            $absolute_file);
+
         if ($ckfinder_compatibility) {
             // Backwards Compatibility with CKEditor
-            $url = str_replace(
-                HOME_PATH . '/' . $this->containers[$container]['storage'] . '/',
-                $this->containers[$container]['url'],
-                $absolute_file);
             echo '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction(' . $funcNum . ',  "' . $url . '", "");</script>';
             exit;
         } else {
-            Output::error('Invalid Container');
+            Output::json(['url' => $url]);
         }
     }
 

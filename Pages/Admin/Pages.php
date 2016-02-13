@@ -33,7 +33,9 @@ class Pages extends Table {
             'type' => 'textarea',
         ),
         'body' => array(
-            'upload' => true
+            'upload' => true,
+            'type' => 'html',
+            'div' => true,
         ),
         'site_map' => array(
             'type' => 'checkbox',

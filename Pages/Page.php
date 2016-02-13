@@ -5,6 +5,8 @@
 
 namespace Lightning\Pages;
 
+use DOMDocument;
+use Exception;
 use Lightning\Tools\CKEditor;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
@@ -17,6 +19,8 @@ use Lightning\View\Field\BasicHTML;
 use Lightning\View\JS;
 use Lightning\View\Page as PageView;
 use Lightning\Model\Page as PageModel;
+use Lightning\View\Video\YouTube;
+use SimpleXMLElement;
 
 class Page extends PageView {
 
@@ -103,20 +107,31 @@ class Page extends PageView {
     protected function renderContent($content) {
         $matches = array();
         preg_match_all('|{{.*}}|', $content, $matches);
-        foreach ($matches as $match) {
+        foreach ($matches[0] as $match) {
             if (!empty($match)) {
-                $match_clean = trim($match[0], '{} ');
-                $match_clean = explode('=', $match_clean);
-                switch ($match_clean[0]) {
+                // Convert to HTML and parse it.
+                $match_html = '<' . trim($match, '{} ') . '/>';
+                $dom = new DOMDocument();
+                libxml_use_internal_errors(true);
+                $dom->loadHTML($match_html);
+                $element = $dom->getElementsByTagName('body')->item(0)->childNodes->item(0);
+                $output = '';
+                switch ($element->nodeName) {
                     case 'template':
                         $sub_template = new Template();
-                        $content = str_replace(
-                            $match[0],
-                            $sub_template->render($match_clean[1], true),
-                            $content
-                        );
+                        $output = $sub_template->render($element->getAttribute('name'), true);
                         break;
+                    case 'youtube':
+                        $output = YouTube::render($element->getAttribute('id'));
+                        if ($element->getAttribute('flex')) {
+                            $output = '<div class="flex-video ' . ($element->getAttribute('widescreen') ? 'widescreen' : '') . '">' . $output . '</div>';
+                        }
                 }
+                $content = str_replace(
+                    $match,
+                    $output,
+                    $content
+                );
             }
         }
         return $content;
@@ -156,11 +171,9 @@ class Page extends PageView {
         );
 
         // Save the page.
-        if ($page_id != 0) {
-            Database::getInstance()->update('page', $new_values, array('page_id' => $page_id));
-        } else {
-            $page_id = Database::getInstance()->insert('page', $new_values);
-        }
+        $update_values = $new_values;
+        unset($update_values['url']);
+        PageModel::insertOrUpdate($new_values, $update_values);
 
         $output = array();
         $output['url'] = $new_values['url'];
