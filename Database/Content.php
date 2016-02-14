@@ -4,7 +4,7 @@ namespace Lightning\Database;
 
 use Lightning\Tools\Database;
 
-class Content {
+abstract class Content implements ContentInterface{
     public function importContent() {
         echo "Importing data for table {$this->table}:\n";
 
@@ -16,4 +16,8 @@ class Content {
 
         echo "Importing complete.\n\n";
     }
+}
+
+interface ContentInterface {
+    public function getContent();
 }
