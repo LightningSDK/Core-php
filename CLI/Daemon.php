@@ -31,7 +31,7 @@ class Daemon extends CLI {
     /**
      * The last time we checked for jobs.
      *
-     * @var integer
+     * @var double
      */
     protected $lastCheck;
 
@@ -52,7 +52,7 @@ class Daemon extends CLI {
     /**
      * The time the daemon was started.
      *
-     * @var integer
+     * @var double
      */
     protected $startTime;
 
