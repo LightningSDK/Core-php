@@ -638,6 +638,34 @@ class Database extends Singleton {
         return 0;
     }
 
+    public function duplicateRows($table, $where = [], $update = []) {
+        $this->dupliacateRowsQuery([
+            'from' => $table,
+            'where' => $where,
+            'set' => $update,
+        ]);
+    }
+
+    public function duplicateRowsQuery($query = []) {
+
+        // Copy the data to the temp table.
+        $select_query = $query;
+        unset($select_query['set']);
+        $values = [];
+        $this->query('CREATE TEMPORARY TABLE `temporary_table` AS ' . $this->parseQuery($select_query, $values), $values);
+
+        // Update the values
+        $values = [];
+        $update_query = [
+            'update' => 'temporary_table',
+            'set' => $query['set']
+        ];
+        $this->query($this->parseQuery($update_query, $values), $values);
+
+        // Copy the new values back.
+        $this->query('INSERT INTO `' . $query['from'] . '` SELECT * FROM `temporary_table`');
+    }
+
     /**
      * Delete rows from the database.
      *
@@ -651,7 +679,7 @@ class Database extends Singleton {
      */
     public function delete($table, $where) {
         $values = [];
-        $this->query($this->parseQuery(['from' => $table, 'where' => $where, 'DELETE'], $values, 'DELETE'), $values);
+        $this->query($this->parseQuery(['from' => $table, 'where' => $where], $values, 'DELETE'), $values);
 
         return $this->result->rowCount() ?: false;
     }
