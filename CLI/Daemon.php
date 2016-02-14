@@ -224,8 +224,8 @@ class Daemon extends CLI {
             ) {
                 $this->startJob($job);
             }
+            $this->lastCheck = $time;
         }
-        $this->lastCheck = $time;
     }
 
     /**
