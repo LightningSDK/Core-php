@@ -2,7 +2,7 @@
 
 namespace Lightning\CLI;
 
-use Lightning\Model\User;
+use Lightning\Model\User as UserModel;
 use Lightning\Tools\Database;
 use Lightning\Tools\Tracker;
 
@@ -19,7 +19,7 @@ class BouncedEmail extends CLI {
         if (!empty($bounce_info[0]['recipient']) && preg_match('/5\.\d\.\d/', $bounce_info[0]['status'])) {
             $email = $bounce_info[0]['recipient'];
 
-            $user = User::loadByEmail($email);
+            $user = UserModel::loadByEmail($email);
             if (!$user) {
                 // Bounced from an unknown recipient, ignore this.
                 Tracker::trackEvent('Email Bounced', 0, 0);
