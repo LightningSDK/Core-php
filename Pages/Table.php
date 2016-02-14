@@ -673,14 +673,11 @@ abstract class Table extends Page {
             Output::error('There was a conflict with an existing entry.');
         }
 
-        if (!empty($this->post_actions['after_insert'])) {
-            $this->getRow();
-            $this->post_actions['after_insert']($this->list);
-        } elseif (!empty($this->post_actions['after_post'])) {
-            $this->getRow();
-            $this->post_actions['after_post']($this->list);
-        }
-        $this->set_posted_links();
+        $this->getRow();
+        $this->afterInsert();
+        $this->afterPost();
+
+        $this->setPostedLinks();
         if (Request::get('pf')) {
             // if we are in a popup, redirect to the popup close script page
             Navigation::redirect($this->createUrl('pop-return', $this->id));
@@ -696,6 +693,8 @@ abstract class Table extends Page {
     }
 
     protected function afterInsert() {}
+    protected function afterUpdate() {}
+    protected function afterPost() {}
     protected function afterDuplicate() {}
 
     public function postUpdate() {
@@ -716,8 +715,8 @@ abstract class Table extends Page {
         if (!empty($new_values)) {
             Database::getInstance()->update($this->table, $new_values, [$this->getKey() => $this->id]);
         }
-        $this->update_accessTable();
-        $this->set_posted_links();
+        $this->updateAccessTable();
+        $this->setPostedLinks();
 
         if ($this->updatedMessage !== false) {
             Messenger::message($this->updatedMessage ?: 'The ' . $this->table . ' has been updated.');
@@ -725,13 +724,9 @@ abstract class Table extends Page {
 
         // If serial update is set, set the next action to be an edit of the next higest key,
         // otherwise, go back to the list.
-        if (!empty($this->post_actions['after_update'])) {
-            $this->getRow();
-            $this->post_actions['after_update']($this->list);
-        } elseif (!empty($this->post_actions['after_post'])) {
-            $this->getRow();
-            $this->post_actions['after_post']($this->list);
-        }
+        $this->getRow();
+        $this->afterUpdate();
+        $this->afterPost();
 
         if ($this->enable_serial_update && $this->serial_update) {
             // Get the next id in the table
@@ -756,8 +751,6 @@ abstract class Table extends Page {
 
         $this->afterPostRedirect();
     }
-
-    protected function afterUpdate() {}
 
     public function afterPostRedirect() {
 
@@ -837,7 +830,7 @@ abstract class Table extends Page {
      * @return string
      *   The primary key name.
      */
-    function getKey($useTableName = FALSE) {
+    public function getKey($useTableName = FALSE) {
         if (empty($this->key) && !empty($this->table)) {
             $result = Database::getInstance()->query("SHOW KEYS FROM `{$this->table}` WHERE Key_name = 'PRIMARY'");
             $result = $result->fetch();
@@ -856,7 +849,7 @@ abstract class Table extends Page {
         }
     }
 
-    function render() {
+    public function render() {
         $output = '';
         $this->loadMainFields();
         $this->check_default_rowClick();
@@ -874,7 +867,7 @@ abstract class Table extends Page {
         } else {
             switch($this->action) {
                 case 'pop_return':
-                    $this->render_pop_return();
+                    $this->renderPopReturn();
                     break;
                 case 'view':
                     $output .= $this->render_action_header();
@@ -926,7 +919,7 @@ abstract class Table extends Page {
         return 'Search: <input type="text" name="table_search" id="table_search" value="' . Scrub::toHTML(Request::get('ste')) . '" />';
     }
 
-    function render_pop_return() {
+    public function renderPopReturn() {
         $this->getRow();
         $send_data = [
             'pf' => Request::get('pf'),
@@ -936,7 +929,7 @@ abstract class Table extends Page {
         JS::startup('lightning.table.returnPop('.json_encode($send_data).')');
     }
 
-    function renderConfirmation() {
+    public function renderConfirmation() {
         // get delete confirmation
         $output = "<br /><br />{$this->confirmMessage}<br /><br /><form action='' method='POST'>";
         $output .= Form::renderTokenInput();
@@ -1096,7 +1089,7 @@ abstract class Table extends Page {
         }
     }
 
-    function renderListHeader() {
+    protected function renderListHeader() {
         $output = '';
         // If the field order is specified.
         if (is_array($this->fieldOrder)) {
@@ -1143,7 +1136,7 @@ abstract class Table extends Page {
         return $output;
     }
 
-    function renderListRows($list, $editable) {
+    protected function renderListRows($list, $editable) {
         $output = '';
         // loop through DATA rows
         foreach($list as $row) {
@@ -1176,14 +1169,14 @@ abstract class Table extends Page {
         return $output;
     }
 
-    function action_fields_requires_submit() {
+    protected function action_fields_requires_submit() {
         foreach($this->action_fields as $a => $action) {
             if ($action['type'] == "checkbox") return true;
         }
     }
 
     // Called when rendering lists
-    function renderLinkList(&$row) {
+    protected function renderLinkList(&$row) {
         $output = '';
         foreach($this->links as $link => $link_settings) {
             if (!empty($link_settings['list']) && $link_settings['list'] == 'compact') {
@@ -1234,7 +1227,7 @@ abstract class Table extends Page {
     }
 
     // called when rendering lists
-    function render_linked_table(&$row) {
+    protected function render_linked_table(&$row) {
         $output = "<tr class='linked_list_container_row'><td colspan='" . $this->getMainTableColumnCount() . "'><table width='100%'>";
         foreach($this->links as $link => $link_settings) {
             if (!empty($link_settings['list']) && $link_settings['list'] === "each") {
@@ -1274,7 +1267,7 @@ abstract class Table extends Page {
         return $output;
     }
 
-    function render_action_fields_headers() {
+    protected function render_action_fields_headers() {
         $output = '';
         foreach($this->action_fields as $a=>$action) {
             $output.= "<td>";
@@ -1307,7 +1300,7 @@ abstract class Table extends Page {
         return $output;
     }
 
-    function render_action_fields_list(&$row, $editable) {
+    protected function render_action_fields_list(&$row, $editable) {
         $output='';
         foreach($this->action_fields as $a=>$action) {
             $output.= "<td>";
@@ -1363,7 +1356,7 @@ abstract class Table extends Page {
      * @return string
      *   The fully rendered HTML content.
      */
-    function render_form() {
+    protected function render_form() {
         if (isset($this->custom_templates[$this->action.'_item'])) {
             // Render the form using HTML templates.
             $template = $this->load_template($this->custom_template_directory.$this->custom_templates[$this->action.'_item']);
@@ -1546,7 +1539,7 @@ abstract class Table extends Page {
         return "<input id='custombutton_{$button_id}' type='submit' name='submit' value='{$button['text']}' class='button'/>";
     }
 
-    function render_form_row(&$field, $row) {
+    protected function render_form_row(&$field, $row) {
         $output = '';
         if ($which_field = $this->whichField($field)) {
             // double column width row
@@ -1594,120 +1587,91 @@ abstract class Table extends Page {
 
     // THIS IS CALLED TO RENDER LINKED TABLES IN view/edit/new MODE
     // (full form)
-    function render_form_linked_tables() {
+    protected function render_form_linked_tables() {
         $output = '';
         foreach($this->links as $link => &$link_settings) {
             if (empty($link_settings['table'])) {
                 $link_settings['table'] = $link;
             }
-            if (!empty($link_settings['list']) && $link_settings['list'] === 'each') {
-                // is this needed in form view?
-                // LOAD THE LIST
-                /*
-                                $this->load_all_active_list($link_settings);
-                                $link_settings['row_count'] = count($link_settings['active_list']);
 
-
-                                // Set the character to join the URL parameters to the edit_link
-                                $joinchar = (strpos($link_settings['edit_link'], $joinchar) !== false) ? ":" : '?';
-
-                                if ($link_settings['display_name'])
-                                    echo "<tr {$style}><td>{$link_settings['display_name']}".($link_settings['edit_link'] ? " <a href='{$link_settings['edit_link']}{$joinchar}action=new&backlinkname={$this->getKey()}&backlinkvalue={$this->id}'><img src='/images/lightning/new.png' border='0' /></a>" : '').($link_settings['edit_js'] ? " <a href='' onclick='{$link_settings['edit_js']}.newLink({$this->id})'>New</a>" : '')."</td></tr>"; // TODO changed from below: $row[$this->getKey()] to $this->id
-                                for($i = 0; $i < count($link_settings['active_list']); $i++) {
-                                    echo "<tr id='link_{$link}_{$link_settings['active_list'][$i][$link_settings['key']]}' {$style}>";
-                                    foreach($link_settings['active_list'][$i] as $v) {
-                                        echo "<td>{$v}</td>";
-                                    }
-                                    if ($link_settings['edit_link'] != '') {
-                                        echo "<td><a href='{$link_settings['edit_link']}{$joinchar}action=edit&id={$link_settings['active_list'][$i][$link_settings['key']]}'>Edit</a> <a href='{$link_settings['edit_link']}{$joinchar}action=delete&id={$link_settings['active_list'][$i][$link_settings['key']]}'><img src='/images/lightning/remove.png' border='0' /></a></td>";
-                                    }
-                                    if ($link_settings['edit_js'] != '') {
-                                        echo "<td><a href='' onclick='{$link_settings['edit_js']}.editLink({$link_settings['active_list'][$i][$link_settings['key']]})'><img src='/images/lightning/edit.png' border='0' /></a> <a href='' onclick='{$link_settings['edit_js']}.deleteLink({$link_settings['active_list'][$i][$link_settings['key']]})'><img src='/images/lightning/remove.png' border='0' /></a></td>";
-                                    }
-                                    echo "</tr>";
-                                }
-                */
-                /* 	END TODO: This section should mirror the similar section from the LIST MODE below */
+            // DISPLAY NAME ON THE LEFT
+            if (isset($link_settings['display_name'])) {
+                $output .= "<tr><td>{$link_settings['display_name']}</td><td>";
             } else {
-                // DISPLAY NAME ON THE LEFT
-                if (isset($link_settings['display_name'])) {
-                    $output .= "<tr><td>{$link_settings['display_name']}</td><td>";
+                $output .= "<tr><td>{$link}</td><td>";
+            }
+
+            // LOAD THE LINKED ROWS
+            // The local key is the primary key column by default or another specified column.
+            $local_key = isset($link_settings['local_key']) ? $link_settings['local_key'] : $this->getKey();
+            // The value of the local key column.
+            $local_id = ($this->table) ? $this->list[$local_key] : $this->id;
+
+            // If there is a local key ID and no active list, load it.
+            if ($local_id > 0 && !isset($link_settings['active_list'])) {
+                $link_settings['active_list'] = $this->load_all_active_list($link_settings, $local_id );
+            } elseif (empty($local_id)) {
+                // If there is no local ID, this is probably a new item, so the list should be blank.
+                $link_settings['active_list'] = [];
+            }
+
+            $link_settings['row_count'] = count($link_settings['active_list']);
+
+            // IN EDIT/NEW MODE, SHOW A FULL FORM
+            if ($this->action == "edit" || $this->action == "new") {
+                // IN EDIT MODE WITH THE full_form OPTION, SHOW THE FORM WITH ADD/REMOVE LINKS
+                if (!empty($link_settings['full_form'])) {
+                    // editable forms (1 to many)
+                    $output .= $this->render_full_linked_table_editable($link_settings);
                 } else {
-                    $output .= "<tr><td>{$link}</td><td>";
-                }
-
-                // LOAD THE LINKED ROWS
-                // The local key is the primary key column by default or another specified column.
-                $local_key = isset($link_settings['local_key']) ? $link_settings['local_key'] : $this->getKey();
-                // The value of the local key column.
-                $local_id = ($this->table) ? $this->list[$local_key] : $this->id;
-
-                // If there is a local key ID and no active list, load it.
-                if ($local_id > 0 && !isset($link_settings['active_list'])) {
-                    $link_settings['active_list'] = $this->load_all_active_list($link_settings, $local_id );
-                } elseif (empty($local_id)) {
-                    // If there is no local ID, this is probably a new item, so the list should be blank.
-                    $link_settings['active_list'] = [];
-                }
-
-                $link_settings['row_count'] = count($link_settings['active_list']);
-
-                // IN EDIT/NEW MODE, SHOW A FULL FORM
-                if ($this->action == "edit" || $this->action == "new") {
-                    // IN EDIT MODE WITH THE full_form OPTION, SHOW THE FORM WITH ADD/REMOVE LINKS
-                    if (!empty($link_settings['full_form'])) {
-                        // editable forms (1 to many)
-                        $output .= $this->render_full_linked_table_editable($link_settings);
+                    // drop down menu (many to many)
+                    if (!empty($link_settings['type']) && $link_settings['type'] == 'image') {
+                        $output .= $this->render_linked_table_editable_image($link_settings);
                     } else {
-                        // drop down menu (many to many)
-                        if (!empty($link_settings['type']) && $link_settings['type'] == 'image') {
-                            $output .= $this->render_linked_table_editable_image($link_settings);
-                        } else {
-                            $output .= $this->render_linked_table_editable_select($link_settings);
-                        }
+                        $output .= $this->render_linked_table_editable_select($link_settings);
                     }
                 }
+            }
 
-                // FULL FORM MODE INDICATES THAT THE LINKED TABLE IS A SUB TABLE OF THE MAIN TABLE - A 1(table) TO MANY (subtable) RELATIONSHIP
-                // for view mode, if "display" is set, use the "display" template
-                elseif ($this->action == "view" && is_array($link_settings['active_list'])) {
-                    if (isset($link_settings['display'])) {
-                        // IN VIEW MODE WITH THE full_form OPTION, JUST SHOW ALL THE DATA
-                        // loop for each entry
-                        foreach($link_settings['active_list'] as $l) {
-                            // loop for each field
-                            $display = $link_settings['display'];
-                            foreach($l as $f=>$v) {
-                                if (isset($link_settings['fields'][$f])) {
-                                    if ($link_settings['fields'][$f]['field'] == '') $link_settings['fields'][$f]['field'] = $f;
-                                    $display = str_replace('{'.$f.'}', $this->print_field_value($link_settings['fields'][$f], $l), $display);
-                                }
+            // FULL FORM MODE INDICATES THAT THE LINKED TABLE IS A SUB TABLE OF THE MAIN TABLE - A 1(table) TO MANY (subtable) RELATIONSHIP
+            // for view mode, if "display" is set, use the "display" template
+            elseif ($this->action == "view" && is_array($link_settings['active_list'])) {
+                if (isset($link_settings['display'])) {
+                    // IN VIEW MODE WITH THE full_form OPTION, JUST SHOW ALL THE DATA
+                    // loop for each entry
+                    foreach($link_settings['active_list'] as $l) {
+                        // loop for each field
+                        $display = $link_settings['display'];
+                        foreach($l as $f=>$v) {
+                            if (isset($link_settings['fields'][$f])) {
+                                if ($link_settings['fields'][$f]['field'] == '') $link_settings['fields'][$f]['field'] = $f;
+                                $display = str_replace('{'.$f.'}', $this->print_field_value($link_settings['fields'][$f], $l), $display);
                             }
-                            $output .= $display;
-                            $output .= $link_settings['seperator'];
-                            // insert break here?
                         }
-                        // THIS IS A MANY TO MANY RELATIONSHIP
-                        // otherwise just list out all the fields
-                    } elseif (!empty($link_settings['full_form']) && $link_settings['full_form'] === true) {
-                        // full form view
-                        foreach($link_settings['active_list'] as $l) {
-                            $output .= "<div class='subtable'><table>";
-                            // SHOW FORM FIELDS
-                            foreach($link_settings['fields'] as $f=>&$s) {
-                                $s['field'] = $f;
-                                $s['form_field'] = "st_{$link}_{$f}_{$l[$link_settings['key']]}";
-                                if ($this->whichField($s) == "display") {
-                                    $output .= "<tr><td>{$s['display_name']}</td><td>";
-                                    $output .= $this->print_field_value($s, $l);
-                                }
-                            }
-                            // ADD REMOVE LINKS
-                            $output .= "</table></div>";
-                        }
+                        $output .= $display;
+                        $output .= $link_settings['seperator'];
+                        // insert break here?
                     }
-                    // LIST MODE
+                    // THIS IS A MANY TO MANY RELATIONSHIP
+                    // otherwise just list out all the fields
+                } elseif (!empty($link_settings['full_form']) && $link_settings['full_form'] === true) {
+                    // full form view
+                    foreach($link_settings['active_list'] as $l) {
+                        $output .= "<div class='subtable'><table>";
+                        // SHOW FORM FIELDS
+                        foreach($link_settings['fields'] as $f=>&$s) {
+                            $s['field'] = $f;
+                            $s['form_field'] = "st_{$link}_{$f}_{$l[$link_settings['key']]}";
+                            if ($this->whichField($s) == "display") {
+                                $output .= "<tr><td>{$s['display_name']}</td><td>";
+                                $output .= $this->print_field_value($s, $l);
+                            }
+                        }
+                        // ADD REMOVE LINKS
+                        $output .= "</table></div>";
+                    }
                 }
+                // LIST MODE
             }
         }
 
@@ -1720,7 +1684,7 @@ abstract class Table extends Page {
     // this would imply to show only the links that are actively linked to this table item for editing
     // this is a 1 to many relationship. it will load all of the links made using load_all_active_list()
     // any link connected is "owned" by this table row and will be editable from this table in edit mode
-    function render_full_linked_table_editable(&$link_settings) {
+    protected function render_full_linked_table_editable(&$link_settings) {
         $output = "<input type='hidden' name='delete_subtable_{$link_settings['table']}' id='delete_subtable_{$link_settings['table']}' />";
         $output .= "<input type='hidden' name='new_subtable_{$link_settings['table']}' id='new_subtable_{$link_settings['table']}' />";
         if (count($link_settings['active_list']) > 0)
@@ -1836,7 +1800,7 @@ abstract class Table extends Page {
 
     // this loads all links that are actively joined by a foreign key on the remote table
     // or by a link table in between. this is used for a one to many relationship, (1 table row to many links)
-    function load_all_active_list(&$link_settings, $row_id) {
+    protected function load_all_active_list(&$link_settings, $row_id) {
         $local_key = isset($link_settings['local_key']) ? $link_settings['local_key'] : $this->getKey();
         if (!empty($link_settings['index'])) {
             // many to many - there will be an index table linking the two tables together
@@ -1896,10 +1860,6 @@ abstract class Table extends Page {
             'base_path' => $this->action_file,
             'parameters' => $params,
         ]);
-    }
-
-    function set_preset($new_preset) {
-        $this->preset = $new_preset;
     }
 
     protected function replaceURLVariables($string) {
@@ -1980,7 +1940,7 @@ abstract class Table extends Page {
         return $this->action_file . (!empty($parameters) ? ('?' . http_build_query($parameters)) : '');
     }
 
-    function load_template($file) {
+    public function load_template($file) {
         if ($file == '') return;
         $template = file_get_contents($file);
         $template = str_replace('{table_link_new}', $this->createUrl("new"), $template);
@@ -1994,7 +1954,7 @@ abstract class Table extends Page {
         return $template;
     }
 
-    function template_item_vars($template, $id) {
+    public function template_item_vars($template, $id) {
         $template = str_replace('{table_link_edit}', $this->createUrl("edit", $id), $template);
         $template = str_replace('{table_link_delete}', $this->createUrl("delete", $id), $template);
         $template = str_replace('{table_link_view}', $this->createUrl("view", $id), $template);
@@ -2115,7 +2075,7 @@ abstract class Table extends Page {
     }
 
     // is the field editable in these forms
-    function userInputNew(&$field) {
+    protected function userInputNew(&$field) {
         if (isset($field['render_'.$this->action.'_field']))
             return true;
         if ($field['type'] == "note")
@@ -2137,7 +2097,7 @@ abstract class Table extends Page {
         return true;
     }
 
-    function userInputEdit(&$field) {
+    protected function userInputEdit(&$field) {
         if (isset($field['render_'.$this->action.'_field']))
             return true;
         if ($field['type'] == "note")
@@ -2155,7 +2115,7 @@ abstract class Table extends Page {
         return true;
     }
 
-    function userDisplayNew(&$field) {
+    protected function userDisplayNew(&$field) {
         if (!empty($field['list_only'])) {
             return false;
         }
@@ -2175,7 +2135,7 @@ abstract class Table extends Page {
         return true;
     }
 
-    function userDisplayEdit(&$field) {
+    protected function userDisplayEdit(&$field) {
         if (!empty($field['list_only']))
             return false;
         // TODO: This should be replaced by an overriding method in the child class.
@@ -2189,7 +2149,7 @@ abstract class Table extends Page {
         return true;
     }
 
-    function displayList(&$field) {
+    protected function displayList(&$field) {
         // TODO: This should be replaced by an overriding method in the child class.
         if (
             (!empty($field['display_value']) && is_callable($field['display_value']))
@@ -2212,7 +2172,7 @@ abstract class Table extends Page {
      *
      * @return boolean
      */
-    function displayView(&$field) {
+    protected function displayView(&$field) {
         if (
             (!empty($field['display_value']) && is_callable($field['display_value']))
             || (!empty($field['displayView_value']) && is_callable($field['displayView_value']))
@@ -2236,7 +2196,7 @@ abstract class Table extends Page {
      *
      * @return boolean
      */
-    function setValueOnNew(&$field) {
+    protected function setValueOnNew(&$field) {
         if (isset($field['insert_function']))
             return true;
         if (isset($field['submit_function']))
@@ -2265,7 +2225,7 @@ abstract class Table extends Page {
      *
      * @return boolean
      */
-    function setValueOnUpdate(&$field) {
+    protected function setValueOnUpdate(&$field) {
         if (isset($field['modified_function']))
             return true;
         if (isset($field['submit_function']))
@@ -2285,7 +2245,7 @@ abstract class Table extends Page {
         return true;
     }
 
-    function update_accessTable() {
+    protected function updateAccessTable() {
         if (isset($this->accessTable)) {
             $accessTable_values = $this->getFieldValues($this->fields, true);
             if (!empty($accessTable_values)) {
@@ -2719,7 +2679,7 @@ abstract class Table extends Page {
         return FileManager::getFileHandler(empty($field['file_handler']) ? '' : $field['file_handler'], $field['location']);
     }
 
-    function decode_bool_group($int) {
+    protected function decode_bool_group($int) {
         return str_split(strrev(decbin($int)));
     }
 
@@ -2729,7 +2689,7 @@ abstract class Table extends Page {
         bindec("1".str_repeat("0", $bit));
     }
 
-    function input_sanitize($val, $allow_html = false) {
+    protected function input_sanitize($val, $allow_html = false) {
 
         $val = stripslashes($val);
 
@@ -2746,7 +2706,7 @@ abstract class Table extends Page {
         return $clean_html;
     }
 
-    function encrypt($table, $column, $value) {
+    protected function encrypt($table, $column, $value) {
         // TODO: use remote AES encryption method for isolated HSM.
         $table_key = Configuration::get('lightning.table.encryption_key');
         return Encryption::aesEncrypt($value, $table_key);
@@ -2769,7 +2729,7 @@ abstract class Table extends Page {
      * @return stores result in $list class variable (no actual return result from the method)
 
      */
-    function getRow($force=true) {
+    protected function getRow($force=true) {
         if (!empty($this->prefixRows[$this->id])) {
             // If it's a fixed value.
             $this->editable = false;
@@ -2843,7 +2803,7 @@ abstract class Table extends Page {
      * @return stores result in $list class variable (no actual return result from the method)
 
      */
-    function loadList() {
+    protected function loadList() {
 
         // check for required variables
         if ($this->table == '') {
@@ -2924,11 +2884,11 @@ abstract class Table extends Page {
         );
     }
 
-    function loadFullListCursor() {
+    protected function loadFullListCursor() {
         $this->list = Database::getInstance()->select($this->table);
     }
 
-    function executeTask() {
+    protected function executeTask() {
         // do we load a subset or ss vars?
         if (isset($_REQUEST['ss'])) {
             $this->cur_subset = Scrub::variable($_REQUEST['ss']);
@@ -3027,13 +2987,13 @@ abstract class Table extends Page {
         }
     }
 
-    function check_default_rowClick() {
+    protected function check_default_rowClick() {
         if (!isset($this->rowClick) && $this->editable) {
             $this->rowClick = ['type' => 'action', 'action' => 'edit'];
         }
     }
 
-    function js_init_data() {
+    protected function js_init_data() {
         $table_data = ['vars' => []];
         if ($this->rowClick) {
             $table_data['rowClick'] = $this->rowClick;
@@ -3085,7 +3045,7 @@ abstract class Table extends Page {
         }
     }
 
-    function get_new_file_loc($dir) {
+    protected function get_new_file_loc($dir) {
         // select random directory
         if (substr($dir,-1) == "/")
             $dir = substr($dir,0,-1);
@@ -3104,14 +3064,14 @@ abstract class Table extends Page {
 
     }
 
-    function get_full_file_location($dir, $file) {
+    protected function get_full_file_location($dir, $file) {
         $f = $dir."/".$file;
         $f = str_replace("//","/", $f);
         $f = str_replace("//","/", $f);
         return $f;
     }
 
-    function hasUploadfield() {
+    protected function hasUploadfield() {
         foreach($this->fields as $f) {
             if ($f['type'] == 'file' || $f['type'] == 'image') {
                 return true;
@@ -3119,7 +3079,7 @@ abstract class Table extends Page {
         }
     }
 
-    function set_posted_links() {
+    protected function setPostedLinks() {
         foreach($this->links as $link => $link_settings) {
             // FOR 1 (local) TO MANY (foreign)
             if (!empty($link_settings['type']) && $link_settings['type'] == 'image') {
@@ -3205,7 +3165,7 @@ abstract class Table extends Page {
     }
 
     // print field or print editable field
-    function print_field_value($field, &$row = null) {
+    protected function print_field_value($field, &$row = null) {
         if (empty($row)) {
             $v = !empty($field['Value']) ? $field['Value'] : '';
         } else {
@@ -3326,15 +3286,11 @@ abstract class Table extends Page {
                     return $field['note'];
                     break;
                 default:
-                    return $this->convert_quotes($v);
+                    return Scrub::toHTML($v);
                     break;
 
             }
         }
-    }
-
-    function convert_quotes($v) {
-        return str_replace("'", "&apos;", str_replace('"',"&quot;", $v));
     }
 
     /**
@@ -3527,14 +3483,14 @@ abstract class Table extends Page {
             case 'div':
                 if ($field['Value'] == '')
                     $field['Value'] = "<p></p>";
-                return "<input type='hidden' name='{$field['form_field']}' id='{$field['form_field']}' value='".$this->convert_quotes($field['Value'])."' />
+                return "<input type='hidden' name='{$field['form_field']}' id='{$field['form_field']}' value='".Scrub::toHTML($field['Value'])."' />
 							<div id='{$field['form_field']}_div' spellcheck='true'>{$field['Value']}</div>";
                 break;
             case 'plaintext':
                 return "<textarea name='{$field['form_field']}' id='{$field['form_field']}' spellcheck='true' cols='90' rows='10'>{$field['Value']}</textarea>";
                 break;
             case 'hidden':
-                return "<input type='hidden' name='{$field['form_field']}' id='{$field['form_field']}' value='".$this->convert_quotes($field['Value'])."' />";
+                return "<input type='hidden' name='{$field['form_field']}' id='{$field['form_field']}' value='".Scrub::toHTML($field['Value'])."' />";
                 break;
             case 'image':
                 if (!empty($field['Value'])) {

@@ -49,13 +49,15 @@ class BlogTable extends Table {
         return true;
     }
 
+    protected function afterPost() {
+        if (Request::get('return') == 'view') {
+            Navigation::redirect('/' . $this->list['url'] . '.htm');
+        }
+    }
+
     protected function initSettings() {
         Template::getInstance()->set('full_width', true);
-        if (Request::get('return') == 'view') {
-            $this->post_actions['after_post'] = function($row) {
-                Navigation::redirect('/' . $row['url'] . '.htm');
-            };
-        }
+
         $this->preset['user_id']['default'] = ClientUser::getInstance()->id;
         $this->preset['url']['submit_function'] = function(&$output) {
             $output['url'] = Request::post('url', 'url') ?: Request::post('title', 'url');

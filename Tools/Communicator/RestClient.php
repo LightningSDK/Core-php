@@ -103,11 +103,11 @@ class RestClient {
      * @param $var
      * @return null
      */
-    function get($var) {
+    public function get($var) {
         return Data::getFromPath($var, $this->results);
     }
 
-    function getErrors() {
+    public function getErrors() {
         if (!isset($this->results['errors'])) {
             return array();
         }
@@ -130,7 +130,7 @@ class RestClient {
      *
      * @return bool
      */
-    function hasErrors() {
+    public function hasErrors() {
         if (isset($this->results['errors']) && count($this->results['errors']) > 0)
             return true;
         return false;

@@ -310,7 +310,7 @@ class Mailer {
      * @return integer
      *   The number of users the message was sent to.
      */
-    function sendBulk($message_id, $test = false, $auto = false) {
+    public function sendBulk($message_id, $test = false, $auto = false) {
         $this->message = new Message($message_id, true, $auto);
 
         $this->from(
@@ -349,7 +349,7 @@ class Mailer {
      * @return boolean
      *   Whether the message was sent successfully.
      */
-    function sendOne($message_id, $user) {
+    public function sendOne($message_id, $user) {
         $this->built = false;
         $this->clearAddresses();
         $this->loadMessage($message_id);

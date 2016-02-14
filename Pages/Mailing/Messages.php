@@ -105,44 +105,44 @@ class Messages extends Table {
                 $("#add_message_criteria_button").click(lightning.admin.messageEditor.checkVars);
             ');
         }
+    }
 
-        $this->post_actions['after_post'] = function() {
-            $db = Database::getInstance();
+    public function afterPost() {
+        $db = Database::getInstance();
 
-            // Find all the criteria added to this message
-            $criteria_list = $db->select(
-                array(
-                    'from' => 'message_message_criteria',
-                    'join' => array(
-                        'JOIN',
-                        'message_criteria',
-                        'USING (message_criteria_id)',
-                    ),
+        // Find all the criteria added to this message
+        $criteria_list = $db->select(
+            array(
+                'from' => 'message_message_criteria',
+                'join' => array(
+                    'JOIN',
+                    'message_criteria',
+                    'USING (message_criteria_id)',
                 ),
-                array('message_id' => $this->id)
-            );
+            ),
+            array('message_id' => $this->id)
+        );
 
-            // See if any variables have been set.
-            foreach($criteria_list as $c) {
-                // If the criteria requires variables.
-                if (!empty($c['variables'])) {
-                    // See what variables are required.
-                    $vars = explode(',', $c['variables']);
-                    $var_data = array();
-                    foreach($vars as $v) {
-                        $var_data[$v] = Request::post('var_' . $c['message_criteria_id'] . '_' . $v);
-                    }
-                    $db->update(
-                        'message_message_criteria',
-                        array('field_values' => json_encode($var_data)),
-                        array(
-                            'message_id' => Request::post('id', 'int'),
-                            'message_criteria_id' => $c['message_criteria_id'],
-                        )
-                    );
+        // See if any variables have been set.
+        foreach($criteria_list as $c) {
+            // If the criteria requires variables.
+            if (!empty($c['variables'])) {
+                // See what variables are required.
+                $vars = explode(',', $c['variables']);
+                $var_data = array();
+                foreach($vars as $v) {
+                    $var_data[$v] = Request::post('var_' . $c['message_criteria_id'] . '_' . $v);
                 }
+                $db->update(
+                    'message_message_criteria',
+                    array('field_values' => json_encode($var_data)),
+                    array(
+                        'message_id' => Request::post('id', 'int'),
+                        'message_criteria_id' => $c['message_criteria_id'],
+                    )
+                );
             }
-        };
+        }
     }
 
     public function getFields() {

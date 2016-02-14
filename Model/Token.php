@@ -163,7 +163,7 @@ class Token extends Singleton {
      * @param $data
      *   The value of the variable.
      */
-    function set($key, $data) {
+    public function set($key, $data) {
         $this->token_data[$key] = $data;
     }
 
@@ -175,7 +175,7 @@ class Token extends Singleton {
      * @return mixed
      *   The data value.
      */
-    function get($key) {
+    public function get($key) {
         if (!isset($this->token_data[$key])) {
             return null;
         } else {
@@ -190,7 +190,7 @@ class Token extends Singleton {
     /**
      * Removes all data from the token in and db.
      */
-    function clear() {
+    public function clear() {
         $this->data = array();
         $this->saveData();
     }
@@ -198,7 +198,7 @@ class Token extends Singleton {
     /**
      * Kill the token so it can never be used again.
      */
-    function destroy() {
+    public function destroy() {
         Database::getInstance()->delete('action_token', ['token_id' => $this->token_id]);
     }
 }

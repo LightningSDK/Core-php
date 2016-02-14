@@ -216,7 +216,7 @@ class Blog extends Singleton {
         );
     }
 
-    function pagination() {
+    public function pagination() {
         // do noting if we don't have more than one page
         if (!$this->isList() || $this->post_count <= $this->list_per_page) {
             return false;
@@ -242,35 +242,9 @@ class Blog extends Singleton {
         ]);
 
         return $pagination->render();
-
-        $output = '<ul class="pagination">';
-
-        // Previous page link.
-        if ($this->page > 1) {
-            $output .= '<li class="arrow' . ($this->page != 1 ? ' unavailable' : '') . '">
-            <a href="' . str_replace('%%', $this->page - 1, $base_link) . '">&laquo;</a>';
-        }
-
-        // Page numbers.
-        for ($i = 1; $i <= $pages; $i++) {
-            if ($i == $this->page) {
-                $output .= '<li class="current"><a href="">' . $i . '</a></li>';
-            } else {
-                $output .= '<li><a href="' . str_replace('%%', $i, $base_link) .'">' . $i . '</a></li>';
-            }
-        }
-
-        // Next page.
-        if ($this->page < $pages) {
-            $output .= '<li class="arrow' . ($pages <= $this->page ? ' unavailable' : '') . '">
-            <a href="' . str_replace('%%', $this->page + 1, $base_link) . '">&raquo;</a>';
-        }
-
-        $output .= '</ul>';
-        return $output;
     }
 
-    function recent_list($remote=false) {
+    public function recent_list($remote=false) {
         $list = Database::getInstance()->select(static::BLOG_TABLE, array(), array(), 'ORDER BY time DESC LIMIT 5');
         $target = $remote ? "target='_blank'" : '';
         if ($list->rowCount() > 0) {
@@ -298,7 +272,7 @@ class Blog extends Singleton {
         );
     }
 
-    function categories_list() {
+    public function categories_list() {
         $list = $this->allCategories();
         if ($list->rowCount() > 0) {
             echo "<ul>";
@@ -317,7 +291,7 @@ class Blog extends Singleton {
      * @return int
      *   The blog ID.
      */
-    function fetch_blog_url($url) {
+    public function fetch_blog_url($url) {
         $this->loadContentByURL($url);
         if ($this->posts) {
             $this->id = $this->posts[0]['blog_id'];
@@ -336,7 +310,7 @@ class Blog extends Singleton {
      * @return int
      *   The blog ID.
      */
-    function fetch_blog_id($id) {
+    public function fetch_blog_id($id) {
         $this->loadContentByID($id);
         if ($this->posts) {
             $this->id = $this->posts[0]['blog_id'];
