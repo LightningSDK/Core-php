@@ -216,7 +216,7 @@ abstract class Table extends Page {
      * Button names according to action type
      * @var array
      */
-    protected $button_names = ['insert' => 'Insert', 'cancel' => 'Cancel' , 'update' => 'Update'];
+    protected $button_names = ['insert' => 'Insert', 'cancel' => 'Cancel', 'update' => 'Update'];
 
     /**
      * The list of actions perform after post request depending on type of the request
@@ -331,7 +331,7 @@ abstract class Table extends Page {
             $field = explode(";", $sort);
             $this->sort_fields = [];
             $sort_strings = [];
-            foreach($field as $f) {
+            foreach ($field as $f) {
                 $f = explode(":", $f);
                 if (!empty($f[1]) && $f[1] == "D") {
                     $this->sort_fields[$f[0]] = "D";
@@ -345,7 +345,7 @@ abstract class Table extends Page {
         }
 
         if (!empty($_SERVER['REQUEST_URI'])) {
-            $this->action_file = preg_replace('/\?.*/','', $_SERVER['REQUEST_URI']);
+            $this->action_file = preg_replace('/\?.*/', '', $_SERVER['REQUEST_URI']);
         }
 
         foreach ($options as $name => $value) {
@@ -458,13 +458,13 @@ abstract class Table extends Page {
 
         // Initialize the export.
         $file = new CSVWriter();
-        $file->setFilename($this->table.'_' . date('Y-m-d') . '.csv');
+        $file->setFilename($this->table . '_' . date('Y-m-d') . '.csv');
 
         // Build header row.
         $headrow = [];
-        foreach ($this->fields as $field){
+        foreach ($this->fields as $field) {
             if ($this->whichField($field)) {
-                $headrow[] = ( !empty( $field['display_name'] ) ? $field['display_name'] : $field['field'] ) ;
+                $headrow[] = (!empty($field['display_name']) ? $field['display_name'] : $field['field']);
             }
         }
 
@@ -474,9 +474,9 @@ abstract class Table extends Page {
         // Output the rows.
         foreach ($this->list as $row) {
             $datarow = [];
-            foreach ($this->fields as $field){
+            foreach ($this->fields as $field) {
                 // Hide hidden fields.
-                if ($this->whichField($field)){
+                if ($this->whichField($field)) {
                     $datarow[] = $this->printFieldValue($field, $row, false);
                 }
             }
@@ -593,7 +593,7 @@ abstract class Table extends Page {
             // Loop through and delete any files.
             $this->loadMainFields();
             $this->getRow();
-            foreach($this->fields as $f=>$field) {
+            foreach ($this->fields as $f=>$field) {
                 if (($field['type'] == 'file' || $field['type'] == 'image') && empty($field['browser'])) {
                     if (file_exists($this->get_full_file_location($field['location'], $this->list[$f]))) {
                         unlink($this->get_full_file_location($field['location'], $this->list[$f]));
@@ -767,7 +767,7 @@ abstract class Table extends Page {
      * @param boolean $readOnly
      *   Whether this should be read only.
      */
-    public function setReadOnly ($readOnly = true) {
+    public function setReadOnly($readOnly = true) {
         $this->editable = !$readOnly;
         $this->deleteable = !$readOnly;
         $this->addable = !$readOnly;
@@ -829,7 +829,7 @@ abstract class Table extends Page {
         if (!empty($this->renderHandler)) {
             $output .= $this->{$this->renderHandler}();
         } else {
-            switch($this->action) {
+            switch ($this->action) {
                 case 'pop_return':
                     $this->renderPopReturn();
                     break;
@@ -890,7 +890,7 @@ abstract class Table extends Page {
             'id' => $this->id,
             'pfdf' => $this->list[Request::get('pfdf')]
         ];
-        JS::startup('lightning.table.returnPop('.json_encode($send_data).')');
+        JS::startup('lightning.table.returnPop(' . json_encode($send_data) . ')');
     }
 
     public function renderConfirmation() {
@@ -902,7 +902,7 @@ abstract class Table extends Page {
             <input type='submit' name='submit' value='Yes' class='button'/>
             <input type='submit' name='submit' value='No' class='button' />";
         if ($this->refer_return) {
-            $output .= '<input type="hidden" name="refer_return" value="'.$this->refer_return.'" />';
+            $output .= '<input type="hidden" name="refer_return" value="' . $this->refer_return . '" />';
         } else {
             $output .= "<input type='hidden' name='redirect' value='" . $this->getRedirectURL() . "' />";
         }
@@ -915,8 +915,8 @@ abstract class Table extends Page {
     }
 
     protected function renderHeader() {
-        if (isset($this->custom_templates[$this->action.'_header'])) {
-            $template = $this->load_template($this->custom_template_directory.$this->custom_templates[$this->action.'_header']);
+        if (isset($this->custom_templates[$this->action . '_header'])) {
+            $template = $this->load_template($this->custom_template_directory . $this->custom_templates[$this->action . '_header']);
             $template = $this->template_item_vars($template, $this->id);
         } elseif ($this->header != '') {
             $template = "<h1>{$this->header}</h1>";
@@ -932,15 +932,15 @@ abstract class Table extends Page {
 
     public function render_action_header() {
         $output = '';
-        if (isset($this->custom_templates[$this->action.'_action_header'])) {
-            if ($this->custom_templates[$this->action.'_action_header'] != '')
-                $output .= $this->load_template($this->custom_template_directory.$this->custom_templates[$this->action.'_action_header']);
+        if (isset($this->custom_templates[$this->action . '_action_header'])) {
+            if ($this->custom_templates[$this->action . '_action_header'] != '')
+                $output .= $this->load_template($this->custom_template_directory . $this->custom_templates[$this->action . '_action_header']);
         } else {
             if ($this->addable && empty($this->singularity)) {
-                $output .= "<a href='".$this->createUrl('new') . "'><img src='/images/lightning/new.png' border='0' title='Add New' /></a>";
+                $output .= "<a href='" . $this->createUrl('new') . "'><img src='/images/lightning/new.png' border='0' title='Add New' /></a>";
             }
             if ($this->importable) {
-                $output .= "<a href='".$this->createUrl('import') . "'><img src='/images/lightning/send_doc.png' border='0' title='Import' /></a>";
+                $output .= "<a href='" . $this->createUrl('import') . "'><img src='/images/lightning/send_doc.png' border='0' title='Import' /></a>";
             }
             if ($this->exportable) {
                 $output .= "<a href='{$this->createUrl('export')}' onclick='event.preventDefault(); lightning.table.export(this)'><img src='/images/lightning/detach.png' border='0' title='Export' /></a><br />";
@@ -975,20 +975,20 @@ abstract class Table extends Page {
     public function renderList() {
 
         if (count($this->list) == 0 && empty($this->prefixRows)) {
-            return "<p></p><p></p><p>There is nothing to show. <a href='".$this->createUrl('new')."'>Add a new entry</a></p><p></p><p></p>";
+            return "<p></p><p></p><p>There is nothing to show. <a href='" . $this->createUrl('new') . "'>Add a new entry</a></p><p></p><p></p>";
         }
 
         $output = '';
-        if (isset($this->custom_templates[$this->action.'_item'])) {
+        if (isset($this->custom_templates[$this->action . '_item'])) {
             // load the template
-            $template = $this->load_template($this->custom_template_directory.$this->custom_templates[$this->action.'_item']);
-            foreach($this->list as $row) {
+            $template = $this->load_template($this->custom_template_directory . $this->custom_templates[$this->action . '_item']);
+            foreach ($this->list as $row) {
                 // create temp instance for this row
                 $this_item_output = $template;
                 // replace variables
-                foreach($this->fields as $field) {
+                foreach ($this->fields as $field) {
                     if ($this->whichField($field)) {
-                        $this_item_output = str_replace('{'.$field['field'].'}', $this->printFieldValue($field, $row), $this_item_output);
+                        $this_item_output = str_replace('{' . $field['field'] . '}', $this->printFieldValue($field, $row), $this_item_output);
                     }
                 }
                 // replace functional links
@@ -1005,23 +1005,23 @@ abstract class Table extends Page {
 
                 // add form if required
                 if ($this->action_fields_requires_submit()) {
-                    $output .= "<form action='".$this->createUrl()."' method='POST'>";
+                    $output .= "<form action='" . $this->createUrl() . "' method='POST'>";
                     $output .= Form::renderTokenInput();
                 }
-                $output.= "<div class='list_table_container'>";
-                $output.= '<table cellspacing="0" cellpadding="3" border="0" width="100%">';
+                $output .= "<div class='list_table_container'>";
+                $output .= '<table cellspacing="0" cellpadding="3" border="0" width="100%">';
 
                 // SHOW HEADER
-                $output.= "<thead><tr>";
+                $output .= "<thead><tr>";
                 $output .= $this->renderListHeader();
 
                 // SHOW ACTION HEADER
-                $output.= $this->render_action_fields_headers();
-                $output.= "</tr></thead>";
+                $output .= $this->render_action_fields_headers();
+                $output .= "</tr></thead>";
 
                 // Initialize the click handler.
                 if (!empty($this->rowClick)) {
-                    switch($this->rowClick['type']) {
+                    switch ($this->rowClick['type']) {
                         case 'url':
                         case 'action':
                             JS::startup('$(".table_list").on("click", "tr", lightning.table.click)');
@@ -1044,9 +1044,9 @@ abstract class Table extends Page {
                 if ($this->action_fields_requires_submit()) {
                     '<input type="submit" name="submit" value="Submit" class="button" />';
                 }
-                $output.= "</table></div>";
+                $output .= "</table></div>";
                 if ($this->action_fields_requires_submit())
-                    $output.= "</form>";
+                    $output .= "</form>";
                 $output .= $pagination->render();
             }
             return $output;
@@ -1057,42 +1057,42 @@ abstract class Table extends Page {
         $output = '';
         // If the field order is specified.
         if (is_array($this->fieldOrder)) {
-            foreach($this->fieldOrder as $f) {
+            foreach ($this->fieldOrder as $f) {
                 if (isset($this->fields[$f])) {
                     if ($this->whichField($this->fields[$f])) {
                         if ($this->sortable)
-                            $output .= "<td><a href='".$this->createUrl('list',0,'',array('sort'=>array($f=>'X')))."'>{$this->fields[$f]['display_name']}</a></td>";
+                            $output .= "<td><a href='" . $this->createUrl('list', 0, '', array('sort'=>array($f=>'X'))) . "'>{$this->fields[$f]['display_name']}</a></td>";
                         else
-                            $output.= "<td>{$this->fields[$f]['display_name']}</td>";
+                            $output .= "<td>{$this->fields[$f]['display_name']}</td>";
                     }
                 } elseif (isset($this->links[$f])) {
                     if (!empty($this->links[$f]['list']) && $this->links[$f]['list'] == 'compact') {
                         if ($this->links[$f]['display_name']) {
-                            $output.= "<td>{$this->links[$f]['display_name']}</td>";
+                            $output .= "<td>{$this->links[$f]['display_name']}</td>";
                         } else {
-                            $output.= "<td>{$f}</td>";
+                            $output .= "<td>{$f}</td>";
                         }
                     }
                 }
             }
         } else {
             // The field order is not specified.
-            foreach($this->fields as $f=>&$field) {
+            foreach ($this->fields as $f=>&$field) {
                 if ($this->whichField($field)) {
                     if ($this->sortable) {
-                        $output .= "<td><a href='".$this->createUrl('list',0,'',array('sort'=>array($f=>'X')))."'>{$field['display_name']}</a></td>";
+                        $output .= "<td><a href='" . $this->createUrl('list', 0, '', array('sort'=>array($f=>'X'))) . "'>{$field['display_name']}</a></td>";
                     } else {
-                        $output.= "<td>{$field['display_name']}</td>";
+                        $output .= "<td>{$field['display_name']}</td>";
                     }
                 }
             }
             // Add the linked tables.
-            foreach($this->links as $l => $v) {
+            foreach ($this->links as $l => $v) {
                 if (!empty($v['list']) && $v['list'] == 'compact') {
                     if (!empty($v['display_name'])) {
-                        $output.= "<td>{$v['display_name']}</td>";
+                        $output .= "<td>{$v['display_name']}</td>";
                     } else {
-                        $output.= "<td>{$l}</td>";
+                        $output .= "<td>{$l}</td>";
                     }
                 }
             }
@@ -1103,16 +1103,16 @@ abstract class Table extends Page {
     protected function renderListRows($list, $editable) {
         $output = '';
         // loop through DATA rows
-        foreach($list as $row) {
+        foreach ($list as $row) {
             // prepare click action for each row
             $output .= "<tr id='{$row[$this->getKey()]}'>";
             // SHOW FIELDS AND VALUES
-            foreach($this->fields as &$field) {
+            foreach ($this->fields as &$field) {
                 if ($this->whichField($field)) {
                     if (!empty($field['align'])) {
-                        $output.= "<td align='{$field['align']}'>";
+                        $output .= "<td align='{$field['align']}'>";
                     } else {
-                        $output.= '<td>';
+                        $output .= '<td>';
                     }
                     $output .= $this->printFieldValue($field, $row);
                     $output .= '</td>';
@@ -1134,7 +1134,7 @@ abstract class Table extends Page {
     }
 
     protected function action_fields_requires_submit() {
-        foreach($this->action_fields as $a => $action) {
+        foreach ($this->action_fields as $a => $action) {
             if ($action['type'] == "checkbox") return true;
         }
     }
@@ -1142,7 +1142,7 @@ abstract class Table extends Page {
     // Called when rendering lists
     protected function renderLinkList(&$row) {
         $output = '';
-        foreach($this->links as $link => $link_settings) {
+        foreach ($this->links as $link => $link_settings) {
             if (!empty($link_settings['list']) && $link_settings['list'] == 'compact') {
                 if (!empty($link_settings['index'])) {
                     // There is a link table joining them. (Many to many) {
@@ -1155,12 +1155,12 @@ abstract class Table extends Page {
                 $output .= '<td>';
                 $displays = [];
                 if (isset($link_settings['list']) == 'compact') {
-                    foreach($links as $l)
+                    foreach ($links as $l)
                         if (!empty($link_settings['fields']) && is_array($link_settings['fields'])) {
                             $display = $link_settings["display"];
-                            foreach($link_settings['fields'] as $f=>$a) {
+                            foreach ($link_settings['fields'] as $f=>$a) {
                                 if (!isset($a['field'])) $a['field'] = $f;
-                                $display = str_replace('{'.$f.'}', $this->printFieldValue($a, $l), $display);
+                                $display = str_replace('{' . $f . '}', $this->printFieldValue($a, $l), $display);
                             }
                             $displays[] = $display;
                         } else {
@@ -1193,10 +1193,10 @@ abstract class Table extends Page {
     // called when rendering lists
     protected function render_linked_table(&$row) {
         $output = "<tr class='linked_list_container_row'><td colspan='" . $this->getMainTableColumnCount() . "'><table width='100%'>";
-        foreach($this->links as $link => $link_settings) {
+        foreach ($this->links as $link => $link_settings) {
             if (!empty($link_settings['list']) && $link_settings['list'] === "each") {
                 $link_settings['fields'] = $this->get_fields($link_settings['table'], $link_settings['preset']);
-                $links = $this->load_all_active_list($link_settings, $row[$this->getKey()] );
+                $links = $this->load_all_active_list($link_settings, $row[$this->getKey()]);
 
                 // Set the character to join the URL parameters to the edit_link
                 $joinchar = (!empty($link_settings['edit_link']) && strpos($link_settings['edit_link'], "?") !== false) ? '&' : '?';
@@ -1212,45 +1212,45 @@ abstract class Table extends Page {
                     $output .= " <a href='' onclick='{$link_settings['edit_js']}.newLink({$row[$this->getKey()]})'>New</a>";
                 }
                 $output .= "</td></tr>";
-                foreach($links as $row) {
-                    $output.= "<tr id='link_{$link}_{$row[$link_settings['key']]}' class='linked_list_row'>";
-                    foreach($link_settings['fields'] as $field_name => $field) {
+                foreach ($links as $row) {
+                    $output .= "<tr id='link_{$link}_{$row[$link_settings['key']]}' class='linked_list_row'>";
+                    foreach ($link_settings['fields'] as $field_name => $field) {
                         $output .= '<td>' . $this->printFieldValue($field, $row) . '</td>';
                     }
                     if (!empty($link_settings['edit_link'])) {
-                        $output.= "<td><a href='{$link_settings['edit_link']}{$joinchar}action=edit&id={$row[$link_settings['key']]}'>Edit</a> <a href='{$link_settings['edit_link']}{$joinchar}action=delete&id={$row[$link_settings['key']]}'><img src='/images/lightning/remove.png' border='0' /></a></td>";
+                        $output .= "<td><a href='{$link_settings['edit_link']}{$joinchar}action=edit&id={$row[$link_settings['key']]}'>Edit</a> <a href='{$link_settings['edit_link']}{$joinchar}action=delete&id={$row[$link_settings['key']]}'><img src='/images/lightning/remove.png' border='0' /></a></td>";
                     }
                     if (!empty($link_settings['edit_js'])) {
-                        $output.= "<td><a href='' onclick='{$link_settings['edit_js']}.editLink({$row[$link_settings['key']]})'>Edit</a> <a href='' onclick='{$link_settings['edit_js']}.deleteLink({$row[$link_settings['key']]})'><img src='/images/lightning/remove.png' border='0' /></a></td>";
+                        $output .= "<td><a href='' onclick='{$link_settings['edit_js']}.editLink({$row[$link_settings['key']]})'>Edit</a> <a href='' onclick='{$link_settings['edit_js']}.deleteLink({$row[$link_settings['key']]})'><img src='/images/lightning/remove.png' border='0' /></a></td>";
                     }
-                    $output.= "</tr>";
+                    $output .= "</tr>";
                 }
             }
         }
-        $output.= "</table></td></tr>";
+        $output .= "</table></td></tr>";
         return $output;
     }
 
     protected function render_action_fields_headers() {
         $output = '';
-        foreach($this->action_fields as $a=>$action) {
-            $output.= "<td>";
+        foreach ($this->action_fields as $a=>$action) {
+            $output .= "<td>";
             if (isset($action['column_name']))
-                $output.= $action['column_name'];
+                $output .= $action['column_name'];
             elseif (isset($action['display_name']))
-                $output.= $action['display_name']; else $output.= $a;
-            switch($action['type']) {
+                $output .= $action['display_name']; else $output .= $a;
+            switch ($action['type']) {
                 case 'link':
                 case 'html':
                     break;
                 case "checkbox":
                 default:
                     if (!isset($action['check_all']) || empty($action['check_all'])) {
-                        $output.= "<input type='checkbox' name='taf_all_{$a}' id='taf_all_{$a}' value='1' onclick=\"lightning.table.selectAll('{$a}');\" />";
+                        $output .= "<input type='checkbox' name='taf_all_{$a}' id='taf_all_{$a}' value='1' onclick=\"lightning.table.selectAll('{$a}');\" />";
                     }
                     break;
             }
-            $output.= "</td>";
+            $output .= "</td>";
         }
         if ($this->editable !== false) {
             $output .= '<td>Edit</td>';
@@ -1265,30 +1265,30 @@ abstract class Table extends Page {
     }
 
     protected function render_action_fields_list(&$row, $editable) {
-        $output='';
-        foreach($this->action_fields as $a=>$action) {
-            $output.= "<td>";
-            switch($action['type']) {
+        $output = '';
+        foreach ($this->action_fields as $a=>$action) {
+            $output .= "<td>";
+            switch ($action['type']) {
                 case "function":
                     // Have table call a function.
-                    $output.= "<a href='".$this->createUrl("action", $row[$this->getKey()], $a,array("ra"=>$this->action))."'>{$action['display_name']}</a>";
+                    $output .= "<a href='" . $this->createUrl("action", $row[$this->getKey()], $a, array("ra"=>$this->action)) . "'>{$action['display_name']}</a>";
                     break;
                 case "link":
-                    $output.= "<a href='{$action['url']}{$row[$this->getKey()]}'>{$action['display_value']}</a>";
+                    $output .= "<a href='{$action['url']}{$row[$this->getKey()]}'>{$action['display_value']}</a>";
                     break;
                 case 'html':
                     // Render the HTML.
                     $output .= is_callable($action['html']) ? $action['html']($row) : $action['html'];
                     break;
                 case "action":
-                    $output.= "<a href='".$this->createUrl($action['action'], $row[$this->getKey()], $action['action_field'])."'>{$action['display_name']}</a>";
+                    $output .= "<a href='" . $this->createUrl($action['action'], $row[$this->getKey()], $action['action_field']) . "'>{$action['display_name']}</a>";
                     break;
                 case "checkbox":
                 default:
-                    $output.= "<input type='checkbox' name='taf_{$a}[{$row[$this->getKey()]}]' class='taf_{$a}' value='1' />";
+                    $output .= "<input type='checkbox' name='taf_{$a}[{$row[$this->getKey()]}]' class='taf_{$a}' value='1' />";
                     break;
             }
-            $output.= "</td>";
+            $output .= "</td>";
         }
         if ($this->editable !== false) {
             $output .= "<td>";
@@ -1321,19 +1321,19 @@ abstract class Table extends Page {
      *   The fully rendered HTML content.
      */
     protected function render_form() {
-        if (isset($this->custom_templates[$this->action.'_item'])) {
+        if (isset($this->custom_templates[$this->action . '_item'])) {
             // Render the form using HTML templates.
-            $template = $this->load_template($this->custom_template_directory.$this->custom_templates[$this->action.'_item']);
-            foreach($this->fields as $field) {
-                switch($this->whichField($field)) {
+            $template = $this->load_template($this->custom_template_directory . $this->custom_templates[$this->action . '_item']);
+            foreach ($this->fields as $field) {
+                switch ($this->whichField($field)) {
                     case 'edit':
-                        $template = str_replace('{'.$field['field'].'}', $this->renderEditField($field, $this->list), $template);
+                        $template = str_replace('{' . $field['field'] . '}', $this->renderEditField($field, $this->list), $template);
                         break;
                     case 'display':
-                        $template = str_replace('{'.$field['field'].'}', $this->printFieldValue($field, $this->list), $template);
+                        $template = str_replace('{' . $field['field'] . '}', $this->printFieldValue($field, $this->list), $template);
                         break;
                     case false:
-                        $template = str_replace('{'.$field['field'].'}', '', $template);
+                        $template = str_replace('{' . $field['field'] . '}', '', $template);
                 }
             }
             $template = $this->template_item_vars($template, $this->id);
@@ -1364,18 +1364,18 @@ abstract class Table extends Page {
             }
             if ($this->action == "view" && !$this->readOnly) {
                 if ($this->editable !== false) {
-                    $output .= "<a href='".$this->createUrl('edit', $this->id)."'><img src='/images/lightning/edit.png' border='0' /></a>";
+                    $output .= "<a href='" . $this->createUrl('edit', $this->id) . "'><img src='/images/lightning/edit.png' border='0' /></a>";
                 }
                 if ($this->deleteable !== false) {
-                    $output .= "<a href='".$this->createUrl('delete', $this->id)."'><img src='/images/lightning/remove.png' border='0' /></a>";
+                    $output .= "<a href='" . $this->createUrl('delete', $this->id) . "'><img src='/images/lightning/remove.png' border='0' /></a>";
                 }
             }
             $style = !empty($this->styles['form_table']) ? "style='{$this->styles['form_table']}'" : '';
-            $output .= '<table class="table_form_table" '. $style . '>';
+            $output .= '<table class="table_form_table" ' . $style . '>';
 
             $hidden_fields = [];
             $fieldOrder = is_array($this->fieldOrder) && !empty($this->fieldOrder) ? $this->fieldOrder : array_keys($this->fields);
-            foreach($fieldOrder as $f) {
+            foreach ($fieldOrder as $f) {
                 if (!empty($this->fields[$f]['type']) && $this->fields[$f]['type'] == 'hidden') {
                     if (!empty($this->fields[$f]['Value'])) {
                         $hidden_fields[] = BasicHTML::hidden($f, $this->fields[$f]['Value']);
@@ -1429,10 +1429,10 @@ abstract class Table extends Page {
 
         if ($this->action != 'view') {
             if ($this->cancel) {
-                $output .= "<input type='button' name='cancel' value='{$this->button_names['cancel']}' onclick='document.location=\"".$this->createUrl()."\";' />";
+                $output .= "<input type='button' name='cancel' value='{$this->button_names['cancel']}' onclick='document.location=\"" . $this->createUrl() . "\";' />";
             }
             if ($this->refer_return) {
-                $output .= '<input type="hidden" name="refer_return" value="'.$this->refer_return.'" />';
+                $output .= '<input type="hidden" name="refer_return" value="' . $this->refer_return . '" />';
             }
             if ($new_action == 'update' && $this->enable_serial_update) {
                 $output .= '<input type="checkbox" name="serialupdate" value="true" checked="checked" /> Edit Next Record';
@@ -1441,9 +1441,9 @@ abstract class Table extends Page {
         }
         if ($this->action == "view" && !$this->readOnly) {
             if ($this->editable !== false)
-                $output .= "<a href='".$this->createUrl('edit', $this->id)."'><img src='/images/lightning/edit.png' border='0' /></a>";
+                $output .= "<a href='" . $this->createUrl('edit', $this->id) . "'><img src='/images/lightning/edit.png' border='0' /></a>";
             if ($this->deleteable !== false)
-                $output .= "<a href='".$this->createUrl('delete', $this->id)."'><img src='/images/lightning/remove.png' border='0' /></a>";
+                $output .= "<a href='" . $this->createUrl('delete', $this->id) . "'><img src='/images/lightning/remove.png' border='0' /></a>";
         }
 
         return $output;
@@ -1513,7 +1513,7 @@ abstract class Table extends Page {
                 } else {
                     $output .= "<tr><td colspan='2'><h3>{$field['display_name']}</h3></td></tr>";
                 }
-            } elseif (!empty($field['width']) && $field['width']=="full") {
+            } elseif (!empty($field['width']) && $field['width'] == "full") {
                 $output .= "<tr><td colspan='2'>{$field['display_name']}</td></tr>";
                 $output .= "<tr><td colspan='2'>";
                 // show the field
@@ -1553,7 +1553,7 @@ abstract class Table extends Page {
     // (full form)
     protected function render_form_linked_tables() {
         $output = '';
-        foreach($this->links as $link => &$link_settings) {
+        foreach ($this->links as $link => &$link_settings) {
             if (empty($link_settings['table'])) {
                 $link_settings['table'] = $link;
             }
@@ -1573,7 +1573,7 @@ abstract class Table extends Page {
 
             // If there is a local key ID and no active list, load it.
             if ($local_id > 0 && !isset($link_settings['active_list'])) {
-                $link_settings['active_list'] = $this->load_all_active_list($link_settings, $local_id );
+                $link_settings['active_list'] = $this->load_all_active_list($link_settings, $local_id);
             } elseif (empty($local_id)) {
                 // If there is no local ID, this is probably a new item, so the list should be blank.
                 $link_settings['active_list'] = [];
@@ -1603,13 +1603,13 @@ abstract class Table extends Page {
                 if (isset($link_settings['display'])) {
                     // IN VIEW MODE WITH THE full_form OPTION, JUST SHOW ALL THE DATA
                     // loop for each entry
-                    foreach($link_settings['active_list'] as $l) {
+                    foreach ($link_settings['active_list'] as $l) {
                         // loop for each field
                         $display = $link_settings['display'];
-                        foreach($l as $f=>$v) {
+                        foreach ($l as $f=>$v) {
                             if (isset($link_settings['fields'][$f])) {
                                 if ($link_settings['fields'][$f]['field'] == '') $link_settings['fields'][$f]['field'] = $f;
-                                $display = str_replace('{'.$f.'}', $this->printFieldValue($link_settings['fields'][$f], $l), $display);
+                                $display = str_replace('{' . $f . '}', $this->printFieldValue($link_settings['fields'][$f], $l), $display);
                             }
                         }
                         $output .= $display;
@@ -1620,10 +1620,10 @@ abstract class Table extends Page {
                     // otherwise just list out all the fields
                 } elseif (!empty($link_settings['full_form']) && $link_settings['full_form'] === true) {
                     // full form view
-                    foreach($link_settings['active_list'] as $l) {
+                    foreach ($link_settings['active_list'] as $l) {
                         $output .= "<div class='subtable'><table>";
                         // SHOW FORM FIELDS
-                        foreach($link_settings['fields'] as $f=>&$s) {
+                        foreach ($link_settings['fields'] as $f=>&$s) {
                             $s['field'] = $f;
                             $s['form_field'] = "st_{$link}_{$f}_{$l[$link_settings['key']]}";
                             if ($this->whichField($s) == "display") {
@@ -1652,10 +1652,10 @@ abstract class Table extends Page {
         $output = "<input type='hidden' name='delete_subtable_{$link_settings['table']}' id='delete_subtable_{$link_settings['table']}' />";
         $output .= "<input type='hidden' name='new_subtable_{$link_settings['table']}' id='new_subtable_{$link_settings['table']}' />";
         if (count($link_settings['active_list']) > 0)
-            foreach($link_settings['active_list'] as $l) {
+            foreach ($link_settings['active_list'] as $l) {
                 $output .= "<div class='subtable' id='subtable_{$link_settings['table']}_{$l[$link_settings['key']]}'><table>";
                 // SHOW FORM FIELDS
-                foreach($link_settings['fields'] as $f=>&$s) {
+                foreach ($link_settings['fields'] as $f=>&$s) {
                     $link_settings['fields'][$f]['field'] = $f;
                     $link_settings['fields'][$f]['form_field'] = "st_{$link_settings['table']}_{$f}_{$l[$link_settings['key']]}";
                     $output .= $this->render_form_row($s, $l);
@@ -1670,10 +1670,10 @@ abstract class Table extends Page {
         $output .= "<div class='subtable' id='subtable_{$link_settings['table']}__N_' style='display:none;'><table>";
 
         // SHOW FORM FIELDS
-        foreach($link_settings['fields'] as $f=>&$s) {
+        foreach ($link_settings['fields'] as $f=>&$s) {
             $link_settings['fields'][$f]['field'] = $f;
             $link_settings['fields'][$f]['form_field'] = "st_{$link_settings['table']}_{$f}__N_";
-            $output .= $this->render_form_row($s,[]);
+            $output .= $this->render_form_row($s, []);
         }
 
         // ADD REMOVE LINKS
@@ -1734,7 +1734,7 @@ abstract class Table extends Page {
         } else {
             $this->loadAllLinkOptions($link_settings);
             $options = [''];
-            foreach($link_settings['options'] as $l) {
+            foreach ($link_settings['options'] as $l) {
                 $key = !empty($link_settings['index_fkey']) ? $link_settings['index_fkey'] : $link_settings['key'];
                 $options[$l[$key]] = $l[$link_settings['display_column']];
             }
@@ -1743,20 +1743,20 @@ abstract class Table extends Page {
         }
 
         if (!empty($link_settings['pop_add'])) {
-            $location = !empty($link_settings['table_url']) ? $link_settings['table_url'] :  "/table?table=".$link_settings['table'];
+            $location = !empty($link_settings['table_url']) ? $link_settings['table_url'] : "/table?table=" . $link_settings['table'];
             $output .= "<a onclick='lightning.table.newPop(\"{$location}\",\"{$link_settings['table']}\",\"{$link_settings['display_column']}\")'>Add New Item</a>";
         }
 
         // create the hidden array field
         $output .= "<input type='hidden' name='{$link_settings['table']}_input_array' id='{$link_settings['table']}_input_array' value='";
-        foreach($link_settings['active_list'] as $init)
-            $output .= $init[$link_settings['key']].",";
+        foreach ($link_settings['active_list'] as $init)
+            $output .= $init[$link_settings['key']] . ",";
         $output .= "' /><br /><div id='{$link_settings['table']}_list_container'>";
         // create each item as a viewable deleteable box
-        foreach($link_settings['active_list'] as $init) {
+        foreach ($link_settings['active_list'] as $init) {
             $output .= "<div class='{$link_settings['table']}_box table_link_box_selected' id='{$link_settings['table']}_box_{$init[$link_settings['key']]}'>{$init[$link_settings['display_column']]}
-						<a href='#' onclick='javascript:".(!empty($link_settings['edit_js']) ? $link_settings['edit_js'].'.deleteLink('.
-                    $init[$link_settings['key']].')' : "lightning.table.removeLink(\"{$link_settings['table']}\",{$init[$link_settings['key']]})").";return false;'>X</a></div>";
+						<a href='#' onclick='javascript:" . (!empty($link_settings['edit_js']) ? $link_settings['edit_js'] . '.deleteLink(' .
+                    $init[$link_settings['key']] . ')' : "lightning.table.removeLink(\"{$link_settings['table']}\",{$init[$link_settings['key']]})") . ";return false;'>X</a></div>";
         }
         $output .= "</div></td></tr>";
         return $output;
@@ -1866,8 +1866,8 @@ abstract class Table extends Page {
         if (is_array($this->sort_fields) && count($this->sort_fields) > 0) {
             $sort_fields = $this->sort_fields;
             if (!empty($other['sort'])) {
-                foreach($other['sort'] as $f=>$d) {
-                    switch($d) {
+                foreach ($other['sort'] as $f=>$d) {
+                    switch ($d) {
                         case 'A': $sort_fields[$f] = 'A'; break;
                         case 'D': $sort_fields[$f] = 'D'; break;
                         case 'X':
@@ -1878,21 +1878,21 @@ abstract class Table extends Page {
                     }
                 }
             }
-            foreach($sort_fields as $f=>$d) {
+            foreach ($sort_fields as $f=>$d) {
                 $sort[] = ($d == 'D') ? $f . ':D' : $f;
             }
-            $vars['sort']=implode(';', $sort);
+            $vars['sort'] = implode(';', $sort);
         } elseif (!empty($other['sort'])) {
             $sort = [];
-            foreach($other['sort'] as $f=>$d) {
-                switch($d) {
+            foreach ($other['sort'] as $f=>$d) {
+                switch ($d) {
                     case 'D': $sort[] = $f . ':D'; break;
 
                     case 'A':
                     default:  $sort[] = $f; break;
                 }
             }
-            $vars['sort']=implode(';', $sort);
+            $vars['sort'] = implode(';', $sort);
         }
 
         // Put it all together
@@ -1912,8 +1912,8 @@ abstract class Table extends Page {
         $template = str_replace('{parentId}', intval($this->parentId), $template);
 
         // additional action vars
-        foreach($this->additional_action_vars as $f=>$v)
-            $template = str_replace('{'.$f.'}', $v, $template);
+        foreach ($this->additional_action_vars as $f=>$v)
+            $template = str_replace('{' . $f . '}', $v, $template);
 
         return $template;
     }
@@ -1926,10 +1926,10 @@ abstract class Table extends Page {
 
         // look for linked file names
         preg_match_all('/\{table_link_file\.([a-z0-9_]+)\}/i', $template, $matches);
-        for($i = 1; $i < count($matches); $i = $i+2) {
+        for ($i = 1; $i < count($matches); $i = $i + 2) {
             $m = $matches[$i][0];
             if ($this->fields[$m]['type'] == 'file') {
-                $template = str_replace('{table_link_file.'.$m.'}', $this->createUrl("file", $id, $m), $template);
+                $template = str_replace('{table_link_file.' . $m . '}', $this->createUrl("file", $id, $m), $template);
             }
         }
 
@@ -1980,7 +1980,7 @@ abstract class Table extends Page {
         //make sure there is a 'field' element and 'display_name' for each $field
         foreach ($return_fields as $f => &$field) {
             if (empty($field['display_name'])) {
-                $field['display_name'] = ucwords(str_replace("_"," ", $f));
+                $field['display_name'] = ucwords(str_replace("_", " ", $f));
             }
             if (!isset($field['field'])) {
                 $field['field'] = $f;
@@ -2008,7 +2008,7 @@ abstract class Table extends Page {
      *   The render type. False if it should not be shown.
      */
     protected function whichField(&$field) {
-        switch($this->action) {
+        switch ($this->action) {
             case 'new':
             case 'duplicate':
                 if ($this->userInputNew($field)) {
@@ -2044,7 +2044,7 @@ abstract class Table extends Page {
 
     // is the field editable in these forms
     protected function userInputNew(&$field) {
-        if (isset($field['render_'.$this->action.'_field']))
+        if (isset($field['render_' . $this->action . '_field']))
             return true;
         if ($field['type'] == "note")
             return true;
@@ -2066,7 +2066,7 @@ abstract class Table extends Page {
     }
 
     protected function userInputEdit(&$field) {
-        if (isset($field['render_'.$this->action.'_field']))
+        if (isset($field['render_' . $this->action . '_field']))
             return true;
         if ($field['type'] == "note")
             return true;
@@ -2222,10 +2222,10 @@ abstract class Table extends Page {
         }
     }
 
-    protected function getFieldValues(&$field_list, $accessTable=false) {
+    protected function getFieldValues(&$field_list, $accessTable = false) {
         $output = [];
         $dependenciesMet = true;
-        foreach($field_list as $f => $field) {
+        foreach ($field_list as $f => $field) {
             // check for settings that override user input
             if ($this->action == "insert" && !$this->setValueOnNew($field)) {
                 continue;
@@ -2315,20 +2315,20 @@ abstract class Table extends Page {
                         $val = Time::getDateTime($field['form_field'], !empty($field['allow_blank']));
                         break;
                     case 'checkbox':
-                        $val = (integer) Request::get($field['form_field'], 'boolean');
+                        $val = ( integer ) Request::get($field['form_field'], 'boolean');
                         break;
                     case 'checklist':
                         $vals = '';
                         $maxi = 0;
-                        foreach($field['options'] as $i => $opt) {
+                        foreach ($field['options'] as $i => $opt) {
                             if (is_array($opt)) {
                                 $maxi = max($maxi, $opt[0]);
                             } else {
                                 $maxi = max($maxi, $i);
                             }
                         }
-                        for($i = 0; $i <= $maxi; $i++) {
-                            $vals .= ($_POST[$field['form_field'].'_'.$i] == 1 || $_POST[$field['form_field'].'_'.$i] == "on") ? 1 : 0;
+                        for ($i = 0; $i <= $maxi; $i++) {
+                            $vals .= ($_POST[$field['form_field'] . '_' . $i] == 1 || $_POST[$field['form_field'] . '_' . $i] == "on") ? 1 : 0;
                         }
                         $val = bindec(strrev($vals));
                         break;
@@ -2409,11 +2409,11 @@ abstract class Table extends Page {
         // copy the uploaded file to the right directory
         // needs some security checks -- IMPLEMENT FEATURE - what kind? make sure its not executable?
         $val = $this->get_new_file_loc($field['location']);
-        move_uploaded_file($file['tmp_name'], $field['location'].$val);
+        move_uploaded_file($file['tmp_name'], $field['location'] . $val);
 
         if (isset($field['extension'])) {
             $extention = preg_match("/\.[a-z1-3]+$/", $_FILES[$field['field']]['name'], $r);
-            $string .= ", `{$field['extension']}` = '".strtolower($r[0])."'";
+            $string .= ", `{$field['extension']}` = '" . strtolower($r[0]) . "'";
         }
         return $string;
     }
@@ -2654,7 +2654,7 @@ abstract class Table extends Page {
     // get the int val of a specific bit - ie convert 1 (2nd col form right or 10) to 2
     // this way you can search for the 2nd bit column in a checlist with: "... AND col&".table::get_bit_int(2)." > 0"
     public static function get_bit_int($bit) {
-        bindec("1".str_repeat("0", $bit));
+        bindec("1" . str_repeat("0", $bit));
     }
 
     protected function input_sanitize($val, $allow_html = false) {
@@ -2697,7 +2697,7 @@ abstract class Table extends Page {
      * @return stores result in $list class variable (no actual return result from the method)
 
      */
-    protected function getRow($force=true) {
+    protected function getRow($force = true) {
         if (!empty($this->prefixRows[$this->id])) {
             // If it's a fixed value.
             $this->editable = false;
@@ -2876,12 +2876,12 @@ abstract class Table extends Page {
         // see if we are calling an action from a link
         $action = Request::get('action');
         if ($action == "action" && isset($this->action_fields[$_GET['f']])) {
-            switch($this->action_fields[$_GET['f']]['type']) {
+            switch ($this->action_fields[$_GET['f']]['type']) {
                 case "function":
                     $this->id = intval($_GET['id']);
                     $this->getRow();
                     $this->action_fields[$_GET['f']]['function']($this->list);
-                    header("Location: ".$this->createUrl($_GET['ra'], $row[$this->getKey()]));
+                    header("Location: " . $this->createUrl($_GET['ra'], $row[$this->getKey()]));
                     exit;
                     break;
             }
@@ -2909,7 +2909,7 @@ abstract class Table extends Page {
         }
 
         $this->getKey();
-        switch($this->action) {
+        switch ($this->action) {
             case 'pop_return': break;
             case 'autocomplete':
                 $this->loadList();
@@ -2921,10 +2921,10 @@ abstract class Table extends Page {
                 $this->loadMainFields();
                 $field = $_GET['f'];
                 $this->getRow();
-                if ($this->fields[$field]['type'] == 'file' && count($this->list)>0) {
+                if ($this->fields[$field]['type'] == 'file' && count($this->list) > 0) {
                     $file = $this->get_full_file_location($this->fields[$field]['location'], $this->list[$field]);
                     if (!file_exists($file)) die("No File Uploaded");
-                    switch($this->list[$this->fields[$field]['extension']]) {
+                    switch ($this->list[$this->fields[$field]['extension']]) {
                         case '.pdf':
                             Output::setContentType('application/pdf'); break;
                         case '.jpg': case '.jpeg':
@@ -2976,7 +2976,7 @@ abstract class Table extends Page {
                 $table_data['vars'] = $this->additional_action_vars;
         }
         $js_startup = '';
-        foreach($this->fields as $f => $field) {
+        foreach ($this->fields as $f => $field) {
             if (!empty($field['autocomplete'])) {
                 $js_startup .= '$(".table_autocomplete").keyup(lightning.table.autocomplete);';
             }
@@ -2984,11 +2984,11 @@ abstract class Table extends Page {
                 $table_data['defaults'][$f] = $field['default'];
             }
             if (!empty($field['type']) && $field['type'] == "div") {
-                $js_startup .= '$("#'.$f.'_div").attr("contentEditable", "true");
-                table_div_editors["'.$f.'"]=CKEDITOR.inline("'.$f.'_div",CKEDITOR.config.toolbar_Full);';
+                $js_startup .= '$("#' . $f . '_div").attr("contentEditable", "true");
+                table_div_editors["'.$f . '"]=CKEDITOR.inline("' . $f . '_div",CKEDITOR.config.toolbar_Full);';
             }
         }
-        foreach($this->links as $link=>$link_settings) {
+        foreach ($this->links as $link=>$link_settings) {
             if (
                 !empty($link_settings['include_blank'])
                 && (
@@ -2999,7 +2999,7 @@ abstract class Table extends Page {
                     || $link_settings['include_blank'] == "always"
                 )
             ) {
-                $js_startup .= 'new_subtable("'.$link.'");';
+                $js_startup .= 'new_subtable("' . $link . '");';
             }
         }
 
@@ -3015,32 +3015,32 @@ abstract class Table extends Page {
 
     protected function get_new_file_loc($dir) {
         // select random directory
-        if (substr($dir,-1) == "/")
-            $dir = substr($dir,0,-1);
-        do{
-            $rand_dir = "/".srand(microtime())."/".srand(microtime())."/";
-            if (!file_exists($dir.$rand_dir))
-                mkdir($dir.$rand_dir, 0755, true);
-        } while (count(scandir($dir.$rand_dir))>1000);
+        if (substr($dir, -1) == "/")
+            $dir = substr($dir, 0, -1);
+        do {
+            $rand_dir = "/" . srand(microtime()) . "/" . srand(microtime()) . "/";
+            if (!file_exists($dir . $rand_dir))
+                mkdir($dir . $rand_dir, 0755, true);
+        } while (count(scandir($dir . $rand_dir)) > 1000);
         // create random file name
-        do{
+        do {
             $rand_file = sha1(srand(microtime()));
-        } while(file_exists($dir.$rand_dir.$rand_file));
+        } while (file_exists($dir . $rand_dir . $rand_file));
 
         // return only random dir and file
-        return $rand_dir.$rand_file;
+        return $rand_dir . $rand_file;
 
     }
 
     protected function get_full_file_location($dir, $file) {
-        $f = $dir."/".$file;
-        $f = str_replace("//","/", $f);
-        $f = str_replace("//","/", $f);
+        $f = $dir . "/" . $file;
+        $f = str_replace("//", "/", $f);
+        $f = str_replace("//", "/", $f);
         return $f;
     }
 
     protected function hasUploadfield() {
-        foreach($this->fields as $f) {
+        foreach ($this->fields as $f) {
             if ($f['type'] == 'file' || $f['type'] == 'image') {
                 return true;
             }
@@ -3048,7 +3048,7 @@ abstract class Table extends Page {
     }
 
     protected function setPostedLinks() {
-        foreach($this->links as $link => $link_settings) {
+        foreach ($this->links as $link => $link_settings) {
             // FOR 1 (local) TO MANY (foreign)
             if (!empty($link_settings['type']) && $link_settings['type'] == 'image') {
                 $filenames = Request::post('linked_images_' . $link_settings['table'], 'array', 'string');
@@ -3081,7 +3081,7 @@ abstract class Table extends Page {
 
                 if ($this->action == "update") {
                     // delete
-                    $deleteable = preg_replace('/,$/', '', $_POST['delete_subtable_'.$link]);
+                    $deleteable = preg_replace('/,$/', '', $_POST['delete_subtable_' . $link]);
                     if ($deleteable != '') {
                         Database::getInstance()->delete(
                             $link,
@@ -3090,8 +3090,8 @@ abstract class Table extends Page {
                     }
                     // update
                     $list = Database::getInstance()->selectAll($link, [$local_key => $local_id], []);
-                    foreach($list as $l) {
-                        foreach($link_settings['fields'] as $f=>$field) {
+                    foreach ($list as $l) {
+                        foreach ($link_settings['fields'] as $f=>$field) {
                             $link_settings['fields'][$f]['field'] = $f;
                             $link_settings['fields'][$f]['form_field'] = "st_{$link}_{$f}_{$l[$link_settings['key']]}";
                         }
@@ -3100,9 +3100,9 @@ abstract class Table extends Page {
                     }
                 }
                 // insert new
-                $new_subtables = explode(",", $_POST['new_subtable_'.$link]);
-                foreach($new_subtables as $i) if ($i != '') {
-                    foreach($link_settings['fields'] as $f=>$field) {
+                $new_subtables = explode(",", $_POST['new_subtable_' . $link]);
+                foreach ($new_subtables as $i) if ($i != '') {
+                    foreach ($link_settings['fields'] as $f=>$field) {
                         $link_settings['fields'][$f]['field'] = $f;
                         $link_settings['fields'][$f]['form_field'] = "st_{$link}_{$f}_-{$i}";
                     }
@@ -3118,8 +3118,8 @@ abstract class Table extends Page {
                 );
 
                 // GET INPUT ARRAY
-                $list = Request::get($link.'_input_array', 'explode', 'int');
-                foreach($list as $l) {
+                $list = Request::get($link . '_input_array', 'explode', 'int');
+                foreach ($list as $l) {
                     Database::getInstance()->insert(
                         $link_settings['index'],
                         [
@@ -3148,12 +3148,12 @@ abstract class Table extends Page {
         if ($this->action == "new" && isset($field['default']))
             $v = $field['default'];
 
-        if (!empty($field['render_'.$this->action.'_field']) && is_callable($field['render_'.$this->action.'_field'])) {
-            return $field['render_'.$this->action.'_field']($row);
+        if (!empty($field['render_' . $this->action . '_field']) && is_callable($field['render_' . $this->action . '_field'])) {
+            return $field['render_' . $this->action . '_field']($row);
         } elseif (!empty($field['display_value']) && is_callable($field['display_value'])) {
             return call_user_func($field['display_value'], $row);
         } else {
-            switch(preg_replace('/\([0-9]+\)/', '', $field['type'])) {
+            switch (preg_replace('/\([0-9]+\)/', '', $field['type'])) {
                 case 'lookup':
                     // a lookup will translate to a value drawn from the lookup table based on the key value
                     if ($field['lookuptable'] && $field['display_column']) {
@@ -3181,14 +3181,14 @@ abstract class Table extends Page {
                     $return = '';
                     if (!empty($v)) {
                         if ($html) {
-                            $return = '<img src="'.$this->getImageLocationWeb($field, $v).'" class="table_list_image" />';
+                            $return = '<img src="' . $this->getImageLocationWeb($field, $v) . '" class="table_list_image" />';
                         } else {
                             return $this->getImageLocationWeb($field, $v);
                         }
                     }
                     return $return;
                 case 'yesno':
-                    $field['options'] = [1=>'No',2=>'Yes'];
+                    $field['options'] = [1=>'No', 2=>'Yes'];
                 case 'state':
                     if ($field['type'] == "state") {
                         $field['options'] = Location::getStateOptions();
@@ -3220,7 +3220,7 @@ abstract class Table extends Page {
                     if ($this->action == "list" || $this->action == "search") {
                         $v = strip_tags($v);
                         if (strlen($v) > 64)
-                            return substr($v,0,64)."...";
+                            return substr($v, 0, 64) . "...";
                         else
                             return $v;
                     }
@@ -3238,16 +3238,16 @@ abstract class Table extends Page {
                     break;
                 case 'checkbox':
                     if ($html) {
-                        return '<input type="checkbox" disabled ' . (($v==1) ? 'checked' : '') . ' />';
+                        return '<input type="checkbox" disabled ' . (($v == 1) ? 'checked' : '') . ' />';
                     } else {
-                        return ($v==1) ? 'Yes' : 'No';
+                        return ($v == 1) ? 'Yes' : 'No';
                     }
                     break;
                 case 'checklist':
                     $vals = $this->decode_bool_group($v);
                     $output = '';
                     if ($html) {
-                        foreach($field['options'] as $i => $opt) {
+                        foreach ($field['options'] as $i => $opt) {
                             if (is_array($opt)) {
                                 $id = $opt[0];
                                 $name = $opt[1];
@@ -3255,11 +3255,11 @@ abstract class Table extends Page {
                                 $id = $i;
                                 $name = $opt;
                             }
-                            $output .= "<div class='checlist_item'><input type='checkbox' disabled ".(($vals[$id]==1)?"checked":'')." />{$name}</div>";
+                            $output .= "<div class='checlist_item'><input type='checkbox' disabled " . (($vals[$id] == 1) ? "checked" : '') . " />{$name}</div>";
                         }
                     } else {
                         $output = [];
-                        foreach($field['options'] as $i => $opt) {
+                        foreach ($field['options'] as $i => $opt) {
                             $output[] = is_array($opt) ? $opt[1] : $opt;
                         }
                         return implode(', ', $output);
@@ -3287,7 +3287,7 @@ abstract class Table extends Page {
      *   The file name.
      */
     protected function getNewRandomImageName($extension) {
-        return rand(0,99999) . '.' . $extension;
+        return rand(0, 99999) . '.' . $extension;
     }
 
     /**
@@ -3407,9 +3407,9 @@ abstract class Table extends Page {
             $v = $row[$field['field']];
         }
 
-        if (isset($this->preset[$field['field']]['render_'.$this->action.'_field'])) {
+        if (isset($this->preset[$field['field']]['render_' . $this->action . '_field'])) {
             $this->getRow(false);
-            return $this->preset[$field['field']]['render_'.$this->action.'_field']($this->list);
+            return $this->preset[$field['field']]['render_' . $this->action . '_field']($this->list);
         }
 
         // Prepare value.
@@ -3428,19 +3428,19 @@ abstract class Table extends Page {
         // Print form input.
         $options = [];
         $return = '';
-        switch(preg_replace('/\([0-9]+\)/', '', $field['type'])) {
+        switch (preg_replace('/\([0-9]+\)/', '', $field['type'])) {
             case 'text':
             case 'mediumtext':
             case 'longtext':
             case 'html':
                 $config = [];
                 $editor = (!empty($field['editor'])) ? strtolower($field['editor']) : 'default';
-                switch($editor) {
-                    case 'full':		$config['toolbar'] = CKEDITOR::TYPE_FULL;        break;
-                    case 'print':		$config['toolbar'] = CKEDITOR::TYPE_PRINT;       break;
+                switch ($editor) {
+                    case 'full':		$config['toolbar'] = CKEDITOR::TYPE_FULL; break;
+                    case 'print':		$config['toolbar'] = CKEDITOR::TYPE_PRINT; break;
                     case 'basic_image':	$config['toolbar'] = CKEDITOR::TYPE_BASIC_IMAGE; break;
                     case 'basic':
-                    default:			$config['toolbar'] = CKEDITOR::TYPE_BASIC;       break;
+                    default:			$config['toolbar'] = CKEDITOR::TYPE_BASIC; break;
                 }
                 if (!empty($field['full_page'])) {
                     $config['fullPage'] = true;
@@ -3467,14 +3467,14 @@ abstract class Table extends Page {
             case 'div':
                 if ($field['Value'] == '')
                     $field['Value'] = "<p></p>";
-                return "<input type='hidden' name='{$field['form_field']}' id='{$field['form_field']}' value='".Scrub::toHTML($field['Value'])."' />
+                return "<input type='hidden' name='{$field['form_field']}' id='{$field['form_field']}' value='" . Scrub::toHTML($field['Value']) . "' />
 							<div id='{$field['form_field']}_div' spellcheck='true'>{$field['Value']}</div>";
                 break;
             case 'plaintext':
                 return "<textarea name='{$field['form_field']}' id='{$field['form_field']}' spellcheck='true' cols='90' rows='10'>{$field['Value']}</textarea>";
                 break;
             case 'hidden':
-                return "<input type='hidden' name='{$field['form_field']}' id='{$field['form_field']}' value='".Scrub::toHTML($field['Value'])."' />";
+                return "<input type='hidden' name='{$field['form_field']}' id='{$field['form_field']}' value='" . Scrub::toHTML($field['Value']) . "' />";
                 break;
             case 'image':
                 if (!empty($field['Value'])) {
@@ -3554,7 +3554,7 @@ abstract class Table extends Page {
                 if (!empty($field['pop_add'])) {
                     // todo: this needs to require an explicit URL
                     if ($field['table_url']) $location = $field['table_url'];
-                    else $location = "table.php?table=".$field['lookuptable'];
+                    else $location = "table.php?table=" . $field['lookuptable'];
                     $output .= "<a onclick='lightning.table.newPop(\"{$location}\",\"{$field['form_field']}\",\"{$field['display_column']}\")'>Add New Item</a>";
                 }
                 return $output;
@@ -3564,8 +3564,8 @@ abstract class Table extends Page {
                 if ($field['allow_blank'])
                     $output .= '<option value="0"></option>';
                 if ($field['start'] < $field['end']) {
-                    for($k = $field['start']; $k <= $field['end']; $k++)
-                        $output .= "<option value='{$k}'".(($field['Value'] == $k) ? 'selected="selected"' : '').">{$k}</option>";
+                    for ($k = $field['start']; $k <= $field['end']; $k++)
+                        $output .= "<option value='{$k}'" . (($field['Value'] == $k) ? 'selected="selected"' : '') . ">{$k}</option>";
                 }
                 $output .= '</select>';
                 return $output;
@@ -3575,7 +3575,7 @@ abstract class Table extends Page {
                 if (!empty($field['disabled'])) {
                     $attribtues['disabled'] = true;
                 }
-                return Checkbox::render($field['form_field'], 1, $field['Value']==1, $attribtues);
+                return Checkbox::render($field['form_field'], 1, $field['Value'] == 1, $attribtues);
                 break;
             case 'note':
                 return $field['note'];
@@ -3583,7 +3583,7 @@ abstract class Table extends Page {
             case 'checklist':
                 $vals = $this->decode_bool_group($field['Value']);
                 $output = '';
-                foreach($field['options'] as $i => $opt) {
+                foreach ($field['options'] as $i => $opt) {
                     if (is_array($opt)) {
                         $id = $opt[0];
                         $name = $opt[1];
@@ -3591,7 +3591,7 @@ abstract class Table extends Page {
                         $id = $i;
                         $name = $opt;
                     }
-                    $output .= "<div class='checlist_item'><input type='checkbox' name='{$field['form_field']}_{$id}' value='1' ".(($vals[$id]==1)?"checked":'')." />{$name}</div>";
+                    $output .= "<div class='checlist_item'><input type='checkbox' name='{$field['form_field']}_{$id}' value='1' " . (($vals[$id] == 1) ? "checked" : '') . " />{$name}</div>";
                 }
                 return $output;
                 break;

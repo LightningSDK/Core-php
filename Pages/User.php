@@ -237,11 +237,9 @@ class User extends Page {
     public function postReset() {
         if (!$email = Request::get('email', 'email')) {
             Output::error('Invalid email');
-        }
-        elseif (!$user = UserModel::loadByEmail($email)) {
+        } elseif (!$user = UserModel::loadByEmail($email)) {
             Output::error('User does not exist.');
-        }
-        elseif ($user->sendResetLink()) {
+        } elseif ($user->sendResetLink()) {
             Navigation::redirect('message', array('msg' => 'reset'));
         }
     }
@@ -285,8 +283,9 @@ class User extends Page {
         $template->set('content', 'user_reset');
         if ($_POST['new_pass'] == $_POST['new_pass_conf']) {
             if (isset($_POST['new_pass'])) {
-                if ($user->change_temp_pass($_POST['email'], $_POST['new_pass'], $_POST['code']))
-                    $template->set("password_changed", true);
+                if ($user->change_temp_pass($_POST['email'], $_POST['new_pass'], $_POST['code'])) {
+                                    $template->set("password_changed", true);
+                }
             } else {
                 $template->set("change_password", true);
             }
