@@ -241,7 +241,7 @@ class User extends Page {
         elseif (!$user = UserModel::loadByEmail($email)) {
             Output::error('User does not exist.');
         }
-        if ($user->sendResetLink()) {
+        elseif ($user->sendResetLink()) {
             Navigation::redirect('message', array('msg' => 'reset'));
         }
     }
