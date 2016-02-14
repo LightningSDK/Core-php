@@ -42,7 +42,7 @@ class Blog extends Page {
             $blog->loadContentById($blog_id);
         }
         else {
-            if (!empty($path)) {
+            if (!empty($path[0]) || count($path) > 2) {
                 $blog->page = is_numeric($path[count($path)]) ? $path[count($path)] : 1;
                 if ($path[1] == 'category') {
                     // Load category roll

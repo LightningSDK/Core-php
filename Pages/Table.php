@@ -184,7 +184,20 @@ abstract class Table extends Page {
     protected $addable = true;
     protected $cancel = false;
     protected $searchable = false;
-    protected $exportable = false; // ability to export table or search results to csv
+
+    /**
+     * Add the ability to export a list.
+     *
+     * @var boolean
+     */
+    protected $exportable = false;
+
+    /**
+     * Add the ability to duplicate an entry.
+     *
+     * @var boolean
+     */
+    protected $duplicatable = false;
 
     /**
      * Whether the table is sortable.
@@ -382,12 +395,10 @@ abstract class Table extends Page {
         $this->id = $this->singularity ? $this->singularityID : Request::query('id', 'int');
 
         if (!$this->id) {
-            Messenger::error('Invalid ID');
-            return;
+            Output::error('Invalid ID');
         }
         if (!$this->editable) {
-            Messenger::error('Access Denied');
-            return;
+            Output::error('Access Denied');
         }
         $this->getRow();
     }
@@ -395,7 +406,7 @@ abstract class Table extends Page {
     public function getView() {
         $this->action = 'view';
         if (!$this->editable) {
-            Messenger::error('Access Denied');
+            Output::error('Access Denied');
         }
         $this->getRow();
     }
@@ -403,13 +414,22 @@ abstract class Table extends Page {
     public function getNew() {
         $this->action = 'new';
         if (!$this->editable || !$this->addable) {
-            Messenger::error('Access Denied');
+            Output::error('Access Denied');
         }
+    }
+
+    public function getDuplicate() {
+        $this->action = 'duplicate';
+        if (!$this->editable || !$this->addable || $this->singularity) {
+            Output::error('Access Denied');
+        }
+        $this->id = Request::query('id', 'int');
+        $this->getRow();
     }
 
     public function getPop() {
         if (!$this->editable || !$this->addable) {
-            Messenger::error('Access Denied');
+            Output::error('Access Denied');
         }
         if ($pf = Request::get('pf')) {
             if (!isset($this->action)) {
@@ -428,8 +448,7 @@ abstract class Table extends Page {
     public function getExport() {
         $this->action = 'export';
         if (!$this->exportable) {
-            Messenger::error('Access Denied');
-            exit;
+            Output::error('Access Denied');
         }
 
         // getting the full list of table data
@@ -669,10 +688,15 @@ abstract class Table extends Page {
 
         $this->afterInsert();
 
+        if (Request::get('lightning_table_duplicate', 'boolean')) {
+            $this->afterDuplicate();
+        }
+
         $this->afterPostRedirect();
     }
 
     protected function afterInsert() {}
+    protected function afterDuplicate() {}
 
     public function postUpdate() {
         $this->id = Request::post('id', 'int');
@@ -838,10 +862,10 @@ abstract class Table extends Page {
         $this->check_default_rowClick();
         $output .= $this->renderHeader();
 
-        if ($this->action == "new" && !$this->addable) {
+        if ($this->action == 'new' && !$this->addable) {
             Output::error('Access Denied');
         }
-        if ($this->action == "edit" && !$this->editable) {
+        if ($this->action == 'edit' && !$this->editable) {
             Output::error('Access Denied');
         }
 
@@ -853,8 +877,9 @@ abstract class Table extends Page {
                     $this->render_pop_return();
                     break;
                 case 'view':
-                case 'edit':
                     $output .= $this->render_action_header();
+                case 'edit':
+                case 'duplicate':
                 case 'new':
                     $output .= $this->render_form();
                     break;
@@ -1005,7 +1030,7 @@ abstract class Table extends Page {
                 $this_item_output = $template;
                 // replace variables
                 foreach($this->fields as $field) {
-                    if ($this->which_field($field)) {
+                    if ($this->whichField($field)) {
                         $this_item_output = str_replace('{'.$field['field'].'}', $this->print_field_value($field, $row), $this_item_output);
                     }
                 }
@@ -1077,7 +1102,7 @@ abstract class Table extends Page {
         if (is_array($this->fieldOrder)) {
             foreach($this->fieldOrder as $f) {
                 if (isset($this->fields[$f])) {
-                    if ($this->which_field($this->fields[$f])) {
+                    if ($this->whichField($this->fields[$f])) {
                         if ($this->sortable)
                             $output .= "<td><a href='".$this->createUrl('list',0,'',array('sort'=>array($f=>'X')))."'>{$this->fields[$f]['display_name']}</a></td>";
                         else
@@ -1096,7 +1121,7 @@ abstract class Table extends Page {
         } else {
             // The field order is not specified.
             foreach($this->fields as $f=>&$field) {
-                if ($this->which_field($field)) {
+                if ($this->whichField($field)) {
                     if ($this->sortable) {
                         $output .= "<td><a href='".$this->createUrl('list',0,'',array('sort'=>array($f=>'X')))."'>{$field['display_name']}</a></td>";
                     } else {
@@ -1126,7 +1151,7 @@ abstract class Table extends Page {
             $output .= "<tr id='{$row[$this->getKey()]}'>";
             // SHOW FIELDS AND VALUES
             foreach($this->fields as &$field) {
-                if ($this->which_field($field)) {
+                if ($this->whichField($field)) {
                     if (!empty($field['align'])) {
                         $output.= "<td align='{$field['align']}'>";
                     } else {
@@ -1271,10 +1296,13 @@ abstract class Table extends Page {
             $output.= "</td>";
         }
         if ($this->editable !== false) {
-            $output.= "<td>Edit</td>";
+            $output .= '<td>Edit</td>';
+        }
+        if ($this->duplicatable !== false) {
+            $output .= '<td>Duplicate</td>';
         }
         if ($this->deleteable !== false) {
-            $output.= "<td>Delete</td>";
+            $output .= '<td>Delete</td>';
         }
         return $output;
     }
@@ -1312,6 +1340,13 @@ abstract class Table extends Page {
             }
             $output .= "</td>";
         }
+        if ($this->duplicatable !== false) {
+            $output .= "<td>";
+            if ($editable) {
+                $output .= "<a href='" . $this->createUrl("duplicate", $row[$this->getKey()]) . "'><img src='/images/lightning/duplicate.png' border='0' /></a>";
+            }
+            $output .= "</td>";
+        }
         if ($this->deleteable !== false) {
             $output .= "<td>";
             if ($editable) {
@@ -1333,7 +1368,7 @@ abstract class Table extends Page {
             // Render the form using HTML templates.
             $template = $this->load_template($this->custom_template_directory.$this->custom_templates[$this->action.'_item']);
             foreach($this->fields as $field) {
-                switch($this->which_field($field)) {
+                switch($this->whichField($field)) {
                     case 'edit':
                         $template = str_replace('{'.$field['field'].'}', $this->renderEditField($field, $this->list), $template);
                         break;
@@ -1350,7 +1385,7 @@ abstract class Table extends Page {
             // Render the form in a table as basic HTML.
             $output = '';
 
-            if ($this->action == 'new') {
+            if ($this->action == 'new' || $this->action == 'duplicate') {
                 $new_action = 'insert';
             } else {
                 $new_action = 'update';
@@ -1358,6 +1393,9 @@ abstract class Table extends Page {
             if ($this->action != 'view') {
                 $multipart_header = $this->hasUploadfield() ? 'enctype="multipart/form-data"' : '';
                 $output .= '<form action="' . $this->createUrl() . '" id="form_' . $this->table . '" method="POST" ' . $multipart_header . '><input type="hidden" name="action" id="action" value="' . $new_action . '" />';
+                if ($this->action == 'duplicate') {
+                    $output .= '<input type="hidden" name="lightning_table_duplicate" value="' . $this->id . '" />';
+                }
                 $output .= Form::renderTokenInput();
                 if ($return = Request::get('return', 'urlencoded')) {
                     $output .= BasicHTML::hidden('table_return', $return);
@@ -1510,7 +1548,7 @@ abstract class Table extends Page {
 
     function render_form_row(&$field, $row) {
         $output = '';
-        if ($which_field = $this->which_field($field)) {
+        if ($which_field = $this->whichField($field)) {
             // double column width row
             if ($field['type'] == "note") {
                 if ($field['note'] != '') {
@@ -1659,7 +1697,7 @@ abstract class Table extends Page {
                             foreach($link_settings['fields'] as $f=>&$s) {
                                 $s['field'] = $f;
                                 $s['form_field'] = "st_{$link}_{$f}_{$l[$link_settings['key']]}";
-                                if ($this->which_field($s) == "display") {
+                                if ($this->whichField($s) == "display") {
                                     $output .= "<tr><td>{$s['display_name']}</td><td>";
                                     $output .= $this->print_field_value($s, $l);
                                 }
@@ -2036,30 +2074,40 @@ abstract class Table extends Page {
         return $return_fields;
     }
 
-    function which_field(&$field) {
+    /**
+     * Determine if the field should be an 'edit' field or 'display' field.
+     *
+     * @param array $field
+     *   The field settings array.
+     *
+     * @return string|boolean
+     *   The render type. False if it should not be shown.
+     */
+    protected function whichField(&$field) {
         switch($this->action) {
-            case "new":
+            case 'new':
+            case 'duplicate':
                 if ($this->userInputNew($field)) {
-                    return "edit";
+                    return 'edit';
                 } elseif ($this->userDisplayNew($field)) {
-                    return "display";
+                    return 'display';
                 } else {
                     return false;
                 }
                 break;
-            case "edit":
+            case 'edit':
                 if ($this->userInputEdit($field)) {
-                    return "edit";
+                    return 'edit';
                 } elseif ($this->userDisplayEdit($field)) {
-                    return "display";
+                    return 'display';
                 } else {
                     return false;
                 }
                 break;
-            case "view":
+            case 'view':
                 return $this->displayView($field) ? 'display' : false;
                 break;
-            case "list":
+            case 'list':
             default:
                 return $this->displayList($field) ? 'display' : false;
                 break;
