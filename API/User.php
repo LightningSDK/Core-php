@@ -100,7 +100,7 @@ class User extends API {
         elseif (!$user = UserModel::loadByEmail($email)) {
             Output::error('User does not exist.');
         }
-        elseif($user->sendResetLink()) {
+        elseif ($user->sendResetLink()) {
             return Output::SUCCESS;
         }
         Output::error('Could not reset password.');
