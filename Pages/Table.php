@@ -453,72 +453,36 @@ abstract class Table extends Page {
 
         // getting the full list of table data
         $this->loadMainFields();
-        $fields = $this->fields;
-        $presets = $this->preset;
         $this->maxPerPage = 10000;
         $this->loadList();
 
-        // getting head row
+        // Initialize the export.
+        $file = new CSVWriter();
+        $file->setFilename($this->table.'_' . date('Y-m-d') . '.csv');
+
+        // Build header row.
         $headrow = [];
-        foreach ( $fields as $field ){
-            // hide hiddens
-            if ( empty($presets[$field['field']]['type']) OR $presets[$field['field']]['type'] != 'hidden' ){
+        foreach ($this->fields as $field){
+            if ($this->whichField($field)) {
                 $headrow[] = ( !empty( $field['display_name'] ) ? $field['display_name'] : $field['field'] ) ;
             }
         }
-        // getting  data rows
-        $datarows = [];
+
+        // Output the header row.
+        $file->writeRow($headrow);
+
+        // Output the rows.
         foreach ($this->list as $row) {
             $datarow = [];
-            foreach ( $fields as $field ){
+            foreach ($this->fields as $field){
                 // Hide hidden fields.
-                if ( empty($presets[$field['field']]['type']) OR $presets[$field['field']]['type'] != 'hidden' ){
-                    // saving from empty fields
-                    // TODO: Default should change based on field type
-                    // TODO: This should be managed in a function that is also used for printing list values.
-                    $value = ( !empty($row[$field['field']]) ) ? $row[$field['field']] : '';
-                    switch ($field['type']) {
-                        case 'date':
-                            $datarow[] = Time::printDate($value);
-                            break;
-                        case 'time':
-                            $datarow[] = Time::printTime($value);
-                            break;
-                        case 'datetime':
-                            $datarow[] = Time::printDateTime($value);
-                            break;
-                        case 'checkbox':
-                            $datarow[] = (integer) $value;
-                            break;
-                        case 'bit':
-                        case 'checklist':
-                        case 'html':
-                        case 'image':
-                        case 'file':
-                        case 'int':
-                        case 'float':
-                        case 'email':
-                        case 'url':
-                            $datarow[] = $value;
-                            break;
-                        default:
-                            $datarow[] = $value;
-                            break;
-                    }
+                if ($this->whichField($field)){
+                    $datarow[] = $this->printFieldValue($field, $row, false);
                 }
             }
-            $datarows[] = $datarow;
-        }
-
-        // write to file
-        $file = new CSVWriter();
-        $file->setFilename($this->table.'_' . date('Y-m-d') . '.csv');
-        // header row
-        $file->writeRow($headrow);
-        // data rows
-        foreach ($datarows as $datarow){
             $file->writeRow($datarow);
         }
+
         exit;
     }
     
@@ -1024,7 +988,7 @@ abstract class Table extends Page {
                 // replace variables
                 foreach($this->fields as $field) {
                     if ($this->whichField($field)) {
-                        $this_item_output = str_replace('{'.$field['field'].'}', $this->print_field_value($field, $row), $this_item_output);
+                        $this_item_output = str_replace('{'.$field['field'].'}', $this->printFieldValue($field, $row), $this_item_output);
                     }
                 }
                 // replace functional links
@@ -1150,7 +1114,7 @@ abstract class Table extends Page {
                     } else {
                         $output.= '<td>';
                     }
-                    $output .= $this->print_field_value($field, $row);
+                    $output .= $this->printFieldValue($field, $row);
                     $output .= '</td>';
                 }
             }
@@ -1196,7 +1160,7 @@ abstract class Table extends Page {
                             $display = $link_settings["display"];
                             foreach($link_settings['fields'] as $f=>$a) {
                                 if (!isset($a['field'])) $a['field'] = $f;
-                                $display = str_replace('{'.$f.'}', $this->print_field_value($a, $l), $display);
+                                $display = str_replace('{'.$f.'}', $this->printFieldValue($a, $l), $display);
                             }
                             $displays[] = $display;
                         } else {
@@ -1251,7 +1215,7 @@ abstract class Table extends Page {
                 foreach($links as $row) {
                     $output.= "<tr id='link_{$link}_{$row[$link_settings['key']]}' class='linked_list_row'>";
                     foreach($link_settings['fields'] as $field_name => $field) {
-                        $output .= '<td>' . $this->print_field_value($field, $row) . '</td>';
+                        $output .= '<td>' . $this->printFieldValue($field, $row) . '</td>';
                     }
                     if (!empty($link_settings['edit_link'])) {
                         $output.= "<td><a href='{$link_settings['edit_link']}{$joinchar}action=edit&id={$row[$link_settings['key']]}'>Edit</a> <a href='{$link_settings['edit_link']}{$joinchar}action=delete&id={$row[$link_settings['key']]}'><img src='/images/lightning/remove.png' border='0' /></a></td>";
@@ -1366,7 +1330,7 @@ abstract class Table extends Page {
                         $template = str_replace('{'.$field['field'].'}', $this->renderEditField($field, $this->list), $template);
                         break;
                     case 'display':
-                        $template = str_replace('{'.$field['field'].'}', $this->print_field_value($field, $this->list), $template);
+                        $template = str_replace('{'.$field['field'].'}', $this->printFieldValue($field, $this->list), $template);
                         break;
                     case false:
                         $template = str_replace('{'.$field['field'].'}', '', $template);
@@ -1554,7 +1518,7 @@ abstract class Table extends Page {
                 $output .= "<tr><td colspan='2'>";
                 // show the field
                 if ($which_field == "display") {
-                    $output .= $this->print_field_value($field, $row);
+                    $output .= $this->printFieldValue($field, $row);
                 } elseif ($which_field == "edit") {
                     $output .= $this->renderEditField($field, $row);
                 }
@@ -1569,7 +1533,7 @@ abstract class Table extends Page {
                 $output .= "</td><td valign='top'>";
                 // show the field
                 if ($which_field == "display") {
-                    $output .= $this->print_field_value($field, $row);
+                    $output .= $this->printFieldValue($field, $row);
                 } elseif ($which_field == "edit") {
                     $output .= $this->renderEditField($field, $row);
                     if (!empty($field['note'])) {
@@ -1645,7 +1609,7 @@ abstract class Table extends Page {
                         foreach($l as $f=>$v) {
                             if (isset($link_settings['fields'][$f])) {
                                 if ($link_settings['fields'][$f]['field'] == '') $link_settings['fields'][$f]['field'] = $f;
-                                $display = str_replace('{'.$f.'}', $this->print_field_value($link_settings['fields'][$f], $l), $display);
+                                $display = str_replace('{'.$f.'}', $this->printFieldValue($link_settings['fields'][$f], $l), $display);
                             }
                         }
                         $output .= $display;
@@ -1664,7 +1628,7 @@ abstract class Table extends Page {
                             $s['form_field'] = "st_{$link}_{$f}_{$l[$link_settings['key']]}";
                             if ($this->whichField($s) == "display") {
                                 $output .= "<tr><td>{$s['display_name']}</td><td>";
-                                $output .= $this->print_field_value($s, $l);
+                                $output .= $this->printFieldValue($s, $l);
                             }
                         }
                         // ADD REMOVE LINKS
@@ -2067,6 +2031,10 @@ abstract class Table extends Page {
             case 'view':
                 return $this->displayView($field) ? 'display' : false;
                 break;
+            case 'export':
+                if (!in_array($field['type'], ['hidden', 'note'])) {
+                    return false;
+                }
             case 'list':
             default:
                 return $this->displayList($field) ? 'display' : false;
@@ -3165,7 +3133,7 @@ abstract class Table extends Page {
     }
 
     // print field or print editable field
-    protected function print_field_value($field, &$row = null) {
+    protected function printFieldValue($field, &$row = null, $html = true) {
         if (empty($row)) {
             $v = !empty($field['Value']) ? $field['Value'] : '';
         } else {
@@ -3212,7 +3180,11 @@ abstract class Table extends Page {
                 case 'image':
                     $return = '';
                     if (!empty($v)) {
-                        $return = '<img src="'.$this->getImageLocationWeb($field, $v).'" class="table_list_image" />';
+                        if ($html) {
+                            $return = '<img src="'.$this->getImageLocationWeb($field, $v).'" class="table_list_image" />';
+                        } else {
+                            return $this->getImageLocationWeb($field, $v);
+                        }
                     }
                     return $return;
                 case 'yesno':
@@ -3265,20 +3237,32 @@ abstract class Table extends Page {
                     return Time::printDateTime($v);
                     break;
                 case 'checkbox':
-                    return "<input type='checkbox' disabled ".(($v==1)?"checked":'')." />";
+                    if ($html) {
+                        return '<input type="checkbox" disabled ' . (($v==1) ? 'checked' : '') . ' />';
+                    } else {
+                        return ($v==1) ? 'Yes' : 'No';
+                    }
                     break;
                 case 'checklist':
                     $vals = $this->decode_bool_group($v);
                     $output = '';
-                    foreach($field['options'] as $i => $opt) {
-                        if (is_array($opt)) {
-                            $id = $opt[0];
-                            $name = $opt[1];
-                        } else {
-                            $id = $i;
-                            $name = $opt;
+                    if ($html) {
+                        foreach($field['options'] as $i => $opt) {
+                            if (is_array($opt)) {
+                                $id = $opt[0];
+                                $name = $opt[1];
+                            } else {
+                                $id = $i;
+                                $name = $opt;
+                            }
+                            $output .= "<div class='checlist_item'><input type='checkbox' disabled ".(($vals[$id]==1)?"checked":'')." />{$name}</div>";
                         }
-                        $output .= "<div class='checlist_item'><input type='checkbox' disabled ".(($vals[$id]==1)?"checked":'')." />{$name}</div>";
+                    } else {
+                        $output = [];
+                        foreach($field['options'] as $i => $opt) {
+                            $output[] = is_array($opt) ? $opt[1] : $opt;
+                        }
+                        return implode(', ', $output);
                     }
                     return $output;
                     break;
