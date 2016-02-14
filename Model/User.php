@@ -837,7 +837,6 @@ class User extends Object {
             ),
             'where' => array(
                 array('user.user_id' => $this->id),
-                array('user_role.site_id' => ['IN', [0, Site::getInstance()->id]]),
             ),
             'select' => ['permission.permission_id', 'permission.permission_id'],
         ]);
