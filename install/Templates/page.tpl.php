@@ -1,6 +1,8 @@
 <div id='content' class="row">
     <div id='inner-content' class="content_panel padding">
-        <?php use Lightning\Pages\Page;
+        <?php
+
+        use Lightning\Pages\Page;
         use Lightning\Tools\Configuration;
         use Lightning\View\SocialLinks;
         use Lightning\View\TinyMCE;
@@ -30,10 +32,12 @@
                     <tr><td>Hide Side Bar:</td><td><?= Page::layoutOptions($full_page['layout']); ?></td></tr>
                 </table>
             </div>
+            <?= TinyMCE::editableDiv('page_display',
+                array('spellcheck' => true, 'content' => $full_page['body_rendered'], 'browser' => true, 'startup' => false)
+            ); ?>
+        <?php else: ?>
+            <?= $full_page['body_rendered']; ?>
         <?php endif; ?>
-        <?= TinyMCE::editableDiv('page_display',
-            array('spellcheck' => true, 'content' => $full_page['body_rendered'], 'browser' => true)
-        ); ?>
         <?php if (!empty($editable)):?>
             <input type="button" name="submit" class='button page_edit' onclick="lightning.page.save();" value="Save" <?php if (empty($action) || $action != 'new'):?>style="display:none;"<?php endif; ?> /><br />
         <?php endif; ?>
