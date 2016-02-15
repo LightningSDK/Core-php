@@ -1454,6 +1454,7 @@ class Database extends Singleton {
             }
         }
 
+        $definitions = [];
         foreach ($columns as $column => $settings) {
             $definitions[] = $this->getColumnDefinition($column, $settings, $primary_column == $column);
             if ($primary_column == $column) {
