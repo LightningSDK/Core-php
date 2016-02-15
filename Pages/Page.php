@@ -6,21 +6,18 @@
 namespace Lightning\Pages;
 
 use DOMDocument;
-use Exception;
-use Lightning\Tools\CKEditor;
 use Lightning\Tools\Configuration;
-use Lightning\Tools\Database;
 use Lightning\Tools\Output;
 use Lightning\Tools\Request;
 use Lightning\Tools\Scrub;
 use Lightning\Tools\Template;
 use Lightning\Tools\ClientUser;
 use Lightning\View\Field\BasicHTML;
+use Lightning\View\HTMLEditor\HTMLEditor;
 use Lightning\View\JS;
 use Lightning\View\Page as PageView;
 use Lightning\Model\Page as PageModel;
 use Lightning\View\Video\YouTube;
-use SimpleXMLElement;
 
 class Page extends PageView {
 
@@ -50,7 +47,7 @@ class Page extends PageView {
             $this->fullPage['body'] = 'This is your new page.';
             $this->fullPage['layout'] = 0;
             $this->fullPage['site_map'] = 1;
-            CKEditor::init();
+            HTMLEditor::init();
             JS::startup('lightning.page.edit();');
         } elseif ($this->fullPage = PageModel::loadByUrl('404')) {
             http_response_code(404);

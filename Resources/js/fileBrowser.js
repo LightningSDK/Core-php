@@ -2,6 +2,7 @@ lightning.fileBrowser = {
     type: null,
     field: null,
     elf: null,
+    funcNum: null,
     init: function() {
         var query = document.location.search.substring(1).split('&');
         for (var i in query) {
@@ -12,11 +13,15 @@ lightning.fileBrowser = {
             if (split[0] == 'field') {
                 lightning.fileBrowser.field = split[1];
             }
+            if (split[0] == 'CKEditorFuncNum') {
+                lightning.fileBrowser.funcNum = split[1];
+            }
         }
 
+        // TODO: This has to be changed to handle other browsers.
         lightning.fileBrowser.elf = $('#elfinder').elfinder({
             // set your elFinder options here
-            url: 'php/connector.minimal.php',  // connector URL
+            url: '/elfinder',  // connector URL
             closeOnEditorCallback: true,
             getFileCallback: lightning.fileBrowser.select
         }).elfinder('instance');
@@ -24,6 +29,10 @@ lightning.fileBrowser = {
 
     select: function(file) {
         switch (lightning.fileBrowser.type) {
+            case 'ckeditor':
+                window.opener.CKEDITOR.tools.callFunction(lightning.fileBrowser.funcNum, file.url);
+                window.close();
+                break;
             case 'tinymce':
                 // pass selected file path to TinyMCE
                 parent.tinymce.activeEditor.windowManager.getParams().setUrl(file.url);
@@ -46,7 +55,7 @@ lightning.fileBrowser = {
 
     openSelect: function(field) {
         window.open(
-            '/elfinder/elfinder.html?type=lightning-field&field=' + field,
+            '/js/elfinder/elfinder.html?type=lightning-field&field=' + field,
             'Image Browser',
             ''
         );

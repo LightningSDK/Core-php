@@ -2,12 +2,12 @@ lightning.page = {
     edit: function() {
         $('.page_edit').show();
         $('.page_edit_links').hide();
-        lightning.tinymce.initEditor('page_display');
+        lightning.htmleditor.initEditor('page_display');
     },
 
     save: function() {
         $('#save_button').hide();
-        lightning.tinymce.destroyEditor('page_display');
+        lightning.htmleditor.destroyEditor('page_display');
         var data = {
             page_id: $('#page_id').val(),
             token: $('#token').val(),

@@ -1,12 +1,12 @@
 lightning.cms = {
     edit: function(editor) {
-        lightning.tinymce.initEditor(editor);
+        lightning.htmleditor.initEditor(editor);
         $('#' + editor.replace(/^cms_/, 'cms_edit_')).hide();
         $('#' + editor.replace(/^cms_/, 'cms_save_')).show();
     },
 
     save: function (editor) {
-        lightning.tinymce.destroyEditor(editor);
+        lightning.htmleditor.destroyEditor(editor);
         var self = this;
         $.ajax({
             url: '/admin/cms',

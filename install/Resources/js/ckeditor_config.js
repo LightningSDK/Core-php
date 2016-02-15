@@ -158,7 +158,4 @@ CKEDITOR.config.toolbar_Basic = [
 ];
 CKEDITOR.config.toolbar_Basic_Image = CKEDITOR.config.toolbar_Basic;
 CKEDITOR.config.toolbar_Print = CKEDITOR.config.toolbar_Basic;
-CKEDITOR.config.extraPlugins = 'sourcedialog';
-CKEDITOR.config.toolbar_Full = CKEDITOR.config.toolbar_Basic.concat([
-    { name: 'sourcedialog' }
-]);
+CKEDITOR.config.toolbar_Full = CKEDITOR.config.toolbar_Basic;

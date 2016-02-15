@@ -2,13 +2,13 @@
 
 namespace Lightning\View;
 
-use Lightning\Tools\CKEditor;
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\IO\FileManager;
 use Lightning\Tools\Session;
 use Lightning\View\Field\Time;
 use Lightning\Model\CMS as CMSModel;
+use Lightning\View\HTMLEditor\HTMLEditor;
 
 class CMS {
 
@@ -23,7 +23,7 @@ class CMS {
             return
                 '<a href="javascript:lightning.cms.edit(\'cms_' . $name . '\')" class="button small" id="cms_edit_' . $name . '">Edit</a>'
                 . '<a href="javascript:lightning.cms.save(\'cms_' . $name . '\')" class="button small" style="display:none;" id="cms_save_' . $name . '">Save</a>'
-                . TinyMCE::editableDiv('cms_' . $name,
+                . HTMLEditor::div('cms_' . $name,
                     array(
                         'spellcheck' => true,
                         'content' => $content,

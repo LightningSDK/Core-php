@@ -37,7 +37,6 @@
 namespace Lightning\Pages;
 
 use Lightning\Tools\Cache\FileCache;
-use Lightning\Tools\CKEditor;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\CSVImport;
 use Lightning\Tools\Database;
@@ -58,11 +57,11 @@ use Lightning\View\Field\FileBrowser;
 use Lightning\View\Field\Location;
 use Lightning\View\Field\Text;
 use Lightning\View\Field\Time;
+use Lightning\View\HTMLEditor\HTMLEditor;
 use Lightning\View\JS;
 use Lightning\View\Page;
 use Lightning\Tools\CSVWriter;
 use Lightning\View\Pagination;
-use Lightning\View\TinyMCE;
 
 abstract class Table extends Page {
 
@@ -1694,7 +1693,7 @@ abstract class Table extends Page {
      * @return string
      */
     protected function render_linked_table_editable_image(&$link_settings) {
-        CKEditor::init(true);
+        HTMLEditor::init(true);
         JS::startup('lightning.table.init()');
         // TODO: This doesn't return anything valuable. Is it used anywhere?
         $link_settings['web_location'] = $this->getImageLocationWeb($link_settings, '');
@@ -2983,10 +2982,6 @@ abstract class Table extends Page {
             if (!empty($field['default_reset'])) {
                 $table_data['defaults'][$f] = $field['default'];
             }
-            if (!empty($field['type']) && $field['type'] == "div") {
-                $js_startup .= '$("#' . $f . '_div").attr("contentEditable", "true");
-                table_div_editors["'.$f . '"]=CKEDITOR.inline("' . $f . '_div",CKEDITOR.config.toolbar_Full);';
-            }
         }
         foreach ($this->links as $link=>$link_settings) {
             if (
@@ -3434,19 +3429,15 @@ abstract class Table extends Page {
             case 'longtext':
             case 'html':
                 $config = [];
-                $editor = (!empty($field['editor'])) ? strtolower($field['editor']) : 'default';
-                switch ($editor) {
-                    case 'full':		$config['toolbar'] = CKEDITOR::TYPE_FULL; break;
-                    case 'print':		$config['toolbar'] = CKEDITOR::TYPE_PRINT; break;
-                    case 'basic_image':	$config['toolbar'] = CKEDITOR::TYPE_BASIC_IMAGE; break;
-                    case 'basic':
-                    default:			$config['toolbar'] = CKEDITOR::TYPE_BASIC; break;
+                if (empty($field['editor'])) {
+                    $field['editor'] = HTMLEditor::TYPE_BASIC;
                 }
+
                 if (!empty($field['full_page'])) {
                     $config['fullPage'] = true;
                 }
 
-                if (!empty($field['full_page']) || $editor == 'full' || !empty($field['trusted']) || $this->trusted) {
+                if (!empty($field['full_page']) || $field['editor'] == HTMLEditor::TYPE_FULL || !empty($field['trusted']) || $this->trusted) {
                     $config['allowedContent'] = true;
                 }
 
@@ -3459,9 +3450,9 @@ abstract class Table extends Page {
                 $config['content'] = $field['Value'];
                 $config['startup'] = true;
                 if (!empty($field['div'])) {
-                    return TinyMCE::editableDiv($field['form_field'], $config);
+                    return HTMLEditor::div($field['form_field'], $config);
                 } else {
-                    return TinyMCE::iframe($field['form_field'], $config);
+                    return HTMLEditor::iframe($field['form_field'], $config);
                 }
                 break;
             case 'div':

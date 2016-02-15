@@ -4,8 +4,8 @@
 
         use Lightning\Pages\Page;
         use Lightning\Tools\Configuration;
+        use Lightning\View\HTMLEditor\HTMLEditor;
         use Lightning\View\SocialLinks;
-        use Lightning\View\TinyMCE;
 
         if (!empty($editable)): ?>
             <div class="page_edit_links">
@@ -32,7 +32,7 @@
                     <tr><td>Hide Side Bar:</td><td><?= Page::layoutOptions($full_page['layout']); ?></td></tr>
                 </table>
             </div>
-            <?= TinyMCE::editableDiv('page_display',
+            <?= HTMLEditor::editableDiv('page_display',
                 array('spellcheck' => true, 'content' => $full_page['body_rendered'], 'browser' => true, 'startup' => false)
             ); ?>
         <?php else: ?>
