@@ -664,6 +664,8 @@ class Database extends Singleton {
 
         // Copy the new values back.
         $this->query('INSERT INTO `' . $query['from'] . '` SELECT * FROM `temporary_table`');
+
+        $this->query('DROP TEMPORARY TABLE `temporary_table`');
     }
 
     /**
