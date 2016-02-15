@@ -91,11 +91,11 @@ class CKEditor {
         $options['editor_type'] = 'ckeditor';
         switch($options['editor']) {
             // TODO: This needs to be in the base HTML Ed
-            case HTMLEditor::TYPE_FULL:         $config['toolbar'] = self::TYPE_FULL;        break;
-            case HTMLEditor::TYPE_PRINT:        $config['toolbar'] = self::TYPE_PRINT;       break;
-            case HTMLEditor::TYPE_BASIC_IMAGE:  $config['toolbar'] = self::TYPE_BASIC_IMAGE; break;
+            case HTMLEditor::TYPE_FULL:         $options['toolbar'] = self::TYPE_FULL;        break;
+            case HTMLEditor::TYPE_PRINT:        $options['toolbar'] = self::TYPE_PRINT;       break;
+            case HTMLEditor::TYPE_BASIC_IMAGE:  $options['toolbar'] = self::TYPE_BASIC_IMAGE; break;
             case HTMLEditor::TYPE_BASIC:
-            default:			$config['toolbar'] = self::TYPE_BASIC;       break;
+            default:			                $options['toolbar'] = self::TYPE_BASIC;       break;
         }
 
         // File Browser
