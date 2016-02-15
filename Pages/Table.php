@@ -359,6 +359,15 @@ abstract class Table extends Page {
         parent::__construct();
     }
 
+    protected function validateAccess($id) {
+        if ($this->accessControl) {
+            if (!Database::getInstance()->check($this->table,
+                array_merge($this->accessControl, [$this->getKey() => $id]))) {
+                Output::accessDenied();
+            }
+        }
+    }
+
     protected function initSettings() {}
 
     protected function fillDetaultSettings() {
@@ -667,6 +676,8 @@ abstract class Table extends Page {
             Output::error('Access Denied');
         }
 
+        $this->validateAccess($this->id);
+
         // Update the record.
         $this->loadMainFields();
         $this->getRow();
@@ -676,7 +687,8 @@ abstract class Table extends Page {
         }
 
         if (!empty($new_values)) {
-            Database::getInstance()->update($this->table, $new_values, [$this->getKey() => $this->id]);
+            $where = array_merge($this->accessControl, [$this->getKey() => $this->id]);
+            Database::getInstance()->update($this->table, $new_values, $where);
         }
         $this->updateAccessTable();
         $this->setPostedLinks();
