@@ -245,7 +245,7 @@ class Blog extends Singleton {
     }
 
     public function recent_list($remote=false) {
-        $list = Database::getInstance()->select(static::BLOG_TABLE, array(), array(), 'ORDER BY time DESC LIMIT 5');
+        $list = self::getAll();
         $target = $remote ? "target='_blank'" : '';
         if ($list->rowCount() > 0) {
             echo "<ul>";
@@ -256,7 +256,11 @@ class Blog extends Singleton {
         }
     }
 
-    public function allCategories($order = 'count', $sort_direction = 'DESC') {
+    public static function getRecent() {
+        return Database::getInstance()->select(static::BLOG_TABLE, [], [], 'ORDER BY time DESC LIMIT 5');
+    }
+
+    public function getAllCategories($order = 'count', $sort_direction = 'DESC') {
         return Database::getInstance()->select(
             array(
                 'from' => static::BLOG_CATEGORY_TABLE,
@@ -273,7 +277,7 @@ class Blog extends Singleton {
     }
 
     public function categories_list() {
-        $list = $this->allCategories();
+        $list = $this->getAllCategories();
         if ($list->rowCount() > 0) {
             echo "<ul>";
             foreach($list as $r)
