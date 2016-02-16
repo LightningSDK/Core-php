@@ -50,11 +50,12 @@ class CKEditor {
     public static function div($id, $options) {
         self::init();
         self::initSettings($id, $options);
-        JS::set('htmleditors.' . $id, $options);
 
         if (empty($options['content'])) {
             $options['content'] = '<p></p>';
         }
+
+        JS::set('htmleditors.' . $id, $options);
 
         $spellcheck = !empty($options['spellcheck']) ? 'spellcheck="true"' : '';
         $style = !empty($options['edit_border']) ? ' style="border:1px solid red;"' : '';

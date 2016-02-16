@@ -27,6 +27,9 @@ lightning.htmleditor = {
         if (lightning.vars.htmleditors[editor_id].editor_type == 'tinymce') {
             tinymce.init(lightning.vars.htmleditors[editor_id]);
         } else if (lightning.vars.htmleditors[editor_id].editor_type == 'ckeditor') {
+            if (lightning.vars.htmleditors[editor_id].hasOwnProperty('plugins')) {
+                lightning.vars.htmleditors[editor_id].plugins = lightning.vars.htmleditors[editor_id].replace(/\*/, CKEDITOR.plugins);
+            }
             lightning.vars.htmleditors[editor_id].ckeditor = CKEDITOR.replace(editor_id, lightning.vars.htmleditors[editor_id]);
         }
     },
