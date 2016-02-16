@@ -1790,7 +1790,7 @@ abstract class Table extends Page {
             } else {
                 $join[] = [
                     'join' => $link_settings['table'],
-                    'using' => $link_settings[key],
+                    'using' => $link_settings['key'],
                 ];
             }
             $where = [$link_settings['index'] . '.' . $local_key => $row_id];

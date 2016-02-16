@@ -36,6 +36,7 @@ class Blog extends Page {
         $blog = BlogModel::getInstance();
 
         if (preg_match('/.*\.htm/', $path[0])) {
+            // TODO: This might not be necessary since it is searched below.
             $blog->loadContentByURL($path[0]);
         }
         elseif ($blog_id) {
@@ -43,11 +44,12 @@ class Blog extends Page {
         }
         else {
             if (!empty($path[0]) || count($path) > 2) {
-                $blog->page = is_numeric($path[count($path)]) ? $path[count($path)] : 1;
-                if ($path[1] == 'category') {
+                // This page num can be in index 2 (blog/page/#) or index 3 (blog/category/a-z/#).
+                $blog->page = is_numeric($path[count($path) - 1]) ? $path[count($path) - 1] : 1;
+                if ($path[1] == 'category' && !empty($path[1])) {
                     // Load category roll
                     $blog->loadList('category', preg_replace('/\.htm$/', '', $path[2]));
-                } elseif ($path[1] == 'author') {
+                } elseif ($path[1] == 'author' && !empty($path[1])) {
                     // Load an author roll.
                     $blog->loadList('author', preg_replace('/\.htm$/', '', $path[2]));
                 } elseif (!empty($blog->page)) {
@@ -59,6 +61,7 @@ class Blog extends Page {
             }
             else {
                 // Fall back, load blogroll
+                // TODO: This should only happen on /blog, otherwise it should return a 404
                 $blog->loadList(1);
             }
         }
