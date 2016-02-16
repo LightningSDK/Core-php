@@ -245,7 +245,7 @@ class Blog extends Singleton {
     }
 
     public function recent_list($remote=false) {
-        $list = self::getRecent();
+        $list = static::getRecent();
         $target = $remote ? "target='_blank'" : '';
         if ($list->rowCount() > 0) {
             echo "<ul>";
