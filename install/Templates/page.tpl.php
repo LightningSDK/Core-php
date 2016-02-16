@@ -32,7 +32,7 @@
                     <tr><td>Hide Side Bar:</td><td><?= Page::layoutOptions($full_page['layout']); ?></td></tr>
                 </table>
             </div>
-            <?= HTMLEditor::editableDiv('page_display',
+            <?= HTMLEditor::div('page_display',
                 array('spellcheck' => true, 'content' => $full_page['body_rendered'], 'browser' => true, 'startup' => false)
             ); ?>
         <?php else: ?>
