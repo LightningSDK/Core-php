@@ -90,6 +90,9 @@ class CKEditor {
     public static function initSettings($id, &$options) {
         // Available Options
         $options['editor_type'] = 'ckeditor';
+        if (empty($options['editor'])) {
+            $options['editor'] = '';
+        }
         switch($options['editor']) {
             // TODO: This needs to be in the base HTML Ed
             case HTMLEditor::TYPE_FULL:         $options['toolbar'] = self::TYPE_FULL;        break;
