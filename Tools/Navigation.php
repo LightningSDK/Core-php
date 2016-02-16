@@ -11,7 +11,7 @@ class Navigation {
      * @param array $query
      *   Additional query parameters to add.
      */
-    public static function redirect($url = null, $query = []) {
+    public static function redirect($url = null, $query = [], $permanent = false) {
         if (empty($url)) {
             $url = '/' . Request::getLocation();
         }
@@ -20,6 +20,9 @@ class Navigation {
         }
         Messenger::storeInSession();
         Output::sendCookies();
+        if ($permanent) {
+            http_response_code(301);
+        }
         header('Location: ' . $url);
         exit;
     }
