@@ -294,9 +294,9 @@ class Database extends Singleton {
      */
     public function timeReport() {
         return [
-            "Total Queries: {$this->query_count}",
-            "Total SQL Time: {$this->mysql_time}",
-            "Total PHP Time: {$this->php_time}",
+            'Total Queries: ' . $this->query_count,
+            'Total SQL Time: ' . $this->mysql_time,
+            'Total PHP Time: ' . number_format($this->php_time, 4),
         ];
     }
 
