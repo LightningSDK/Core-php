@@ -49,16 +49,39 @@ lightning.fileBrowser = {
                 window.close();
                 break;
             case 'lightning-cms':
+                window.opener.lightning.cms.imageSelected(file.url, lightning.fileBrowser.field);
+                window.close();
                 break;
         }
     },
 
-    openSelect: function(field) {
-        window.open(
-            '/js/elfinder/elfinder.html?type=lightning-field&field=' + field,
-            'Image Browser',
-            ''
-        );
+    openSelect: function(type, field) {
+        // TODO: add case here for other browser types.
+        switch (lightning.fileBrowser.type || lightning.vars.fileBrowser.type) {
+            case 'elfinder':
+                window.open(
+                    '/js/elfinder/elfinder.html?type=' + type + '&field=' + field,
+                    'Image Browser',
+                    ''
+                );
+                break;
+            case 'ckfinder':
+                CKFinder.popup({
+                    basePath: lightning.vars.cms.basepath,
+                    chooseFiles: true,
+                    chooseFilesOnDblClick: true,
+                    onInit: function( finder ) {
+                        finder.on( 'files:choose', function( evt ) {
+                            var file = evt.data.files.first();
+                            self.updateImage(id, file.getUrl());
+                        } );
+                        finder.on( 'file:choose:resizedImage', function( evt ) {
+                            self.updateImage(id, evt.data.resizedUrl);
+                        } );
+                    }
+                });
+                break;
+        }
     },
     fieldSelected: function(url, field) {
         var imageField = $('#file_browser_image_' + field);

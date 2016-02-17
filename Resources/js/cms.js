@@ -51,24 +51,10 @@ lightning.cms = {
     },
 
     editImage: function(id) {
-        var self = this;
-        CKFinder.popup({
-            basePath: lightning.vars.cms.basepath,
-            chooseFiles: true,
-            chooseFilesOnDblClick: true,
-            onInit: function( finder ) {
-                finder.on( 'files:choose', function( evt ) {
-                    var file = evt.data.files.first();
-                    self.updateImage(id, file.getUrl());
-                } );
-                finder.on( 'file:choose:resizedImage', function( evt ) {
-                    self.updateImage(id, evt.data.resizedUrl);
-                } );
-            }
-        });
+        lightning.fileBrowser.openSelect('lightning-cms', id);
     },
 
-    updateImage: function(id, fileUrl) {
+    imageSelected: function(fileUrl, id) {
         $('#cms_' + id).attr('src', fileUrl);
     },
 
