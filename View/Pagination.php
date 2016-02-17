@@ -86,7 +86,7 @@ class Pagination {
             if ($this->currentPage > 1) {
                 $output .= '<li class="arrow ' . ($this->currentPage > 1 ? '' : 'unavailable') . '"><a href="' . $prefix . 1 . $suffix . '">&laquo; First</a></li>';
             }
-            for($i = max(1, $this->currentPage - 10); $i <= min($this->pages, $this->currentPage + 10); $i++) {
+            for($i = max(1, $this->currentPage - 5); $i <= min($this->pages, $this->currentPage + 5); $i++) {
                 if ($this->currentPage == $i) {
                     $output.= '<li class="current"><a>' . $i . '</a></li>';
                 } else {
