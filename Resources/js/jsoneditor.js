@@ -12,12 +12,14 @@ lightning.jsoneditor = {
             lightning.vars.jsoneditor[i].editor = new JSONEditor(container, options);
             lightning.vars.jsoneditor[i].editor.set(lightning.vars.jsoneditor[i].json)
         }
-    },
-    save: function(editor, submit_form) {
-        var field = $('#' + editor + '_data');
-        field.val(JSON.stringify(lightning.vars.jsoneditor[editor].editor.get()));
-        if (submit_form) {
-            field.closest('form').submit();
-        }
+
+        // Make sure the json data is saved to the field before saving.
+        $('.jsoneditor_presave').closest('form').submit(function(){
+            $(this).find('.jsoneditor_presave').each(function(){
+                var field = $(this);
+                var id = $(this).prop('id').replace(/_data$/, '');
+                field.val(JSON.stringify(lightning.vars.jsoneditor[id].editor.get()));
+            });
+        });
     }
 };

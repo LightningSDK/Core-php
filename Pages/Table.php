@@ -62,6 +62,7 @@ use Lightning\View\JS;
 use Lightning\View\Page;
 use Lightning\Tools\CSVWriter;
 use Lightning\View\Pagination;
+use Lightning\View\JSONEditor as JSONEditorView;
 
 abstract class Table extends Page {
 
@@ -360,7 +361,7 @@ abstract class Table extends Page {
     }
 
     protected function validateAccess($id) {
-        if ($this->accessControl) {
+        if (!empty($this->accessControl)) {
             if (!Database::getInstance()->check($this->table,
                 array_merge($this->accessControl, [$this->getKey() => $id]))) {
                 Output::accessDenied();
@@ -2359,16 +2360,15 @@ abstract class Table extends Page {
                             !empty($field['full_page'])
                         );
                         break;
+                    case 'json':
+                        $val = Request::post($field['form_field'], 'json_string');
+                        break;
                     case 'int':
                     case 'float':
                     case 'email':
                     case 'url':
-                        $val = Request::post($field['form_field'], $field['type']);
-                        break;
                     default:
-                        // This will include 'url'
-                        // TODO: this can be set to include the date types above also.
-                        $val = Request::get($field['form_field'], $field['type']);
+                        $val = Request::post($field['form_field'], $field['type']);
                         break;
                 }
             }
@@ -3472,6 +3472,9 @@ abstract class Table extends Page {
                     $field['Value'] = "<p></p>";
                 return "<input type='hidden' name='{$field['form_field']}' id='{$field['form_field']}' value='" . Scrub::toHTML($field['Value']) . "' />
 							<div id='{$field['form_field']}_div' spellcheck='true'>{$field['Value']}</div>";
+                break;
+            case 'json':
+                return JSONEditorView::render($field['form_field'], [], $field['Value']);
                 break;
             case 'plaintext':
                 return "<textarea name='{$field['form_field']}' id='{$field['form_field']}' spellcheck='true' cols='90' rows='10'>{$field['Value']}</textarea>";
