@@ -22,7 +22,7 @@ abstract class JSONEditor extends Page {
      *
      * @return array
      */
-    protected function getJSONData() {
+    public function getJSONData() {
         return [];
     }
 
@@ -31,7 +31,7 @@ abstract class JSONEditor extends Page {
      *
      * @return array
      */
-    protected function getSettings() {
+    public function getSettings() {
         return [];
     }
 
@@ -40,7 +40,7 @@ abstract class JSONEditor extends Page {
      *
      * @return string
      */
-    protected function postedData() {
+    public function postedData() {
         return Request::post('jsoneditor', 'json_string');
     }
 }
