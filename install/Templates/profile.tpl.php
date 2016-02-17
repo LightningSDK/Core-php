@@ -57,7 +57,7 @@ use Lightning\View\Field\Checkbox;
             </tr>
         </table>
     </fieldset>
-    <? if ($mailing_lists): ?>
+    <?php if ($mailing_lists): ?>
         <fieldset>
             <legend>Subscriptions:</legend>
             <table class="small-12">
@@ -73,18 +73,18 @@ use Lightning\View\Field\Checkbox;
                             <td><?= $list['name'] ?></td>
                             <td><?= Checkbox::render('subscribed[' . $list['message_list_id'] . ']', $list['message_list_id'], isset($mailing_lists[$list['message_list_id']])); ?></td>
                         </tr>
-                    <? else:
+                    <?php else:
                         $subscribe_other_active |= isset($mailing_lists[$list['message_list_id']]);
                     endif;
                 endforeach; ?>
-                <? if ($subscribe_other_active): ?>
+                <?php if ($subscribe_other_active): ?>
                     <tr>
                         <td>Other</td>
                         <td><?= Checkbox::render('subscribed[]', '0', $subscribe_other_active); ?></td>
                     </tr>
-                <? endif; ?>
+                <?php endif; ?>
             </table>
         </fieldset>
-    <? endif; ?>
+    <?php endif; ?>
     <input type="submit" name="submit" value="Save" class="button">
 </form>

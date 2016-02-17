@@ -33,9 +33,9 @@ if (empty($action) || $action == 'join' || $action == 'register'): ?>
             <input type="submit" name="submit" value="Register" class="button" />
         </form>
     </fieldset>
-<? endif; ?>
+<?php endif; ?>
 
-<? if (empty($action) || $action == "login"): ?>
+<?php if (empty($action) || $action == "login"): ?>
     <fieldset>
         <legend>Log In with your email and password</legend>
         <form action="/user" method="post" id="register" class="validate">
@@ -50,8 +50,8 @@ if (empty($action) || $action == 'join' || $action == 'register'): ?>
             <a href='/user?action=reset' class="right">Forgot your password?</a>
         </form>
     </fieldset>
-<? endif; ?>
-<? if (!empty($action) && $action == 'reset'): ?>
+<?php endif; ?>
+<?php if (!empty($action) && $action == 'reset'): ?>
     <fieldset>
         <legend>Forgot your password?</legend>
         <form action="/user" method="post" class="validate">
@@ -67,8 +67,8 @@ if (empty($action) || $action == 'join' || $action == 'register'): ?>
             <input type="submit" name="submit" value="Reset" class="button" />
         </form>
     </fieldset>
-<? endif; ?>
-<? if (!empty($action) && $action == "set_password"): ?>
+<?php endif; ?>
+<?php if (!empty($action) && $action == "set_password"): ?>
     <fieldset>
         <legend>Set your new password:</legend>
         <form action="/user" method="post" class="validate">
@@ -82,4 +82,4 @@ if (empty($action) || $action == 'join' || $action == 'register'): ?>
             <input type="submit" name="submit" value="Set Password" class="button" />
         </form>
     </fieldset>
-<? endif; ?>
+<?php endif; ?>

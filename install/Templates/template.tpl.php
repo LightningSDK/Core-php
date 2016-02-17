@@ -21,9 +21,9 @@ use Lightning\View\CSS;
     <meta name="description" content="<?= $page_description ?>">
     <meta name="author" content="<?= $page_author ?>">
     <meta name="copyright" content="LightningSDK.com Copyright (c) 2014">
-    <? if (!empty($og_image)): ?>
+    <?php if (!empty($og_image)): ?>
         <meta property="og:image" content="<?=$og_image?>" />
-    <? endif; ?>
+    <?php endif; ?>
     <meta property="og:title" content="<?=$page_title?>" />
     <meta property="og:description" content="<?= $page_description ?>">
     <?= JS::render(); ?><?= CSS::render(); ?>
@@ -65,20 +65,20 @@ use Lightning\View\CSS;
                             <li class="blog"><a href="/blog">Blog</a></li>
                             <li class="contact"><a href="/contact">Contact</a></li>
                             <li>
-                                <? if (ClientUser::getInstance()->isImpersonating()): ?>
+                                <?php if (ClientUser::getInstance()->isImpersonating()): ?>
                                     <a href="/user?action=stop-impersonating">Return to Admin User</a>
-                                <? endif; ?>
-                                <?if (ClientUser::getInstance()->id > 0): ?>
+                                <?php endif; ?>
+                                <?php if (ClientUser::getInstance()->id > 0): ?>
                                     <a href="/user?action=logout">Log Out</a>
-                                <? else: ?>
+                                <?php else: ?>
                                     <a href="/user">Log In</a>
-                                <? endif; ?>
+                                <?php endif; ?>
                             </li>
                         </ul>
                     </section>
                 </section>
             </nav>
-            <? if (ClientUser::getInstance()->isAdmin()): ?>
+            <?php if (ClientUser::getInstance()->isAdmin()): ?>
                 <nav class="top-bar" data-topbar>
                     <ul class="title-area">
                         <li class="name">
@@ -109,13 +109,13 @@ use Lightning\View\CSS;
                         </ul>
                     </section>
                 </nav>
-            <? endif; ?>
+            <?php endif; ?>
         </div>
         <section role="main" class="scroll-container">
             <div class="row">
-                <? if (empty($full_width)): ?>
+                <?php if (empty($full_width)): ?>
                     <div class="medium-8 columns">
-                        <? if (!empty($page_header)): ?>
+                        <?php if (!empty($page_header)): ?>
                             <h1 id="page_header"><?=$page_header?></h1>
                         <?php
                         endif;
@@ -125,11 +125,11 @@ use Lightning\View\CSS;
                         endif; ?>
                     </div>
                     <div class="small-12 medium-4 columns right-column">
-                        <? $this->build('right_column'); ?>
+                        <?php $this->build('right_column'); ?>
                     </div>
-                <? else: ?>
+                <?php else: ?>
                     <div class="large-12 columns">
-                        <? if (!empty($page_header)): ?>
+                        <?php if (!empty($page_header)): ?>
                             <h1 id="page_header"><?=$page_header?></h1>
                         <?php
                         endif;
@@ -138,7 +138,7 @@ use Lightning\View\CSS;
                             $this->build($content);
                         endif; ?>
                     </div>
-                <? endif; ?>
+                <?php endif; ?>
             </div>
             <pre>
             <?php
