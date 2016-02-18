@@ -70,7 +70,7 @@ class Page extends PageView {
             $this->fullPage['url'] = Request::getFromURL('/(.*)\.html$/');
             if (!empty($this->fullPage['url'])) {
                 JS::set('page.source', $this->fullPage['body']);
-                $template->set('editable', $user->isAdmin());
+                $template->set('editable', true);
             }
         }
 
@@ -148,7 +148,7 @@ class Page extends PageView {
         $user = ClientUser::getInstance();
 
         if (!$user->isAdmin()) {
-            return $this->get();
+            Output::accessDenied();
         }
 
         $page_id = Request::post('page_id', 'int');
@@ -176,6 +176,7 @@ class Page extends PageView {
         $output['url'] = $new_values['url'];
         $output['page_id'] = $page_id;
         $output['title'] = $title;
+        $output['body_rendered'] = $this->renderContent($new_values['body']);
         Output::json($output);
     }
 

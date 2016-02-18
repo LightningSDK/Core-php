@@ -17,10 +17,16 @@ lightning.htmleditor = {
                 var field = $(this);
                 var id = $(this).prop('id').replace('save_', '');
                 if (lightning.vars.htmleditors[id].editor_type == 'ckeditor') {
-                    field.val(lightning.vars.htmleditors[id].ckeditor.getData());
+                    field.val(lightning.htmleditor.getContent(id));
                 }
             });
         });
+    },
+
+    getContent: function(id) {
+        if (lightning.vars.htmleditors[id].editor_type == 'ckeditor') {
+            return lightning.vars.htmleditors[id].ckeditor.getData();
+        }
     },
 
     initEditor: function(editor_id) {

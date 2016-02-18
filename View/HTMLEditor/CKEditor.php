@@ -62,7 +62,7 @@ class CKEditor {
 
         $output = '<input class="html_editor_presave" type="hidden" name="' . $id . '" id="save_' . $id . '" value="' . Scrub::toHTML($options['content']) . '">';
         $output .= '<div id="' .$id . '" ' . $spellcheck . $style . '>';
-        $output .= $options['content'];
+        $output .= !empty($options['content_rendered']) ? $options['content_rendered'] : $options['content'];
         $output .= '</div>';
 
         return $output;

@@ -70,6 +70,9 @@ class CMS {
             JS::set('token', Session::getInstance()->getToken());
             // TODO: This will need extra slashes if using the File handler.
             JS::set('cms.basepath', $settings['location']);
+            if (empty($settings['file_handler'])) {
+                $settings['file_handler'] = 'Lightning\Tools\IO\File';
+            }
             $fh = FileManager::getFileHandler($settings['file_handler'], $settings['location']);
             JS::set('cms.baseUrl', $fh->getWebURL(''));
             JS::set('fileBrowser.type', Configuration::get('html_editor.browser'));
