@@ -33,10 +33,10 @@ then
     git submodule update --init Vendor/htmlpurifier
     git submodule update --init Vendor/PHPMailer
     git submodule update --init Vendor/plancakeEmailParser
-    chmod 777 $DIR/Vendor/htmlpurifier/library/HTMLPurifier/DefinitionCache/Serializer
+    chmod 777 $DIR/Lightning/Vendor/htmlpurifier/library/HTMLPurifier/DefinitionCache/Serializer
 fi
 
-if [ `shouldInstall "Install compass and foundation dependencies? This is needed for advanced scss includes."` -eq 1 ]
+if [ `shouldInstall "Install compass and foundation dependencies? This is needed for advanced scss includes in your source files. But not required."` -eq 1 ]
 then
     cd $DIR/Lightning
     git submodule update --init Vendor/compass
@@ -91,7 +91,7 @@ then
     git config --global url.https://.insteadOf git://
 
     # Install foundation dependencies with npm and bower.
-    cd ${DIR}/Vendor/foundation
+    cd $DIR/Lightning/Vendor/foundation
     sudo npm install -g bower grunt-cli
 
     # for centos, install with bundler
@@ -105,7 +105,7 @@ then
     grunt build
 
     # Install jquery Validation
-    cd ${DIR}/Vendor/jquery-validation
+    cd $DIR/Lightning/Vendor/jquery-validation
     sudo npm install
     grunt
 fi
@@ -118,13 +118,35 @@ then
     git submodule update --init Vendor/twitterapiclient
 fi
 
+# Copy Source/Resources.
+if [ ! -d $DIR/Source/Resources -o `shouldInstall "Install or Reset the Source/Resources file?"` -eq 1 ]
+then
+    echo "Linking compass files"
+    cp -r ${DIR}/Lightning/install/Resources ${DIR}/Source/
+
+    if [[ "$PLATFORM" == 'Linux' ]]; then
+        sudo apt-get -y nodejs build-essential
+    fi
+
+    # Install lightning dependencies with grunt
+    cd $DIR/Source/Resources
+    npm install grunt grunt-cli
+    npm install
+    grunt build
+fi
+
 if [ `shouldInstall "Install ckeditor?"` -eq 1 ]
 then
+    cd $DIR
+    if [[ ! -d js ]]
+    then
+        mkdir js
+    fi
     cd $DIR/js
     wget http://download.cksource.com/CKEditor/CKEditor/CKEditor%204.5.7/ckeditor_4.5.7_standard.zip
     unzip ckeditor_4.5.7_standard.zip
-    if [[ ! -f "${DIR}/Source/Resources/sass/ckeditor_contents.scss" ]]; then
-        cp $DIR/ckeditor/content.css $DIR/Source/Resources/sass/ckeditor_contents.scss
+    if [[ ! -f $DIR/Source/Resources/sass/ckeditor_contents.scss ]]; then
+        cp $DIR/js/ckeditor/content.css $DIR/Source/Resources/sass/ckeditor_contents.scss
         cd $DIR/Source/Resources
         grunt build
     fi
@@ -133,6 +155,7 @@ fi
 if [ `shouldInstall "Install ckfinder?"` -eq 1 ]
 then
     # Install ckfinder
+    echo 'Missing install instructions'
 fi
 
 if [ `shouldInstall "Install tinymce?"` -eq 1 ]
@@ -159,39 +182,23 @@ then
     cp $DIR/Lightning/install/index.php $DIR/index.php
 fi
 
-if [ `shouldInstall "Install index file for Apache web server?"` -eq 1 ]
+if [ `shouldInstall "Install root .htaccess file for Apache web server?"` -eq 1 ]
 then
     cp $DIR/install/.htaccess-router $DIR/.htaccess
 fi
 
 # Create the source paths
-if [ ! -d $DIR/../Source ]; then
+if [ ! -d $DIR/Source ]; then
     echo "Making Source Directory"
-    mkdir $DIR/../Source
+    mkdir $DIR/Source
     echo "Copying Source htaccess file"
     cp $DIR/Lightning/install/.htaccess-protected $DIR/Source/.htaccess
 fi
 
 # Install the cache directory.
-if [ ! -d $DIR/../cache ]; then
+if [ ! -d $DIR/cache ]; then
     echo "Creating cache directory"
     cp -r $DIR/Lightning/install/cache $DIR/
-fi
-
-# Copy Source/Resources.
-if [ ! -d $DIR/Source/Resources -o `shouldInstall "Reset the Source/Resources file?"` -eq 1 ]
-then
-    echo "Linking compass files"
-    cp -r ${DIR}/Lightning/install/Resources ${DIR}/Source/
-
-    if [[ "$PLATFORM" == 'Linux' ]]; then
-        sudo apt-get -y nodejs build-essential
-    fi
-
-    # Install lightning dependencies with grunt
-    cd $DIR/Source/Resources
-    npm install
-    grunt build
 fi
 
 # Install the sample config file as active.
@@ -225,18 +232,19 @@ if [ `shouldInstall "Install/reset default templates and images?"` -eq 1 ]
 then
     # Install main templates.
     echo "Copying default templates to source folder."
-    cp -rf $DIR/install/Templates $DIR/../Source/
+    cp -rf $DIR/Lightning/install/Templates $DIR/Source/
 
     echo "Copying default images to web root."
-    cp -rf $DIR/install/images $DIR/../
+    cp -rf $DIR/Lightning/install/images $DIR/
 elif [ `shouldInstall "Install missing default templates and images?"` -eq 1 ]
 then
     # Install main templates.
+    # The difference is that this won't replace any templates.
     echo "Copying default templates to source folder."
-    cp -r $DIR/install/Templates $DIR/../Source/
+    cp -r $DIR/Lightning/install/Templates $DIR/Source/
 
     echo "Copying default images to web root."
-    cp -r $DIR/install/images $DIR/../
+    cp -r $DIR/Lightning/install/images $DIR/
 fi
 
 echo "Lightning Installation Complete."
