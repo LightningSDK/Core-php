@@ -49,11 +49,11 @@ class CMS {
         $settings += self::$settings;
         $content = CMSModel::loadByName($name);
         if (empty($content)) {
-            $content = array(
+            $content = (object) [
                 'class' => '',
                 'content' => !empty($settings['default']) ? $settings['default'] : '',
                 'url' => !empty($settings['defaultUrl']) ? $settings['defaultUrl'] : '',
-            );
+            ];
         }
         if (!empty($content->content) && empty($content->url)) {
             // Needs a file prefix for rendering.
