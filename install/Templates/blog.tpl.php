@@ -66,9 +66,9 @@
             </div>
         <?php endforeach; ?>
         <?=$blog->pagination()?>
-    <?php elseif ($page_section == "blog"): ?>
+    <?php elseif (!empty($page_section) && $page_section == "blog"): ?>
         The page you are looking for does not exist.
-    <?php elseif ($page_section == "blog_list"): ?>
+    <?php elseif (!empty($page_section) && $page_section == "blog_list"): ?>
         Nothing Found.
     <?php endif; ?>
 </div>
