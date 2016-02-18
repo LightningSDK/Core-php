@@ -267,10 +267,10 @@ class Scrub {
             }
         }
 
-        if (!empty($allowed_css) || $allowed_css[0] == '.') {
+        if (!empty($allowed_css) && $allowed_css[0] == '.') {
             $allowed_css = self::SCRUB_BASIC_CSS . ',' . substr($allowed_css, 1);
         }
-        elseif ($allowed_css == '') {
+        elseif (empty($allowed_css)) {
             $allowed_css = self::SCRUB_BASIC_CSS;
         }
 
