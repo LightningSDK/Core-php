@@ -79,7 +79,9 @@ class CMS {
             . '<input type="text" placeholder="classes" id="cms_' . $name . '_class" class="imagesCSS" name="' . $forced_classes . '" value="' . $added_classes . '" />'
             . '<img src="' . $content->url . '" id="cms_' . $name . '" class="' . $content->class . '" />';
         } else {
-            return '<img src="' . $content->url . '" class="' . $content->class . '" />';
+            if (!empty($content)) {
+                return '<img src="' . $content->url . '" class="' . $content->class . '" />';
+            }
         }
     }
 
