@@ -822,7 +822,7 @@ class Database extends Singleton {
                              'inner_join' => ' INNER JOIN ',
                         ] as $type => $format) {
                     // Rewrite old queries for backwards compatibility.
-                    if (!empty($join[$format])) {
+                    if (!empty($join[$format]) && is_array($join[$format])) {
                         $output .= $this->parseJoin($join, $values);
                     }
                     if (!empty($join[$type])) {
@@ -832,6 +832,9 @@ class Database extends Singleton {
                 }
 
                 if (!empty($join['on'])) {
+                    if (!is_array($join['on'])) {
+                        throw new Exception('Expecting array!');
+                    }
                     $output .= ' ON ' . $this->sqlImplode($join['on'], $values, ' AND ');
                 }
                 elseif (!empty($join['using'])) {
