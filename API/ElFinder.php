@@ -54,7 +54,6 @@ class ElFinder extends API {
 			Output::http(401);
 		}
 		$opts = array(
-			 'debug' => true,
 			'roots' => array(
 				array(
 					'driver'        => 'LocalFileSystem',           // driver for accessing file system (REQUIRED)
