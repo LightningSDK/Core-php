@@ -121,7 +121,8 @@ class User extends Object {
      *   Whether the current user is impersonated.
      */
     public function isImpersonating() {
-        return (boolean) Session::getInstance()->getSetting('impersonate');
+        $session = Session::getInstance(true, false);
+        return $session && (boolean) $session->getSetting('impersonate');
     }
 
     /**
@@ -142,7 +143,7 @@ class User extends Object {
      *   Whether the user is a site admin.
      */
     public function isAdmin() {
-        return $this->hasPermission(Permissions::ALL);
+        return !$this->isAnonymous() && $this->hasPermission(Permissions::ALL);
     }
 
     /**
