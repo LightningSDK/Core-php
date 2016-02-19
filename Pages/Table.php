@@ -156,7 +156,7 @@ abstract class Table extends Page {
      *
      * @var array
      */
-    protected $accessControl;
+    protected $accessControl = [];
 
     /**
      * This allows the edit form to return to a page other than the list view
@@ -688,7 +688,7 @@ abstract class Table extends Page {
         }
 
         if (!empty($new_values)) {
-            $where = array_merge($this->accessControl, [$this->getKey() => $this->id]);
+            $where = $this->accessRestrictions([$this->getKey() => $this->id]);
             Database::getInstance()->update($this->table, $new_values, $where);
         }
         $this->updateAccessTable();
@@ -726,6 +726,14 @@ abstract class Table extends Page {
         $this->afterUpdate();
 
         $this->afterPostRedirect();
+    }
+
+    protected function accessRestrictions($where = []) {
+        $where = $this->accessControl + $where;
+        if ($this->singularity || $this->singularityID) {
+            $where[] = [$this->getKey() => $this->singularityID];
+        }
+        return $where;
     }
 
     public function afterPostRedirect() {
