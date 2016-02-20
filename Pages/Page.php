@@ -81,7 +81,7 @@ class Page extends PageView {
         foreach (array('title', 'keywords', 'description') as $meta_data) {
             $this->fullPage[$meta_data] = Scrub::toHTML($this->fullPage[$meta_data]);
             if (!empty($this->fullPage[$meta_data])) {
-                Configuration::set('page_' . $meta_data, str_replace("*", Configuration::get('page_' . $meta_data), $this->fullPage[$meta_data]));
+                $template->set('page_' . $meta_data, str_replace("*", Configuration::get('page_' . $meta_data), $this->fullPage[$meta_data]));
             }
         }
 
