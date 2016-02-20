@@ -226,11 +226,11 @@ class Blog extends Singleton {
         $pages = ceil($this->post_count / $this->list_per_page);
 
         if ($this->m > 0) {
-            $base_link = "/archive/{$this->y}/{$this->m}-%%.htm";
+            $base_link = "/blog/archive/{$this->y}/{$this->m}-%%.htm";
         } else if ($this->y > 0) {
-            $base_link = "/archive/{$this->y}-%%.htm";
+            $base_link = "/blog/archive/{$this->y}-%%.htm";
         } else if (!empty($this->category)) {
-            $base_link = '/category/' . $this->category_url . '.htm';
+            $base_link = '/blog/category/' . $this->category_url . '-%%.htm';
         } else {
             $base_link = '/blog/page/%%';
         }
@@ -281,7 +281,7 @@ class Blog extends Singleton {
         if ($list->rowCount() > 0) {
             echo "<ul>";
             foreach($list as $r)
-                echo "<li><a href='/blog/category/". Scrub::url($r['category']) . ".htm'>{$r['category']}</a> ({$r['count']})</li>";
+                echo "<li><a href='/blog/category/". $r['cat_url'] . ".htm'>{$r['category']}</a> ({$r['count']})</li>";
             echo "</ul>";
         }
     }
