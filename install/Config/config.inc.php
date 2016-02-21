@@ -54,7 +54,7 @@ $conf = [
     ],
     'html_editor' => [
         'editor' => 'text',
-        'finder' => '',
+        'browser' => '',
     ],
     'imageBrowser' => [
         'containers' => [
