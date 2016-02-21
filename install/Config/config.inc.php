@@ -22,6 +22,7 @@ $conf = [
         'domain' => 'Website.com',
         'email_domain' => 'www.Website.com',
         'log' => '../logs/web.log',
+        'logtype' => 'stacktrace',
     ],
     'contact' => [
         'subject' => 'Message from Website.com',
