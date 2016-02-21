@@ -46,9 +46,17 @@ class Blog extends Page {
             if (!empty($path[0]) || count($path) > 2) {
                 // This page num can be in index 2 (blog/page/#) or index 3 (blog/category/a-z/#).
                 $blog->page = is_numeric($path[count($path) - 1]) ? $path[count($path) - 1] : 1;
-                if ($path[1] == 'category' && !empty($path[1])) {
+                if (empty($path[1])) {
+                    $blog->loadList(1);
+                } elseif ($path[1] == 'category' && !empty($path[1])) {
                     // Load category roll
-                    $blog->loadList('category', preg_replace('/\.htm$/', '', $path[2]));
+                    $category = preg_replace('/\.htm$/', '', $path[2]);
+                    $c_parts = explode('-', $category);
+                    if (is_numeric(end($c_parts))) {
+                        $blog->page = array_pop($c_parts);
+                    }
+                    $blog->category = implode('-', $c_parts);
+                    $blog->loadList('category', $blog->category);
                 } elseif ($path[1] == 'author' && !empty($path[1])) {
                     // Load an author roll.
                     $blog->loadList('author', preg_replace('/\.htm$/', '', $path[2]));
@@ -62,7 +70,7 @@ class Blog extends Page {
             else {
                 // Fall back, load blogroll
                 // TODO: This should only happen on /blog, otherwise it should return a 404
-                $blog->loadList(1);
+                $blog->loadList();
             }
         }
 
