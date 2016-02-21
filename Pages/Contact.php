@@ -79,7 +79,12 @@ class Contact extends PageView {
             $this->user->subscribe($list);
         }
 
-        // Send a message.
+        if ($message = Request::post('message', 'int')) {
+            $mailer = new Mailer();
+            $mailer->sendOne($message, $this->user);
+        }
+
+        // Send a message to the site contact.
         if ($this->settings['always_notify'] || ($request_contact || $this->settings['contact'])) {
             $sent = $this->sendMessage();
             if (!$sent) {

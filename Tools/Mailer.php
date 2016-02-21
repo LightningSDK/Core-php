@@ -356,7 +356,7 @@ class Mailer {
         $this->message->resetCustomVariables($this->customVariables);
         $this->message->setUser($user);
         $this->message->setDefaultVars();
-        $this->to($user->email, $user->first . ' ' . $user->last);
+        $this->to($user->email, $user->fullName());
         if ($this->sendMessage()) {
             Tracker::trackEvent('Email Sent', $message_id, $user->id);
             return true;
