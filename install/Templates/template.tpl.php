@@ -4,6 +4,7 @@ use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
 use Lightning\Tools\Messenger;
+use Lightning\Tools\Performance;
 use Lightning\View\JS;
 use Lightning\View\CSS;
 ?>
@@ -145,7 +146,7 @@ use Lightning\View\CSS;
             if (ClientUser::getInstance()->isAdmin()) {
                 $database = Database::getInstance();
                 print_r($database->getQueries());
-                print_r($database->timeReport());
+                print_r(Performance::timeReport());
             }
             ?>
             </pre>

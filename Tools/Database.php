@@ -58,14 +58,14 @@ class Database extends Singleton {
      *
      * @var float
      */
-    private $end1;
+    private $end_mysql;
 
     /**
      * The php execution end time.
      *
      * @var float
      */
-    private $end2;
+    private $end_php;
 
     /**
      * The last query executed. If it's the same it does not need to be reprepared.
@@ -268,16 +268,16 @@ class Database extends Singleton {
      * A query is done, add up the times.
      */
     public function timerQueryEnd() {
-        $this->end1 = microtime(TRUE);
+        $this->end_mysql = microtime(TRUE);
     }
 
     /**
      * Stop the timer and add up the times.
      */
     public function timerEnd() {
-        $this->end2 = microtime(TRUE);
-        $this->mysql_time += $this->end1-$this->start;
-        $this->php_time += $this->end2-$this->start;
+        $this->end_php = microtime(TRUE);
+        $this->mysql_time += $this->end_mysql - $this->start;
+        $this->php_time += $this->end_php - $this->start;
     }
 
     /**
@@ -294,9 +294,9 @@ class Database extends Singleton {
      */
     public function timeReport() {
         return [
-            'Total Queries: ' . $this->query_count,
-            'Total SQL Time: ' . $this->mysql_time,
-            'Total PHP Time: ' . number_format($this->php_time, 4),
+            'Total MySQL Queries: ' . $this->query_count,
+            'Total MySQL Time: ' . number_format($this->mysql_time, 4),
+            'Total MySQL PHP Time: ' . number_format($this->php_time, 4),
         ];
     }
 
@@ -315,14 +315,11 @@ class Database extends Singleton {
             }
         }
         $this->query_count ++;
+        $this->timerStart();
+        $this->__query_execute($query, $vars);
+        $this->timerQueryEnd();
         if ($this->verbose) {
-            $this->timerStart();
-            $this->__query_execute($query, $vars);
-            $this->timerQueryEnd();
-            $this->log($query, $vars, $this->end1 - $this->start);
-        }
-        else {
-            $this->__query_execute($query, $vars);
+            $this->log($query, $vars, $this->end_mysql - $this->start);
         }
         if (!$this->result) {
             $this->errorHandler($this->connection->errorInfo(), $query);

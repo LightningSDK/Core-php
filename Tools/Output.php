@@ -205,7 +205,7 @@ class Output {
             if ($database) {
                 $output['database'] = array(
                     'queries' => $database->getQueries(),
-                    'time' => $database->timeReport(),
+                    'time' => Performance::timeReport(),
                 );
             }
         }

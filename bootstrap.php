@@ -13,10 +13,13 @@ if (!defined('CONFIG_PATH')) {
 
 use Lightning\Tools\Logger;
 use Lightning\Tools\ClassLoader;
+use Lightning\Tools\Performance;
 
 // Set the autoloader to the Lightning autoloader.
 require_once HOME_PATH . '/Lightning/Tools/ClassLoader.php';
 spl_autoload_register(array('Lightning\\Tools\\ClassLoader', 'classAutoloader'));
+
+Performance::startTimer();
 
 if (!defined('LIGHTNING_BOOTSTRAP_NO_LOGGER')) {
     // Set the error handler.
