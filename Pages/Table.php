@@ -3178,6 +3178,9 @@ abstract class Table extends Page {
                             if (!empty($field['filter'])) {
                                 $filter += $field['filter'];
                             }
+                            if (!empty($field['accessControl'])) {
+                                $filter = $field['accessControl'] + $filter;
+                            }
                             // TODO: implement a cache or join in the main query to prevent multiple query execution.
                             $value = Database::getInstance()->selectRow(
                                 $field['lookuptable'],
@@ -3530,11 +3533,16 @@ abstract class Table extends Page {
             case 'radios':
             case 'select':
                 if ($field['type'] == 'lookup') {
+                    $filter = !empty($field['filter']) ? $field['filter'] : [];
+                    if (!empty($field['accessControl'])) {
+                        $filter = $field['accessControl'] + $filter;
+                    }
+
                     $options = Database::getInstance()->selectColumn(
                         // todo: rename these for consistency.
                         $field['lookuptable'],
                         $field['display_column'],
-                        !empty($field['filter']) ? $field['filter'] : [],
+                        $filter,
                         !empty($field['lookupkey']) ? $field['lookupkey'] : $field['field']
                     );
                 }
