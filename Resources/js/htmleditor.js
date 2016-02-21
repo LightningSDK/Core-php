@@ -33,10 +33,26 @@ lightning.htmleditor = {
         if (lightning.vars.htmleditors[editor_id].editor_type == 'tinymce') {
             tinymce.init(lightning.vars.htmleditors[editor_id]);
         } else if (lightning.vars.htmleditors[editor_id].editor_type == 'ckeditor') {
-            if (lightning.vars.htmleditors[editor_id].hasOwnProperty('plugins')) {
-                lightning.vars.htmleditors[editor_id].plugins = lightning.vars.htmleditors[editor_id].replace(/\*/, CKEDITOR.plugins);
-            }
-            lightning.vars.htmleditors[editor_id].ckeditor = CKEDITOR.replace(editor_id, lightning.vars.htmleditors[editor_id]);
+            CKEDITOR.scriptLoader.queue(CKEDITOR.getUrl('config.js'), function(){
+                // Init the CKEditor Config
+                if (typeof CKEDITOR.editorConfig == "function") {
+                    CKEDITOR.editorConfig(CKEDITOR.config);
+                }
+
+                // Add any plugins specified for just this editor.
+                if (lightning.vars.htmleditors[editor_id].hasOwnProperty('plugins')) {
+                    lightning.vars.htmleditors[editor_id].plugins = lightning.vars.htmleditors[editor_id].plugins.replace(/\*/, CKEDITOR.config.plugins);
+                } else {
+                    lightning.vars.htmleditors[editor_id].plugins = CKEDITOR.config.plugins;
+                }
+
+                // If fullPage is requested, the divarea plugin must be removed.
+                if (lightning.vars.htmleditors[editor_id].hasOwnProperty('fullPage') && lightning.vars.htmleditors[editor_id].fullPage) {
+                    lightning.vars.htmleditors[editor_id].plugins = lightning.vars.htmleditors[editor_id].plugins.replace('divarea', '');
+                }
+
+                lightning.vars.htmleditors[editor_id].ckeditor = CKEDITOR.replace(editor_id, lightning.vars.htmleditors[editor_id]);
+            });
         }
     },
 
