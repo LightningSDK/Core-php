@@ -2663,7 +2663,8 @@ abstract class Table extends Page {
     }
 
     protected function getFileHandler($field) {
-        return FileManager::getFileHandler(empty($field['file_handler']) ? '' : $field['file_handler'], $field['location']);
+        // TODO: $field['location'] is deprecated. All tables should be updated to use container instead.
+        return FileManager::getFileHandler(empty($field['file_handler']) ? '' : $field['file_handler'], !empty($field['container']) ? $field['container'] : $field['location']);
     }
 
     protected function decode_bool_group($int) {
