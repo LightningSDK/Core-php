@@ -64,7 +64,8 @@ $conf = [
                 // Will be prefixed to an image file. Include the trailing slash.
                 'url' => '/images/',
             ],
-        ]
+        ],
+        'type' => 'elfinder',
     ],
     'meta_data' => [
         'title' => '',
