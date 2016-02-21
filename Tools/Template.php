@@ -7,6 +7,8 @@
 namespace Lightning\Tools;
 
 use Lightning\Tools\Cache\Cache;
+use Lightning\View\CSS;
+use Lightning\View\JS;
 use stdClass;
 
 /**
@@ -205,11 +207,15 @@ class Template extends Singleton {
         $this->footer .= $content;
     }
 
+    public function renderHeader() {
+        return JS::render() . CSS::render();
+    }
+
     /**
      * Display the footer content.
      */
     public function renderFooter() {
-        return $this->footer;
+        return JS::render() . CSS::render() . $this->footer;
     }
 
     /**

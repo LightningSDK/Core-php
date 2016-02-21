@@ -27,7 +27,7 @@ use Lightning\View\CSS;
     <?php endif; ?>
     <meta property="og:title" content="<?=$page_title?>" />
     <meta property="og:description" content="<?= $page_description ?>">
-    <?= JS::render(); ?><?= CSS::render(); ?>
+    <?= $this->renderHeader(); ?>
 </head>
 <body class="antialiased hide-extras">
 <?php if ($analytics_id = Configuration::get('google_analytics_id')): ?>
@@ -153,6 +153,6 @@ use Lightning\View\CSS;
         </section>
     </div>
 </div>
-<?= JS::render(); ?><?= CSS::render(); ?><?= $this->renderFooter(); ?>
+<?= $this->renderFooter(); ?>
 </body>
 </html>
