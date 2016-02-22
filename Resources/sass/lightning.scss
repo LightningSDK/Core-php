@@ -536,7 +536,7 @@ ul.tags{
     display: inline-block;
     color: white;
     padding: 10px 0;
-    width: 25%;
+    width: 20%;
     &.google {
       background-color: #f32e06;
     }
@@ -546,11 +546,22 @@ ul.tags{
     &.twitter {
       background-color: #28aae1;
     }
+    &.linkedin {
+      background-color: #166eab;
+    }
     &.email {
-      background-color: #2f6fad;
+      background-color: #646f72;
       a {
         color: white;
       }
     }
   }
+}
+@media #{$small-only} {
+  .social-share {
+    font-size: 12px;
+  }
+}
+.semi-white {
+  background-color: rgba(255, 255, 255, .8);
 }

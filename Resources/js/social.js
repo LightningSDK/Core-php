@@ -105,17 +105,22 @@ lightning.social = {
     shareClick: function() {
         var el = $(this);
         var url = el.closest('.social-share').data('url');
+        if (el.is('.facebook')) {
+            lightning.social.sharePop('http://www.facebook.com/sharer.php?s=100&p[url]=' + url);
+        } else if (el.is('.twitter')) {
+            lightning.social.sharePop('https://twitter.com/intent/tweet?url=' + url);
+        } else if (el.is('.google')) {
+            lightning.social.sharePop('https://plus.google.com/share?url=' + url);
+        } else if (el.is('.linkedin')) {
+            lightning.social.sharePop('http://www.linkedin.com/shareArticle?mini=true&url=' + url);
+        }
+    },
+    sharePop: function(url) {
         var winHeight = 350;
         var winWidth = 520;
         var winTop = (screen.height / 2) - (winHeight / 2);
         var winLeft = (screen.width / 2) - (winWidth / 2);
-        if (el.is('.facebook')) {
-            window.open('http://www.facebook.com/sharer.php?s=100&p[url]=' + url, 'sharer', 'top=' + winTop + ',left=' + winLeft + ',toolbar=0,status=0,width=' + winWidth + ',height=' + winHeight);
-        } else if (el.is('.twitter')) {
-            window.open('https://twitter.com/intent/tweet?url=' + url + '&via=' + lightning.vars.social.twitter.url + '', 'sharer', 'top=' + winTop + ',left=' + winLeft + ',toolbar=0,status=0,width=' + winWidth + ',height=' + winHeight);
-        } else if (el.is('.google')) {
-            window.open('https://plus.google.com/share?url=' + url, 'sharer', 'top=' + winTop + ',left=' + winLeft + ',toolbar=0,status=0,width=' + winWidth + ',height=' + winHeight);
-        }
+        window.open(url, 'sharer', 'top=' + winTop + ',left=' + winLeft + ',toolbar=0,status=0,width=' + winWidth + ',height=' + winHeight);
     },
 
     initLogout: function(site) {
