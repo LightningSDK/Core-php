@@ -90,17 +90,17 @@ class Contact extends PageView {
             if (!$sent) {
                 Output::error('Your message could not be sent. Please try again later');
             } else {
-                $this->customMessage();
+                $custom_message = $this->customMessage();
                 // Send an email to to have them test for spam.
                 if (!empty($this->settings['auto_responder'])) {
                     $auto_responder_mailer = new Mailer();
                     $result = $auto_responder_mailer->sendOne($this->settings['auto_responder'], UserModel::loadByEmail($this->getSender()) ?: new UserModel(array('email' => $this->getSender())));
                     if ($result && $this->settings['spam_test']) {
                         // Set the notice.
-                        Navigation::redirect('/message', array('msg' => 'spam_test'));
+                        Navigation::redirect('/message', ['msg' => 'spam_test']);
                     }
                 }
-                Navigation::redirect('/message', array('msg' => 'contact_sent'));
+                Navigation::redirect('/message', $custom_message ? [] : ['msg' => 'contact_sent']);
             }
         } else {
             $this->customMessage();
@@ -113,7 +113,9 @@ class Contact extends PageView {
     protected function customMessage() {
         if ($this->settings['custom_message'] && $message = Request::post('success')) {
             Messenger::message($message);
+            return true;
         }
+        return false;
     }
 
     /**
