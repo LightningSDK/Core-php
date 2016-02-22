@@ -44,6 +44,9 @@ $conf = [
         'default_list' => null,
         'mail_template' => null,
         'confirm_message' => null, // Set a message_id here to enable double confirmation.
+        'dkim_key' => '',
+        'dkim_domain' => '',
+        'dkim_selector' => '', // This is the subdomain where your dkim key is found. For example if your dkim record is dkim._domainkey.mydomain.com, then this value would be set to 'dkim'.
     ],
     'tracker' => [
         'allow_unencrypted' => true,

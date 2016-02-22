@@ -97,6 +97,13 @@ class Mailer {
             $this->mailer->Mailer = 'smtp';
             $this->mailer->Host = $smtpHost;
         }
+
+        if ($dkim_key = Configuration::get('mailer.dkim_key')) {
+            $this->mailer->DKIM_domain = Configuration::get('mailer.dkim_domain');
+            $this->mailer->DKIM_private = $dkim_key;
+            $this->mailer->DKIM_selector = Configuration::get('mailer.dkim_selector');
+            $this->mailer->DKIM_passphrase = '';
+        }
     }
 
     /**
@@ -141,7 +148,7 @@ class Mailer {
      *   Returns itself for method chaining.
      */
     public function from($email, $name = null) {
-        $this->from = $email;
+        $this->mailer->DKIM_identity = $this->from = $email;
         $this->fromName = $name;
         try {
             $this->mailer->AddReplyTo($email, $name);
