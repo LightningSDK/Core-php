@@ -36,7 +36,7 @@ module.exports = function(grunt) {
                     '../build/js/placeholder.min.js': '../Vendor/foundation/vendor/jquery-placeholder/jquery.placeholder.js',
                     '../build/js/fastclick.min.js': '../Vendor/foundation/vendor/fastclick/lib/fastclick.js',
                     '../build/js/jquery.cookie.min.js': '../Vendor/foundation/vendor/jquery.cookie/jquery.cookie.js',
-                    '../build/js/jquery.min.js': '../Vendor/foundation/vendor/jquery/dist/jquery.js'
+                    '../build/js/jquery.min.js': '../Vendor/jquery/dist/jquery.js'
                 }
             }
         },
