@@ -36,7 +36,7 @@ lightning.video = {
             var maxres = '//i.ytimg.com/vi/' + this.id + '/maxresdefault.jpg';
             var defaultres = '//i.ytimg.com/vi/' + this.id + '/hqdefault.jpg';
             var image = new Image();
-            var container = this;
+            var container = $(this);
             image.onerror = function() {
                 // Downgrade to default res.
                 $(this).css('background-image', 'url(' + defaultres + ')');
@@ -44,30 +44,41 @@ lightning.video = {
             image.onload = function() {
                 // Show the max res.
                 if (this.width <= 120) {
-                    $(container).css('background-image', 'url(' + defaultres + ')');
+                    container.css('background-image', 'url(' + defaultres + ')');
                 } else {
-                    $(container).css('background-image', 'url(' + maxres + ')');
+                    container.css('background-image', 'url(' + maxres + ')');
                 }
             };
             image.src = maxres;
 
             // Overlay the Play icon to make it look like a video player
-            $(this).append($('<div/>', {'class': 'play'}));
+            container.append($('<div/>', {'class': 'play'}));
 
-            $(document).delegate('#'+this.id, 'click', function() {
-                // Create an iFrame with autoplay set to true
-                var iframe_url = 'https://www.youtube.com/embed/' + this.id + '?autoplay=1&autohide=1&modestbranding=0&showinfo=0&rel=0';
-                if ($(this).data('params')) iframe_url+='&'+$(this).data('params');
+            if (container.data('autoplay')) {
+                lightning.video.playYouTube(container);
+            } else {
+                $(document).delegate('#'+this.id, 'click', function(){
+                    lightning.video.playYouTube($(this));
+                });
+            }
 
-                // The height and width of the iFrame should be the same as parent
-                var iframe = $('<iframe/>', {'frameborder': '0', 'src': iframe_url, 'width': '100%', 'height': '100%' });
-
-                // Replace the YouTube thumbnail with YouTube HTML5 Player
-                $(this).replaceWith(iframe);
-            });
-
-            $(this).addClass('initted');
+            container.addClass('initted');
         });
+    },
+
+    playYouTube: function(container) {
+        var el = $(container);
+        // Create an iFrame with autoplay set to true
+        var iframe_url = 'https://www.youtube.com/embed/' + el.prop('id') + '?autoplay=1&autohide=1&modestbranding=0&showinfo=0&rel=0';
+        if (el.data('params')) {
+            iframe_url += '&' + el.data('params');
+        }
+
+        // The height and width of the iFrame should be the same as parent
+        var iframe = $('<iframe/>', {'frameborder': '0', 'src': iframe_url, 'width': '100%', 'height': '100%' });
+
+        // Replace the YouTube thumbnail with YouTube HTML5 Player
+        el.replaceWith(iframe);
     },
 
     clickPlaylist: function(event) {

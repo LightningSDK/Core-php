@@ -22,8 +22,9 @@ class YouTube {
      * @return string
      *   The rendered HTML.
      */
-    public static function render($video_id) {
+    public static function render($video_id, $settings = []) {
         JS::startup('lightning.video.initYouTube()');
-        return '<div class="youtube" id="' . $video_id . '" ></div>';
+        $autoplay = !empty($settings['autoplay']) ? 'data-autoplay="true"' : '';
+        return '<div class="youtube" id="' . $video_id . '" ' . $autoplay . '></div>';
     }
 }

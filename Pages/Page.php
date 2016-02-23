@@ -119,7 +119,9 @@ class Page extends PageView {
                         $output = $sub_template->render($element->getAttribute('name'), true);
                         break;
                     case 'youtube':
-                        $output = YouTube::render($element->getAttribute('id'));
+                        $output = YouTube::render($element->getAttribute('id'), [
+                            'autoplay' => $element->getAttribute('id') ? true : false,
+                        ]);
                         if ($element->getAttribute('flex')) {
                             $output = '<div class="flex-video ' . ($element->getAttribute('widescreen') ? 'widescreen' : '') . '">' . $output . '</div>';
                         }
