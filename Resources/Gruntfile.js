@@ -27,16 +27,12 @@ module.exports = function(grunt) {
             },
             vendor: {
                 files: {
-                    '../build/js/lightning.min.js': ['init.js', 'js/*.js'],
-                    '../build/js/foundation.min.js': [
-                        '../Vendor/foundation/js/foundation/foundation.js',
-                        '../Vendor/foundation/js/foundation/foundation.*.js'
-                    ],
-                    '../build/js/modernizr.min.js': '../Vendor/foundation/vendor/modernizr/modernizr.js',
-                    '../build/js/placeholder.min.js': '../Vendor/foundation/vendor/jquery-placeholder/jquery.placeholder.js',
-                    '../build/js/fastclick.min.js': '../Vendor/foundation/vendor/fastclick/lib/fastclick.js',
-                    '../build/js/jquery.cookie.min.js': '../Vendor/foundation/vendor/jquery.cookie/jquery.cookie.js',
-                    '../build/js/jquery.min.js': '../Vendor/jquery/dist/jquery.js'
+                    '../build/js-res/lightning.min.js': ['init.js', 'js/*.js'],
+                    '../build/js-res/modernizr.min.js': '../Vendor/foundation/vendor/modernizr/modernizr.js',
+                    '../build/js-res/placeholder.min.js': '../Vendor/foundation/vendor/jquery-placeholder/jquery.placeholder.js',
+                    '../build/js-res/fastclick.min.js': '../Vendor/foundation/vendor/fastclick/lib/fastclick.js',
+                    '../build/js-res/jquery.cookie.min.js': '../Vendor/foundation/vendor/jquery.cookie/jquery.cookie.js',
+                    '../build/js-res/jquery.min.js': '../Vendor/jquery/dist/jquery.js'
                 }
             }
         },
@@ -46,9 +42,18 @@ module.exports = function(grunt) {
                     {
                         src: [
                             '../Vendor/chartjs/Chart.min.js',
-                            '../Vendor/build/videojs/video-js.min.js'
+                            '../Vendor/videojs/build/video-js.min.js'
                         ],
                         dest: '../build/js',
+                        expand: true,
+                        flatten: true,
+                        filter:'isFile'
+                    },
+                    {
+                        src: [
+                            '../Vendor/foundation/js/foundation/*'
+                        ],
+                        dest: '../build/js-res',
                         expand: true,
                         flatten: true,
                         filter:'isFile'
