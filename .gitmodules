@@ -25,9 +25,6 @@
 [submodule "Vendor/BounceHandler"]
 	path = Vendor/BounceHandler
 	url = https://github.com/Rambomst/PHP-Bounce-Handler.git
-[submodule "Vendor/jquery-validation"]
-	path = Vendor/jquery-validation
-	url = https://github.com/jzaefferer/jquery-validation.git
 [submodule "Vendor/videojs"]
 	path = Vendor/videojs
 	url = https://github.com/videojs/video.js.git

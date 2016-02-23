@@ -5,24 +5,37 @@ use Lightning\View\Field;
 use Lightning\Tools\ReCaptcha;
 
 ?>
-<h1>Contact</h1>
+<div class="row">
+    <h1>Contact</h1>
 
-<form action="contact" method="post" id="contact_form" class="validate">
-    <?= Form::renderTokenInput(); ?>
+    <form action="contact" method="post" id="contact_form" data-abide>
+        <?= Form::renderTokenInput(); ?>
 
-    <p>Contact Us:</p>
+        <h2>Contact Us:</h2>
 
-    <input type="hidden" name="action" value="sendMessage" />
+        <div>
+            <label>Your Name:
+                <input type="text" name="name" id='name' value="<?=Field::defaultValue('name');?>" required />
+            </label>
+            <small class="error">Please enter your name.</small>
+        </div>
 
-    Your Name:<br />
-    <input type="text" name="name" id='name' value="<?=Field::defaultValue('name');?>" class="required" /><br />
+        <div>
+            <label>
+                Your Email:
+                <input type="email" name="email" id='my_email' value="<?=Field::defaultValue('email');?>" required />
+            </label>
+            <small class="error">Please enter a valid email address.</small>
+        </div>
 
-    Your Email:<br />
-    <input type="text" name="email" id='my_email' value="<?=Field::defaultValue('email');?>" class="required email" /><br />
-
-    Your message:<br />
-    <textarea name="message" cols="70" rows="20"><?=Field::defaultValue('name', null, 'text');?></textarea><br />
-    <?=ReCaptcha::render()?>
-    <br />
-    <input type="Submit" name="Submit" value="Send Message" class="button" />
-</form>
+        <div>
+            <label>
+                Your message:
+                <textarea name="message" cols="70" rows="5"><?=Field::defaultValue('name', null, 'text');?></textarea><br />
+            </label>
+        </div>
+        <?=ReCaptcha::render()?>
+        <br />
+        <input type="Submit" name="Submit" value="Send Message" class="button" />
+    </form>
+</div>
