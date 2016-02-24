@@ -26,8 +26,7 @@ module.exports = function(grunt) {
                 files: {
                     '../../js/lightning.min.js': [
                         '../../Lightning/build/js-res/fastclick.min.js',
-                        '../../Lightning/build/js-res/jquery.min.js',
-                        '../../Lightning/build/js-res/jquery.cookie.min.js',
+                        '../../Lightning/build/js-res/jquery.js',
                         '../../Lightning/build/js-res/placeholder.min.js',
                         '../../Lightning/build/js-res/modernizr.min.js',
                         '../../Lightning/build/js-res/foundation.js',
