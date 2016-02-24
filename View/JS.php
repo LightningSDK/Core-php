@@ -145,7 +145,10 @@ class JS {
                 $file_name = $file['file'];
                 if ($file['versioning']) {
                     $concatenator = strpos($file['file'], '?') !== false ? '&' : '?';
-                    $file_name .= $concatenator . 'v=' . Configuration::get('minified_version', 0);
+                    $file_name .= $concatenator;
+                    if ($version = Configuration::get('minified_version', 0)) {
+                        $file_name .= 'v=' .$version;
+                    }
                 }
 
                 $output .= '<script language="javascript" src="' . $file_name . '" ' . (!empty($file['async']) ? 'async defer' : '');
