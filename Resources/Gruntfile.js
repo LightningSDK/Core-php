@@ -31,8 +31,6 @@ module.exports = function(grunt) {
                     '../build/js-res/modernizr.min.js': '../Vendor/foundation/vendor/modernizr/modernizr.js',
                     '../build/js-res/placeholder.min.js': '../Vendor/foundation/vendor/jquery-placeholder/jquery.placeholder.js',
                     '../build/js-res/fastclick.min.js': '../Vendor/foundation/vendor/fastclick/lib/fastclick.js',
-                    '../build/js-res/jquery.cookie.min.js': '../Vendor/foundation/vendor/jquery.cookie/jquery.cookie.js',
-                    '../build/js-res/jquery.min.js': '../Vendor/jquery/dist/jquery.js'
                 }
             }
         },
@@ -51,7 +49,8 @@ module.exports = function(grunt) {
                     },
                     {
                         src: [
-                            '../Vendor/foundation/js/foundation/*'
+                            '../Vendor/foundation/js/foundation/*',
+                            '../Vendor/jquery/dist/jquery.js'
                         ],
                         dest: '../build/js-res',
                         expand: true,
