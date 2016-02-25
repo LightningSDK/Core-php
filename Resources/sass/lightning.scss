@@ -529,6 +529,11 @@ ul.tags{
     text-align: center;
   }
 }
+@media print {
+  .social-share {
+    display:none;
+  }
+}
 .social-share {
   width: 100%;
   text-align: center;
