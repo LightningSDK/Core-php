@@ -8,6 +8,7 @@ namespace Lightning\Pages;
 
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Form;
+use Lightning\Tools\Language;
 use Lightning\Tools\Mailer;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
@@ -85,37 +86,47 @@ class Contact extends PageView {
         }
 
         // Send a message to the site contact.
-        if ($this->settings['always_notify'] || ($request_contact || $this->settings['contact'])) {
+        if ($this->settings['always_notify'] || ($request_contact && $this->settings['contact'])) {
             $sent = $this->sendMessage();
             if (!$sent) {
                 Output::error('Your message could not be sent. Please try again later');
             } else {
-                $custom_message = $this->customMessage();
                 // Send an email to to have them test for spam.
                 if (!empty($this->settings['auto_responder'])) {
                     $auto_responder_mailer = new Mailer();
                     $result = $auto_responder_mailer->sendOne($this->settings['auto_responder'], UserModel::loadByEmail($this->getSender()) ?: new UserModel(array('email' => $this->getSender())));
                     if ($result && $this->settings['spam_test']) {
                         // Set the notice.
-                        Navigation::redirect('/message', ['msg' => 'spam_test']);
+                        $this->setSuccessMessage(Language::translate('spam_test'));
+                        $this->redirect();
                     }
                 }
-                Navigation::redirect('/message', $custom_message ? [] : ['msg' => 'contact_sent']);
+                $this->setSuccessMessage(Language::translate('contact_sent'));
+                $this->redirect();
             }
         } else {
-            $this->customMessage();
+            $this->setSuccessMessage(Language::translate('optin.success'));
+            $this->redirect();
+        }
+    }
+
+    public function redirect() {
+        if ($redirect = Request::post('redirect', 'url')) {
+            Navigation::redirect($redirect);
+        } else {
+            Navigation::redirect('/message');
         }
     }
 
     /**
      * Add a custom message from the form input.
      */
-    protected function customMessage() {
+    protected function setSuccessMessage($default) {
         if ($this->settings['custom_message'] && $message = Request::post('success')) {
             Messenger::message($message);
-            return true;
+        } else {
+            Messenger::message($default);
         }
-        return false;
     }
 
     /**
