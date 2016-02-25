@@ -4,7 +4,7 @@
  */
 lightning.table = {
     init: function() {
-        $('.add_image').click(lightning.table.clickAddImage);
+        $('.add_image').on('click', lightning.table.clickAddImage);
         $('.linked_images').on('click', '.remove', lightning.table.removeLinkedImage);
         self = this;
         var search = $('#table_search');
@@ -203,7 +203,7 @@ lightning.table = {
             $('#list_' + field).append('<span id="' + field + '_' + i + '" >' + list[i] + '</span>');
             count++;
         }
-        $('#list_' + field + ' span').click(lightning.table.setAutocompleteSelection);
+        $('#list_' + field + ' span').on('click', lightning.table.setAutocompleteSelection);
     },
 
     setAutocompleteSelection: function(event) {

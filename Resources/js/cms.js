@@ -89,11 +89,11 @@ lightning.cms = {
 
     initPlain: function() {
         var self = this;
-        $('.cms_edit_plain').click(function(e) {
+        $('.cms_edit_plain').on('click', function(e) {
             var id = $(e.target).attr('id').replace(/^cms_edit_/, '');
             self.editPlain(id);
         });
-        $('.cms_save_plain').click(function(e) {
+        $('.cms_save_plain').on('click', function(e) {
             var id = $(e.target).attr('id').replace(/^cms_save_/, '');
             self.savePlain(id);
         });
@@ -141,11 +141,11 @@ lightning.cms = {
     },
     initDate: function() {
         var self = this;
-        $('.cms_edit_date').click(function(e) {
+        $('.cms_edit_date').on('click', function(e) {
             var id = $(e.target).attr('id').replace(/^cms_edit_/, '');
             self.editDate(id);
         });
-        $('.cms_save_date').click(function(e) {
+        $('.cms_save_date').on('click', function(e) {
             var id = $(e.target).attr('id').replace(/^cms_save_/, '');
             self.saveDate(id);
         });

@@ -37,7 +37,7 @@ function tree_sub_click() {
 
                     /* 				$("#tree_column_"+data.node_id).append("<div class='tree_column_row tree_column_item'><a href=\"#\">test<a/></div>"); */
 
-                    $("#tree_column_"+data.node_id+" .tree_column_row").click(tree_sub_click);
+                    $("#tree_column_"+data.node_id+" .tree_column_row").on('click', tree_sub_click);
                     var container_width = $('#tree_'+tree_data.tree_name).find('.tree_column').length * ($('#tree_'+tree_data.tree_name).find('.tree_column').first().width()+1);//+1 for border
                     $('#tree_'+tree_data.tree_name).css('width',container_width);
                     $('#tree_'+tree_data.tree_name).parent().scrollLeft($('#tree_'+tree_data.tree_name).width() - $('#tree_'+tree_data.tree_name).parent().width());
@@ -78,14 +78,14 @@ function tree_add(obj) {
                     col.find('.tree_column_row').each(function() {
                         if ($(this).html().replace(/\<span\>.*\<\/span\>/,'').toLowerCase() > data.name.toLowerCase()) {
                             $(this).before(tree_node_string(data.name,data.node_id));
-                            $('#tree_node_'+data.node_id).click(tree_sub_click);
+                            $('#tree_node_'+data.node_id).on('click', tree_sub_click);
                             inserted = true;
                             return false;
                         }
                     });
                     if (!inserted) {
                         $(obj).closest('.tree_column').append(tree_node_string(data.name,data.node_id));
-                        $('#tree_node_'+data.node_id).click(tree_sub_click);
+                        $('#tree_node_'+data.node_id).on('click', tree_sub_click);
                     }
                 }
             }

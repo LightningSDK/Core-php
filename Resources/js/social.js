@@ -124,13 +124,13 @@ lightning.social = {
     },
 
     initLogout: function(site) {
-        $('.logout_button').click(function(event){
+        $('.logout_button').on('click', function(event){
             event.preventDefault();
             lightning.social[site].signout();
         });
     },
     initLogin: function() {
-        $('.social-signin').click(function(){
+        $('.social-signin').on('click', function(){
             if ($(this).is('.google')) {
                 lightning.social.google.signin();
             }

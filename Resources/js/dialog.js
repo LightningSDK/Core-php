@@ -18,7 +18,7 @@ lightning.dialog = {
             '<div class="inner" id="dialog_box_loader"><p align="center"><img src="/images/lightning/cog-spinner.gif" class="loader_image"></p></div>'+
             '</div>'+
             '</div>').prependTo('body');
-            $('#veil').click(lightning.dialog.hide);
+            $('#veil').on('click', lightning.dialog.hide);
             $(window).scroll(lightning.dialog.reposition).resize(lightning.dialog.reposition);
             this.dialogBox = $('#dialog_box');
             this.dialogBoxLoader = $('#dialog_box_loader');
