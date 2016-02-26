@@ -151,7 +151,7 @@ class JS {
                     }
                 }
 
-                $output .= '<script language="javascript" src="' . $file_name . '" ' . (!empty($file['async']) ? 'async defer' : '');
+                $output .= '<script src="' . $file_name . '" ' . (!empty($file['async']) ? 'async defer' : '');
                 if (!empty($file['id'])) {
                     $output .= ' id="' . $file['id'] . '"';
                 }
