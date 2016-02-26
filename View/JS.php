@@ -132,11 +132,11 @@ class JS {
     public static function render() {
         $output = '';
         if (!self::$inited) {
-            $output = '<script language="javascript">lightning={"vars":' . json_encode(self::$vars) . '};</script>';
+            $output = '<script>lightning={"vars":' . json_encode(self::$vars) . '};</script>';
             self::$vars = [];
             self::$inited = true;
         } elseif (!empty(self::$vars)) {
-            $output = '<script language="javascript">$.extend(true, lightning.vars, ' . json_encode(self::$vars) . ');</script>';
+            $output = '<script>$.extend(true, lightning.vars, ' . json_encode(self::$vars) . ');</script>';
         }
 
         // Include JS files.
@@ -184,7 +184,7 @@ class JS {
                 }
             }
             if (!empty($init_scripts)) {
-                $output .= '<script language="javascript">' . $init_scripts . '</script>';
+                $output .= '<script>' . $init_scripts . '</script>';
             }
         }
 
