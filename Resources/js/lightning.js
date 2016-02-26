@@ -30,6 +30,16 @@ lightning.startup = {
     },
 
     initForms: function() {
+        $('.captcha_container').closest('form').submit(function(){
+            var self = $(this);
+            return self && (function(){
+                    var valid = grecaptcha.getResponse().length != 0;
+                    $('#captcha_abide').val(valid ? 1 : '');
+                    return valid;
+                })();
+        });
+
+        // Everything below here is deprecated.
         var forms = $('form.validate');
 
         if (forms.length == 0) {

@@ -158,6 +158,14 @@ $amber-low: rgb(255,205,1);
   height:32px;
 }
 
+// Captcha
+div.captcha_container {
+  display:inline-block;
+  input {
+    height:0;border:0;padding:0;margin:0;
+  }
+}
+
 .button.red {
   background-color: #88000b;
   color: white;
