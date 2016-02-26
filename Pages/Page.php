@@ -120,7 +120,7 @@ class Page extends PageView {
                         break;
                     case 'youtube':
                         $output = YouTube::render($element->getAttribute('id'), [
-                            'autoplay' => $element->getAttribute('id') ? true : false,
+                            'autoplay' => $element->getAttribute('autoplay') ? true : false,
                         ]);
                         if ($element->getAttribute('flex')) {
                             $output = '<div class="flex-video ' . ($element->getAttribute('widescreen') ? 'widescreen' : '') . '">' . $output . '</div>';
