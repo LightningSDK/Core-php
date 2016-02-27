@@ -13,6 +13,11 @@ class CSVImport extends Page {
     protected $table;
     protected $handlers = [];
     protected $values = [];
+
+    /**
+     * @var CSVIterator
+     */
+    protected $csv;
     public $importAction = 'import';
     public $importAlignAction = 'import-align';
 
@@ -49,12 +54,33 @@ class CSVImport extends Page {
         return '<form action="" method="post" enctype="multipart/form-data">' . Form::renderTokenInput() . '<input type="hidden" name="' . $this->importAction . '" value="import"><input type="file" name="import-file" /><input type="submit" name="submit" value="Submit" class="button"></form>';
     }
 
-    public function renderAlignmentForm() {
-        $csv = new CSVIterator($this->importCache->getFile());
-        $header_row = $csv->current();
+    public function validate() {
+        $this->loadCSVFromCache();
+        $header_row = $this->csv->current();
         if (!$header_row) {
             throw new Exception('No file uploaded');
         }
+    }
+
+    protected function loadCSVFromCache($force = false) {
+        if (empty($this->importCache) && $cache_key = Request::post('cache')) {
+            $this->importCache = new FileCache();
+            $this->importCache->loadReference($cache_key);
+            if (!$this->importCache->isValid()) {
+                throw new Exception('Invalid reference. Please try again.');
+            }
+        } elseif (empty($this->importCache)) {
+            throw new Exception('Invalid reference. Please try again.');
+        }
+
+        if (empty($this->csv) || $force) {
+            $this->csv = new CSVIterator($this->importCache->getFile());
+        }
+    }
+
+    public function renderAlignmentForm() {
+        $this->loadCSVFromCache();
+        $header_row = $this->csv->current();
         $output = '<form action="" method="POST">' . Form::renderTokenInput();
         $output .= '<input type="hidden" name="action" value="' . $this->importAlignAction . '">';
         $output .= '<input type="hidden" name="cache" value="' . $this->importCache->getReference() . '" />';
@@ -107,16 +133,11 @@ class CSVImport extends Page {
      * Process the data and import it based on alignment fields.
      */
     public function importDataFile() {
-        $cache = new FileCache();
-        $cache->loadReference(Request::post('cache'));
-        if (!$cache->isValid()) {
-            Output::error('Invalid reference. Please try again.');
-        }
+        $this->loadCSVFromCache();
 
         // Load the CSV, skip the first row if it's a header.
-        $csv = new CSVIterator($cache->getFile());
         if (Request::post('header', 'int')) {
-            $csv->next();
+            $this->csv->next();
         }
 
         // Process the alignment so we know which fields to import.
@@ -131,8 +152,8 @@ class CSVImport extends Page {
         $this->database = Database::getInstance();
 
         $this->values = array();
-        while ($csv->valid()) {
-            $row = $csv->current();
+        while ($this->csv->valid()) {
+            $row = $this->csv->current();
             foreach ($fields as $field => $column) {
                 $this->values[$field][] = $row[$column];
             }
@@ -142,7 +163,7 @@ class CSVImport extends Page {
                 $this->values = array();
             }
 
-            $csv->next();
+            $this->csv->next();
         }
 
         if (!empty($this->values)) {
