@@ -3460,6 +3460,9 @@ abstract class Table extends Page {
                 if (!empty($field['full_page'])) {
                     $config['fullPage'] = true;
                 }
+                if (!empty($field['url'])) {
+                    $config['url'] = $field['url'];
+                }
 
                 if (!empty($field['full_page']) || $field['editor'] == HTMLEditor::TYPE_FULL || !empty($field['trusted']) || $this->trusted) {
                     $config['allowedContent'] = true;

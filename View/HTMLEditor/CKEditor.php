@@ -110,8 +110,13 @@ class CKEditor {
                     JS::startup('CKFinder.setupCKEditor(lightning.ckeditors["' . $id . '"], "/js/ckfinder/")');
                     break;
                 case 'elfinder':
-                    $options['filebrowserBrowseUrl'] = '/js/elfinder/elfinder.html?container=images&type=ckeditor';
-                    $options['filebrowserUploadUrl'] = '/imageBrowser?container=images&action=upload&type=ckeditor';
+                    $parameters = ['type' => 'ckeditor'];
+                    if (!empty($options['url']) && $options['url'] == 'full') {
+                        $parameters['url'] = 'full';
+                        $parameters['web_root'] = Configuration::get('web_root');
+                    }
+                    $options['filebrowserBrowseUrl'] = '/js/elfinder/elfinder.html?container=images&' . http_build_query($parameters);
+                    $options['filebrowserUploadUrl'] = '/imageBrowser?container=images&action=upload&' . http_build_query($parameters);
                     break;
                 case 'lightning':
                     $options['filebrowserBrowseUrl'] = '/imageBrowser?container=images';

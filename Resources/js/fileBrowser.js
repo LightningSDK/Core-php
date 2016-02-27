@@ -16,6 +16,12 @@ lightning.fileBrowser = {
             if (split[0] == 'CKEditorFuncNum') {
                 lightning.fileBrowser.funcNum = split[1];
             }
+            if (split[0] == 'url') {
+                lightning.fileBrowser.urlType = split[1];
+            }
+            if (split[0] == 'web_root') {
+                lightning.fileBrowser.webRoot = unescape(split[1]);
+            }
         }
 
         // TODO: This has to be changed to handle other browsers.
@@ -27,15 +33,19 @@ lightning.fileBrowser = {
         }).elfinder('instance');
     },
 
-    select: function(file) {
+    select: function(file, urlType) {
+        var url = file.url;
+        if (lightning.fileBrowser.urlType == 'full') {
+            url = (lightning.fileBrowser.webRoot + '/' + url).replace(/([^:])\/\/+/g, '$1/');
+        }
         switch (lightning.fileBrowser.type) {
             case 'ckeditor':
-                window.opener.CKEDITOR.tools.callFunction(lightning.fileBrowser.funcNum, file.url);
+                window.opener.CKEDITOR.tools.callFunction(lightning.fileBrowser.funcNum, url);
                 window.close();
                 break;
             case 'tinymce':
                 // pass selected file path to TinyMCE
-                parent.tinymce.activeEditor.windowManager.getParams().setUrl(file.url);
+                parent.tinymce.activeEditor.windowManager.getParams().setUrl(url);
 
                 // force the TinyMCE dialog to refresh and fill in the image dimensions
                 var t = parent.tinymce.activeEditor.windowManager.windows[0];
@@ -45,22 +55,36 @@ lightning.fileBrowser = {
                 parent.tinymce.activeEditor.windowManager.close();
                 break;
             case 'lightning-field':
-                window.opener.lightning.fileBrowser.fieldSelected(file.url, lightning.fileBrowser.field);
+                window.opener.lightning.fileBrowser.fieldSelected(url, lightning.fileBrowser.field);
                 window.close();
                 break;
             case 'lightning-cms':
-                window.opener.lightning.cms.imageSelected(file.url, lightning.fileBrowser.field);
+                window.opener.lightning.cms.imageSelected(url, lightning.fileBrowser.field);
                 window.close();
                 break;
         }
     },
 
-    openSelect: function(type, field) {
+    /**
+     * Open the image browser window for selection.
+     *
+     * @param string type
+     *   The browser type to use: elfinder, ckfinder, etc.
+     * @param field
+     *   The type the type of the parent: ckeditor, tinymce, lightning-field, lightning-cms
+     * @param url
+     *   The url type to use: full, absolute
+     */
+    openSelect: function(type, field, url) {
+        if (typeof url == 'undefined') {
+            url = 'absolute&web_root=' + escape(lightning.vars.web_root);
+        }
+
         // TODO: add case here for other browser types.
         switch (lightning.fileBrowser.type || lightning.vars.fileBrowser.type) {
             case 'elfinder':
                 window.open(
-                    '/js/elfinder/elfinder.html?type=' + type + '&field=' + field,
+                    '/js/elfinder/elfinder.html?type=' + type + '&field=' + field + '&url=' + url,
                     'Image Browser',
                     ''
                 );

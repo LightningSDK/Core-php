@@ -12,6 +12,9 @@ class Templates extends Table {
         'body' => array(
             'type' => 'html',
             'full_page' => true,
+            'editor' => 'full',
+            'upload' => true,
+            'url' => 'full',
         )
     );
 
