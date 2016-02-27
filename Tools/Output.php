@@ -270,16 +270,7 @@ class Output {
      * Load and render the access denied page.
      */
     public static function accessDenied() {
-        Messenger::error('Access Denied');
-        // TODO : This can be simplified using the error function below.
-        if (static::isJSONRequest()) {
-            Output::json();
-        } else {
-            Template::resetInstance();
-            $page = new Message();
-            $page->execute();
-        }
-        exit;
+        self::error('Access Denied');
     }
 
     /**

@@ -407,7 +407,7 @@ abstract class Table extends Page {
             Output::error('Invalid ID');
         }
         if (!$this->editable) {
-            Output::error('Access Denied');
+            Output::accessDenied();
         }
         $this->getRow();
     }
@@ -415,7 +415,7 @@ abstract class Table extends Page {
     public function getView() {
         $this->action = 'view';
         if (!$this->editable) {
-            Output::error('Access Denied');
+            Output::accessDenied();
         }
         $this->getRow();
     }
@@ -423,14 +423,14 @@ abstract class Table extends Page {
     public function getNew() {
         $this->action = 'new';
         if (!$this->editable || !$this->addable) {
-            Output::error('Access Denied');
+            Output::accessDenied();
         }
     }
 
     public function getDuplicate() {
         $this->action = 'duplicate';
         if (!$this->editable || !$this->addable || $this->singularity) {
-            Output::error('Access Denied');
+            Output::accessDenied();
         }
         $this->id = Request::query('id', 'int');
         $this->getRow();
@@ -438,7 +438,7 @@ abstract class Table extends Page {
 
     public function getPop() {
         if (!$this->editable || !$this->addable) {
-            Output::error('Access Denied');
+            Output::accessDenied();
         }
         if ($pf = Request::get('pf')) {
             if (!isset($this->action)) {
@@ -457,7 +457,7 @@ abstract class Table extends Page {
     public function getExport() {
         $this->action = 'export';
         if (!$this->exportable) {
-            Output::error('Access Denied');
+            Output::accessDenied();
         }
 
         // getting the full list of table data
@@ -494,7 +494,7 @@ abstract class Table extends Page {
 
         exit;
     }
-    
+
     public function getPopReturn() {
         $this->action = 'pop_return';
     }
@@ -502,8 +502,8 @@ abstract class Table extends Page {
     public function getImport() {
         $this->action = 'import';
         $this->CSVImporter = new CSVImport();
-        if (!$this->editable || !$this->addable || !$this->importable) {
-            Messenger::error('Access Denied');
+        if (!$this->importable) {
+            Output::accessDenied();
         }
     }
 
@@ -511,16 +511,16 @@ abstract class Table extends Page {
         $this->action = 'import-align';
         $this->initCSVImporter();
         $this->CSVImporter->cacheImportFile();
-        if (!$this->editable || !$this->addable || !$this->importable) {
-            Messenger::error('Access Denied');
+        if (!$this->importable) {
+            Output::accessDenied();
         }
     }
 
     public function postImportAlign() {
         $this->initCSVImporter();
         $this->CSVImporter->importDataFile();
-        if (!$this->editable || !$this->addable || !$this->importable) {
-            Messenger::error('Access Denied');
+        if (!$this->importable) {
+            Output::accessDenied();
         } else {
             Messenger::message('Import successful!');
         }
@@ -558,7 +558,7 @@ abstract class Table extends Page {
     public function getDelete() {
         $this->action = 'delete';
         if (!$this->editable || !$this->deleteable) {
-            Messenger::error('Access Denied');
+            Messenger::accessDenied();
         }
     }
 
@@ -596,7 +596,7 @@ abstract class Table extends Page {
         if ($_POST['submit'] == 'Yes') {
             // Make sure they have access.
             if (!$this->editable || !$this->addable) {
-                Output::error('Access Denied');
+                Output::accessDenied();
             }
 
             // Loop through and delete any files.
@@ -621,7 +621,7 @@ abstract class Table extends Page {
     public function postInsert() {
         $this->action = 'insert';
         if (!$this->addable) {
-            Output::error('Access Denied');
+            Output::accessDenied();
         }
 
         // Insert a new record.
@@ -639,7 +639,7 @@ abstract class Table extends Page {
         }
 
         /*
-         * Check if id is defined. If it's FALSE, there was an error 
+         * Check if id is defined. If it's FALSE, there was an error
          * inserting the new row. Probably duplicating.
          */
         if ($this->id == FALSE) {
@@ -674,7 +674,7 @@ abstract class Table extends Page {
         $this->id = Request::post('id', 'int');
         $this->action = 'update';
         if (!$this->editable) {
-            Output::error('Access Denied');
+            Output::accessDenied();
         }
 
         $this->validateAccess($this->id);
@@ -810,7 +810,7 @@ abstract class Table extends Page {
      *
      * @param boolean
      *   Whether to use table name for quering
-     * 
+     *
      * @return string
      *   The primary key name.
      */
@@ -820,7 +820,7 @@ abstract class Table extends Page {
             $result = $result->fetch();
             $this->key = $result['Column_name'];
         }
-        
+
         // When tables are joined we need to use table names to avoid key duplicating
         return $useTableName ? $this->fullField($this->key) : $this->key;
     }
@@ -840,10 +840,10 @@ abstract class Table extends Page {
         $output .= $this->renderHeader();
 
         if ($this->action == 'new' && !$this->addable) {
-            Output::error('Access Denied');
+            Output::accessDenied();
         }
         if ($this->action == 'edit' && !$this->editable) {
-            Output::error('Access Denied');
+            Output::accessDenied();
         }
 
         if (!empty($this->renderHandler)) {
@@ -863,7 +863,7 @@ abstract class Table extends Page {
                 // DELETE CONFIRMATION
                 case 'delete':
                     if (!$this->deleteable) {
-                        Output::error('Access Denied');
+                        Output::accessDenied();
                         break;
                     }
                     $this->confirmMessage = 'Are you sure you want to delete this?';
