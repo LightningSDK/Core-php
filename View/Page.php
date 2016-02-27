@@ -77,23 +77,28 @@ class Page {
      * Prepare the output and tell the template to render.
      */
     public function output() {
-        // Send globals to the template.
-        $template = Template::getInstance();
+        try {
+            // Send globals to the template.
+            $template = Template::getInstance();
 
-        if (!empty($this->page)) {
-            $template->set('content', $this->page);
+            if (!empty($this->page)) {
+                $template->set('content', $this->page);
+            }
+
+            $template->set('google_analytics_id', Configuration::get('google_analytics_id'));
+
+            // TODO: These should be called directly from the template.
+            $template->set('errors', Messenger::getErrors());
+            $template->set('messages', Messenger::getMessages());
+
+            $template->set('site_name', Configuration::get('site.name'));
+            $template->set('blog', Blog::getInstance());
+            JS::set('active_nav', $this->nav);
+            $template->render($this->template);
+        } catch (Exception $e) {
+            echo 'Error rendering template: ' . $e;
+            exit;
         }
-
-        $template->set('google_analytics_id', Configuration::get('google_analytics_id'));
-
-        // TODO: These should be called directly from the template.
-        $template->set('errors', Messenger::getErrors());
-        $template->set('messages', Messenger::getMessages());
-
-        $template->set('site_name', Configuration::get('site.name'));
-        $template->set('blog', Blog::getInstance());
-        JS::set('active_nav', $this->nav);
-        $template->render($this->template);
     }
 
     /**
@@ -124,23 +129,22 @@ class Page {
                 $method = Request::convertFunctionName($request_type, $action);
                 if (method_exists($this, $method)) {
                     $this->{$method}();
-                    $this->output();
                 }
                 else {
-                    Output::error('There was an error processing your submission.');
+                    throw new Exception('There was an error processing your submission.');
                 }
             } else {
                 if (method_exists($this, $request_type)) {
                     $this->$request_type();
-                    $this->output();
                 } else {
                     // TODO: show 302
-                    Output::error('Method not available');
+                    throw new Exception('Method not available');
                 }
             }
         } catch (Exception $e) {
             Output::error($e->getMessage());
         }
+        $this->output();
     }
 
     public function requireToken() {
