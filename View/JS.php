@@ -44,6 +44,13 @@ class JS {
     protected static $vars = array();
 
     /**
+     * @var boolean
+     *
+     * Whether the funciton lighting_startup() has been added already.
+     */
+    protected static $startupFunctionAdded = false;
+
+    /**
      * @var array
      *
      * A list of scripts to run when the page is ready.
@@ -180,7 +187,11 @@ class JS {
                     }
                 }
                 if (!empty($ready_scripts)) {
-                    $init_scripts .= '$(document).ready(function() {' . $ready_scripts . '})';
+                    if (!self::$startupFunctionAdded) {
+                        $init_scripts .= 'function lightning_startup(callback) { if (typeof $ == "undefined") { setTimeout(function(){ lightning_startup(callback); }, 500) } else $().ready(callback) }';
+                        self::$startupFunctionAdded = true;
+                    }
+                    $init_scripts .= 'lightning_startup(function() {' . $ready_scripts . '})';
                 }
             }
             if (!empty($init_scripts)) {

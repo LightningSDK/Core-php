@@ -57,7 +57,7 @@ class Page {
         // Load messages and errors from the query string.
         Messenger::loadFromQuery();
         Messenger::loadFromSession();
-        JS::add('/js/lightning.min.js', false);
+        JS::add('/js/lightning.min.js');
         JS::startup('lightning.startup.init()');
         JS::startup('$(document).foundation()');
         CSS::add('/css/lightning.css');
