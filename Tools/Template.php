@@ -33,6 +33,13 @@ class Template extends Singleton {
     protected $footer = '';
 
     /**
+     * Header html content.
+     *
+     * @var string
+     */
+    protected $header = '';
+
+    /**
      * The main template file.
      *
      * @var string
@@ -207,8 +214,12 @@ class Template extends Singleton {
         $this->footer .= $content;
     }
 
+    public function addHeader($content) {
+        $this->header .= $content;
+    }
+
     public function renderHeader() {
-        return JS::render() . CSS::render();
+        return JS::render() . CSS::render() . $this->header;
     }
 
     /**
