@@ -143,7 +143,8 @@ class JS {
             self::$vars = [];
             self::$inited = true;
         } elseif (!empty(self::$vars)) {
-            $output = '<script>$.extend(true, lightning.vars, ' . json_encode(self::$vars) . ');</script>';
+            $startup = self::includeStartupFunction();
+            $output = '<script>' . $startup . 'lightning_startup(function(){$.extend(true, lightning.vars, ' . json_encode(self::$vars) . ')});</script>';
         }
 
         // Include JS files.
@@ -186,11 +187,8 @@ class JS {
                         $script['rendered'] = true;
                     }
                 }
+                $init_scripts .= self::includeStartupFunction();
                 if (!empty($ready_scripts)) {
-                    if (!self::$startupFunctionAdded) {
-                        $init_scripts .= 'function lightning_startup(callback) { if (typeof $ == "undefined") { setTimeout(function(){ lightning_startup(callback); }, 500) } else $().ready(callback) }';
-                        self::$startupFunctionAdded = true;
-                    }
                     $init_scripts .= 'lightning_startup(function() {' . $ready_scripts . '})';
                 }
             }
@@ -200,5 +198,13 @@ class JS {
         }
 
         return $output;
+    }
+
+    protected function includeStartupFunction() {
+        if (!self::$startupFunctionAdded) {
+            self::$startupFunctionAdded = true;
+            return 'function lightning_startup(callback) { if (typeof $ == "undefined") { setTimeout(function(){ lightning_startup(callback); }, 500) } else $().ready(callback) }';
+        }
+        return '';
     }
 }
