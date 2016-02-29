@@ -6,6 +6,7 @@ use Facebook\Entities\SignedRequest;
 use Facebook\FacebookRequest;
 use Facebook\FacebookSession;
 use Lightning\Tools\Configuration;
+use Lightning\Tools\Scrub;
 use Lightning\Tools\Session;
 use Lightning\Tools\Template;
 use Lightning\View\Facebook\SDK;
@@ -92,9 +93,18 @@ class Facebook extends SocialMediaApi {
         return $friends;
     }
 
-    public static function renderLike() {
+    /**
+     * Create a like button.
+     *
+     * @param array $options
+     *   A list of options. Can include:
+     *     - url: A url to associate the like.
+     * @return string
+     */
+    public static function renderLike($options = []) {
         SDK::init();
-        return '<div class="fb-like" data-layout="standard" data-action="like" data-show-faces="true" data-share="true"></div>';
+        $url = !empty($options['url']) ? 'data-href="' . Scrub::toHTML($options['url']) . '"' : '';
+        return '<div class="fb-like" data-layout="standard" ' . $url . ' data-action="like" data-show-faces="true" data-share="true"></div>';
     }
 
     /**
