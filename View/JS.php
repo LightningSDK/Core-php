@@ -200,7 +200,7 @@ class JS {
         return $output;
     }
 
-    protected function includeStartupFunction() {
+    protected static function includeStartupFunction() {
         if (!self::$startupFunctionAdded) {
             self::$startupFunctionAdded = true;
             return 'function lightning_startup(callback) { if (typeof $ == "undefined") { setTimeout(function(){ lightning_startup(callback); }, 500) } else $().ready(callback) }';
