@@ -40,7 +40,8 @@ module.exports = function(grunt) {
                     {
                         src: [
                             '../Vendor/chartjs/Chart.min.js',
-                            '../Vendor/videojs/build/video-js.min.js'
+                            '../Vendor/videojs/build/video-js.min.js',
+                            '../Vendor/jsoneditor/dist/jsoneditor.min.js'
                         ],
                         dest: '../build/js',
                         expand: true,
