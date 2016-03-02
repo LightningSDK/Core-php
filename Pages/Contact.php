@@ -163,7 +163,7 @@ class Contact extends PageView {
             $mailer->to($to);
         }
         return $mailer
-            ->from($this->user->email)
+            ->replyTo($this->user->email)
             ->subject($this->settings['subject'])
             ->message($this->getMessageBody())
             ->send();
