@@ -12,6 +12,7 @@ class MessageMessageCriteria extends Schema {
         return array(
             'message_id' => $this->int(true),
             'message_criteria_id' => $this->int(true),
+            'field_values' => $this->varchar(255),
         );
     }
 
