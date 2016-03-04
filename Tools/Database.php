@@ -792,6 +792,9 @@ class Database extends Singleton {
      *
      * @return string
      *   The rendered query portion.
+     *
+     * @throws Exception
+     *   On parse error.
      */
     protected function parseJoin($joins, &$values) {
         // If the first element of join is not an array, it's an actual join.
@@ -1322,7 +1325,7 @@ class Database extends Singleton {
                 continue;
             }
 
-            if (is_string($field)) {
+            if (!is_numeric($field)) {
                 $field = $this->formatField($field);
             }
 
