@@ -12,6 +12,7 @@ use Lightning\Tools\Database;
 use Lightning\Tools\Language;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Tracker;
+use Lightning\View\Field\Time;
 
 /**
  * A model of the mailing system message.
@@ -529,10 +530,14 @@ class Message extends Object {
         return $query;
     }
 
-    protected function replaceCriteriaVariables(&$query_segment, $variables) {
-        if (empty($variables)) {
-            return;
+    protected function replaceCriteriaVariables(&$query_segment, $variables = []) {
+        if (empty($variables['TODAY'])) {
+            $variables['TODAY'] = Time::today();
         }
+        if (empty($variables['NOW'])) {
+            $variables['NOW'] = time();
+        }
+
         $next_is_array = false;
         array_walk_recursive($query_segment, function(&$item) use ($variables, &$next_is_array) {
             if (is_string($item)) {
