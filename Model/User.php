@@ -403,11 +403,12 @@ class User extends Object {
      *   The new user's ID.
      */
     protected static function insertUser($email, $pass = NULL, $first_name = '', $last_name = '') {
+        $time = time();
         $user_details = array(
             'email' => Scrub::email(strtolower($email)),
             'first' => $first_name,
             'last' => $last_name,
-            'created' => Time::today(),
+            'created' => $time,
             'confirmed' => static::requiresConfirmation() ? static::UNCONFIRMED : static::CONFIRMED,
             // TODO: Need to get the referrer id.
             'referrer' => 0,
@@ -416,7 +417,7 @@ class User extends Object {
             $salt = static::getSalt();
             $user_details['password'] = static::passHash($pass, $salt);
             $user_details['salt'] = bin2hex($salt);
-            $user_details['registered'] = Time::today();
+            $user_details['registered'] = $time;
         }
         return Database::getInstance()->insert('user', $user_details);
     }
