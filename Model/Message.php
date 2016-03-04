@@ -434,7 +434,7 @@ class Message extends Object {
             // Add per user variables.
             $this->defaultVariables += [
                 'FULL_NAME' => (!empty($this->user->first) ? $this->user->fullName() : $this->default_name),
-                'FIRST_NAME' => $this->user->first,
+                'FIRST_NAME' => (!empty($this->user->first) ? $this->user->first : $this->default_name),
                 'LAST_NAME' => $this->user->last,
                 'USER_ID' => $this->user->id,
                 'EMAIL' => $this->user->email,
