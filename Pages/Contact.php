@@ -127,6 +127,8 @@ class Contact extends PageView {
     protected function setSuccessMessage($default) {
         if ($this->settings['custom_message'] && $message = Request::post('success')) {
             Messenger::message($message);
+        } elseif (isset($_POST['success'])) {
+            return;
         } else {
             Messenger::message($default);
         }
