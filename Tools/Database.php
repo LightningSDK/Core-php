@@ -68,7 +68,7 @@ class Database extends Singleton {
     private $end_php;
 
     /**
-     * The last query executed. If it's the same it does not need to be reprepared.
+     * The last query executed. If it's the same it does not need to be re-prepared.
      *
      * @var string
      */
@@ -159,7 +159,7 @@ class Database extends Singleton {
      *   The database object.
      */
     public static function createInstance() {
-        return new self(Configuration::get('database'));
+        return new static(Configuration::get('database'));
     }
 
     /**
