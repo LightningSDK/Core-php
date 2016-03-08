@@ -162,7 +162,7 @@ class Messenger {
                 $reset = true;
             }
             if ($reset) {
-                $session->unsetData('content.messages');
+                unset($session->content->messages);
                 $session->save();
             }
         }
