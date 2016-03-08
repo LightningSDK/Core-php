@@ -122,7 +122,7 @@ class User extends Object {
      */
     public function isImpersonating() {
         $session = Session::getInstance(true, false);
-        return $session && (boolean) $session->getSetting('impersonate');
+        return $session && !empty($session->content->impersonate);
     }
 
     /**

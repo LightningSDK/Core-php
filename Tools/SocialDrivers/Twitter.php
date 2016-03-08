@@ -7,6 +7,7 @@ use Lightning\Tools\Configuration;
 use Lightning\Tools\Output;
 use Lightning\Tools\Session;
 use Lightning\View\JS;
+use stdClass;
 
 class Twitter extends SocialMediaApi {
 
@@ -28,7 +29,10 @@ class Twitter extends SocialMediaApi {
 
     public static function createInstance($token = null) {
         if (empty($token)) {
-            $token = Session::getInstance(true, false)->getSetting('twitter.token');
+            $session = Session::getInstance(true, false);
+            if (!empty($session->content->twitter->token)) {
+                $token = $session->content->twitter->token;
+            }
         }
         if (empty($token)) {
             return new static();
@@ -51,8 +55,11 @@ class Twitter extends SocialMediaApi {
 
     public function storeSessionData() {
         $session = Session::getInstance();
-        $session->setSetting('twitter.token', $this->token);
-        $session->saveData();
+        if (empty($session->content->twitter)) {
+            $session->content->twitter = new stdClass();
+        }
+        $session->content->twitter->token = $this->token;
+        $session->save();
     }
 
     public static function getAccessToken() {
@@ -60,8 +67,8 @@ class Twitter extends SocialMediaApi {
         $session = Session::getInstance();
 
         $request_token = [
-            'oauth_token' => $session->getSetting('twitter.oauth_token'),
-            'oauth_token_secret' => $session->getSetting('twitter.oauth_token_secret'),
+            'oauth_token' => !empty($session->content->twitter->oauth_token) ? $session->content->twitter->oauth_token : '',
+            'oauth_token_secret' => !empty($session->content->twitter->oauth_token_secret) ? $session->content->twitter->oauth_token_secret : '',
         ];
         if (isset($_REQUEST['oauth_token']) && $request_token['oauth_token'] !== $_REQUEST['oauth_token']) {
             // Abort! Something is wrong.
@@ -170,9 +177,12 @@ class Twitter extends SocialMediaApi {
 
         // Save the token to the session.
         $session = Session::getInstance();
-        $session->setSetting('twitter.oauth_token', $request_token['oauth_token']);
-        $session->setSetting('twitter.oauth_token_secret', $request_token['oauth_token_secret']);
-        $session->saveData();
+        if (empty($session->content->twitter)) {
+            $session->content->twitter = new stdClass();
+        }
+        $session->content->twitter->oauth_token = $request_token['oauth_token'];
+        $session->content->twitter->oauth_token_secret = $request_token['oauth_token_secret'];
+        $session->save();
 
         $url = $connection->url('oauth/authorize', array('oauth_token' => $request_token['oauth_token']));
         JS::set('social.twitter.signin_url', $url);

@@ -11,6 +11,7 @@ use Lightning\Tools\Session;
 use Lightning\Tools\Template;
 use Lightning\View\Facebook\SDK;
 use Lightning\View\JS;
+use stdClass;
 
 class Facebook extends SocialMediaApi {
 
@@ -23,8 +24,11 @@ class Facebook extends SocialMediaApi {
         $fb = new static();
         if (!empty($token)) {
             $fb->setToken($token, $authorize);
-        } elseif ($token = Session::getInstance(true, false)->getSetting('facebook.token')) {
-            $fb->setToken($token, $authorize);
+        } else {
+            $session = Session::getInstance(true, false);
+            if (!empty($session->content->facebook->token)) {
+                $fb->setToken($session->content->facebook->token, $authorize);
+            }
         }
         return $fb;
     }
@@ -69,7 +73,11 @@ class Facebook extends SocialMediaApi {
 
     public function storeSessionData() {
         $session = Session::getInstance();
-        $session->setSetting('facebook.token', $this->token);
+        if (empty($session->content->facebook)) {
+            $session->content->facebook = new stdClass();
+        }
+        $session->content->facebook->token = $this->token;
+        $session->save();
     }
 
     public function myImageURL() {

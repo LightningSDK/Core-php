@@ -7,6 +7,7 @@ use Google_Service_Plus;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Session;
 use Lightning\View\JS;
+use stdClass;
 
 class Google extends SocialMediaApi {
 
@@ -25,8 +26,8 @@ class Google extends SocialMediaApi {
             $google->setToken($token, $authorize);
         } else {
             $session = Session::getInstance(true, false);
-            if ($session && $token = $session->getSetting('google.token')) {
-                $google->setToken($token, $authorize);
+            if (!empty($session->content->google->token)) {
+                $google->setToken($session->content->google->token, $authorize);
             }
         }
 
@@ -56,7 +57,11 @@ class Google extends SocialMediaApi {
 
     public function storeSessionData() {
         $session = Session::getInstance();
-        $session->setSetting('google.token', $this->token);
+        if (empty($session->content->google)) {
+            $session->content->google = new stdClass();
+        }
+        $session->content->google->token = $this->token;
+        $session->save();
     }
 
     public function loadProfile() {

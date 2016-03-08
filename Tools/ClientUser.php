@@ -40,8 +40,8 @@ class ClientUser extends Singleton {
         $session = SessionTool::getInstance(true, false);
         if ($session && $session->user_id > 0) {
             // If we are logged into someone elses account.
-            if ($impersonate = $session->getSetting('impersonate')) {
-                $user = User::loadById($impersonate);
+            if (!empty($session->content->impersonate)) {
+                $user = User::loadById($session->content->impersonate);
             } else {
                 // Try to load the user on this session.
                 $user = User::loadById($session->user_id);
