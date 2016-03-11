@@ -45,7 +45,10 @@ abstract class SocialMediaApi extends Singleton implements SocialMediaApiInterfa
             $user_settings = $this->getLightningUserData();
             $this->user = User::addUser($this->getLightningEmail(), $user_settings, $user_settings);
 
-            $this->setUserImage();
+            // This requires mongodb.
+            if (Configuration::get('social.store_images', false)) {
+                $this->setUserImage();
+            }
         } else {
             throw new Exception('Failed to load user data.');
         }
