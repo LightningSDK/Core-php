@@ -3,38 +3,27 @@
 namespace Overridable\Lightning\Tools;
 
 use Lightning\Tools\Configuration;
-use Lightning\Tools\Data;
 use Lightning\Tools\Database;
 use Lightning\Tools\Logger;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Output;
 use Lightning\Tools\Security\Random;
-use Lightning\Tools\Singleton;
+use Lightning\Tools\SingletonObject;
 use Lightning\Tools\Request as LightningRequest;
 
-class Session extends Singleton {
+class Session extends SingletonObject {
 
     const STATE_ANONYMOUS = 0;
     const STATE_REMEMBER = 1;
     const STATE_PASSWORD = 2;
     const STATE_APP = 4;
 
+    const TABLE = 'session';
     const PRIMARY_KEY = 'session_id';
 
     protected $content = array();
 
-    /**
-     * Constructs the session object given it's row from the database, possibly with some
-     * altered values from the instantiating static function.
-     *
-     * @param array $data
-     */
-    public function __construct($data = array()) {
-        $this->data = $data;
-        if (!empty($this->data['content'])) {
-            $this->content = json_decode($this->data['content'], true);
-        }
-    }
+    protected $__json_encoded_fields = ['content'];
 
     /**
      * Get the current session.
@@ -207,7 +196,7 @@ class Session extends Singleton {
      */
     public function resetState() {
         $this->state = 0;
-        Database::getInstance()->update('session', ['state' => 0], ['session_id' => $this->id]);
+        $this->save();
     }
 
     /**
@@ -225,7 +214,7 @@ class Session extends Singleton {
      */
     public function destroy () {
         if (!empty($this->id)) {
-            Database::getInstance()->delete('session', array('session_id' => $this->id));
+            $this->delete();
             $this->__data = [];
         }
         $this->clearCookie();
@@ -344,83 +333,20 @@ class Session extends Singleton {
         $this->setCookie();
     }
 
-
+    /**
+     * Destroy all instances of sessions for a user.
+     *
+     * @param integer $user_id
+     *   The user id.
+     */
     public function destroy_all($user_id) {
         Database::getInstance()->delete('session', array('user_id'=>$user_id));
     }
 
-    // Blank out the session cookie
-    // No return value
+    /**
+     * Tell the browser to drop the session.
+     */
     public function blank_session () {
         Output::clearCookie(Configuration::get('session.cookie'));
-    }
-
-    /**
-     * Get the value of a saved session variable.
-     *
-     * @param string $field
-     *   The name of the field.
-     * @param mixed $default
-     *   The default value if it's not set.
-     *
-     * @return mixed
-     *   The set value.
-     */
-    public function getSetting($field, $default = null) {
-        return Data::getFromPath($field, $this->content, $default);
-    }
-
-    /**
-     * Set a value for a setting.
-     *
-     * @param string $field
-     *   The name of the field.
-     * @param mixed $value
-     *   The value for the field.
-     */
-    public function setSetting($field, $value) {
-        Data::setInPath($field, $value, $this->content);
-    }
-
-    /**
-     * Remove a setting from the session.
-     *
-     * @param string $field
-     *   The field name
-     */
-    public function unsetSetting($field) {
-        Data::removeFromPath($field, $this->content);
-    }
-
-    /**
-     * Return the session content
-     */
-    public function getData () {
-        return $this->content;
-    }
-
-    /**
-     * Set session content
-     *
-     * @param $content
-     *   Set all session fields.
-     */
-    public function setData ($content) {
-        Database::getInstance()->update(
-            'session',
-            array('content' => json_encode($content)),
-            array('session_id' => $this->id)
-        );
-    }
-
-    /**
-     * Save the current session data.
-     */
-    public function saveData () {
-        Database::getInstance()->update(
-            'session',
-            array('content' => json_encode($this->content)),
-            array('session_id' => $this->id)
-        );
     }
 }

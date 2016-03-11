@@ -135,8 +135,8 @@ class Users extends Table {
 
     public function getImpersonate() {
         $session = Session::getInstance();
-        $session->setSetting('impersonate', Request::get('id', 'int'));
-        $session->saveData();
+        $session->content->impersonate = Request::get('id', 'int');
+        $session->save();
         // TODO: This should call the User::loginRedirect() function.
         Navigation::redirect('/');
     }

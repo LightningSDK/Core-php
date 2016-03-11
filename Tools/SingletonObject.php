@@ -1,9 +1,10 @@
 <?php
 
-namespace Lightning\Model;
+namespace Lightning\Tools;
 
-class Object {
-    use ObjectDataStorage;
+use Lightning\Model\ObjectDatabaseStorage;
+
+class SingletonObject extends Singleton {
     use ObjectDatabaseStorage;
 
     /**
@@ -15,4 +16,5 @@ class Object {
      * The table where the object is stored.
      */
     const TABLE = '';
+
 }

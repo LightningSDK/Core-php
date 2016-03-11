@@ -83,6 +83,10 @@ class Request {
         return trim(static::query('request'), '/');
     }
 
+    public static function getURL() {
+        return (static::isHTTPS() ? 'https://' : 'http://') . static::getDomain() . '/' . static::getLocation();
+    }
+
     public static function getDomain() {
         return !empty($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : (!empty($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : '');
     }

@@ -12,6 +12,7 @@ use Lightning\Tools\Database;
 use Lightning\Tools\Language;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Tracker;
+use Lightning\View\Field\Time;
 
 /**
  * A model of the mailing system message.
@@ -293,19 +294,14 @@ class Message extends Object {
      */
     protected function loadCriteria() {
         if ($this->criteria === null) {
-            $this->criteria = Database::getInstance()->selectAll(
-                [
-                    'from' => 'message_message_criteria',
-                    'join' => [
-                        'LEFT JOIN',
-                        'message_criteria',
-                        'USING (message_criteria_id)',
-                    ],
+            $this->criteria = Database::getInstance()->selectAllQuery([
+                'from' => 'message_message_criteria',
+                'join' => [
+                    'left_join' => 'message_criteria',
+                    'using' => 'message_criteria_id',
                 ],
-                [
-                    'message_id' => $this->message_id,
-                ]
-            );
+                'where' => ['message_id' => $this->message_id],
+            ]);
         }
     }
 
@@ -438,7 +434,7 @@ class Message extends Object {
             // Add per user variables.
             $this->defaultVariables += [
                 'FULL_NAME' => (!empty($this->user->first) ? $this->user->fullName() : $this->default_name),
-                'FIRST_NAME' => $this->user->first,
+                'FIRST_NAME' => (!empty($this->user->first) ? $this->user->first : $this->default_name),
                 'LAST_NAME' => $this->user->last,
                 'USER_ID' => $this->user->id,
                 'EMAIL' => $this->user->email,
@@ -472,11 +468,14 @@ class Message extends Object {
 
         // Make sure the message is never resent.
         if ($this->auto || !empty($this->never_resend)) {
-            $query['join'][] = array(
-                'LEFT JOIN',
-                'tracker_event',
-                'ON tracker_event.user_id = user.user_id AND tracker_event.tracker_id = ' . self::$message_sent_id . ' AND tracker_event.sub_id = ' . $this->message_id,
-            );
+            $query['join'][] = [
+                'left_join' => 'tracker_event',
+                'on' => [
+                    'tracker_event.user_id' => ['user.user_id'],
+                    'tracker_event.tracker_id' => self::$message_sent_id,
+                    'tracker_event.sub_id' => $this->message_id,
+                ]
+            ];
             $query['where']['tracker_event.user_id'] = null;
         }
 
@@ -484,6 +483,8 @@ class Message extends Object {
         $this->loadCriteria();
         foreach ($this->criteria as $criteria) {
             $field_values = json_decode($criteria['field_values'], true);
+
+            // Add Joins
             if (!empty($criteria['join'])) {
                 if ($c_table = json_decode($criteria['join'], true)) {
                     // The entry is a full join array.
@@ -498,13 +499,14 @@ class Message extends Object {
                     }
                 } else {
                     // The entry is just a table name.
-                    $query['join'][] = array(
-                        'LEFT JOIN',
-                        $criteria['join'],
-                        'ON ' . $criteria['join'] . '.user_id = user.user_id',
-                    );
+                    $query['join'][] = [
+                        'left_join' => $criteria['join'],
+                        'on' => [$criteria['join'] . '.user_id' => ['user.user_id']],
+                    ];
                 }
             }
+
+            // Add where conditions
             if ($where = json_decode($criteria['where'], true)) {
                 $this->replaceCriteriaVariables($where, $field_values);
                 $query['where'][] = $where;
@@ -528,10 +530,14 @@ class Message extends Object {
         return $query;
     }
 
-    protected function replaceCriteriaVariables(&$query_segment, $variables) {
-        if (empty($variables)) {
-            return;
+    protected function replaceCriteriaVariables(&$query_segment, $variables = []) {
+        if (empty($variables['TODAY'])) {
+            $variables['TODAY'] = Time::today();
         }
+        if (empty($variables['NOW'])) {
+            $variables['NOW'] = time();
+        }
+
         $next_is_array = false;
         array_walk_recursive($query_segment, function(&$item) use ($variables, &$next_is_array) {
             if (is_string($item)) {

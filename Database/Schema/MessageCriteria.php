@@ -12,6 +12,11 @@ class MessageCriteria extends Schema {
         return array(
             'message_criteria_id' => $this->autoincrement(),
             'criteria_name' => $this->varchar(255),
+            'join' => $this->varchar(255),
+            'where' => $this->varchar(255),
+            'select' => $this->varchar(255),
+            'group_by' => $this->varchar(255),
+            'having' => $this->varchar(255),
         );
     }
 

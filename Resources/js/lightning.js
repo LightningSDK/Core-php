@@ -21,6 +21,7 @@ lightning.startup = {
         this.initNav();
         lightning.ajax.init();
         lightning.dialog.init();
+        lightning.splitTest.init();
     },
 
     initNav: function() {

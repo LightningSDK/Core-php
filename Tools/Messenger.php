@@ -1,6 +1,7 @@
 <?php
 
 namespace Lightning\Tools;
+use stdClass;
 
 /**
  * Class Messenger
@@ -129,12 +130,18 @@ class Messenger {
 
         $session = Session::getInstance();
         if (!empty(self::$messages)) {
-            $session->setSetting('messages.messages', self::$messages);
+            if (empty($session->content->messages)) {
+                $session->content->messages = new stdClass();
+            }
+            $session->content->messages->messages = self::$messages;
         }
         if (!empty(self::$errors)) {
-            $session->setSetting('messages.errors', self::$errors);
+            if (empty($session->content->messages)) {
+                $session->content->messages = new stdClass();
+            }
+            $session->content->messages->errors = self::$errors;
         }
-        $session->saveData();
+        $session->save();
     }
 
     /**
@@ -142,20 +149,21 @@ class Messenger {
      */
     public static function loadFromSession() {
         if ($session = Session::getInstance(true, false)) {
-            $session_messages = $session->getSetting('messages.messages', array());
-            $session_errors = $session->getSetting('messages.errors', array());
+
+            $session_messages = !empty($session->content->messages->messages) ? $session->content->messages->messages : [];
+            $session_errors = !empty($session->content->messages->errors) ? $session->content->messages->errors : [];
             $reset = false;
             if (!empty($session_messages)) {
-                self::$messages = array_merge(self::$messages, $session->getSetting('messages.messages', array()));
+                self::$messages = array_merge(self::$messages, $session_messages);
                 $reset = true;
             }
             if (!empty($session_errors)) {
-                self::$errors = array_merge(self::$errors, $session->getSetting('messages.errors', array()));
+                self::$errors = array_merge(self::$errors, $session_errors);
                 $reset = true;
             }
             if ($reset) {
-                $session->unsetSetting('messages');
-                $session->saveData();
+                unset($session->content->messages);
+                $session->save();
             }
         }
     }

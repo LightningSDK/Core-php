@@ -6,6 +6,7 @@
 
 namespace Lightning\Pages;
 
+use Lightning\Model\URL;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Form;
 use Lightning\Tools\Language;
@@ -15,6 +16,7 @@ use Lightning\Tools\Navigation;
 use Lightning\Tools\Output;
 use Lightning\Tools\ReCaptcha;
 use Lightning\Tools\Request;
+use Lightning\Tools\Tracker;
 use Lightning\View\Page as PageView;
 use Lightning\Model\User as UserModel;
 use Source\Model\Message;
@@ -88,6 +90,7 @@ class Contact extends PageView {
         // Send a message to the site contact.
         if ($this->settings['always_notify'] || ($request_contact && $this->settings['contact'])) {
             $sent = $this->sendMessage();
+            Tracker::trackEvent('Contact Sent', URL::getCurrentUrlId(), $this->user->id);
             if (!$sent) {
                 Output::error('Your message could not be sent. Please try again later');
             } else {
@@ -110,11 +113,11 @@ class Contact extends PageView {
         }
     }
 
-    public function redirect() {
+    public function redirect($params = []) {
         if ($redirect = Request::post('redirect', 'url')) {
-            Navigation::redirect($redirect);
+            Navigation::redirect($redirect, $params);
         } else {
-            Navigation::redirect('/message');
+            Navigation::redirect('/message', $params);
         }
     }
 
@@ -124,6 +127,8 @@ class Contact extends PageView {
     protected function setSuccessMessage($default) {
         if ($this->settings['custom_message'] && $message = Request::post('success')) {
             Messenger::message($message);
+        } elseif (isset($_POST['success'])) {
+            return;
         } else {
             Messenger::message($default);
         }
@@ -163,7 +168,7 @@ class Contact extends PageView {
             $mailer->to($to);
         }
         return $mailer
-            ->from($this->user->email)
+            ->replyTo($this->user->email)
             ->subject($this->settings['subject'])
             ->message($this->getMessageBody())
             ->send();

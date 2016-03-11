@@ -68,7 +68,7 @@ class Database extends Singleton {
     private $end_php;
 
     /**
-     * The last query executed. If it's the same it does not need to be reprepared.
+     * The last query executed. If it's the same it does not need to be re-prepared.
      *
      * @var string
      */
@@ -159,7 +159,7 @@ class Database extends Singleton {
      *   The database object.
      */
     public static function createInstance() {
-        return new self(Configuration::get('database'));
+        return new static(Configuration::get('database'));
     }
 
     /**
@@ -792,6 +792,9 @@ class Database extends Singleton {
      *
      * @return string
      *   The rendered query portion.
+     *
+     * @throws Exception
+     *   On parse error.
      */
     protected function parseJoin($joins, &$values) {
         // If the first element of join is not an array, it's an actual join.
@@ -1322,7 +1325,7 @@ class Database extends Singleton {
                 continue;
             }
 
-            if (is_string($field)) {
+            if (!is_numeric($field)) {
                 $field = $this->formatField($field);
             }
 

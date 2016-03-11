@@ -147,7 +147,6 @@ class Messages extends Table {
     }
 
     public function getFields() {
-        // TODO: REQUIRE ADMIN
         $cl = Request::get('criteria_list', 'explode', 'int');
         $output = array();
         if (!empty($cl)) {

@@ -9,11 +9,10 @@ use Lightning\Tools\ClientUser;
 use Lightning\Tools\Database;
 use Lightning\Tools\Request;
 use Lightning\Tools\Session;
-use Lightning\Tools\Singleton;
+use Lightning\Tools\SingletonObject;
 use Source\Overrides\Tools\Security\Random;
 
-class Token extends Singleton {
-
+class Token extends SingletonObject{
     /**
      * Life time of token.
      */
@@ -34,7 +33,7 @@ class Token extends Singleton {
      *
      * @param $data
      */
-    public function __construct($data) {
+    public function __construct($data = []) {
         $this->data = $data;
         $this->token_data = !empty($data['token_data']) ? json_decode($data['token_data'], true) : [];
     }
@@ -145,14 +144,7 @@ class Token extends Singleton {
      */
     public function updateTime() {
         $this->time = time();
-        Database::getInstance()->update('action_token', ['time' => $this->time], ['key' => $this->key]);
-    }
-
-    /**
-     * Write the token $data to the db.
-     */
-    public function saveData() {
-        Database::getInstance()->update('action_token', ['token_data' => json_encode($this->token_data)], ['token_id' => $this->id]);
+        $this->save();
     }
 
     /**
@@ -191,14 +183,7 @@ class Token extends Singleton {
      * Removes all data from the token in and db.
      */
     public function clear() {
-        $this->data = array();
-        $this->saveData();
-    }
-
-    /**
-     * Kill the token so it can never be used again.
-     */
-    public function destroy() {
-        Database::getInstance()->delete('action_token', ['token_id' => $this->token_id]);
+        $this->data = [];
+        $this->save();
     }
 }
