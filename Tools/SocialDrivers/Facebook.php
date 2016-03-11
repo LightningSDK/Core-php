@@ -39,9 +39,9 @@ class Facebook extends SocialMediaApi {
     public function getLightningUserData() {
         $this->loadProfile();
         return [
-            'first' => $this->profile['first_name'],
-            'last' => $this->profile['last_name'],
-            'alt_email' => $this->profile['email'],
+            'first' => !empty($this->profile['first_name']) ? $this->profile['first_name'] : '',
+            'last' => !empty($this->profile['last_name']) ? $this->profile['last_name'] : '',
+            'alt_email' => !empty($this->profile['email']) ? $this->profile['email'] : '',
         ];
     }
 
