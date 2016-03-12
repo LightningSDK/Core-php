@@ -81,7 +81,7 @@ class Facebook extends SocialMediaApi {
     }
 
     public function myImageURL() {
-        $request = new FacebookRequest($this->service, 'GET', '/me/picture?redirect=0');
+        $request = new FacebookRequest($this->service, 'GET', '/me/picture?redirect=0&type=large');
         $response = $request->execute()->getGraphObject()->asArray();
         return $response['url'];
     }
