@@ -2,6 +2,7 @@
 
 namespace Lightning\Tools\SocialDrivers;
 
+use CURLFile;
 use Facebook\Entities\SignedRequest;
 use Facebook\FacebookRequest;
 use Facebook\FacebookSession;
@@ -90,6 +91,14 @@ class Facebook extends SocialMediaApi {
         return file_get_contents($this->myImageURL());
     }
 
+    public function postImage($image_path) {
+        $request = new FacebookRequest($this->service, 'POST', '/' . $this->getSocialId() . '/photos', [
+            'source' => new CURLFile($image_path)
+        ]);
+        $response = $request->execute()->getGraphObject()->asArray();
+        return $response;
+    }
+
     public function getFriends() {
         $request = new FacebookRequest($this->service, 'GET', '/me/friends');
         $response = $request->execute()->getGraphObject()->asArray();
@@ -161,6 +170,7 @@ class Facebook extends SocialMediaApi {
         JS::set('token', Session::getInstance()->getToken());
         JS::set('social.authorize', $authorize);
         JS::set('social.facebook.appid', Configuration::get('social.facebook.appid'));
+        JS::set('social.facebook.scope', Configuration::get('social.facebook.scope'));
         JS::startup('lightning.social.initLogin()');
 
         return '<span class="social-signin facebook"><i class="fa fa-facebook"></i><span> Sign in with Facebook</span></span>';
