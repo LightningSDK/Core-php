@@ -167,6 +167,7 @@ class Facebook extends SocialMediaApi {
     }
 
     public static function loginButton($authorize = false) {
+        JS::add('//connect.facebook.net/en_US/sdk.js');
         JS::set('token', Session::getInstance()->getToken());
         JS::set('social.authorize', $authorize);
         JS::set('social.facebook.appid', Configuration::get('social.facebook.appid'));
