@@ -2,6 +2,7 @@
 
 namespace Lightning\Tools\SocialDrivers;
 
+use CURLFile;
 use Facebook\Entities\SignedRequest;
 use Facebook\FacebookRequest;
 use Facebook\FacebookSession;
@@ -43,9 +44,9 @@ class Facebook extends SocialMediaApi {
     public function getLightningUserData() {
         $this->loadProfile();
         return [
-            'first' => $this->profile['first_name'],
-            'last' => $this->profile['last_name'],
-            'alt_email' => $this->profile['email'],
+            'first' => !empty($this->profile['first_name']) ? $this->profile['first_name'] : '',
+            'last' => !empty($this->profile['last_name']) ? $this->profile['last_name'] : '',
+            'alt_email' => !empty($this->profile['email']) ? $this->profile['email'] : '',
         ];
     }
 
@@ -81,13 +82,21 @@ class Facebook extends SocialMediaApi {
     }
 
     public function myImageURL() {
-        $request = new FacebookRequest($this->service, 'GET', '/me/picture?redirect=0');
+        $request = new FacebookRequest($this->service, 'GET', '/me/picture?redirect=0&type=large');
         $response = $request->execute()->getGraphObject()->asArray();
         return $response['url'];
     }
 
     public function myImageData() {
         return file_get_contents($this->myImageURL());
+    }
+
+    public function postImage($image_path) {
+        $request = new FacebookRequest($this->service, 'POST', '/' . $this->getSocialId() . '/photos', [
+            'source' => new CURLFile($image_path)
+        ]);
+        $response = $request->execute()->getGraphObject()->asArray();
+        return $response;
     }
 
     public function getFriends() {
@@ -158,9 +167,11 @@ class Facebook extends SocialMediaApi {
     }
 
     public static function loginButton($authorize = false) {
+        JS::add('//connect.facebook.net/en_US/sdk.js');
         JS::set('token', Session::getInstance()->getToken());
         JS::set('social.authorize', $authorize);
         JS::set('social.facebook.appid', Configuration::get('social.facebook.appid'));
+        JS::set('social.facebook.scope', Configuration::get('social.facebook.scope'));
         JS::startup('lightning.social.initLogin()');
 
         return '<span class="social-signin facebook"><i class="fa fa-facebook"></i><span> Sign in with Facebook</span></span>';
