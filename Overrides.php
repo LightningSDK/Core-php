@@ -18,6 +18,7 @@ class Page extends \Overridable\Lightning\Model\Page {}
 class Token extends \Overridable\Lightning\Model\Token {}
 class User extends \Overridable\Lightning\Model\User {}
 class Permissions extends \Overridable\Lightning\Model\Permissions {}
+class Calendar extends \Overridable\Lightning\Model\Calendar {}
 
 namespace Lightning\Tools;
 
