@@ -33,4 +33,15 @@ class HTML5 {
         JS::set('videos.' . $video_id, $settings);
         JS::startup('lightning.video.init()');
     }
+
+    /**
+     * Render the default video container.
+     *
+     * @param $video_id
+     * @param array $settings
+     * @return string
+     */
+    public static function render($video_id, $settings = []) {
+        return '<div id="video_' . $video_id . '" class="' . (!empty($settings['widescreen']) ? 'widescreen' : '') . '"></div>';
+    }
 }
