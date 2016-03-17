@@ -3428,6 +3428,9 @@ abstract class Table extends Page {
 
         if (isset($this->preset[$field['field']]['render_' . $this->action . '_field'])) {
             $this->getRow(false);
+            if ($this->preset[$field['field']]['render_' . $this->action . '_field'][0] == 'this') {
+                $this->preset[$field['field']]['render_' . $this->action . '_field'][0] = $this;
+            }
             return $this->preset[$field['field']]['render_' . $this->action . '_field']($this->list);
         }
 
