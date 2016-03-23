@@ -229,6 +229,7 @@ then
     # Conform the databases
     echo "Conforming the database"
     $DIR/Lightning/lightning database conform-schema
+    $DIR/Lightning/lightning database import-defaults
 fi
 
 if [ `shouldInstall "Install/reset default templates and images?"` -eq 1 ]
