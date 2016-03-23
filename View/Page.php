@@ -129,6 +129,7 @@ class Page {
                 Output::accessDenied();
             }
 
+            // Outputs an error if this is a POST request without a valid token.
             $this->requireToken();
 
             // If there is a requested action.
