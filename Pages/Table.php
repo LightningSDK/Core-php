@@ -771,14 +771,16 @@ abstract class Table extends Page {
         }
     }
 
-    public function execute() {
+    /**
+     * Prepend the output by setting the page templates, etc.
+     */
+    public function output() {
         // Setup the template.
         $template = Template::getInstance();
         $template->set('table', $this);
-        $template->set('content', 'table');
 
-        // Call the appropriate execution handler.
-        parent::execute();
+        // Call finalize the output.
+        parent::output();
     }
 
     /**
