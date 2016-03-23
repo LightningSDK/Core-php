@@ -1,4 +1,7 @@
 lightning.htmleditor = {
+    /**
+     * Initialize editor settings.
+     */
     init: function() {
         for (var i in lightning.vars.htmleditors) {
             if (lightning.vars.htmleditors[i].editor_type == 'tinymce') {
@@ -29,6 +32,11 @@ lightning.htmleditor = {
         }
     },
 
+    /**
+     * Activate the editor.
+     *
+     * TODO: Change this to 'activateEditor'
+     */
     initEditor: function(editor_id) {
         if (lightning.vars.htmleditors[editor_id].editor_type == 'tinymce') {
             tinymce.init(lightning.vars.htmleditors[editor_id]);
@@ -56,6 +64,13 @@ lightning.htmleditor = {
         }
     },
 
+    /**
+     * Deactivate an editor.
+     *
+     * TODO: Change to deactivateEditor.
+     * @param integer editor_id
+     *   The name of the editor.
+     */
     destroyEditor: function(editor_id) {
         if (lightning.vars.htmleditors[editor_id].editor_type == 'tinymce') {
             for (var i in tinymce.editors) {
