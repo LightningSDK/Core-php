@@ -5,7 +5,7 @@ namespace Lightning\Tools;
 use Exception;
 use Lightning\Tools\Cache\FileCache;
 use Lightning\View\Field\BasicHTML;
-use Source\Model\Page;
+use Lightning\Model\Page;
 
 class CSVImport extends Page {
     protected $fields;
