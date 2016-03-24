@@ -54,3 +54,19 @@ lightning.require = function(url, callback) {
     var s = document.getElementsByTagName('script')[0];
     s.parentNode.insertBefore(script, s);
 };
+
+lightning.get = function(locator) {
+    if (!locator) {
+        return null;
+    }
+    locator = locator.split('.');
+    var value = lightning.vars;
+    for (var i in locator) {
+        if (value.hasOwnProperty(locator[i])) {
+            value = value[locator[i]];
+        } else {
+            return null;
+        }
+    }
+    return value;
+};
