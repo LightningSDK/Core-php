@@ -4,7 +4,7 @@ namespace Lightning\Database\Schema;
 
 use Lightning\Database\Schema;
 
-class TrackerEvent extends Schema {
+class URL extends Schema {
     protected $table = 'url';
 
     public function getColumns() {

@@ -54,6 +54,18 @@ abstract class SocialMediaApi extends Singleton implements SocialMediaApiInterfa
         }
     }
 
+    public function isLoggedIn() {
+        try {
+            if ($this->getSocialId()) {
+                return true;
+            }
+        } catch (Exception $e) {
+
+        }
+
+        return false;
+    }
+
     protected function getLightningEmail() {
         return $this->getSocialId() . '@@' . static::EMAIL_SUFFIX;
     }

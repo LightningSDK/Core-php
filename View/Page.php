@@ -50,6 +50,9 @@ class Page {
      */
     protected $params = array();
 
+    protected $rightColumn = true;
+    protected $fullWidth = false;
+
     /**
      * Run any global initialization functions.
      */
@@ -69,6 +72,10 @@ class Page {
         if (!empty($this->js)) {
             JS::add($this->js);
         }
+
+        $template = Template::getInstance();
+        $template->set('full_width', $this->fullWidth);
+        $template->set('right_column', $this->rightColumn);
     }
 
     public function get() {}
@@ -122,6 +129,7 @@ class Page {
                 Output::accessDenied();
             }
 
+            // Outputs an error if this is a POST request without a valid token.
             $this->requireToken();
 
             // If there is a requested action.

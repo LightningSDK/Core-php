@@ -222,10 +222,14 @@ if [ ! -f $DIR/Source/Config/config.inc.php ]; then
     # TODO: This needs to be escaped to prevent sed from using the original line.
     sed "s|'database.*,|'database' => 'mysql:user=${USER};password=${PASS};host=${DBHOST};dbname=${DBNAME}',|"\
         <$DIR/Lightning/install/Config/config.inc.php >$DIR/Source/Config/config.inc.php
+fi
 
+if [ `shouldInstall "Install default database?"` -eq 1 ]
+then
     # Conform the databases
     echo "Conforming the database"
     $DIR/Lightning/lightning database conform-schema
+    $DIR/Lightning/lightning database import-defaults
 fi
 
 if [ `shouldInstall "Install/reset default templates and images?"` -eq 1 ]
