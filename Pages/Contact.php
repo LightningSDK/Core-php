@@ -29,7 +29,7 @@ use Source\Model\Message;
 class Contact extends PageView {
 
     protected $page = 'contact';
-    protected $nav = 'contact';
+    protected $menuContext = 'contact';
 
     /**
      * @var UserModel

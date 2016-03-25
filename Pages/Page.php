@@ -21,8 +21,18 @@ use Lightning\View\Video\YouTube;
 
 class Page extends PageView {
 
+    /**
+     * Whether this page was just created and should be inserted as a new page.
+     *
+     * @var boolean
+     */
     protected $new = false;
 
+    /**
+     * Page content from the database.
+     *
+     * @var array
+     */
     protected $fullPage;
 
     protected function hasAccess() {
@@ -31,11 +41,17 @@ class Page extends PageView {
 
     public function get() {
         $request = Request::getLocation();
-        $content_locator = empty($request) ? 'index' : Request::getFromURL('/(.*)\.html$/') ?: '404';
+        if (empty($request) || $request == 'index') {
+            $content_locator = 'index';
+            $this->menuContext = 'index';
+        } else {
+            $content_locator = Request::getFromURL('/(.*)\.html$/') ?: '404';
+        }
 
         // LOAD PAGE DETAILS
         if ($this->fullPage = PageModel::loadByUrl($content_locator)) {
             header('HTTP/1.0 200 OK');
+            $this->menuContext = $this->fullPage['menu_context'];
             if (Configuration::get('page.modification_date') && $this->fullPage['last_update'] > 0) {
                 header("Last-Modified: ".gmdate("D, d M Y H:i:s", $this->fullPage['last_update'])." GMT");
             }

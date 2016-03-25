@@ -49,10 +49,35 @@ class Page {
      *
      * @var array
      */
-    protected $params = array();
+    protected $params = [];
 
+    /**
+     * Whether to display the right column.
+     *
+     * Passed to, and depends on template.
+     *
+     * @var boolean
+     */
     protected $rightColumn = true;
+
+    /**
+     * Whether to allow the page to use the full page width (true) or
+     * whether it should be contained within a div.column (false)
+     *
+     * Passed to, and depends on template.
+     *
+     * @var boolean
+     */
     protected $fullWidth = false;
+
+    /**
+     * Which menu should be marked as 'active'.
+     *
+     * Passed to, and depends on template.
+     *
+     * @var string
+     */
+    protected $menuContext = '';
 
     /**
      * Run any global initialization functions.
@@ -75,8 +100,6 @@ class Page {
         }
 
         $template = Template::getInstance();
-        $template->set('full_width', $this->fullWidth);
-        $template->set('right_column', $this->rightColumn);
     }
 
     public function get() {}
@@ -95,13 +118,15 @@ class Page {
 
             $template->set('google_analytics_id', Configuration::get('google_analytics_id'));
 
-            // TODO: These should be called directly from the template.
+            // TODO: Remove these, they should be called directly from the template.
             $template->set('errors', Messenger::getErrors());
             $template->set('messages', Messenger::getMessages());
 
             $template->set('site_name', Configuration::get('site.name'));
             $template->set('blog', Blog::getInstance());
-            JS::set('active_nav', $this->nav);
+            $template->set('full_width', $this->fullWidth);
+            $template->set('right_column', $this->rightColumn);
+            JS::set('menu_context', $this->menuContext);
             $template->render($this->template);
         } catch (Exception $e) {
             echo 'Error rendering template: ' . $e;
