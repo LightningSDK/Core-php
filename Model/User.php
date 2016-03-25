@@ -309,13 +309,13 @@ class User extends Object {
      *
      * @return User
      */
-    public static function addUser($email, $options = array(), $update = array()) {
+    public static function addUser($email, $options = [], $update = []) {
         $user_data = array();
         $user_data['email'] = strtolower($email);
         $db = Database::getInstance();
         if ($user = $db->selectRow('user', $user_data)) {
             if ($update) {
-                $db->update('user', $user_data, $update);
+                $db->update('user', $update, $user_data);
             }
             $user_id = $user['user_id'];
             return static::loadById($user_id);

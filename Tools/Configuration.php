@@ -54,6 +54,16 @@ class Configuration {
     }
 
     /**
+     * Merge new data into the configuration.
+     *
+     * @param array $new_data
+     *   An array of new data to merge.
+     */
+    public static function merge($new_data) {
+        self::$configuration = array_merge_recursive(self::$configuration, $new_data);
+    }
+
+    /**
      * Load the configuration from the configuration.inc.php file.
      */
     protected static function loadConfiguration() {

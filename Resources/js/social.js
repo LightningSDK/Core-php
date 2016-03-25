@@ -55,6 +55,10 @@ lightning.social = {
         },
 
         signin: function() {
+            if (!lightning.vars.social.facebook.appid) {
+                console.log('Missing facebook app ID');
+                return;
+            }
             FB.init({
                 appId      : lightning.vars.social.facebook.appid,
                 cookie     : true,  // enable cookies to allow the server to access
@@ -63,7 +67,13 @@ lightning.social = {
                 version    : 'v2.2' // use version 2.2
             });
 
-            FB.login(lightning.social.facebook.signinComplete, lightning.social.facebook.scope);
+            var settings = {};
+            var scope = lightning.get('social.facebook.scope');
+            if (scope) {
+                settings.scope = scope;
+            }
+
+            FB.login(lightning.social.facebook.signinComplete, settings);
         },
 
         // This is called with the results from from FB.getLoginStatus().
@@ -135,6 +145,10 @@ lightning.social = {
     signinComplete: function(site, type, token) {
         var form = $('<form action="/user" method="post" style="display:none">');
         form.append('<input type="hidden" name="token" value="' + lightning.vars.token + '">');
+        var redirect = lightning.get('social.login_redirect');
+        if (redirect) {
+            form.append('<input type="hidden" name="redirect" value="' + redirect + '">');
+        }
         form.append('<input type="hidden" name="action" value="' + site + '-login">');
         form.append($('<input type="hidden" name="' + type + '-token">').val(token));
         form.submit();

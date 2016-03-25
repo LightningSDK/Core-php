@@ -241,13 +241,14 @@ class Template extends Singleton {
      *   The output if requested, or null.
      */
     public function build($template, $return_as_string = false) {
-        if (!empty($this->cache[$template])) {
+        $cache_name = $this->getCacheName($template);
+        if (!empty($this->cache[$cache_name])) {
             // Cache is enabled for this page.
-            $ttl = !empty($this->cache[$template]['ttl']) ? $this->cache[$template]['ttl'] : Cache::MONTH;
-            $size = !empty($this->cache[$template]['size']) ? $this->cache[$template]['size'] : Cache::MEDIUM;
+            $ttl = !empty($this->cache[$cache_name]['ttl']) ? $this->cache[$cache_name]['ttl'] : Cache::MONTH;
+            $size = !empty($this->cache[$cache_name]['size']) ? $this->cache[$cache_name]['size'] : Cache::MEDIUM;
 
             // Load the cache.
-            $cache = Cache::get('template_' . $template, $ttl, $size);
+            $cache = Cache::get('template_' . $this->getCacheName($cache_name), $ttl, $size);
 
             // If the cache doesn't exist.
             if ($cache->isNew()) {
@@ -267,6 +268,19 @@ class Template extends Singleton {
         }
     }
 
+    protected function getCacheName($template) {
+        return preg_replace('|\\\\|', '__', $this->getFileName($template));
+    }
+
+    protected function getFileName($template) {
+        if (is_string($template)) {
+            return $this->template_dir . $template;
+        }
+        elseif (is_array($template)) {
+            return HOME_PATH . '/Modules/' . $template[1] . '/Templates/' . $template[0];
+        }
+    }
+
     /**
      * @param string $template
      *   The name of the template file to render.
@@ -283,7 +297,7 @@ class Template extends Singleton {
 
         // Include the file with vars in scope.
         extract($this->vars);
-        include $this->template_dir . $template . '.tpl.php';
+        include $this->getFileName($template) . '.tpl.php';
 
         if ($return_as_string) {
             return ob_get_clean();
