@@ -49,10 +49,8 @@ class Page extends PageView {
             $this->fullPage['site_map'] = 1;
             HTMLEditor::init();
             JS::startup('lightning.page.edit();');
-        } elseif ($this->fullPage = PageModel::loadByUrl('404')) {
-            http_response_code(404);
         } else {
-            Output::http(404);
+            $this->output404();
         }
 
         $this->prepare();

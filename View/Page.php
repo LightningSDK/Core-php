@@ -13,6 +13,7 @@ use Lightning\Tools\Session;
 use Lightning\Tools\Template;
 use Lightning\View\CSS;
 use Lightning\View\JS;
+use Lightning\Model\Page as PageModel;
 
 /**
  * The basic html page handler.
@@ -105,6 +106,18 @@ class Page {
         } catch (Exception $e) {
             echo 'Error rendering template: ' . $e;
             exit;
+        }
+    }
+
+    /**
+     * Build a 404 page.
+     */
+    public function output404() {
+        $this->page = 'page';
+        if ($this->fullPage = PageModel::loadByUrl('404')) {
+            http_response_code(404);
+        } else {
+            Output::http(404);
         }
     }
 
