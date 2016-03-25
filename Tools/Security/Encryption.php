@@ -20,25 +20,25 @@ class Encryption {
         $pubKey = openssl_pkey_get_details($res);
         $pubKey = $pubKey['key'];
 
-        return (array('public' => $pubKey, 'private' => $privKey));
+        return ['public' => $pubKey, 'private' => $privKey];
     }
 
     public static function shortenKey($key) {
         $key = preg_replace('|-----.*-----|', '', $key);
-        $key = str_replace("\n", '', $key);
+        $key = preg_replace( '/\r|\n/', '', $key);
         return $key;
     }
 
     public static function lengthenPublicKey($key) {
         return "-----BEGIN PUBLIC KEY-----\n"
-        . wordwrap($key, 65, "\n")
-        . "\n-----END PUBLIC KEY-----";
+            . wordwrap($key, 64, "\n", true)
+            . "\n-----END PUBLIC KEY-----";
     }
 
     public static function lengthenPrivateKey($key) {
         return "-----BEGIN PRIVATE KEY-----\n"
-            . wordwrap($key, 65, "\n")
-            . "-----END PRIVATE KEY-----";
+            . wordwrap($key, 64, "\n", true)
+            . "\n-----END PRIVATE KEY-----";
     }
 
     public static function publicEncrypt($pubKey, $data) {
