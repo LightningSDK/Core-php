@@ -5,6 +5,7 @@ namespace Overridable\Lightning\View;
 use Exception;
 use Lightning\Model\Blog;
 use Lightning\Tools\Configuration;
+use Lightning\Tools\Language;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Output;
@@ -195,7 +196,7 @@ class Page {
 
     public function requireToken() {
         if (!$this->validateToken()) {
-            Output::error('You submitted a form with an invalid token. Your requested has been ignored as a security precaution.');
+            Output::error(Language::translate('invalid_token'));
         }
     }
 
