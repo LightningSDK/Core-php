@@ -85,6 +85,8 @@ abstract class Table extends Page {
      *     - datetime - 6 popups, m/d/y h:m ap, saved as a unix timestamp
      *     - string - a single text input
      *     - html - an html input box
+     *     - file - a file input
+     *     - image - a file input with image processing options
      *   - hidden boolean - Will hide the field from all views
      *   - default mixed - Will use this as the default value when inserting. Will not be used if a value is supplied unless force_default_new is set to true. When creating a new entry, the field is visible, editable, and populated with this value.
      *   - force_default_new boolean - Forces new entries to use the default value. Prevents tampering with a field that has hidden and default set.
@@ -93,6 +95,8 @@ abstract class Table extends Page {
      *   - unlisted boolean - if set to true, this field will not appear on the list view
      *   - render_list_field - Will render the field in the list view.
      *   - render_edit_field - Will render the edit field. Must also render form fields if necessary.
+     *   - location - for file and image types, the location is an absolute or relative directory of the storage location.
+     *   - replace - for a file or image, whether the previous upload should be replaced.
      *
      * @var array
      */
@@ -558,7 +562,7 @@ abstract class Table extends Page {
     public function getDelete() {
         $this->action = 'delete';
         if (!$this->editable || !$this->deleteable) {
-            Messenger::accessDenied();
+            Output::accessDenied();
         }
     }
 
@@ -604,9 +608,8 @@ abstract class Table extends Page {
             $this->getRow();
             foreach ($this->fields as $f=>$field) {
                 if (($field['type'] == 'file' || $field['type'] == 'image') && empty($field['browser'])) {
-                    if (file_exists($this->get_full_file_location($field['location'], $this->list[$f]))) {
-                        unlink($this->get_full_file_location($field['location'], $this->list[$f]));
-                    }
+                    $fileHandler = $this->getFileHandler($field);
+                    $fileHandler->delete($this->list[$field['field']]);
                 }
             }
 
@@ -2314,9 +2317,6 @@ abstract class Table extends Page {
                                     || $this->action == 'insert'
                                 )
                             ) {
-                                // delete previous file
-                                $this->getRow();
-
                                 if ($field['type'] == 'file') {
                                     $val = $this->saveFile($field, $_FILES[$field['field']]);
                                 } else {
@@ -2427,16 +2427,36 @@ abstract class Table extends Page {
     }
 
     protected function saveFile($field, $file) {
-        // copy the uploaded file to the right directory
-        // needs some security checks -- IMPLEMENT FEATURE - what kind? make sure its not executable?
-        $val = $this->get_new_file_loc($field['location']);
-        move_uploaded_file($file['tmp_name'], $field['location'] . $val);
 
-        if (isset($field['extension'])) {
-            $extention = preg_match("/\.[a-z1-3]+$/", $_FILES[$field['field']]['name'], $r);
-            $string .= ", `{$field['extension']}` = '" . strtolower($r[0]) . "'";
+        // Delete previous file.
+        $fileHandler = $this->getFileHandler($field);
+        $new_file = $this->getFullFileName($file['name'], $field, null);
+        if ($this->id && !empty($field['replace'])) {
+            $this->getRow();
+            if ($fileHandler->exists($new_file)) {
+                $fileHandler->delete($new_file);
+            }
+        } else {
+            $i = 1;
+            $filename = preg_replace('/:/', '', $file['name']);
+            $filename = preg_replace('~\.(?!.*\.)~', ':', $filename);
+            $components = explode(':', $filename);
+            if (count($components) == 1) {
+                $prefix = $components[0];
+                $suffix = '';
+            } else {
+                $prefix = $components[0];
+                $suffix = '.' . $components[1];
+            }
+            while ($fileHandler->exists($new_file)) {
+                $new_file = $this->getFullFileName($prefix . '_' . $i . $suffix, $field, null);
+            }
         }
-        return $string;
+
+        // Write the file.
+        $fileHandler->moveUploadedFile($new_file, $file['tmp_name']);
+
+        return $new_file;
     }
 
     /**
@@ -2650,6 +2670,15 @@ abstract class Table extends Page {
         return $random_file;
     }
 
+    /**
+     * @param string $file_name
+     * @param array $field
+     * @param array $uploaded_file
+     *   The uploaded file data from $_FILES.
+     *   Only pass this if you want to auto detect the file extension.
+     *
+     * @return string
+     */
     protected function getFullFileName($file_name, $field, $uploaded_file = null) {
         // Add developer specified prefix/suffix
         if (!empty($field['file_prefix'])) {
@@ -2659,11 +2688,18 @@ abstract class Table extends Page {
             $file_name .= $field['file_suffix'];
         }
         // Add the format suffix.
-        $file_name .= '.' . $this->getOutputFormat($field, $uploaded_file);
+        if ($uploaded_file) {
+            $file_name .= '.' . $this->getOutputFormat($field, $uploaded_file);
+        }
 
         return $file_name;
     }
 
+    /**
+     * @param $field
+     *
+     * @return \Lightning\Tools\IO\FileHandlerInterface
+     */
     protected function getFileHandler($field) {
         // TODO: $field['location'] is deprecated. All tables should be updated to use container instead.
         return FileManager::getFileHandler(empty($field['file_handler']) ? '' : $field['file_handler'], !empty($field['container']) ? $field['container'] : $field['location']);
@@ -3031,25 +3067,13 @@ abstract class Table extends Page {
         }
     }
 
-    protected function get_new_file_loc($dir) {
-        // select random directory
-        if (substr($dir, -1) == "/")
-            $dir = substr($dir, 0, -1);
-        do {
-            $rand_dir = "/" . srand(microtime()) . "/" . srand(microtime()) . "/";
-            if (!file_exists($dir . $rand_dir))
-                mkdir($dir . $rand_dir, 0755, true);
-        } while (count(scandir($dir . $rand_dir)) > 1000);
-        // create random file name
-        do {
-            $rand_file = sha1(srand(microtime()));
-        } while (file_exists($dir . $rand_dir . $rand_file));
-
-        // return only random dir and file
-        return $rand_dir . $rand_file;
-
-    }
-
+    /**
+     * @param $dir
+     * @param $file
+     * @return mixed|string
+     *
+     * @deprecated
+     */
     protected function get_full_file_location($dir, $file) {
         $f = $dir . "/" . $file;
         $f = str_replace("//", "/", $f);
@@ -3343,17 +3367,20 @@ abstract class Table extends Page {
     protected function getOutputFormat($field, $file) {
         if (!empty($file)) {
             $uploadedFormat = $this->getUploadedFileFormat($file);
-        } else {
-            // Default format.
-            $uploadedFormat = 'jpg';
+        }
+
+        if (empty($file)) {
+            return '';
         }
 
         if (empty($field['format'])) {
             return $uploadedFormat;
         }
+
         if (is_array($field['format'])) {
             return in_array($uploadedFormat, $field['format']) ? $uploadedFormat : $field['format'][0];
         }
+
         return $field['format'];
     }
 
