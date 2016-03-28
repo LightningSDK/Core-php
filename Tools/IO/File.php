@@ -5,12 +5,18 @@ namespace Lightning\Tools\IO;
 class File implements FileHandlerInterface {
 
     protected $root;
+    protected $web_root;
 
-    public function __construct($root) {
+    public function __construct($root, $web_root = null) {
         if ($root[0] == '/') {
             $this->root = $root;
         } else {
             $this->root = preg_replace('|/+|', '/', HOME_PATH . '/' . $root);
+        }
+        if (!empty($web_root)) {
+            $this->web_root = $web_root;
+        } else {
+            $this->web_root = preg_replace('|' . preg_quote(HOME_PATH) . '|', '', $this->root);
         }
     }
 
@@ -38,7 +44,7 @@ class File implements FileHandlerInterface {
     }
 
     public function getWebURL($file) {
-        return '/' . $this->root . '/' . $file;
+        return $this->web_root . '/' . $file;
     }
 
     public function getAbsoluteLocal($file) {
