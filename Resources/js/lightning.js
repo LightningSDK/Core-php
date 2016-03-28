@@ -26,7 +26,7 @@ lightning.startup = {
 
     initNav: function() {
         var menu_context = lightning.get('menu_context');
-        if (menu_context.length > 0) {
+        if (menu_context) {
             $('nav .' + menu_context).addClass('active');
         }
     },
