@@ -40,7 +40,7 @@ class Blog extends Page {
         elseif (!empty($path[0]) || count($path) > 2) {
             // This page num can be in index 2 (blog/page/#) or index 3 (blog/category/a-z/#).
             $blog->page = is_numeric($path[count($path) - 1]) ? $path[count($path) - 1] : 1;
-            if (count($path) == 2 && preg_match('/.htm$/', $path[1])) {
+            if (preg_match('/.htm$/', $path[0])) {
                 // Load single blog by URL.
                 $blog->loadContentByURL(preg_replace('/.htm$/', '', $path[0]));
                 if (empty($blog->id)) {
