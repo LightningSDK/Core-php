@@ -55,6 +55,10 @@ class Google extends SocialMediaApi {
         }
     }
 
+    public function getToken() {
+        return $this->token;
+    }
+
     public function storeSessionData() {
         $session = Session::getInstance();
         if (empty($session->content->google)) {
@@ -124,6 +128,16 @@ class Google extends SocialMediaApi {
         return $this->service->people->listPeople('me', 'visible');
     }
 
+    public function getName() {
+        $this->loadProfile();
+        return $this->profile->getName()->getGivenName()
+          . ' ' . $this->profile->getName()->getFamilyName();
+    }
+
+    public function getScreenName() {
+        return '';
+    }
+
     public function getFriendIDs() {
         $friends = $this->getFriends();
         $ids = [];
@@ -175,5 +189,8 @@ class Google extends SocialMediaApi {
         JS::startup('lightning.social.initLogin()');
 
         return '<span class="social-signin google"><i class="fa fa-google"></i><span> Sign in with Google</span></span>';
+    }
+
+    public function share($text, $settings = []) {
     }
 }

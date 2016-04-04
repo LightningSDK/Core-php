@@ -48,6 +48,21 @@ class LinkedIn extends SocialMediaApi {
     public function getFriendIDs() {
     }
 
+    public function getToken() {
+
+    }
+
+    public function getScreenName()
+    {
+        // TODO: Implement getScreenName() method.
+    }
+
+    public function getName()
+    {
+        // TODO: Implement getName() method.
+    }
+
+
     public static function renderShare($url) {
         JS::add('//platform.linkedin.com/in.js');
         return '<script type="IN/Share" data-url="' . $url . '" data-counter="top"></script>';
@@ -61,5 +76,9 @@ class LinkedIn extends SocialMediaApi {
     }
 
     public static function loginButton() {
+    }
+
+    public function share($text, $settings = []) {
+
     }
 }

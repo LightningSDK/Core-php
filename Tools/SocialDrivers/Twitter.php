@@ -23,11 +23,20 @@ class Twitter extends SocialMediaApi {
      */
     protected $me;
 
+    protected $network = 'twitter';
+
     public static function loadAutoLoader() {
         require_once HOME_PATH . '/Lightning/Vendor/twitterapiclient/autoload.php';
     }
 
-    public static function createInstance($token = null) {
+    /**
+     * @param null $token
+     * @param boolean $authorize
+     *   Not used, twitter is always authorized.
+     *
+     * @return static
+     */
+    public static function createInstance($token = null, $authorize = true) {
         if (empty($token)) {
             $session = Session::getInstance(true, false);
             if (!empty($session->content->twitter->token)) {
@@ -51,6 +60,13 @@ class Twitter extends SocialMediaApi {
 
         $this->token = $token;
         $this->connection = new TwitterOAuth($appId, $secret, $token['oauth_token'], $token['oauth_token_secret']);
+    }
+
+    public function getToken() {
+        return json_encode([
+            'oauth_token' => $this->token['oauth_token'],
+            'oauth_token_secret' => $this->token['oauth_token_secret']
+        ]);
     }
 
     public function storeSessionData() {
@@ -106,11 +122,23 @@ class Twitter extends SocialMediaApi {
         return $user_settings;
     }
 
+    public function getName() {
+        $this->loadProfile();
+        return $this->profile->name;
+    }
+
+    public function getScreenName() {
+        $this->loadProfile();
+        return $this->profile->screen_name;
+    }
+
     public function getSocialId() {
+        $this->loadProfile();
         return $this->profile->id;
     }
 
     public function myImageURL() {
+        $this->loadProfile();
         return $this->profile->profile_image_url;
     }
 
@@ -165,7 +193,16 @@ class Twitter extends SocialMediaApi {
         return $return;
     }
 
-    public static function loginButton() {
+    /**
+     * Create a social signin button for twitter.
+     *
+     * @param boolean $authorize
+     *   This might not be used, if twitter always authorizes.
+     *
+     * @return string
+     *   The HTML building the sign in button.
+     */
+    public static function loginButton($authorize = false) {
         JS::set('token', Session::getInstance()->getToken());
         JS::startup('lightning.social.initLogin()');
 
@@ -173,7 +210,9 @@ class Twitter extends SocialMediaApi {
         $appId = Configuration::get('social.twitter.key');
         $secret = Configuration::get('social.twitter.secret');
         $connection = new TwitterOAuth($appId, $secret);
-        $request_token = $connection->oauth('oauth/request_token', array('oauth_callback' => Configuration::get('web_root') . '/user/twitterauth'));
+        $oauth_callback = Configuration::get('social.twitter.oauth_callback', null)
+            ?: Configuration::get('web_root') . '/user/twitterauth';
+        $request_token = $connection->oauth('oauth/request_token', array('oauth_callback' => $oauth_callback));
 
         // Save the token to the session.
         $session = Session::getInstance();
@@ -187,5 +226,26 @@ class Twitter extends SocialMediaApi {
         $url = $connection->url('oauth/authorize', array('oauth_token' => $request_token['oauth_token']));
         JS::set('social.twitter.signin_url', $url);
         return '<span class="social-signin twitter"><i class="fa fa-twitter"></i><span> Sign in with Twitter</span></span>';
+    }
+
+    public function share($text, $settings = []) {
+        // Add the URL to the tweet.
+        if (!empty($settings['url'])) {
+            $text .= ' ' . $settings['url'];
+        }
+        $parameters = ['status' => $text];
+        if (!empty($settings['images'])) {
+            // Upload images.
+            $image_ids = [];
+            $images = is_array($settings['images']) ? $settings['images'] : [$settings['images']];
+            foreach ($images as $image) {
+                $result = $this->connection->upload('media/upload', ['media' => $image['location']]);
+                $image_ids[] = $result->media_id_string;
+            }
+            // Add the images to the tweet.
+            $parameters['media_ids'] = implode(',', $image_ids);
+        }
+        // Send the tweet.
+        $this->connection->post('statuses/update', $parameters);
     }
 }

@@ -152,8 +152,8 @@ class User extends Page {
     }
 
     public function postFacebookLogin() {
-        if ($token = SocialMediaApi::getToken()) {
-            $fb = Facebook::getInstance(true, $token['token'], $token['auth']);
+        if ($token = SocialMediaApi::getRequestToken()) {
+            $fb = Facebook::getInstance(true, $token, $token['auth']);
             $this->finishSocialLogin($fb);
         }
         Messenger::error('Login Failed');
@@ -161,7 +161,7 @@ class User extends Page {
     }
 
     public function postGoogleLogin() {
-        if ($token = SocialMediaApi::getToken()) {
+        if ($token = SocialMediaApi::getRequestToken()) {
             $google = Google::getInstance(true, $token['token'], $token['auth']);
             $this->finishSocialLogin($google);
         }
