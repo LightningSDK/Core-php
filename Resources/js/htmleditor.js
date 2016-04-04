@@ -15,29 +15,31 @@ lightning.htmleditor = {
                     lightning.htmleditor.initEditor(i);
                 }
             } else if (lightning.vars.htmleditors[i].editor_type == 'ckeditor') {
-                CKEDITOR.scriptLoader.queue(CKEDITOR.getUrl('config.js'), function(){
-                    // Init the CKEditor Config
-                    if (typeof CKEDITOR.editorConfig == "function") {
-                        CKEDITOR.editorConfig(CKEDITOR.config);
-                    }
+                var x = function(j){
+                    CKEDITOR.scriptLoader.queue(CKEDITOR.getUrl('config.js'), function(){
+                        // Init the CKEditor Config
+                        if (typeof CKEDITOR.editorConfig == "function") {
+                            CKEDITOR.editorConfig(CKEDITOR.config);
+                        }
 
-                    // Add any plugins specified for just this editor.
-                    if (lightning.vars.htmleditors[i].hasOwnProperty('plugins')) {
-                        lightning.vars.htmleditors[i].plugins = lightning.vars.htmleditors[i].plugins.replace(/\*/, CKEDITOR.config.plugins);
-                    } else {
-                        lightning.vars.htmleditors[i].plugins = CKEDITOR.config.plugins;
-                    }
+                        // Add any plugins specified for just this editor.
+                        if (lightning.vars.htmleditors[j].hasOwnProperty('plugins')) {
+                            lightning.vars.htmleditors[j].plugins = lightning.vars.htmleditors[j].plugins.replace(/\*/, CKEDITOR.config.plugins);
+                        } else {
+                            lightning.vars.htmleditors[j].plugins = CKEDITOR.config.plugins;
+                        }
 
-                    // If fullPage is requested, the divarea plugin must be removed.
-                    if (lightning.vars.htmleditors[i].hasOwnProperty('fullPage') && lightning.vars.htmleditors[i].fullPage) {
-                        lightning.vars.htmleditors[i].plugins = lightning.vars.htmleditors[i].plugins.replace('divarea', '');
-                    }
+                        // If fullPage is requested, the divarea plugin must be removed.
+                        if (lightning.vars.htmleditors[j].hasOwnProperty('fullPage') && lightning.vars.htmleditors[j].fullPage) {
+                            lightning.vars.htmleditors[j].plugins = lightning.vars.htmleditors[j].plugins.replace('divarea', '');
+                        }
 
-                    // Activate any startup editors.
-                    if (lightning.vars.htmleditors[i].startup) {
-                        lightning.htmleditor.initEditor(i);
-                    }
-                });
+                        // Activate any startup editors.
+                        if (lightning.vars.htmleditors[j].startup) {
+                            lightning.htmleditor.initEditor(j);
+                        }
+                    });
+                }(i);
             }
         }
         // For div based editors, a presave function must be called to include it in the form.

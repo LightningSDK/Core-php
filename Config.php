@@ -8,6 +8,7 @@ $conf = array(
         'Lightning\\View\\Page' => 'Overridable\\Lightning\\View\\Page',
         'Lightning\\View\\API' => 'Overridable\\Lightning\\View\\API',
         'Lightning\\Model\\Blog' => 'Overridable\\Lightning\\Model\\Blog',
+        'Lightning\\Model\\BlogPost' => 'Overridable\\Lightning\\Model\\BlogPost',
         'Lightning\\Model\\Page' => 'Overridable\\Lightning\\Model\\Page',
         'Lightning\\Model\\Calendar' => 'Overridable\\Lightning\\Model\\Calendar',
         'Lightning\\Model\\CMS' => 'Overridable\\Lightning\\Model\\CMS',

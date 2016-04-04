@@ -26,7 +26,7 @@ trait ObjectDatabaseStorage {
      *
      * @return array
      */
-    public static function loadAll($where = [], $fields = [], $final = '') {
+    public static function loadAll($where = [], $fields = [], $final = '', $keyed = false) {
         $objects = [];
         $results = Database::getInstance()->select(static::TABLE, $where, $fields, $final);
         foreach ($results as $row) {

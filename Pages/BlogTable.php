@@ -5,21 +5,21 @@ namespace Lightning\Pages;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Request;
 use Lightning\Tools\ClientUser;
-use Lightning\Model\Blog as BlogModel;
+use Lightning\Model\BlogPost;
 use Lightning\Tools\Template;
 
 class BlogTable extends Table {
     protected $trusted = true;
 
-    protected $table = BlogModel::BLOG_TABLE;
+    protected $table = BlogPost::TABLE;
 
     protected $key = 'blog_id';
 
     protected $sort = 'time DESC';
 
     protected $links = [
-        BlogModel::CATEGORY_TABLE => [
-            'index' => BlogModel::BLOG_CATEGORY_TABLE,
+        BlogPost::TABLE . BlogPost::CATEGORY_TABLE => [
+            'index' => BlogPost::TABLE . BlogPost::BLOG_CATEGORY_TABLE,
             'key' => 'cat_id',
             'display_column' => 'category',
             'list' => 'compact'
@@ -62,12 +62,7 @@ class BlogTable extends Table {
         $this->preset['url']['submit_function'] = function(&$output) {
             $output['url'] = Request::post('url', 'url') ?: Request::post('title', 'url');
         };
-        $this->preset['header_image'] = array(
-            'type' => 'image',
-            'browser' => true,
-            'container' => 'images',
-            'format' => 'jpg',
-        );
+        $this->preset['header_image'] = self::getHeaderImageSettings();
 
         $this->action_fields = array(
             'view' => array(
@@ -78,5 +73,14 @@ class BlogTable extends Table {
                 }
             ),
         );
+    }
+
+    public static function getHeaderImageSettings() {
+        return [
+            'type' => 'image',
+            'browser' => true,
+            'container' => 'images',
+            'format' => 'jpg',
+        ];
     }
 }

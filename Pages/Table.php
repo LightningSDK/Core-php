@@ -2305,7 +2305,7 @@ abstract class Table extends Page {
                     case 'image':
                     case 'file':
                         if (!empty($field['browser'])) {
-                            $val = Request::get($field['field']);
+                            $val = $this->getStorageName($field, Request::get($field['field']));
                         } else {
                             if ($_FILES[$field['field']]['size'] > 0
                                 && $_FILES[$field['field']]['error'] == UPLOAD_ERR_OK
@@ -2424,6 +2424,11 @@ abstract class Table extends Page {
 
     protected function processFieldValues(&$values) {
         return true;
+    }
+
+    protected function getStorageName($field, $web_url) {
+        $fileHandler = $this->getFileHandler($field);
+        return $fileHandler->getFileFromWebURL($web_url);
     }
 
     protected function saveFile($field, $file) {
@@ -3531,14 +3536,14 @@ abstract class Table extends Page {
                 break;
             case 'image':
                 if (!empty($field['Value'])) {
-                    $return .= '<img src="' . $this->getImageLocationWeb($field, $field['Value']) . '" class="table_edit_image" />';
+                    $image_url = $this->getImageLocationWeb($field, $field['Value']);
                 }
             // Fall through.
             case 'file':
                 if (!empty($field['browser'])) {
-                    $return = FileBrowser::render($field['form_field'], [
-                        'image' => $field['Value'] ?: '',
-                        'image_class' => 'table_edit_image',
+                    $return .= FileBrowser::render($field['form_field'], [
+                        'image' => !empty($image_url) ? $image_url : '',
+                        'class' => 'table_edit_image',
                         'container' => $field['container'],
                     ]);
                 }

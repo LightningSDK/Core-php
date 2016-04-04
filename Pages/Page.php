@@ -13,6 +13,7 @@ use Lightning\Tools\Scrub;
 use Lightning\Tools\Template;
 use Lightning\Tools\ClientUser;
 use Lightning\View\Field\BasicHTML;
+use Lightning\View\HTML;
 use Lightning\View\HTMLEditor\HTMLEditor;
 use Lightning\View\JS;
 use Lightning\View\Page as PageView;
@@ -65,8 +66,10 @@ class Page extends PageView {
             $this->fullPage['site_map'] = 1;
             HTMLEditor::init();
             JS::startup('lightning.page.edit();');
+        } elseif ($this->fullPage = PageModel::loadByUrl('404')) {
+            http_response_code(404);
         } else {
-            $this->output404();
+            Output::http(404);
         }
 
         $this->prepare();
@@ -92,11 +95,13 @@ class Page extends PageView {
         $template->set('content', 'page');
 
         // PREPARE FORM DATA CONTENTS
-        foreach (array('title', 'keywords', 'description') as $meta_data) {
-            $this->fullPage[$meta_data] = Scrub::toHTML($this->fullPage[$meta_data]);
-            if (!empty($this->fullPage[$meta_data])) {
-                $template->set('page_' . $meta_data, str_replace("*", Configuration::get('page_' . $meta_data), $this->fullPage[$meta_data]));
+        foreach (array('title', 'keywords', 'description') as $field) {
+            if (!empty($this->fullPage[$field])) {
+                $this->setMeta($field, $this->fullPage[$field]);
             }
+        }
+        if ($image = HTML::getFirstImage($this->fullPage['body'])) {
+            $this->setMeta('image', $image);
         }
 
         if ($this->fullPage['url'] == "" && isset($_GET['page'])) {

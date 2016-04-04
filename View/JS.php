@@ -173,7 +173,7 @@ class JS {
             // Include inline scripts.
             foreach (self::$inline_scripts as $script) {
                 if (empty($script['rendered'])) {
-                    $init_scripts .= $script['script'] . "\n\n";
+                    $init_scripts .= $script['script'] . ";";
                     $script['rendered'] = true;
                 }
             }

@@ -80,6 +80,8 @@ class Page {
      */
     protected $menuContext = '';
 
+    protected $meta = [];
+
     /**
      * Run any global initialization functions.
      */
@@ -127,6 +129,17 @@ class Page {
             $template->set('blog', Blog::getInstance());
             $template->set('full_width', $this->fullWidth);
             $template->set('right_column', $this->rightColumn);
+
+            // Include the site title into the page title for meta data.
+            $meta = $this->meta;
+            if (empty($meta['title'])) {
+                $meta['title'] = Configuration::get('meta_data.title');
+            }
+            elseif (!empty($meta['title']) && $site_title = Configuration::get('meta_data.title')) {
+                $meta['title'] .= ' | ' . $site_title;
+            }
+            $template->set('meta', $meta);
+
             JS::set('menu_context', $this->menuContext);
             $template->render($this->template);
         } catch (Exception $e) {
@@ -233,5 +246,9 @@ class Page {
             }
         }
         Navigation::redirect('/' . Request::getLocation(), $output_params);
+    }
+
+    public function setMeta($field, $value) {
+        $this->meta[$field] = $value;
     }
 }

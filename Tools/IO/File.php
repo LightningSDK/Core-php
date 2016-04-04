@@ -47,6 +47,10 @@ class File implements FileHandlerInterface {
         return $this->web_root . '/' . $file;
     }
 
+    public function getFileFromWebURL($web_url) {
+        return str_replace($this->web_root . '/', '', $web_url);
+    }
+
     public function getAbsoluteLocal($file) {
 
     }
