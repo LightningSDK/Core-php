@@ -6,6 +6,8 @@ class File implements FileHandlerInterface {
 
     protected $root;
     protected $web_root;
+    protected $currentFile;
+    protected $currentFileHandler;
 
     public function __construct($root, $web_root = null) {
         if ($root[0] == '/') {
@@ -26,6 +28,19 @@ class File implements FileHandlerInterface {
 
     public function read($file) {
         return file_get_contents($this->root . '/' . $file);
+    }
+
+    public function readRange($file, $start, $end) {
+        if (!empty($file) && $file != $this->file) {
+            $this->currentFile = $file;
+            $this->currentFileHandler = fopen($this->root . '/' . $this->currentFile, 'r');
+        }
+        fseek($this->currentFileHandler, $start);
+        return fread($this->currentFileHandler, 1 + $end - $start);
+    }
+
+    public function getSize($file) {
+        return filesize($this->root . '/' . $file);
     }
 
     public function write($file, $contents) {
