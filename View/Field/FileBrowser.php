@@ -13,8 +13,10 @@ class FileBrowser {
             $class = !empty($options['class']) ? 'class="' . $options['class'] . '"' : '';
             $hidden = empty($options['image']) ? 'style="display:none"' : '';
             $output .= '<img src="' . $options['image'] . '" id="file_browser_image_' . $id . '" ' . $class . ' ' . $hidden . ' />';
+        } else {
+            $options['image'] = '';
         }
-        $output .= '<input type="hidden" name="' . $id . '" id="' . $id . '" />';
+        $output .= '<input type="hidden" name="' . $id . '" id="' . $id . '" value="' . $options['image'] . '" />';
         $output .= '<span class="button small" onclick="lightning.fileBrowser.openSelect(\'lightning-field\', \'' . $id . '\')">Select</span>';
         if (!isset($options['clear']) || !empty($options['clear'])) {
             $output .= '<span class="button small" onclick="lightning.fileBrowser.clear(\'' . $id . '\')">Clear</span>';
