@@ -21,7 +21,7 @@ class Session extends SingletonObject {
     const TABLE = 'session';
     const PRIMARY_KEY = 'session_id';
 
-    protected $content = array();
+    protected $content = [];
 
     protected $__json_encoded_fields = ['content'];
 
