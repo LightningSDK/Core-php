@@ -24,6 +24,8 @@ use Lightning\View\CSS;
     <meta name="copyright" content="LightningSDK.com Copyright (c) 2014">
     <?php if (!empty($og_image)): ?>
         <meta property="og:image" content="<?=$og_image?>" />
+    <?php elseif (!empty($meta['image'])): ?>
+        <meta property="og:image" content="<?=$meta['image']?>" />
     <?php endif; ?>
     <meta property="og:title" content="<?=$page_title?>" />
     <meta property="og:description" content="<?= $page_description ?>">

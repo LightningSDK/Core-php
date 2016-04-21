@@ -138,6 +138,9 @@ class Page {
             elseif (!empty($meta['title']) && $site_title = Configuration::get('meta_data.title')) {
                 $meta['title'] .= ' | ' . $site_title;
             }
+            if (empty($meta['image'])) {
+                $meta['image'] = Configuration::get('meta_data.image');
+            }
             $template->set('meta', $meta);
 
             JS::set('menu_context', $this->menuContext);
