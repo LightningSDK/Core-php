@@ -142,7 +142,7 @@ class User extends Page {
         $login_result = UserModel::login($email, $pass);
         if (!$login_result) {
             // BAD PASSWORD COMBO
-            Messenger::error("You entered the wrong password. If you are having problems and would like to reset your password, <a href='/user?action=reset'>click here</a>");
+            Messenger::error('You entered the wrong password. If you are having problems and would like to reset your password, <a href="/user?action=reset">click here</a>');
             Template::getInstance()->set('action', 'login');
             return $this->get();
         } else {
