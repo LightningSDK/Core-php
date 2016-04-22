@@ -14,21 +14,7 @@ use Lightning\View\CSS;
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title><?=$page_title;?></title>
-    <link rel="icon" href="/favicon.png" type="image/x-icon">
-
-    <meta name="keywords" content="<?= $page_keywords ?>" />
-    <meta name="robots" content="ALL, INDEX, FOLLOW" />
-    <meta name="description" content="<?= $page_description ?>">
-    <meta name="author" content="<?= $page_author ?>">
-    <meta name="copyright" content="LightningSDK.com Copyright (c) 2014">
-    <?php if (!empty($og_image)): ?>
-        <meta property="og:image" content="<?=$og_image?>" />
-    <?php elseif (!empty($meta['image'])): ?>
-        <meta property="og:image" content="<?=$meta['image']?>" />
-    <?php endif; ?>
-    <meta property="og:title" content="<?=$page_title?>" />
-    <meta property="og:description" content="<?= $page_description ?>">
+    <?= $this->build('metadata'); ?>
     <?= $this->renderHeader(); ?>
 </head>
 <body class="antialiased hide-extras">

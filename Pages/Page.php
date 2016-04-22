@@ -18,6 +18,7 @@ use Lightning\View\HTMLEditor\HTMLEditor;
 use Lightning\View\JS;
 use Lightning\View\Page as PageView;
 use Lightning\Model\Page as PageModel;
+use Lightning\View\Text;
 use Lightning\View\Video\YouTube;
 
 class Page extends PageView {
@@ -102,6 +103,9 @@ class Page extends PageView {
         }
         if ($image = HTML::getFirstImage($this->fullPage['body'])) {
             $this->setMeta('image', $image);
+        }
+        if (empty($this->fullPage['description'])) {
+            $this->setMeta('description', Text::shorten($this->fullPage['body'], 500));
         }
 
         if ($this->fullPage['url'] == "" && isset($_GET['page'])) {

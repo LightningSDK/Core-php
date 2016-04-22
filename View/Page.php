@@ -101,8 +101,6 @@ class Page {
         if (!empty($this->js)) {
             JS::add($this->js);
         }
-
-        $template = Template::getInstance();
     }
 
     public function get() {}
@@ -131,17 +129,13 @@ class Page {
             $template->set('right_column', $this->rightColumn);
 
             // Include the site title into the page title for meta data.
-            $meta = $this->meta;
-            if (empty($meta['title'])) {
-                $meta['title'] = Configuration::get('meta_data.title');
+            if (!empty($this->meta['title']) && $site_title = Configuration::get('meta_data.title')) {
+                $this->meta['title'] .= ' | ' . $site_title;
             }
-            elseif (!empty($meta['title']) && $site_title = Configuration::get('meta_data.title')) {
-                $meta['title'] .= ' | ' . $site_title;
-            }
-            if (empty($meta['image'])) {
-                $meta['image'] = Configuration::get('meta_data.image');
-            }
-            $template->set('meta', $meta);
+
+            // Load default metadata.
+            $this->meta += Configuration::get('meta_data');
+            $template->set('meta', $this->meta);
 
             JS::set('menu_context', $this->menuContext);
             $template->render($this->template);
