@@ -85,11 +85,11 @@ class Page extends PageView {
 
         // Determine if the user can edit this page.
         if ($user->isAdmin()) {
-            $this->fullPage['url'] = Request::getFromURL('/(.*)\.html$/');
-            if (!empty($this->fullPage['url'])) {
-                JS::set('page.source', $this->fullPage['body']);
-                $template->set('editable', true);
+            if (empty($this->fullPage['url']) || $this->fullPage['url'] == '404') {
+                $this->fullPage['url'] = Request::getFromURL('/(.*)\.html$/') ?: 'index';
             }
+            JS::set('page.source', $this->fullPage['body']);
+            $template->set('editable', true);
         }
 
         // Set the page template.
