@@ -346,6 +346,11 @@ class Request {
                 }
                 return $output;
                 break;
+            case 'assoc_array':
+                if (!is_array($data) || count($data) == 0) {
+                    return false;
+                }
+                return $data;
             case 'url':
             case 'email':
             case 'boolean':
