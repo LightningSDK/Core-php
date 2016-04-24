@@ -30,9 +30,10 @@ class Facebook extends SocialMediaApi {
         } else {
             $session = Session::getInstance(true, false);
             if (!empty($session->content->facebook->token)) {
-                $fb->setToken($session->content->facebook->token, $authorize);
+                $fb->setToken((array) $session->content->facebook->token, $authorize);
             }
         }
+
         return $fb;
     }
 
@@ -74,6 +75,16 @@ class Facebook extends SocialMediaApi {
         return $this->profile['id'];
     }
 
+    /**
+     * Set the token data.
+     *
+     * @param array $token
+     *   The token data.
+     * @param boolean $authorize
+     *   Whether authorization is required to transmit data to the account.
+     *
+     * @throws \Facebook\FacebookRequestException
+     */
     public function setToken($token, $authorize = false) {
         $this->token = $token;
         $this->authorize = $authorize;
@@ -82,19 +93,21 @@ class Facebook extends SocialMediaApi {
         $secret = Configuration::get('social.facebook.secret');
         FacebookSession::setDefaultApplication($appId, $secret);
 
-        if ($authorize) {
-            $this->service = new FacebookSession($token['token']);
-            if ($token['type'] == 'short' && $authorize) {
+        if ($this->authorize) {
+            $this->service = new FacebookSession($this->token['token']);
+            if ($this->token['type'] == 'short' && $this->authorize) {
                 // Convert the short token to a long token.
                 $request = new FacebookRequest($this->service, 'GET', '/oauth/access_token', [
                     'grant_type' => 'fb_exchange_token',
                     'client_id' => $appId,
                     'client_secret' => $secret,
-                    'fb_exchange_token' => $token['token']
+                    'fb_exchange_token' => $this->token['token']
                 ]);
-                $token = $request->execute()->getGraphObject()->asArray();
-                $this->token['token'] = $token['access_token'];
+                $bearer_token = $request->execute()->getGraphObject()->asArray();
+                $this->token['token'] = $bearer_token['access_token'];
                 $this->token['type'] = 'bearer';
+                // Save the updated token.
+                $this->storeSessionData();
             }
         } else {
             $this->service = FacebookSession::newSessionFromSignedRequest(new SignedRequest($token['token']));
@@ -112,7 +125,7 @@ class Facebook extends SocialMediaApi {
         if (empty($session->content->facebook)) {
             $session->content->facebook = new stdClass();
         }
-        $session->content->facebook->token = $this->token['token'];
+        $session->content->facebook->token = (object) $this->token;
         $session->save();
     }
 
