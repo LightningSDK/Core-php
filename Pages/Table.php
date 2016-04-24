@@ -1730,7 +1730,7 @@ abstract class Table extends Page {
         foreach ($link_settings['active_list'] as $image) {
             $output .= '<span class="selected_image_container">
                 <input type="hidden" name="linked_images_' . $link_settings['table'] . '[]" value="' . $image['image'] . '">
-                <span class="remove">X</span>
+                <span class="remove fa fa-close"></span>
                 <img src="' . $this->getImageLocationWeb($link_settings, $image['image']) . '"></span>';
         }
         $output .= '</span>';
@@ -1764,7 +1764,7 @@ abstract class Table extends Page {
                 $options[$l[$key]] = $l[$link_settings['display_column']];
             }
             $output .= BasicHTML::select($link_settings['table'] . '_list', $options);
-            $output .= "<input type='button' name='add_{$link_settings['table']}_button' value='Add {$link_settings['table']}' id='add_{$link_settings['table']}_button' onclick='lightning.table.addLink(\"{$link_settings['table']}\")' />";
+            $output .= "<input type='button' name='add_{$link_settings['table']}_button' value='Add {$link_settings['table']}' class='add-link' id='add_{$link_settings['table']}_button' data-link='{$link_settings['table']}' />";
         }
 
         if (!empty($link_settings['pop_add'])) {
@@ -1780,8 +1780,7 @@ abstract class Table extends Page {
         // create each item as a viewable deleteable box
         foreach ($link_settings['active_list'] as $init) {
             $output .= "<div class='{$link_settings['table']}_box table_link_box_selected' id='{$link_settings['table']}_box_{$init[$link_settings['key']]}'>{$init[$link_settings['display_column']]}
-						<a href='#' onclick='javascript:" . (!empty($link_settings['edit_js']) ? $link_settings['edit_js'] . '.deleteLink(' .
-                    $init[$link_settings['key']] . ')' : "lightning.table.removeLink(\"{$link_settings['table']}\",{$init[$link_settings['key']]})") . ";return false;'>X</a></div>";
+						<i class='remove-link fa fa-close' data-link='{$link_settings['table']}' data-link-item='{$init[$link_settings['key']]}' ></i></div>";
         }
         $output .= "</div></td></tr>";
         return $output;
@@ -3062,7 +3061,7 @@ abstract class Table extends Page {
             }
         }
 
-        if (!empty($this->search_fields)) {
+        if (!empty($this->search_fields) || !empty($this->links)) {
             JS::startup('lightning.table.init()');
         }
 
