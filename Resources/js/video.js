@@ -102,8 +102,9 @@ lightning.video = {
         var showControls = source.controls || !source.hasOwnProperty('controls') && (!video.hasOwnProperty('controls') || video.controls);
         var width = video.hasOwnProperty('width') ? video.width : 640;
         var height = video.hasOwnProperty('height') ? video.width : 320;
+        var video_tag;
         if (source.mp4 || source.ogg || source.webm) {
-            var video_tag = '<video id=video_player_' + id + ' class="video-js vjs-default-skin" width="' + width + '" height="' + height + '" poster="' + (source.still ? source.still : video.still ? video.still : '') + '" ' + (showControls ? 'controls' : '') + ' preload>';
+            video_tag = '<video id=video_player_' + id + ' class="video-js vjs-default-skin" width="' + width + '" height="' + height + '" poster="' + (source.still ? source.still : video.still ? video.still : '') + '" ' + (showControls ? 'controls' : '') + ' preload>';
             for (var codec in {'mp4': 1, 'ogg': 1, 'webm': 1}) {
                 if (source[codec]) {
                     video_tag += '<source src="' + source[codec] + '" type="video/' + codec + ';">';
@@ -111,7 +112,7 @@ lightning.video = {
             }
             video_tag += '</video>';
         } else {
-            var video_tag = '<audio id=video_player_' + id + ' class="video-js vjs-default-skin" width="' + width + '" height="' + height + '" ' + (showControls ? 'controls' : '') + ' preload>';
+            video_tag = '<audio id=video_player_' + id + ' class="video-js vjs-default-skin" width="' + width + '" height="' + height + '" ' + (showControls ? 'controls' : '') + ' preload>';
             for (var codec in {'mp3': 1}) {
                 if (source[codec]) {
                     video_tag += '<source src="' + source[codec] + '" type="audio/' + codec + ';">';
@@ -122,7 +123,6 @@ lightning.video = {
         container.append(video_tag);
 
         // Initialize the player.
-        videojs.autoSetup();
         this.players[id] = videojs(
             document.getElementById('video_player_' + id),
             {

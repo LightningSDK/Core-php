@@ -15,6 +15,26 @@ $conf = [
     'session' => [
         'single_ip' => true,
     ],
+    'social' => [
+        'store_images' => true,
+        'facebook' => [
+            'appid' => '',
+            'secret' => '',
+        ],
+        'twitter' => [
+            'key' => '',
+            'secret' => '',
+        ],
+        'google' => [
+            'client_id' => '',
+            'secret' => '',
+        ],
+        // Google uses a separate client/secret for login through iphone/android.
+        'google-app' => [
+            'client_id' => '',
+            'secret' => '',
+        ],
+    ],
     'site' => [
         'mail_from' => 'donotreply@Website.com',
         'mail_from_name' => 'My Mailer',

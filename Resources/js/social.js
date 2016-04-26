@@ -143,7 +143,11 @@ lightning.social = {
         });
     },
     signinComplete: function(site, type, token) {
-        var form = $('<form action="/user" method="post" style="display:none">');
+        var signinLocation = lightning.get('social.signin_url');
+        if (signinLocation == null) {
+            signinLocation = '/user';
+        }
+        var form = $('<form method="post" style="display:none">').attr('action', signinLocation);
         form.append('<input type="hidden" name="token" value="' + lightning.vars.token + '">');
         var redirect = lightning.get('social.login_redirect');
         if (redirect) {

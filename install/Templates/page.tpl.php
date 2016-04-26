@@ -42,6 +42,8 @@
             <input type="button" name="submit" class='button page_edit' onclick="lightning.page.save();" value="Save" <?php if (empty($action) || $action != 'new'):?>style="display:none;"<?php endif; ?> /><br />
         <?php endif; ?>
 
-        <div class="social-share"><?= SocialLinks::render(Configuration::get('web_root') . '/' . (!empty($full_page['url']) ? $full_page['url'] . '.html' : '')); ?></div>
+        <?php if (!empty($full_page['error'])): ?>
+            <div class="social-share"><?= SocialLinks::render(Configuration::get('web_root') . '/' . (!empty($full_page['url']) ? $full_page['url'] . '.html' : '')); ?></div>
+        <?php endif; ?>
     </div>
 </div>

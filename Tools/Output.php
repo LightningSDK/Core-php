@@ -446,6 +446,7 @@ class Output {
             $full_page['body'] = '';
             $full_page['layout'] = 0;
             $full_page['site_map'] = 1;
+            $full_page['error'] = 404;
         }
 
         // Render the page and exit.

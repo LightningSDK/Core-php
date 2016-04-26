@@ -5,6 +5,7 @@ namespace Overridable\Lightning\View;
 use Exception;
 use Lightning\Model\Blog;
 use Lightning\Tools\Configuration;
+use Lightning\Tools\Language;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Output;
@@ -49,10 +50,37 @@ class Page {
      *
      * @var array
      */
-    protected $params = array();
+    protected $params = [];
 
+    /**
+     * Whether to display the right column.
+     *
+     * Passed to, and depends on template.
+     *
+     * @var boolean
+     */
     protected $rightColumn = true;
+
+    /**
+     * Whether to allow the page to use the full page width (true) or
+     * whether it should be contained within a div.column (false)
+     *
+     * Passed to, and depends on template.
+     *
+     * @var boolean
+     */
     protected $fullWidth = false;
+
+    /**
+     * Which menu should be marked as 'active'.
+     *
+     * Passed to, and depends on template.
+     *
+     * @var string
+     */
+    protected $menuContext = '';
+
+    protected $meta = [];
 
     /**
      * Run any global initialization functions.
@@ -73,10 +101,6 @@ class Page {
         if (!empty($this->js)) {
             JS::add($this->js);
         }
-
-        $template = Template::getInstance();
-        $template->set('full_width', $this->fullWidth);
-        $template->set('right_column', $this->rightColumn);
     }
 
     public function get() {}
@@ -95,13 +119,25 @@ class Page {
 
             $template->set('google_analytics_id', Configuration::get('google_analytics_id'));
 
-            // TODO: These should be called directly from the template.
+            // TODO: Remove these, they should be called directly from the template.
             $template->set('errors', Messenger::getErrors());
             $template->set('messages', Messenger::getMessages());
 
             $template->set('site_name', Configuration::get('site.name'));
             $template->set('blog', Blog::getInstance());
-            JS::set('active_nav', $this->nav);
+            $template->set('full_width', $this->fullWidth);
+            $template->set('right_column', $this->rightColumn);
+
+            // Include the site title into the page title for meta data.
+            if (!empty($this->meta['title']) && $site_title = Configuration::get('meta_data.title')) {
+                $this->meta['title'] .= ' | ' . $site_title;
+            }
+
+            // Load default metadata.
+            $this->meta += Configuration::get('meta_data');
+            $template->set('meta', $this->meta);
+
+            JS::set('menu_context', $this->menuContext);
             $template->render($this->template);
         } catch (Exception $e) {
             echo 'Error rendering template: ' . $e;
@@ -170,7 +206,7 @@ class Page {
 
     public function requireToken() {
         if (!$this->validateToken()) {
-            Output::error('You submitted a form with an invalid token. Your requested has been ignored as a security precaution.');
+            Output::error(Language::translate('invalid_token'));
         }
     }
 
@@ -207,5 +243,9 @@ class Page {
             }
         }
         Navigation::redirect('/' . Request::getLocation(), $output_params);
+    }
+
+    public function setMeta($field, $value) {
+        $this->meta[$field] = $value;
     }
 }

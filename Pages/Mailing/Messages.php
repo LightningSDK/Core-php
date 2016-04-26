@@ -103,8 +103,9 @@ class Messages extends Table {
         if ($action == 'edit' || $action == 'new') {
             JS::startup('
                 lightning.admin.messageEditor.checkVars();
-                $("#add_message_criteria_button").click(lightning.admin.messageEditor.checkVars);
+                $("#add_message_criteria_button").click();
             ');
+            JS::set('table.linkProcess.cirteria', 'lightning.admin.messageEditor.checkVars');
         }
     }
 

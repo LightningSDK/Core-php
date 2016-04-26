@@ -9,7 +9,10 @@ use Lightning\Tools\Mongo;
 use Lightning\Tools\Request;
 use Lightning\Tools\Session;
 use Lightning\Tools\Singleton;
+use Lightning\Tools\SocialDrivers\Facebook;
+use Lightning\Tools\SocialDrivers\Google;
 use Lightning\Tools\SocialDrivers\SocialMediaApiInterface;
+use Lightning\Tools\SocialDrivers\Twitter;
 use Lightning\View\JS;
 
 abstract class SocialMediaApi extends Singleton implements SocialMediaApiInterface {
@@ -35,6 +38,28 @@ abstract class SocialMediaApi extends Singleton implements SocialMediaApiInterfa
     protected $id_profile;
     protected $authorize = false;
 
+    /**
+     * Create a connection based on a row from the social_auth table.
+     *
+     * @param array $social_auth
+     *   The network connection data.
+     *
+     * @return SocialMediaApi
+     */
+    public static function connect($social_auth) {
+        switch ($social_auth['network']) {
+            case 'facebook':
+                return Facebook::createInstance(json_decode($social_auth['token'], true), true);
+            case 'twitter':
+                return Twitter::createInstance(json_decode($social_auth['token'], true), true);
+            case 'google':
+                return Google::createInstance($social_auth['token'], true);
+        }
+    }
+
+    /**
+     * An overridable function of what to do after a user signs in to the network.
+     */
     public function afterLogin() {
     }
 
@@ -101,7 +126,7 @@ abstract class SocialMediaApi extends Singleton implements SocialMediaApiInterfa
         return $this->profile;
     }
 
-    public static function getToken() {
+    public static function getRequestToken() {
         if ($token = Request::post('id-token')) {
             return [
                 'auth' => false,
@@ -110,10 +135,15 @@ abstract class SocialMediaApi extends Singleton implements SocialMediaApiInterfa
         } elseif ($token = Request::post('auth-token')) {
             return [
                 'auth' => true,
+                'type' => 'short',
                 'token' => $token,
             ];
         }
         return null;
+    }
+
+    public function getNetwork() {
+        return $this->network;
     }
 
     public static function initJS($suffix) {

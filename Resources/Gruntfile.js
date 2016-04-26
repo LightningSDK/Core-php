@@ -40,13 +40,13 @@ module.exports = function(grunt) {
                     {
                         src: [
                             '../Vendor/chartjs/Chart.min.js',
-                            '../Vendor/videojs/build/video-js.min.js',
+                            '../Vendor/videojs/build/temp/video.min.js',
                             '../Vendor/jsoneditor/dist/jsoneditor.min.js'
                         ],
                         dest: '../build/js',
                         expand: true,
                         flatten: true,
-                        filter:'isFile'
+                        filter: 'isFile'
                     },
                     {
                         src: [
@@ -56,21 +56,31 @@ module.exports = function(grunt) {
                         dest: '../build/js-res',
                         expand: true,
                         flatten: true,
-                        filter:'isFile'
+                        filter: 'isFile'
                     },
                     {
-                        src: '../Vendor/Font-Awesome/css/font-awesome.min.css',
+                        src: [
+                            '../Vendor/Font-Awesome/css/font-awesome.min.css',
+                            '../Vendor/videojs/build/temp/video-js.min.css',
+                        ],
                         dest: '../build/css',
                         expand: true,
                         flatten: true,
-                        filter:'isFile'
+                        filter: 'isFile'
                     },
                     {
                         src: '../Vendor/Font-Awesome/fonts/*',
                         dest: '../build/fonts',
                         expand: true,
                         flatten: true,
-                        filter:'isFile'
+                        filter: 'isFile'
+                    },
+                    {
+                        src: '../Vendor/videojs/build/temp/video-js.swf',
+                        dest: '../build/swf',
+                        expand: true,
+                        flatten: true,
+                        filter: 'isFile'
                     }
                 ]
             }

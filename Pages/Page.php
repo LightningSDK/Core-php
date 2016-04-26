@@ -13,16 +13,28 @@ use Lightning\Tools\Scrub;
 use Lightning\Tools\Template;
 use Lightning\Tools\ClientUser;
 use Lightning\View\Field\BasicHTML;
+use Lightning\View\HTML;
 use Lightning\View\HTMLEditor\HTMLEditor;
 use Lightning\View\JS;
 use Lightning\View\Page as PageView;
 use Lightning\Model\Page as PageModel;
+use Lightning\View\Text;
 use Lightning\View\Video\YouTube;
 
 class Page extends PageView {
 
+    /**
+     * Whether this page was just created and should be inserted as a new page.
+     *
+     * @var boolean
+     */
     protected $new = false;
 
+    /**
+     * Page content from the database.
+     *
+     * @var array
+     */
     protected $fullPage;
 
     protected function hasAccess() {
@@ -31,11 +43,17 @@ class Page extends PageView {
 
     public function get() {
         $request = Request::getLocation();
-        $content_locator = empty($request) ? 'index' : Request::getFromURL('/(.*)\.html$/') ?: '404';
+        if (empty($request) || $request == 'index') {
+            $content_locator = 'index';
+            $this->menuContext = 'index';
+        } else {
+            $content_locator = Request::getFromURL('/(.*)\.html$/') ?: '404';
+        }
 
         // LOAD PAGE DETAILS
         if ($this->fullPage = PageModel::loadByUrl($content_locator)) {
             header('HTTP/1.0 200 OK');
+            $this->menuContext = $this->fullPage['menu_context'];
             if (Configuration::get('page.modification_date') && $this->fullPage['last_update'] > 0) {
                 header("Last-Modified: ".gmdate("D, d M Y H:i:s", $this->fullPage['last_update'])." GMT");
             }
@@ -49,8 +67,10 @@ class Page extends PageView {
             $this->fullPage['site_map'] = 1;
             HTMLEditor::init();
             JS::startup('lightning.page.edit();');
+        } elseif ($this->fullPage = PageModel::loadByUrl('404')) {
+            http_response_code(404);
         } else {
-            $this->output404();
+            Output::http(404);
         }
 
         $this->prepare();
@@ -65,22 +85,27 @@ class Page extends PageView {
 
         // Determine if the user can edit this page.
         if ($user->isAdmin()) {
-            $this->fullPage['url'] = Request::getFromURL('/(.*)\.html$/');
-            if (!empty($this->fullPage['url'])) {
-                JS::set('page.source', $this->fullPage['body']);
-                $template->set('editable', true);
+            if (empty($this->fullPage['url']) || $this->fullPage['url'] == '404') {
+                $this->fullPage['url'] = Request::getFromURL('/(.*)\.html$/') ?: 'index';
             }
+            JS::set('page.source', $this->fullPage['body']);
+            $template->set('editable', true);
         }
 
         // Set the page template.
         $template->set('content', 'page');
 
         // PREPARE FORM DATA CONTENTS
-        foreach (array('title', 'keywords', 'description') as $meta_data) {
-            $this->fullPage[$meta_data] = Scrub::toHTML($this->fullPage[$meta_data]);
-            if (!empty($this->fullPage[$meta_data])) {
-                $template->set('page_' . $meta_data, str_replace("*", Configuration::get('page_' . $meta_data), $this->fullPage[$meta_data]));
+        foreach (array('title', 'keywords', 'description') as $field) {
+            if (!empty($this->fullPage[$field])) {
+                $this->setMeta($field, $this->fullPage[$field]);
             }
+        }
+        if ($image = HTML::getFirstImage($this->fullPage['body'])) {
+            $this->setMeta('image', $image);
+        }
+        if (empty($this->fullPage['description'])) {
+            $this->setMeta('description', Text::shorten($this->fullPage['body'], 500));
         }
 
         if ($this->fullPage['url'] == "" && isset($_GET['page'])) {

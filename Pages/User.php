@@ -142,7 +142,7 @@ class User extends Page {
         $login_result = UserModel::login($email, $pass);
         if (!$login_result) {
             // BAD PASSWORD COMBO
-            Messenger::error("You entered the wrong password. If you are having problems and would like to reset your password, <a href='/user?action=reset'>click here</a>");
+            Messenger::error('You entered the wrong password. If you are having problems and would like to reset your password, <a href="/user?action=reset">click here</a>');
             Template::getInstance()->set('action', 'login');
             return $this->get();
         } else {
@@ -152,8 +152,8 @@ class User extends Page {
     }
 
     public function postFacebookLogin() {
-        if ($token = SocialMediaApi::getToken()) {
-            $fb = Facebook::getInstance(true, $token['token'], $token['auth']);
+        if ($token = SocialMediaApi::getRequestToken()) {
+            $fb = Facebook::getInstance(true, $token, $token['auth']);
             $this->finishSocialLogin($fb);
         }
         Messenger::error('Login Failed');
@@ -161,7 +161,7 @@ class User extends Page {
     }
 
     public function postGoogleLogin() {
-        if ($token = SocialMediaApi::getToken()) {
+        if ($token = SocialMediaApi::getRequestToken()) {
             $google = Google::getInstance(true, $token['token'], $token['auth']);
             $this->finishSocialLogin($google);
         }

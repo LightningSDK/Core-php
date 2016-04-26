@@ -25,8 +25,9 @@ lightning.startup = {
     },
 
     initNav: function() {
-        if (lightning.vars.active_nav && lightning.vars.active_nav.length > 0) {
-            $('nav .' + lightning.vars.active_nav).addClass('active');
+        var menu_context = lightning.get('menu_context');
+        if (menu_context) {
+            $('nav .' + menu_context).addClass('active');
         }
     },
 

@@ -35,7 +35,7 @@ class User extends API {
     }
 
     public function postFacebookLogin() {
-        if ($token = SocialMediaApi::getToken()) {
+        if ($token = SocialMediaApi::getRequestToken()) {
             $fb = Facebook::getInstance(true, $token['token'], $token['auth']);
             $this->finishSocialLogin($fb);
             exit;
@@ -44,7 +44,7 @@ class User extends API {
     }
 
     public function postGoogleLogin() {
-        if ($token = SocialMediaApi::getToken()) {
+        if ($token = SocialMediaApi::getRequestToken()) {
             $google = Google::getInstance(true, $token['token'], $token['auth']);
             $this->finishSocialLogin($google);
             exit;

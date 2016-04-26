@@ -312,6 +312,8 @@ class User extends Object {
     public static function addUser($email, $options = [], $update = []) {
         $user_data = array();
         $user_data['email'] = strtolower($email);
+        static::parseNames($options);
+        static::parseNames($update);
         $db = Database::getInstance();
         if ($user = $db->selectRow('user', $user_data)) {
             if ($update) {
@@ -513,8 +515,32 @@ class User extends Object {
 
     }
 
+    /**
+     * Return the combined first and last names.
+     *
+     * @return string
+     */
     public function fullName() {
         return $this->first . ' ' . $this->last;
+    }
+
+    /**
+     * Replace input data 'full_name' field with 'first' and 'last' fields.
+     * If the full_name field is not present, the array will not be modified.
+     * If the full_name field is present, it will be removed after inserting first and last names.
+     *
+     * @param array $data
+     *   The user input data.
+     */
+    protected static function parseNames(&$data) {
+        if (!empty($data['full_name'])) {
+            $name = explode(' ', $data['full_name'], 2);
+            $data['first'] = $name[0];
+            if (!empty($name[1])) {
+                $data['last'] = $name[1];
+            }
+            unset($data['full_name']);
+        }
     }
 
     /**

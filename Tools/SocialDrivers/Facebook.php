@@ -20,17 +20,20 @@ class Facebook extends SocialMediaApi {
 
     protected $service;
 
+    protected $network = 'facebook';
+
     public static function createInstance($token = null, $authorize = false) {
-        include HOME_PATH . '/Lightning/Vendor/facebooksdk/autoload.php';
+        require_once HOME_PATH . '/Lightning/Vendor/facebooksdk/autoload.php';
         $fb = new static();
         if (!empty($token)) {
             $fb->setToken($token, $authorize);
         } else {
             $session = Session::getInstance(true, false);
             if (!empty($session->content->facebook->token)) {
-                $fb->setToken($session->content->facebook->token, $authorize);
+                $fb->setToken((array) $session->content->facebook->token, $authorize);
             }
         }
+
         return $fb;
     }
 
@@ -50,11 +53,38 @@ class Facebook extends SocialMediaApi {
         ];
     }
 
+    public function getName() {
+        if (!empty($this->profile['name'])) {
+            return $this->profile['name'];
+        }
+        if (!empty($this->profile['first_name'])) {
+            $name[] = $this->profile['first_name'];
+        }
+        if (!empty($this->profile['last_name'])) {
+            $name[] = $this->profile['last_name'];
+        }
+        return implode(' ', $name);
+    }
+
+    public function getScreenName() {
+        return '';
+    }
+
     public function getSocialId() {
         $this->loadProfile();
         return $this->profile['id'];
     }
 
+    /**
+     * Set the token data.
+     *
+     * @param array $token
+     *   The token data.
+     * @param boolean $authorize
+     *   Whether authorization is required to transmit data to the account.
+     *
+     * @throws \Facebook\FacebookRequestException
+     */
     public function setToken($token, $authorize = false) {
         $this->token = $token;
         $this->authorize = $authorize;
@@ -63,13 +93,31 @@ class Facebook extends SocialMediaApi {
         $secret = Configuration::get('social.facebook.secret');
         FacebookSession::setDefaultApplication($appId, $secret);
 
-        if ($authorize) {
-            $this->service = new FacebookSession($token);
+        if ($this->authorize) {
+            $this->service = new FacebookSession($this->token['token']);
+            if ($this->token['type'] == 'short' && $this->authorize) {
+                // Convert the short token to a long token.
+                $request = new FacebookRequest($this->service, 'GET', '/oauth/access_token', [
+                    'grant_type' => 'fb_exchange_token',
+                    'client_id' => $appId,
+                    'client_secret' => $secret,
+                    'fb_exchange_token' => $this->token['token']
+                ]);
+                $bearer_token = $request->execute()->getGraphObject()->asArray();
+                $this->token['token'] = $bearer_token['access_token'];
+                $this->token['type'] = 'bearer';
+                // Save the updated token.
+                $this->storeSessionData();
+            }
         } else {
-            $this->service = FacebookSession::newSessionFromSignedRequest(new SignedRequest($token));
+            $this->service = FacebookSession::newSessionFromSignedRequest(new SignedRequest($token['token']));
             $this->profile = $this->loadProfile();
             $this->social_id = $this->service->getUserID();
         }
+    }
+
+    public function getToken() {
+        return json_encode($this->token);
     }
 
     public function storeSessionData() {
@@ -77,12 +125,12 @@ class Facebook extends SocialMediaApi {
         if (empty($session->content->facebook)) {
             $session->content->facebook = new stdClass();
         }
-        $session->content->facebook->token = $this->token;
+        $session->content->facebook->token = (object) $this->token;
         $session->save();
     }
 
     public function myImageURL() {
-        $request = new FacebookRequest($this->service, 'GET', '/me/picture?redirect=0&type=large');
+        $request = new FacebookRequest($this->service, 'GET', '/me/picture?redirect=0&width=800');
         $response = $request->execute()->getGraphObject()->asArray();
         return $response['url'];
     }
@@ -108,6 +156,15 @@ class Facebook extends SocialMediaApi {
     public function getFriendIDs() {
         $friends = $this->getFriends();
         return $friends;
+    }
+
+    /**
+     * Return a list of managable pages.
+     */
+    public function getPages() {
+        $request = new FacebookRequest($this->service, 'GET', '/me/accounts');
+        $response = $request->execute()->getGraphObject()->asArray();
+        return $response['data'];
     }
 
     /**
@@ -175,5 +232,19 @@ class Facebook extends SocialMediaApi {
         JS::startup('lightning.social.initLogin()');
 
         return '<span class="social-signin facebook"><i class="fa fa-facebook"></i><span> Sign in with Facebook</span></span>';
+    }
+
+    public function share($text, $settings = []) {
+        $parameters = [
+            'message' => $text,
+            'link' => $settings['url'],
+        ];
+        if (!empty($settings['images'])) {
+            // Add the image.
+            $parameters['picture'] = $settings['images'][0]['url'];
+        }
+        // Send the tweet.
+        $request = new FacebookRequest($this->service, 'POST', '/me/feed', $parameters);
+        $response = $request->execute()->getGraphObject()->asArray();
     }
 }

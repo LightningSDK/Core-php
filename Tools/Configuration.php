@@ -60,7 +60,7 @@ class Configuration {
      *   An array of new data to merge.
      */
     public static function merge($new_data) {
-        self::$configuration = array_merge_recursive(self::$configuration, $new_data);
+        self::$configuration = array_replace_recursive(self::$configuration, $new_data);
     }
 
     /**

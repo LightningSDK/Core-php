@@ -183,14 +183,14 @@ class Messenger {
         if (!empty(self::$errors)) {
             $output .= '<div class="messenger error">';
             foreach (self::$errors as $error) {
-                $output .= '<li>' . Scrub::toHTML($error) . '</li>';
+                $output .= '<li>' . $error . '</li>';
             }
             $output .= '</div>';
         }
         if (!empty(self::$messages)) {
             $output .= '<div class="messenger message">';
             foreach (self::$messages as $message) {
-                $output .= '<li>' . Scrub::toHTML($message) . '</li>';
+                $output .= '<li>' . $message . '</li>';
             }
             $output .= '</div>';
         }

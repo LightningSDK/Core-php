@@ -8,6 +8,7 @@ use Lightning\Model\Calendar;
 
 class Events extends Page {
     public $page = 'calendar_page';
+    protected $menuContext = 'events';
 
     public function hasAccess() {
         return true;
