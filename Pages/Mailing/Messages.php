@@ -88,9 +88,9 @@ class Messages extends Table {
             'redirect' => '/admin/mailing/send?id={' . self::PRIMARY_KEY . '}',
         ],
     ];
-    
+
     protected $sort = 'message_id DESC';
-    protected $maxPerPage = 100;
+    protected $duplicatable = true;
 
     /**
      * Require admin privileges.
