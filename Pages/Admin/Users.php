@@ -15,6 +15,10 @@ use Overridable\Lightning\Tools\Session;
 
 class Users extends Table {
 
+    const TABLE = 'user';
+    const PRIMARY_KEY = 'user_id';
+    protected $table = 'user';
+
     protected function hasAccess() {
         ClientUser::requireAdmin();
         return true;
@@ -24,11 +28,10 @@ class Users extends Table {
         'send' => [
             'type' => self::CB_SUBMITANDREDIRECT,
             'text' => 'Save &amp; Impersonate',
-            'redirect' => '/admin/users?action=impersonate&id={ID}',
+            'redirect' => '/admin/users?action=impersonate&id={' . self::PRIMARY_KEY . '}',
         ],
     ];
 
-    protected $table = 'user';
     protected $searchable = true;
     protected $search_fields = array('email', 'first', 'last', 'user.user_id');
     protected $preset = array(

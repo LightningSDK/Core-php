@@ -68,10 +68,41 @@ abstract class Table extends Page {
 
     protected $page = 'table';
 
+    /**
+     * The primary key form the database.
+     */
+    const PRIMARY_KEY = '';
+
+    /**
+     * The table where the object is stored.
+     */
+    const TABLE = '';
+
+    /**
+     * @deprecated - see const TABLE
+     */
     protected $table;
+
+    /**
+     * @deprecated - see const PRIMARY_KEY
+     */
+    protected $key;
+
     protected $action;
     protected $function;
+
+    /**
+     * @var integer
+     *
+     * The primary key value of the current row.
+     */
     protected $id = 0;
+
+    /**
+     * @var array
+     *
+     * A list of rows, or a list of values of a single row.
+     */
     protected $list;
 
     /**
@@ -109,7 +140,6 @@ abstract class Table extends Page {
      */
     protected $template_vars;	//
     protected $trusted = false;
-    protected $key;
     protected $delconf = true;
     protected $action_file;
     protected $defaultAction = 'list';
@@ -1859,8 +1889,21 @@ abstract class Table extends Page {
         ]);
     }
 
+    /**
+     * Replace variables in a string with values from the current selected row.
+     *
+     * @param string $string
+     *   The original string containing replacement variables in curly brackets
+     *
+     * @return string
+     *   The updated string with variables replaced.
+     */
     protected function replaceURLVariables($string) {
-        $string = str_replace('{ID}', $this->id, $string);
+        if (!empty($this->id)) {
+            foreach ($this->list as $key => $value) {
+                $string = str_replace('{' . $key . '}', $value, $string);
+            }
+        }
         return $string;
     }
 

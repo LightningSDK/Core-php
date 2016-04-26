@@ -9,11 +9,23 @@ use Lightning\Model\BlogPost;
 use Lightning\Tools\Template;
 
 class BlogTable extends Table {
-    protected $trusted = true;
 
+    const TABLE = BlogPost::TABLE;
+    const PRIMARY_KEY = 'blog_id';
+
+    /**
+     * @deprecated
+     * @var string;
+     */
     protected $table = BlogPost::TABLE;
 
+    /**
+     * @deprecated
+     * @var string;
+     */
     protected $key = 'blog_id';
+
+    protected $trusted = true;
 
     protected $sort = 'time DESC';
 
@@ -24,6 +36,14 @@ class BlogTable extends Table {
             'display_column' => 'category',
             'list' => 'compact'
         ]
+    ];
+
+    protected $custom_buttons = [
+        'send' => [
+            'type' => self::CB_SUBMITANDREDIRECT,
+            'text' => 'Save &amp; Share',
+            'redirect' => '/admin/social/share?type=blog&id={' . self::PRIMARY_KEY . '}',
+        ],
     ];
 
     protected $preset = array(

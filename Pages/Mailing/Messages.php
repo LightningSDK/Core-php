@@ -20,7 +20,11 @@ use Lightning\View\JS;
  */
 class Messages extends Table {
 
+    const TABLE = 'message';
+    const PRIMARY_KEY = 'message_id';
+
     protected $table = 'message';
+
     protected $preset = array(
         'never_resend' => array(
             'type' => 'checkbox',
@@ -81,7 +85,7 @@ class Messages extends Table {
         'send' => [
             'type' => self::CB_SUBMITANDREDIRECT,
             'text' => 'Update &amp; Send',
-            'redirect' => '/admin/mailing/send?id={ID}',
+            'redirect' => '/admin/mailing/send?id={' . self::PRIMARY_KEY . '}',
         ],
     ];
     
