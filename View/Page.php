@@ -233,16 +233,8 @@ class Page {
      * @param array
      *   Additional query string parameters to add to the current url.
      */
-    public function redirect($params = array()) {
-        $output_params = array();
-        foreach ($this->params as $param) {
-            if (isset($params[$param])) {
-                $output_params[$param] = $params[$param];
-            } elseif (isset($this->$param)) {
-                $output_params[$param] = $this->$param;
-            }
-        }
-        Navigation::redirect('/' . Request::getLocation(), $output_params);
+    public function redirect($params = []) {
+        Navigation::redirect('/' . Request::getLocation(), $params + $this->params);
     }
 
     public function setMeta($field, $value) {
