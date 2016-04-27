@@ -16,7 +16,7 @@ class Scrub {
     /**
      * Basic html elements allowed in HTML fields by users.
      */
-    const SCRUB_BASIC_HTML = 'p,b,a[href|name|target|title],i,u,strong,em,img[src|width|height],table[cellpadding|cellspacing|border],tr,td,tbody,thead,tfoot,hr,h1,h2,h3,h4,h5,h6,*[id|name|align|style|alt|class],sup,sub,ul,ol,li,span,font[color|size],div,br,blockquote,code,pre';
+    const SCRUB_BASIC_HTML = 'p,b,a[href|name|target|title],i,u,strong,small,em,img[src|width|height],table[cellpadding|cellspacing|border],tr,td,tbody,thead,tfoot,hr,h1,h2,h3,h4,h5,h6,*[id|name|align|style|alt|class],sup,sub,ul,ol,li,span,font[color|size],div,br,blockquote,code,pre';
     /**
      * Advanced html elements allowed in HTML primarily by admins.
      *
