@@ -66,7 +66,9 @@ class CMS {
             $content->class .= ' ' . $settings['class'];
         }
 
-        if (ClientUser::getInstance()->isAdmin()) {
+        if (!empty($settings['display_only'])) {
+            return $content->url;
+        } elseif (ClientUser::getInstance()->isAdmin()) {
             JS::set('token', Session::getInstance()->getToken());
             // TODO: This will need extra slashes if using the File handler.
             JS::set('cms.basepath', $settings['location']);
@@ -81,6 +83,8 @@ class CMS {
             . '<a href="" class="button small" onclick="javascript:lightning.cms.saveImage(\'' . $name . '\'); return false;">Save</a>'
             . '<input type="text" placeholder="classes" id="cms_' . $name . '_class" class="imagesCSS" name="' . $forced_classes . '" value="' . $added_classes . '" />'
             . '<img src="' . $content->url . '" id="cms_' . $name . '" class="' . $content->class . '" />';
+        } elseif (!empty($settings['norender'])) {
+            return '';
         } else {
             if (!empty($content)) {
                 return '<img src="' . $content->url . '" class="' . $content->class . '" />';
@@ -97,13 +101,17 @@ class CMS {
             $value = '';
         }
 
-        if (ClientUser::getInstance()->isAdmin()) {
+        if (!empty($settings['display_only'])) {
+            return $value;
+        } elseif (ClientUser::getInstance()->isAdmin()) {
             JS::startup('lightning.cms.initPlain()');
             JS::set('token', Session::getInstance()->getToken());
             return '<img src="/images/lightning/pencil.png" class="cms_edit_plain icon-16" id="cms_edit_' . $name . '">'
             . '<img src="/images/lightning/save.png" class="cms_save_plain icon-16" id="cms_save_' . $name . '" style="display:none">'
             . '<input type="text" id="cms_' . $name . '" value="' . $value . '" style="display:none" />'
             . '<span id="cms_display_' . $name . '">' . $value . '</span>';
+        } elseif (!empty($settings['norender'])) {
+            return '';
         } else {
             return $value;
         }
