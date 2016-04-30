@@ -55,9 +55,6 @@ trait ObjectDataStorage {
             case 'id':
                 return !empty($this->__data[static::PRIMARY_KEY]);
                 break;
-            case 'data':
-                return true;
-                break;
             default:
                 return isset($this->__data[$var]);
                 break;
@@ -87,9 +84,6 @@ trait ObjectDataStorage {
                     return false;
                 };
                 break;
-            case 'data':
-                return $this->__data;
-                break;
             default:
                 if (isset($this->__data[$var])) {
                     return $this->__data[$var];
@@ -98,6 +92,15 @@ trait ObjectDataStorage {
                 }
                 break;
         }
+    }
+
+    /**
+     * Get the entire data contents of the object.
+     *
+     * @return array $data
+     */
+    public function getData() {
+        return $this->__data;
     }
 
     /**
@@ -123,15 +126,20 @@ trait ObjectDataStorage {
                 $this->__changed[static::PRIMARY_KEY] = static::PRIMARY_KEY;
                 $this->__data[static::PRIMARY_KEY] = $value;
                 break;
-            case 'data':
-                $this->__changed_all = true;
-                $this->__data = $value;
-                break;
             default:
                 $this->__changed[$var] = $var;
                 $this->__data[$var] = $value;
                 break;
         }
+    }
+
+    /**
+     * Replace the entire data contents of the object.
+     *
+     * @param array $data
+     */
+    public function setData($data) {
+        $this->__data = $data;
     }
 
     /**
@@ -182,5 +190,39 @@ trait ObjectDataStorage {
         }
 
         return $values;
+    }
+
+    /**
+     * Checks that the object is the same, including data and ID.
+     *
+     * @param Object $object
+     *   The object to compare to.
+     *
+     * @return boolean
+     */
+    public function equals($object) {
+        if ($this->__data != $object->getData()) {
+            return false;
+        }
+        if (empty($this->id) || empty($object->id)) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Checks that the object data is the same, excluding ID.
+     *
+     * @param Object $object
+     *   The object to compare to.
+     *
+     * @return boolean
+     */
+    public function equalsData($object) {
+        $data1 = $this->__data;
+        $data2 = $object->getData();
+        unset($data1[static::PRIMARY_KEY]);
+        unset($data2[static::PRIMARY_KEY]);
+        return $data1 == $data2;
     }
 }
