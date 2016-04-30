@@ -149,13 +149,13 @@ class Output {
      */
     public static function json($data = array(), $suppress_status = false) {
         // Predefined outputs.
-        if ($data == self::ACCESS_DENIED) {
+        if ($data === self::ACCESS_DENIED) {
             $data = array('status' => 'access_denied');
         }
-        elseif ($data == self::SUCCESS) {
+        elseif ($data === self::SUCCESS || $data === true) {
             $data = array('status' => 'success');
         }
-        elseif ($data == self::ERROR) {
+        elseif ($data === self::ERROR || $data === false) {
             $data = array('status' => 'error');
         }
         elseif (!empty($data['status']) && !empty(self::$statusStrings[$data['status']])) {
