@@ -134,7 +134,7 @@ class Message extends Object {
      */
     public function __construct($message_id = null, $unsubscribe = true, $auto = true) {
         $this->auto = $auto;
-        $this->__data = Database::getInstance()->selectRow('message', array('message_id' => $message_id));
+        $this->__data = Database::getInstance()->selectRow('message', ['message_id' => $message_id]);
         $this->loadTemplate();
         $this->unsubscribe = $unsubscribe;
 
@@ -345,15 +345,10 @@ class Message extends Object {
      */
     public function replaceVariables($source) {
         // Replace variables.
-        foreach($this->customVariables + $this->internalCustomVariables + $this->defaultVariables as $cv => $cvv) {
-            // Replace simple variables as a string.
-            $source = str_replace('{' . $cv . '}', $cvv, $source);
-            // Some curly brackets might be escaped if they are links.
-            $source = str_replace('%7B' . $cv . '%7D', $cvv, $source);
-        }
+        $this->replaceVars('', $this->customVariables + $this->internalCustomVariables + $this->defaultVariables, $source);
 
         // Replace conditions.
-        $conditions = array();
+        $conditions = [];
         $conditional_search = '/{IF ([a-z_]+)}(.*){ENDIF \1}/imsU';
         preg_match_all($conditional_search, $source, $conditions);
         foreach ($conditions[1] as $key => $var) {
@@ -365,6 +360,30 @@ class Message extends Object {
         }
 
         return $source;
+    }
+
+    /**
+     * A loopable subfunction of replaceVariables().
+     *
+     * @param string $prefix
+     *   A prefix added to all variable names in the current array.
+     * @param array $vars
+     *   A list of variables to replace.
+     * @param string $source
+     *   The content to replace in.
+     */
+    private function replaceVars($prefix, $vars, &$source) {
+        foreach($vars as $var => $value) {
+            if (is_string($value)) {
+                $find = strtoupper($prefix . $var);
+                // Replace simple variables as a string.
+                $source = str_replace('{' . $find . '}', $value, $source);
+                // Some curly brackets might be escaped if they are links.
+                $source = str_replace('%7B' . $find . '%7D', $value, $source);
+            } elseif (is_array($value)) {
+                $this->replaceVars($prefix . $var . '.', $value, $source);
+            }
+        }
     }
 
     /**
