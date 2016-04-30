@@ -31,13 +31,18 @@ lightning.ajax = {
             } else {
                 lightning.dialog.setContent(data);
             }
+            return;
         }
+
         // Add standard messages to the dialog.
-        if (data && data.messages) {
-            for(var i in data.messages) {
-                lightning.dialog.add(data.messages[i], 'message');
-            }
+        if (data && data.messages && data.messages.length > 0) {
+            lightning.dialog.showPrepared(function(){
+                for(var i in data.messages) {
+                    lightning.dialog.add(data.messages[i], 'message');
+                }
+            });
         }
+
         // Add standard error messages.
         if (data && data.errors && data.errors.length) {
             // TODO: make this more graceful.
@@ -48,8 +53,6 @@ lightning.ajax = {
         if (data && data.status == 'success') {
             if (settings.user_success) {
                 settings.user_success(data);
-            } else {
-                lightning.dialog.hide();
             }
         } else if (data && data.status == 'redirect') {
             // TODO: check for redirect cookie
