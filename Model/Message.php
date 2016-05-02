@@ -284,7 +284,7 @@ class Message extends Object {
         $db = Database::getInstance();
         $list = $db->selectField('message_list_id', 'message_list', ['name' => 'Default']);
         if (!$list) {
-            $list = $db->insert('message_list_id', 'message_list', ['name' => 'Default']);
+            $list = $db->insert('message_list', ['name' => 'Default']);
         }
         return $list;
     }
