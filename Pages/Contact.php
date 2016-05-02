@@ -19,7 +19,7 @@ use Lightning\Tools\Request;
 use Lightning\Tools\Tracker;
 use Lightning\View\Page as PageView;
 use Lightning\Model\User as UserModel;
-use Source\Model\Message;
+use Lightning\Model\Message;
 
 /**
  * A contact page handler.
@@ -58,7 +58,17 @@ class Contact extends PageView {
 
         // Check captcha if required.
         $request_contact = Request::post('contact', 'boolean');
-        if (($this->settings['require_captcha'] === true || ($this->settings['require_captcha'] == 'contact_only' && $request_contact)) && !ReCaptcha::verify()) {
+        if (
+            !empty($this->settings['require_captcha'])
+            && (
+                $this->settings['require_captcha'] === true
+                || (
+                    $this->settings['require_captcha'] == 'contact_only'
+                    && $request_contact
+                )
+            )
+            && !ReCaptcha::verify()
+        ) {
             Messenger::error('You did not correctly enter the captcha code.');
             return $this->get();
         }
