@@ -24,6 +24,8 @@ use Lightning\Model\Page as PageModel;
  */
 class Page {
 
+    const MODULE = null;
+
     /**
      * The template file.
      *
@@ -86,6 +88,11 @@ class Page {
      * Run any global initialization functions.
      */
     public function __construct() {
+        // Load module settings if present.
+        if (!empty(static::MODULE)) {
+            $this->initModule();
+        }
+
         // Load messages and errors from the query string.
         Messenger::loadFromQuery();
         Messenger::loadFromSession();
@@ -239,5 +246,22 @@ class Page {
 
     public function setMeta($field, $value) {
         $this->meta[$field] = $value;
+    }
+
+    protected function initModule() {
+        $settings = Configuration::get('modules.' . static::MODULE);
+        $this->updateSettings($settings);
+    }
+
+    protected function updateSettings($settings) {
+        if (!empty($settings['menu_context'])) {
+            $this->menuContext = $settings['menu_context'];
+        }
+        if (!empty($settings['template'])) {
+            $this->template = $settings['template'];
+        }
+        if (!empty($settings['meta_data'])) {
+            $this->meta += $settings['meta_data'];
+        }
     }
 }

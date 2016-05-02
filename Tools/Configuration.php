@@ -70,12 +70,14 @@ class Configuration {
         if (empty(self::$configuration)) {
             foreach (self::getConfigurations() as $config_file) {
                 if (file_exists($config_file)) {
-                    self::$configuration = array_replace_recursive(
-                        self::getConfigurationData($config_file),
-                        self::$configuration
-                    );
+                    self::merge(self::getConfigurationData($config_file));
                 } else {
                     echo "not found $config_file";
+                }
+            }
+            foreach (self::$configuration['modules'] as $module => $settings) {
+                if (file_exists(HOME_PATH . '/Modules/' . $module . '/config.php')) {
+                    self::merge(include HOME_PATH . '/Modules/' . $module . '/config.php');
                 }
             }
         }

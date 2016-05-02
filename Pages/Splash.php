@@ -30,13 +30,7 @@ class Splash extends Page {
             $this->page = is_array($splash_settings) ? $splash_settings['page'] : $splash_settings;
         }
 
-        if (!empty($splash_settings['menu_context'])) {
-            $this->menuContext = $splash_settings['menu_context'];
-        }
-
-        if (!empty($splash_settings['template'])) {
-            $this->template = $splash_settings['template'];
-        }
+        $this->updateSettings($splash_settings);
 
         // Add any CSS or JS files.
         if (is_array($splash_settings)) {
