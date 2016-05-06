@@ -75,9 +75,11 @@ class Configuration {
                     echo "not found $config_file";
                 }
             }
-            foreach (self::$configuration['modules'] as $module => $settings) {
-                if (file_exists(HOME_PATH . '/Modules/' . $module . '/config.php')) {
-                    self::merge(include HOME_PATH . '/Modules/' . $module . '/config.php');
+            if (!empty(self::$configuration['modules'])) {
+                foreach (self::$configuration['modules'] as $module => $settings) {
+                    if (file_exists(HOME_PATH . '/Modules/' . $module . '/config.php')) {
+                        self::merge(include HOME_PATH . '/Modules/' . $module . '/config.php');
+                    }
                 }
             }
         }
