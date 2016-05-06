@@ -60,12 +60,23 @@ class BasicHTML {
         return $return;
     }
 
-    public static function radioGroup($name, $options, $default = null, $attributes = array()) {
+    public static function radioGroup($name, $options, $default = null, $attributes = []) {
         $output = '<div ' . HTML::implodeAttributes($attributes) . '>';
 
         foreach ($options as $value => $label) {
             $checked = $default === $value ? 'CHECKED="checked"' : '';
             $output .= '<label><input type="radio" name="' . $name . '" value="' . $value . '" ' . $checked . ' /> ' . $label . '</label>';
+        }
+
+        return $output . '</div>';
+    }
+
+    public static function checkboxGroup($name, $options, $default = null, $attributes = array()) {
+        $output = '<div ' . HTML::implodeAttributes($attributes) . '>';
+
+        foreach ($options as $value => $label) {
+            $checked = $default === $value ? 'CHECKED="checked"' : '';
+            $output .= '<label><input type="checkbox" name="' . $name . '[]" value="' . $value . '" ' . $checked . ' /> ' . $label . '</label>';
         }
 
         return $output . '</div>';
