@@ -263,5 +263,11 @@ class Page {
         if (!empty($settings['meta_data'])) {
             $this->meta += $settings['meta_data'];
         }
+        if (isset($settings['right_column'])) {
+            $this->rightColumn = $settings['right_column'];
+        }
+        if (isset($settings['full_width'])) {
+            $this->fullWidth = $settings['full_width'];
+        }
     }
 }
