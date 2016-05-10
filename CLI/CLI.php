@@ -56,7 +56,6 @@ class CLI {
      *   --var will set flag var = true
      */
     protected function parseArgs($args) {
-        print_r($args);
         foreach ($args as $key => $arg) {
             if (substr($arg, 0, 2) == '--') {
                 echo '.--.';
@@ -79,10 +78,19 @@ class CLI {
                 }
             }
         }
-        print_r($this->parameters);
-        print_r($this->flags);
     }
 
+    /**
+     * Get a param value from the input.
+     *
+     * @param array|string $params
+     *   A param or list of params in the order they should be checked
+     * @param mixed $default
+     *   The default value if none is set.
+     *
+     * @return mixed
+     *   The param value
+     */
     protected function get($params, $default = null) {
         if (is_array($params)) {
             foreach ($params as $p) {
