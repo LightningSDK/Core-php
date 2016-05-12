@@ -694,8 +694,6 @@ abstract class Table extends Page {
             Navigation::redirect($this->createUrl('pop-return', $this->id));
         }
 
-        $this->afterInsert();
-
         if (Request::get('lightning_table_duplicate', 'boolean')) {
             $this->afterDuplicate();
         }
@@ -760,8 +758,6 @@ abstract class Table extends Page {
                 $this->serial_update = false;
             }
         }
-
-        $this->afterUpdate();
 
         $this->afterPostRedirect();
     }
