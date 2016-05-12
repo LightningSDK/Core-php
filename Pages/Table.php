@@ -338,6 +338,10 @@ abstract class Table extends Page {
     protected $createdMessage;
 
     public function __construct($options = []) {
+        // TODO: Remove this when the properties are removed:
+        $this->table = static::TABLE;
+        $this->key = static::PRIMARY_KEY;
+
         // TODO: Action is not set yet. Is any of this necessary?
         if ($this->action == 'new') {
             $backlinkname = '';
