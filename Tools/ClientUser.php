@@ -62,6 +62,9 @@ class ClientUser extends Singleton {
      *
      * @param string $action
      *   The action on the login page.
+     *
+     * @return boolean
+     *   Returns true if the user is logged in.
      */
     public static function requireLogin($action = '') {
         if (self::getInstance()->id == 0) {
@@ -79,6 +82,9 @@ class ClientUser extends Singleton {
                 $query['redirect'] .= '?' . http_build_query($redirect_query);
             }
             Navigation::redirect('/user' . $action, $query);
+            return false;
+        } else {
+            return true;
         }
     }
 
