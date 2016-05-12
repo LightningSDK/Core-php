@@ -14,7 +14,7 @@ class SDK {
         }
         self::$inited = true;
 
-        JS::add('//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.5&appId=247438262089646');
+        JS::add('//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.6&appId=247438262089646');
 
         return '<div id="fb-root"></div>';
     }
