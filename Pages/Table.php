@@ -36,6 +36,7 @@
 
 namespace Lightning\Pages;
 
+use Exception;
 use Lightning\Tools\Cache\FileCache;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\CSVImport;
@@ -1110,49 +1111,40 @@ abstract class Table extends Page {
 
     protected function renderListHeader() {
         $output = '';
-        // If the field order is specified.
-        if (is_array($this->fieldOrder)) {
-            foreach ($this->fieldOrder as $f) {
-                if (isset($this->fields[$f])) {
-                    if ($this->whichField($this->fields[$f])) {
-                        if ($this->sortable)
-                            $output .= "<td><a href='" . $this->createUrl('list', 0, '', array('sort'=>array($f=>'X'))) . "'>{$this->fields[$f]['display_name']}</a></td>";
-                        else
-                            $output .= "<td>{$this->fields[$f]['display_name']}</td>";
-                    }
-                } elseif (isset($this->links[$f])) {
-                    if (!empty($this->links[$f]['list']) && $this->links[$f]['list'] == 'compact') {
-                        if ($this->links[$f]['display_name']) {
-                            $output .= "<td>{$this->links[$f]['display_name']}</td>";
-                        } else {
-                            $output .= "<td>{$f}</td>";
-                        }
-                    }
+        // Determine which field order to use.
+        $field_order = is_array($this->fieldOrder) ? $this->fieldOrder
+            : array_merge(array_keys($this->fields), array_keys($this->links));
+
+        foreach ($field_order as $f) {
+            if (!empty($this->fields[$f])) {
+                $display_name = $this->getDisplayName($this->fields[$f], $f);
+                if ($this->whichField($this->fields[$f])) {
+                    if ($this->sortable)
+                        $output .= "<td><a href='" . $this->createUrl('list', 0, '', ['sort'=> [$f => 'X']]) . "'>{$display_name}</a></td>";
+                    else
+                        $output .= "<td>{$display_name}</td>";
                 }
             }
-        } else {
-            // The field order is not specified.
-            foreach ($this->fields as $f => &$field) {
-                if ($this->whichField($field)) {
-                    if ($this->sortable) {
-                        $output .= "<td><a href='" . $this->createUrl('list', 0, '', array('sort'=>array($f=>'X'))) . "'>{$field['display_name']}</a></td>";
-                    } else {
-                        $output .= "<td>{$field['display_name']}</td>";
-                    }
+            elseif (!empty($this->links[$f])) {
+                $display_name = $this->getDisplayName($this->links[$f], $f);
+                if (!empty($this->links[$f]['list']) && $this->links[$f]['list'] == 'compact') {
+                    $output .= "<td>{$display_name}</td>";
                 }
             }
-            // Add the linked tables.
-            foreach ($this->links as $l => $v) {
-                if (!empty($v['list']) && $v['list'] == 'compact') {
-                    if (!empty($v['display_name'])) {
-                        $output .= "<td>{$v['display_name']}</td>";
-                    } else {
-                        $output .= "<td>{$l}</td>";
-                    }
-                }
+            else {
+                throw new Exception('Invalid field');
             }
         }
+
         return $output;
+    }
+
+    protected function getDisplayName($field, $field_name) {
+        if (isset($field['display_name'])) {
+            return $field['display_name'];
+        } else {
+            return ucwords(str_replace('_', ' ', $field_name));
+        }
     }
 
     protected function renderListRows($list, $editable) {
@@ -1162,19 +1154,27 @@ abstract class Table extends Page {
             // prepare click action for each row
             $output .= "<tr id='{$row[$this->getKey()]}'>";
             // SHOW FIELDS AND VALUES
-            foreach ($this->fields as &$field) {
-                if ($this->whichField($field)) {
-                    if (!empty($field['align'])) {
-                        $output .= "<td align='{$field['align']}'>";
+            $field_order = is_array($this->fieldOrder) ? $this->fieldOrder
+                : array_merge(array_keys($this->fields), array_keys($this->links));
+
+            foreach ($field_order as $f) {
+                // Fields
+                if (!empty($this->fields[$f]) && $this->whichField($this->fields[$f])) {
+                    if (!empty($this->fields[$f]['align'])) {
+                        $output .= "<td align='{$this->fields[$f]['align']}'>";
                     } else {
                         $output .= '<td>';
                     }
-                    $output .= $this->printFieldValue($field, $row);
+                    $output .= $this->printFieldValue($this->fields[$f], $row);
                     $output .= '</td>';
                 }
+
+                // Links
+                elseif (!empty($this->links[$f])) {
+                    // List all links in one cell.
+                    $output .= $this->renderLinkCell($this->links[$f], $row, $f);
+                }
             }
-            // LINKS w ALL ITEMS LISTED IN ONE BOX
-            $output .= $this->renderLinkList($row);
 
             // EDIT, DELETE, AND OTHER ACTIONS
             $output .= $this->render_action_fields_list($row, $editable);
@@ -1194,40 +1194,38 @@ abstract class Table extends Page {
         }
     }
 
-    // Called when rendering lists
-    protected function renderLinkList(&$row) {
+    // Render a link cell
+    protected function renderLinkCell(&$link_settings, &$row, $link) {
         $output = '';
-        foreach ($this->links as $link => $link_settings) {
-            if (!empty($link_settings['list']) && $link_settings['list'] == 'compact') {
-                if (!empty($link_settings['index'])) {
-                    // There is a link table joining them. (Many to many) {
-                    $links = $this->load_all_active_list($link_settings, $row[$this->getKey()]);
-                }
-                else {
-                    $links = Database::getInstance()->select($link, [$this->getKey() => $row[$this->getKey()]]);
-                }
-
-                $output .= '<td>';
-                $displays = [];
-                if (isset($link_settings['list']) == 'compact') {
-                    foreach ($links as $l)
-                        if (!empty($link_settings['fields']) && is_array($link_settings['fields'])) {
-                            $display = $link_settings["display"];
-                            foreach ($link_settings['fields'] as $f => $a) {
-                                if (!isset($a['field'])) $a['field'] = $f;
-                                $display = str_replace('{' . $f . '}', $this->printFieldValue($a, $l), $display);
-                            }
-                            $displays[] = $display;
-                        } else {
-                            $displays[] = $l[$link_settings['display_column']];
-                        }
-                    if (!isset($link_settings['seperator'])) {
-                        $link_settings['seperator'] = ', ';
-                    }
-                    $output .= implode($link_settings['seperator'], $displays);
-                }
-                $output .= '</td>';
+        if (!empty($link_settings['list']) && $link_settings['list'] == 'compact') {
+            if (!empty($link_settings['index'])) {
+                // There is a link table joining them. (Many to many) {
+                $links = $this->load_all_active_list($link_settings, $row[$this->getKey()]);
             }
+            else {
+                $links = Database::getInstance()->select($link, [$this->getKey() => $row[$this->getKey()]]);
+            }
+
+            $output .= '<td>';
+            $displays = [];
+            if (isset($link_settings['list']) == 'compact') {
+                foreach ($links as $l)
+                    if (!empty($link_settings['fields']) && is_array($link_settings['fields'])) {
+                        $display = $link_settings["display"];
+                        foreach ($link_settings['fields'] as $f => $a) {
+                            if (!isset($a['field'])) $a['field'] = $f;
+                            $display = str_replace('{' . $f . '}', $this->printFieldValue($a, $l), $display);
+                        }
+                        $displays[] = $display;
+                    } else {
+                        $displays[] = $l[$link_settings['display_column']];
+                    }
+                if (!isset($link_settings['seperator'])) {
+                    $link_settings['seperator'] = ', ';
+                }
+                $output .= implode($link_settings['seperator'], $displays);
+            }
+            $output .= '</td>';
         }
         return $output;
     }
@@ -2241,24 +2239,26 @@ abstract class Table extends Page {
      * @return boolean
      */
     protected function setValueOnNew(&$field) {
-        if (isset($field['insert_function']))
+        if (
+            isset($field['value'])
+            || isset($field['insert_function'])
+            || isset($field['submit_function'])
+            || !empty($field['force_default_new']) || !empty($field['default'])
+            || !empty($field['set_on_new'])
+        ) {
             return true;
-        if (isset($field['submit_function']))
-            return true;
-        if (!empty($field['force_default_new']) || !empty($field['default']))
-            return true;
-        if (!empty($field['set_on_new']))
-            return true;
-        if ((!empty($field['type']) && $field['type'] == 'hidden') || !empty($field['hidden']))
+        }
+        if (
+            ((!empty($field['type']) && $field['type'] == 'hidden') || !empty($field['hidden']))
+            || (isset($field['editable']) && $field['editable'] === false)
+            || (isset($field['insertable']) && $field['insertable'] === false)
+            || !empty($field['list_only'])
+            || (!empty($this->fieldOrder) && !in_array($field['field'], $this->fieldOrder))
+        ) {
             return false;
-        if (isset($field['editable']) && $field['editable'] === false)
-            return false;
-        if (isset($field['insertable']) && $field['insertable'] === false)
-            return false;
-        if (!empty($field['list_only']))
-            return false;
-        if (!empty($this->fieldOrder) && !in_array($field['field'], $this->fieldOrder))
-            return false;
+        }
+
+        // Default.
         return true;
     }
 
@@ -2270,22 +2270,26 @@ abstract class Table extends Page {
      * @return boolean
      */
     protected function setValueOnUpdate(&$field) {
-        if (isset($field['modified_function']))
+        if (
+            isset($field['value'])
+            || isset($field['modified_function'])
+            || isset($field['submit_function'])
+        ) {
             return true;
-        if (isset($field['submit_function']))
-            return true;
-        if ((!empty($field['type']) && $field['type'] == 'hidden') || !empty($field['hidden']))
+        }
+
+        if (
+            ((!empty($field['type']) && $field['type'] == 'hidden') || !empty($field['hidden']))
+            || $field['field'] == $this->parentLink
+            || (isset($field['editable']) && $field['editable'] === false)
+            || !empty($field['list_only'])
+            || $field['field'] == $this->getKey()
+            || (!empty($this->fieldOrder) && !in_array($field['field'], $this->fieldOrder))
+        ) {
             return false;
-        if ($field['field'] == $this->parentLink)
-            return false;
-        if (isset($field['editable']) && $field['editable'] === false)
-            return false;
-        if (!empty($field['list_only']))
-            return false;
-        if ($field['field'] == $this->getKey())
-            return false;
-        if (!empty($this->fieldOrder) && !in_array($field['field'], $this->fieldOrder))
-            return false;
+        }
+
+        // Default.
         return true;
     }
 
@@ -2331,15 +2335,15 @@ abstract class Table extends Page {
 
             // OVERRIDES
 
-            if (!empty($field['force_default_new']) && $this->action == "insert") {
+            if (!empty($field['value'])) {
+                // Fixed value.
+                $val = $field['value'];
+            } elseif (!empty($field['force_default_new']) && $this->action == "insert") {
+                // Fixed default value.
                 $val = $field['default'];
-                // developer entered, could need sanitization
-                $sanitize = true;
             } elseif ($this->parentLink == $field['field']) {
-                // parent link
+                // If the field is a parent link.
                 $val = $this->parentId;
-                // already sanitized, not needed
-                // FUNCTIONS
             } elseif ($this->action == 'insert' && isset($field['insert_function'])) {
                 // function when modified
                 $this->preset[$field['field']]['insert_function']($output);
@@ -3513,7 +3517,8 @@ abstract class Table extends Page {
 
         if (isset($this->preset[$field['field']]['render_' . $this->action . '_field'])) {
             $this->getRow(false);
-            if ($this->preset[$field['field']]['render_' . $this->action . '_field'][0] == 'this') {
+            if (is_array($this->preset[$field['field']]['render_' . $this->action . '_field'])
+              && $this->preset[$field['field']]['render_' . $this->action . '_field'][0] == 'this') {
                 $this->preset[$field['field']]['render_' . $this->action . '_field'][0] = $this;
             }
             return $this->preset[$field['field']]['render_' . $this->action . '_field']($this->list);
