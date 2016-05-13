@@ -518,8 +518,6 @@ class Database extends Singleton {
      *
      * @param string $table
      *   The table to insert into.
-     * @param array $fields
-     *   A list of column names to associate the value sets.
      * @param array $value_sets
      *   A list of column values. Each value should either be an array of the same length
      *   as all other arrays, or a string to have the same entry for each set.
@@ -529,10 +527,11 @@ class Database extends Singleton {
      * @return integer
      *   The number of entries submitted.
      */
-    public function insertSets($table, $fields, $value_sets, $existing = FALSE) {
+    public function insertSets($table, $value_sets, $existing = FALSE) {
         $vars = [];
         $table = $this->parseTable($table, $vars);
         $ignore = $existing === TRUE ? 'IGNORE' : '';
+        $fields = array_keys($value_sets);
         $field_string = '`' . implode('`,`', $fields) . '`';
 
         $values = '(' . implode(',', array_fill(0, count($fields), '?')) . ')';
