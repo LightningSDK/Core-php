@@ -538,31 +538,39 @@ abstract class Table extends Page {
         $this->action = 'pop_return';
     }
 
+    /**
+     * The initial form to ask for the upload file.
+     */
     public function getImport() {
         $this->action = 'import';
-        $this->CSVImporter = new CSVImport();
         if (!$this->importable) {
             Output::accessDenied();
         }
+        $this->CSVImporter = new CSVImport();
     }
 
+    /**
+     * The file upload is posted here.
+     */
     public function postImport() {
         $this->action = 'import-align';
+        if (!$this->importable) {
+            Output::accessDenied();
+        }
         $this->initCSVImporter();
         $this->CSVImporter->cacheImportFile();
-        if (!$this->importable) {
-            Output::accessDenied();
-        }
     }
 
+    /**
+     * The important alignment is posted, so process it here.
+     */
     public function postImportAlign() {
-        $this->initCSVImporter();
-        $this->CSVImporter->importDataFile();
         if (!$this->importable) {
             Output::accessDenied();
-        } else {
-            Messenger::message('Import successful!');
         }
+        $this->initCSVImporter();
+        $this->CSVImporter->importDataFile();
+        Messenger::message('Import successful!');
         Navigation::redirect();
     }
 
@@ -1295,8 +1303,10 @@ abstract class Table extends Page {
             switch ($action['type']) {
                 case 'link':
                 case 'html':
+                case 'action':
+                case 'function':
                     break;
-                case "checkbox":
+                case 'checkbox':
                 default:
                     if (!isset($action['check_all']) || empty($action['check_all'])) {
                         $output .= "<input type='checkbox' name='taf_all_{$a}' id='taf_all_{$a}' value='1' onclick=\"lightning.table.selectAll('{$a}');\" />";
