@@ -29,6 +29,7 @@ class User extends API {
             $session = Session::getInstance();
             $session->setState(Session::STATE_APP);
             $data['cookies'] = array('session' => $session->session_key);
+            $data['user_id'] = ClientUser::getInstance()->id;
             Output::setJsonCookies(true);
             return $data;
         }
@@ -45,6 +46,7 @@ class User extends API {
 
     public function postGoogleLogin() {
         if ($token = SocialMediaApi::getToken()) {
+            Google::setApp(true);
             $google = Google::getInstance(true, $token['token'], $token['auth']);
             $this->finishSocialLogin($google);
             exit;
@@ -53,7 +55,10 @@ class User extends API {
     }
 
     public function postTwitterLogin() {
-        if ($token = Twitter::getAccessToken()) {
+        // Do not verify the twitter token against the session,
+        // because it's coming in through the API which means
+        // an app created it.
+        if ($token = Twitter::getAccessToken(false)) {
             $twitter = Twitter::getInstance(true, $token);
             $this->finishSocialLogin($twitter);
             exit;
@@ -71,6 +76,7 @@ class User extends API {
 
         // Output the new cookie.
         $data['cookies'] = array('session' => Session::getInstance()->session_key);
+        $data['user_id'] = ClientUser::getInstance()->id;
         Output::json($data);
     }
 
