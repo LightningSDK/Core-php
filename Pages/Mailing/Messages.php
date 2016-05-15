@@ -20,7 +20,11 @@ use Lightning\View\JS;
  */
 class Messages extends Table {
 
+    const TABLE = 'message';
+    const PRIMARY_KEY = 'message_id';
+
     protected $table = 'message';
+
     protected $preset = array(
         'never_resend' => array(
             'type' => 'checkbox',
@@ -41,6 +45,7 @@ class Messages extends Table {
             'type' => 'html',
             'editor' => 'full',
             'upload' => true,
+            'url' => 'full',
         )
     );
 
@@ -80,12 +85,12 @@ class Messages extends Table {
         'send' => [
             'type' => self::CB_SUBMITANDREDIRECT,
             'text' => 'Update &amp; Send',
-            'redirect' => '/admin/mailing/send?id={ID}',
+            'redirect' => '/admin/mailing/send?id={' . self::PRIMARY_KEY . '}',
         ],
     ];
-    
+
     protected $sort = 'message_id DESC';
-    protected $maxPerPage = 100;
+    protected $duplicatable = true;
 
     /**
      * Require admin privileges.
@@ -102,51 +107,51 @@ class Messages extends Table {
         if ($action == 'edit' || $action == 'new') {
             JS::startup('
                 lightning.admin.messageEditor.checkVars();
-                $("#add_message_criteria_button").click(lightning.admin.messageEditor.checkVars);
+                $("#add_message_criteria_button").click();
             ');
+            JS::set('table.linkProcess.cirteria', 'lightning.admin.messageEditor.checkVars');
         }
+    }
 
-        $this->post_actions['after_post'] = function() {
-            $db = Database::getInstance();
+    public function afterPost() {
+        $db = Database::getInstance();
 
-            // Find all the criteria added to this message
-            $criteria_list = $db->select(
-                array(
-                    'from' => 'message_message_criteria',
-                    'join' => array(
-                        'JOIN',
-                        'message_criteria',
-                        'USING (message_criteria_id)',
-                    ),
+        // Find all the criteria added to this message
+        $criteria_list = $db->select(
+            array(
+                'from' => 'message_message_criteria',
+                'join' => array(
+                    'JOIN',
+                    'message_criteria',
+                    'USING (message_criteria_id)',
                 ),
-                array('message_id' => $this->id)
-            );
+            ),
+            array('message_id' => $this->id)
+        );
 
-            // See if any variables have been set.
-            foreach($criteria_list as $c) {
-                // If the criteria requires variables.
-                if (!empty($c['variables'])) {
-                    // See what variables are required.
-                    $vars = explode(',', $c['variables']);
-                    $var_data = array();
-                    foreach($vars as $v) {
-                        $var_data[$v] = Request::post('var_' . $c['message_criteria_id'] . '_' . $v);
-                    }
-                    $db->update(
-                        'message_message_criteria',
-                        array('field_values' => json_encode($var_data)),
-                        array(
-                            'message_id' => Request::post('id', 'int'),
-                            'message_criteria_id' => $c['message_criteria_id'],
-                        )
-                    );
+        // See if any variables have been set.
+        foreach($criteria_list as $c) {
+            // If the criteria requires variables.
+            if (!empty($c['variables'])) {
+                // See what variables are required.
+                $vars = explode(',', $c['variables']);
+                $var_data = array();
+                foreach($vars as $v) {
+                    $var_data[$v] = Request::post('var_' . $c['message_criteria_id'] . '_' . $v);
                 }
+                $db->update(
+                    'message_message_criteria',
+                    array('field_values' => json_encode($var_data)),
+                    array(
+                        'message_id' => Request::post('id', 'int'),
+                        'message_criteria_id' => $c['message_criteria_id'],
+                    )
+                );
             }
-        };
+        }
     }
 
     public function getFields() {
-        // TODO: REQUIRE ADMIN
         $cl = Request::get('criteria_list', 'explode', 'int');
         $output = array();
         if (!empty($cl)) {

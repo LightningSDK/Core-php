@@ -60,12 +60,23 @@ class BasicHTML {
         return $return;
     }
 
-    public static function radioGroup($name, $options, $default = null, $attributes = array()) {
+    public static function radioGroup($name, $options, $default = null, $attributes = []) {
         $output = '<div ' . HTML::implodeAttributes($attributes) . '>';
 
         foreach ($options as $value => $label) {
             $checked = $default === $value ? 'CHECKED="checked"' : '';
             $output .= '<label><input type="radio" name="' . $name . '" value="' . $value . '" ' . $checked . ' /> ' . $label . '</label>';
+        }
+
+        return $output . '</div>';
+    }
+
+    public static function checkboxGroup($name, $options, $default = null, $attributes = array()) {
+        $output = '<div ' . HTML::implodeAttributes($attributes) . '>';
+
+        foreach ($options as $value => $label) {
+            $checked = $default === $value ? 'CHECKED="checked"' : '';
+            $output .= '<label><input type="checkbox" name="' . $name . '[]" value="' . $value . '" ' . $checked . ' /> ' . $label . '</label>';
         }
 
         return $output . '</div>';
@@ -101,8 +112,13 @@ class BasicHTML {
         return '<textarea ' . HTML::implodeAttributes($attributes) . ' >' . Scrub::toHTML($value) . '</textarea>';
     }
 
-    public static function hidden($name, $value = '') {
-        return '<input type="hidden" name="' . $name . '" id="' . $name . '" value="' . $value . '" />';
+    public static function hidden($name, $value = '', $attributes = []) {
+        // This only applies to text fields.
+        $attributes['name'] = $name;
+        $attributes['id'] = $name;
+        $attributes['value'] = $value;
+        $attributes['type'] = 'hidden';
+        return '<input ' . HTML::implodeAttributes($attributes) . ' />';
     }
 
     /**

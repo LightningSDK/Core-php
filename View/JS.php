@@ -44,6 +44,13 @@ class JS {
     protected static $vars = array();
 
     /**
+     * @var boolean
+     *
+     * Whether the funciton lighting_startup() has been added already.
+     */
+    protected static $startupFunctionAdded = false;
+
+    /**
      * @var array
      *
      * A list of scripts to run when the page is ready.
@@ -132,22 +139,27 @@ class JS {
     public static function render() {
         $output = '';
         if (!self::$inited) {
-            $output = '<script language="javascript">lightning={"vars":' . json_encode(self::$vars) . '};</script>';
-            self::$vars = array();
+            $output = '<script>lightning={"vars":' . json_encode(self::$vars) . '};</script>';
+            self::$vars = [];
             self::$inited = true;
         } elseif (!empty(self::$vars)) {
-            $output = '<script language="javascript">$.extend(true, lightning.vars, ' . json_encode(self::$vars) . ');</script>';
+            $startup = self::includeStartupFunction();
+            $output = '<script>' . $startup . 'lightning_startup(function(){$.extend(true, lightning.vars, ' . json_encode(self::$vars) . ')});</script>';
         }
 
         // Include JS files.
         foreach (self::$included_scripts as &$file) {
-            $file_name = $file['file'];
-            if ($file['versioning']) {
-                $concatenator = strpos($file['file'], '?') !== false ? '&' : '?';
-                $file_name .= $concatenator . 'v=' . Configuration::get('minified_version', 0);
-            }
             if (empty($file['rendered'])) {
-                $output .= '<script language="javascript" src="' . $file_name . '" ' . (!empty($file['async']) ? 'async defer' : '');
+                $file_name = $file['file'];
+                if ($file['versioning']) {
+                    $concatenator = strpos($file['file'], '?') !== false ? '&' : '?';
+                    $file_name .= $concatenator;
+                    if ($version = Configuration::get('minified_version', 0)) {
+                        $file_name .= 'v=' .$version;
+                    }
+                }
+
+                $output .= '<script src="' . $file_name . '" ' . (!empty($file['async']) ? 'async defer' : '');
                 if (!empty($file['id'])) {
                     $output .= ' id="' . $file['id'] . '"';
                 }
@@ -157,29 +169,42 @@ class JS {
         }
 
         if (!empty(self::$inline_scripts) || !empty(self::$startup_scripts)) {
-            $output .= '<script language="javascript">';
+            $init_scripts = '';
             // Include inline scripts.
             foreach (self::$inline_scripts as $script) {
                 if (empty($script['rendered'])) {
-                    $output .= $script['script'] . "\n\n";
+                    $init_scripts .= $script['script'] . ";";
                     $script['rendered'] = true;
                 }
             }
 
             // Include ready scripts.
             if (!empty(self::$startup_scripts)) {
-                $output .= '$(document).ready(function() {';
+                $ready_scripts = '';
                 foreach (self::$startup_scripts as &$script) {
                     if (empty($script['rendered'])) {
-                        $output .= $script['script'] . ';';
+                        $ready_scripts .= $script['script'] . ';';
                         $script['rendered'] = true;
                     }
                 }
-                $output .= '})';
+                $init_scripts .= self::includeStartupFunction();
+                if (!empty($ready_scripts)) {
+                    $init_scripts .= 'lightning_startup(function() {' . $ready_scripts . '})';
+                }
             }
-            $output .= '</script>';
+            if (!empty($init_scripts)) {
+                $output .= '<script>' . $init_scripts . '</script>';
+            }
         }
 
         return $output;
+    }
+
+    protected static function includeStartupFunction() {
+        if (!self::$startupFunctionAdded) {
+            self::$startupFunctionAdded = true;
+            return 'function lightning_startup(callback) { if (typeof $ == "undefined") { setTimeout(function(){ lightning_startup(callback); }, 500) } else $().ready(callback) }';
+        }
+        return '';
     }
 }

@@ -5,6 +5,7 @@ namespace Overridable\Lightning\View;
 use Exception;
 use Lightning\Model\Blog;
 use Lightning\Tools\Configuration;
+use Lightning\Tools\Language;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Output;
@@ -13,6 +14,7 @@ use Lightning\Tools\Session;
 use Lightning\Tools\Template;
 use Lightning\View\CSS;
 use Lightning\View\JS;
+use Lightning\Model\Page as PageModel;
 
 /**
  * The basic html page handler.
@@ -21,6 +23,8 @@ use Lightning\View\JS;
  * @todo: Should be abstract
  */
 class Page {
+
+    const MODULE = null;
 
     /**
      * The template file.
@@ -48,23 +52,51 @@ class Page {
      *
      * @var array
      */
-    protected $params = array();
+    protected $params = [];
+
+    /**
+     * Whether to display the right column.
+     *
+     * Passed to, and depends on template.
+     *
+     * @var boolean
+     */
+    protected $rightColumn = true;
+
+    /**
+     * Whether to allow the page to use the full page width (true) or
+     * whether it should be contained within a div.column (false)
+     *
+     * Passed to, and depends on template.
+     *
+     * @var boolean
+     */
+    protected $fullWidth = false;
+
+    /**
+     * Which menu should be marked as 'active'.
+     *
+     * Passed to, and depends on template.
+     *
+     * @var string
+     */
+    protected $menuContext = '';
+
+    protected $meta = [];
 
     /**
      * Run any global initialization functions.
      */
     public function __construct() {
+        // Load module settings if present.
+        if (!empty(static::MODULE)) {
+            $this->initModule();
+        }
+
         // Load messages and errors from the query string.
         Messenger::loadFromQuery();
         Messenger::loadFromSession();
-        JS::add('/js/fastclick.min.js');
-        JS::add('/js/jquery.min.js', false);
-        JS::add('/js/jquery.cookie.min.js');
-        JS::add('/js/modernizr.min.js', false);
-        JS::add('/js/placeholder.min.js');
-        JS::add('/js/foundation.min.js', false);
-        JS::add('/js/lightning.min.js', false);
-        JS::add('/js/jquery.validate.min.js', false);
+        JS::add('/js/lightning.min.js');
         JS::startup('lightning.startup.init()');
         JS::startup('$(document).foundation()');
         CSS::add('/css/lightning.css');
@@ -84,23 +116,52 @@ class Page {
      * Prepare the output and tell the template to render.
      */
     public function output() {
-        // Send globals to the template.
-        $template = Template::getInstance();
+        try {
+            // Send globals to the template.
+            $template = Template::getInstance();
 
-        if (!empty($this->page)) {
-            $template->set('content', $this->page);
+            if (!empty($this->page)) {
+                $template->set('content', $this->page);
+            }
+
+            $template->set('google_analytics_id', Configuration::get('google_analytics_id'));
+
+            // TODO: Remove these, they should be called directly from the template.
+            $template->set('errors', Messenger::getErrors());
+            $template->set('messages', Messenger::getMessages());
+
+            $template->set('site_name', Configuration::get('site.name'));
+            $template->set('blog', Blog::getInstance());
+            $template->set('full_width', $this->fullWidth);
+            $template->set('right_column', $this->rightColumn);
+
+            // Include the site title into the page title for meta data.
+            if (!empty($this->meta['title']) && $site_title = Configuration::get('meta_data.title')) {
+                $this->meta['title'] .= ' | ' . $site_title;
+            }
+
+            // Load default metadata.
+            $this->meta += Configuration::get('meta_data');
+            $template->set('meta', $this->meta);
+
+            JS::set('menu_context', $this->menuContext);
+            $template->render($this->template);
+        } catch (Exception $e) {
+            echo 'Error rendering template: ' . $e;
+            exit;
         }
+    }
 
-        $template->set('google_analytics_id', Configuration::get('google_analytics_id'));
-
-        // TODO: These should be called directly from the template.
-        $template->set('errors', Messenger::getErrors());
-        $template->set('messages', Messenger::getMessages());
-
-        $template->set('site_name', Configuration::get('site.name'));
-        $template->set('blog', Blog::getInstance());
-        JS::set('active_nav', $this->nav);
-        $template->render($this->template);
+    /**
+     * Build a 404 page.
+     */
+    public function output404() {
+        $this->page = 'page';
+        if ($this->fullPage = PageModel::loadByUrl('404')) {
+            http_response_code(404);
+        } else {
+            Output::http(404);
+        }
     }
 
     /**
@@ -124,6 +185,7 @@ class Page {
                 Output::accessDenied();
             }
 
+            // Outputs an error if this is a POST request without a valid token.
             $this->requireToken();
 
             // If there is a requested action.
@@ -131,28 +193,27 @@ class Page {
                 $method = Request::convertFunctionName($request_type, $action);
                 if (method_exists($this, $method)) {
                     $this->{$method}();
-                    $this->output();
                 }
                 else {
-                    Output::error('There was an error processing your submission.');
+                    throw new Exception('There was an error processing your submission.');
                 }
             } else {
                 if (method_exists($this, $request_type)) {
                     $this->$request_type();
-                    $this->output();
                 } else {
                     // TODO: show 302
-                    Output::error('Method not available');
+                    throw new Exception('Method not available');
                 }
             }
         } catch (Exception $e) {
             Output::error($e->getMessage());
         }
+        $this->output();
     }
 
     public function requireToken() {
         if (!$this->validateToken()) {
-            Output::error('You submitted a form with an invalid token. Your requested has been ignored as a security precaution.');
+            Output::error(Language::translate('invalid_token'));
         }
     }
 
@@ -179,15 +240,34 @@ class Page {
      * @param array
      *   Additional query string parameters to add to the current url.
      */
-    public function redirect($params = array()) {
-        $output_params = array();
-        foreach ($this->params as $param) {
-            if (isset($params[$param])) {
-                $output_params[$param] = $params[$param];
-            } elseif (isset($this->$param)) {
-                $output_params[$param] = $this->$param;
-            }
+    public function redirect($params = []) {
+        Navigation::redirect('/' . Request::getLocation(), $params + $this->params);
+    }
+
+    public function setMeta($field, $value) {
+        $this->meta[$field] = $value;
+    }
+
+    protected function initModule() {
+        $settings = Configuration::get('modules.' . static::MODULE);
+        $this->updateSettings($settings);
+    }
+
+    protected function updateSettings($settings) {
+        if (!empty($settings['menu_context'])) {
+            $this->menuContext = $settings['menu_context'];
         }
-        Navigation::redirect('/' . Request::getLocation(), $output_params);
+        if (!empty($settings['template'])) {
+            $this->template = $settings['template'];
+        }
+        if (!empty($settings['meta_data'])) {
+            $this->meta += $settings['meta_data'];
+        }
+        if (isset($settings['right_column'])) {
+            $this->rightColumn = $settings['right_column'];
+        }
+        if (isset($settings['full_width'])) {
+            $this->fullWidth = $settings['full_width'];
+        }
     }
 }

@@ -1,19 +1,12 @@
 lightning.cms = {
     edit: function(editor) {
-        var config = lightning.vars.cms && lightning.vars.cms[editor] && lightning.vars.cms[editor].config ? lightning.vars.cms[editor].config : {};
-        $('#' + editor).attr('contentEditable', 'true');
-        lightning.ckeditors[editor] = CKEDITOR.inline(editor, {
-                toolbar: config.toolbar ? eval(config.toolbar) : CKEDITOR.config.toolbar_Full,
-                allowedContent: true
-            }
-        );
-        CKFinder.setupCKEditor(lightning.ckeditors[editor], '/js/ckfinder/');
+        lightning.htmleditor.initEditor(editor);
         $('#' + editor.replace(/^cms_/, 'cms_edit_')).hide();
-        $('#' + editor.replace(/^cms_/, 'cms_save_')).removeClass('hide').show();
+        $('#' + editor.replace(/^cms_/, 'cms_save_')).show();
     },
 
     save: function (editor) {
-        lightning.ckeditors[editor].destroy();
+        lightning.htmleditor.destroyEditor(editor);
         var self = this;
         $.ajax({
             url: '/admin/cms',
@@ -58,24 +51,10 @@ lightning.cms = {
     },
 
     editImage: function(id) {
-        var self = this;
-        CKFinder.popup({
-            basePath: lightning.vars.cms.basepath,
-            chooseFiles: true,
-            chooseFilesOnDblClick: true,
-            onInit: function( finder ) {
-                finder.on( 'files:choose', function( evt ) {
-                    var file = evt.data.files.first();
-                    self.updateImage(id, file.getUrl());
-                } );
-                finder.on( 'file:choose:resizedImage', function( evt ) {
-                    self.updateImage(id, evt.data.resizedUrl);
-                } );
-            }
-        });
+        lightning.fileBrowser.openSelect('lightning-cms', id);
     },
 
-    updateImage: function(id, fileUrl) {
+    imageSelected: function(fileUrl, id) {
         $('#cms_' + id).attr('src', fileUrl);
     },
 
@@ -110,11 +89,11 @@ lightning.cms = {
 
     initPlain: function() {
         var self = this;
-        $('.cms_edit_plain').click(function(e) {
+        $('.cms_edit_plain').on('click', function(e) {
             var id = $(e.target).attr('id').replace(/^cms_edit_/, '');
             self.editPlain(id);
         });
-        $('.cms_save_plain').click(function(e) {
+        $('.cms_save_plain').on('click', function(e) {
             var id = $(e.target).attr('id').replace(/^cms_save_/, '');
             self.savePlain(id);
         });
@@ -162,11 +141,11 @@ lightning.cms = {
     },
     initDate: function() {
         var self = this;
-        $('.cms_edit_date').click(function(e) {
+        $('.cms_edit_date').on('click', function(e) {
             var id = $(e.target).attr('id').replace(/^cms_edit_/, '');
             self.editDate(id);
         });
-        $('.cms_save_date').click(function(e) {
+        $('.cms_save_date').on('click', function(e) {
             var id = $(e.target).attr('id').replace(/^cms_save_/, '');
             self.saveDate(id);
         });

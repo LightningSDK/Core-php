@@ -14,7 +14,7 @@ class Video {
     public static function initDisplay() {
         static $inited = false;
         if (!$inited) {
-            JS::add('/js/video-js.min.js', false);
+            JS::add('/js/video.min.js', false);
             JS::startup('videojs.options.flash.swf = "/swf/video-js.swf"');
             CSS::add('/css/video-js.min.css');
             $inited = true;

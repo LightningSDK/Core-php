@@ -83,8 +83,12 @@ class Request {
         return trim(static::query('request'), '/');
     }
 
+    public static function getURL() {
+        return (static::isHTTPS() ? 'https://' : 'http://') . static::getDomain() . '/' . static::getLocation();
+    }
+
     public static function getDomain() {
-        return !empty($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
+        return !empty($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : (!empty($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : '');
     }
 
     /**
@@ -342,6 +346,11 @@ class Request {
                 }
                 return $output;
                 break;
+            case 'assoc_array':
+                if (!is_array($data) || count($data) == 0) {
+                    return false;
+                }
+                return $data;
             case 'url':
             case 'email':
             case 'boolean':

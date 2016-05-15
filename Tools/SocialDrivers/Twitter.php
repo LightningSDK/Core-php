@@ -7,7 +7,8 @@ use Lightning\Tools\Configuration;
 use Lightning\Tools\Output;
 use Lightning\Tools\Session;
 use Lightning\View\JS;
-use Overridable\Lightning\Tools\Request;
+use Lightning\Tools\Request;
+use stdClass;
 
 class Twitter extends SocialMediaApi {
 
@@ -23,13 +24,25 @@ class Twitter extends SocialMediaApi {
      */
     protected $me;
 
+    protected $network = 'twitter';
+
     public static function loadAutoLoader() {
         require_once HOME_PATH . '/Lightning/Vendor/twitterapiclient/autoload.php';
     }
 
-    public static function createInstance($token = null) {
+    /**
+     * @param null $token
+     * @param boolean $authorize
+     *   Not used, twitter is always authorized.
+     *
+     * @return static
+     */
+    public static function createInstance($token = null, $authorize = true) {
         if (empty($token)) {
-            $token = Session::getInstance(true, false)->getSetting('twitter.token');
+            $session = Session::getInstance(true, false);
+            if (!empty($session->content->twitter->token)) {
+                $token = $session->content->twitter->token;
+            }
         }
         if (empty($token)) {
             return new static();
@@ -50,10 +63,20 @@ class Twitter extends SocialMediaApi {
         $this->connection = new TwitterOAuth($key, $secret, $token['oauth_token'], $token['oauth_token_secret']);
     }
 
+    public function getToken() {
+        return json_encode([
+            'oauth_token' => $this->token['oauth_token'],
+            'oauth_token_secret' => $this->token['oauth_token_secret']
+        ]);
+    }
+
     public function storeSessionData() {
         $session = Session::getInstance();
-        $session->setSetting('twitter.token', $this->token);
-        $session->saveData();
+        if (empty($session->content->twitter)) {
+            $session->content->twitter = new stdClass();
+        }
+        $session->content->twitter->token = $this->token;
+        $session->save();
     }
 
     /**
@@ -69,8 +92,8 @@ class Twitter extends SocialMediaApi {
 
         if ($verify) {
             $request_token = [
-                'oauth_token' => $session->getSetting('twitter.oauth_token'),
-                'oauth_token_secret' => $session->getSetting('twitter.oauth_token_secret'),
+                'oauth_token' => !empty($session->content->twitter->oauth_token) ? $session->content->twitter->oauth_token : '',
+                'oauth_token_secret' => !empty($session->content->twitter->oauth_token_secret) ? $session->content->twitter->oauth_token_secret : '',
             ];
         } else {
             return [
@@ -78,6 +101,7 @@ class Twitter extends SocialMediaApi {
                 'oauth_token_secret' => Request::get('oauth_token_secret'),
             ];
         }
+
         if (isset($_REQUEST['oauth_token']) && $request_token['oauth_token'] !== $_REQUEST['oauth_token']) {
             // Abort! Something is wrong.
             Output::error('Invalid Request');
@@ -114,11 +138,23 @@ class Twitter extends SocialMediaApi {
         return $user_settings;
     }
 
+    public function getName() {
+        $this->loadProfile();
+        return $this->profile->name;
+    }
+
+    public function getScreenName() {
+        $this->loadProfile();
+        return $this->profile->screen_name;
+    }
+
     public function getSocialId() {
+        $this->loadProfile();
         return $this->profile->id;
     }
 
     public function myImageURL() {
+        $this->loadProfile();
         return $this->profile->profile_image_url;
     }
 
@@ -136,6 +172,22 @@ class Twitter extends SocialMediaApi {
         return $this->getFriends();
     }
 
+    public static function renderShare($url) {
+        JS::add('https://platform.twitter.com/widgets.js');
+        $via = Configuration::get('social.twitter.url');
+        if ($via) {
+            $via = 'via="' . $via . '"';
+        }
+        return '<a class="twitter-share-button" ' . $via . ' rel="canonical" href="https://twitter.com/intent/tweet" url="' . $url . '">Tweet</a>';
+    }
+
+    public static function renderFollow() {
+        if ($url = Configuration::get('social.twitter.url')) {
+            JS::add('https://platform.twitter.com/widgets.js');
+            return '<a class="twitter-follow-button"  href="https://twitter.com/' . $url . '">Follow @' . $url . '</a>';
+        }
+    }
+
     /**
      * Render the follow and tweet links.
      */
@@ -143,7 +195,6 @@ class Twitter extends SocialMediaApi {
         $settings = Configuration::get('social.twitter');
         if (!empty($settings['follow']) || !empty($settings['share'])) {
             // Add the initialization script.
-            JS::startup("!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');");
 
             $return = '';
             if (!empty($settings['share'])) {
@@ -158,7 +209,16 @@ class Twitter extends SocialMediaApi {
         return $return;
     }
 
-    public static function loginButton() {
+    /**
+     * Create a social signin button for twitter.
+     *
+     * @param boolean $authorize
+     *   This might not be used, if twitter always authorizes.
+     *
+     * @return string
+     *   The HTML building the sign in button.
+     */
+    public static function loginButton($authorize = false) {
         JS::set('token', Session::getInstance()->getToken());
         JS::startup('lightning.social.initLogin()');
 
@@ -166,16 +226,42 @@ class Twitter extends SocialMediaApi {
         $appId = Configuration::get('social.twitter.key');
         $secret = Configuration::get('social.twitter.secret');
         $connection = new TwitterOAuth($appId, $secret);
-        $request_token = $connection->oauth('oauth/request_token', array('oauth_callback' => Configuration::get('web_root') . '/user/twitterauth'));
+        $oauth_callback = Configuration::get('social.twitter.oauth_callback', null)
+            ?: Configuration::get('web_root') . '/user/twitterauth';
+        $request_token = $connection->oauth('oauth/request_token', array('oauth_callback' => $oauth_callback));
 
         // Save the token to the session.
         $session = Session::getInstance();
-        $session->setSetting('twitter.oauth_token', $request_token['oauth_token']);
-        $session->setSetting('twitter.oauth_token_secret', $request_token['oauth_token_secret']);
-        $session->saveData();
+        if (empty($session->content->twitter)) {
+            $session->content->twitter = new stdClass();
+        }
+        $session->content->twitter->oauth_token = $request_token['oauth_token'];
+        $session->content->twitter->oauth_token_secret = $request_token['oauth_token_secret'];
+        $session->save();
 
         $url = $connection->url('oauth/authorize', array('oauth_token' => $request_token['oauth_token']));
         JS::set('social.twitter.signin_url', $url);
         return '<span class="social-signin twitter"><i class="fa fa-twitter"></i><span> Sign in with Twitter</span></span>';
+    }
+
+    public function share($text, $settings = []) {
+        // Add the URL to the tweet.
+        if (!empty($settings['url'])) {
+            $text .= ' ' . $settings['url'];
+        }
+        $parameters = ['status' => $text];
+        if (!empty($settings['images'])) {
+            // Upload images.
+            $image_ids = [];
+            $images = is_array($settings['images']) ? $settings['images'] : [$settings['images']];
+            foreach ($images as $image) {
+                $result = $this->connection->upload('media/upload', ['media' => $image['location']]);
+                $image_ids[] = $result->media_id_string;
+            }
+            // Add the images to the tweet.
+            $parameters['media_ids'] = implode(',', $image_ids);
+        }
+        // Send the tweet.
+        $this->connection->post('statuses/update', $parameters);
     }
 }

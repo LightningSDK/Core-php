@@ -55,9 +55,6 @@ trait ObjectDataStorage {
             case 'id':
                 return !empty($this->__data[static::PRIMARY_KEY]);
                 break;
-            case 'data':
-                return true;
-                break;
             default:
                 return isset($this->__data[$var]);
                 break;
@@ -87,16 +84,23 @@ trait ObjectDataStorage {
                     return false;
                 };
                 break;
-            case 'data':
-                return $this->__data;
-                break;
             default:
-                if (isset($this->__data[$var]))
+                if (isset($this->__data[$var])) {
                     return $this->__data[$var];
-                else
+                } else {
                     return NULL;
+                }
                 break;
         }
+    }
+
+    /**
+     * Get the entire data contents of the object.
+     *
+     * @return array $data
+     */
+    public function getData() {
+        return $this->__data;
     }
 
     /**
@@ -122,10 +126,6 @@ trait ObjectDataStorage {
                 $this->__changed[static::PRIMARY_KEY] = static::PRIMARY_KEY;
                 $this->__data[static::PRIMARY_KEY] = $value;
                 break;
-            case 'data':
-                $this->__changed_all = true;
-                $this->__data = $value;
-                break;
             default:
                 $this->__changed[$var] = $var;
                 $this->__data[$var] = $value;
@@ -134,13 +134,27 @@ trait ObjectDataStorage {
     }
 
     /**
+     * Replace the entire data contents of the object.
+     *
+     * @param array $data
+     */
+    public function setData($data) {
+        $this->__data = $data;
+    }
+
+    /**
      * Convert JSON encoded fields to objects.
      */
     protected function initJSONEncodedFields() {
         foreach ($this->__json_encoded_fields as $field) {
             if (!empty($this->__data[$field])) {
-                $this->__json_encoded_source[$field] = $this->__data[$field];
-                $this->__data[$field] = json_decode($this->__data[$field]) ?: new stdClass();
+                if (is_string($this->__data[$field])) {
+                    $this->__json_encoded_source[$field] = $this->__data[$field];
+                    $this->__data[$field] = json_decode($this->__data[$field]) ?: new stdClass();
+                } elseif (is_array($this->__data[$field]) || is_object($this->__data[$field])) {
+                    $this->__json_encoded_source[$field] = json_encode($this->__data[$field]);
+                    $this->__data[$field] = json_decode($this->__json_encoded_source[$field]) ?: new stdClass();
+                }
             } else {
                 $this->__data[$field] = new stdClass();
             }
@@ -153,7 +167,8 @@ trait ObjectDataStorage {
      * @return array
      */
     protected function getModifiedValues() {
-        if ($this->__changed_all || empty($this->id)) {
+        $create_new = $this->__changed_all || empty($this->id) || $this->__createNew;
+        if ($create_new) {
             $values = $this->__data;
         } else {
             $values = array();
@@ -164,11 +179,50 @@ trait ObjectDataStorage {
 
         foreach ($this->__json_encoded_fields as $field) {
             $encoded = json_encode($this->__data[$field]);
-            if (!empty($encoded) && (empty($this->__json_encoded_source[$field]) || $encoded != $this->__json_encoded_source[$field])) {
+            if (!empty($encoded) && (
+                    $create_new
+                    || empty($this->__json_encoded_source[$field])
+                    || $encoded != $this->__json_encoded_source[$field]
+                )
+            ) {
                 $values[$field] = $encoded;
             }
         }
 
         return $values;
+    }
+
+    /**
+     * Checks that the object is the same, including data and ID.
+     *
+     * @param Object $object
+     *   The object to compare to.
+     *
+     * @return boolean
+     */
+    public function equals($object) {
+        if ($this->__data != $object->getData()) {
+            return false;
+        }
+        if (empty($this->id) || empty($object->id)) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Checks that the object data is the same, excluding ID.
+     *
+     * @param Object $object
+     *   The object to compare to.
+     *
+     * @return boolean
+     */
+    public function equalsData($object) {
+        $data1 = $this->__data;
+        $data2 = $object->getData();
+        unset($data1[static::PRIMARY_KEY]);
+        unset($data2[static::PRIMARY_KEY]);
+        return $data1 == $data2;
     }
 }

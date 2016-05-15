@@ -6,7 +6,8 @@
 
 namespace Lightning\Tools;
 use Lightning\Pages\Message;
-use Lightning\Pages\Page;
+use Lightning\Pages\Page as PageView;
+use Lightning\Model\Page as PageModel;
 
 /**
  * Class Output
@@ -34,7 +35,8 @@ class Output {
      *
      * @var array
      */
-    protected static $cookies = array();
+    protected static $cookies = [];
+    protected static $sentCookies = [];
 
     protected static $isJson = false;
 
@@ -147,13 +149,13 @@ class Output {
      */
     public static function json($data = array(), $suppress_status = false) {
         // Predefined outputs.
-        if ($data == self::ACCESS_DENIED) {
+        if ($data === self::ACCESS_DENIED) {
             $data = array('status' => 'access_denied');
         }
-        elseif ($data == self::SUCCESS) {
+        elseif ($data === self::SUCCESS || $data === true) {
             $data = array('status' => 'success');
         }
-        elseif ($data == self::ERROR) {
+        elseif ($data === self::ERROR || $data === false) {
             $data = array('status' => 'error');
         }
         elseif (!empty($data['status']) && !empty(self::$statusStrings[$data['status']])) {
@@ -203,7 +205,7 @@ class Output {
             if ($database) {
                 $output['database'] = array(
                     'queries' => $database->getQueries(),
-                    'time' => $database->timeReport(),
+                    'time' => Performance::timeReport(),
                 );
             }
         }
@@ -268,16 +270,7 @@ class Output {
      * Load and render the access denied page.
      */
     public static function accessDenied() {
-        Messenger::error('Access Denied');
-        // TODO : This can be simplified using the error function below.
-        if (static::isJSONRequest()) {
-            Output::json();
-        } else {
-            Template::resetInstance();
-            $page = new Message();
-            $page->execute();
-        }
-        exit;
+        self::error('Access Denied');
     }
 
     /**
@@ -368,6 +361,7 @@ class Output {
             'secure' => $secure !== null ? $secure : (!empty($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] == 1 || strtolower($_SERVER['HTTPS']) == 'on')),
             'httponly' => $httponly,
         );
+
         if (isset(self::$cookies[$cookie])) {
             self::$cookies[$cookie] = $settings + self::$cookies[$cookie];
         } else {
@@ -383,6 +377,8 @@ class Output {
         foreach (self::$cookies as $cookie => $settings) {
             setcookie($cookie, $settings['value'], $settings['ttl'], $settings['path'], $settings['domain'], $settings['secure'], $settings['httponly']);
         }
+        self::$sentCookies = self::$cookies;
+        self::$cookies = [];
     }
 
     /**
@@ -436,10 +432,10 @@ class Output {
         http_response_code($reponse_code);
 
         // Use the Page handler for output.
-        $page = new Page();
+        $page = new PageView();
 
         // Attempt to load a page from the database.
-        if ($full_page = $page->loadPage($reponse_code)) {
+        if ($full_page = PageModel::loadByURL($reponse_code)) {
             $full_page['url'] = Request::get('page');
         } else {
             // If the page doesn't exist, fill it with default content.
@@ -450,6 +446,7 @@ class Output {
             $full_page['body'] = '';
             $full_page['layout'] = 0;
             $full_page['site_map'] = 1;
+            $full_page['error'] = 404;
         }
 
         // Render the page and exit.

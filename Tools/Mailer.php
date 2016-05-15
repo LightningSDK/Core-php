@@ -41,6 +41,13 @@ class Mailer {
     protected $fromSet = false;
 
     /**
+     * Whether the reply-to has been explicitly set.
+     *
+     * @var boolean
+     */
+    protected $replyToSet = false;
+
+    /**
      * A list of users to send the message to in bulk mode.
      *
      * @var array
@@ -97,6 +104,13 @@ class Mailer {
             $this->mailer->Mailer = 'smtp';
             $this->mailer->Host = $smtpHost;
         }
+
+        if ($dkim_key = Configuration::get('mailer.dkim_key')) {
+            $this->mailer->DKIM_domain = Configuration::get('mailer.dkim_domain');
+            $this->mailer->DKIM_private = $dkim_key;
+            $this->mailer->DKIM_selector = Configuration::get('mailer.dkim_selector');
+            $this->mailer->DKIM_passphrase = '';
+        }
     }
 
     /**
@@ -141,12 +155,35 @@ class Mailer {
      *   Returns itself for method chaining.
      */
     public function from($email, $name = null) {
-        $this->from = $email;
+        $this->mailer->DKIM_identity = $this->from = $email;
         $this->fromName = $name;
         try {
-            $this->mailer->AddReplyTo($email, $name);
+            if (!$this->replyToSet) {
+                $this->mailer->AddReplyTo($email, $name);
+            }
             $this->mailer->SetFrom($email, $name);
             $this->fromSet = true;
+        } catch (\Exception $e) {
+            Messenger::error($e->getMessage());
+        }
+        return $this;
+    }
+
+    /**
+     * Set the reply to address.
+     *
+     * @param string $email
+     *   The email address
+     * @param string $name
+     *   The address name.
+     *
+     * @return Mailer
+     *   Returns itself for method chaining.
+     */
+    public function replyTo($email, $name = null) {
+        try {
+            $this->mailer->AddReplyTo($email, $name);
+            $this->replyToSet = true;
         } catch (\Exception $e) {
             Messenger::error($e->getMessage());
         }
@@ -310,7 +347,7 @@ class Mailer {
      * @return integer
      *   The number of users the message was sent to.
      */
-    function sendBulk($message_id, $test = false, $auto = false) {
+    public function sendBulk($message_id, $test = false, $auto = false) {
         $this->message = new Message($message_id, true, $auto);
 
         $this->from(
@@ -349,14 +386,14 @@ class Mailer {
      * @return boolean
      *   Whether the message was sent successfully.
      */
-    function sendOne($message_id, $user) {
+    public function sendOne($message_id, $user) {
         $this->built = false;
         $this->clearAddresses();
         $this->loadMessage($message_id);
         $this->message->resetCustomVariables($this->customVariables);
         $this->message->setUser($user);
         $this->message->setDefaultVars();
-        $this->to($user->email, $user->first . ' ' . $user->last);
+        $this->to($user);
         if ($this->sendMessage()) {
             Tracker::trackEvent('Email Sent', $message_id, $user->id);
             return true;

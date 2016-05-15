@@ -31,7 +31,7 @@ class Daemon extends CLI {
     /**
      * The last time we checked for jobs.
      *
-     * @var array
+     * @var double
      */
     protected $lastCheck;
 
@@ -52,7 +52,7 @@ class Daemon extends CLI {
     /**
      * The time the daemon was started.
      *
-     * @var integer
+     * @var double
      */
     protected $startTime;
 
@@ -85,6 +85,7 @@ class Daemon extends CLI {
         $logfile = Configuration::get('daemon.log');
         Logger::setLog($logfile);
 
+        $mypid = $this->getMyPid();
         if (!empty($mypid) && $mypid != posix_getpid()) {
             $this->out('Already running.', true);
             return;
@@ -156,7 +157,7 @@ class Daemon extends CLI {
             }
         }
         $jobs = Configuration::get('jobs');
-        if (empty($jobs[$job])) {
+        if (empty($job) || empty($jobs[$job])) {
             throw new Exception('Job not found');
         }
         $job = $jobs[$job];
@@ -223,8 +224,8 @@ class Daemon extends CLI {
             ) {
                 $this->startJob($job);
             }
+            $this->lastCheck = $time;
         }
-        $this->lastCheck = $time;
     }
 
     /**

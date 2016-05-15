@@ -5,6 +5,8 @@
  */
 
 namespace Lightning\Tools;
+use Lightning\Tools\Communicator\RestClient;
+use Lightning\View\JS;
 
 /**
  * A class for rendering the Recaptcha verification elements.
@@ -19,8 +21,12 @@ class ReCaptcha {
      *   Rendered HTML.
      */
     public static function render() {
-        require_once HOME_PATH . '/Lightning/Vendor/recaptcha/recaptcha-plugins/php/recaptchalib.php';
-        return recaptcha_get_html(Configuration::get('recaptcha.public'), null, Request::isHTTPS());
+        JS::add('https://www.google.com/recaptcha/api.js');
+        echo '<div class="captcha_container clearfix">
+                <div class="g-recaptcha" data-sitekey="' . Configuration::get('recaptcha.public') . '"></div>
+                <input type="text" name="captcha_abide" id="captcha_abide" required>
+                <small class="error">Please check the box.</small>
+        </div>';
     }
 
     /**
@@ -30,12 +36,12 @@ class ReCaptcha {
      *   Whether the captcha was verified.
      */
     public static function verify() {
-        require_once HOME_PATH . '/Lightning/Vendor/recaptcha/recaptcha-plugins/php/recaptchalib.php';
-        $resp = recaptcha_check_answer (Configuration::get('recaptcha.private'),
-            $_SERVER["REMOTE_ADDR"],
-            $_POST["recaptcha_challenge_field"],
-            $_POST["recaptcha_response_field"]);
+        $client = new RestClient('https://www.google.com/recaptcha/api/siteverify');
+        $client->set('secret', Configuration::get('recaptcha.private'));
+        $client->set('response', Request::post('g-recaptcha-response'));
+        $client->set('remoteip', Request::server(Request::IP));
+        $client->callPost();
 
-        return !empty($resp->is_valid);
+        return (boolean) $client->get('success');
     }
 }

@@ -142,7 +142,7 @@ class User extends Page {
         $login_result = UserModel::login($email, $pass);
         if (!$login_result) {
             // BAD PASSWORD COMBO
-            Messenger::error("You entered the wrong password. If you are having problems and would like to reset your password, <a href='/user?action=reset'>click here</a>");
+            Messenger::error('You entered the wrong password. If you are having problems and would like to reset your password, <a href="/user?action=reset">click here</a>');
             Template::getInstance()->set('action', 'login');
             return $this->get();
         } else {
@@ -152,8 +152,8 @@ class User extends Page {
     }
 
     public function postFacebookLogin() {
-        if ($token = SocialMediaApi::getToken()) {
-            $fb = Facebook::getInstance(true, $token['token'], $token['auth']);
+        if ($token = SocialMediaApi::getRequestToken()) {
+            $fb = Facebook::getInstance(true, $token, $token['auth']);
             $this->finishSocialLogin($fb);
         }
         Messenger::error('Login Failed');
@@ -161,7 +161,7 @@ class User extends Page {
     }
 
     public function postGoogleLogin() {
-        if ($token = SocialMediaApi::getToken()) {
+        if ($token = SocialMediaApi::getRequestToken()) {
             $google = Google::getInstance(true, $token['token'], $token['auth']);
             $this->finishSocialLogin($google);
         }
@@ -237,11 +237,9 @@ class User extends Page {
     public function postReset() {
         if (!$email = Request::get('email', 'email')) {
             Output::error('Invalid email');
-        }
-        elseif (!$user = UserModel::loadByEmail($email)) {
+        } elseif (!$user = UserModel::loadByEmail($email)) {
             Output::error('User does not exist.');
-        }
-        if ($user->sendResetLink()) {
+        } elseif ($user->sendResetLink()) {
             Navigation::redirect('message', array('msg' => 'reset'));
         }
     }
@@ -285,8 +283,9 @@ class User extends Page {
         $template->set('content', 'user_reset');
         if ($_POST['new_pass'] == $_POST['new_pass_conf']) {
             if (isset($_POST['new_pass'])) {
-                if ($user->change_temp_pass($_POST['email'], $_POST['new_pass'], $_POST['code']))
+                if ($user->change_temp_pass($_POST['email'], $_POST['new_pass'], $_POST['code'])) {
                     $template->set("password_changed", true);
+                }
             } else {
                 $template->set("change_password", true);
             }
@@ -310,8 +309,10 @@ class User extends Page {
     public function getStopImpersonating() {
         $session = Session::getInstance();
         if (ClientUser::getInstance()->isImpersonating()) {
-            $session->unsetSetting('impersonate');
-            $session->saveData();
+            if (!empty($session->content->impersonate)) {
+                unset($session->content->impersonate);
+                $session->save();
+            }
             Navigation::redirect('/');
         }
     }

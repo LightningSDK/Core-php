@@ -5,31 +5,63 @@ namespace Lightning\Pages;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Request;
 use Lightning\Tools\ClientUser;
-use Lightning\Model\Blog as BlogModel;
+use Lightning\Model\BlogPost;
+use Lightning\Tools\Template;
 
 class BlogTable extends Table {
-    protected $trusted = true;
 
-    protected $table = BlogModel::BLOG_TABLE;
+    const TABLE = BlogPost::TABLE;
+    const PRIMARY_KEY = 'blog_id';
 
+    /**
+     * @deprecated
+     * @var string;
+     */
+    protected $table = BlogPost::TABLE;
+
+    /**
+     * @deprecated
+     * @var string;
+     */
     protected $key = 'blog_id';
+
+    protected $trusted = true;
 
     protected $sort = 'time DESC';
 
-    protected $links = array(
-        BlogModel::CATEGORY_TABLE => array(
-            'index' => BlogModel::BLOG_CATEGORY_TABLE,
+    protected $links = [
+        BlogPost::TABLE . BlogPost::CATEGORY_TABLE => [
+            'index' => BlogPost::TABLE . BlogPost::BLOG_CATEGORY_TABLE,
             'key' => 'cat_id',
             'display_column' => 'category',
             'list' => 'compact'
-        )
-    );
+        ]
+    ];
+
+    protected $custom_buttons = [
+        'send' => [
+            'type' => self::CB_SUBMITANDREDIRECT,
+            'text' => 'Save &amp; Share',
+            'redirect' => '/admin/social/share?type=blog&id={' . self::PRIMARY_KEY . '}',
+        ],
+    ];
 
     protected $preset = array(
-        'user_id' => array('type' => 'hidden'),
-        'time' => array('type' => 'datetime'),
-        'url' => array('type' => 'url', 'unlisted' => true),
-        'body' => array('editor' => 'full', 'upload' => true),
+        'user_id' => [
+            'type' => 'hidden'
+        ],
+        'time' => [
+            'type' => 'datetime'
+        ],
+        'url' => [
+            'type' => 'url',
+            'unlisted' => true
+        ],
+        'body' => [
+            'upload' => true,
+            'type' => 'html',
+            'div' => true,
+        ],
     );
 
     protected function hasAccess() {
@@ -37,22 +69,20 @@ class BlogTable extends Table {
         return true;
     }
 
-    protected function initSettings() {
+    protected function afterPost() {
         if (Request::get('return') == 'view') {
-            $this->post_actions['after_post'] = function($row) {
-                Navigation::redirect('/' . $row['url'] . '.htm');
-            };
+            Navigation::redirect('/' . $this->list['url'] . '.htm');
         }
+    }
+
+    protected function initSettings() {
+        Template::getInstance()->set('full_width', true);
+
         $this->preset['user_id']['default'] = ClientUser::getInstance()->id;
         $this->preset['url']['submit_function'] = function(&$output) {
             $output['url'] = Request::post('url', 'url') ?: Request::post('title', 'url');
         };
-        $this->preset['header_image'] = array(
-            'type' => 'image',
-            'location' => BlogModel::IMAGE_PATH,
-            'weblocation' => '/' . BlogModel::IMAGE_PATH,
-            'format' => 'jpg',
-        );
+        $this->preset['header_image'] = self::getHeaderImageSettings();
 
         $this->action_fields = array(
             'view' => array(
@@ -63,5 +93,14 @@ class BlogTable extends Table {
                 }
             ),
         );
+    }
+
+    public static function getHeaderImageSettings() {
+        return [
+            'type' => 'image',
+            'browser' => true,
+            'container' => 'images',
+            'format' => 'jpg',
+        ];
     }
 }

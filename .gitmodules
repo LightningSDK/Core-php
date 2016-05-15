@@ -7,9 +7,6 @@
 [submodule "Vendor/foundation"]
 	path = Vendor/foundation
 	url = https://github.com/zurb/foundation.git
-[submodule "Vendor/recaptcha"]
-	path = Vendor/recaptcha
-	url = https://github.com/macdabby/recaptcha-php.git
 [submodule "Vendor/jquery"]
 	path = Vendor/jquery
 	url = https://github.com/jquery/jquery.git
@@ -28,9 +25,6 @@
 [submodule "Vendor/BounceHandler"]
 	path = Vendor/BounceHandler
 	url = https://github.com/Rambomst/PHP-Bounce-Handler.git
-[submodule "Vendor/jquery-validation"]
-	path = Vendor/jquery-validation
-	url = https://github.com/jzaefferer/jquery-validation.git
 [submodule "Vendor/videojs"]
 	path = Vendor/videojs
 	url = https://github.com/videojs/video.js.git
@@ -46,3 +40,9 @@
 [submodule "Vendor/Font-Awesome"]
 	path = Vendor/Font-Awesome
 	url = git@github.com:FortAwesome/Font-Awesome.git
+[submodule "Vendor/elfinder"]
+	path = Vendor/elfinder
+	url = https://github.com/Studio-42/elFinder.git
+[submodule "Vendor/jsoneditor"]
+	path = Vendor/jsoneditor
+	url = https://github.com/josdejong/jsoneditor.git

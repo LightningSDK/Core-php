@@ -7,10 +7,13 @@ use Google_Service_Plus;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Session;
 use Lightning\View\JS;
+use stdClass;
 
 class Google extends SocialMediaApi {
 
     const EMAIL_SUFFIX = 'google.com';
+
+    protected $network = 'google';
 
     /**
      * @var Google_Service_Plus
@@ -31,8 +34,8 @@ class Google extends SocialMediaApi {
             $google->setToken($token, $authorize);
         } else {
             $session = Session::getInstance(true, false);
-            if ($session && $token = $session->getSetting('google.token')) {
-                $google->setToken($token, $authorize);
+            if (!empty($session->content->google->token)) {
+                $google->setToken($session->content->google->token, $authorize);
             }
         }
 
@@ -65,9 +68,17 @@ class Google extends SocialMediaApi {
         }
     }
 
+    public function getToken() {
+        return $this->token;
+    }
+
     public function storeSessionData() {
         $session = Session::getInstance();
-        $session->setSetting('google.token', $this->token);
+        if (empty($session->content->google)) {
+            $session->content->google = new stdClass();
+        }
+        $session->content->google->token = $this->token;
+        $session->save();
     }
 
     public function loadProfile() {
@@ -108,6 +119,7 @@ class Google extends SocialMediaApi {
 
     public function getSocialId() {
         if ($this->authorize) {
+            $this->loadProfile();
             return $this->profile->getId();
         } else {
             return $this->social_id;
@@ -130,6 +142,16 @@ class Google extends SocialMediaApi {
         return $this->service->people->listPeople('me', 'visible');
     }
 
+    public function getName() {
+        $this->loadProfile();
+        return $this->profile->getName()->getGivenName()
+          . ' ' . $this->profile->getName()->getFamilyName();
+    }
+
+    public function getScreenName() {
+        return '';
+    }
+
     public function getFriendIDs() {
         $friends = $this->getFriends();
         $ids = [];
@@ -140,14 +162,38 @@ class Google extends SocialMediaApi {
         return $ids;
     }
 
-    public static function renderLinks() {
-        $settings = Configuration::get('social.google');
-        if (!empty($settings['like'])) {
-            JS::add('https://apis.google.com/js/platform.js', true);
-            $output = '<g:plusone size="medium" annotation="none"></g:plusone>';
+    public static function renderLike() {
+        JS::add('https://apis.google.com/js/platform.js', true);
+        return '<div class="g-plusone" ' . self::getLayout() . '></div>';
+    }
 
-            return $output;
+    public static function renderShare($url) {
+        JS::add('https://apis.google.com/js/platform.js', true);
+        return '<div class="g-plus" ' . self::getLayout() . ' data-action="share" data-href="' . $url . '"></div>';
+    }
+
+    public static function renderFollow() {
+        if ($url = Configuration::get('social.google.url')) {
+            JS::add('https://apis.google.com/js/platform.js', true);
+            return '<div class="g-follow" ' . self::getLayout() . ' data-href="' . $url . '" data-rel="publisher"></div>';
         }
+    }
+
+    protected static function getLayout() {
+        $count = Configuration::get('social.share_count');
+        switch ($count) {
+            case SocialMediaApi::COUNT_HORIZONTAL:
+                $layout = 'data-annotation="bubble"';
+                break;
+            case SocialMediaApi::COUNT_VERTICAL:
+                $layout = 'data-annotation="vertical-bubble"';
+                break;
+            case SocialMediaApi::COUNT_NONE:
+            default:
+                $layout = 'data-annotation="none" data-height="20"';
+                break;
+        }
+        return $layout;
     }
 
     public static function loginButton($authorize = false) {
@@ -157,5 +203,8 @@ class Google extends SocialMediaApi {
         JS::startup('lightning.social.initLogin()');
 
         return '<span class="social-signin google"><i class="fa fa-google"></i><span> Sign in with Google</span></span>';
+    }
+
+    public function share($text, $settings = []) {
     }
 }

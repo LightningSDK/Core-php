@@ -12,7 +12,7 @@ class HTML5 {
     public static function initDisplay() {
         static $inited = false;
         if (!$inited) {
-            JS::add('/js/video-js.min.js', false);
+            JS::add('/js/video.min.js', false);
             JS::startup('videojs.options.flash.swf = "/swf/video-js.swf"');
             CSS::add('/css/video-js.min.css');
             $inited = true;
@@ -32,5 +32,16 @@ class HTML5 {
         self::initDisplay();
         JS::set('videos.' . $video_id, $settings);
         JS::startup('lightning.video.init()');
+    }
+
+    /**
+     * Render the default video container.
+     *
+     * @param $video_id
+     * @param array $settings
+     * @return string
+     */
+    public static function render($video_id, $settings = []) {
+        return '<div id="video_' . $video_id . '" class="' . (!empty($settings['widescreen']) ? 'widescreen' : '') . '"></div>';
     }
 }

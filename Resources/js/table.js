@@ -4,12 +4,20 @@
  */
 lightning.table = {
     init: function() {
-        $('.add_image').click(lightning.table.clickAddImage);
+        $('.add_image').on('click', lightning.table.clickAddImage);
         $('.linked_images').on('click', '.remove', lightning.table.removeLinkedImage);
-        self = this;
+        var self = this;
         var search = $('#table_search');
         search.keyup(function(){
             self.search(search);
+        });
+
+        // Initialize the link field buttons.
+        $('table.table_form_table').on('click', '.remove-link', function(e){
+            var element = $(e.target);
+            self.removeLink(element.data('link'), element.data('link-item'));
+        }).on('click', '.add-link', function(e){
+            self.addLink($(e.target).data('link'));
         });
     },
 
@@ -102,11 +110,23 @@ lightning.table = {
         var list = $('#' + link + '_list');
         var new_link = list.val();
         var new_link_name = $('#'+link+'_list option:selected').text();
-        // TODO: This shouldn't be removed, but just check if it's already there.
-        this.removeLink(link, new_link);
+
+        // Make sure it's a valid selection.
+        if (new_link == 0 && new_link_name == '') {
+            return;
+        }
+
+        // Make sure it's not already in the list.
+        var regex = new RegExp('(^|,)' + new_link + ',');
         var input_array = $('#'+link+'_input_array');
-        input_array.val(input_array.val() + new_link + ',');
-        $('#'+link+'_list_container').append($('<div class="' + link + '_box table_link_box_selected" id="' + link + '_box_' + new_link + '">' + new_link_name + ' <a href="#" onclick="javascript:lightning.table.removeLink(\'' + link + '\', ' + new_link + ');return false;">X</a></div>'));
+        if (input_array.val().match(regex) == null) {
+            input_array.val(input_array.val() + new_link + ',');
+            $('#'+link+'_list_container').append($('<div class="' + link + '_box table_link_box_selected" id="' + link + '_box_' + new_link + '">' + new_link_name + ' <i class="remove-link fa fa-close" data-link="' + link + '" data-link-item="' + new_link + '"></i></div>'));
+            var processes = lightning.get('table.linkProcess');
+            for (var i in processes) {
+                lightning.getMethodReference(processes[i])();
+            }
+        }
     },
 
     /**
@@ -117,7 +137,7 @@ lightning.table = {
      * @param {integer} link_id
      *   The id of the link item.
      */
-    removeLink: function(link,link_id) {
+    removeLink: function(link, link_id) {
         $('#'+link+'_box_'+link_id).remove();
         var input_array = $('#' + link + '_input_array');
         var new_links = input_array.val();
@@ -203,7 +223,7 @@ lightning.table = {
             $('#list_' + field).append('<span id="' + field + '_' + i + '" >' + list[i] + '</span>');
             count++;
         }
-        $('#list_' + field + ' span').click(lightning.table.setAutocompleteSelection);
+        $('#list_' + field + ' span').on('click', lightning.table.setAutocompleteSelection);
     },
 
     setAutocompleteSelection: function(event) {
@@ -260,8 +280,24 @@ lightning.table = {
         console.log(link);
         var url = $(link).attr('href');
         if ( searchStr != '' ){
-            url += '&ste='+searchStr;
+            url += '&ste=' + searchStr;
         }
         window.location = url;
     }
 };
+
+
+function reset_field_value(field) {
+    // check for ckeditor
+    if (typeof CKEDITOR.instances[field] !== "undefined") {
+        CKEDITOR.instances[field].setData(table_data.defaults[field]);
+    }
+
+    // other fields
+    else if (typeof ("#"+field).val !== "undefined") {
+        $('#'+field).val(table_data.defaults[field]);
+    }
+    else {
+        $('#'+field).html(table_data.defaults[field]);
+    }
+}

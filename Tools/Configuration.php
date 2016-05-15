@@ -54,18 +54,32 @@ class Configuration {
     }
 
     /**
+     * Merge new data into the configuration.
+     *
+     * @param array $new_data
+     *   An array of new data to merge.
+     */
+    public static function merge($new_data) {
+        self::$configuration = array_replace_recursive(self::$configuration, $new_data);
+    }
+
+    /**
      * Load the configuration from the configuration.inc.php file.
      */
     protected static function loadConfiguration() {
         if (empty(self::$configuration)) {
             foreach (self::getConfigurations() as $config_file) {
                 if (file_exists($config_file)) {
-                    self::$configuration = array_replace_recursive(
-                        self::getConfigurationData($config_file),
-                        self::$configuration
-                    );
+                    self::merge(self::getConfigurationData($config_file));
                 } else {
                     echo "not found $config_file";
+                }
+            }
+            if (!empty(self::$configuration['modules'])) {
+                foreach (self::$configuration['modules'] as $module => $settings) {
+                    if (file_exists(HOME_PATH . '/Modules/' . $module . '/config.php')) {
+                        self::merge(include HOME_PATH . '/Modules/' . $module . '/config.php');
+                    }
                 }
             }
         }

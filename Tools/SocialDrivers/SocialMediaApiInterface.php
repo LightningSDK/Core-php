@@ -8,6 +8,7 @@ interface SocialMediaApiInterface {
     public function setupUser();
 
     public function setToken($token);
+    public function getToken();
 
     public function storeSessionData();
 
@@ -19,4 +20,7 @@ interface SocialMediaApiInterface {
     public function getSocialId();
     public function activateUser();
     public function afterLogin();
+    public function getName();
+    public function getScreenName();
+    public function share($text, $settings = []);
 }

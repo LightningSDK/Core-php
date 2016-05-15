@@ -44,6 +44,8 @@ class User extends Object {
     const PRIMARY_KEY = 'user_id';
     const TABLE = 'user';
 
+    protected $permissions;
+
     /**
      * Load a user by their email.
      *
@@ -119,7 +121,8 @@ class User extends Object {
      *   Whether the current user is impersonated.
      */
     public function isImpersonating() {
-        return (boolean) Session::getInstance()->getSetting('impersonate');
+        $session = Session::getInstance(true, false);
+        return $session && !empty($session->content->impersonate);
     }
 
     /**
@@ -140,7 +143,7 @@ class User extends Object {
      *   Whether the user is a site admin.
      */
     public function isAdmin() {
-        return $this->hasPermission(Permissions::ALL);
+        return !$this->isAnonymous() && $this->hasPermission(Permissions::ALL);
     }
 
     /**
@@ -306,13 +309,15 @@ class User extends Object {
      *
      * @return User
      */
-    public static function addUser($email, $options = array(), $update = array()) {
+    public static function addUser($email, $options = [], $update = []) {
         $user_data = array();
         $user_data['email'] = strtolower($email);
+        static::parseNames($options);
+        static::parseNames($update);
         $db = Database::getInstance();
         if ($user = $db->selectRow('user', $user_data)) {
             if ($update) {
-                $db->update('user', $user_data, $update);
+                $db->update('user', $update, $user_data);
             }
             $user_id = $user['user_id'];
             return static::loadById($user_id);
@@ -400,11 +405,12 @@ class User extends Object {
      *   The new user's ID.
      */
     protected static function insertUser($email, $pass = NULL, $first_name = '', $last_name = '') {
+        $time = time();
         $user_details = array(
             'email' => Scrub::email(strtolower($email)),
             'first' => $first_name,
             'last' => $last_name,
-            'created' => Time::today(),
+            'created' => $time,
             'confirmed' => static::requiresConfirmation() ? static::UNCONFIRMED : static::CONFIRMED,
             // TODO: Need to get the referrer id.
             'referrer' => 0,
@@ -413,7 +419,7 @@ class User extends Object {
             $salt = static::getSalt();
             $user_details['password'] = static::passHash($pass, $salt);
             $user_details['salt'] = bin2hex($salt);
-            $user_details['registered'] = Time::today();
+            $user_details['registered'] = $time;
         }
         return Database::getInstance()->insert('user', $user_details);
     }
@@ -509,8 +515,32 @@ class User extends Object {
 
     }
 
+    /**
+     * Return the combined first and last names.
+     *
+     * @return string
+     */
     public function fullName() {
         return $this->first . ' ' . $this->last;
+    }
+
+    /**
+     * Replace input data 'full_name' field with 'first' and 'last' fields.
+     * If the full_name field is not present, the array will not be modified.
+     * If the full_name field is present, it will be removed after inserting first and last names.
+     *
+     * @param array $data
+     *   The user input data.
+     */
+    protected static function parseNames(&$data) {
+        if (!empty($data['full_name'])) {
+            $name = explode(' ', $data['full_name'], 2);
+            $data['first'] = $name[0];
+            if (!empty($name[1])) {
+                $data['last'] = $name[1];
+            }
+            unset($data['full_name']);
+        }
     }
 
     /**
@@ -805,6 +835,41 @@ class User extends Object {
         Database::getInstance()->delete('user_role', ['user_id' => $this->id, 'role_id' => $role_id]);
     }
 
+    public function loadPermissions($force = false) {
+        if (!$force && isset($this->permissions)) {
+            return;
+        }
+        $this->permissions = Database::getInstance()->selectColumnQuery([
+            'from' => 'user',
+            'join' => array(
+                array(
+                    'LEFT JOIN',
+                    'user_role',
+                    'ON user_role.user_id = user.user_id'
+                ),
+                array(
+                    'LEFT JOIN',
+                    'role_permission',
+                    'ON role_permission.role_id=user_role.role_id',
+                ),
+                array(
+                    'LEFT JOIN',
+                    'permission',
+                    'ON role_permission.permission_id=permission.permission_id',
+                ),
+                array(
+                    'JOIN',
+                    'role',
+                    'ON  user_role.role_id=role.role_id',
+                )
+            ),
+            'where' => array(
+                array('user.user_id' => $this->id),
+            ),
+            'select' => ['permission.permission_id', 'permission.permission_id'],
+        ]);
+    }
+
     /**
      * check if user has permission on this page
      * @param integer $permissionID
@@ -813,43 +878,8 @@ class User extends Object {
      * @return boolean
      */
     public function hasPermission($permissionID) {
-        $permissions = Database::getInstance()->selectAll(
-            array(
-                'from' => 'user',
-                'join' => array(
-                    array(
-                        'LEFT JOIN',
-                        'user_role',
-                        'ON user_role.user_id = user.user_id'
-                    ),
-                    array(
-                        'LEFT JOIN',
-                        'role_permission',
-                        'ON role_permission.role_id=user_role.role_id',
-                    ),
-                    array(
-                        'LEFT JOIN',
-                        'permission',
-                        'ON role_permission.permission_id=permission.permission_id',
-                    ),
-                    array(
-                        'JOIN',
-                        'role',
-                        'ON  user_role.role_id=role.role_id',
-                    )
-                )
-            ),
-            array(
-                array('user.user_id' => $this->id),
-                '#OR' => array(
-                    array('permission.permission_id' => $permissionID),
-                    array('permission.permission_id' => Permissions::ALL)
-                )
-            ),
-            array('user.user_id', 'role.name', 'permission.name')
-        );
-
-        return (count($permissions) > 0 ) ?  TRUE :  FALSE;
+        $this->loadPermissions();
+        return !empty($this->permissions[$permissionID]) || !empty($this->permissions[Permissions::ALL]);
     }
 
     public function initSocialMediaApi() {

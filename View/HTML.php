@@ -25,4 +25,12 @@ class HTML {
 
         return $attribute_string;
     }
+
+    public static function getFirstImage($html) {
+        preg_match_all('/<img\s+.*?src=[\"\']?([^\"\' >]*)[\"\']?[^>]*>/i', $html, $matches, PREG_SET_ORDER);
+        if(!empty($matches[0][1])) {
+            return (file_exists(HOME_PATH.$matches[0][1])) ? $matches[0][1] : NULL;
+        }
+        return null;
+    }
 }

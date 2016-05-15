@@ -10,8 +10,10 @@ class Navigation {
      *   The page to redirect to. If left null, it will redirect to the current page.
      * @param array $query
      *   Additional query parameters to add.
+     * @param boolean $permanent
+     *   If set to true, this will be a 301 permanent redirect.
      */
-    public static function redirect($url = null, $query = []) {
+    public static function redirect($url = null, $query = [], $permanent = false) {
         if (empty($url)) {
             $url = '/' . Request::getLocation();
         }
@@ -20,6 +22,9 @@ class Navigation {
         }
         Messenger::storeInSession();
         Output::sendCookies();
+        if ($permanent) {
+            http_response_code(301);
+        }
         header('Location: ' . $url);
         exit;
     }

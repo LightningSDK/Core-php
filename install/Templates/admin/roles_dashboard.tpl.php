@@ -18,9 +18,9 @@ use Lightning\Tools\Form;
         <h3>Roles</h3>
         <table>
             <tr><td>id</td><td>name</td></tr>
-            <? foreach ($roles as $role): ?>
+            <?php foreach ($roles as $role): ?>
                 <tr><td><?=$role['role_id'];?></td><td><?=$role['name'];?></td></tr>
-            <? endforeach; ?>
+            <?php endforeach; ?>
         </table>
         <a href="/admin/roles"class="button small">Edit Roles</a>
     </div>
@@ -28,9 +28,9 @@ use Lightning\Tools\Form;
         <h3>Permissions</h3>
         <table>
             <tr><td>id</td><td>name</td></tr>
-            <? foreach ($permissions as $permission): ?>
+            <?php foreach ($permissions as $permission): ?>
                 <tr><td><?=$permission['permission_id'];?></td><td><?=$permission['name'];?></td></tr>
-            <? endforeach; ?>
+            <?php endforeach; ?>
         </table>
         <a href="/admin/permissions" class="button small">Edit permissions</a>
     </div>

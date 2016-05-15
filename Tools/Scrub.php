@@ -16,7 +16,7 @@ class Scrub {
     /**
      * Basic html elements allowed in HTML fields by users.
      */
-    const SCRUB_BASIC_HTML = 'p,b,a[href|name|target|title],i,strong,em,img[src|width|height],table[cellpadding|cellspacing|border],tr,td,tbody,hr,h1,h2,h3,h4,h5,h6,*[id|name|align|style|alt|class],sup,sub,ul,ol,li,span,font[color|size],div,br,blockquote,code,pre';
+    const SCRUB_BASIC_HTML = 'p,b,a[href|name|target|title],i,u,strong,small,em,img[src|width|height],table[cellpadding|cellspacing|border],tr,td,tbody,thead,tfoot,hr,h1,h2,h3,h4,h5,h6,*[id|name|align|style|alt|class],sup,sub,ul,ol,li,span,font[color|size],div,br,blockquote,code,pre';
     /**
      * Advanced html elements allowed in HTML primarily by admins.
      *
@@ -27,7 +27,7 @@ class Scrub {
     /**
      * Allowed CSS rules.
      */
-    const SCRUB_BASIC_CSS = 'height,width,color,background-color,vertical-align,text-align,margin,margin-left,margin-right,margin-top,margin-bottom,padding,padding-left,margin-right,margin-top,margin-bottom,border,border-left,border-right,border-top,border-bottom,float,font-size';
+    const SCRUB_BASIC_CSS = 'height,width,color,background-color,vertical-align,text-align,margin,margin-left,margin-right,margin-top,margin-bottom,padding,padding-left,margin-right,margin-top,margin-bottom,border,border-left,border-right,border-top,border-bottom,float,font-size,display';
 
     /**
      * Convert text to HTML safe output.
@@ -65,8 +65,10 @@ class Scrub {
      *   The url safe string.
      */
     public static function url($value) {
-        $url = preg_replace("/(&[#a-z0-9]+;)/i", "_", $value);
-        $url = preg_replace("/[^a-z0-9]/i", "_", $url);
+        $url = preg_replace('/[^a-z0-9-_ .]/i', '', $value);
+        $url = preg_replace('/[^a-z0-9-_.]/i', '-', $url);
+        $url = trim($url, '-_');
+        $url = preg_replace('/-+/', '-', $url);
         return $url;
     }
 
@@ -249,6 +251,7 @@ class Scrub {
             return $html;
         } elseif ($trusted) {
             $config->set('CSS.Trusted', true);
+            $config->set('CSS.AllowTricky', true);
             $config->set('HTML.Trusted', true);
             $config->set('Attr.EnableID', true);
             $config->set('Attr.AllowedFrameTargets', array('_blank'));
@@ -264,10 +267,10 @@ class Scrub {
             }
         }
 
-        if (empty($allowed_css) || $allowed_css[0] == '.') {
+        if (!empty($allowed_css) && $allowed_css[0] == '.') {
             $allowed_css = self::SCRUB_BASIC_CSS . ',' . substr($allowed_css, 1);
         }
-        elseif ($allowed_css == '') {
+        elseif (empty($allowed_css)) {
             $allowed_css = self::SCRUB_BASIC_CSS;
         }
 

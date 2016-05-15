@@ -5,22 +5,36 @@
 
 namespace Lightning\Pages;
 
-use Lightning\Tools\CKEditor;
+use DOMDocument;
 use Lightning\Tools\Configuration;
-use Lightning\Tools\Database;
 use Lightning\Tools\Output;
 use Lightning\Tools\Request;
 use Lightning\Tools\Scrub;
 use Lightning\Tools\Template;
 use Lightning\Tools\ClientUser;
 use Lightning\View\Field\BasicHTML;
+use Lightning\View\HTML;
+use Lightning\View\HTMLEditor\HTMLEditor;
 use Lightning\View\JS;
 use Lightning\View\Page as PageView;
+use Lightning\Model\Page as PageModel;
+use Lightning\View\Text;
+use Lightning\View\Video\YouTube;
 
 class Page extends PageView {
 
+    /**
+     * Whether this page was just created and should be inserted as a new page.
+     *
+     * @var boolean
+     */
     protected $new = false;
 
+    /**
+     * Page content from the database.
+     *
+     * @var array
+     */
     protected $fullPage;
 
     protected function hasAccess() {
@@ -29,11 +43,17 @@ class Page extends PageView {
 
     public function get() {
         $request = Request::getLocation();
-        $content_locator = empty($request) ? 'index' : Request::getFromURL('/(.*)\.html$/') ?: '404';
+        if (empty($request) || $request == 'index') {
+            $content_locator = 'index';
+            $this->menuContext = 'index';
+        } else {
+            $content_locator = Request::getFromURL('/(.*)\.html$/') ?: '404';
+        }
 
         // LOAD PAGE DETAILS
-        if ($this->fullPage = $this->loadPage($content_locator)) {
+        if ($this->fullPage = PageModel::loadByUrl($content_locator)) {
             header('HTTP/1.0 200 OK');
+            $this->menuContext = $this->fullPage['menu_context'];
             if (Configuration::get('page.modification_date') && $this->fullPage['last_update'] > 0) {
                 header("Last-Modified: ".gmdate("D, d M Y H:i:s", $this->fullPage['last_update'])." GMT");
             }
@@ -45,9 +65,9 @@ class Page extends PageView {
             $this->fullPage['body'] = 'This is your new page.';
             $this->fullPage['layout'] = 0;
             $this->fullPage['site_map'] = 1;
-            CKEditor::init();
+            HTMLEditor::init();
             JS::startup('lightning.page.edit();');
-        } elseif ($this->fullPage = $this->loadPage('404')) {
+        } elseif ($this->fullPage = PageModel::loadByUrl('404')) {
             http_response_code(404);
         } else {
             Output::http(404);
@@ -65,22 +85,27 @@ class Page extends PageView {
 
         // Determine if the user can edit this page.
         if ($user->isAdmin()) {
-            $this->fullPage['url'] = Request::getFromURL('/(.*)\.html$/');
-            if (!empty($this->fullPage['url'])) {
-                JS::set('page.source', $this->fullPage['body']);
-                $template->set('editable', $user->isAdmin());
+            if (empty($this->fullPage['url']) || $this->fullPage['url'] == '404') {
+                $this->fullPage['url'] = Request::getFromURL('/(.*)\.html$/') ?: 'index';
             }
+            JS::set('page.source', $this->fullPage['body']);
+            $template->set('editable', true);
         }
 
         // Set the page template.
         $template->set('content', 'page');
 
         // PREPARE FORM DATA CONTENTS
-        foreach (array('title', 'keywords', 'description') as $meta_data) {
-            $this->fullPage[$meta_data] = Scrub::toHTML($this->fullPage[$meta_data]);
-            if (!empty($this->fullPage[$meta_data])) {
-                Configuration::set('page_' . $meta_data, str_replace("*", Configuration::get('page_' . $meta_data), $this->fullPage[$meta_data]));
+        foreach (array('title', 'keywords', 'description') as $field) {
+            if (!empty($this->fullPage[$field])) {
+                $this->setMeta($field, $this->fullPage[$field]);
             }
+        }
+        if ($image = HTML::getFirstImage($this->fullPage['body'])) {
+            $this->setMeta('image', $image);
+        }
+        if (empty($this->fullPage['description'])) {
+            $this->setMeta('description', Text::shorten($this->fullPage['body'], 500));
         }
 
         if ($this->fullPage['url'] == "" && isset($_GET['page'])) {
@@ -102,27 +127,36 @@ class Page extends PageView {
     protected function renderContent($content) {
         $matches = array();
         preg_match_all('|{{.*}}|', $content, $matches);
-        foreach ($matches as $match) {
+        foreach ($matches[0] as $match) {
             if (!empty($match)) {
-                $match_clean = trim($match[0], '{} ');
-                $match_clean = explode('=', $match_clean);
-                switch ($match_clean[0]) {
+                // Convert to HTML and parse it.
+                $match_html = '<' . trim($match, '{} ') . '/>';
+                $dom = new DOMDocument();
+                libxml_use_internal_errors(true);
+                $dom->loadHTML($match_html);
+                $element = $dom->getElementsByTagName('body')->item(0)->childNodes->item(0);
+                $output = '';
+                switch ($element->nodeName) {
                     case 'template':
                         $sub_template = new Template();
-                        $content = str_replace(
-                            $match[0],
-                            $sub_template->render($match_clean[1], true),
-                            $content
-                        );
+                        $output = $sub_template->render($element->getAttribute('name'), true);
                         break;
+                    case 'youtube':
+                        $output = YouTube::render($element->getAttribute('id'), [
+                            'autoplay' => $element->getAttribute('autoplay') ? true : false,
+                        ]);
+                        if ($element->getAttribute('flex')) {
+                            $output = '<div class="flex-video ' . ($element->getAttribute('widescreen') ? 'widescreen' : '') . '">' . $output . '</div>';
+                        }
                 }
+                $content = str_replace(
+                    $match,
+                    $output,
+                    $content
+                );
             }
         }
         return $content;
-    }
-
-    public function loadPage($content_locator) {
-        return Database::getInstance()->selectRow('page', array('url' => array('LIKE', $content_locator)));
     }
 
     public function getNew() {
@@ -139,7 +173,7 @@ class Page extends PageView {
         $user = ClientUser::getInstance();
 
         if (!$user->isAdmin()) {
-            return $this->get();
+            Output::accessDenied();
         }
 
         $page_id = Request::post('page_id', 'int');
@@ -159,16 +193,15 @@ class Page extends PageView {
         );
 
         // Save the page.
-        if ($page_id != 0) {
-            Database::getInstance()->update('page', $new_values, array('page_id' => $page_id));
-        } else {
-            $page_id = Database::getInstance()->insert('page', $new_values);
-        }
+        $update_values = $new_values;
+        unset($update_values['url']);
+        PageModel::insertOrUpdate($new_values, $update_values);
 
         $output = array();
         $output['url'] = $new_values['url'];
         $output['page_id'] = $page_id;
         $output['title'] = $title;
+        $output['body_rendered'] = $this->renderContent($new_values['body']);
         Output::json($output);
     }
 

@@ -12,6 +12,7 @@ class User extends Schema {
         return array(
             'user_id' => $this->autoincrement(),
             'email' => $this->varchar(128),
+            'alt_email' => $this->varchar(128),
             'password' => $this->char(64),
             'salt' => $this->char(64),
             'first' => $this->varchar(64),

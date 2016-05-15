@@ -4,7 +4,6 @@ namespace Lightning\Pages\Mailing;
 
 use Lightning\Pages\Table;
 use Lightning\Tools\ClientUser;
-use Lightning\View\JS;
 
 class Templates extends Table {
     protected $table = 'message_template';
@@ -12,6 +11,9 @@ class Templates extends Table {
         'body' => array(
             'type' => 'html',
             'full_page' => true,
+            'editor' => 'full',
+            'upload' => true,
+            'url' => 'full',
         )
     );
 

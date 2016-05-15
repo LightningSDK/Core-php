@@ -16,6 +16,10 @@ use Lightning\Tools\Request;
  * @package Lightning\CLI
  */
 class CLI {
+
+    protected $flags = [];
+    protected $parameters = [];
+
     /**
      * Create the object and set the logger.
      */
@@ -31,11 +35,75 @@ class CLI {
         $func = Request::convertFunctionName('execute', $argv[2]);
         if (method_exists($this, $func)) {
             $args = count($argv) > 3 ? array_slice($argv, 3) : [];
+            $this->parseArgs($args);
             call_user_func_array([$this, $func], $args);
         }
         else {
             $this->out('No handler found.');
         }
+    }
+
+    /**
+     * Parse the incoming CLI arguments into flags and parameters.
+     *
+     * @param array $args
+     *   The arguments from the command line, excluding those already processed.
+     *
+     * The following formats will be parsed:
+     *   -x123 will set parameter x = 123
+     *   -x 123 will set parameter x = 123
+     *   --var 123 will set param var = 123
+     *   --var will set flag var = true
+     */
+    protected function parseArgs($args) {
+        foreach ($args as $key => $arg) {
+            if (substr($arg, 0, 2) == '--') {
+                echo '.--.';
+                $next_arg = $args[$key + 1];
+                echo 'next=' . $next_arg;
+                if ($next_arg[0] == '-') {
+                    $this->flags[substr($arg, 2)] = true;
+                } else {
+                    $this->parameters[substr($arg, 2)] = $next_arg;
+                    next($args);
+                }
+            } elseif ($arg[0] == '-') {
+                echo '.-.';
+                if (strlen($arg) > 2) {
+                    $this->parameters[$arg[1]] = substr($arg, 2);
+                } else {
+                    // Get the value form the parameter after
+                    $this->parameters[$arg[1]] = $args[$key + 1];
+                    next($args);
+                }
+            }
+        }
+    }
+
+    /**
+     * Get a param value from the input.
+     *
+     * @param array|string $params
+     *   A param or list of params in the order they should be checked
+     * @param mixed $default
+     *   The default value if none is set.
+     *
+     * @return mixed
+     *   The param value
+     */
+    protected function get($params, $default = null) {
+        if (is_array($params)) {
+            foreach ($params as $p) {
+                if (isset($this->parameters[$p])) {
+                    return $this->parameters[$p];
+                }
+            }
+            return $default;
+        }
+        if (isset($this->parameters[$params])) {
+            return $this->parameters[$params];
+        }
+        return $default;
     }
 
     /**

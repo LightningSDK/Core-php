@@ -27,16 +27,10 @@ module.exports = function(grunt) {
             },
             vendor: {
                 files: {
-                    '../build/js/lightning.min.js': ['init.js', 'js/*.js'],
-                    '../build/js/foundation.min.js': [
-                        '../Vendor/foundation/js/foundation/foundation.js',
-                        '../Vendor/foundation/js/foundation/foundation.*.js'
-                    ],
-                    '../build/js/modernizr.min.js': '../Vendor/foundation/vendor/modernizr/modernizr.js',
-                    '../build/js/placeholder.min.js': '../Vendor/foundation/vendor/jquery-placeholder/jquery.placeholder.js',
-                    '../build/js/fastclick.min.js': '../Vendor/foundation/vendor/fastclick/lib/fastclick.js',
-                    '../build/js/jquery.cookie.min.js': '../Vendor/foundation/vendor/jquery.cookie/jquery.cookie.js',
-                    '../build/js/jquery.min.js': '../Vendor/foundation/vendor/jquery/dist/jquery.js'
+                    '../build/js-res/lightning.min.js': ['init.js', 'js/*.js'],
+                    '../build/js-res/modernizr.min.js': '../Vendor/foundation/vendor/modernizr/modernizr.js',
+                    '../build/js-res/placeholder.min.js': '../Vendor/foundation/vendor/jquery-placeholder/jquery.placeholder.js',
+                    '../build/js-res/fastclick.min.js': '../Vendor/foundation/vendor/fastclick/lib/fastclick.js',
                 }
             }
         },
@@ -46,26 +40,47 @@ module.exports = function(grunt) {
                     {
                         src: [
                             '../Vendor/chartjs/Chart.min.js',
-                            '../Vendor/build/videojs/video-js.min.js'
+                            '../Vendor/videojs/build/temp/video.min.js',
+                            '../Vendor/jsoneditor/dist/jsoneditor.min.js'
                         ],
                         dest: '../build/js',
                         expand: true,
                         flatten: true,
-                        filter:'isFile'
+                        filter: 'isFile'
                     },
                     {
-                        src: '../Vendor/Font-Awesome/css/font-awesome.min.css',
+                        src: [
+                            '../Vendor/foundation/js/foundation/*',
+                            '../Vendor/jquery/dist/jquery.js'
+                        ],
+                        dest: '../build/js-res',
+                        expand: true,
+                        flatten: true,
+                        filter: 'isFile'
+                    },
+                    {
+                        src: [
+                            '../Vendor/Font-Awesome/css/font-awesome.min.css',
+                            '../Vendor/videojs/build/temp/video-js.min.css',
+                        ],
                         dest: '../build/css',
                         expand: true,
                         flatten: true,
-                        filter:'isFile'
+                        filter: 'isFile'
                     },
                     {
                         src: '../Vendor/Font-Awesome/fonts/*',
                         dest: '../build/fonts',
                         expand: true,
                         flatten: true,
-                        filter:'isFile'
+                        filter: 'isFile'
+                    },
+                    {
+                        src: '../Vendor/videojs/build/temp/video-js.swf',
+                        dest: '../build/swf',
+                        expand: true,
+                        flatten: true,
+                        filter: 'isFile'
                     }
                 ]
             }

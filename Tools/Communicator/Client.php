@@ -31,20 +31,20 @@ class Client extends RestClient {
      * @param $var
      * @return null
      */
-    function get($var) {
+    public function get($var) {
         if (!empty($this->results['data'])) {
             return Data::getFromPath($var, $this->results['data']);
         }
     }
 
-    function getAll() {
+    public function getAll() {
         return $this->results['data'];
     }
 
     /**
      * If there was an action called at execution time, this will show it.
      */
-    function print_last_action() {
+    public function print_last_action() {
         if ($this->last_action) { echo $this->last_action; }
     }
 
@@ -53,7 +53,7 @@ class Client extends RestClient {
      *
      * @param $action
      */
-    function action($action) {
+    public function action($action) {
         if (!isset($this->vars)) {
             $this->vars['actions'] = [];
         }

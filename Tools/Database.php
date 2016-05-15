@@ -37,7 +37,7 @@ class Database extends Singleton {
      *
      * @var array
      */
-    private $history = array();
+    private $history = [];
 
     /**
      * The result of the last query.
@@ -58,17 +58,17 @@ class Database extends Singleton {
      *
      * @var float
      */
-    private $end1;
+    private $end_mysql;
 
     /**
      * The php execution end time.
      *
      * @var float
      */
-    private $end2;
+    private $end_php;
 
     /**
-     * The last query executed. If it's the same it does not need to be reprepared.
+     * The last query executed. If it's the same it does not need to be re-prepared.
      *
      * @var string
      */
@@ -159,7 +159,7 @@ class Database extends Singleton {
      *   The database object.
      */
     public static function createInstance() {
-        return new self(Configuration::get('database'));
+        return new static(Configuration::get('database'));
     }
 
     /**
@@ -207,7 +207,7 @@ class Database extends Singleton {
      *   When a mysql error occurs.
      */
     public function errorHandler($error, $sql) {
-        $errors = array();
+        $errors = [];
 
         // Add a header.
         $errors[] = "MYSQL ERROR ($error[0]:$error[1]): $error[2]";
@@ -250,11 +250,11 @@ class Database extends Singleton {
      *   Add a query to the sql log.
      */
     public function log($sql, $vars, $time) {
-        $this->history[] = array(
+        $this->history[] = [
             'query' => $sql,
             'vars' => $vars,
             'time' => $time,
-        );
+        ];
     }
 
     /**
@@ -268,16 +268,16 @@ class Database extends Singleton {
      * A query is done, add up the times.
      */
     public function timerQueryEnd() {
-        $this->end1 = microtime(TRUE);
+        $this->end_mysql = microtime(TRUE);
     }
 
     /**
      * Stop the timer and add up the times.
      */
     public function timerEnd() {
-        $this->end2 = microtime(TRUE);
-        $this->mysql_time += $this->end1-$this->start;
-        $this->php_time += $this->end2-$this->start;
+        $this->end_php = microtime(TRUE);
+        $this->mysql_time += $this->end_mysql - $this->start;
+        $this->php_time += $this->end_php - $this->start;
     }
 
     /**
@@ -293,11 +293,11 @@ class Database extends Singleton {
      * Output a time report
      */
     public function timeReport() {
-        return array(
-            "Total Queries: {$this->query_count}",
-            "Total SQL Time: {$this->mysql_time}",
-            "Total PHP Time: {$this->php_time}",
-        );
+        return [
+            'Total MySQL Queries: ' . $this->query_count,
+            'Total MySQL Time: ' . number_format($this->mysql_time, 4),
+            'Total MySQL PHP Time: ' . number_format($this->php_time, 4),
+        ];
     }
 
     /**
@@ -308,21 +308,18 @@ class Database extends Singleton {
      * @param array $vars
      *   A list of replacement variables.
      */
-    private function _query($query, $vars = array()) {
+    private function _query($query, $vars = []) {
         if ($this->readOnly) {
             if (!preg_match("/^SELECT /i", $query)) {
                 return;
             }
         }
         $this->query_count ++;
+        $this->timerStart();
+        $this->__query_execute($query, $vars);
+        $this->timerQueryEnd();
         if ($this->verbose) {
-            $this->timerStart();
-            $this->__query_execute($query, $vars);
-            $this->timerQueryEnd();
-            $this->log($query, $vars, $this->end1 - $this->start);
-        }
-        else {
-            $this->__query_execute($query, $vars);
+            $this->log($query, $vars, $this->end_mysql - $this->start);
         }
         if (!$this->result) {
             $this->errorHandler($this->connection->errorInfo(), $query);
@@ -346,7 +343,7 @@ class Database extends Singleton {
             $this->last_query = $query;
             $this->result = $this->connection->prepare($query);
         }
-        // Execute the query with subsitutions.
+        // Execute the query with substitutions.
         $this->result->execute($vars);
     }
 
@@ -360,14 +357,14 @@ class Database extends Singleton {
      *
      * @return PDOStatement
      */
-    public function query($query, $vars = array()) {
+    public function query($query, $vars = []) {
         $this->_query($query, $vars);
         $this->timerEnd();
         return $this->result;
     }
 
     public function queryArray($query) {
-        $values = array();
+        $values = [];
         $parsed = $this->parseQuery($query, $values);
         $this->query($parsed, $values);
         $this->timerEnd();
@@ -405,11 +402,11 @@ class Database extends Singleton {
      * @return integer
      *   How many matching rows were found.
      */
-    public function count($table, $where = array(), $count_field = '*', $final = '') {
+    public function count($table, $where = [], $count_field = '*', $final = '') {
         if (!empty($table['limit'])) {
             unset($table['limit']);
         }
-        return (integer) $this->selectField(array('count' => array('expression' => 'COUNT(' . $count_field . ')')), $table, $where, $final);
+        return (integer) $this->selectField(['count' => ['expression' => 'COUNT(' . $count_field . ')']], $table, $where, $final);
     }
 
     public function countQuery($query, $subquery = false) {
@@ -441,9 +438,9 @@ class Database extends Singleton {
      * @return array
      *   A list of counts keyed by the $key column.
      */
-    public function countKeyed($table, $key, $where = array(), $order = '') {
-        $this->_select($table, $where, array('count' => array('expression' => 'COUNT(*)'), $key), NULL, 'GROUP BY `' . $key . '` ' . $order);
-        $results = array();
+    public function countKeyed($table, $key, $where = [], $order = '') {
+        $this->_select($table, $where, ['count' => ['expression' => 'COUNT(*)'], $key], NULL, 'GROUP BY `' . $key . '` ' . $order);
+        $results = [];
         // TODO: This is built in to PDO.
         while ($row = $this->result->fetch(PDO::FETCH_ASSOC)) {
             $results[$row[$key]] = $row['count'];
@@ -480,7 +477,7 @@ class Database extends Singleton {
      *   The number of rows updated.
      */
     public function update($table, $data, $where) {
-        $vars = array();
+        $vars = [];
         $query = 'UPDATE ' . $this->parseTable($table, $vars) . ' SET ' . $this->sqlImplode($data, $vars, ', ', true);
         if (!empty($where)) {
             $query .= ' WHERE ' . $this->sqlImplode($where, $vars, ' AND ');
@@ -504,7 +501,7 @@ class Database extends Singleton {
      *   The last inserted id.
      */
     public function insert($table, $data, $existing = FALSE) {
-        $vars = array();
+        $vars = [];
         $table = $this->parseTable($table, $vars);
         $ignore = $existing === TRUE ? 'IGNORE' : '';
         $set = $this->sqlImplode($data, $vars, ', ', true);
@@ -533,7 +530,7 @@ class Database extends Singleton {
      *   The number of entries submitted.
      */
     public function insertSets($table, $fields, $value_sets, $existing = FALSE) {
-        $vars = array();
+        $vars = [];
         $table = $this->parseTable($table, $vars);
         $ignore = $existing === TRUE ? 'IGNORE' : '';
         $field_string = '`' . implode('`,`', $fields) . '`';
@@ -578,7 +575,7 @@ class Database extends Singleton {
         $last_insert = false;
 
         // Set up the constant variables.
-        $start_vars = array();
+        $start_vars = [];
         $table = $this->parseTable($table, $start_vars);
         $ignore = $existing === TRUE ? 'IGNORE' : '';
 
@@ -593,7 +590,7 @@ class Database extends Singleton {
         $duplicate = '';
         if (is_array($existing)) {
             $duplicate .= ' ON DUPLICATE KEY UPDATE ';
-            $feilds = array();
+            $feilds = [];
             foreach ($existing as $field) {
                 $feilds[] = '`' . $field . '`=VALUES(`' . $field . '`)';
             }
@@ -601,7 +598,7 @@ class Database extends Singleton {
         }
 
         // Initialize data.
-        $vars = array();
+        $vars = [];
         $i = 0;
         $iterations_per_query = 100;
 
@@ -617,7 +614,7 @@ class Database extends Singleton {
                 $last_insert = $this->result->rowCount() == 0 ? $last_insert : $this->connection->lastInsertId();
                 // Reset the data.
                 $i = 1;
-                $vars = array();
+                $vars = [];
             }
             $vars = array_merge($vars, $combination);
         }
@@ -638,6 +635,36 @@ class Database extends Singleton {
         return 0;
     }
 
+    public function duplicateRows($table, $where = [], $update = []) {
+        $this->duplicateRowsQuery([
+            'from' => $table,
+            'where' => $where,
+            'set' => $update,
+        ]);
+    }
+
+    public function duplicateRowsQuery($query = []) {
+
+        // Copy the data to the temp table.
+        $select_query = $query;
+        unset($select_query['set']);
+        $values = [];
+        $this->query('CREATE TEMPORARY TABLE `temporary_table` AS ' . $this->parseQuery($select_query, $values), $values);
+
+        // Update the values
+        $values = [];
+        $update_query = [
+            'update' => 'temporary_table',
+            'set' => $query['set']
+        ];
+        $this->query($this->parseQuery($update_query, $values), $values);
+
+        // Copy the new values back.
+        $this->query('INSERT INTO `' . $query['from'] . '` SELECT * FROM `temporary_table`');
+
+        $this->query('DROP TEMPORARY TABLE `temporary_table`');
+    }
+
     /**
      * Delete rows from the database.
      *
@@ -650,8 +677,8 @@ class Database extends Singleton {
      *   The number of rows deleted.
      */
     public function delete($table, $where) {
-        $values = array();
-        $this->query($this->parseQuery(['from' => $table, 'where' => $where, 'DELETE'], $values, 'DELETE'), $values);
+        $values = [];
+        $this->query($this->parseQuery(['from' => $table, 'where' => $where], $values, 'DELETE'), $values);
 
         return $this->result->rowCount() ?: false;
     }
@@ -670,9 +697,9 @@ class Database extends Singleton {
      * @param string $final
      *   A final string to append to the query, such as limit and sort.
      */
-    protected function _select($table, $where = array(), $fields = array(), $limit = NULL, $final = '') {
+    protected function _select($table, $where = [], $fields = [], $limit = NULL, $final = '') {
         $fields = $this->implodeFields($fields);
-        $values = array();
+        $values = [];
         if (!empty($where) && $where = $this->sqlImplode($where, $values, ' AND ')) {
             $where = ' WHERE ' . $where;
         } else {
@@ -680,7 +707,7 @@ class Database extends Singleton {
         }
         $limit = is_array($limit) ? ' LIMIT ' . $limit[0] . ', ' . $limit[1] . ' '
             : !empty($limit) ? ' LIMIT ' . intval($limit) : '';
-        $table_values = array();
+        $table_values = [];
         $table = $this->parseTable($table, $table_values);
         $this->query('SELECT ' . $fields . ' FROM ' . $table . $where . ' ' . $final . $limit, array_merge($table_values, $values));
     }
@@ -765,6 +792,9 @@ class Database extends Singleton {
      *
      * @return string
      *   The rendered query portion.
+     *
+     * @throws Exception
+     *   On parse error.
      */
     protected function parseJoin($joins, &$values) {
         // If the first element of join is not an array, it's an actual join.
@@ -792,7 +822,7 @@ class Database extends Singleton {
                              'inner_join' => ' INNER JOIN ',
                         ] as $type => $format) {
                     // Rewrite old queries for backwards compatibility.
-                    if (!empty($join[$format])) {
+                    if (!empty($join[$format]) && is_array($join[$format])) {
                         $output .= $this->parseJoin($join, $values);
                     }
                     if (!empty($join[$type])) {
@@ -802,6 +832,9 @@ class Database extends Singleton {
                 }
 
                 if (!empty($join['on'])) {
+                    if (!is_array($join['on'])) {
+                        throw new Exception('Expecting array!');
+                    }
                     $output .= ' ON ' . $this->sqlImplode($join['on'], $values, ' AND ');
                 }
                 elseif (!empty($join['using'])) {
@@ -879,14 +912,14 @@ class Database extends Singleton {
      * @return PDOStatement
      *   The query results.
      */
-    public function select($table, $where = array(), $fields = array(), $final = '') {
+    public function select($table, $where = [], $fields = [], $final = '') {
         $this->_select($table, $where, $fields, null, $final);
         $this->timerEnd();
         return $this->result;
     }
 
     public function selectQuery($query) {
-        $values = array();
+        $values = [];
         $parsed = $this->parseQuery($query, $values);
         $this->query($parsed, $values);
         $this->timerEnd();
@@ -908,7 +941,7 @@ class Database extends Singleton {
      * @return array
      *   The query results.
      */
-    public function selectAll($table, $where = array(), $fields = array(), $final = '') {
+    public function selectAll($table, $where = [], $fields = [], $final = '') {
         $this->_select($table, $where, $fields, null, $final);
         $result = $this->result->fetchAll(PDO::FETCH_ASSOC);
         $this->timerEnd();
@@ -916,7 +949,7 @@ class Database extends Singleton {
     }
 
     public function selectAllQuery($query) {
-        $values = array();
+        $values = [];
         $parsed = $this->parseQuery($query, $values);
         $this->query($parsed, $values);
         if (!empty($query['indexed_by'])) {
@@ -948,27 +981,15 @@ class Database extends Singleton {
      * @return array
      *   The query results keyed by $key.
      */
-    public function selectIndexed($table, $key, $where = array(), $fields = array(), $final = '') {
+    public function selectIndexed($table, $key, $where = [], $fields = [], $final = '') {
         $this->_select($table, $where, $fields, NULL, $final);
-        $results = array();
+        $results = [];
         // TODO: This is built in to PDO.
         while ($row = $this->result->fetch(PDO::FETCH_ASSOC)) {
             $results[$row[$key]] = $row;
         }
         $this->timerEnd();
         return $results;
-    }
-
-    /**
-     * @deprecated
-     *
-     * @param $query
-     * @param $key
-     * @return array
-     */
-    public function selectIndexedQuery($query, $key) {
-        $query['indexed_by'] = $key;
-        return $this->selectAllQuery($query);
     }
 
     /**
@@ -986,14 +1007,14 @@ class Database extends Singleton {
      * @return array
      *   A single row from the database.
      */
-    public function selectRow($table, $where = array(), $fields = array(), $final = '') {
+    public function selectRow($table, $where = [], $fields = [], $final = '') {
         $this->_select($table, $where, $fields, 1, $final);
         $this->timerEnd();
         return $this->result->fetch(PDO::FETCH_ASSOC);
     }
 
     public function selectRowQuery($query) {
-        $values = array();
+        $values = [];
         $query['limit'] = 1;
         $parsed = $this->parseQuery($query, $values);
         $this->query($parsed, $values);
@@ -1018,8 +1039,8 @@ class Database extends Singleton {
      * @return array
      *   All values from the column.
      */
-    public function selectColumn($table, $column, $where = array(), $key = NULL, $final = '') {
-        $fields = array($column);
+    public function selectColumn($table, $column, $where = [], $key = NULL, $final = '') {
+        $fields = [$column];
         if ($key) {
             array_unshift($fields, $key);
         }
@@ -1034,7 +1055,7 @@ class Database extends Singleton {
     }
 
     public function selectColumnQuery($query) {
-        $values = array();
+        $values = [];
         $parsed = $this->parseQuery($query, $values);
         $this->query($parsed, $values);
         if (count($query['select']) == 2) {
@@ -1049,7 +1070,7 @@ class Database extends Singleton {
     /**
      * Select a single column from the first row.
      *
-     * @param string $field
+     * @param string|array $field
      *   The column to select from.
      * @param array|string $table
      *   The table and optionally joins.
@@ -1061,9 +1082,9 @@ class Database extends Singleton {
      * @return mixed
      *   A single field value.
      */
-    public function selectField($field, $table, $where = array(), $final = '') {
+    public function selectField($field, $table, $where = [], $final = '') {
         if (!is_array($field)) {
-            $field = array($field => $field);
+            $field = [$field => $field];
         }
         $row = $this->selectRow($table, $where, $field, $final);
 
@@ -1171,7 +1192,7 @@ class Database extends Singleton {
      */
     protected function implodeFields($fields) {
         if (!is_array($fields)) {
-            $fields = array($fields);
+            $fields = [$fields];
         }
         foreach ($fields as $alias => &$field) {
             $current = null;
@@ -1179,13 +1200,13 @@ class Database extends Singleton {
                 $current = current($field);
             }
             if (!empty($current) && !empty($field['expression'])) {
-                // Format of array('count' => array('expression' => 'COUNT(*)'))
+                // Format of ['count' => ['expression' => 'COUNT(*)'))
                 $field = $field['expression'] . ' AS ' . $this->formatField($alias);
             }
             elseif (!empty($field) && is_array($field)) {
-                // Format of array('table' => array('column1', 'column2'))
-                // Or array('table' => array('alias' => 'column'))
-                // Or array(0 => array('table' => array('column1', 'alias' => 'column2')))
+                // Format of ['table' => ['column1', 'column2'))
+                // Or ['table' => ['alias' => 'column'))
+                // Or [0 => ['table' => ['column1', 'alias' => 'column2')))
                 $table = $alias;
                 $table_field_list = $this->implodeTableFields($table, $field);
                 $field = implode(', ', $table_field_list);
@@ -1198,7 +1219,7 @@ class Database extends Singleton {
                 $field = $this->formatField($field);
 
                 if (!empty($alias) && !is_numeric($alias)) {
-                    // Format of array('alias' => 'column') to column as `alias`.
+                    // Format of ['alias' => 'column') to column as `alias`.
                     $field = $field . ' AS `' . $alias . '`';
                 }
             }
@@ -1218,20 +1239,20 @@ class Database extends Singleton {
      *   A list of formatted fields.
      */
     protected function implodeTableFields($first, $seconds) {
-        $output = array();
+        $output = [];
         foreach ($seconds as $second => $third) {
             if (is_array($third)) {
-                // array(0 => array('table' => array('column1', 'alias' => 'column2')))
+                // [0 => ['table' => ['column1', 'alias' => 'column2')))
                 $output = array_merge($output, $this->implodeTableFields($second, $third));
             } elseif (is_numeric($second)) {
-                // Format of array('table' => array('column'))
+                // Format of ['table' => ['column'))
                 if ($third == '*') {
                     $output[] = "`{$first}`.*";
                 } else {
                     $output[] = "`{$first}`.`{$third}`";
                 }
             } else {
-                // Format of array('table' => array('alias' => 'column'))
+                // Format of ['table' => ['alias' => 'column'))
                 $output[] = "`{$first}`.`{$third}` AS `{$second}`";
             }
         }
@@ -1283,9 +1304,9 @@ class Database extends Singleton {
      *   The query string segment.
      */
     public function sqlImplode($array, &$values, $concatenator = ', ', $setting = false) {
-        $a2 = array();
+        $a2 = [];
         if (!is_array($array)) {
-            $array = array($array);
+            $array = [$array];
         }
         foreach ($array as $field => $v) {
             if (is_numeric($field) && empty($v['expression'])) {
@@ -1307,7 +1328,7 @@ class Database extends Singleton {
                 continue;
             }
 
-            if (is_string($field)) {
+            if (!is_numeric($field)) {
                 $field = $this->formatField($field);
             }
 
@@ -1441,6 +1462,7 @@ class Database extends Singleton {
             }
         }
 
+        $definitions = [];
         foreach ($columns as $column => $settings) {
             $definitions[] = $this->getColumnDefinition($column, $settings, $primary_column == $column);
             if ($primary_column == $column) {
@@ -1520,10 +1542,10 @@ class Database extends Singleton {
             $columns = $settings['columns'];
         }
         elseif (is_string($settings['columns'])) {
-            $columns = array($settings['columns']);
+            $columns = [$settings['columns']];
         }
         else {
-            $columns = array($name);
+            $columns = [$name];
         }
 
         if ($name == 'primary') {
@@ -1547,7 +1569,7 @@ class Database extends Singleton {
      * @return boolean
      */
     public function tableExists($table) {
-        return $this->query('SHOW TABLES LIKE ?', array($table))->rowCount() == 1;
+        return $this->query('SHOW TABLES LIKE ?', [$table])->rowCount() == 1;
     }
 
     /**
@@ -1564,14 +1586,14 @@ class Database extends Singleton {
      *   A where condition.
      */
     public static function getMultiFieldSearch($fields, $values, $wildcard = self::WILDCARD_AFTER) {
-        $where = array();
+        $where = [];
         // where field_1 like a or field_2 like a or field_3 like a
         // AND field_1 like b or field_2 like b or field_3 like b
         foreach ($values as $v) {
             $wv = self::addWildCards($v, $wildcard);
-            $set = array('#OR' => array());
+            $set = ['#OR' => []];
             foreach ($fields as $f) {
-                $set['#OR'][$f] = array('LIKE', $wv);
+                $set['#OR'][$f] = ['LIKE', $wv];
             }
             $where[] = $set;
         }

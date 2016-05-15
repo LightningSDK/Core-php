@@ -40,8 +40,8 @@ class ClientUser extends Singleton {
         $session = SessionTool::getInstance(true, false);
         if ($session && $session->user_id > 0) {
             // If we are logged into someone elses account.
-            if ($impersonate = $session->getSetting('impersonate')) {
-                $user = User::loadById($impersonate);
+            if (!empty($session->content->impersonate)) {
+                $user = User::loadById($session->content->impersonate);
             } else {
                 // Try to load the user on this session.
                 $user = User::loadById($session->user_id);
@@ -64,7 +64,7 @@ class ClientUser extends Singleton {
      *   The action on the login page.
      *
      * @return boolean
-     *   Returns true if they are logged in.
+     *   Returns true if the user is logged in.
      */
     public static function requireLogin($action = '') {
         if (self::getInstance()->id == 0) {
@@ -82,6 +82,7 @@ class ClientUser extends Singleton {
                 $query['redirect'] .= '?' . http_build_query($redirect_query);
             }
             Navigation::redirect('/user' . $action, $query);
+            return false;
         } else {
             return true;
         }

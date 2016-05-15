@@ -48,6 +48,11 @@ class Image {
         return $ret;
     }
 
+    /**
+     * Creates an image object from a mime encoded web form.
+     * @param $name
+     * @return bool|Image
+     */
     public static function loadFromPost($name) {
         $file = $_FILES[$name]['tmp_name'];
         if (!file_exists($file) || !is_uploaded_file($file)) {
@@ -66,6 +71,12 @@ class Image {
         return $image;
     }
 
+    /**
+     * Creates an image object from a posted base64, form encoded image.
+     *
+     * @param $field
+     * @return bool|Image
+     */
     public static function loadFromPostField($field) {
         $image = new self();
 
@@ -78,6 +89,14 @@ class Image {
      *
      * @param array $settings
      *   The image transformation settings.
+     *   - max_size int - the maximum size in either axis
+     *   - max_width int - the maximum width
+     *   - max_height int - the maximum height
+     *   - height int - an absolute height
+     *   - width int - an absolute width
+     *   - crop array|string - @todo: needs documentation
+     *   - alpha boolean - whether to set an alpha if the image does not fill the new size
+     *   - background array - [r, g, b] values for a background color if not using alpha
      *
      * @return boolean
      *   Whether the image size was changed.
@@ -228,7 +247,7 @@ class Image {
     public function getPNGData() {
         ob_start();
         imagepng($this->getOutputImage());
-        $contents =  ob_get_contents();
+        $contents = ob_get_contents();
         ob_end_clean();
         return $contents;
     }
@@ -245,7 +264,7 @@ class Image {
     public function getJPGData($quality = 80) {
         ob_start();
         imagejpeg($this->getOutputImage(), null, $quality);
-        $contents =  ob_get_contents();
+        $contents = ob_get_contents();
         ob_end_clean();
         return $contents;
     }

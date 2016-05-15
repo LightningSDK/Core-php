@@ -1,21 +1,3 @@
-function cms_edit_content(container) {
-    $('#content_block_'+container).hide();
-    $('#edit_content_block_'+container).show();
-}
-
-function cms_save_content(container) {
-    $.ajax({
-        url:'/cms.php',
-        data:{action:'update_content','container':container,content:CKEDITOR.instances["cke_"+container].getData()},
-        type:"POST",
-        dataType:"html",
-        success:function() {
-            $('#content_body_'+container).html(CKEDITOR.instances["cke_"+container].getData());
-            $('#content_block_'+container).show();
-            $('#edit_content_block_'+container).hide();
-        }
-    });
-}
 lightning.admin = {};
 /**
  * Functions for editing mailing messages.

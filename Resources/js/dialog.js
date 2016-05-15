@@ -8,17 +8,17 @@ lightning.dialog = {
     init: function() {
         if (!this.dialogBox) {
             $('<div id="veil"></div>'+
-            '<div id="dialog_box">'+
-            '<div class="table_data clear border_top">'+
-            '<div class="inner" id="dialog_box_inner">'+
-            '<div class="messenger error"><ul></ul></div>'+
-            '<div class="messenger message"><ul></ul></div>'+
-            '<div class="content"><ul></ul></div>'+
-            '</div>'+
-            '<div class="inner" id="dialog_box_loader"><p align="center"><img src="/images/lightning/cog-spinner.gif" class="loader_image"></p></div>'+
-            '</div>'+
-            '</div>').prependTo('body');
-            $('#veil').click(lightning.dialog.hide);
+                '<div id="dialog_box">'+
+                '<div class="table_data clear border_top">'+
+                '<div class="inner" id="dialog_box_inner">'+
+                '<div class="messenger error"><ul></ul></div>'+
+                '<div class="messenger message"><ul></ul></div>'+
+                '<div class="content"><ul></ul></div>'+
+                '</div>'+
+                '<div class="inner" id="dialog_box_loader"><p align="center"><img src="/images/lightning/cog-spinner.gif" class="loader_image"></p></div>'+
+                '</div>'+
+                '</div>').prependTo('body');
+            $('#veil').on('click', lightning.dialog.hide);
             $(window).scroll(lightning.dialog.reposition).resize(lightning.dialog.reposition);
             this.dialogBox = $('#dialog_box');
             this.dialogBoxLoader = $('#dialog_box_loader');
@@ -49,16 +49,21 @@ lightning.dialog = {
         this.reposition();
     },
 
+    /**
+     * Load a URL into the dialog.
+     * @param url
+     */
     showURL: function(url) {
         this.show();
-        $.ajax({dataType:'HTML',url:url,success:function(data) {
+        $.ajax({dataType:'HTML', url:url, success:function(data) {
             this.setContent(data);
         }});
     },
 
     /**
      * Stop any fading out (if required) and fade in.
-     * @param show_loader
+     *
+     * @param {boolean} show_loader
      */
     show: function(show_loader) {
         this.dialogBoxLoader.stop(true);
@@ -78,8 +83,9 @@ lightning.dialog = {
     },
 
     /**
-     * Fades in all dialog components.
-     * @param show_loader
+     * Fades in all dialog components with empty container and optional loader.
+     *
+     * @param {boolean} show_loader
      */
     showContainer: function(show_loader) {
         this.clear();
@@ -95,7 +101,8 @@ lightning.dialog = {
 
     /**
      * Fades in all dialog components.
-     * @param callback
+     *
+     * @param {function} callback
      */
     showPrepared: function(callback) {
         this.dialogBoxLoader.stop(true);
@@ -104,18 +111,25 @@ lightning.dialog = {
         var self = this;
         this.dialogBox.fadeOut('fast',function() {
             self.clear();
-            if (callback != undefined)
+            if (callback != undefined) {
                 callback();
+            }
             self.dialogBox.fadeIn('fast', lightning.dialog.reposition);
         });
     },
 
+    /**
+     * Fade out the dialog and veil.
+     */
     hide: function() {
         lightning.dialog.dialogBox.fadeOut('fast', function() {
             $('#veil').fadeOut('fast');
         });
     },
 
+    /**
+     * Clear the modal contents.
+     */
     clear: function() {
         this.dialogBoxInner.find('.content').empty().hide();
         this.dialogBoxInner.find('.error ul').empty();
@@ -140,8 +154,8 @@ lightning.dialog = {
 
     /**
      * Resets a dialog with new content. (fades out if required).
-     * @param content
-     * @param callback
+     * @param {string} content
+     * @param {function} callback
      */
     setContent: function(content, callback) {
         var self = this;
@@ -161,7 +175,11 @@ lightning.dialog = {
 
     /**
      * Add a success message to an existing dialog.
-     * @param message
+     *
+     * @param {string} message
+     *   The message to display.
+     * @param {string} message_type
+     *   (Optional) This can be 'error' or 'message'. Default is 'message'.
      */
     add: function(message, message_type) {
         message = $('<li>' + message + '</li>');
@@ -180,12 +198,8 @@ lightning.dialog = {
                     self.dialogBoxInner.find(container).show();
                 }
             }
-            self.dialogBoxInner.find(container).fadeIn('fast');
+            self.dialogBoxInner.fadeIn('fast');
         });
         this.reposition();
-    },
-
-    setContent: function(content, callback) {
-        this.dialogBoxInner.fadeOut('fast',function() {$(this).html(content).fadeIn('fast', callback);})
     },
 };

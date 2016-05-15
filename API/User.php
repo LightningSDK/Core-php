@@ -36,7 +36,7 @@ class User extends API {
     }
 
     public function postFacebookLogin() {
-        if ($token = SocialMediaApi::getToken()) {
+        if ($token = SocialMediaApi::getRequestToken()) {
             $fb = Facebook::getInstance(true, $token['token'], $token['auth']);
             $this->finishSocialLogin($fb);
             exit;
@@ -45,7 +45,7 @@ class User extends API {
     }
 
     public function postGoogleLogin() {
-        if ($token = SocialMediaApi::getToken()) {
+        if ($token = SocialMediaApi::getRequestToken()) {
             Google::setApp(true);
             $google = Google::getInstance(true, $token['token'], $token['auth']);
             $this->finishSocialLogin($google);
@@ -106,7 +106,10 @@ class User extends API {
         elseif (!$user = UserModel::loadByEmail($email)) {
             Output::error('User does not exist.');
         }
-        $user->sendResetLink();
+        elseif ($user->sendResetLink()) {
+            return Output::SUCCESS;
+        }
+        Output::error('Could not reset password.');
     }
 
     public function postLogout() {

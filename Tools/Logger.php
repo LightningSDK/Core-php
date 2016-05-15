@@ -27,7 +27,7 @@ class Logger extends Singleton {
     );
 
     public static function init() {
-        if (Configuration::get('errorlog') == 'stacktrace') {
+        if (Configuration::get('site.logtype') == 'stacktrace') {
             set_error_handler(['Lightning\\Tools\\Logger', 'errorLogStacktrace']);
         }
 

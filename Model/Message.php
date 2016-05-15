@@ -4,13 +4,15 @@
  * Contains Lightning\Model\Message
  */
 
-namespace Lightning\Model;
+namespace Overridable\Lightning\Model;
 
+use Lightning\Model\Object;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
 use Lightning\Tools\Language;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Tracker;
+use Lightning\View\Field\Time;
 
 /**
  * A model of the mailing system message.
@@ -132,7 +134,7 @@ class Message extends Object {
      */
     public function __construct($message_id = null, $unsubscribe = true, $auto = true) {
         $this->auto = $auto;
-        $this->__data = Database::getInstance()->selectRow('message', array('message_id' => $message_id));
+        $this->__data = Database::getInstance()->selectRow('message', ['message_id' => $message_id]);
         $this->loadTemplate();
         $this->unsubscribe = $unsubscribe;
 
@@ -253,7 +255,7 @@ class Message extends Object {
             if ($this->template_id > 0) {
                 $this->template = Database::getInstance()->selectRow(
                     'message_template',
-                    array('template_id' => $this->template_id)
+                    ['template_id' => $this->template_id]
                 );
             } else {
                 $this->setDefaultTemplate();
@@ -261,11 +263,30 @@ class Message extends Object {
         }
     }
 
-
+    /**
+     * Load the lists that this message can be sent to.
+     */
     protected function loadLists() {
         if ($this->lists === null) {
-            $this->lists = Database::getInstance()->selectColumn('message_message_list', 'message_list_id', array('message_id' => $this->message_id));
+            $this->lists = Database::getInstance()->selectColumn('message_message_list', 'message_list_id', ['message_id' => $this->message_id]);
         }
+    }
+
+    public static function getAllLists() {
+        return Database::getInstance()->selectColumn('message_list', 'name', [], 'message_list_id');
+    }
+
+    public static function validateListID($id) {
+        return Database::getInstance()->check('message_list', ['message_list_id' => $id]);
+    }
+
+    public static function getDefaultListID() {
+        $db = Database::getInstance();
+        $list = $db->selectField('message_list_id', 'message_list', ['name' => 'Default']);
+        if (!$list) {
+            $list = $db->insert('message_list', ['name' => 'Default']);
+        }
+        return $list;
     }
 
     /**
@@ -273,19 +294,14 @@ class Message extends Object {
      */
     protected function loadCriteria() {
         if ($this->criteria === null) {
-            $this->criteria = Database::getInstance()->selectAll(
-                array(
-                    'from' => 'message_message_criteria',
-                    'join' => array(
-                        'LEFT JOIN',
-                        'message_criteria',
-                        'USING (message_criteria_id)',
-                    ),
-                ),
-                array(
-                    'message_id' => $this->message_id,
-                )
-            );
+            $this->criteria = Database::getInstance()->selectAllQuery([
+                'from' => 'message_message_criteria',
+                'join' => [
+                    'left_join' => 'message_criteria',
+                    'using' => 'message_criteria_id',
+                ],
+                'where' => ['message_id' => $this->message_id],
+            ]);
         }
     }
 
@@ -312,9 +328,9 @@ class Message extends Object {
      *   Outputs the unsubscribe string.
      */
     protected function getUnsubscribeString() {
-        return Language::getInstance()->translate('unsubscribe', array(
+        return Language::translate('unsubscribe', [
                 '{LINK}' => $this->user->getUnsubscribeLink()
-            )
+            ]
         );
     }
 
@@ -329,15 +345,10 @@ class Message extends Object {
      */
     public function replaceVariables($source) {
         // Replace variables.
-        foreach($this->customVariables + $this->internalCustomVariables + $this->defaultVariables as $cv => $cvv) {
-            // Replace simple variables as a string.
-            $source = str_replace('{' . $cv . '}', $cvv, $source);
-            // Some curly brackets might be escaped if they are links.
-            $source = str_replace('%7B' . $cv . '%7D', $cvv, $source);
-        }
+        $this->replaceVars('', $this->customVariables + $this->internalCustomVariables + $this->defaultVariables, $source);
 
         // Replace conditions.
-        $conditions = array();
+        $conditions = [];
         $conditional_search = '/{IF ([a-z_]+)}(.*){ENDIF \1}/imsU';
         preg_match_all($conditional_search, $source, $conditions);
         foreach ($conditions[1] as $key => $var) {
@@ -349,6 +360,30 @@ class Message extends Object {
         }
 
         return $source;
+    }
+
+    /**
+     * A loopable subfunction of replaceVariables().
+     *
+     * @param string $prefix
+     *   A prefix added to all variable names in the current array.
+     * @param array $vars
+     *   A list of variables to replace.
+     * @param string $source
+     *   The content to replace in.
+     */
+    private function replaceVars($prefix, $vars, &$source) {
+        foreach($vars as $var => $value) {
+            if (is_string($value)) {
+                $find = strtoupper($prefix . $var);
+                // Replace simple variables as a string.
+                $source = str_replace('{' . $find . '}', $value, $source);
+                // Some curly brackets might be escaped if they are links.
+                $source = str_replace('%7B' . $find . '%7D', $value, $source);
+            } elseif (is_array($value)) {
+                $this->replaceVars($prefix . $var . '.', $value, $source);
+            }
+        }
     }
 
     /**
@@ -418,7 +453,7 @@ class Message extends Object {
             // Add per user variables.
             $this->defaultVariables += [
                 'FULL_NAME' => (!empty($this->user->first) ? $this->user->fullName() : $this->default_name),
-                'FIRST_NAME' => $this->user->first,
+                'FIRST_NAME' => (!empty($this->user->first) ? $this->user->first : $this->default_name),
                 'LAST_NAME' => $this->user->last,
                 'USER_ID' => $this->user->id,
                 'EMAIL' => $this->user->email,
@@ -452,11 +487,14 @@ class Message extends Object {
 
         // Make sure the message is never resent.
         if ($this->auto || !empty($this->never_resend)) {
-            $query['join'][] = array(
-                'LEFT JOIN',
-                'tracker_event',
-                'ON tracker_event.user_id = user.user_id AND tracker_event.tracker_id = ' . self::$message_sent_id . ' AND tracker_event.sub_id = ' . $this->message_id,
-            );
+            $query['join'][] = [
+                'left_join' => 'tracker_event',
+                'on' => [
+                    'tracker_event.user_id' => ['user.user_id'],
+                    'tracker_event.tracker_id' => self::$message_sent_id,
+                    'tracker_event.sub_id' => $this->message_id,
+                ]
+            ];
             $query['where']['tracker_event.user_id'] = null;
         }
 
@@ -464,6 +502,8 @@ class Message extends Object {
         $this->loadCriteria();
         foreach ($this->criteria as $criteria) {
             $field_values = json_decode($criteria['field_values'], true);
+
+            // Add Joins
             if (!empty($criteria['join'])) {
                 if ($c_table = json_decode($criteria['join'], true)) {
                     // The entry is a full join array.
@@ -478,13 +518,14 @@ class Message extends Object {
                     }
                 } else {
                     // The entry is just a table name.
-                    $query['join'][] = array(
-                        'LEFT JOIN',
-                        $criteria['join'],
-                        'ON ' . $criteria['join'] . '.user_id = user.user_id',
-                    );
+                    $query['join'][] = [
+                        'left_join' => $criteria['join'],
+                        'on' => [$criteria['join'] . '.user_id' => ['user.user_id']],
+                    ];
                 }
             }
+
+            // Add where conditions
             if ($where = json_decode($criteria['where'], true)) {
                 $this->replaceCriteriaVariables($where, $field_values);
                 $query['where'][] = $where;
@@ -508,10 +549,14 @@ class Message extends Object {
         return $query;
     }
 
-    protected function replaceCriteriaVariables(&$query_segment, $variables) {
-        if (empty($variables)) {
-            return;
+    protected function replaceCriteriaVariables(&$query_segment, $variables = []) {
+        if (empty($variables['TODAY'])) {
+            $variables['TODAY'] = Time::today();
         }
+        if (empty($variables['NOW'])) {
+            $variables['NOW'] = time();
+        }
+
         $next_is_array = false;
         array_walk_recursive($query_segment, function(&$item) use ($variables, &$next_is_array) {
             if (is_string($item)) {
