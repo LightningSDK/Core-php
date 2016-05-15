@@ -7,6 +7,7 @@ use Lightning\Tools\Configuration;
 use Lightning\Tools\Output;
 use Lightning\Tools\Session;
 use Lightning\View\JS;
+use Lightning\Tools\Request;
 use stdClass;
 
 class Twitter extends SocialMediaApi {
@@ -55,11 +56,11 @@ class Twitter extends SocialMediaApi {
     }
 
     public function setToken($token) {
-        $appId = Configuration::get('social.twitter.key');
+        $key = Configuration::get('social.twitter.key');
         $secret = Configuration::get('social.twitter.secret');
 
         $this->token = $token;
-        $this->connection = new TwitterOAuth($appId, $secret, $token['oauth_token'], $token['oauth_token_secret']);
+        $this->connection = new TwitterOAuth($key, $secret, $token['oauth_token'], $token['oauth_token_secret']);
     }
 
     public function getToken() {
@@ -78,14 +79,29 @@ class Twitter extends SocialMediaApi {
         $session->save();
     }
 
-    public static function getAccessToken() {
+    /**
+     * Get the access token from the form post. For web only.
+     *
+     * @return array
+     *
+     * @throws \Abraham\TwitterOAuth\TwitterOAuthException
+     */
+    public static function getAccessToken($verify = true) {
         self::loadAutoLoader();
         $session = Session::getInstance();
 
-        $request_token = [
-            'oauth_token' => !empty($session->content->twitter->oauth_token) ? $session->content->twitter->oauth_token : '',
-            'oauth_token_secret' => !empty($session->content->twitter->oauth_token_secret) ? $session->content->twitter->oauth_token_secret : '',
-        ];
+        if ($verify) {
+            $request_token = [
+                'oauth_token' => !empty($session->content->twitter->oauth_token) ? $session->content->twitter->oauth_token : '',
+                'oauth_token_secret' => !empty($session->content->twitter->oauth_token_secret) ? $session->content->twitter->oauth_token_secret : '',
+            ];
+        } else {
+            return [
+                'oauth_token' => Request::get('oauth_token'),
+                'oauth_token_secret' => Request::get('oauth_token_secret'),
+            ];
+        }
+
         if (isset($_REQUEST['oauth_token']) && $request_token['oauth_token'] !== $_REQUEST['oauth_token']) {
             // Abort! Something is wrong.
             Output::error('Invalid Request');

@@ -13,10 +13,18 @@ class Google extends SocialMediaApi {
 
     const EMAIL_SUFFIX = 'google.com';
 
+    protected $network = 'google';
+
     /**
      * @var Google_Service_Plus
      */
     public $service;
+
+    protected static $isApp = false;
+
+    public static function setApp($app) {
+        self::$isApp = $app;
+    }
 
     public static function createInstance($token = null, $authorize = false) {
         include HOME_PATH . '/Lightning/Vendor/googleapiclient/src/Google/autoload.php';
@@ -38,8 +46,13 @@ class Google extends SocialMediaApi {
         $this->token = $token;
         $this->authorize = $authorize;
 
-        $appId = Configuration::get('social.google.client_id');
-        $secret = Configuration::get('social.google.secret');
+        if (empty(self::$isApp)) {
+            $appId = Configuration::get('social.google.client_id');
+            $secret = Configuration::get('social.google.secret');
+        } else {
+            $appId = Configuration::get('social.google-app.client_id');
+            $secret = Configuration::get('social.google-app.secret');
+        }
 
         $client = new Google_Client();
         $client->setClientId($appId);
@@ -106,6 +119,7 @@ class Google extends SocialMediaApi {
 
     public function getSocialId() {
         if ($this->authorize) {
+            $this->loadProfile();
             return $this->profile->getId();
         } else {
             return $this->social_id;
