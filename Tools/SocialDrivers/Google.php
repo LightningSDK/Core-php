@@ -13,6 +13,8 @@ class Google extends SocialMediaApi {
 
     const EMAIL_SUFFIX = 'google.com';
 
+    protected $network = 'google';
+
     /**
      * @var Google_Service_Plus
      */
@@ -106,6 +108,7 @@ class Google extends SocialMediaApi {
 
     public function getSocialId() {
         if ($this->authorize) {
+            $this->loadProfile();
             return $this->profile->getId();
         } else {
             return $this->social_id;
