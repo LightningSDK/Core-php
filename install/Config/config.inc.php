@@ -139,6 +139,8 @@ $conf = [
             // Admin
             'admin/blog/edit' => 'Lightning\\Pages\\BlogTable',
             'admin/blog/categories' => 'Lightning\\Pages\\BlogCategories',
+            'admin/social/auth' => 'Lightning\\Pages\\SocialSharing\\Auth',
+            'admin/social/share' => 'Lightning\\Pages\\SocialSharing\\Share',
             'admin/mailing/lists' => 'Lightning\\Pages\\Mailing\\Lists',
             'admin/mailing/messages' => 'Lightning\\Pages\\Mailing\\Messages',
             'admin/mailing/send' => 'Lightning\\Pages\\Mailing\\Send',
