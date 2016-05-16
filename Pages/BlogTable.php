@@ -13,18 +13,6 @@ class BlogTable extends Table {
     const TABLE = BlogPost::TABLE;
     const PRIMARY_KEY = 'blog_id';
 
-    /**
-     * @deprecated
-     * @var string;
-     */
-    protected $table = BlogPost::TABLE;
-
-    /**
-     * @deprecated
-     * @var string;
-     */
-    protected $key = 'blog_id';
-
     protected $trusted = true;
 
     protected $sort = 'time DESC';
