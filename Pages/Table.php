@@ -1297,7 +1297,7 @@ abstract class Table extends Page {
     protected function render_action_fields_headers() {
         $output = '';
         foreach ($this->action_fields as $a => $action) {
-            $output .= "<td>";
+            $output .= '<td>';
             if (isset($action['column_name']))
                 $output .= $action['column_name'];
             elseif (isset($action['display_name']))
@@ -1315,7 +1315,7 @@ abstract class Table extends Page {
                     }
                     break;
             }
-            $output .= "</td>";
+            $output .= '</td>';
         }
         if ($this->editable !== false) {
             $output .= '<td>Edit</td>';
@@ -1332,28 +1332,33 @@ abstract class Table extends Page {
     protected function render_action_fields_list(&$row, $editable) {
         $output = '';
         foreach ($this->action_fields as $a => $action) {
-            $output .= "<td>";
+            $output .= '<td>';
+            if (!empty($action['display_value'])) {
+                $link_content = $action['display_value'];
+            } else {
+                $link_content = $this->getDisplayName($action, $a);
+            }
             switch ($action['type']) {
-                case "function":
+                case 'function':
                     // Have table call a function.
-                    $output .= "<a href='" . $this->createUrl("action", $row[$this->getKey()], $a, array("ra" => $this->action)) . "'>{$action['display_name']}</a>";
+                    $output .= "<a href='" . $this->createUrl("action", $row[$this->getKey()], $a, array("ra" => $this->action)) . "'>{$link_content}</a>";
                     break;
-                case "link":
-                    $output .= "<a href='{$action['url']}{$row[$this->getKey()]}'>{$action['display_value']}</a>";
+                case 'link':
+                    $output .= "<a href='{$action['url']}{$row[$this->getKey()]}'>{$link_content}</a>";
                     break;
                 case 'html':
                     // Render the HTML.
                     $output .= is_callable($action['html']) ? $action['html']($row) : $action['html'];
                     break;
-                case "action":
-                    $output .= "<a href='" . $this->createUrl($action['action'], $row[$this->getKey()], $action['action_field']) . "'>{$action['display_name']}</a>";
+                case 'action':
+                    $output .= "<a href='" . $this->createUrl($action['action'], $row[$this->getKey()], $action['action_field']) . "'>{$link_content}</a>";
                     break;
-                case "checkbox":
+                case 'checkbox':
                 default:
                     $output .= "<input type='checkbox' name='taf_{$a}[{$row[$this->getKey()]}]' class='taf_{$a}' value='1' />";
                     break;
             }
-            $output .= "</td>";
+            $output .= '</td>';
         }
         if ($this->editable !== false) {
             $output .= "<td>";
