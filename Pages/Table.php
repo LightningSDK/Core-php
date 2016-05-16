@@ -1665,13 +1665,13 @@ abstract class Table extends Page {
                 // IN EDIT MODE WITH THE full_form OPTION, SHOW THE FORM WITH ADD/REMOVE LINKS
                 if (!empty($link_settings['full_form'])) {
                     // editable forms (1 to many)
-                    $output .= $this->render_full_linked_table_editable($link_settings);
+                    $output .= $this->render_full_linked_table_editable($link, $link_settings);
                 } else {
                     // drop down menu (many to many)
                     if (!empty($link_settings['type']) && $link_settings['type'] == 'image') {
-                        $output .= $this->render_linked_table_editable_image($link_settings);
+                        $output .= $this->render_linked_table_editable_image($link, $link_settings);
                     } else {
-                        $output .= $this->render_linked_table_editable_select($link_settings);
+                        $output .= $this->render_linked_table_editable_select($link, $link_settings);
                     }
                 }
             }
@@ -1727,16 +1727,16 @@ abstract class Table extends Page {
     // this would imply to show only the links that are actively linked to this table item for editing
     // this is a 1 to many relationship. it will load all of the links made using load_all_active_list()
     // any link connected is "owned" by this table row and will be editable from this table in edit mode
-    protected function render_full_linked_table_editable(&$link_settings) {
-        $output = "<input type='hidden' name='delete_subtable_{$link_settings['table']}' id='delete_subtable_{$link_settings['table']}' />";
-        $output .= "<input type='hidden' name='new_subtable_{$link_settings['table']}' id='new_subtable_{$link_settings['table']}' />";
+    protected function render_full_linked_table_editable($link_id, &$link_settings) {
+        $output = "<input type='hidden' name='delete_subtable_{$link_id}' id='delete_subtable_{$link_id}' />";
+        $output .= "<input type='hidden' name='new_subtable_{$link_id}' id='new_subtable_{$link_id}' />";
         if (count($link_settings['active_list']) > 0)
             foreach ($link_settings['active_list'] as $l) {
-                $output .= "<div class='subtable' id='subtable_{$link_settings['table']}_{$l[$link_settings['key']]}'><table>";
+                $output .= "<div class='subtable' id='subtable_{$link_id}_{$l[$link_settings['key']]}'><table>";
                 // SHOW FORM FIELDS
                 foreach ($link_settings['fields'] as $f => &$s) {
                     $link_settings['fields'][$f]['field'] = $f;
-                    $link_settings['fields'][$f]['form_field'] = "st_{$link_settings['table']}_{$f}_{$l[$link_settings['key']]}";
+                    $link_settings['fields'][$f]['form_field'] = "st_{$link_id}_{$f}_{$l[$link_settings['key']]}";
                     $output .= $this->renderFormRow($s, $l);
                 }
                 // ADD REMOVE LINKS
@@ -1746,12 +1746,12 @@ abstract class Table extends Page {
             }
 
         // ADD BLANK FORM FOR ADDING NEW LINK
-        $output .= "<div class='subtable' id='subtable_{$link_settings['table']}__N_' style='display:none;'><table>";
+        $output .= "<div class='subtable' id='subtable_{$link_id}__N_' style='display:none;'><table>";
 
         // SHOW FORM FIELDS
         foreach ($link_settings['fields'] as $f => &$s) {
             $link_settings['fields'][$f]['field'] = $f;
-            $link_settings['fields'][$f]['form_field'] = "st_{$link_settings['table']}_{$f}__N_";
+            $link_settings['fields'][$f]['form_field'] = "st_{$link_id}_{$f}__N_";
             $output .= $this->renderFormRow($s, []);
         }
 
@@ -1761,7 +1761,7 @@ abstract class Table extends Page {
         $output .= "</div>";
 
         // ADD NEW LINK
-        $output .= "<span class='link' onclick='new_subtable(\"{$link_settings['table']}\")'>{$link_settings['add_name']}</span>";
+        $output .= "<span class='link' onclick='new_subtable(\"{$link_id}\")'>{$link_settings['add_name']}</span>";
         return $output;
     }
 
@@ -1772,18 +1772,18 @@ abstract class Table extends Page {
      *
      * @return string
      */
-    protected function render_linked_table_editable_image(&$link_settings) {
+    protected function render_linked_table_editable_image($link_id, &$link_settings) {
         HTMLEditor::init(true);
         JS::startup('lightning.table.init()');
         // TODO: This doesn't return anything valuable. Is it used anywhere?
         $link_settings['web_location'] = $this->getImageLocationWeb($link_settings, '');
-        JS::set('table.links.' . $link_settings['table'], $link_settings);
-        $output = '<span class="button add_image" id="add_image_' . $link_settings['table'] . '">Add Image</span>';
-        $output .= '<span class="linked_images" id="linked_images_' . $link_settings['table'] . '">';
+        JS::set('table.links.' . $link_id, $link_settings);
+        $output = '<span class="button add_image" id="add_image_' . $link_id . '">Add Image</span>';
+        $output .= '<span class="linked_images" id="linked_images_' . $link_id . '">';
         $link_settings['conform_name'] = false;
         foreach ($link_settings['active_list'] as $image) {
             $output .= '<span class="selected_image_container">
-                <input type="hidden" name="linked_images_' . $link_settings['table'] . '[]" value="' . $image['image'] . '">
+                <input type="hidden" name="linked_images_' . $link_id . '[]" value="' . $image['image'] . '">
                 <span class="remove fa fa-close"></span>
                 <img src="' . $this->getImageLocationWeb($link_settings, $image['image']) . '"></span>';
         }
@@ -1801,13 +1801,13 @@ abstract class Table extends Page {
      * @param $link_settings
      * @return string
      */
-    protected function render_linked_table_editable_select(&$link_settings) {
+    protected function render_linked_table_editable_select($link_id, &$link_settings) {
         // show list of options to ad
         // IN REGULAR MODE IF edit_js? IS TURNED ON
         $output = '';
         if (!empty($link_settings['edit_js'])) {
-            $output .= "<select name='{$link_settings['table']}_list' id='{$link_settings['table']}_list' ></select>";
-            $output .= "<input type='button' name='add_{$link_settings['table']}_button' value='Add {$link_settings['table']}' id='add_{$link_settings['table']}_button' onclick='{$link_settings['edit_js']}.newLink(\"{$this->id}\")' />";
+            $output .= "<select name='{$link_id}_list' id='{$link_id}_list' ></select>";
+            $output .= "<input type='button' name='add_{$link_id}_button' value='Add {$link_id}' id='add_{$link_id}_button' onclick='{$link_settings['edit_js']}.newLink(\"{$this->id}\")' />";
 
             //DEFAULT VIEW MODE
         } else {
@@ -1817,24 +1817,24 @@ abstract class Table extends Page {
                 $key = !empty($link_settings['index_fkey']) ? $link_settings['index_fkey'] : $link_settings['key'];
                 $options[$l[$key]] = $l[$link_settings['display_column']];
             }
-            $output .= BasicHTML::select($link_settings['table'] . '_list', $options);
-            $output .= "<input type='button' name='add_{$link_settings['table']}_button' value='Add {$link_settings['table']}' class='add-link' id='add_{$link_settings['table']}_button' data-link='{$link_settings['table']}' />";
+            $output .= BasicHTML::select($link_id . '_list', $options);
+            $output .= "<input type='button' name='add_{$link_id}_button' value='Add {$link_id}' class='add-link' id='add_{$link_id}_button' data-link='{$link_id}' />";
         }
 
         if (!empty($link_settings['pop_add'])) {
-            $location = !empty($link_settings['table_url']) ? $link_settings['table_url'] : "/table?table=" . $link_settings['table'];
-            $output .= "<a onclick='lightning.table.newPop(\"{$location}\",\"{$link_settings['table']}\",\"{$link_settings['display_column']}\")'>Add New Item</a>";
+            $location = !empty($link_settings['table_url']) ? $link_settings['table_url'] : "/table?table=" . $link_id;
+            $output .= "<a onclick='lightning.table.newPop(\"{$location}\",\"{$link_id}\",\"{$link_settings['display_column']}\")'>Add New Item</a>";
         }
 
         // create the hidden array field
-        $output .= "<input type='hidden' name='{$link_settings['table']}_input_array' id='{$link_settings['table']}_input_array' value='";
+        $output .= "<input type='hidden' name='{$link_id}_input_array' id='{$link_id}_input_array' value='";
         foreach ($link_settings['active_list'] as $init)
             $output .= $init[$link_settings['key']] . ",";
-        $output .= "' /><br /><div id='{$link_settings['table']}_list_container'>";
+        $output .= "' /><br /><div id='{$link_id}_list_container'>";
         // create each item as a viewable deleteable box
         foreach ($link_settings['active_list'] as $init) {
-            $output .= "<div class='{$link_settings['table']}_box table_link_box_selected' id='{$link_settings['table']}_box_{$init[$link_settings['key']]}'>{$init[$link_settings['display_column']]}
-						<i class='remove-link fa fa-close' data-link='{$link_settings['table']}' data-link-item='{$init[$link_settings['key']]}' ></i></div>";
+            $output .= "<div class='{$link_id}_box table_link_box_selected' id='{$link_id}_box_{$init[$link_settings['key']]}'>{$init[$link_settings['display_column']]}
+						<i class='remove-link fa fa-close' data-link='{$link_id}' data-link-item='{$init[$link_settings['key']]}' ></i></div>";
         }
         $output .= "</div></td></tr>";
         return $output;
@@ -2860,13 +2860,13 @@ abstract class Table extends Page {
 
         if ($this->joins) {
             $join = array_merge($join, $this->joins);
-        } 
-        
+        }
+
         $where[$this->getKey(true)] = $this->singularity ? $this->singularityID : $this->id;
-        
+
         // fields we retrieve from the query
         $fields = array_merge(["{$this->table}.*"], $this->joinFields);
-        
+
         if ($this->table) {
             $this->list = Database::getInstance()->selectRowQuery([
                 'from' => $this->table,
@@ -3535,7 +3535,7 @@ abstract class Table extends Page {
         if (isset($this->preset[$field['field']]['render_' . $this->action . '_field'])) {
             $this->getRow(false);
             if (is_array($this->preset[$field['field']]['render_' . $this->action . '_field'])
-              && $this->preset[$field['field']]['render_' . $this->action . '_field'][0] == 'this') {
+                && $this->preset[$field['field']]['render_' . $this->action . '_field'][0] == 'this') {
                 $this->preset[$field['field']]['render_' . $this->action . '_field'][0] = $this;
             }
             return $this->preset[$field['field']]['render_' . $this->action . '_field']($this->list);
