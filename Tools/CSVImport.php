@@ -86,7 +86,7 @@ class CSVImport extends Page {
         $output .= '<input type="hidden" name="cache" value="' . $this->importCache->getReference() . '" />';
         $output .= '<table><thead><tr><td>Field</td><td>From CSV Column</td></tr></thead>';
 
-        $input_select = BasicHTML::select('%%', array('-1' => '') + $header_row);
+        $input_select = BasicHTML::select('%%', ['-1' => ''] + $header_row);
 
         foreach ($this->fields as $field) {
             if (is_array($field)) {
@@ -142,7 +142,7 @@ class CSVImport extends Page {
 
         // Process the alignment so we know which fields to import.
         $alignment = Request::get('alignment', 'keyed_array', 'int');
-        $fields = array();
+        $fields = [];
         foreach ($alignment as $field => $column) {
             if ($column != -1) {
                 $fields[$field] = $column;
@@ -151,21 +151,42 @@ class CSVImport extends Page {
 
         $this->database = Database::getInstance();
 
-        $this->values = array();
+        $this->values = [];
+        // While there is another row available.
         while ($this->csv->valid()) {
+            // Get the current row.
             $row = $this->csv->current();
+
+            // See if there is a validate handler.
+            if (is_callable($this->handlers['validate'])) {
+                // Convert the row into field/value pairs.
+                $validate_row = [];
+                foreach ($fields as $field => $column) {
+                    $validate_row[$field] = $row[$column];
+                }
+
+                // Call the validate method.
+                if (!call_user_func_array($this->handlers['validate'], [&$validate_row])) {
+                    $this->csv->next();
+                    continue;
+                }
+            }
+
+            // Add the current row to the import list.
             foreach ($fields as $field => $column) {
                 $this->values[$field][] = $row[$column];
             }
 
+            // If there are more than 100 rows, insert it before continuing.
             if (count($this->values[$field]) >= 100) {
                 $this->processImportBatch();
-                $this->values = array();
+                $this->values = [];
             }
 
             $this->csv->next();
         }
 
+        // If there are any values that haven't been inserted, insert now.
         if (!empty($this->values)) {
             $this->processImportBatch();
         }
@@ -174,9 +195,11 @@ class CSVImport extends Page {
     protected function processImportBatch() {
         if (!empty($this->table)) {
             // This is a direct import to a database table.
-            $last_id = $this->database->insertSets($this->table, array_keys($this->values), $this->values, true);
+            $last_id = $this->database->insertSets($this->table, $this->values, true);
             if (is_callable($this->handlers['importPostProcess'])) {
-                $ids = $last_id ? range($last_id - $this->database->affectedRows() + 1, $last_id) : [];
+                $ids = $last_id
+                    ? range($last_id, $last_id + $this->database->affectedRows() - 1)
+                    : [];
                 call_user_func_array($this->handlers['importPostProcess'], [&$this->values, &$ids]);
             }
         }

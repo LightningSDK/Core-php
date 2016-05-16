@@ -20,6 +20,12 @@ class Google extends SocialMediaApi {
      */
     public $service;
 
+    protected static $isApp = false;
+
+    public static function setApp($app) {
+        self::$isApp = $app;
+    }
+
     public static function createInstance($token = null, $authorize = false) {
         include HOME_PATH . '/Lightning/Vendor/googleapiclient/src/Google/autoload.php';
 
@@ -40,8 +46,13 @@ class Google extends SocialMediaApi {
         $this->token = $token;
         $this->authorize = $authorize;
 
-        $appId = Configuration::get('social.google.client_id');
-        $secret = Configuration::get('social.google.secret');
+        if (empty(self::$isApp)) {
+            $appId = Configuration::get('social.google.client_id');
+            $secret = Configuration::get('social.google.secret');
+        } else {
+            $appId = Configuration::get('social.google-app.client_id');
+            $secret = Configuration::get('social.google-app.secret');
+        }
 
         $client = new Google_Client();
         $client->setClientId($appId);
