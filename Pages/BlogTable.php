@@ -26,6 +26,19 @@ class BlogTable extends Table {
         ]
     ];
 
+    protected $action_fields = [
+        'view' => [
+            'display_name' => 'View',
+            'type' => 'html',
+        ],
+        'share' => [
+            'column_name' => 'Share',
+            'type' => 'link',
+            'url' => '/admin/social/share?type=blog&id=',
+            'display_name' => '<img src="/images/lightning/share.png">',
+        ]
+    ];
+
     protected $custom_buttons = [
         'send' => [
             'type' => self::CB_SUBMITANDREDIRECT,
@@ -72,15 +85,9 @@ class BlogTable extends Table {
         };
         $this->preset['header_image'] = self::getHeaderImageSettings();
 
-        $this->action_fields = array(
-            'view' => array(
-                'display_name' => 'View',
-                'type' => 'html',
-                'html' => function($row) {
-                    return '<a href="/' . $row['url'] . '.htm"><img src="/images/lightning/resume.png" /></a>';
-                }
-            ),
-        );
+        $this->action_fields['view']['html'] = function($row) {
+            return '<a href="/' . $row['url'] . '.htm"><img src="/images/lightning/resume.png" /></a>';
+        };
     }
 
     public static function getHeaderImageSettings() {

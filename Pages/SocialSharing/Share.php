@@ -55,6 +55,10 @@ class Share extends Page {
                         $facebook_pages = array_merge($facebook_pages, $pages);
                     }
                     break;
+                case 'google':
+                    $google = SocialMediaApi::connect($auth);
+                    $pages = $google->getPages();
+                    break;
             }
         }
 
@@ -69,13 +73,14 @@ class Share extends Page {
     public function postShare() {
         $networks = Request::post('network', 'array', 'int', []);
         $facebook_pages = Request::post('facebook', 'array', 'int');
-        $social_auths = SocialAuth::loadAll(['site_id' => Site::getInstance()->id]);
+        $social_auths = SocialAuth::loadAll(['user_id' => ClientUser::getInstance()->id]);
         $content = $this->loadContent();
-        $text = 'just testing this out';
+        $text = Request::post('text');
+        $short_text = Request::post('short_text');
         foreach ($social_auths as $auth) {
             if (in_array($auth->social_auth_id, $networks)) {
-                $connection = SocialMediaApi::connect($auth->data);
-                $connection->share($text, $content);
+                $connection = SocialMediaApi::connect($auth->getData());
+                $connection->share($auth->network == 'twitter' ? $short_text : $text, $content);
             }
             if ($auth->network == 'facebook') {
                 // Get list of pages, see if any of them are selected.

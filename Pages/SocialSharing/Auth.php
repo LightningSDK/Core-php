@@ -23,8 +23,16 @@ class Auth extends Page {
 
         // Override the facebook scope with required additions.
         $current_scope = Configuration::get('social.facebook.scope');
-        $new_scope = implode(',', array_merge(explode(',', $current_scope), explode(',', 'pages_show_list,manage_pages,publish_pages,public_profile,publish_actions')));
+        $new_scope = implode(',', array_unique(array_merge(explode(',', $current_scope), explode(',', 'pages_show_list,manage_pages,publish_pages,public_profile,publish_actions'))));
         Configuration::set('social.facebook.scope', $new_scope);
+
+        // Override the google scope with required additions.
+        $current_scope = Configuration::get('social.google.scope');
+        $new_scope = implode(' ', array_unique(array_merge(explode(' ', $current_scope), [
+            'https://www.googleapis.com/auth/plus.stream.write',
+            'https://www.googleapis.com/auth/plus.me',
+        ])));
+        Configuration::set('social.google.scope', $new_scope);
     }
 
     public function hasAccess() {
