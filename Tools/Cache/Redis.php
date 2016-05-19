@@ -9,9 +9,10 @@ namespace Lightning\Tools\Cache;
 
 use Exception;
 use Lightning\Tools\Configuration;
+use Lightning\Tools\Output;
 use Lightning\Tools\Singleton;
 
-class Redis extends Singleton {
+class Redis extends CacheController {
 
     const NEW_ONLY = 'NX';
     const UPDATE_ONLY = 'XX';
@@ -19,8 +20,12 @@ class Redis extends Singleton {
     protected $socket;
     protected $connection;
 
-    public function __construct($socket) {
-        $this->socket = $socket;
+    public function __construct($settings = []) {
+        $this->socket = Configuration::get('redis.socket');
+        if (empty($this->socket)) {
+            Output::error('Redis not configured');
+        }
+        parent::__construct($settings);
     }
 
     public function __destruct() {
@@ -28,22 +33,19 @@ class Redis extends Singleton {
         fclose($this->connection);
     }
 
-    public static function createInstance($socket = null) {
-        if (empty($socket)) {
-            $socket = Configuration::get('redis.socket');
+    public function get($key, $default = null) {
+        if ($result = $this->send('GET', $key)) {
+            return unserialize($result);
+        } else {
+            return $default;
         }
-        return new static($socket);
-    }
-
-    public function get($key) {
-        return $this->send('GET', $key);
     }
 
     public function set($key, $value, $ttl = null, $NXXX = '') {
         if (empty($ttl)) {
             $ttl = Configuration::get('redis.default_ttl');
         }
-        $params = ['SET', $key, $value];
+        $params = ['SET', $key, serialize($value)];
 
         // @todo: This causes an error.
 //        if (!empty($ttl)) {
@@ -71,7 +73,7 @@ class Redis extends Singleton {
         }
 
         if (empty($this->connection)) {
-            $this->connection = stream_socket_client($this->socket);
+            $this->connection = stream_socket_client($this->socket, $error, $errstr);
         }
 
         $cmd = '*' . count($args) . "\r\n";

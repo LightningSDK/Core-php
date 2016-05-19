@@ -4,6 +4,13 @@ namespace Lightning\Tools\Cache;
 
 use Lightning\Tools\Configuration;
 
+/**
+ * Class Cache
+ * @package Lightning\Tools\Cache
+ *
+ * This is a main class controller that will load more specific caches depending on the
+ * cache requirements such as TTL and data size.
+ */
 class Cache {
 
     const TEMPORARY = 1;
@@ -17,13 +24,30 @@ class Cache {
     const MEDIUM = 2;
     const LARGE = 3;
 
-    public static function get($name, $ttl = self::TEMPORARY, $size = self::MEDIUM) {
-        $cache = self::getType($ttl, $size);
-        $cache->load($name);
+    /**
+     * Get the cache object pointing at a specific entry.
+     *
+     * @param int $ttl
+     * @param int $size
+     *
+     * @return CacheController
+     *   The cache controller.
+     */
+    public static function get($ttl = self::TEMPORARY, $size = self::MEDIUM) {
+        $cache = self::getInstance($ttl, $size);
         return $cache;
     }
 
-    protected static function getType($ttl = self::TEMPORARY, $size = self::MEDIUM) {
+    /**
+     * @param int $ttl
+     *   The time the cache should be held for.
+     * @param int $size
+     *   The size class of the data to store.
+     *
+     * @return CacheController
+     *   An instance of the cache controller
+     */
+    protected static function getInstance($ttl = self::TEMPORARY, $size = self::MEDIUM) {
         if ($ttl == self::TEMPORARY) {
             // Static Cache
             return new StaticCache();
@@ -35,5 +59,4 @@ class Cache {
             }
         }
     }
-
 }

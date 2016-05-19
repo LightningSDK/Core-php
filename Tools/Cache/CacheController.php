@@ -2,7 +2,7 @@
 
 namespace Lightning\Tools\Cache;
 
-class BaseCache {
+abstract class CacheController implements CacheControllerInterface {
 
     public $value;
 
@@ -21,7 +21,7 @@ class BaseCache {
      *
      * @param array $settings
      */
-    public function __construct($settings = array()) {
+    public function __construct($settings = []) {
         // Load any default with this class and save them.
         foreach ($settings as $setting => $value) {
             $this->$setting = $value;
@@ -63,6 +63,14 @@ class BaseCache {
             // It wasn't updated but we're supposed to update the ttl.
             $this->resetTTL();
         }
+    }
+
+    public function get($key, $default = null) {
+
+    }
+
+    public function set($key, $value) {
+
     }
 
     protected function read() {
