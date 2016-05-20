@@ -98,7 +98,7 @@ class Contact extends PageView {
         }
 
         // Send a message to the site contact.
-        if ($this->settings['always_notify'] || ($request_contact && $this->settings['contact'])) {
+        if (!empty($this->settings['always_notify']) || ($request_contact && $this->settings['contact'])) {
             $sent = $this->sendMessage();
             Tracker::trackEvent('Contact Sent', URL::getCurrentUrlId(), $this->user->id);
             if (!$sent) {
@@ -172,6 +172,12 @@ class Contact extends PageView {
         return true;
     }
 
+    /**
+     * Send a message to the site contact.
+     *
+     * @return boolean
+     *   Whether the email was successfully sent.
+     */
     public function sendMessage() {
         $mailer = new Mailer();
         foreach ($this->settings['to'] as $to) {
@@ -193,7 +199,7 @@ class Contact extends PageView {
         $fields = array_combine(array_keys($_POST), array_keys($_POST));
         $values = [
             'Name' => Request::post('name'),
-            'Email' => $this->getSender(),
+            'Email' => $this->user->email,
             'IP' => Request::server(Request::IP),
         ];
         $message = Request::post('message');
@@ -202,9 +208,16 @@ class Contact extends PageView {
         unset($fields['name']);
         unset($fields['email']);
         unset($fields['message']);
+        unset($fields['contact']);
+        unset($fields['success']);
 
         foreach ($fields as $field) {
-            $values[ucfirst(preg_replace('/_/', ' ', $field))] = Request::post($field);
+            if (is_array($_POST[$field])) {
+                $input = json_encode(Request::post($field, 'array'));
+            } else {
+                $input = Request::post($field);
+            }
+            $values[ucfirst(preg_replace('/_/', ' ', $field))] = $input;
         }
 
         $output = '';
