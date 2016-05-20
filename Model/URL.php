@@ -18,7 +18,10 @@ class URL extends Object {
             'from' => static::TABLE,
             'where' => ['url' => ['LIKE', $url]],
         ], static::PRIMARY_KEY)) {
-            $id = $db->insert(static::TABLE, ['url' => $url]);
+            $id = $db->insert(static::TABLE, ['url' => $url], true);
+            if (empty($id)) {
+                $id = $db->selectField('url_id', static::TABLE, ['url' => $url]);
+            }
         }
         return $id;
     }

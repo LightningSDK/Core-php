@@ -9,7 +9,7 @@ class URL extends Schema {
 
     public function getColumns() {
         return array(
-            'url_id' => $this->int(true),
+            'url_id' => $this->autoincrement(),
             'url' => $this->varchar(255),
         );
     }
