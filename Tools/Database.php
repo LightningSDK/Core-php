@@ -819,13 +819,13 @@ class Database extends Singleton {
                              'right_join' => ' RIGHT JOIN ',
                              'join' => ' JOIN ',
                              'inner_join' => ' INNER JOIN ',
-                        ] as $type => $format) {
+                         ] as $type => $format) {
                     // Rewrite old queries for backwards compatibility.
                     if (!empty($join[$format]) && is_array($join[$format])) {
                         $output .= $this->parseJoin($join, $values);
                     }
                     if (!empty($join[$type])) {
-                        $output .= $format . $this->parseTable($join[$type], $values);
+                        $output .= $format . $this->parseTable($join[$type], $values, is_string($alias) ? $alias : null);
                         break;
                     }
                 }
@@ -856,6 +856,9 @@ class Database extends Singleton {
      *   The query-ready string for the table and it's joins.
      */
     protected function parseTable($table, &$values, $alias = null) {
+        if (empty($alias) && !empty($table['as'])) {
+            $alias = $table['as'];
+        }
         if (is_string($table)) {
             // A simple table as alias.
             $output = '`' . $table . '`';
@@ -877,9 +880,9 @@ class Database extends Singleton {
             }
 
             // If there is an alias, then it's a subquery that needs to be wrapped.
-            elseif(isset($table['as'])) {
+            elseif (!empty($alias)) {
                 $output = $this->parseQuery($table, $values);
-                $output = '(' . $output . ') AS `' . $table['as'] . '`';
+                $output = '(' . $output . ') AS `' . $alias . '`';
             }
 
             // If this is a full array without an alais.
@@ -1332,19 +1335,21 @@ class Database extends Singleton {
             if (is_array($v)) {
                 // Value is an expression.
                 if (!empty($v['expression'])) {
+                    $expression_values = !empty($v['vars']) ? $v['vars'] : [];
+                    $expression = is_array($v['expression']) ? $this->parseQuery($v['expression'], $expression_values) : $v['expression'];
                     if (is_numeric($field)) {
                         // There is no name, this expression should contain it's own equations.
-                        $a2[] = $v['expression'];
+                        $a2[] = $expression;
                     } else {
                         // Check a field equal to an expression.
-                        $a2[] = "{$field} = {$v['expression']}";
+                        $a2[] = "{$field} = {$expression}";
                     }
                     // Add any vars.
-                    if (isset($v['vars'])) {
-                        if (is_array($v['vars'])) {
-                            $values = array_merge($values, $v['vars']);
+                    if (!empty($expression_values)) {
+                        if (is_array($expression_values)) {
+                            $values = array_merge($values, $expression_values);
                         } else {
-                            $values[] = $v['vars'];
+                            $values[] = $expression_values;
                         }
                     }
                 }
