@@ -1,4 +1,15 @@
 <form method="post" action="/admin/social/share">
+    <h3>Post information</h3>
+    <p>Type: <?= $type; ?></p>
+    <p>ID: <?= $id; ?></p>
+    <p>
+        Text: (For Facebook and Google+ posts)
+        <textarea name="text"></textarea>
+    </p>
+    <p>
+        Tweet: (For Twitter Only)
+        <input name="short_text" type="text" maxlength="160" />
+    </p>
     <h3>Social Networks</h3>
     <table id="networks">
         <thead>
