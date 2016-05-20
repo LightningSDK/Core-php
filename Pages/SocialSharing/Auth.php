@@ -6,7 +6,6 @@ use Lightning\Model\Permissions;
 use Lightning\Model\SocialAuth;
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
-use Lightning\Tools\Database;
 use Lightning\Tools\SocialDrivers\Facebook;
 use Lightning\Tools\SocialDrivers\Google;
 use Lightning\Tools\SocialDrivers\SocialMediaApi;
@@ -20,15 +19,20 @@ class Auth extends Page {
     protected $page = 'admin/social/auth';
 
     public function __construct() {
-        // Custom construct and app ID override
         parent::__construct();
-        $overlay = Database::getInstance()->selectRow('overlay', ['site_id' => 16]);
-        Configuration::set('social.facebook', [
-            'appid' => $overlay['app_id'],
-            'secret' => $overlay['secret'],
-            // This line can stay if this module is converted publicly.
-            'scope' => 'pages_show_list,manage_pages,publish_pages,public_profile,publish_actions'
-        ]);
+
+        // Override the facebook scope with required additions.
+        $current_scope = Configuration::get('social.facebook.scope');
+        $new_scope = implode(',', array_unique(array_merge(explode(',', $current_scope), explode(',', 'pages_show_list,manage_pages,publish_pages,public_profile,publish_actions'))));
+        Configuration::set('social.facebook.scope', $new_scope);
+
+        // Override the google scope with required additions.
+        $current_scope = Configuration::get('social.google.scope');
+        $new_scope = implode(' ', array_unique(array_merge(explode(' ', $current_scope), [
+            'https://www.googleapis.com/auth/plus.stream.write',
+            'https://www.googleapis.com/auth/plus.me',
+        ])));
+        Configuration::set('social.google.scope', $new_scope);
     }
 
     public function hasAccess() {
@@ -76,7 +80,6 @@ class Auth extends Page {
             'token' => $api->getToken(),
             'social_id' => $api->getSocialId(),
             'user_id' => ClientUser::getInstance()->id,
-            'site_id' => Site::getInstance()->id,
             'network' => $api->getNetwork(),
             'name' => $api->getName(),
             'screen_name' => $api->getScreenName(),

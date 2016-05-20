@@ -2860,13 +2860,13 @@ abstract class Table extends Page {
 
         if ($this->joins) {
             $join = array_merge($join, $this->joins);
-        } 
-        
+        }
+
         $where[$this->getKey(true)] = $this->singularity ? $this->singularityID : $this->id;
-        
+
         // fields we retrieve from the query
         $fields = array_merge(["{$this->table}.*"], $this->joinFields);
-        
+
         if ($this->table) {
             $this->list = Database::getInstance()->selectRowQuery([
                 'from' => $this->table,
@@ -3535,7 +3535,7 @@ abstract class Table extends Page {
         if (isset($this->preset[$field['field']]['render_' . $this->action . '_field'])) {
             $this->getRow(false);
             if (is_array($this->preset[$field['field']]['render_' . $this->action . '_field'])
-              && $this->preset[$field['field']]['render_' . $this->action . '_field'][0] == 'this') {
+                && $this->preset[$field['field']]['render_' . $this->action . '_field'][0] == 'this') {
                 $this->preset[$field['field']]['render_' . $this->action . '_field'][0] = $this;
             }
             return $this->preset[$field['field']]['render_' . $this->action . '_field']($this->list);
