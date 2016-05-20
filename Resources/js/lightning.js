@@ -15,6 +15,9 @@ lightning.format = {
     }
 };
 
+/**
+ * The contains startup functions that can run on each page.
+ */
 lightning.startup = {
     init: function() {
         this.initForms();
@@ -42,6 +45,15 @@ lightning.startup = {
         });
     }
 };
+
+/**
+ * Force external scripts to load asynchronously before executing a callback.
+ *
+ * @param {string|array} url
+ *   A URL or array of urls of JS files.
+ * @param callback
+ *   A method to call when all the JS files have loaded.
+ */
 lightning.require = function(url, callback) {
     if (typeof url == "string") {
         url = [url];
@@ -68,6 +80,13 @@ lightning.require = function(url, callback) {
     }
 };
 
+/**
+ * Get a deep lightning variable using . notation.
+ *
+ * @param {string} locator
+ *
+ * @returns {*}
+ */
 lightning.get = function(locator) {
     if (!locator) {
         return null;
@@ -82,4 +101,38 @@ lightning.get = function(locator) {
         }
     }
     return value;
+};
+
+/**
+ * Load from hash or query string.
+ */
+lightning.parsed_query = null;
+lightning.parsed_hash = null;
+lightning.getFromURL = function(field, q) {
+    var parsedField = 'parsed_' + field;
+    // If the query has not been parsed yet.
+    if (lightning[parsedField] == null) {
+        // Parse the query.
+        var query = document.location[field].substring(1).split('&');
+        lightning[parsedField] = {};
+        for (var i in query) {
+            if (query[i].length == 0) {
+                continue;
+            }
+            split = query[i].split('=', 2);
+            lightning[parsedField][split[0]] = split[1];
+        }
+    }
+
+    // If there is a value for the requested property, return it.
+    if (lightning[parsedField].hasOwnProperty(q)) {
+        return lightning[parsedField][q];
+    }
+    return null;
+};
+lightning.query = function(q) {
+    return lightning.getFromURL('search', q);
+};
+lightning.hash = function(q) {
+    return lightning.getFromURL('hash', q);
 };
