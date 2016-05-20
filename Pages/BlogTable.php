@@ -13,18 +13,6 @@ class BlogTable extends Table {
     const TABLE = BlogPost::TABLE;
     const PRIMARY_KEY = 'blog_id';
 
-    /**
-     * @deprecated
-     * @var string;
-     */
-    protected $table = BlogPost::TABLE;
-
-    /**
-     * @deprecated
-     * @var string;
-     */
-    protected $key = 'blog_id';
-
     protected $trusted = true;
 
     protected $sort = 'time DESC';
@@ -35,6 +23,19 @@ class BlogTable extends Table {
             'key' => 'cat_id',
             'display_column' => 'category',
             'list' => 'compact'
+        ]
+    ];
+
+    protected $action_fields = [
+        'view' => [
+            'display_name' => 'View',
+            'type' => 'html',
+        ],
+        'share' => [
+            'column_name' => 'Share',
+            'type' => 'link',
+            'url' => '/admin/social/share?type=blog&id=',
+            'display_name' => '<img src="/images/lightning/share.png">',
         ]
     ];
 
@@ -84,15 +85,9 @@ class BlogTable extends Table {
         };
         $this->preset['header_image'] = self::getHeaderImageSettings();
 
-        $this->action_fields = array(
-            'view' => array(
-                'display_name' => 'View',
-                'type' => 'html',
-                'html' => function($row) {
-                    return '<a href="/' . $row['url'] . '.htm"><img src="/images/lightning/resume.png" /></a>';
-                }
-            ),
-        );
+        $this->action_fields['view']['html'] = function($row) {
+            return '<a href="/' . $row['url'] . '.htm"><img src="/images/lightning/resume.png" /></a>';
+        };
     }
 
     public static function getHeaderImageSettings() {

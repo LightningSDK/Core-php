@@ -103,11 +103,13 @@ class JS {
      *
      * @param string $script
      *   The javascript code.
+     * @param array $requires
+     *   A list of JS files required before this script runs.
      */
-    public static function startup($script) {
+    public static function startup($script, $requires = []) {
         $hash = md5($script);
         if (empty(self::$startup_scripts[$hash])) {
-            self::$startup_scripts[$hash] = array('script' => $script, 'rendered' => false);
+            self::$startup_scripts[$hash] = ['script' => $script, 'requires' => $requires, 'rendered' => false];
         }
     }
 
@@ -183,7 +185,13 @@ class JS {
                 $ready_scripts = '';
                 foreach (self::$startup_scripts as &$script) {
                     if (empty($script['rendered'])) {
-                        $ready_scripts .= $script['script'] . ';';
+                        if (!empty($script['requires'])) {
+                            // Include the startup script with the required JS scripts.
+                            $ready_scripts .= 'lightning.require(' . json_encode(array_values($script['requires']))
+                                . ', function(){' . $script['script'] . '})';
+                        } else {
+                            $ready_scripts .= $script['script'] . ';';
+                        }
                         $script['rendered'] = true;
                     }
                 }

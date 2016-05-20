@@ -4,6 +4,10 @@ namespace Lightning\Tools\SocialDrivers;
 
 use Google_Client;
 use Google_Service_Plus;
+use Google_Service_Plus_Activity;
+use Google_Service_Plus_ActivityObject;
+use Google_Service_Plus_ActivityObjectAttachments;
+use Google_Service_PlusDomains;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Session;
 use Lightning\View\JS;
@@ -13,10 +17,18 @@ class Google extends SocialMediaApi {
 
     const EMAIL_SUFFIX = 'google.com';
 
+    protected $network = 'google';
+
     /**
      * @var Google_Service_Plus
      */
     public $service;
+
+    protected static $isApp = false;
+
+    public static function setApp($app) {
+        self::$isApp = $app;
+    }
 
     public static function createInstance($token = null, $authorize = false) {
         include HOME_PATH . '/Lightning/Vendor/googleapiclient/src/Google/autoload.php';
@@ -38,18 +50,23 @@ class Google extends SocialMediaApi {
         $this->token = $token;
         $this->authorize = $authorize;
 
-        $appId = Configuration::get('social.google.client_id');
-        $secret = Configuration::get('social.google.secret');
+        if (empty(self::$isApp)) {
+            $appId = Configuration::get('social.google.client_id');
+            $secret = Configuration::get('social.google.secret');
+        } else {
+            $appId = Configuration::get('social.google-app.client_id');
+            $secret = Configuration::get('social.google-app.secret');
+        }
 
-        $client = new Google_Client();
-        $client->setClientId($appId);
-        $client->setClientSecret($secret);
+        $this->client = new Google_Client();
+        $this->client->setClientId($appId);
+        $this->client->setClientSecret($secret);
 
         if ($authorize) {
-            $client->setAccessToken($token);
-            $this->service = new Google_Service_Plus($client);
+            $this->client->setAccessToken($token);
+            $this->service = new Google_Service_Plus($this->client);
         } else {
-            $user_data = $client->verifyIdToken($token);
+            $user_data = $this->client->verifyIdToken($token);
             $this->id_profile = $user_data->getAttributes()['payload'];
             $this->social_id = $user_data->getUserId();
         }
@@ -106,6 +123,7 @@ class Google extends SocialMediaApi {
 
     public function getSocialId() {
         if ($this->authorize) {
+            $this->loadProfile();
             return $this->profile->getId();
         } else {
             return $this->social_id;
@@ -148,6 +166,10 @@ class Google extends SocialMediaApi {
         return $ids;
     }
 
+    public function getPages() {
+
+    }
+
     public static function renderLike() {
         JS::add('https://apis.google.com/js/platform.js', true);
         return '<div class="g-plusone" ' . self::getLayout() . '></div>';
@@ -186,11 +208,21 @@ class Google extends SocialMediaApi {
         JS::set('token', Session::getInstance()->getToken());
         JS::set('social.authorize', $authorize);
         JS::set('social.google.client_id', Configuration::get('social.google.client_id'));
+        JS::set('social.google.scope', Configuration::get('social.google.scope'));
         JS::startup('lightning.social.initLogin()');
 
         return '<span class="social-signin google"><i class="fa fa-google"></i><span> Sign in with Google</span></span>';
     }
 
     public function share($text, $settings = []) {
+        $this->serviceDomains = new Google_Service_PlusDomains($this->client);
+        $object = new Google_Service_Plus_ActivityObject();
+        $object->originalContent = $text;
+        $attachment = new Google_Service_Plus_ActivityObjectAttachments();
+        $attachment->setUrl($settings['url']);
+        $object->setAttachments([$attachment]);
+        $activity = new Google_Service_Plus_Activity();
+        $activity->setObject($object);
+        $this->serviceDomains->activities->insert('me', $activity);
     }
 }

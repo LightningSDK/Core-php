@@ -4,7 +4,7 @@ namespace Lightning\Tools\Cache;
 
 class StaticCache extends BaseCache {
 
-    protected static $cache = array();
+    protected static $cache = [];
 
     public function __construct($settings = array()) {
 

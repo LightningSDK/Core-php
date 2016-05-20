@@ -64,25 +64,41 @@ class Configuration {
     }
 
     /**
+     * Override the entire configuration with a new one.
+     *
+     * @param array $new_configuration
+     *   An array with the new configuration.
+     */
+    public static function override($new_configuration) {
+        self::$configuration = $new_configuration;
+    }
+
+    /**
      * Load the configuration from the configuration.inc.php file.
      */
     protected static function loadConfiguration() {
         if (empty(self::$configuration)) {
             foreach (self::getConfigurations() as $config_file) {
                 if (file_exists($config_file)) {
-                    self::merge(self::getConfigurationData($config_file));
+                    self::$configuration = array_replace_recursive(
+                        self::getConfigurationData($config_file),
+                        self::$configuration
+                    );
                 } else {
                     echo "not found $config_file";
                 }
             }
-            if (!empty(self::$configuration['modules'])) {
-                foreach (self::$configuration['modules'] as $module => $settings) {
-                    if (file_exists(HOME_PATH . '/Modules/' . $module . '/config.php')) {
-                        self::merge(include HOME_PATH . '/Modules/' . $module . '/config.php');
-                    }
-                }
-            }
         }
+    }
+
+    /**
+     * Get the full configuration.
+     *
+     * @return array
+     *   The full configuration.
+     */
+    public static function getConfiguration() {
+        return self::$configuration;
     }
 
     /**
