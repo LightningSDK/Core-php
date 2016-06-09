@@ -30,7 +30,9 @@ class Redis extends CacheController {
 
     public function __destruct() {
         // Close the socket.
-        fclose($this->connection);
+        if (!empty($this->connection)) {
+            fclose($this->connection);
+        }
     }
 
     public function get($key, $default = null) {
