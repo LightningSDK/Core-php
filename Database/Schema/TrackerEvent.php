@@ -11,8 +11,10 @@ class TrackerEvent extends Schema {
         return array(
             'tracker_id' => $this->int(true),
             'user_id' => $this->int(true),
+            'session_id' => $this->int(true),
             'sub_id' => $this->int(true),
             'date' => $this->int(true),
+            'time' => $this->int(true),
         );
     }
 
