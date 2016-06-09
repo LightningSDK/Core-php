@@ -1351,7 +1351,7 @@ abstract class Table extends Page {
                     $output .= is_callable($action['html']) ? $action['html']($row) : $action['html'];
                     break;
                 case 'action':
-                    $output .= "<a href='" . $this->createUrl($action['action'], $row[$this->getKey()], $action['action_field']) . "'>{$link_content}</a>";
+                    $output .= "<a href='" . $this->createUrl($action['action'], $row[$this->getKey()], !empty($action['action_field']) ? $action['action_field'] : '') . "'>{$link_content}</a>";
                     break;
                 case 'checkbox':
                 default:
@@ -1361,11 +1361,11 @@ abstract class Table extends Page {
             $output .= '</td>';
         }
         if ($this->editable !== false) {
-            $output .= "<td>";
+            $output .= '<td>';
             if ($editable) {
                 $output .= "<a href='" . $this->createUrl("edit", $row[$this->getKey()]) . "'><img src='/images/lightning/edit.png' border='0' /></a>";
             }
-            $output .= "</td>";
+            $output .= '</td>';
         }
         if ($this->duplicatable !== false) {
             $output .= "<td>";
@@ -2953,7 +2953,18 @@ abstract class Table extends Page {
         $start = (max(1, $this->page_number) - 1) * $this->maxPerPage;
 
         // validate the sort order
-        $sort = !empty($this->sort) ? " ORDER BY " . $this->sort : '';
+        if (!empty($this->sort)) {
+            if (is_array($this->sort)) {
+                foreach ($this->sort as $f => $d) {
+                    $sorts[] = $f . ' '  . $d . ' ';
+                }
+                $sort = ' ORDER BY ' . implode(',', $sorts);
+            } else {
+                $sort = ' ORDER BY ' . $this->sort;
+            }
+        } else {
+            $sort = '';
+        }
 
         if ($this->joins) {
             $join = array_merge($join, $this->joins);
