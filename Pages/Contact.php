@@ -92,6 +92,7 @@ class Contact extends PageView {
             $this->user->subscribe($list);
         }
 
+        // Send a message to the user who just opted in.
         if ($message = Request::post('message', 'int')) {
             $mailer = new Mailer();
             $mailer->sendOne($message, $this->user);
@@ -210,6 +211,9 @@ class Contact extends PageView {
         unset($fields['message']);
         unset($fields['contact']);
         unset($fields['success']);
+        unset($fields['list']);
+        unset($fields['g-recaptcha-response']);
+        unset($fields['captcha_abide']);
 
         foreach ($fields as $field) {
             if (is_array($_POST[$field])) {
