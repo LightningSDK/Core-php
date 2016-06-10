@@ -16,6 +16,9 @@ class CMS extends API {
         return true;
     }
 
+    /**
+     * Save most CMS objects.
+     */
     public function postSave() {
         if (ClientUser::getInstance()->isAdmin()) {
             $name = Request::post('cms');
@@ -30,6 +33,9 @@ class CMS extends API {
         }
     }
 
+    /**
+     * Save image objects which have additional data.
+     */
     public function postSaveImage() {
         if (ClientUser::getInstance()->isAdmin()) {
             $name = Request::post('cms');

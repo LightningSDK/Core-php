@@ -47,17 +47,17 @@ lightning.ajax = {
         if (data && data.errors && data.errors.length) {
             // TODO: make this more graceful.
             lightning.ajax.error(settings, data);
+            return;
         }
 
-        // Process success handling.
-        if (data && data.status == 'success') {
-            if (settings.user_success) {
-                settings.user_success(data);
-            }
-        } else if (data && data.status == 'redirect') {
-            // TODO: check for redirect cookie
+        // Process redirect.
+        if (data && data.status && data.status == 'redirect') {
             document.location = data.location;
-        } else if (settings.user_success) {
+            return;
+        }
+
+        // No errors handling, just call the success function if there is one.
+        if (settings.user_success) {
             settings.user_success(data);
         }
     },

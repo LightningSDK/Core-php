@@ -100,10 +100,10 @@ class CMS {
             JS::set('cms.baseUrl', $fh->getWebURL(''));
             JS::set('fileBrowser.type', Configuration::get('html_editor.browser'));
             JS::startup('lightning.cms.initImage();');
-            return '<a href="" class="button small" onclick="javascript:lightning.cms.editImage(\'' . $name . '\'); return false;">Change</a>'
-            . '<a href="" class="button small" onclick="javascript:lightning.cms.saveImage(\'' . $name . '\'); return false;">Save</a>'
-            . '<input type="text" placeholder="classes" id="cms_' . $name . '_class" class="imagesCSS" name="' . $forced_classes . '" value="' . $added_classes . '" />'
-            . '<img src="' . $content->url . '" id="cms_' . $name . '" class="' . $content->class . '" />';
+            return '<img src="/images/lightning/pencil.png" class="cms_edit_image icon-16" id="cms_edit_' . $name . '">
+            <img src="/images/lightning/save.png" class="cms_save_image icon-16" id="cms_save_' . $name . '" style="display:none">'
+            . '<input type="text" placeholder="classes" id="cms_' . $name . '_class" class="imagesCSS" name="' . $forced_classes . '" value="' . $added_classes . '" style="display:none" />'
+            . '<img src="' . $content->url . '" id="cms_' . $name . '" class="' . $content->class . '" style="display:none" />';
         } elseif (!empty($settings['norender'])) {
             return '';
         } else {

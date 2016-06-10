@@ -18,30 +18,26 @@ lightning.cms = {
                 action: "save",
                 content: $('#' + editor).html()
             },
-            success:function(data) {
-                if (data.status == 'success') {
-                    $('#' + editor.replace(/^cms_/, 'cms_edit_')).show();
-                    $('#' + editor.replace(/^cms_/, 'cms_save_')).hide();
-                } else {
-                    var error = '';
-                    for (var i in data.errors) {
-                        error += data.error[i] + ' ';
-                    }
-                    if (error == '') {
-                        error = 'Could not save: Unknown error.';
-                    }
-                    alert(error);
-                    self.edit();
-                }
+            success: function(data) {
+                $('#' + editor.replace(/^cms_/, 'cms_edit_')).show();
+                $('#' + editor.replace(/^cms_/, 'cms_save_')).hide();
             },
-            error:function() {
-                alert('The page could not be saved, please try again later.');
+            error: function() {
                 self.edit();
             }
         });
     },
 
     initImage: function() {
+        var self = this;
+        $('.cms_edit_image').on('click', function(e) {
+            var id = $(e.target).attr('id').replace(/^cms_edit_/, '');
+            self.editImage(id);
+        });
+        $('.cms_save_image').on('click', function(e) {
+            var id = $(e.target).attr('id').replace(/^cms_save_/, '');
+            self.saveImage(id);
+        });
         $('.imagesCSS').keyup(function() {
             var textField = $(this);
             var id = textField.attr('id').replace('_class', '');
@@ -51,6 +47,12 @@ lightning.cms = {
     },
 
     editImage: function(id) {
+        $('#cms_save_' + id).show();
+        $('#cms_save_' + id + '_class').show();
+        this.selectImage(id);
+    },
+
+    selectImage: function(id) {
         lightning.fileBrowser.openSelect('lightning-cms', id);
     },
 
@@ -70,19 +72,18 @@ lightning.cms = {
                 action: "save-image",
                 content: $('#cms_' + id).attr('src').replace(lightning.vars.cms.baseUrl, '')
             },
-            success:function(data) {
-                if (data.status != 'success') {
-                    var error = '';
-                    for (var i in data.errors) {
-                        error += data.error[i] + ' ';
-                    }
-                    if (error == '') {
-                        error = 'Could not save: Unknown error.';
-                    }
+            error: function() {
+                $('#cms_edit_' + id).hide();
+                $('#cms_save_' + id).show();
+                $('#cms_save_' + id + '_class').show();
+
+                var error = '';
+                for (var i in data.errors) {
+                    error += data.error[i] + ' ';
                 }
-            },
-            error:function() {
-                alert('The image could not be saved, please try again later.');
+                if (error == '') {
+                    error = 'Could not save: Unknown error.';
+                }
             }
         });
     },
@@ -117,26 +118,13 @@ lightning.cms = {
                 action: "save",
                 content: $('#cms_' + id).val()
             },
-            success:function(data) {
-                if (data.status != 'success') {
-                    var error = '';
-                    for (var i in data.errors) {
-                        error += data.error[i] + ' ';
-                    }
-                    if (error == '') {
-                        error = 'Could not save: Unknown error.';
-                    }
-                } else {
-                    // Switch back to the main view.
-                    $('#cms_edit_' + id).show();
-                    $('#cms_save_' + id).hide();
-                    $('#cms_' + id).hide();
-                    $('#cms_display_' + id).html($('#cms_' + id).val()).show();
-                }
+            success: function() {
+                // Switch back to the main view.
+                $('#cms_edit_' + id).show();
+                $('#cms_save_' + id).hide();
+                $('#cms_' + id).hide();
+                $('#cms_display_' + id).html($('#cms_' + id).val()).show();
             },
-            error:function() {
-                alert('The image could not be saved, please try again later.');
-            }
         });
     },
     initDate: function() {
@@ -172,25 +160,21 @@ lightning.cms = {
                 date_y: $('#cms_' + id + '_y').val()
             },
             success:function(data) {
-                if (data.status != 'success') {
-                    var error = '';
-                    for (var i in data.errors) {
-                        error += data.error[i] + ' ';
-                    }
-                    if (error == '') {
-                        error = 'Could not save: Unknown error.';
-                    }
-                } else {
-                    // Switch back to the main view.
-                    $('#cms_edit_' + id).show();
-                    $('#cms_save_' + id).hide();
-                    $('#cms_' + id).hide();
-                    var newDate = $('#cms_' + id + '_m').val() + '/' + $('#cms_' + id + '_d').val() + '/' + $('#cms_' + id + '_y').val();
-                    $('#date_'+id).text(newDate);
+                var error = '';
+                for (var i in data.errors) {
+                    error += data.error[i] + ' ';
+                }
+                if (error == '') {
+                    error = 'Could not save: Unknown error.';
                 }
             },
             error:function() {
-                alert('The image could not be saved, please try again later.');
+                // Switch back to the main view.
+                $('#cms_edit_' + id).show();
+                $('#cms_save_' + id).hide();
+                $('#cms_' + id).hide();
+                var newDate = $('#cms_' + id + '_m').val() + '/' + $('#cms_' + id + '_d').val() + '/' + $('#cms_' + id + '_y').val();
+                $('#date_'+id).text(newDate);
             }
         });
     }
