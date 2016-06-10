@@ -48,11 +48,7 @@ lightning.cms = {
 
     editImage: function(id) {
         $('#cms_save_' + id).show();
-        $('#cms_save_' + id + '_class').show();
-        this.selectImage(id);
-    },
-
-    selectImage: function(id) {
+        $('#cms_' + id + '_class').show();
         lightning.fileBrowser.openSelect('lightning-cms', id);
     },
 
@@ -61,6 +57,8 @@ lightning.cms = {
     },
 
     saveImage: function(id) {
+        $('#cms_save_' + id).hide();
+        $('#cms_' + id + '_class').hide();
         $.ajax({
             url: '/admin/cms',
             type: 'POST',
@@ -73,17 +71,9 @@ lightning.cms = {
                 content: $('#cms_' + id).attr('src').replace(lightning.vars.cms.baseUrl, '')
             },
             error: function() {
-                $('#cms_edit_' + id).hide();
+                // Revert back to edit mode.
                 $('#cms_save_' + id).show();
-                $('#cms_save_' + id + '_class').show();
-
-                var error = '';
-                for (var i in data.errors) {
-                    error += data.error[i] + ' ';
-                }
-                if (error == '') {
-                    error = 'Could not save: Unknown error.';
-                }
+                $('#cms_' + id + '_class').show();
             }
         });
     },
