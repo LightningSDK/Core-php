@@ -147,16 +147,17 @@ class Output {
      * @param boolean $suppress_status
      *   Whether to suppress the default success/error message.
      */
-    public static function json($data = array(), $suppress_status = false) {
+    public static function json($data = [], $suppress_status = false) {
         // Predefined outputs.
         if ($data === self::ACCESS_DENIED) {
-            $data = array('status' => 'access_denied');
+            $data = ['status' => 'access_denied'];
+            Messenger::error('Access Denied');
         }
         elseif ($data === self::SUCCESS || $data === true) {
-            $data = array('status' => 'success');
+            $data = ['status' => 'success'];
         }
         elseif ($data === self::ERROR || $data === false) {
-            $data = array('status' => 'error');
+            $data = ['status' => 'error'];
         }
         elseif (!empty($data['status']) && !empty(self::$statusStrings[$data['status']])) {
             // Convert numeric status to string.
