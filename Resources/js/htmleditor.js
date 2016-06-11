@@ -54,6 +54,15 @@ lightning.htmleditor = {
         });
     },
 
+    /**
+     * Get the content of an editor.
+     *
+     * @param {string} id
+     *   The name of the editor.
+     *
+     * @returns {string}
+     *   The content.
+     */
     getContent: function(id) {
         if (lightning.vars.htmleditors[id].editor_type == 'ckeditor') {
             return lightning.vars.htmleditors[id].ckeditor.getData();
@@ -69,7 +78,8 @@ lightning.htmleditor = {
         if (lightning.vars.htmleditors[editor_id].editor_type == 'tinymce') {
             tinymce.init(lightning.vars.htmleditors[editor_id]);
         } else if (lightning.vars.htmleditors[editor_id].editor_type == 'ckeditor') {
-            lightning.vars.htmleditors[editor_id].ckeditor = CKEDITOR.replace(editor_id, lightning.vars.htmleditors[editor_id]);
+            $('#' + editor_id).attr('contenteditable', 'true');
+            lightning.vars.htmleditors[editor_id].ckeditor = CKEDITOR.inline(editor_id, lightning.vars.htmleditors[editor_id]);
         }
     },
 
