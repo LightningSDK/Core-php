@@ -1333,10 +1333,18 @@ abstract class Table extends Page {
         $output = '';
         foreach ($this->action_fields as $a => $action) {
             $output .= '<td>';
+            // Get the display value for the column.
             if (!empty($action['display_value'])) {
                 $link_content = $action['display_value'];
             } else {
                 $link_content = $this->getDisplayName($action, $a);
+            }
+            // Run a custom condition to see if this should be displayed at all.
+            if (is_callable($action['condition'])) {
+                if (!$action['condition']($row)) {
+                    $output .= '</td>';
+                    continue;
+                }
             }
             switch ($action['type']) {
                 case 'function':
