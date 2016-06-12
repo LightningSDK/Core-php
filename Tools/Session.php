@@ -273,7 +273,7 @@ class Session extends SingletonObject {
             if (empty($key)) {
                 return FALSE;
             }
-        } while(Database::getInstance()->check('session', array('session_key'=>$key)));
+        } while(Database::getInstance()->check('session', ['session_key'=>$key]));
         return $key;
     }
 
@@ -287,20 +287,20 @@ class Session extends SingletonObject {
         // Remove password state for all other sessions.
         Database::getInstance()->update(
             'session',
-            array(
+            [
                 'state' => ['expression' => 'state & ' . self::STATE_REMEMBER],
-            ),
-            array(
+            ],
+            [
                 'user_id' => $this->user_id,
-                'session_id' => array('!=', $exception),
-            )
+                'session_id' => ['!=', $exception],
+            ]
         );
         // Delete sessions that are not in the remember state.
         Database::getInstance()->delete('session',
             array(
                 'user_id' => $this->user_id,
                 'state' => ['!&', self::STATE_REMEMBER],
-                'session_id' => array('!=', $exception),
+                'session_id' => ['!=', $exception],
             )
         );
     }
@@ -343,7 +343,7 @@ class Session extends SingletonObject {
         if (empty($new_sess_id)) {
             Output::error('Session error.');
         }
-        Database::getInstance()->update('session', array('session_key'=>$new_sess_id), array('session_id'=>$this->id));
+        Database::getInstance()->update('session', ['session_key'=>$new_sess_id], ['session_id'=>$this->id]);
         $this->session_key = $new_sess_id;
         $this->setCookie();
     }
@@ -355,7 +355,7 @@ class Session extends SingletonObject {
      *   The user id.
      */
     public function destroy_all($user_id) {
-        Database::getInstance()->delete('session', array('user_id'=>$user_id));
+        Database::getInstance()->delete('session', ['user_id'=>$user_id]);
     }
 
     /**
