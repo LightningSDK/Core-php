@@ -10,18 +10,32 @@ class URL extends Object {
     const PRIMARY_KEY = 'url_id';
     const MAX_LENGTH = 255;
 
+    /**
+     * Get a URL ID for the current web URL.
+     *
+     * @return integer
+     *   The URL ID.
+     */
     public static function getCurrentUrlId() {
-        $url = substr(Request::getURL(), 0, static::MAX_LENGTH);
+        return self::getURLId(substr(Request::getURL(), 0, static::MAX_LENGTH));
+    }
+
+    /**
+     * Get a URL ID for a specified URL.
+     *
+     * @param string $url
+     *
+     * @return integer
+     *   The URL ID.
+     */
+    public static function getURLId($url) {
         $db = Database::getInstance();
         if (!$id = $db->selectFieldQuery([
             'select' => static::PRIMARY_KEY,
             'from' => static::TABLE,
             'where' => ['url' => ['LIKE', $url]],
         ], static::PRIMARY_KEY)) {
-            $id = $db->insert(static::TABLE, ['url' => $url], true);
-            if (empty($id)) {
-                $id = $db->selectField('url_id', static::TABLE, ['url' => $url]);
-            }
+            $id = $db->insert(static::TABLE, ['url' => $url]);
         }
         return $id;
     }
