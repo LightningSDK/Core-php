@@ -11,6 +11,15 @@ use Lightning\Tools\Security\Random;
 use Lightning\Tools\SingletonObject;
 use Lightning\Tools\Request as LightningRequest;
 
+/**
+ * Class Session
+ *   An object to reference a user's session on the site.
+ *
+ * @package Overridable\Lightning\Tools
+ *
+ * @property integer $id
+ * @property integer $user_id
+ */
 class Session extends SingletonObject {
 
     const STATE_ANONYMOUS = 0;
