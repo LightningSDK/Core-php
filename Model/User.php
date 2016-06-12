@@ -647,21 +647,42 @@ class User extends Object {
         //  There is no session
         //  The session is blank
         //  The session user is not set to this user
-        $session = Session::getInstance(false);
+        $session = Session::getInstance(true, false);
+        // If there is a session, there is cleanup work to do.
+        if (is_object($session) && $session->user_id == 0) {
+            // If this is an anonymous session, we want to update any tables with session reference to user reference.
+            if ($session->user_id == 0) {
+                $convert_tables = Configuration::get('session.user_convert');
+                if (is_array($convert_tables)) {
+                    foreach ($convert_tables as $table) {
+                        Database::getInstance()->update($table, [
+                            'user_id' => $this->id,
+                        ], [
+                            'session_id' => $session->id,
+                        ]);
+                    }
+                }
+            }
+        }
+        // If it is not a session or is an anonymous session or other user, we need to create a new one.
         if ((!is_object($session)) || ($session->id == 0) || ($session->user_id != $this->id && $session->user_id != 0)) {
-            if (is_object($session)) {
-                // If there is some other session here, we can destroy it.
+            // If there is some other session here, we can destroy it.
+            if (is_object($session) && !empty($session->id)) {
                 $session->destroy();
             }
             $session = Session::create($this->id, $remember);
             Session::setInstance($session);
         }
+
+        // Set the user id and state.
         if ($session->user_id == 0) {
             $session->setUser($this->id);
         }
         if ($state) {
             $session->setState($state);
         }
+
+        // Load this session into the static instance.
         ClientUser::setInstance($this);
     }
 

@@ -119,7 +119,7 @@ class Tracker extends Singleton {
      *   The user id.
      */
     public static function trackEventID($tracker_id, $sub_id = 0, $user_id = -1) {
-        if ($user_id == -1) {
+        if ($user_id == -1 || $user_id == false) {
             $user_id = ClientUser::getInstance()->id;
         }
 
@@ -128,12 +128,14 @@ class Tracker extends Singleton {
         // Insert the event.
         Database::getInstance()->insert(
             'tracker_event',
-            array(
+            [
                 'tracker_id' => $tracker_id,
                 'user_id' => $user_id ?: 0,
                 'sub_id' => $sub_id ?: 0,
-                'date' => $today
-            )
+                'date' => $today,
+                'time' => time(),
+                'session_id' => Session::getInstance()->id,
+            ]
         );
     }
 
@@ -258,8 +260,10 @@ class Tracker extends Singleton {
                     'user_id',
                     'tracker_id',
                     'sub_id',
+                    'session_id',
                 ],
-                'group_by' => 'user_id',
+                // Group by user id, then by the session id if the user_id is not set.
+                'group_by' => ['user_id', ['expression' => 'IF(user_id > 0, 0, session_id)']],
             ]];
         } else {
             $table = 'tracker_event';
@@ -273,7 +277,7 @@ class Tracker extends Singleton {
         );
 
         // Make sure all entries are present.
-        $return = array();
+        $return = [];
         for ($i = $start; $i <= $end; $i++) {
             $return[$i] = isset($results[$i]) ? $results[$i] : 0;
         }

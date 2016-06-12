@@ -36,6 +36,9 @@ $conf = array(
         'password_ttl' => 432000, // 5 Days
         'app_ttl' => 7776000, // 90 Days
         'cookie' => 'session',
+        'user_convert' => [
+            'tracker_event' => 'tracker_event',
+        ]
     ),
     'user' => array(
         'login_url' => '/',
