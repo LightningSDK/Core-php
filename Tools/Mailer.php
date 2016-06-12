@@ -388,6 +388,9 @@ class Mailer {
      */
     public function sendOne($message_id, $user) {
         $this->built = false;
+        if (is_string($user)) {
+            $user = User::addUser($user);
+        }
         $this->clearAddresses();
         $this->loadMessage($message_id);
         $this->message->resetCustomVariables($this->customVariables);
