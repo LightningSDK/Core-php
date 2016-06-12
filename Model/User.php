@@ -19,6 +19,19 @@ use Lightning\Tools\Tracker;
 use Lightning\View\Field\Time;
 use Lightning\Model\Permissions;
 
+/**
+ * Class User
+ * @package Overridable\Lightning\Model
+ *
+ * @property integer $id
+ * @property string $email
+ * @property string $first
+ * @property string $last
+ * @property object $content
+ * @property string $password
+ * @property string $salt
+ * @property boolean $new
+ */
 class User extends Object {
 
     /**
@@ -101,8 +114,8 @@ class User extends Object {
     }
 
     public function update($values) {
-        $this->data = $values + $this->data;
-        Database::getInstance()->update('user', $values, array('user_id' => $this->id));
+        $this->__data = $values + $this->__data;
+        Database::getInstance()->update('user', $values, ['user_id' => $this->id]);
     }
 
     /**
@@ -111,7 +124,7 @@ class User extends Object {
      * @return User
      */
     public static function anonymous() {
-        return new static(array('user_id' => 0));
+        return new static(['user_id' => 0]);
     }
 
     /**
@@ -175,7 +188,7 @@ class User extends Object {
             $salt = $this->salt;
             $hashed_pass = $this->password;
         }
-        if ($hashed_pass == $this->passHash($pass, pack("H*",$salt))) {
+        if ($hashed_pass == $this->passHash($pass, pack('H*', $salt))) {
             return true;
         }
         else {
@@ -195,7 +208,7 @@ class User extends Object {
      *   The hashed password.
      */
     public static function passHash($pass, $salt) {
-        return hash("sha256", $pass . $salt);
+        return hash('sha256', $pass . $salt);
     }
 
     /**
@@ -226,7 +239,7 @@ class User extends Object {
      * This should happen on each page load.
      */
     public function ping() {
-        Database::getInstance()->update('user', array('last_active' => time()), array('user_id' => $this->id));
+        Database::getInstance()->update('user', ['last_active' => time()], ['user_id' => $this->id]);
     }
 
     /**
@@ -236,8 +249,8 @@ class User extends Object {
      *   Whether to force the data to load and overwrite current data.
      */
     public function load_info($force = false) {
-        if (!isset($this->data) || $force) {
-            $this->data = Database::getInstance()->selectRow('user', array('user_id' => $this->id));
+        if (!isset($this->__data) || $force) {
+            $this->__data = Database::getInstance()->selectRow('user', ['user_id' => $this->id]);
         }
     }
 
@@ -256,15 +269,15 @@ class User extends Object {
      *      [Status of creation, Error short code]
      */
     public static function create($email, $pass) {
-        if (Database::getInstance()->check('user', array('email' => strtolower($email), 'password' => array('!=', '')))) {
+        if (Database::getInstance()->check('user', ['email' => strtolower($email), 'password' => ['!=', '']])) {
             // An account already exists with that email.
             return [
                 'success'   => false,
                 'error'     => 'A user with that email already exists.'
             ];
-        } elseif ($user_info = Database::getInstance()->selectRow('user', array('email' => strtolower($email), 'password' => ''))) {
+        } elseif ($user_info = Database::getInstance()->selectRow('user', ['email' => strtolower($email), 'password' => ''])) {
             // EMAIL EXISTS IN MAILING LIST ONLY
-            $updates = array();
+            $updates = [];
             // Set the referrer.
             if ($ref = Request::cookie('ref', 'int')) {
                 $updates['referrer'] = $ref;
@@ -281,12 +294,12 @@ class User extends Object {
         } else {
             // EMAIL IS NOT IN MAILING LIST AT ALL
             $user_id = static::insertUser($email, $pass);
-            $updates = array();
+            $updates = [];
             if ($ref = Request::cookie('ref', 'int')) {
                 $updates['referrer'] = $ref;
             }
             if (!empty($updates)) {
-                Database::getInstance()->update('user', $updates, array('user_id' => $user_id));
+                Database::getInstance()->update('user', $updates, ['user_id' => $user_id]);
             }
             $user = static::loadById($user_id);
             $user->sendConfirmationEmail();
@@ -310,7 +323,7 @@ class User extends Object {
      * @return User
      */
     public static function addUser($email, $options = [], $update = []) {
-        $user_data = array();
+        $user_data = [];
         $user_data['email'] = strtolower($email);
         static::parseNames($options);
         static::parseNames($update);
@@ -361,7 +374,7 @@ class User extends Object {
      * Remove this user from all mailing lists.
      */
     public function unsubscribeAll() {
-        Database::getInstance()->delete('message_list_user', array('user_id' => $this->id));
+        Database::getInstance()->delete('message_list_user', ['user_id' => $this->id]);
     }
 
     /**
@@ -480,13 +493,13 @@ class User extends Object {
                 ->send();
             Database::getInstance()->update(
                 'user',
-                array(
+                [
                     'registered' => $today,
                     'confirmed' => static::requiresConfirmation() ? static::UNCONFIRMED : static::CONFIRMED,
-                ),
-                array(
+                ],
+                [
                     'user_id' => $user_info['user_id'],
-                )
+                ]
             );
             return $user_info['user_id'];
         } else {
@@ -502,13 +515,13 @@ class User extends Object {
                 ->send();
             Database::getInstance()->update(
                 'user',
-                array(
+                [
                     'registered' => $today,
                     'confirmed' => static::requiresConfirmation() ? static::UNCONFIRMED : static::CONFIRMED,
-                ),
-                array(
+                ],
+                [
                     'user_id' => $user_id,
-                )
+                ]
             );
             return $user_id;
         }
@@ -638,7 +651,7 @@ class User extends Object {
 
     public function destroy() {
         // TODO: Remove the current user's session.
-        $this->data = array();
+        $this->__data = [];
         Session::reset();
     }
 

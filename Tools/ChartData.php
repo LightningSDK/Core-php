@@ -14,7 +14,7 @@ class ChartData {
     public function __construct($start, $end) {
         $this->start = $start;
         $this->end = $end;
-        $this->data = array();
+        $this->data = [];
     }
 
     /**
@@ -23,7 +23,7 @@ class ChartData {
     public function createDataSets($data) {
         foreach ($data as $row) {
             if (!isset($this->data[$row['set']])) {
-                $this->data[$row['set']] = array('data' => array_fill(0, $this->end - $this->start + 1, 0));
+                $this->data[$row['set']] = ['data' => array_fill(0, $this->end - $this->start + 1, 0)];
             }
             // Make sure it's within the range.
             if ($row['x'] - $this->start > 0 && $row['x'] - $this->start < $this->end - $this->start + 1) {

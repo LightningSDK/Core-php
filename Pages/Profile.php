@@ -34,7 +34,7 @@ class Profile extends Page {
         $user = ClientUser::getInstance();
 
         // Update the user name.
-        $user->update(array('first' => Request::get('first'), 'last' => Request::get('last')));
+        $user->update(['first' => Request::get('first'), 'last' => Request::get('last')]);
 
         // Update the password.
         $password = Request::post('password');
@@ -53,12 +53,12 @@ class Profile extends Page {
         }
 
         // Update mailing list preferences.
-        $new_lists = Request::get('subscribed', 'array', 'int', array());
+        $new_lists = Request::get('subscribed', 'array', 'int', []);
         $new_lists = array_combine($new_lists, $new_lists);
         $all_lists = Subscription::getLists();
         $user_id = ClientUser::getInstance()->id;
         $user_lists = Subscription::getUserLists($user_id);
-        $remove_lists = array();
+        $remove_lists = [];
         foreach ($user_lists as $list) {
             if (empty($new_lists[$list['message_list_id']]) && !empty($list['visible'])) {
                 $remove_lists[$list['message_list_id']] = $list['message_list_id'];
@@ -76,14 +76,14 @@ class Profile extends Page {
 
         $db = Database::getInstance();
         if (!empty($remove_lists)) {
-            $db->delete('message_list_user', array('message_list_id' => array('IN', $remove_lists), 'user_id' => $user_id));
+            $db->delete('message_list_user', ['message_list_id' => ['IN', $remove_lists], 'user_id' => $user_id]);
         }
         if (!empty($add_lists)) {
-            $db->insertMultiple('message_list_user', array('message_list_id' => $add_lists, 'user_id' => $user_id), true);
+            $db->insertMultiple('message_list_user', ['message_list_id' => $add_lists, 'user_id' => $user_id], true);
         }
 
         if (count(Messenger::getErrors()) == 0) {
-            Navigation::redirect(null, array('msg' => 'saved'));
+            Navigation::redirect(null, ['msg' => 'saved']);
         }
     }
 }

@@ -10,14 +10,14 @@ trait ObjectDataStorage {
      *
      * @var array
      */
-    protected $__data = array();
+    protected $__data = [];
 
     /**
      * To track changes in the data container.
      *
      * @var array
      */
-    protected $__changed = array();
+    protected $__changed = [];
 
     /**
      * Track whether to update all fields.
@@ -66,8 +66,8 @@ trait ObjectDataStorage {
      *
      * This works for:
      *   ->id
-     *   ->data
      *   ->{primary_key} (item inside ->data)
+     *   ->{field_name} (item inside ->data)
      *
      * @param string $var
      *   The name of the requested variable.
@@ -108,8 +108,8 @@ trait ObjectDataStorage {
      *
      * This works for:
      *   ->id
-     *   ->data
-     *   ->user_id (item inside ->data)
+     *   ->{primary_key} (item inside ->data)
+     *   ->{field_name} (item inside ->data)
      *
      * @param string $var
      *   The name of the variable to set.

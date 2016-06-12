@@ -26,7 +26,7 @@ class Tracker extends Singleton {
      */
     protected static function loadTrackers() {
         if (!isset(self::$trackers)) {
-            self::$trackers = Database::getInstance()->selectColumn('tracker', 'tracker_id', array(), 'tracker_name');
+            self::$trackers = Database::getInstance()->selectColumn('tracker', 'tracker_id', [], 'tracker_name');
         }
     }
 
@@ -67,7 +67,7 @@ class Tracker extends Singleton {
         // The tracker does not exist.
         if (empty(self::$trackers[$tracker_name])) {
             // Create a new tracker.
-            self::$trackers[$tracker_name] = Database::getInstance()->insert('tracker', array('tracker_name' => $tracker_name));
+            self::$trackers[$tracker_name] = Database::getInstance()->insert('tracker', ['tracker_name' => $tracker_name]);
         }
 
         return self::$trackers[$tracker_name];
@@ -119,7 +119,7 @@ class Tracker extends Singleton {
      *   The user id.
      */
     public static function trackEventID($tracker_id, $sub_id = 0, $user_id = -1) {
-        if ($user_id == -1 || $user_id == false) {
+        if ($user_id == -1 || $user_id === false) {
             $user_id = ClientUser::getInstance()->id;
         }
 

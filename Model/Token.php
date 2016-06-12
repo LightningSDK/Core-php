@@ -8,9 +8,9 @@ use Lightning\Exceptions\TokenNotFound;
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Database;
 use Lightning\Tools\Request;
+use Lightning\Tools\Security\Random;
 use Lightning\Tools\Session;
 use Lightning\Tools\SingletonObject;
-use Source\Overrides\Tools\Security\Random;
 
 class Token extends SingletonObject{
     /**
@@ -26,7 +26,7 @@ class Token extends SingletonObject{
      *
      * @var array
      */
-    protected $token_data = array();
+    protected $token_data = [];
 
     /**
      * Set's the details of a token object.
@@ -34,12 +34,22 @@ class Token extends SingletonObject{
      * @param $data
      */
     public function __construct($data = []) {
-        $this->data = $data;
+        $this->__data = $data;
+        // TODO: This can be set using the JSONEncodedFields setting.
         $this->token_data = !empty($data['token_data']) ? json_decode($data['token_data'], true) : [];
     }
 
     /**
      * Wrapper for getInstance()
+     *
+     * @param boolean $create
+     *   Whether to create a token if it doesn't exist.
+     * @param boolean $reset_time
+     *   Whether to reset the time on the token to postpone expiration.
+     * @param boolean $ignore_expiration
+     *   Whether to continue to load the object, even if the token has expired.
+     * @param boolean $new_if_not_found
+     *   Whether to create a new token if there isn't one.
      *
      * @return Token
      *   The token object.
@@ -72,7 +82,7 @@ class Token extends SingletonObject{
         $session = Session::getInstance();
         $user = ClientUser::getInstance();
         $db = Database::getInstance();
-        do{
+        do {
             $token = Random::get(32, Random::BASE64);
         } while ($db->check('action_token', array('key' => $token)));
         // MAKE SURE THERE IS A SESSION
@@ -103,6 +113,13 @@ class Token extends SingletonObject{
 
     /**
      * Load a token and it's data based on the current submission.
+     *
+     * @param boolean $reset_time
+     *   Whether to reset the time and postpone expiration.
+     * @param boolean $ignore_expiration
+     *   Whether to load the object regardless of expiration.
+     * @param boolean $new_if_not_found
+     *   Whether to create the object if it's not found.
      *
      * @return token
      *   A token object.
@@ -183,7 +200,7 @@ class Token extends SingletonObject{
      * Removes all data from the token in and db.
      */
     public function clear() {
-        $this->data = [];
+        $this->__data = [];
         $this->save();
     }
 }

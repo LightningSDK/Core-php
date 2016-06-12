@@ -19,6 +19,10 @@ use Lightning\Tools\Request as LightningRequest;
  *
  * @property integer $id
  * @property integer $user_id
+ * @property integer $last_ping
+ * @property integer $state
+ * @property string $session_key
+ * @property string $form_token
  */
 class Session extends SingletonObject {
 
@@ -169,7 +173,7 @@ class Session extends SingletonObject {
      *   The new user id.
      */
     public function setUser($user_id) {
-        Database::getInstance()->update('session', array('user_id' => $user_id), array('session_id' => $this->id));
+        Database::getInstance()->update('session', ['user_id' => $user_id], ['session_id' => $this->id]);
     }
 
     /**
@@ -192,6 +196,10 @@ class Session extends SingletonObject {
 
     /**
      * Remove a state.
+     *
+     * @property integer $state
+     *   The state value to set. Should be a value of 2^(n-1) so the first bit is 1,
+     *   2nd bit is 2, 3rd bit is 4, etc.
      */
     public function unsetState($state) {
         $this->state ^= $state;
@@ -232,7 +240,7 @@ class Session extends SingletonObject {
      */
     public function ping() {
         // Make the cookie last longer in the database.
-        Database::getInstance()->update('session', array('last_ping' => time()), array('session_id' => $this->id));
+        Database::getInstance()->update('session', ['last_ping' => time()], ['session_id' => $this->id]);
         // Make the cookie last longer in the browser.
         $this->setCookie();
     }
@@ -317,10 +325,10 @@ class Session extends SingletonObject {
         foreach ($timeouts as $state => $timeout) {
             $deletions += $db->delete(
                 'session',
-                array(
-                    'last_ping' => array('<', time() - $timeout),
-                    'state' => array('&', $aggregate_state, 0),
-                )
+                [
+                    'last_ping' => ['<', time() - $timeout],
+                    'state' => ['&', $aggregate_state, 0],
+                ]
             );
             $aggregate_state |= $state;
         }

@@ -12,18 +12,18 @@ class AjaxPage {
      *
      * @var array
      */
-    protected $data = array();
+    protected $data = [];
 
     /**
      * Output the data.
      */
     public function output() {
         Output::json(
-            array(
+            [
                 'data' => $this->data,
                 'messages' => Messenger::getMessages(),
                 'errors' => Messenger::getErrors(),
-            )
+            ]
         );
     }
 
@@ -47,7 +47,8 @@ class AjaxPage {
                 $this->$request_type();
                 $this->output();
             } else {
-                $this->output = array();
+                // TODO: This can probably be deleted.
+                $this->output = [];
                 // TODO: show 302
                 echo 'Method not available';
                 exit;
