@@ -171,13 +171,13 @@ fi
 if [ `shouldInstall "Install elfinder?"` -eq 1 ]
 then
     cd $DIR/js
-    wget https://github.com/Studio-42/elFinder/archive/2.1.6.zip -O elfinder-2.1.6.zip
-    unzip elfinder-2.1.6.zip
-    mv elFinder-2.1.6 elfinder
+    wget https://github.com/Studio-42/elFinder/archive/2.1.12.zip -O elfinder-2.1.12.zip
+    unzip elfinder-2.1.12.zip
+    mv elFinder-2.1.12 elfinder
     cp $DIR/Lightning/install/elfinder/elfinder.html $DIR/js/elfinder/elfinder.html
 fi
 
-if [ `shouldInstall "Install index file?"` -eq 1 ]
+if [ `shouldInstall "Install Lightning index file?"` -eq 1 ]
 then
     cp $DIR/Lightning/install/index.php $DIR/index.php
 fi
