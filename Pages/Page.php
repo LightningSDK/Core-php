@@ -184,6 +184,7 @@ class Page extends PageView {
         $new_values = array(
             'title' => $title,
             'url' => !empty($url) ? $url : Scrub::url($title),
+            'menu_context' => Request::post('menu_context'),
             'keywords' => Request::post('keywords'),
             'description' => Request::post('description'),
             'site_map' => Request::post('sitemap', 'int'),

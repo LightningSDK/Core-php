@@ -26,6 +26,7 @@
                 <table border='0' width="100%">
                     <tr><td>Title:</td><td><input type="text" name="title" id='page_title' value="<?=$full_page['title']?>" /></td></tr>
                     <tr><td>URL:</td><td><input type="text" name="url" id='page_url' value="<?=$full_page['url']?>" /></td></tr>
+                    <tr><td>Menu Context:</td><td><input type="text" name="menu_context" id='page_menu_context' value="<?=$full_page['menu_context']?>" /></td></tr>
                     <tr><td>Description:</td><td><input type="text" name="description" id='page_description' value="<?=$full_page['description']?>" /></td></tr>
                     <tr><td>Keywords:</td><td><input type="text" name="keywords" id='page_keywords' value="<?=$full_page['keywords']?>" /></td></tr>
                     <tr><td>Include in site map:</td><td><input type="checkbox" name="sitemap" id='page_sitemap' value="1" <?php if ( $full_page['site_map'] == 1):?>checked="true"<?php endif; ?> /></td></tr>

@@ -15,6 +15,7 @@ lightning.page = {
             action: "save",
             title: $("#page_title").val(),
             url: $("#page_url").val(),
+            menu_context: $("#page_menu_context").val(),
             description: $("#page_description").val(),
             keywords: $('#page_keywords').val(),
             sitemap: $('#page_sitemap').is(":checked") ? 1 : 0,
