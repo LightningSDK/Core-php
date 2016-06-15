@@ -26,6 +26,20 @@ shouldInstall() {
     done
 }
 
+# Create the source paths
+if [ ! -d $DIR/Source ]; then
+    echo "Making Source Directory"
+    mkdir $DIR/Source
+    cp $DIR/Lightning/install/.htaccess-protected $DIR/Source/.htaccess
+fi
+
+# Install the cache directory.
+if [ ! -d $DIR/cache ]; then
+    echo "Creating cache directory"
+    cp -r $DIR/Lightning/install/cache $DIR/
+fi
+
+# Start the install process.
 if [ `shouldInstall "Install PHP dependencies and set permissions?"` -eq 1 ]
 then
     cd $DIR/Lightning
@@ -185,20 +199,6 @@ fi
 if [ `shouldInstall "Install root .htaccess file for Apache web server?"` -eq 1 ]
 then
     cp $DIR/install/.htaccess-router $DIR/.htaccess
-fi
-
-# Create the source paths
-if [ ! -d $DIR/Source ]; then
-    echo "Making Source Directory"
-    mkdir $DIR/Source
-    echo "Copying Source htaccess file"
-    cp $DIR/Lightning/install/.htaccess-protected $DIR/Source/.htaccess
-fi
-
-# Install the cache directory.
-if [ ! -d $DIR/cache ]; then
-    echo "Creating cache directory"
-    cp -r $DIR/Lightning/install/cache $DIR/
 fi
 
 # Install the sample config file as active.
