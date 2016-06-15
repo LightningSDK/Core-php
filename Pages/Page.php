@@ -68,6 +68,7 @@ class Page extends PageView {
             HTMLEditor::init();
             JS::startup('lightning.page.edit();');
         } elseif ($this->fullPage = PageModel::loadByUrl('404')) {
+            $this->fullPage['site_map'] = 1;
             http_response_code(404);
         } else {
             Output::http(404);
@@ -108,7 +109,7 @@ class Page extends PageView {
             $this->setMeta('description', Text::shorten($this->fullPage['body'], 500));
         }
 
-        if ($this->fullPage['url'] == "" && isset($_GET['page'])) {
+        if ($this->fullPage['url'] == '' && isset($_GET['page'])) {
             $this->fullPage['url'] = $_GET['page'];
         }
         else {
