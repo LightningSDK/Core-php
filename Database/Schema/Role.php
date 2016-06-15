@@ -6,7 +6,7 @@ use Lightning\Database\Schema;
 
 class Role extends Schema {
 
-    protected $table = 'role';
+    const TABLE = 'role';
 
     public function getColumns() {
         return array(

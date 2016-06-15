@@ -5,7 +5,7 @@ namespace Lightning\Database\Schema;
 use Lightning\Database\Schema;
 
 class Tracker extends Schema {
-    protected $table = 'tracker';
+    const TABLE = 'tracker';
 
     public function getColumns() {
         return array(

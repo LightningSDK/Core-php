@@ -6,7 +6,7 @@ use Lightning\Database\Schema;
 
 class MessageCriteria extends Schema {
 
-    protected $table = 'message_criteria';
+    const TABLE = 'message_criteria';
 
     public function getColumns() {
         return array(

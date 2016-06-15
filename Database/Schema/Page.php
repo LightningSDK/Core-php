@@ -6,7 +6,7 @@ use Lightning\Database\Schema;
 
 class Page extends Schema {
 
-    protected $table = 'page';
+    const TABLE = 'page';
 
     public function getColumns() {
         return array(

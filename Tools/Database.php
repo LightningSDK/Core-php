@@ -1483,6 +1483,31 @@ class Database extends Singleton {
     }
 
     /**
+     * Add a new column to an existing table.
+     *
+     * @param string $table
+     *   The existing table.
+     * @param string $column
+     *   The name of the new column.
+     * @param array $settings
+     *   The column definition.
+     * @param null|string|boolean $position
+     *   TRUE to add the column to the beginning of the table,
+     *   Column name to add the column after another column,
+     *   FALSE or NULL to add the column to the end of the table.
+     */
+    public function addColumn($table, $column, $settings, $position = null) {
+        $query = 'ALTER TABLE ' . $this->parseTable($table);
+        $query .= ' ADD COLUMN ' . $this->getColumnDefinition($column, $settings);
+        if ($position === true) {
+            $query .= ' FIRST';
+        } elseif (!empty($position)) {
+            $query .= ' AFTER `' . $position . '`';
+        }
+        $this->query($query);
+    }
+
+    /**
      * Create a column definition for adding to a table.
      *
      * @param string $name

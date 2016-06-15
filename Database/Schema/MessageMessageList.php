@@ -6,7 +6,7 @@ use Lightning\Database\Schema;
 
 class MessageMessageList extends Schema {
 
-    protected $table = 'message_message_list';
+    const TABLE = 'message_message_list';
 
     public function getColumns() {
         return array(

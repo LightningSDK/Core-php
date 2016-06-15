@@ -6,7 +6,7 @@ use Lightning\Database\Schema;
 
 class Session extends Schema {
 
-    protected $table = 'session';
+    const TABLE = 'session';
 
     public function getColumns() {
         return array(

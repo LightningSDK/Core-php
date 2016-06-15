@@ -6,7 +6,7 @@ use Lightning\Database\Schema;
 
 class CMS extends Schema {
 
-    protected $table = 'cms';
+    const TABLE = 'cms';
 
     public function getColumns() {
         return array(

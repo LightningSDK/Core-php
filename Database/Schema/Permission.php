@@ -6,7 +6,7 @@ use Lightning\Database\Schema;
 
 class Permission extends Schema {
 
-    protected $table = 'permission';
+    const TABLE = 'permission';
 
     public function getColumns() {
         return array(

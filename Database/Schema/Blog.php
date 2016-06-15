@@ -6,7 +6,7 @@ use Lightning\Database\Schema;
 
 class Blog extends Schema {
 
-    protected $table = 'blog';
+    const TABLE = 'blog';
 
     public function getColumns() {
         return array(

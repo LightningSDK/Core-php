@@ -5,7 +5,7 @@ namespace Lightning\Database\Schema;
 use Lightning\Database\Schema;
 
 class URL extends Schema {
-    protected $table = 'url';
+    const TABLE = 'url';
 
     public function getColumns() {
         return array(

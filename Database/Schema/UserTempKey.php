@@ -6,7 +6,7 @@ use Lightning\Database\Schema;
 
 class UserTempKey extends Schema {
 
-    protected $table = 'user_temp_key';
+    const TABLE = 'user_temp_key';
 
     public function getColumns() {
         return array(
