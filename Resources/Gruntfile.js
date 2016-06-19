@@ -14,7 +14,7 @@ module.exports = function(grunt) {
                     httpImagesPath: '/images',
                     outputStyle: 'compressed',
                     importPath: [
-                        '../Vendor/foundation/scss',
+                        '../Vendor/foundation/dist/assets/scss',
                         '../Vendor/compass/frameworks/compass/stylesheets'
                     ]
                 }
