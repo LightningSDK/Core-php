@@ -428,19 +428,20 @@ class Output {
         header('Content-Type: ' . $content_type);
     }
 
-    public static function http($reponse_code) {
+    public static function http($response_code) {
         // Attempt to load from ###.html
-        http_response_code($reponse_code);
+        http_response_code($response_code);
 
         // Use the Page handler for output.
         $page = new PageView();
 
         // Attempt to load a page from the database.
-        if ($full_page = PageModel::loadByURL($reponse_code)) {
+        if ($full_page = PageModel::loadByURL($response_code)) {
             $full_page['url'] = Request::get('page');
+            $full_page['site_map'] = 1;
         } else {
             // If the page doesn't exist, fill it with default content.
-            $full_page['title'] = $reponse_code . ' ' . self::$httpErrorMessages[$reponse_code];
+            $full_page['title'] = $response_code . ' ' . self::$httpErrorMessages[$response_code];
             $full_page['keywords'] = '';
             $full_page['description'] = '';
             $full_page['url'] = '';

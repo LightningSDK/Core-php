@@ -1,4 +1,3 @@
-@import 'foundation/components/_grid.scss';
 @import '_compass';
 @import 'foundation';
 @import 'normalize';
@@ -550,6 +549,9 @@ ul.tags{
 .social-share {
   width: 100%;
   text-align: center;
+  @include breakpoint(small only) {
+    font-size: 12px;
+  }
   div.share {
     display: inline-block;
     color: white;
@@ -574,11 +576,6 @@ ul.tags{
         color: white;
       }
     }
-  }
-}
-@media #{$small-only} {
-  .social-share {
-    font-size: 12px;
   }
 }
 .semi-white {

@@ -39,6 +39,7 @@ class Pages extends Table {
         ),
         'site_map' => array(
             'type' => 'checkbox',
+            'default' => true,
         ),
         'last_update' => array(
             'type' => 'datetime',

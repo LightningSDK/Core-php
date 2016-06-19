@@ -455,4 +455,8 @@ class Mailer {
         }
         echo "\n\n";
     }
+
+    public function addStringAttachment($data, $filename, $encoding = 'base64', $content_type = '', $disposition = 'attachment') {
+        $this->mailer->addStringAttachment($data, $filename, $encoding, $content_type, $disposition);
+    }
 }
