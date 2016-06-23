@@ -1,3 +1,4 @@
+@import 'foundation/components/_grid.scss';
 @import '_compass';
 @import 'foundation';
 @import 'normalize';
@@ -355,6 +356,10 @@ ul.tags{
   -webkit-transition: all 0.3s ease-out;
   transition: all 0.3s ease-out;
 }
+.button-spacer {
+  width: 10px;
+  display: inline-block;
+}
 .button {
   outline:none;
   font-size: 24px; font-weight: bold;
@@ -561,4 +566,5 @@ ul.tags{
 
 .cms_edit_image, .cms_save_image {
   position: relative !important;
+  z-index: 500;
 }
