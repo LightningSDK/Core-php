@@ -119,7 +119,7 @@ lightning.getFromURL = function(field, q) {
             if (query[i].length == 0) {
                 continue;
             }
-            split = query[i].split('=', 2);
+            var split = query[i].split('=', 2);
             lightning[parsedField][split[0]] = split[1];
         }
     }
@@ -136,3 +136,4 @@ lightning.query = function(q) {
 lightning.hash = function(q) {
     return lightning.getFromURL('hash', q);
 };
+lightning.modules = {};

@@ -29,18 +29,18 @@ lightning.ajax = {
             if (settings.user_success) {
                 settings.user_success(data);
             } else {
-                lightning.dialog.setContent(data);
+                lightning.dialog.showContent(data);
             }
             return;
         }
 
         // Add standard messages to the dialog.
         if (data && data.messages && data.messages.length > 0) {
-            lightning.dialog.showPrepared(function(){
-                for(var i in data.messages) {
-                    lightning.dialog.add(data.messages[i], 'message');
-                }
-            });
+            lightning.dialog.clear();
+            for(var i in data.messages) {
+                lightning.dialog.add(data.messages[i], 'message');
+            }
+            lightning.dialog.show();
         }
 
         // Add standard error messages.
@@ -71,29 +71,32 @@ lightning.ajax = {
      *   The response from the server.
      */
     error: function(settings, data) {
-        lightning.dialog.showPrepared(function() {
-            if (data == undefined) {
-                lightning.dialog.add('Communication Error', 'error');
-            } else if (typeof(data) == 'string') {
-                lightning.dialog.add(data, 'error');
-            } else if (data.errors) {
-                for(var i in data.errors) {
-                    lightning.dialog.add(data.errors[i], 'error');
-                }
-            } else {
-                lightning.dialog.add('There was an error loading the page. Please reload the page. If the problem persists, please <a href="/contact">contact support</a>.', 'error');
-                if (data.hasOwnProperty('status')) {
-                    lightning.dialog.add('HTTP: ' + data.status, 'error');
-                }
-                if (data.hasOwnProperty('responseText') && !data.responseText.match(/<html/i)) {
-                    lightning.dialog.add(data.responseText, 'error');
-                }
+        lightning.dialog.clear();
+        if (data == undefined) {
+            lightning.dialog.add('Communication Error', 'error');
+            lightning.dialog.show();
+        } else if (typeof(data) == 'string') {
+            lightning.dialog.add(data, 'error');
+            lightning.dialog.show();
+        } else if (data.errors) {
+            for(var i in data.errors) {
+                lightning.dialog.add(data.errors[i], 'error');
+                lightning.dialog.show();
             }
-            // Allows an additional error handler.
-            if (settings.user_error) {
-                settings.user_error(data);
+        } else {
+            lightning.dialog.add('There was an error loading the page. Please reload the page. If the problem persists, please <a href="/contact">contact support</a>.', 'error');
+            if (data.hasOwnProperty('status')) {
+                lightning.dialog.add('HTTP: ' + data.status, 'error');
             }
-        });
+            if (data.hasOwnProperty('responseText') && !data.responseText.match(/<html/i)) {
+                lightning.dialog.add(data.responseText, 'error');
+            }
+            lightning.dialog.show();
+        }
+        // Allows an additional error handler.
+        if (settings.user_error) {
+            settings.user_error(data);
+        }
     },
 
     /**

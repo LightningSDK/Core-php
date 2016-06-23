@@ -1,205 +1,146 @@
-lightning.dialog = {
-    originalScroll: 0,
-    newPosition: 0,
-    dialogBox: false,
-    dialogBoxLoader: undefined,
-    dialogBoxInner: undefined,
+(function(){
+    var self;
+    lightning.dialog = {
+        originalScroll: 0,
+        newPosition: 0,
+        dialogBox: false,
+        dialogBoxLoader: undefined,
+        dialogBoxInner: undefined,
 
-    init: function() {
-        if (!this.dialogBox) {
-            $('<div id="veil"></div>'+
-                '<div id="dialog_box">'+
-                '<div class="table_data clear border_top">'+
-                '<div class="inner" id="dialog_box_inner">'+
-                '<div class="messenger error"><ul></ul></div>'+
-                '<div class="messenger message"><ul></ul></div>'+
-                '<div class="content"><ul></ul></div>'+
-                '</div>'+
-                '<div class="inner" id="dialog_box_loader"><p align="center"><img src="/images/lightning/cog-spinner.gif" class="loader_image"></p></div>'+
-                '</div>'+
-                '</div>').prependTo('body');
-            $('#veil').on('click', lightning.dialog.hide);
-            $(window).scroll(lightning.dialog.reposition).resize(lightning.dialog.reposition);
-            this.dialogBox = $('#dialog_box');
-            this.dialogBoxLoader = $('#dialog_box_loader');
-            this.dialogBoxInner = $('#dialog_box_inner');
-            this.clear();
-        }
-    },
-
-    reposition: function() {
-        if (lightning.dialog.dialogBox.is(":visible")) {
-            if ($(window).height() > lightning.dialog.dialogBox.height()) {
-                lightning.dialog.newPosition = (($(window).height() - lightning.dialog.dialogBox.height())/2) + $(window).scrollTop();
-                lightning.dialog.dialogBox.css("top",lightning.dialog.newPosition+"px");
-            } else {
-                lightning.dialog.newPosition = lightning.dialog.originalScroll-$(window).scrollTop() + lightning.dialog.dialogBox.position().top;
-                var min_pos = Math.max(0,$(window).height()+$(window).scrollTop() - lightning.dialog.dialogBox.height()-20);
-                var max_pos = $(window).scrollTop()+10;
-                lightning.dialog.newPosition = Math.min(lightning.dialog.newPosition, max_pos);
-                lightning.dialog.newPosition = Math.max(lightning.dialog.newPosition, min_pos);
-                lightning.dialog.originalScroll = $(window).scrollTop();
-                lightning.dialog.dialogBox.css('top', lightning.dialog.newPosition + 'px');
+        init: function() {
+            if (!self.dialogBox) {
+                $('<div class="reveal-modal" id="dialog_box" data-reveal aria-hidden="true" role="dialog">'+
+                    '<div class="table_data clear border_top">'+
+                    '<div class="inner" id="dialog_box_inner">'+
+                    '<div class="messenger error"><ul></ul></div>'+
+                    '<div class="messenger message"><ul></ul></div>'+
+                    '<div class="content"><ul></ul></div>'+
+                    '</div>'+
+                    '<div class="inner" id="dialog_box_loader"></div>'+
+                    '</div>'+
+                    '</div>').prependTo('body');
+                self.dialogBox = $('#dialog_box');
+                self.dialogBoxLoader = $('#dialog_box_loader');
+                self.dialogBoxInner = $('#dialog_box_inner');
+                self.clear();
             }
-        }
-    },
+        },
 
-    showPosition: function() {
-        this.originalScroll = $(window).scrollTop();
-        this.reposition();
-    },
+        /**
+         * Fade out the dialog and veil.
+         */
+        hide: function() {
+            self.init();
+            self.dialogBox.foundation('reveal', 'close');
+        },
 
-    /**
-     * Load a URL into the dialog.
-     * @param url
-     */
-    showURL: function(url) {
-        this.show();
-        $.ajax({dataType:'HTML', url:url, success:function(data) {
-            this.setContent(data);
-        }});
-    },
+        show: function() {
+            self.init();
+            self.dialogBox.foundation('reveal', 'open');
+        },
 
-    /**
-     * Stop any fading out (if required) and fade in.
-     *
-     * @param {boolean} show_loader
-     */
-    show: function(show_loader) {
-        this.dialogBoxLoader.stop(true);
-        this.dialogBoxInner.stop(true);
-        if (show_loader == "undefined") {
-            show_loader = true;
-        }
-        if (this.dialogBox.is(":visible")) {
-            var self = this;
-            this.dialogBoxInner.fadeOut('fast',function() {
-                self.showContainer(show_loader);
-            });
-        } else {
-            this.showPosition();
-            this.showContainer(show_loader);
-        }
-    },
-
-    /**
-     * Fades in all dialog components with empty container and optional loader.
-     *
-     * @param {boolean} show_loader
-     */
-    showContainer: function(show_loader) {
-        this.clear();
-        $('#veil').fadeIn('fast');
-        this.dialogBoxInner.hide();
-        if (show_loader) {
-            this.dialogBoxLoader.show();
-        } else {
-            this.dialogBoxLoader.hide();
-        }
-        this.dialogBox.fadeIn('fast', lightning.dialog.reposition);
-    },
-
-    /**
-     * Fades in all dialog components.
-     *
-     * @param {function} callback
-     */
-    showPrepared: function(callback) {
-        this.dialogBoxLoader.stop(true);
-        this.dialogBoxInner.stop(true);
-        $('#veil').fadeIn('fast');
-        var self = this;
-        this.dialogBox.fadeOut('fast',function() {
+        showLoader: function() {
+            self.init();
             self.clear();
-            if (callback != undefined) {
-                callback();
-            }
-            self.dialogBox.fadeIn('fast', lightning.dialog.reposition);
-        });
-    },
+            self.setContent('<p align="center"><img src="/images/lightning/cog-spinner.gif" class="loader_image"></p>');
+            self.show();
+        },
 
-    /**
-     * Fade out the dialog and veil.
-     */
-    hide: function() {
-        lightning.dialog.dialogBox.fadeOut('fast', function() {
-            $('#veil').fadeOut('fast');
-        });
-    },
+        /**
+         * Load a URL into the dialog.
+         * @param url
+         */
+        showURL: function(url) {
+            self.init();
+            self.showLoader();
+            $.ajax({dataType:'HTML', url:url, success:function(data) {
+                self.setContent(data);
+                self.show();
+            }});
+        },
 
-    /**
-     * Clear the modal contents.
-     */
-    clear: function() {
-        this.dialogBoxInner.find('.content').empty().hide();
-        this.dialogBoxInner.find('.error ul').empty();
-        this.dialogBoxInner.find('.error').hide();
-        this.dialogBoxInner.find('.message ul').empty();
-        this.dialogBoxInner.find('.message').hide();
-        this.dialogBoxLoader.hide();
-    },
+        showContent: function(content) {
+            self.init();
+            self.setContent(content);
+            self.show();
+        },
 
-    /**
-     * Adds new content to a dialog even if it's visible without changing anything else.
-     * @param content
-     */
-    addContent: function(content) {
-        content = $(content).hide();
-        this.dialogBoxInner.find('.content').append(content);
-        content.fadeIn('fast');
-        this.dialogBoxInner.fadeIn('fast');
-        this.dialogBoxInner.find('.content').fadeIn('fast');
-        this.reposition();
-    },
+        /**
+         * Clear the modal contents.
+         */
+        clear: function() {
+            self.init();
+            self.dialogBoxInner.find('.content').empty().hide();
+            self.dialogBoxInner.find('.error ul').empty();
+            self.dialogBoxInner.find('.error').hide();
+            self.dialogBoxInner.find('.message ul').empty();
+            self.dialogBoxInner.find('.message').hide();
+        },
 
-    /**
-     * Resets a dialog with new content. (fades out if required).
-     * @param {string} content
-     * @param {function} callback
-     */
-    setContent: function(content, callback) {
-        var self = this;
-        this.dialogBoxLoader.fadeOut('fast', function() {
-            this.dialogBoxInner.fadeOut('fast', function() {
-                self.showPrepared(function() {
-                    this.dialogBoxInner.find('.content').html(content).show();
-                    this.dialogBoxInner.fadeIn('fast');
-                });
+        /**
+         * Adds new content to a dialog even if it's visible without changing anything else.
+         * @param {string} content
+         *   This must be wrapped in at least an HTML tag or the hide() function will erase it.
+         */
+        addContent: function(content) {
+            self.init();
+            content = $(content).hide();
+            self.dialogBoxInner.find('.content').append(content);
+            content.fadeIn('fast');
+            self.dialogBoxInner.fadeIn('fast');
+            self.dialogBoxInner.find('.content').fadeIn('fast');
+        },
+
+        /**
+         * Add a success/error message to an existing dialog.
+         *
+         * @param {string} message
+         *   The message to display.
+         * @param {string} message_type
+         *   (Optional) self can be 'error' or 'message'. Default is 'message'.
+         */
+        add: function(message, message_type) {
+            self.init();
+            message = $('<li>' + message + '</li>');
+            var container = (message_type == 'message') ? '.message' : '.error';
+            self.dialogBoxLoader.fadeOut('fast', function() {
+                if (self.dialogBoxInner.find(container).is(':visible')) {
+                    message.hide();
+                    self.dialogBoxInner.find(container + ' ul').append(message);
+                    message.fadeIn("fast");
+                } else {
+                    self.dialogBoxInner.find(container + ' ul').append(message);
+                    if (self.dialogBoxInner.is(':visible')) {
+                        self.dialogBoxInner.find(container).fadeIn('fast');
+                    } else {
+                        self.dialogBoxInner.find(container).show();
+                    }
+                }
+                self.dialogBoxInner.fadeIn('fast');
+            });
+        },
+
+        /**
+         * The following methods should only be called internally.
+         */
+
+        /**
+         * Resets a dialog with new content. (fades out if required).
+         * @param {string} content
+         * @param {function} callback
+         */
+        setContent: function(content, callback) {
+            self.init();
+            self.dialogBoxInner.fadeOut('fast', function() {
+                self.clear();
+                self.dialogBoxInner.find('.content').html(content).show();
+                self.dialogBox.foundation('reveal', 'open');
+                self.dialogBoxInner.fadeIn('fast');
                 if (callback) {
                     callback();
                 }
             });
-        });
-        this.reposition();
-    },
-
-    /**
-     * Add a success message to an existing dialog.
-     *
-     * @param {string} message
-     *   The message to display.
-     * @param {string} message_type
-     *   (Optional) This can be 'error' or 'message'. Default is 'message'.
-     */
-    add: function(message, message_type) {
-        message = $('<li>' + message + '</li>');
-        var container = (message_type == 'message') ? '.message' : '.error';
-        var self = this;
-        this.dialogBoxLoader.fadeOut('fast', function() {
-            if (self.dialogBoxInner.find(container).is(':visible')) {
-                message.hide();
-                self.dialogBoxInner.find(container + ' ul').append(message);
-                message.fadeIn("fast");
-            } else {
-                self.dialogBoxInner.find(container + ' ul').append(message);
-                if (self.dialogBoxInner.is(':visible')) {
-                    self.dialogBoxInner.find(container).fadeIn('fast');
-                } else {
-                    self.dialogBoxInner.find(container).show();
-                }
-            }
-            self.dialogBoxInner.fadeIn('fast');
-        });
-        this.reposition();
-    },
-};
+        }
+    };
+    self = lightning.dialog;
+})();
