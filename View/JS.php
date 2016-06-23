@@ -188,7 +188,7 @@ class JS {
                         if (!empty($script['requires'])) {
                             // Include the startup script with the required JS scripts.
                             $ready_scripts .= 'lightning.require(' . json_encode(array_values($script['requires']))
-                                . ', function(){' . $script['script'] . '})';
+                                . ', function(){' . $script['script'] . '});';
                         } else {
                             $ready_scripts .= $script['script'] . ';';
                         }
