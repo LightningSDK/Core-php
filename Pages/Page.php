@@ -117,8 +117,8 @@ class Page extends PageView {
         }
 
         $template->set('page_header', $this->fullPage['title']);
+        $this->fullWidth = $this->fullPage['layout'] == 1;
         $template->set('full_page', $this->fullPage);
-        $template->set('full_width', $this->fullPage['layout'] == 1);
     }
 
     public function setPage($page) {
