@@ -31,8 +31,10 @@ interface FileHandlerInterface {
      *   The name of the file, relative to the root container.
      * @param string $contents
      *   The data for the file.
+     * @param integer $offset
+     *   The offset location for amending files.
      */
-    public function write($file, $contents);
+    public function write($file, $contents, $offset = 0);
 
     /**
      * Move from an uplaoded file if possible. This will only work if the

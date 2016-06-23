@@ -43,11 +43,17 @@ class File implements FileHandlerInterface {
         return filesize($this->root . '/' . $file);
     }
 
-    public function write($file, $contents) {
+    public function write($file, $contents, $offset = 0) {
         if (!file_exists(dirname($this->root . '/' . $file))) {
             mkdir(dirname($this->root . '/' . $file), 0777, true);
         }
-        file_put_contents($this->root . '/' . $file, $contents);
+        if ($offset == 0) {
+            file_put_contents($this->root . '/' . $file, $contents);
+        } else {
+            $file = fopen($this->root . '/' . $file, 'w');
+            fseek($file, $offset);
+            fwrite($file, $contents);
+        }
     }
 
     public function moveUploadedFile($file, $temp_file) {
