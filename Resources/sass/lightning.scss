@@ -1,7 +1,7 @@
-@import 'foundation/components/_grid.scss';
+@import 'util/_unit';
+@import 'util/breakpoint';
 @import '_compass';
 @import 'foundation';
-@import 'normalize';
 
 $red-high: rgb(255,55,52);
 $red-med: rgb(242,84,72);
@@ -69,15 +69,33 @@ $amber-low: rgb(255,205,1);
     border-color: $green-med;
     background-color: $green-low;
     @include background(linear-gradient($green-high, $green-low));
+    a {
+      color: #006DA0;
+    }
   }
   &.warning {
     color: black;
     border-color: $amber-med;
     background-color: $amber-low;
     @include background(linear-gradient($amber-high, $amber-low));
+    a {
+      color: #006DA0;
+    }
+  }
+  a {
+    color: #beeaff;
+    font-weight: 400;
+    text-decoration: underline;
   }
   ul {
+    list-style: none;
     margin: 0px;
+    li:before {
+      content: "\f054";
+      font-family: FontAwesome;
+      margin-left: -20px;
+      margin-right: 10px;
+    }
   }
 }
 

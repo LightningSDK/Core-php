@@ -10,9 +10,11 @@
         init: function() {
             if (!self.dialogBox) {
                 $('<div class="reveal-modal" id="dialog_box" data-reveal aria-hidden="true" role="dialog">'+
+                    '<a class="close-reveal-modal"><i class="fa fa-close"></i></a>' +
                     '<div class="table_data clear border_top">'+
                     '<div class="inner" id="dialog_box_inner">'+
                     '<div class="messenger error"><ul></ul></div>'+
+                    '<div class="messenger warning"><ul></ul></div>'+
                     '<div class="messenger message"><ul></ul></div>'+
                     '<div class="content"><ul></ul></div>'+
                     '</div>'+
@@ -73,6 +75,8 @@
             self.dialogBoxInner.find('.content').empty().hide();
             self.dialogBoxInner.find('.error ul').empty();
             self.dialogBoxInner.find('.error').hide();
+            self.dialogBoxInner.find('.warning ul').empty();
+            self.dialogBoxInner.find('.warning').hide();
             self.dialogBoxInner.find('.message ul').empty();
             self.dialogBoxInner.find('.message').hide();
         },
@@ -102,7 +106,7 @@
         add: function(message, message_type) {
             self.init();
             message = $('<li>' + message + '</li>');
-            var container = (message_type == 'message') ? '.message' : '.error';
+            var container = (message_type == 'message') ? '.message' : (message_type == 'warning' ? '.warning' : '.error');
             self.dialogBoxLoader.fadeOut('fast', function() {
                 if (self.dialogBoxInner.find(container).is(':visible')) {
                     message.hide();
