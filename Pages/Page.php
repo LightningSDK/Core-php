@@ -15,6 +15,7 @@ use Lightning\Tools\ClientUser;
 use Lightning\View\Field\BasicHTML;
 use Lightning\View\HTML;
 use Lightning\View\HTMLEditor\HTMLEditor;
+use Lightning\View\HTMLEditor\Markup;
 use Lightning\View\JS;
 use Lightning\View\Page as PageView;
 use Lightning\Model\Page as PageModel;
@@ -82,7 +83,7 @@ class Page extends PageView {
         $template = Template::getInstance();
 
         // Replace special tags.
-        $this->fullPage['body_rendered'] = $this->renderContent($this->fullPage['body']);
+        $this->fullPage['body_rendered'] = Markup::render($this->fullPage['body']);
 
         // Determine if the user can edit this page.
         if ($user->isAdmin()) {
@@ -123,41 +124,6 @@ class Page extends PageView {
 
     public function setPage($page) {
         $this->fullPage = $page;
-    }
-
-    protected function renderContent($content) {
-        $matches = array();
-        preg_match_all('|{{.*}}|', $content, $matches);
-        foreach ($matches[0] as $match) {
-            if (!empty($match)) {
-                // Convert to HTML and parse it.
-                $match_html = '<' . trim($match, '{} ') . '/>';
-                $dom = new DOMDocument();
-                libxml_use_internal_errors(true);
-                $dom->loadHTML($match_html);
-                $element = $dom->getElementsByTagName('body')->item(0)->childNodes->item(0);
-                $output = '';
-                switch ($element->nodeName) {
-                    case 'template':
-                        $sub_template = new Template();
-                        $output = $sub_template->render($element->getAttribute('name'), true);
-                        break;
-                    case 'youtube':
-                        $output = YouTube::render($element->getAttribute('id'), [
-                            'autoplay' => $element->getAttribute('autoplay') ? true : false,
-                        ]);
-                        if ($element->getAttribute('flex')) {
-                            $output = '<div class="flex-video ' . ($element->getAttribute('widescreen') ? 'widescreen' : '') . '">' . $output . '</div>';
-                        }
-                }
-                $content = str_replace(
-                    $match,
-                    $output,
-                    $content
-                );
-            }
-        }
-        return $content;
     }
 
     public function getNew() {
@@ -203,7 +169,7 @@ class Page extends PageView {
         $output['url'] = $new_values['url'];
         $output['page_id'] = $page_id;
         $output['title'] = $title;
-        $output['body_rendered'] = $this->renderContent($new_values['body']);
+        $output['body_rendered'] = Markup::render($new_values['body']);
         Output::json($output);
     }
 

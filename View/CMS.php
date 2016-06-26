@@ -8,6 +8,7 @@ use Lightning\Tools\IO\FileManager;
 use Lightning\Tools\Session;
 use Lightning\Model\CMS as CMSModel;
 use Lightning\View\HTMLEditor\HTMLEditor;
+use Lightning\View\HTMLEditor\Markup;
 
 class CMS {
 
@@ -53,7 +54,7 @@ class CMS {
                     ]
                 );
         } else {
-            return '<div>' . $content . '</div>';
+            return '<div>' . Markup::render($content) . '</div>';
         }
     }
 
