@@ -11,6 +11,28 @@ class Request {
     const IP = 'ip';
     const IP_INT = 'ip_int';
 
+    const TYPE_BOOLEAN_INT = 'boolean-int';
+    const TYPE_EXPLODE = 'explode';
+    const TYPE_ARRAY = 'array';
+    const TYPE_ARRAY_KEYS = 'array_keys';
+    const TYPE_KEYED_ARRAY = 'keyed_array';
+    const TYPE_ASSOC_ARRAY = 'assoc_array';
+    const TYPE_URL = 'url';
+    const TYPE_EMAIL = 'email';
+    const TYPE_BOOLEAN = 'boolean';
+    const TYPE_HEX = 'hex';
+    const TYPE_INT = 'int';
+    const TYPE_FLOAT = 'float';
+    const TYPE_DECIMAL = 'decimal';
+    const TYPE_BASE64 = 'base64';
+    const TYPE_ENCRYPTED = 'encrypted';
+    const TYPE_HTML = 'html';
+    const TYPE_JSON = 'json';
+    const TYPE_JSON_STRING = 'json_string';
+    const TYPE_URL_ENCODED = 'url_encoded';
+    const TYPE_TEXT = 'text';
+    const TYPE_STRING = 'string';
+
     /**
      * A list of request headers.
      *
