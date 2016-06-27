@@ -22,7 +22,7 @@ class BasicHTML {
      * @return string
      *   The rendered HTML.
      */
-    public static function select($name, $values, $default = null, $attributes = array()) {
+    public static function select($name, $values, $default = null, $attributes = []) {
         // Add any attributes.
         $attribute_string = HTML::implodeAttributes($attributes);
 
@@ -63,9 +63,10 @@ class BasicHTML {
     public static function radioGroup($name, $options, $default = null, $attributes = []) {
         $output = '<div ' . HTML::implodeAttributes($attributes) . '>';
 
+        $required = !empty($attributes['required']) ? 'required ' : '';
         foreach ($options as $value => $label) {
-            $checked = $default === $value ? 'CHECKED="checked"' : '';
-            $output .= '<label><input type="radio" name="' . $name . '" value="' . $value . '" ' . $checked . ' /> ' . $label . '</label>';
+            $checked = $default === $value ? 'CHECKED="checked" ' : '';
+            $output .= '<label><input type="radio" name="' . $name . '" value="' . $value . '" ' . $checked . $required . ' /> ' . $label . '</label>';
         }
 
         return $output . '</div>';
@@ -94,7 +95,7 @@ class BasicHTML {
         return '<input ' . HTML::implodeAttributes($attributes) . ' />';
     }
 
-    public static function password($id, $value, $options = array()) {
+    public static function password($id, $value, $options = []) {
         if (empty($options['max_length']) && !empty($options['size'])) {
             $options['max_length'] = $options['size'];
         }
