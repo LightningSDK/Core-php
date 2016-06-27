@@ -58,4 +58,12 @@ class PHP {
     protected static function compareNumericReverse($a1, $a2) {
         return - self::compareNumeric($a1, $a2);
     }
+
+    public static function objectToArray($object) {
+        $array = [];
+        foreach ((array) $object as $key => $value) {
+            $array[$key] = $value;
+        }
+        return $array;
+    }
 }
