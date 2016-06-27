@@ -34,6 +34,14 @@ class BlogPost extends Object {
         );
     }
 
+    public static function getRecent() {
+        static $recent;
+        if (empty($recent)) {
+            $recent = Database::getInstance()->select(BlogPost::TABLE, [], [], 'ORDER BY time DESC LIMIT 5');
+        }
+        return $recent;
+    }
+
     protected static function joinAuthorCatTables() {
         return array(
             // Join categories

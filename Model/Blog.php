@@ -145,19 +145,15 @@ class Blog extends Singleton {
     }
 
     public function renderRecentList($remote=false) {
-        $list = static::getRecent();
+        $list = BlogPost::getRecent();
         $target = $remote ? "target='_blank'" : '';
-        if ($list->rowCount() > 0) {
+        if (!empty($list)) {
             echo "<ul>";
             foreach($list as $r) {
                 echo "<li><a href='/{$r['url']}.htm' {$target}>{$r['title']}</a></li>";
             }
             echo "</ul>";
         }
-    }
-
-    public static function getRecent() {
-        return Database::getInstance()->select(BlogPost::TABLE, [], [], 'ORDER BY time DESC LIMIT 5');
     }
 
     public function renderCategoriesList() {
