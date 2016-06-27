@@ -7,12 +7,12 @@ use Exception;
 class ClassLoader {
     protected static $loaded = false;
     protected static $classes;
-    protected static $overrides = array();
-    protected static $overridable = array();
-    protected static $loadedClasses = array(
+    protected static $overrides = [];
+    protected static $overridable = [];
+    protected static $loadedClasses = [
         'Lightning\\Tools\\Configuration' => 'Lightning\\Tools\\Configuration',
         'Lightning\\Tools\\Data' => 'Lightning\\Tools\\Data',
-    );
+    ];
     protected static $classLoader = array();
 
     /**
@@ -90,5 +90,9 @@ class ClassLoader {
                 }
             }
         }
+    }
+
+    public static function updateOverridesFromConfiguration() {
+        self::$overridable = Configuration::get('overridable');
     }
 }
