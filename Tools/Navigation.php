@@ -2,6 +2,8 @@
 
 namespace Lightning\Tools;
 
+use Lightning\Tools\Security\Encryption;
+
 class Navigation {
     /**
      * Redirect to another location.
@@ -13,12 +15,16 @@ class Navigation {
      * @param boolean $permanent
      *   If set to true, this will be a 301 permanent redirect.
      */
-    public static function redirect($url = null, $query = [], $permanent = false) {
+    public static function redirect($url = null, $query = [], $permanent = false, $encrypted = false) {
         if (empty($url)) {
             $url = '/' . Request::getLocation();
         }
         if (!empty($query)) {
-            $url .= '?' . http_build_query($query);
+            if ($encrypted) {
+                $url .= '?ep=' . Encryption::aesEncrypt(json_encode($query), Configuration::get('user.key'));
+            } else {
+                $url .= '?' . http_build_query($query);
+            }
         }
         Messenger::storeInSession();
         Output::sendCookies();
