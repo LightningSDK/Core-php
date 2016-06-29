@@ -428,7 +428,7 @@ class Output {
         header('Content-Type: ' . $content_type);
     }
 
-    public static function http($response_code) {
+    public static function http($response_code, $editable = false) {
         // Attempt to load from ###.html
         http_response_code($response_code);
 
@@ -453,7 +453,7 @@ class Output {
 
         // Render the page and exit.
         $page->setPage($full_page);
-        $page->prepare();
+        $page->prepare($editable);
         $page->output();
         exit;
     }

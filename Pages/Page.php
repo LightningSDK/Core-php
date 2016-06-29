@@ -72,13 +72,14 @@ class Page extends PageView {
             $this->fullPage['site_map'] = 1;
             http_response_code(404);
         } else {
-            Output::http(404);
+            // This should still be editable because we know it's within the .html handler.
+            Output::http(404, true);
         }
 
         $this->prepare();
     }
 
-    public function prepare() {
+    public function prepare($admin_editable = true) {
         $user = ClientUser::getInstance();
         $template = Template::getInstance();
 
@@ -91,7 +92,7 @@ class Page extends PageView {
                 $this->fullPage['url'] = Request::getFromURL('/(.*)\.html$/') ?: 'index';
             }
             JS::set('page.source', $this->fullPage['body']);
-            $template->set('editable', true);
+            $template->set('editable', $admin_editable);
         }
 
         // Set the page template.
