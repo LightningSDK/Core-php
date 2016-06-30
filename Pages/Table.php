@@ -67,8 +67,6 @@ use Lightning\View\JSONEditor as JSONEditorView;
 
 abstract class Table extends Page {
 
-    protected $page = 'table';
-
     /**
      * The primary key form the database.
      */
@@ -78,6 +76,10 @@ abstract class Table extends Page {
      * The table where the object is stored.
      */
     const TABLE = '';
+
+    protected $page = 'table';
+
+    protected $fullWidth = true;
 
     /**
      * @deprecated - see const TABLE
