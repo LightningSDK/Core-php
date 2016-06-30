@@ -72,7 +72,7 @@ class BasicHTML {
         return $output . '</div>';
     }
 
-    public static function checkboxGroup($name, $options, $default = null, $attributes = array()) {
+    public static function checkboxGroup($name, $options, $default = null, $attributes = []) {
         $output = '<div ' . HTML::implodeAttributes($attributes) . '>';
 
         foreach ($options as $value => $label) {
@@ -83,7 +83,7 @@ class BasicHTML {
         return $output . '</div>';
     }
 
-    public static function text($id, $value, $attributes = array()) {
+    public static function text($id, $value, $attributes = []) {
         // This only applies to text fields.
         if (empty($attributes['max_length']) && !empty($attributes['size'])) {
             $attributes['max_length'] = $attributes['size'];
@@ -132,9 +132,9 @@ class BasicHTML {
      */
     public static function setDefaultClass(&$attributes, $default) {
         if (empty($attributes['class'])) {
-            $attributes['class'] = array($default);
+            $attributes['class'] = [$default];
         } elseif (!is_array($attributes['class'])) {
-            $attributes['class'] = array($attributes['class']);
+            $attributes['class'] = [$attributes['class']];
         } elseif (!in_array('datePop', $attributes['class'])) {
             $attributes['class'][] = $default;
         }
