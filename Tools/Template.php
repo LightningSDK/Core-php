@@ -23,7 +23,7 @@ class Template extends Singleton {
      *
      * @var array
      */
-    protected $cache = array();
+    protected $cache = [];
 
     /**
      * Footer html content.
@@ -58,7 +58,7 @@ class Template extends Singleton {
      *
      * @var array
      */
-    protected $vars = array();
+    protected $vars = [];
 
     /**
      * Initialize the template object.
@@ -96,6 +96,10 @@ class Template extends Singleton {
         } else {
             return null;
         }
+    }
+
+    public function __isset($var) {
+        return isset($this->vars[$var]);
     }
 
     /**
@@ -226,7 +230,14 @@ class Template extends Singleton {
      * Display the footer content.
      */
     public function renderFooter() {
-        return JS::render() . CSS::render() . $this->footer;
+        echo JS::render() . CSS::render() . $this->footer;
+        if (ClientUser::getInstance()->isAdmin()) {
+            echo '<pre class="debug">';
+            $database = Database::getInstance();
+            print_r($database->getQueries());
+            print_r(Performance::timeReport());
+            echo '</pre>';
+        }
     }
 
     /**
