@@ -10,7 +10,6 @@ use Lightning\Model\Object;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
 use Lightning\Tools\Language;
-use Lightning\Tools\Messenger;
 use Lightning\Tools\Tracker;
 use Lightning\View\Field\Time;
 
@@ -467,13 +466,15 @@ class Message extends Object {
      *
      * @return array
      *   An array of users.
+     *
+     * @throws \Exception
+     *   If there are no lists for the message.
      */
     protected function getUsersQuery() {
         $query = [];
         $this->loadLists();
         if (empty($this->lists)) {
-            Messenger::error('Your message does not have any mailing lists selected.');
-            return ['from' => 'user', 'where' => ['false' => ['expression' => 'false']]];
+            throw new \Exception('Your message does not have any mailing lists selected.');
         }
 
         // Start with a list of users in the messages selected lists.

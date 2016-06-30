@@ -40,6 +40,8 @@ class Output {
 
     protected static $isJson = false;
 
+    protected static $isPlainText = false;
+
     protected static $jsonCookies = false;
 
     protected static $statusStrings = array(
@@ -137,6 +139,16 @@ class Output {
      */
     public static function setJson($isJson) {
         static::$isJson = $isJson;
+    }
+
+    /**
+     * Set whether the output should be in plain text, without HTML.
+     *
+     * @param $isPlainText
+     *   Whether or not to use plain text output.
+     */
+    public static function setPlainText($isPlainText) {
+        static::$isPlainText = $isPlainText;
     }
 
     /**
@@ -282,9 +294,9 @@ class Output {
      */
     public static function error($error) {
         Messenger::error($error);
-        if(static::isJSONRequest()) {
+        if (static::isJSONRequest()) {
             static::json(static::ERROR);
-        } elseif (Request::isCLI()) {
+        } elseif (static::$isPlainText || Request::isCLI()) {
             $errors = Messenger::getErrors();
             echo implode($errors, "\n") . "\n";
         } else {

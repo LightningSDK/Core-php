@@ -38,11 +38,11 @@ class Messenger {
      *   The new error.
      */
     public static function error($error) {
-        if (!empty($error)) {
-            self::$errors[] = $error;
-        }
         if (self::$verbose) {
             echo "Error: $error \n";
+        }
+        else if (!empty($error)) {
+            self::$errors[] = $error;
         }
     }
 
@@ -53,11 +53,11 @@ class Messenger {
      *   The new message.
      */
     public static function message($message) {
-        if (!empty($message)) {
-            self::$messages[] = $message;
-        }
         if (self::$verbose) {
             echo "Message: $message \n";
+        }
+        else if (!empty($message)) {
+            self::$messages[] = $message;
         }
     }
 

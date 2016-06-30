@@ -54,6 +54,7 @@ class Send extends Page {
      */
     public function postSendAll() {
         Output::disableBuffering();
+        Output::setPlainText(true);
         Messenger::setVerbose(true);
         $mailer = new Mailer(true);
         $mailer->sendBulk(Request::get('id', 'int'), false);
@@ -64,6 +65,7 @@ class Send extends Page {
      * Get a count of how many emails to be sent with output for XHR monitoring.
      */
     public function postSendCount() {
+        Output::setPlainText(true);
         Messenger::setVerbose(true);
         $message = new Message(Request::get('id', 'int'));
         echo 'Sending now will go to ' . $message->getUsersCount() . ' users.';
@@ -75,6 +77,7 @@ class Send extends Page {
      */
     public function postSendTest() {
         Output::disableBuffering();
+        Output::setPlainText(true);
         Messenger::setVerbose(true);
         $mailer = new Mailer(true);
         $mailer->sendBulk(Request::get('id', 'int'), true);
