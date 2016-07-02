@@ -2,6 +2,7 @@
 
 namespace Lightning\Model;
 
+use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
 use Overridable\Lightning\Tools\Request;
 
@@ -38,5 +39,15 @@ class URL extends Object {
             $id = $db->insert(static::TABLE, ['url' => $url]);
         }
         return $id;
+    }
+
+    public static function getAbsolute($url) {
+        if (preg_match('/https?:\/\//i', $url)) {
+            return $url;
+        } elseif (substr($url, 0, 1) == '/') {
+            return Configuration::get('web_root') . $url;
+        } else {
+            return Configuration::get('web_root') . '/' . $url;
+        }
     }
 }

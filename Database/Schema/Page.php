@@ -14,6 +14,7 @@ class Page extends Schema {
             'title' => $this->varchar(255),
             'url' => $this->varchar(128),
             'menu_context' => $this->varchar(64),
+            'preview_image' => $this->varchar(64),
             'keywords' => $this->varchar(255),
             'description' => $this->varchar(255),
             'body' => $this->text(Schema::MEDIUMTEXT),

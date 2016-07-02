@@ -6,6 +6,7 @@
 namespace Lightning\Pages;
 
 use DOMDocument;
+use Lightning\Model\URL;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Output;
 use Lightning\Tools\Request;
@@ -99,22 +100,29 @@ class Page extends PageView {
         $template->set('content', 'page');
 
         // PREPARE FORM DATA CONTENTS
-        foreach (array('title', 'keywords', 'description') as $field) {
+        foreach (array('title', 'keywords') as $field) {
             if (!empty($this->fullPage[$field])) {
                 $this->setMeta($field, $this->fullPage[$field]);
             }
         }
-        if ($image = HTML::getFirstImage($this->fullPage['body'])) {
-            $this->setMeta('image', $image);
+
+        // Set the preview image.
+        if (!empty($this->fullPage['preview_image'])) {
+            if ($this->fullPage['preview_image'] != 'default') {
+                $this->setMeta('image', URL::getAbsolute($this->fullPage['preview_image']));
+            }
+        } elseif ($image = HTML::getFirstImage($this->fullPage['body'])) {
+            $this->setMeta('image', URL::getAbsolute($image));
         }
+
         if (empty($this->fullPage['description'])) {
             $this->setMeta('description', Text::shorten($this->fullPage['body'], 500));
         }
 
+        // If there is no page here, we need to set the URL for editing.
         if ($this->fullPage['url'] == '' && isset($_GET['page'])) {
             $this->fullPage['url'] = $_GET['page'];
-        }
-        else {
+        } else {
             $this->fullPage['url'] = Scrub::toHTML($this->fullPage['url']);
         }
 
