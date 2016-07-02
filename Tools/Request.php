@@ -2,6 +2,7 @@
 
 namespace Overridable\Lightning\Tools;
 
+use Lightning\Tools\Data;
 use Lightning\Tools\Scrub;
 
 class Request {
@@ -157,26 +158,25 @@ class Request {
      * @param string $type
      *   The type of data to allow. This will default to plain text.
      * @param $subtype
+     *   If $type is an array, subtype can be used to process the values inside.
+     * @param mixed $default
+     *   A default value if none is set.
      *
      * @return mixed
      *   value or false if none.
      */
     public static function get($var, $type = '', $subtype = '', $default = null) {
-        if (isset($_POST[$var])) {
-            $args = func_get_args();
-            $args[0] = $_POST[$var];
-            return call_user_func_array('self::clean', $args);
+        $value = Data::getFromPath($var, $_POST);
+        if ($value === null) {
+            $value = Data::getFromPath($var, $_GET);
         }
-
-        if (isset($_GET[$var])) {
-            $args = func_get_args();
-            $args[0] = $_GET[$var];
-            return call_user_func_array('self::clean', $args);
-        }
-
-        else {
+        if ($value === null) {
             return $default;
         }
+
+        $args = func_get_args();
+        $args[0] = $value;
+        return call_user_func_array('self::clean', $args);
     }
 
     /**
@@ -189,11 +189,13 @@ class Request {
      * @return bool|float|int|string
      */
     public static function cookie($var, $type='', $subtype='', $default = null) {
-        if (!isset($_COOKIE[$var]))
+        $value = Data::getFromPath($var, $_COOKIE);
+        if ($value === null) {
             return $default;
+        }
 
         $args = func_get_args();
-        $args[0] = $_COOKIE[$var];
+        $args[0] = $value;
         return call_user_func_array('self::clean', $args);
     }
 
@@ -207,12 +209,13 @@ class Request {
      * @return bool|float|int|string
      */
     public static function post($var, $type='', $subtype='', $default = null) {
-        if (!isset($_POST[$var])) {
+        $value = Data::getFromPath($var, $_POST);
+        if ($value === null) {
             return $default;
         }
 
         $args = func_get_args();
-        $args[0] = $_POST[$var];
+        $args[0] = $value;
         return call_user_func_array('static::clean', $args);
     }
 
@@ -227,12 +230,13 @@ class Request {
      * @return mixed
      */
     public static function query($var, $type='', $subtype='', $default = null) {
-        if (!isset($_GET[$var])) {
+        $value = Data::getFromPath($var, $_GET);
+        if ($value === null) {
             return $default;
         }
 
         $args = func_get_args();
-        $args[0] = $_GET[$var];
+        $args[0] = $value;
         return call_user_func_array('self::clean', $args);
     }
 
@@ -248,7 +252,7 @@ class Request {
      */
     public static function json($var, $type='', $subtype='', $default = null) {
         if (self::$parsedInput === null && $json = file_get_contents('php://input')) {
-            self::$parsedInput = json_decode($json, true) ?: array();
+            self::$parsedInput = json_decode($json, true) ?: [];
         }
 
         if (!isset(self::$parsedInput[$var])) {
@@ -262,26 +266,25 @@ class Request {
     /**
      * Get a POST/GET if set, if not check for a cookie by the same name.
      *
-     * @param $var
+     * @param string $var
      * @param string $type
-     * @param $subtype
+     * @param string $subtype
+     * @param mixed $default
      *
      * @return bool|float|int|string
      */
-    public static function getAny($var, $type='', $subtype='') {
-        if (isset($_REQUEST[$var])) {
-            $args = func_get_args();
-            $args[0] = $_REQUEST[$var];
-            return call_user_func_array('self::clean', $args);
+    public static function getAny($var, $type = '', $subtype = '', $default = null) {
+        $value = Data::getFromPath($var, $_REQUEST);
+        if ($value === null) {
+            $value = Data::getFromPath($var, $_COOKIE);
+        }
+        if ($value === null) {
+            return $default;
         }
 
-        if (isset($_COOKIE[$var])) {
-            $args = func_get_args();
-            $args[0] = $_COOKIE[$var];
-            return call_user_func_array('self::clean', $args);
-        }
-
-        return false;
+        $args = func_get_args();
+        $args[0] = $value;
+        return call_user_func_array('self::clean', $args);
     }
 
     /**
@@ -332,21 +335,21 @@ class Request {
 
         // Return the value.
         switch($type) {
-            case 'boolean-int':
+            case self::TYPE_BOOLEAN_INT:
                 return intval(Scrub::boolean($data));
                 break;
-            case 'explode':
+            case self::TYPE_EXPLODE:
                 $data = trim($data, ',');
                 if ($data === "") {
                     return [];
                 }
                 $data = explode(',', $data);
-            case 'array':
-            case 'array_keys':
+            case self::TYPE_ARRAY:
+            case self::TYPE_ARRAY_KEYS:
                 $args = func_get_args();
                 if (!is_array($data) || count($data) == 0)
                     return false;
-                $output = array();
+                $output = [];
                 foreach($data as $k => $v) {
                     $output[] = self::clean(
                         $type == 'array_keys' ? $k : $v,
@@ -355,11 +358,11 @@ class Request {
                 }
                 return $output;
                 break;
-            case 'keyed_array':
+            case self::TYPE_KEYED_ARRAY:
                 $args = func_get_args();
                 if (!is_array($data) || count($data) == 0)
                     return false;
-                $output = array();
+                $output = [];
                 foreach($data as $k => $v) {
                     $output[$k] = self::clean(
                         $v,
@@ -368,23 +371,23 @@ class Request {
                 }
                 return $output;
                 break;
-            case 'assoc_array':
+            case self::TYPE_ASSOC_ARRAY:
                 if (!is_array($data) || count($data) == 0) {
                     return false;
                 }
                 return $data;
-            case 'url':
-            case 'email':
-            case 'boolean':
-            case 'hex':
-            case 'int':
-            case 'float':
-            case 'decimal':
-            case 'base64':
-            case 'encrypted':
-            case 'html':
-            case 'json':
-            case 'json_string':
+            case self::TYPE_URL:
+            case self::TYPE_EMAIL:
+            case self::TYPE_BOOLEAN:
+            case self::TYPE_HEX:
+            case self::TYPE_INT:
+            case self::TYPE_FLOAT:
+            case self::TYPE_DECIMAL:
+            case self::TYPE_BASE64:
+            case self::TYPE_ENCRYPTED:
+            case self::TYPE_HTML:
+            case self::TYPE_JSON:
+            case self::TYPE_JSON_STRING:
                 $args = func_get_args();
                 // It's possible that a + was changed to a space in URL decoding.
                 if ($type == 'base64' || $type == 'encrypted') {
@@ -397,14 +400,14 @@ class Request {
                 }
                 return call_user_func_array("Lightning\\Tools\\Scrub::{$type}", $args);
                 break;
-            case 'urlencoded':
+            case self::TYPE_URL_ENCODED:
                 return urldecode($data);
                 break;
-            case 'text':
+            case self::TYPE_TEXT:
                 // This still allows some basic HTML.
                 return Scrub::text($data);
                 break;
-            case 'string':
+            case self::TYPE_STRING:
             default:
                 // This does nothing to the string. Assume it is not sanitized.
                 return $data;
