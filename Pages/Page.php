@@ -170,6 +170,7 @@ class Page extends PageView {
         $output['url'] = $new_values['url'];
         $output['page_id'] = $page_id;
         $output['title'] = $title;
+        $output['page_body'] = $new_values['body'];
         $output['body_rendered'] = Markup::render($new_values['body']);
         Output::json($output);
     }

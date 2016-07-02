@@ -6,7 +6,7 @@ lightning.cms = {
     },
 
     save: function (editor) {
-        lightning.htmleditor.destroyEditor(editor);
+        lightning.htmleditor.deactivateEditor(editor);
         var self = this;
         $.ajax({
             url: '/admin/cms',

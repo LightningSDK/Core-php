@@ -2,9 +2,10 @@ lightning.page = {
     edit: function() {
         $('.page_edit').show();
         $('.page_edit_links').hide();
-        lightning.htmleditor.initEditor('page_display');
         // Move the unrendered html into the div.
         $('#page_display').html($('#save_page_display').val());
+        // Activate the editor.
+        lightning.htmleditor.initEditor('page_display');
     },
 
     save: function() {
@@ -31,7 +32,7 @@ lightning.page = {
             success:function(data) {
                 if (data.status == 'success') {
                     // Hide the editing controls.
-                    lightning.htmleditor.destroyEditor('page_display');
+                    lightning.htmleditor.deactivateEditor('page_display');
                     $('.page_edit').hide();
                     $('.page_edit_links').show();
                     $('#page_display').attr('contentEditable', 'false');
