@@ -193,8 +193,7 @@ class Page {
                 $method = Request::convertFunctionName($request_type, $action);
                 if (method_exists($this, $method)) {
                     $this->{$method}();
-                }
-                else {
+                } else {
                     throw new Exception('There was an error processing your submission.');
                 }
             } else {
