@@ -546,7 +546,7 @@ class User extends Object {
      *   The user input data.
      */
     protected static function parseNames(&$data) {
-        if (!empty($data['full_name'])) {
+        if (isset($data['full_name'])) {
             $name = explode(' ', $data['full_name'], 2);
             $data['first'] = $name[0];
             if (!empty($name[1])) {
