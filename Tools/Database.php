@@ -227,20 +227,22 @@ class Database extends Singleton {
         // Show actual mysql error.
         $errors[] = $error[2];
 
+        // Log the error:
+        foreach ($errors as $e) {
+            Logger::error($e);
+        }
+        Logger::error($sql);
+
+        // If set to verbose, show the errors to the user.
         if ($this->verbose) {
             // Add a footer.
-            // @todo change this so it doesn't require an input.
             foreach ($errors as $e) {
                 Messenger::error($e);
             }
-            throw new Exception("***** MYSQL ERROR *****");
-        } else {
-            foreach ($errors as $e) {
-                Logger::error($e);
-            }
-            Logger::error($sql);
         }
-        exit;
+
+        // Throw a general exception for all users.
+        throw new Exception("***** MYSQL ERROR *****");
     }
 
     /**
