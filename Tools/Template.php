@@ -123,8 +123,6 @@ class Template extends Singleton {
             $template = $this->template;
         }
 
-        $this->setTemplateMetaData();
-        
         if ($return_as_string) {
             return $this->build($template, true);
         } else {
@@ -132,22 +130,6 @@ class Template extends Singleton {
         }
     }
 
-    /**
-     * Set template metadata variables.
-     */
-    protected function setTemplateMetaData() {
-        foreach (array('title', 'keywords', 'description', 'author') as $meta_data) {
-            // Check if template already has these variables set
-            $var_name = 'page_'.$meta_data;
-            $var = $this->$var_name;
-            if (empty($var)) { 
-                // Set it by default from configuration if it's not defined earlier
-                $this->set('page_' . $meta_data, Configuration::get('meta_data.' . $meta_data));
-            }
-        }
-    }
-    
-    
     /**
      * Set a variable so it's accessible within the template.
      *
