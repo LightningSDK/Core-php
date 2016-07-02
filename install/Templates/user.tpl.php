@@ -51,7 +51,7 @@ if (empty($action) || $action == 'join' || $action == 'register'): ?>
                 <small class="error">Please enter your email.</small>
             </div>
             <div>
-                <label>Create a Password:
+                <label>Your password:
                     <input type="password" name="password" id='password' value="" required />
                 </label>
                 <small class="error">Please enter your password.</small>
