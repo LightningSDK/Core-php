@@ -448,18 +448,16 @@ class Output {
         $page = new PageView();
 
         // Attempt to load a page from the database.
-        if ($full_page = PageModel::loadByURL($response_code)) {
-            $full_page['url'] = Request::get('page');
-            $full_page['site_map'] = 1;
-        } else {
+        $full_page = PageModel::loadByURL($response_code);
+        if (empty($full_page)) {
             // If the page doesn't exist, fill it with default content.
             $full_page['title'] = $response_code . ' ' . self::$httpErrorMessages[$response_code];
             $full_page['keywords'] = '';
             $full_page['description'] = '';
-            $full_page['url'] = '';
+            $full_page['url'] = $response_code;
             $full_page['body'] = '';
             $full_page['layout'] = 0;
-            $full_page['site_map'] = 1;
+            $full_page['site_map'] = 0;
             $full_page['error'] = 404;
         }
 
