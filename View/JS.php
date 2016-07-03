@@ -211,7 +211,7 @@ class JS {
     protected static function includeStartupFunction() {
         if (!self::$startupFunctionAdded) {
             self::$startupFunctionAdded = true;
-            return 'function lightning_startup(callback) { if (typeof $ == "undefined") { setTimeout(function(){ lightning_startup(callback); }, 500) } else $().ready(callback) }';
+            return 'var lightning_startup_q = []; function lightning_startup(callback) { if (typeof $ == "undefined") { if (typeof callback != "undefined") lightning_startup_q.push(callback); setTimeout(lightning_startup, 500); } else {for (var i in lightning_startup_q) { $(lightning_startup_q[i]); } lightning_startup_q = []; if (typeof callback != "undefined") $(callback);} }';
         }
         return '';
     }
