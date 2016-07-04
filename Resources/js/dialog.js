@@ -41,10 +41,13 @@
             self.dialogBox.foundation('reveal', 'open');
         },
 
-        showLoader: function() {
+        showLoader: function(message) {
             self.init();
             self.clear();
             self.setContent('<p align="center"><img src="/images/lightning/cog-spinner.gif" class="loader_image"></p>');
+            if (typeof message != 'undefined') {
+                self.addContent('<p align="center">' + message + '</p>');
+            }
             self.show();
         },
 
@@ -131,19 +134,14 @@
         /**
          * Resets a dialog with new content. (fades out if required).
          * @param {string} content
-         * @param {function} callback
          */
-        setContent: function(content, callback) {
+        setContent: function(content) {
             self.init();
-            self.dialogBoxInner.fadeOut('fast', function() {
-                self.clear();
-                self.dialogBoxInner.find('.content').html(content).show();
-                self.dialogBox.foundation('reveal', 'open');
-                self.dialogBoxInner.fadeIn('fast');
-                if (callback) {
-                    callback();
-                }
-            });
+            self.dialogBoxInner.hide();
+            self.clear();
+            self.dialogBoxInner.find('.content').html(content).show();
+            self.dialogBox.foundation('reveal', 'open');
+            self.dialogBoxInner.fadeIn('fast');
         }
     };
     self = lightning.dialog;
