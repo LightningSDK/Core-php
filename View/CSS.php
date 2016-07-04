@@ -38,7 +38,8 @@ class CSS {
             if (empty($file['rendered'])) {
                 $file_name = $file['file'];
                 if ($version = Configuration::get('minified_version', 0)) {
-                    $file_name .= 'v=' .$version;
+                    $concatenator = strpos($file['file'], '?') !== false ? '&' : '?';
+                    $file_name .= $concatenator . 'v=' .$version;
                 }
                 // TODO: add $file[1] for media type. media="screen"
                 $output .= '<link rel="stylesheet" type="text/css" href="' . $file_name . '" />';

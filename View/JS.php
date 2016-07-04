@@ -153,12 +153,9 @@ class JS {
         foreach (self::$included_scripts as &$file) {
             if (empty($file['rendered'])) {
                 $file_name = $file['file'];
-                if ($file['versioning']) {
+                if ($file['versioning'] && $version = Configuration::get('minified_version', 0)) {
                     $concatenator = strpos($file['file'], '?') !== false ? '&' : '?';
-                    $file_name .= $concatenator;
-                    if ($version = Configuration::get('minified_version', 0)) {
-                        $file_name .= 'v=' .$version;
-                    }
+                    $file_name .= $concatenator . 'v=' .$version;
                 }
 
                 $output .= '<script src="' . $file_name . '" ' . (!empty($file['async']) ? 'async defer' : '');
