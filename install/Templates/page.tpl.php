@@ -24,7 +24,7 @@
                 <input type="hidden" name="page_id" id='page_id' value="<?= !empty($full_page['page_id']) ? $full_page['page_id'] : 0 ?>" />
                 <?= \Lightning\Tools\Form::renderTokenInput(); ?>
                 <table border='0' width="100%">
-                    <tr><td>Title:</td><td><input type="text" name="title" id='page_title' value="<?=$full_page['title']?>" /></td></tr>
+                    <tr><td>Title:</td><td><input type="text" name="title" id='page_title' value="<?=!empty($full_page['new_title']) ? $full_page['new_title'] : $full_page['title']?>" /></td></tr>
                     <tr><td>URL:</td><td><input type="text" name="url" id='page_url' value="<?=$full_page['url']?>" /></td></tr>
                     <tr><td>Menu Context:</td><td><input type="text" name="menu_context" id='page_menu_context' value="<?=$full_page['menu_context']?>" /></td></tr>
                     <tr><td>Description:</td><td><input type="text" name="description" id='page_description' value="<?=$full_page['description']?>" /></td></tr>
