@@ -53,7 +53,7 @@ class Page extends PageView {
         }
 
         // LOAD PAGE DETAILS
-        if ($this->fullPage = PageModel::loadByUrl($content_locator)) {
+        if ($this->fullPage = PageModel::loadByURL($content_locator)) {
             header('HTTP/1.0 200 OK');
             $this->menuContext = $this->fullPage['menu_context'];
             if (Configuration::get('page.modification_date') && $this->fullPage['last_update'] > 0) {
@@ -69,7 +69,7 @@ class Page extends PageView {
             $this->fullPage['site_map'] = 1;
             HTMLEditor::init();
             JS::startup('lightning.page.edit();');
-        } elseif ($this->fullPage = PageModel::loadByUrl('404')) {
+        } elseif ($this->fullPage = PageModel::loadByURL('404')) {
             $this->fullPage['site_map'] = 1;
             http_response_code(404);
         } else {
@@ -92,6 +92,7 @@ class Page extends PageView {
             if (empty($this->fullPage['url']) || $this->fullPage['url'] == '404') {
                 $this->fullPage['url'] = Request::getFromURL('/(.*)\.html$/') ?: 'index';
             }
+            $this->fullPage['new_title'] = ucwords(preg_replace('/[\-_]/', ' ', $this->fullPage['url']));
             JS::set('page.source', $this->fullPage['body']);
             $template->set('editable', $admin_editable);
         }

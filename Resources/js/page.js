@@ -41,7 +41,7 @@
                     $('#page_id').val(data.page_id);
                     $('#page_url').val(data.url);
                     document.title = data.title;
-                    $('#page_title').val(data.title);
+                    $('#page_header').html(data.title);
                     // Replace the unrendered html with the new html
                     $('#save_page_display').val(data.page_body);
                     $('#page_display').html(data.body_rendered);
