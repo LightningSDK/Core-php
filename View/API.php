@@ -17,6 +17,14 @@ class API extends Page {
     public function __construct() {
         // Override parent method.
         Output::setJson(true);
+
+        if (!$this->hasAccess()) {
+            Output::error(Output::ACCESS_DENIED);
+        }
+    }
+
+    public function hasAccess() {
+        return true;
     }
 
     public function execute() {
