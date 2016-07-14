@@ -132,6 +132,7 @@ abstract class Table extends Page {
      *   - render_edit_field - Will render the edit field. Must also render form fields if necessary.
      *   - location - for file and image types, the location is an absolute or relative directory of the storage location.
      *   - replace - for a file or image, whether the previous upload should be replaced.
+     *   - browser boolean - whether to use the file browser for selection. If not, a file upload field will be used. Note that if using the browser, the file extension will be saved, but this is intended to change once the file browser supports multiple file sizes.
      *   - images array - a list of images for the image type. The key of this array is not used, and all elements from the main $field array are added to each image as default values.
      *     - original booleam - whether this is should be stored as the original, unmodified image
      *     - image_preprocess callable (source image resources) - A function that can modify the input image before other processes are called.
@@ -3529,23 +3530,24 @@ abstract class Table extends Page {
      */
     protected function getImageLocationWeb($field, $file = '') {
         $images = $this->getCompositeImageArray($field);
+        // See if there is an image marked as default.
         foreach ($images as $image) {
             if (!empty($image['default'])) {
                 $image_data = $image;
                 break;
             }
         }
+        // If no image is selected, select the first image to display.
         if (empty($image_data)) {
             $image_data = $images[0];
         }
 
-        // Convert the file prefix to the actual file name.
-        if (!empty($field['images'])) {
-            $image_data = array_replace($field, $image_data);
-        }
-
         if (!isset($image_data['conform_name']) || $image_data['conform_name'] !== false) {
-            $file = $this->getFullFileName($file, $image_data);
+            $file = $this->getFullFileName($file, $image_data, null);
+            // This condition is temporary until all images are stored with extensions.
+            if (empty($image_data['browser'])) {
+                $file .= '.' . (!empty($image_data['format']) ? $image_data['format'] : 'jpg');
+            }
         }
 
         $handler = $this->getFileHandler($image_data);
