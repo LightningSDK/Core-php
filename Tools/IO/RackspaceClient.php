@@ -8,7 +8,7 @@ use \Exception;
 use Lightning\Tools\Configuration;
 use OpenCloud\Rackspace;
 
-class RackspaceClient {
+class RackspaceClient implements FileHandlerInterface {
     protected $client;
 
     /**
@@ -52,11 +52,28 @@ class RackspaceClient {
         return $this->object->getContent();
     }
 
-    public function write($file, $contents) {
+    public function write($file, $contents, $offset = 0) {
         $this->connect();
         $remoteName = self::getRemoteName($this->root . '/' . $file);
         $container = $this->service->getContainer($remoteName[0]);
         $this->object = $container->uploadObject($remoteName[1], $contents);
+    }
+
+    public function moveUploadedFile($file, $temp_file) {
+        $this->connect();
+        $remoteName = $this->getRemoteName($this->root . '/' . $file);
+        $container = $this->service->getContainer($remoteName[0]);
+        $fh = fopen($temp_file, 'r');
+        if ($fh) {
+            $this->object = $container->uploadObject($remoteName[1], $fh);
+        } else {
+            throw new Exception('File not found.');
+        }
+        return !empty($this->object);
+    }
+
+    public function delete($file) {
+        // TODO: Implement delete() method.
     }
 
     public function getWebURL($file) {
@@ -76,22 +93,6 @@ class RackspaceClient {
         $remoteName = explode(':', $remoteName);
         preg_replace('|^/|', '', $remoteName[1]);
         return $remoteName;
-    }
-
-    /**
-     * @TODO: Can this be renamed to "copyFile"
-     */
-    public function uploadFile($file, $remoteName) {
-        $this->connect();
-        $remoteName = $this->getRemoteName($this->root . '/' . $remoteName);
-        $container = $this->service->getContainer($remoteName[0]);
-        $fh = fopen($file, 'r');
-        if ($fh) {
-            $this->object = $container->uploadObject($remoteName[1], $fh);
-        } else {
-            throw new Exception('File not found.');
-        }
-        return !empty($this->object);
     }
 
     public function getURL($remoteName) {

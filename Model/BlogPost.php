@@ -58,7 +58,8 @@ class BlogPost extends Object {
         if (!empty($this->header_image)) {
             // Image from upload.
             $field = BlogTable::getHeaderImageSettings();
-            $fileHandler = FileManager::getFileHandler(empty($field['file_handler']) ? '' : $field['file_handler'], $field['container']);
+            $handler = empty($field['file_handler']) ? '' : $field['file_handler'];
+            $fileHandler = FileManager::getFileHandler($handler, $field['container']);
             return $fileHandler->getWebURL($this->header_image);
         }
         return false;

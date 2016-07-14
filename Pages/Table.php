@@ -123,6 +123,7 @@ abstract class Table extends Page {
      *     - image - a file input with image processing options
      *   - hidden boolean - Will hide the field from all views
      *   - default mixed - Will use this as the default value when inserting. Will not be used if a value is supplied unless force_default_new is set to true. When creating a new entry, the field is visible, editable, and populated with this value.
+     *   - value mixed - An absolute value that will always be used whether inserting or updating. This can not be overridden by user input.
      *   - force_default_new boolean - Forces new entries to use the default value. Prevents tampering with a field that has hidden and default set.
      *   - note string - Adds text under the field to help the user understand the input.
      *   - edit_value mixed - A value or callable. If a callable, the entire row will be passed as a parameter.
@@ -131,6 +132,30 @@ abstract class Table extends Page {
      *   - render_edit_field - Will render the edit field. Must also render form fields if necessary.
      *   - location - for file and image types, the location is an absolute or relative directory of the storage location.
      *   - replace - for a file or image, whether the previous upload should be replaced.
+     *   - images array - a list of images for the image type. The key of this array is not used, and all elements from the main $field array are added to each image as default values.
+     *     - original booleam - whether this is should be stored as the original, unmodified image
+     *     - image_preprocess callable (source image resources) - A function that can modify the input image before other processes are called.
+     *     - quality integer - the jpeg image compression quality (default 75).
+     *     - image_postprocess callable (source image resources) - A function that can modify the input image after other processes are called.
+     *     - keep_unprocessed boolean - if the image has not been modified and is destined for the same format, this will keep the image from recompressing. Default is false.
+     *     - format string - The output format. Can be jpg or png. Default is jpg.
+     *     - max_size integer - The maximum pixel dimensions in either X or Y axis.
+     *     - max_width integer - The maximum pixel width. Larger than this will be scaled down.
+     *     - max_height integer - The maximum pixel height. Larger than this will be scaled down.
+     *     - width integer - An absolute width. Any other width will be scaled to this width.
+     *     - height integer - An absolute height. Any other height will be scaled to this height.
+     *     - crop string|array - A crop format. Can be any of the following:
+     *          x - Will crop left and right only
+     *          y - Will crop top and bottom only
+     *          top
+     *          bottom
+     *          left
+     *          right
+     *          ['x' => (true|'left'|'right'), 'y' => (true|'top'|'bottom')]
+     *     - alpha boolean - whether the output will have an alpha channel that needs to be preserved
+     *     - background array - the background color when discarding an alpha channel. This will be in the format of an array of 3 integers [0, 0, 0,] to [255, 255, 255]
+     *     - file_prefix string - prefixed to the stored file name (can include additional path info)
+     *     - file_suffix - suffixed to the file name before the file extension.
      *
      * @var array
      */
@@ -1342,7 +1367,7 @@ abstract class Table extends Page {
                 $link_content = $this->getDisplayName($action, $a);
             }
             // Run a custom condition to see if this should be displayed at all.
-            if (is_callable($action['condition'])) {
+            if (!empty($action['condition']) && is_callable($action['condition'])) {
                 if (!$action['condition']($row)) {
                     $output .= '</td>';
                     continue;
@@ -1965,7 +1990,7 @@ abstract class Table extends Page {
         // Search.
         $sort = [];
         if (is_array($this->sort_fields) && count($this->sort_fields) > 0) {
-            $sort_fields = $this->sort_fields;
+            $sort_fields = [];
             if (!empty($other['sort'])) {
                 foreach ($other['sort'] as $f => $d) {
                     switch ($d) {
@@ -1982,7 +2007,9 @@ abstract class Table extends Page {
             foreach ($sort_fields as $f => $d) {
                 $sort[] = ($d == 'D') ? $f . ':D' : $f;
             }
-            $vars['sort'] = implode(';', $sort);
+            if (!empty($sort)) {
+                $vars['sort'] = implode(';', $sort);
+            }
         } elseif (!empty($other['sort'])) {
             $sort = [];
             foreach ($other['sort'] as $f => $d) {
@@ -2619,7 +2646,7 @@ abstract class Table extends Page {
             if (!empty($image['original'])) {
                 if (!empty($file)) {
                     // The file was just uploaded, so make sure to move it to the correct location.
-                    $fileHandler->uploadFile($file['tmp_name'], $new_image);
+                    $fileHandler->moveUploadedFile($new_image, $file['tmp_name']);
                 }
                 // If the 'original' does not exist, we still need to create it.
                 if ($fileHandler->exists($new_image)) {
@@ -2651,7 +2678,7 @@ abstract class Table extends Page {
 
             if (!$modified && !empty($file) && $this->getUploadedFileFormat($file) == $output_format && !empty($field['keep_unprocessed'])) {
                 // The file was just uploaded, not modified, and destined for the same format. Just upload it.
-                $fileHandler->uploadFile($file['tmp_name'], $new_image);
+                $fileHandler->moveUploadedFile($new_image, $file['tmp_name']);
             }
             else {
                 switch ($output_format) {
@@ -2789,7 +2816,14 @@ abstract class Table extends Page {
      */
     protected function getFileHandler($field) {
         // TODO: $field['location'] is deprecated. All tables should be updated to use container instead.
-        return FileManager::getFileHandler(empty($field['file_handler']) ? '' : $field['file_handler'], !empty($field['container']) ? $field['container'] : $field['location']);
+        if (empty($field['container']) &!empty($field['location'])) {
+            $field['container'] = [
+                'storage' => $field['location'],
+                'url' => null . '/',
+            ];
+        }
+        $handler = empty($field['file_handler']) ? '' : $field['file_handler'];
+        return FileManager::getFileHandler($handler, $field['container']);
     }
 
     protected function decode_bool_group($int) {
@@ -2797,7 +2831,7 @@ abstract class Table extends Page {
     }
 
     // get the int val of a specific bit - ie convert 1 (2nd col form right or 10) to 2
-    // this way you can search for the 2nd bit column in a checlist with: "... AND col&".table::get_bit_int(2)." > 0"
+    // this way you can search for the 2nd bit column in a checklist with: "... AND col&".table::get_bit_int(2)." > 0"
     public static function get_bit_int($bit) {
         bindec("1" . str_repeat("0", $bit));
     }
