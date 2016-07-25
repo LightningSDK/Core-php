@@ -31,6 +31,11 @@ class Output {
     const ERROR = 3;
 
     /**
+     * A login is required.
+     */
+    const LOGIN_REQUIRED = 4;
+
+    /**
      * A list of cookies to output.
      *
      * @var array
@@ -170,6 +175,15 @@ class Output {
         }
         elseif ($data === self::ERROR || $data === false) {
             $data = ['status' => 'error'];
+        }
+        elseif ($data === self::LOGIN_REQUIRED) {
+            $template = Template::getInstance();
+            $template->set('modal', true);
+            $template->set('content', 'user');
+            $data = [
+                'status' => 'login_required',
+                'content' => $template->render('modal')
+            ];
         }
         elseif (!empty($data['status']) && !empty(self::$statusStrings[$data['status']])) {
             // Convert numeric status to string.

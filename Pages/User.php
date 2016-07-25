@@ -36,6 +36,14 @@ class User extends Page {
         }
     }
 
+    public function getModal() {
+        Template::getInstance()->setTemplate('modal');
+        if (!ClientUser::getInstance()->isAnonymous() && !Request::get('social', Request::TYPE_BOOLEAN)) {
+            Messenger::message('You are already signed in.');
+            $this->page = '';
+        }
+    }
+
     /**
      * Show just the registration page.
      */
