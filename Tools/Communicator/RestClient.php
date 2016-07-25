@@ -76,8 +76,9 @@ class RestClient {
      */
     public function set($var, $value, $auto_pass_to_template=false) {
         $this->vars[$var] = $value;
-        if ($auto_pass_to_template)
+        if ($auto_pass_to_template) {
             $this->auto_template[] = $var;
+        }
     }
 
     public function setMultiple($vars) {
@@ -138,6 +139,15 @@ class RestClient {
 
     /**
      * Connect to the URL and load the data.
+     *
+     * @param array $vars
+     *   A list of variables to send.
+     * @param boolean $post
+     *   Whether this is a post request.
+     * @param string $path
+     *   An additional path to add to the server URL.
+     *
+     * @throws Exception
      */
     protected function connect($vars, $post = true, $path = null) {
 
