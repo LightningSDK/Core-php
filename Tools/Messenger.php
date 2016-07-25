@@ -181,18 +181,18 @@ class Messenger {
     public static function renderErrorsAndMessages() {
         $output = '';
         if (!empty(self::$errors)) {
-            $output .= '<div class="messenger error">';
+            $output .= '<div class="messenger error"><ul>';
             foreach (self::$errors as $error) {
                 $output .= '<li>' . $error . '</li>';
             }
-            $output .= '</div>';
+            $output .= '</ul></div>';
         }
         if (!empty(self::$messages)) {
-            $output .= '<div class="messenger message">';
+            $output .= '<div class="messenger message"><ul>';
             foreach (self::$messages as $message) {
                 $output .= '<li>' . $message . '</li>';
             }
-            $output .= '</div>';
+            $output .= '</ul></div>';
         }
 
         return $output;

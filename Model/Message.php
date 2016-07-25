@@ -12,6 +12,7 @@ use Lightning\Tools\Database;
 use Lightning\Tools\Language;
 use Lightning\Tools\Tracker;
 use Lightning\View\Field\Time;
+use Lightning\View\HTMLEditor\Markup;
 
 /**
  * A model of the mailing system message.
@@ -156,12 +157,25 @@ class Message extends Object {
      * For db message it makes some replaces
      */
     protected function setCombinedMessageTemplate() {
-        if (empty($this->__data)) {
-            $this->combinedMessageTemplate = $this->template['body'] . '{TRACKING_IMAGE}';
-        } elseif (!strpos($this->template['body'], '{UNSUBSCRIBE}')) {
-            $this->combinedMessageTemplate = str_replace('{CONTENT_BODY}', $this->body . '{UNSUBSCRIBE}', $this->template['body']) . '{TRACKING_IMAGE}';
+        if (!empty($this->template) && strpos($this->template['body'], '{CONTENT_BODY}') !== false) {
+            // If a template is loaded, start with the combined body as the template.
+            $this->combinedMessageTemplate = str_replace('{CONTENT_BODY}', $this->body, $this->template['body']);
         } else {
-            $this->combinedMessageTemplate = str_replace('{CONTENT_BODY}', $this->body, $this->template['body']) . '{TRACKING_IMAGE}';
+            // Otherwise just use this message body.
+            $this->combinedMessageTemplate = $this->body;
+        }
+
+        // See if there are any missing required tags.
+        $additions = '';
+        foreach (['UNSUBSCRIBE', 'TRACKING_IMAGE'] as $requirement) {
+            if (strpos($this->combinedMessageTemplate, '{' . $requirement . '}') === false) {
+                $additions = '{' . $requirement . '}';
+            }
+        }
+
+        // Add the missing required tags.
+        if (!empty($additions) && strpos($this->template['body'], '{CONTENT_BODY}') !== false) {
+            $this->combinedMessageTemplate = str_replace('{CONTENT_BODY}', '{CONTENT_BODY}' . $additions, $this->combinedMessageTemplate);
         }
     }
 
@@ -344,47 +358,9 @@ class Message extends Object {
      */
     public function replaceVariables($source) {
         // Replace variables.
-        $this->replaceVars('', $this->customVariables + $this->internalCustomVariables + $this->defaultVariables, $source);
-
-        // Replace conditions.
-        $conditions = [];
-        $conditional_search = '/{IF ([a-z_]+)}(.*){ENDIF \1}/imsU';
-        preg_match_all($conditional_search, $source, $conditions);
-        foreach ($conditions[1] as $key => $var) {
-            if (!empty($this->customVariables[$var]) || !empty($this->internalCustomVariables[$var])) {
-                $source = str_replace($conditions[0][$key], $conditions[2][$key], $source);
-            } else {
-                $source = str_replace($conditions[0][$key], '', $source);
-            }
-        }
-
-        return $source;
+        return Markup::render($source, $this->customVariables + $this->internalCustomVariables + $this->defaultVariables);
     }
-
-    /**
-     * A loopable subfunction of replaceVariables().
-     *
-     * @param string $prefix
-     *   A prefix added to all variable names in the current array.
-     * @param array $vars
-     *   A list of variables to replace.
-     * @param string $source
-     *   The content to replace in.
-     */
-    private function replaceVars($prefix, $vars, &$source) {
-        foreach($vars as $var => $value) {
-            if (is_string($value)) {
-                $find = strtoupper($prefix . $var);
-                // Replace simple variables as a string.
-                $source = str_replace('{' . $find . '}', $value, $source);
-                // Some curly brackets might be escaped if they are links.
-                $source = str_replace('%7B' . $find . '%7D', $value, $source);
-            } elseif (is_array($value)) {
-                $this->replaceVars($prefix . $var . '.', $value, $source);
-            }
-        }
-    }
-
+    
     /**
      * Get the message subject with variables replaced.
      *

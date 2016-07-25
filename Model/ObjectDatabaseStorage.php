@@ -23,14 +23,23 @@ trait ObjectDatabaseStorage {
      * @param array $where
      * @param array $fields
      * @param string $final
+     * @param boolean|string $keyed
      *
      * @return array
      */
     public static function loadAll($where = [], $fields = [], $final = '', $keyed = false) {
         $objects = [];
         $results = Database::getInstance()->select(static::TABLE, $where, $fields, $final);
-        foreach ($results as $row) {
-            $objects[] = new static($row);
+
+        $key = ($keyed === true) ? static::PRIMARY_KEY : $keyed;
+        if (!empty($key)) {
+            foreach ($results as $row) {
+                $objects[$row[$key]] = new static($row);
+            }
+        } else {
+            foreach ($results as $row) {
+                $objects[] = new static($row);
+            }
         }
         return $objects;
     }

@@ -22,6 +22,7 @@ class User extends Page {
 
     protected $page = 'user';
     protected $ignoreToken = true;
+    protected $rightColumn = false;
 
     protected function hasAccess() {
         return true;

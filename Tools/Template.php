@@ -225,7 +225,7 @@ class Template extends Singleton {
     /**
      * Build a template file, optionally with caching.
      *
-     * @param string $template
+     * @param array|string $template
      *   The name of the template excluding .tpl.php.
      * @param boolean $return_as_string
      *   Whether to return the contents or print them to the stdout.
@@ -265,6 +265,13 @@ class Template extends Singleton {
         return preg_replace('|\\\\|', '__', $this->getFileName($template));
     }
 
+    /**
+     * @param string|array $template
+     *   If this is a string, it will be found in Source/Templates/{string}.tpl.php
+     *   If this is an array, it will be found in Modules/[0]/Templates/[1].tpl.php
+     *
+     * @return string
+     */
     protected function getFileName($template) {
         if (is_string($template)) {
             return $this->template_dir . $template;

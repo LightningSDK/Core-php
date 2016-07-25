@@ -68,11 +68,11 @@ lightning.fileBrowser = {
     /**
      * Open the image browser window for selection.
      *
-     * @param string type
+     * @param {string} type
      *   The browser type to use: elfinder, ckfinder, etc.
-     * @param field
+     * @param {string} field
      *   The type the type of the parent: ckeditor, tinymce, lightning-field, lightning-cms
-     * @param url
+     * @param {string} url
      *   The url type to use: full, absolute
      */
     openSelect: function(type, field, url) {

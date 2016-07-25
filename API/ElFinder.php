@@ -53,12 +53,18 @@ class ElFinder extends API {
 		if (!ClientUser::getInstance()->isAdmin()) {
 			Output::http(401);
 		}
+		$path = HOME_PATH . '/' . Configuration::get('imageBrowser.containers.images.storage') . '/';
+		$url = Configuration::get('imageBrowser.containers.images.url');
+		if ($subdirectory = Configuration::get('imageBrowser.containers.images.subdirectory')) {
+			$path .= $subdirectory . '/';
+			$url .= $subdirectory . '/';
+		}
 		$opts = array(
 			'roots' => array(
 				array(
 					'driver'        => 'LocalFileSystem',           // driver for accessing file system (REQUIRED)
-					'path'          => HOME_PATH . '/' . Configuration::get('imageBrowser.containers.images.storage') . '/',                 // path to files (REQUIRED)
-					'URL'           => Configuration::get('imageBrowser.containers.images.url'), // URL to files (REQUIRED)
+					'path'          => $path,                       // path to files (REQUIRED)
+					'URL'           => $url,                        // URL to files (REQUIRED)
 					'uploadDeny'    => array('all'),                // All Mimetypes not allowed to upload
 					'uploadAllow'   => array('image', 'text/plain'),// Mimetype `image` and `text/plain` allowed to upload
 					'uploadOrder'   => array('deny', 'allow'),      // allowed Mimetype `image` and `text/plain` only

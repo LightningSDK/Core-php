@@ -134,11 +134,15 @@
         /**
          * Resets a dialog with new content. (fades out if required).
          * @param {string} content
+         * @param {boolean} clear_messages
+         *   Whether to clear errors and messages before placing the content.
          */
-        setContent: function(content) {
+        setContent: function(content, clear_messages) {
             self.init();
             self.dialogBoxInner.hide();
-            self.clear();
+            if (typeof clear_messages == "undefined" || clear_messages) {
+                self.clear();
+            }
             self.dialogBoxInner.find('.content').html(content).show();
             self.dialogBox.foundation('reveal', 'open');
             self.dialogBoxInner.fadeIn('fast');

@@ -103,7 +103,7 @@ class Page extends PageView {
         // PREPARE FORM DATA CONTENTS
         foreach (array('title', 'keywords') as $field) {
             if (!empty($this->fullPage[$field])) {
-                $this->setMeta($field, $this->fullPage[$field]);
+                $this->setMeta($field, html_entity_decode($this->fullPage[$field]));
             }
         }
 
@@ -117,7 +117,7 @@ class Page extends PageView {
         }
 
         if (empty($this->fullPage['description'])) {
-            $this->setMeta('description', Text::shorten($this->fullPage['body'], 500));
+            $this->setMeta('description', Text::shorten(html_entity_decode($this->fullPage['body'], 500)));
         }
 
         // If there is no page here, we need to set the URL for editing.
