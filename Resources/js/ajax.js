@@ -34,9 +34,10 @@ lightning.ajax = {
             return;
         }
 
+        lightning.dialog.clear();
+
         // Add standard messages to the dialog.
         if (data && data.messages && data.messages.length > 0) {
-            lightning.dialog.clear();
             for(var i in data.messages) {
                 lightning.dialog.add(data.messages[i], 'message');
             }
@@ -44,10 +45,35 @@ lightning.ajax = {
         }
 
         // Add standard error messages.
-        if (data && data.errors && data.errors.length) {
-            // TODO: make this more graceful.
-            lightning.ajax.error(settings, data);
+        if (data && data.errors && data.errors.length > 0) {
+            for(var i in data.errors) {
+                lightning.dialog.add(data.errors[i], 'error');
+            }
+            lightning.dialog.show();
             return;
+        }
+
+        // If there is additional content to show.
+        if (data.content) {
+            lightning.dialog.showContent(data.content);
+        }
+
+        // Are there variables to set?
+        if (data.js_vars) {
+            $.extend(lightning.vars, data.js_vars);
+        }
+
+        // Is there JS to run?
+        if (data.js_startup) {
+            for (var i in data.js_startup) {
+                if (data.js_startup[i].requires && data.js_startup[i].requires.length > 0) {
+                    lightning.require(data.js_startup[i].requires, function(){
+                        eval(data.js_startup[i].script);
+                    });
+                } else {
+                    eval(data.js_startup[i].script);
+                }
+            }
         }
 
         // Process redirect.

@@ -18,8 +18,12 @@ class API extends Page {
         // Override parent method.
         Output::setJson(true);
 
-        if (!$this->hasAccess()) {
-            Output::error(Output::ACCESS_DENIED);
+        try {
+            if (!$this->hasAccess()) {
+                Output::error(Output::ACCESS_DENIED);
+            }
+        } catch (Exception $e) {
+            Output::error($e->getMessage());
         }
     }
 
@@ -28,33 +32,29 @@ class API extends Page {
     }
 
     public function execute() {
-        $request_type = strtolower(Request::type());
+        try {
+            $request_type = strtolower(Request::type());
 
-        // If there is a requested action.
-        $output = [];
-        if ($action = Request::get('action')) {
-            $method = Request::convertFunctionName($request_type, $action);
-            if (method_exists($this, $method)) {
-                try {
+            // If there is a requested action.
+            if ($action = Request::get('action')) {
+                $method = Request::convertFunctionName($request_type, $action);
+                if (method_exists($this, $method)) {
                     $output = $this->{$method}();
-                } catch (Exception $e) {
-                    Output::error($e->getMessage());
                 }
-            }
-            else {
-                Messenger::error('Method not available');
-            }
-        } else {
-            if (method_exists($this, $request_type)) {
-                try {
-                    $output = $this->$request_type();
-                } catch (Exception $e) {
-                    Output::error($e->getMessage());
+                else {
+                    throw new Exception('Method not available');
                 }
             } else {
-                Messenger::error('Method not available');
+                if (method_exists($this, $request_type)) {
+                    $output = $this->$request_type();
+                } else {
+                    throw new Exception('Method not available');
+                }
             }
+
+            Output::json($output);
+        } catch (Exception $e) {
+            Output::error($e->getMessage());
         }
-        Output::json($output);
     }
 }

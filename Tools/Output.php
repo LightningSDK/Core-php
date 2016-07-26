@@ -8,6 +8,7 @@ namespace Lightning\Tools;
 use Lightning\Pages\Message;
 use Lightning\Pages\Page as PageView;
 use Lightning\Model\Page as PageModel;
+use Lightning\View\JS;
 
 /**
  * Class Output
@@ -166,25 +167,36 @@ class Output {
      */
     public static function json($data = [], $suppress_status = false) {
         // Predefined outputs.
-        if ($data === self::ACCESS_DENIED) {
+        if ($data === self::SUCCESS || $data === true) {
+            $data = ['status' => 'success'];
+        }
+        elseif ($data == self::ACCESS_DENIED) {
             $data = ['status' => 'access_denied'];
             Messenger::error('Access Denied');
         }
-        elseif ($data === self::SUCCESS || $data === true) {
-            $data = ['status' => 'success'];
-        }
-        elseif ($data === self::ERROR || $data === false) {
+        elseif ($data == self::ERROR || $data === false) {
             $data = ['status' => 'error'];
         }
-        elseif ($data === self::LOGIN_REQUIRED) {
+        elseif ($data == self::LOGIN_REQUIRED) {
             $template = Template::getInstance();
             $template->set('modal', true);
             $template->set('content', 'user');
             $data = [
                 'status' => 'login_required',
-                'content' => $template->render('modal')
+                'content' => $template->render('modal', true),
+            ];
+            $data += self::getJSONJSOutput();
+        }
+        
+        // If $data is a string, it is an error message.
+        elseif (is_string($data)) {
+            $data = [
+                'status' => 'error',
+                'error' => $data,
             ];
         }
+        
+        // The rest of these conditions assume $data is an array.
         elseif (!empty($data['status']) && !empty(self::$statusStrings[$data['status']])) {
             // Convert numeric status to string.
             $data['status'] = self::$statusStrings[$data['status']];
@@ -204,6 +216,20 @@ class Output {
 
         // Output and terminate.
         self::jsonOut($data);
+    }
+    
+    public static function getJSONJSOutput() {
+        $output = [];
+        if ($vars = JS::getAll()) {
+            $output['js_vars'] = $vars;
+        }
+        if ($init = JS::getStartups()) {
+            if (!empty($init)) {
+                $output['js_startup'] = $init;
+            }
+        }
+
+        return $output;
     }
 
     public static function jsonData($data, $include_cookies = false) {
@@ -307,13 +333,13 @@ class Output {
      *   An error to output to the user.
      */
     public static function error($error) {
-        Messenger::error($error);
         if (static::isJSONRequest()) {
-            static::json(static::ERROR);
+            static::json($error);
         } elseif (static::$isPlainText || Request::isCLI()) {
             $errors = Messenger::getErrors();
             echo implode($errors, "\n") . "\n";
         } else {
+            Messenger::error($error);
             $template = Template::getInstance();
             if ($error_template = Configuration::get('template.error')) {
                 $template->setTemplate($error_template);

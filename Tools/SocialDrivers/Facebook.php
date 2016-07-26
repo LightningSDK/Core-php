@@ -229,7 +229,7 @@ class Facebook extends SocialMediaApi {
         JS::set('social.authorize', $authorize);
         JS::set('social.facebook.appid', Configuration::get('social.facebook.appid'));
         JS::set('social.facebook.scope', Configuration::get('social.facebook.scope'));
-        JS::startup('lightning.social.initLogin()');
+        JS::startup('lightning.social.initLogin()', '//connect.facebook.net/en_US/sdk.js');
 
         return '<span class="social-signin facebook"><i class="fa fa-facebook"></i><span> Sign in with Facebook</span></span>';
     }

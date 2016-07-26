@@ -113,6 +113,10 @@ class JS {
         }
     }
 
+    public static function getStartups() {
+        return self::$startup_scripts;
+    }
+
     /**
      * Set a javascript variable.
      *
@@ -123,6 +127,10 @@ class JS {
      */
     public static function set($var, $value) {
         Data::setInPath($var, $value, self::$vars);
+    }
+
+    public static function getAll() {
+        return self::$vars;
     }
 
     /**
