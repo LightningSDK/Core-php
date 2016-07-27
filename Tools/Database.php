@@ -498,11 +498,16 @@ class Database extends Singleton {
      *   An array of columns and values to set.
      * @param boolean|array $existing
      *   TRUE to ignore, an array to update.
+     * @param boolean $return_count
+     *   Whether to return the insert count instead of the last ID.
+     *   This is useful when there is no auto increment, or if you are
+     *   testing for whether a row was inserted (1) or updated (2) or
+     *   no changes were made (-1)
      *
      * @return integer
      *   The last inserted id.
      */
-    public function insert($table, $data, $existing = FALSE) {
+    public function insert($table, $data, $existing = false, $return_count = false) {
         $vars = [];
         $table = $this->parseTable($table, $vars);
         $ignore = $existing === TRUE ? 'IGNORE' : '';
@@ -510,9 +515,13 @@ class Database extends Singleton {
         $duplicate = is_array($existing) ? ' ON DUPLICATE KEY UPDATE ' . $this->sqlImplode($existing, $vars, ', ', true) : '';
         $this->query('INSERT ' . $ignore . ' INTO ' . $table . ' SET ' . $set . $duplicate, $vars);
         $this->timerEnd();
-        return $this->result->rowCount() == 0 ? false :
-            // If there is no auto increment, just return true.
-            ($this->connection->lastInsertId() ?: true);
+        if ($return_count) {
+            return $this->result->rowCount();
+        } else {
+            return $this->result->rowCount() == 0 ? false :
+                // If there is no auto increment, just return true.
+                ($this->connection->lastInsertId() ?: true);
+        }
     }
 
     /**
