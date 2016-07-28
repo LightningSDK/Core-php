@@ -36,6 +36,7 @@ class CMS {
      * @return string
      */
     public static function embed($name, $settings = []) {
+        // TODO: Add caching
         $content = CMSModel::loadByName($name);
         $content = (!empty($content) ? $content->content : (!empty($settings['default']) ? $settings['default'] : ''));
         if (ClientUser::getInstance()->isAdmin()) {
@@ -48,6 +49,7 @@ class CMS {
                     [
                         'spellcheck' => true,
                         'content' => $content,
+                        'content_rendered' => Markup::render($content),
                         'browser' => true,
                         'edit_border' => !empty($settings['edit_border']),
                         'config' => !empty($settings['config']) ? $settings['config'] : [],
