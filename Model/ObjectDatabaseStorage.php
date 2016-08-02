@@ -86,6 +86,21 @@ trait ObjectDatabaseStorage {
     }
 
     /**
+     * Increment a field directly to the database.
+     * 
+     * @param string $field
+     * @param integer $amount
+     */
+    public function increment($field, $amount = 1) {
+        Database::getInstance()->update(static::TABLE,
+            [$field => [
+                'expression' => '`' . $field . '` + ?',
+                'vars' => [$amount],
+            ]],
+            [static::PRIMARY_KEY => $this->__data[static::PRIMARY_KEY]]);
+    }
+
+    /**
      * Save a new object or update if it already exists.
      *
      * @param array $new_values
