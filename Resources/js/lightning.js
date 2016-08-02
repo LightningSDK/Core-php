@@ -1,16 +1,27 @@
 lightning.format = {
     sizes: ['B', 'KB', 'MB', 'GB', 'TB', 'PB'],
+    counts: ['', 'k', 'm', 'b', 't', 'q'],
     dataSize: function(bytes) {
-        var output = bytes;
+        return lightning.format.divide(bytes, 1024, lightning.format.sizes, false);
+    },
+    count: function(number) {
+        return lightning.format.divide(number, 1000, lightning.format.counts, true);
+    },
+    divide: function(number, divide, suffix, int) {
+        var output = number;
         var size = 0;
-        while (output >= 1000) {
-            output /= 1024;
+        while (output >= divide * .9) {
+            output /= divide;
             size++;
         }
-        if (this.sizes[0] == undefined) {
+        if (suffix[size] == undefined) {
             return 'Really Big';
         } else {
-            return output.toPrecision(3) + this.sizes[size];
+            if (size == 0 && int) {
+                return output;
+            } else {
+                return parseFloat(output).toPrecision(3) + suffix[size];
+            }
         }
     }
 };
