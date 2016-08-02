@@ -62,6 +62,9 @@ class ClientUserOverridable extends Singleton {
      *
      * @return boolean
      *   Returns true if the user is logged in.
+     *
+     * @throws Exception
+     *   If the user is not logged in but this is a JSON request.
      */
     public static function requireLogin($action = '') {
         if (self::getInstance()->id == 0) {
@@ -78,7 +81,11 @@ class ClientUserOverridable extends Singleton {
             if (!empty($redirect_query)) {
                 $query['redirect'] .= '?' . http_build_query($redirect_query);
             }
-            Navigation::redirect('/user' . $action, $query);
+            if (Output::isJSONRequest()) {
+                throw new Exception(Output::LOGIN_REQUIRED);
+            } else {
+                Navigation::redirect('/user' . $action, $query);
+            }
             return false;
         } else {
             return true;
