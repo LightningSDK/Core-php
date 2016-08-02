@@ -590,13 +590,12 @@ pre.debug {
   white-space: pre-wrap;
 }
 .reveal-modal {
-  top: 0;
-  margin-top: 20%;
+  top: 20%;
   max-height: 60%;
   overflow-y: auto;
   position: fixed !important;
   @include breakpoint(small only) {
-    margin-top: 0;
+    top: 0;
     height: 100%;
   }
 }
