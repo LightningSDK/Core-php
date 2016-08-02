@@ -13,7 +13,6 @@
       align : 'bottom',
       is_hover : false,
       hover_timeout : 150,
-      no_pip : false,
       opened : function () {},
       closed : function () {}
     },
@@ -329,7 +328,7 @@
           p.left = p.left - this.outerWidth() + t.outerWidth();
         }
 
-        if (!self.settings.no_pip && t.outerWidth() < this.outerWidth() || self.small() || this.hasClass(s.mega_menu)) {
+        if (t.outerWidth() < this.outerWidth() || self.small() || this.hasClass(s.mega_menu)) {
           self.adjust_pip(this, t, s, p);
         }
 
@@ -349,7 +348,7 @@
           p.left = p.left - this.outerWidth() + t.outerWidth();
         }
 
-        if (!self.settings.no_pip && t.outerWidth() < this.outerWidth() || self.small() || this.hasClass(s.mega_menu)) {
+        if (t.outerWidth() < this.outerWidth() || self.small() || this.hasClass(s.mega_menu)) {
           self.adjust_pip(this, t, s, p);
         }
 
@@ -389,7 +388,7 @@
 
         var self = Foundation.libs.dropdown;
 
-        if (!self.settings.no_pip && t.outerWidth() < this.outerWidth() || self.small() || this.hasClass(s.mega_menu)) {
+        if (t.outerWidth() < this.outerWidth() || self.small() || this.hasClass(s.mega_menu)) {
           self.adjust_pip(this, t, s, p);
         }
 
@@ -399,8 +398,6 @@
 
     // Insert rule to style psuedo elements
     adjust_pip : function (dropdown, target, settings, position) {
-      if (settings.no_pip === true) return;
-      
       var sheet = Foundation.stylesheet,
           pip_offset_base = 8;
 

@@ -13,7 +13,8 @@ gulp.task('compass', function() {
             image: '../build/images',
             import_path: [
                 '../Vendor/compass/frameworks/compass/stylesheets',
-                '../Vendor/foundation/scss'
+                '../Vendor/foundation/scss',
+                '../build/scss'
             ]
         }))
         .pipe(gulp.dest('../build/css'));
