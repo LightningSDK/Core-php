@@ -44,9 +44,9 @@ function access($attr, $path, $data, $volume) {
 // Documentation for connector options:
 // https://github.com/Studio-42/elFinder/wiki/Connector-configuration-options
 include '../../Lightning/bootstrap.php';
-if (!\Overridable\Lightning\Tools\ClientUser::getInstance()->isAdmin()) {
+if (!\Lightning\Tools\ClientUser::getInstance()->isAdmin()) {
 	header("HTTP/1.0 401 Unauthorized");
-	echo '{"error": "Login faild."}';
+	echo '{"error": "Login failed."}';
 	exit;
 }
 $opts = array(

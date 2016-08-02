@@ -4,20 +4,17 @@
  * Lightning\Tools\ClientUser
  */
 
-namespace Overridable\Lightning\Tools;
+namespace Lightning\Tools;
 
+use Exception;
 use Lightning\Model\User;
-use Lightning\Tools\Navigation;
-use Lightning\Tools\Output;
-use Lightning\Tools\Singleton;
-use Lightning\Tools\Session as SessionTool;
 
 /**
  * A singleton for the global user.
  *
  * @package Lightning\Tools.
  */
-class ClientUser extends Singleton {
+class ClientUserOverridable extends Singleton {
 
     /**
      * Get the currently logged in user.
@@ -37,7 +34,7 @@ class ClientUser extends Singleton {
      */
     public static function createInstance() {
         // If a session is found.
-        $session = SessionTool::getInstance(true, false);
+        $session = Session::getInstance(true, false);
         if ($session && $session->user_id > 0) {
             // If we are logged into someone elses account.
             if (!empty($session->content->impersonate)) {

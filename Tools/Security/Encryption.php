@@ -1,8 +1,8 @@
 <?php
 
-namespace Overridable\Lightning\Tools\Security;
+namespace Lightning\Tools\Security;
 
-class Encryption {
+class EncryptionOverridable {
     public static function generateKeyPair($bits = 1024, $type = OPENSSL_KEYTYPE_RSA, $digest = 'sha512') {
         $config = array(
             'digest_alg' => $digest,

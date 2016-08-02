@@ -1,11 +1,11 @@
 <?php
 
-namespace Overridable\Lightning\Model;
+namespace Lightning\Model;
 
 use DateTime;
 use Lightning\Tools\Database;
 
-class Calendar {
+class CalendarOverridable {
 
     protected $month;
     protected $year;

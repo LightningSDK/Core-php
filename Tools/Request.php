@@ -1,11 +1,8 @@
 <?php
 
-namespace Overridable\Lightning\Tools;
+namespace Lightning\Tools;
 
-use Lightning\Tools\Data;
-use Lightning\Tools\Scrub;
-
-class Request {
+class RequestOverridable {
 
     const X_FORWARDED_FOR = 'X-Forwarded-For';
     const X_FORWARDED_PROTO = 'X-Forwarded-Proto';

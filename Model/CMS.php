@@ -1,6 +1,6 @@
 <?php
 
-namespace Overridable\Lightning\Model;
+namespace Lightning\Model;
 
 use Lightning\Model\Object;
 use Lightning\Tools\Database;
@@ -18,7 +18,7 @@ use Source\Model\Site;
  * @parameter string class
  * @parameter integer last_modified
  */
-class CMS extends Object {
+class CMSOverridable extends Object {
 
     const TABLE = 'cms';
     const PRIMARY_KEY = 'cms_id';

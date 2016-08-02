@@ -1,6 +1,6 @@
 <?php
 
-namespace Overridable\Lightning\View;
+namespace Lightning\View;
 
 use Exception;
 use Lightning\Model\Blog;
@@ -12,17 +12,15 @@ use Lightning\Tools\Output;
 use Lightning\Tools\Request;
 use Lightning\Tools\Session;
 use Lightning\Tools\Template;
-use Lightning\View\CSS;
-use Lightning\View\JS;
 use Lightning\Model\Page as PageModel;
 
 /**
  * The basic html page handler.
  *
- * @package Overridable\Lightning\View
+ * @package Lightning\View
  * @todo: Should be abstract
  */
-class Page {
+class PageOverridable {
 
     const MODULE = null;
 

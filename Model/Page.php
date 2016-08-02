@@ -1,12 +1,12 @@
 <?php
 
-namespace Overridable\Lightning\Model;
+namespace Lightning\Model;
 
 use Lightning\Model\Object;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
 
-class Page extends Object {
+class PageOverridable extends Object {
 
     const PRIMARY_KEY = 'page_id';
     const TABLE = 'page';

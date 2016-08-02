@@ -4,7 +4,7 @@
  * Contains Lightning\Model\Message
  */
 
-namespace Overridable\Lightning\Model;
+namespace Lightning\Model;
 
 use Lightning\Model\Object;
 use Lightning\Tools\Configuration;
@@ -19,7 +19,7 @@ use Lightning\View\HTMLEditor\Markup;
  *
  * @package Lightning\Model
  */
-class Message extends Object {
+class MessageOverridable extends Object {
 
     const PRIMARY_KEY = 'message_id';
 

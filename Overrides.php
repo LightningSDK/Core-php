@@ -6,33 +6,33 @@
 
 namespace Lightning\View;
 
-class API extends \Overridable\Lightning\View\API {}
-class Page extends \Overridable\Lightning\View\Page {}
+class API extends \Lightning\View\APIOverridable {}
+class Page extends \Lightning\View\PageOverridable {}
 
 namespace Lightning\Model;
 
-class Blog extends \Overridable\Lightning\Model\Blog {}
-class BlogPost extends \Overridable\Lightning\Model\BlogPost {}
-class Calendar extends \Overridable\Lightning\Model\Calendar {}
-class CMS extends \Overridable\Lightning\Model\CMS {}
-class Message extends \Overridable\Lightning\Model\Message {}
-class Page extends \Overridable\Lightning\Model\Page {}
-class Permissions extends \Overridable\Lightning\Model\Permissions {}
-class SocialAuth extends \Overridable\Lightning\Model\SocialAuth {}
-class Token extends \Overridable\Lightning\Model\Token {}
-class User extends \Overridable\Lightning\Model\User {}
+class Blog extends \Lightning\Model\BlogOverridable {}
+class BlogPost extends \Lightning\Model\BlogPostOverridable {}
+class Calendar extends \Lightning\Model\CalendarOverridable {}
+class CMS extends \Lightning\Model\CMSOverridable {}
+class Message extends \Lightning\Model\MessageOverridable {}
+class Page extends \Lightning\Model\PageOverridable {}
+class Permissions extends \Lightning\Model\PermissionsOverridable {}
+class SocialAuth extends \Lightning\Model\SocialAuthOverridable {}
+class Token extends \Lightning\Model\TokenOverridable {}
+class User extends \Lightning\Model\UserOverridable {}
 
 namespace Lightning\Tools;
 
-class ClientUser extends \Overridable\Lightning\Tools\ClientUser {}
-class Request extends \Overridable\Lightning\Tools\Request {}
-class Session extends \Overridable\Lightning\Tools\Session {}
+class ClientUser extends \Lightning\Tools\ClientUserOverridable {}
+class Request extends \Lightning\Tools\RequestOverridable {}
+class Session extends \Lightning\Tools\SessionOverridable {}
 
 namespace Lightning\Tools\Security;
 
-class Encryption extends \Overridable\Lightning\Tools\Security\Encryption {}
-class Random extends \Overridable\Lightning\Tools\Security\Random {}
+class Encryption extends \Lightning\Tools\Security\EncryptionOverridable {}
+class Random extends \Lightning\Tools\Security\RandomOverridable {}
 
 namespace Lightning\Tools\SocialDrivers;
 
-abstract class SocialMediaApi extends \Overridable\Lightning\Tools\SocialDrivers\SocialMediaApi {}
+abstract class SocialMediaApi extends \Lightning\Tools\SocialDrivers\SocialMediaApiOverridable {}

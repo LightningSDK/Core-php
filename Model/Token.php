@@ -1,6 +1,6 @@
 <?php
 
-namespace Overridable\Lightning\Model;
+namespace Lightning\Model;
 
 use Exception;
 use Lightning\Exceptions\TokenExpired;
@@ -12,7 +12,7 @@ use Lightning\Tools\Security\Random;
 use Lightning\Tools\Session;
 use Lightning\Tools\SingletonObject;
 
-class Token extends SingletonObject{
+class TokenOverridable extends SingletonObject{
     /**
      * Life time of token.
      */

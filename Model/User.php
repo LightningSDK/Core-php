@@ -1,6 +1,6 @@
 <?php
 
-namespace Overridable\Lightning\Model;
+namespace Lightning\Model;
 
 use Lightning\Model\Object;
 use Lightning\Tools\ClientUser;
@@ -32,7 +32,7 @@ use Lightning\Model\Permissions;
  * @property string $salt
  * @property boolean $new
  */
-class User extends Object {
+class UserOverridable extends Object {
 
     /**
      * A registered user who has not been confirmed.

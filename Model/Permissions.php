@@ -1,8 +1,8 @@
 <?php
 
-namespace Overridable\Lightning\Model;
+namespace Lightning\Model;
 
-class Permissions {
+class PermissionsOverridable {
     /**
      * Default permission for admins.
      */

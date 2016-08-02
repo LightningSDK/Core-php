@@ -1,8 +1,7 @@
 <?php
 
-namespace Overridable\Lightning\Model;
+namespace Lightning\Model;
 
-use Lightning\Model\Object;
 use Lightning\Pages\BlogTable;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
@@ -10,7 +9,7 @@ use Lightning\Tools\IO\FileManager;
 use Lightning\View\HTML;
 use Lightning\View\Text;
 
-class BlogPost extends Object {
+class BlogPostOverridable extends Object {
     const TABLE = 'blog';
     const PRIMARY_KEY = 'blog_id';
 

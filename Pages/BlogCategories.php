@@ -5,7 +5,7 @@ namespace Lightning\Pages;
 use Lightning\Tools\Request;
 use Lightning\Tools\Scrub;
 use Lightning\Tools\Template;
-use Overridable\Lightning\Tools\ClientUser;
+use Lightning\Tools\ClientUser;
 
 class BlogCategories extends Table {
     protected $table = 'blog_category';

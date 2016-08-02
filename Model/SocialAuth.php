@@ -1,12 +1,12 @@
 <?php
 
-namespace Overridable\Lightning\Model;
+namespace Lightning\Model;
 
 use Lightning\Model\Object;
 use Lightning\Tools\Database;
 use Lightning\Tools\ClientUser;
 
-class SocialAuth extends Object {
+class SocialAuthOverridable extends Object {
     const TABLE = 'social_auth';
     const PRIMARY_KEY = 'social_auth_id';
 

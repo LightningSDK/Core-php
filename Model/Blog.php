@@ -1,14 +1,14 @@
 <?php
 
-namespace Overridable\Lightning\Model;
+namespace Lightning\Model;
 
 use Lightning\View\Pagination;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
 use Lightning\Tools\Singleton;
-use Lightning\Model\BlogPost as BlogPostMain;
+use Lightning\Model\BlogPost;
 
-class Blog extends Singleton {
+class BlogOverridable extends Singleton {
 
     protected $post_count = 0;
     protected $isList = false;
@@ -39,7 +39,7 @@ class Blog extends Singleton {
     public function getAuthorID($search_value) {
         return Database::getInstance()->selectField(
             'user_id',
-            BlogPostMain::TABLE . BlogPostMain::AUTHOR_TABLE,
+            BlogPost::TABLE . BlogPost::AUTHOR_TABLE,
             ['author_url' => ['LIKE', $search_value]]
         );
     }
@@ -50,7 +50,7 @@ class Blog extends Singleton {
 
     public function loadContentByURL($url) {
         $this->isList = false;
-        $this->posts = BlogPostMain::loadPosts(['url' => $url]);
+        $this->posts = BlogPost::loadPosts(['url' => $url]);
         if (!empty($this->posts)) {
             $this->id = $this->posts[0]['blog_id'];
         }
@@ -58,7 +58,7 @@ class Blog extends Singleton {
 
     public function loadContentById($id) {
         $this->isList = false;
-        $this->posts = BlogPostMain::loadPosts(['blog_id' => $id]);
+        $this->posts = BlogPost::loadPosts(['blog_id' => $id]);
         if (!empty($this->posts)) {
             $this->id = $this->posts[0]['blog_id'];
         }
@@ -78,14 +78,14 @@ class Blog extends Singleton {
         elseif ($search_field == 'category') {
             $join[] = [
                 'JOIN',
-                array('cat_search' => BlogPostMain::TABLE . '_blog_category'),
-                'ON cat_search.blog_id = ' . BlogPostMain::TABLE . '.blog_id'
+                array('cat_search' => BlogPost::TABLE . '_blog_category'),
+                'ON cat_search.blog_id = ' . BlogPost::TABLE . '.blog_id'
             ];
             $where['cat_search.cat_id'] = $search_value;
         }
 
         elseif ($search_field == 'author') {
-            $where[BlogPostMain::TABLE . '.user_id'] = $search_value;
+            $where[BlogPost::TABLE . '.user_id'] = $search_value;
         }
 
         $limit = '';
@@ -93,14 +93,14 @@ class Blog extends Singleton {
             $limit = " LIMIT " . intval(($this->page -1) * $this->list_per_page) . ", {$this->list_per_page}";
         }
 
-        $this->posts = BlogPostMain::loadPosts($where, $join, $limit);
+        $this->posts = BlogPost::loadPosts($where, $join, $limit);
 
         $this->loadPostCount($where, $join);
     }
 
     protected function loadPostCount($where, $join) {
         $this->post_count = Database::getInstance()->count([
-                'from' => BlogPostMain::TABLE,
+                'from' => BlogPost::TABLE,
                 'join' => $join,
             ],
             $where
@@ -157,7 +157,7 @@ class Blog extends Singleton {
     }
 
     public function renderCategoriesList() {
-        $list = BlogPostMain::getAllCategories();
+        $list = BlogPost::getAllCategories();
         if (!empty($list)) {
             echo "<ul>";
             foreach($list as $r)
@@ -178,7 +178,7 @@ class Blog extends Singleton {
     public function loadBlogURL($url) {
         $this->isList = false;
         $url = preg_replace('/.htm$/', '', $url);
-        $this->posts = BlogPostMain::loadPosts(['url' => $url]);
+        $this->posts = BlogPost::loadPosts(['url' => $url]);
         if ($this->posts) {
             $this->id = $this->posts[0]['blog_id'];
         } else {
@@ -198,7 +198,7 @@ class Blog extends Singleton {
      */
     public function loadBlogID($id) {
         $this->isList = false;
-        $this->posts = BlogPostMain::loadPosts([BlogPostMain::TABLE.'.blog_id' => $id]);
+        $this->posts = BlogPost::loadPosts([BlogPost::TABLE.'.blog_id' => $id]);
         if ($this->posts) {
             $this->id = $this->posts[0]->id;
         } else {
@@ -209,11 +209,11 @@ class Blog extends Singleton {
     public static function getSitemapUrls() {
         $web_root = Configuration::get('web_root');
         $blogs = Database::getInstance()->select([
-            'from' => BlogPostMain::TABLE,
+            'from' => BlogPost::TABLE,
         ],
             [],
             [
-                [BlogPostMain::TABLE => ['blog_time' => 'time']],
+                [BlogPost::TABLE => ['blog_time' => 'time']],
                 'url',
             ],
             'GROUP BY blog_id'

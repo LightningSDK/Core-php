@@ -7,13 +7,11 @@ use Exception;
 class ClassLoader {
     protected static $loaded = false;
     protected static $classes;
-    protected static $overrides = [];
-    protected static $overridable = [];
-    protected static $loadedClasses = [
+    protected static $loadedClasses = [];
+    protected static $classLoader = [
         'Lightning\\Tools\\Configuration' => 'Lightning\\Tools\\Configuration',
         'Lightning\\Tools\\Data' => 'Lightning\\Tools\\Data',
     ];
-    protected static $classLoader = array();
 
     /**
      * A custom class loader.
@@ -21,49 +19,41 @@ class ClassLoader {
      * @param string $classname
      */
     public static function classAutoloader($classname) {
-        if (empty(self::$loadedClasses[$classname])) {
-            // Make sure the configuration is loaded.
-            if (!self::$loaded) {
-                // Load the class definitions.
-                self::$classes = Configuration::get('classes');
-                self::$overridable = Configuration::get('overridable');
-                self::$classLoader = Configuration::get('class_loader');
-                self::$loaded = true;
+        if (!self::$loaded) {
+            // These are not overridable because they are required for startup.
+            foreach (self::$classLoader as $class) {
+                self::loadClassFile($class);
             }
 
-            // If the class is explicitly set as an override.
-            if (!empty(self::$classes[$classname])) {
-                // Load an override class and override it.
-                $overridden_name = 'Overridden\\' . $classname;
-                self::$overrides[$overridden_name] = $overridden_name;
-                // Load the Lightning version in the Overridden namespace.
-                self::loadClassFile($classname);
-                // Load the overidden version in the Source namespace.
-                self::loadClassFile(self::$classes[$classname]);
-                // Alias the Lightning namespace to the Source namespace.
-                class_alias(self::$classes[$classname], $classname);
-                self::$loadedClasses[$classname] = $classname;
-                return;
-            }
-
-            // If the class is already loaded as an override, do nothing.
-            if (isset(self::$overrides[$classname])) {
-                return;
-            }
-
-            // Load the overridable class.
-            $class_file = str_replace('Overridable\\', '', $classname);
-            if (isset(self::$overridable[$classname]) || isset(self::$overridable[$class_file])) {
-                self::loadClassFile($class_file);
-                self::$loadedClasses[$class_file] = $class_file;
-                class_alias(self::$overridable[$class_file], $class_file);
-                return;
-            }
+            // Load the class definitions.
+            self::$classes = Configuration::get('classes');
+            self::$loaded = true;
         }
 
-        // No special tricks, just load the file.
-        self::$loadedClasses[$classname] = $classname;
+
+        // If the class is explicitly set as an override.
+        if (!empty(self::$classes[$classname])) {
+            // Load the Lightning version in the Overridden namespace.
+            self::loadClassFile($classname);
+            // Load the project version in the Source namespace.
+            self::loadClassFile(self::$classes[$classname]);
+            // Alias the Lightning namespace to the Source namespace.
+            class_alias(self::$classes[$classname], $classname);
+            self::$loadedClasses[$classname] = $classname;
+            return;
+        }
+
+        // Load the class.
         self::loadClassFile($classname);
+        self::$loadedClasses[$classname] = $classname;
+
+        // If this was an overridable class, create the standard alias.
+        if (!class_exists($classname, false) && class_exists($classname . 'Overridable', false)) {
+            class_alias($classname . 'Overridable', $classname);
+        }
+        if (!trait_exists($classname, false) && trait_exists($classname . 'Overridable', false)) {
+            class_alias($classname . 'Overridable', $classname);
+        }
     }
 
     /**

@@ -1,15 +1,8 @@
 <?php
 
-namespace Overridable\Lightning\Tools;
+namespace Lightning\Tools;
 
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Database;
-use Lightning\Tools\Logger;
-use Lightning\Tools\Messenger;
-use Lightning\Tools\Output;
 use Lightning\Tools\Security\Random;
-use Lightning\Tools\SingletonObject;
-use Lightning\Tools\Request as LightningRequest;
 
 /**
  * Class Session
@@ -24,7 +17,7 @@ use Lightning\Tools\Request as LightningRequest;
  * @property string $session_key
  * @property string $form_token
  */
-class Session extends SingletonObject {
+class SessionOverridable extends SingletonObject {
 
     const STATE_ANONYMOUS = 0;
     const STATE_REMEMBER = 1;
@@ -71,7 +64,7 @@ class Session extends SingletonObject {
             );
             // If the session is only allowed on one IP.
             if (Configuration::get('session.single_ip')) {
-                $session_criteria['session_ip'] = LightningRequest::server('ip_int');
+                $session_criteria['session_ip'] = Request::server('ip_int');
             }
 
             // See if the session exists.
@@ -142,7 +135,7 @@ class Session extends SingletonObject {
         }
         $session_details['session_key'] = $new_sess_key;
         $session_details['last_ping'] = time();
-        $session_details['session_ip'] = LightningRequest::server('ip_int');
+        $session_details['session_ip'] = Request::server('ip_int');
         $session_details['user_id'] = $user_id;
         $session_details['state'] = 0 | ($remember ? static::STATE_REMEMBER : 0);
         $session_details['form_token'] = $new_token;

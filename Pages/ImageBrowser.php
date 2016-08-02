@@ -8,9 +8,8 @@ use Lightning\Tools\Image;
 use Lightning\Tools\Output;
 use Lightning\View\JS;
 use Lightning\View\Page;
-use Overridable\Lightning\Tools\ClientUser;
-use Overridable\Lightning\Tools\Request;
-use Source\Model\Site;
+use Lightning\Tools\ClientUser;
+use Lightning\Tools\Request;
 
 class ImageBrowser extends Page {
 

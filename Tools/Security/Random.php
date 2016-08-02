@@ -1,11 +1,11 @@
 <?php
 
-namespace Overridable\Lightning\Tools\Security;
+namespace Lightning\Tools\Security;
 
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Singleton;
 
-class Random extends Singleton {
+class RandomOverridable extends Singleton {
 
     const INT = 1;
     const HEX = 2;

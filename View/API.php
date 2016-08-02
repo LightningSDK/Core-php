@@ -1,6 +1,6 @@
 <?php
 
-namespace Overridable\Lightning\View;
+namespace Lightning\View;
 
 use Exception;
 use Lightning\Tools\Messenger;
@@ -10,9 +10,9 @@ use Lightning\Tools\Request;
 /**
  * The basic html page handler.
  *
- * @package Overridable\Lightning\View
+ * @package Lightning\View
  */
-class API extends Page {
+class APIOverridable extends Page {
 
     public function __construct() {
         // Override parent method.
