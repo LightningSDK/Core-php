@@ -106,7 +106,7 @@ lightning.social = {
         var el = $(this);
         var url = el.closest('.social-share').data('url');
         if (el.is('.facebook')) {
-            lightning.social.sharePop('http://www.facebook.com/sharer.php?s=100&p[url]=' + url);
+            lightning.social.sharePop('http://www.facebook.com/sharer.php?u=' + url);
         } else if (el.is('.twitter')) {
             lightning.social.sharePop('https://twitter.com/intent/tweet?url=' + url);
         } else if (el.is('.google')) {
