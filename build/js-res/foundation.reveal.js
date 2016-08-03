@@ -361,7 +361,7 @@
           this.locked = false;
         }
         if (animData.pop) {
-          css.top = $(window).scrollTop() - el.data('offset') + 'px';
+          // css.top = $(window).scrollTop() - el.data('offset') + 'px';
           var end_css = {
             // top: $(window).scrollTop() + el.data('css-top') + 'px',
             opacity: 1
@@ -430,7 +430,7 @@
         }
         if (animData.pop) {
           var end_css = {
-            top: - $(window).scrollTop() - el.data('offset') + 'px',
+            // top: - $(window).scrollTop() - el.data('offset') + 'px',
             opacity: 0
           };
 
