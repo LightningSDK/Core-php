@@ -5,6 +5,7 @@ namespace Lightning\View;
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\IO\FileManager;
+use Lightning\Tools\Scrub;
 use Lightning\Tools\Session;
 use Lightning\Model\CMS as CMSModel;
 use Lightning\View\HTMLEditor\HTMLEditor;
@@ -36,6 +37,7 @@ class CMS {
      * @return string
      */
     public static function embed($name, $settings = []) {
+        // TODO: Add caching
         $content = CMSModel::loadByName($name);
         $content = (!empty($content) ? $content->content : (!empty($settings['default']) ? $settings['default'] : ''));
         if (ClientUser::getInstance()->isAdmin()) {
@@ -48,6 +50,7 @@ class CMS {
                     [
                         'spellcheck' => true,
                         'content' => $content,
+                        'content_rendered' => Markup::render($content),
                         'browser' => true,
                         'edit_border' => !empty($settings['edit_border']),
                         'config' => !empty($settings['config']) ? $settings['config'] : [],
@@ -130,10 +133,15 @@ class CMS {
         } elseif (ClientUser::getInstance()->isAdmin()) {
             JS::startup('lightning.cms.initPlain()');
             JS::set('token', Session::getInstance()->getToken());
-            return '<img src="/images/lightning/pencil.png" class="cms_edit_plain icon-16" id="cms_edit_' . $name . '">'
-            . '<img src="/images/lightning/save.png" class="cms_save_plain icon-16" id="cms_save_' . $name . '" style="display:none">'
-            . '<input type="text" id="cms_' . $name . '" value="' . $value . '" style="display:none" />'
-            . '<span id="cms_display_' . $name . '">' . $value . '</span>';
+            $output = '<img src="/images/lightning/pencil.png" class="cms_edit_plain icon-16" id="cms_edit_' . $name . '">'
+            . '<img src="/images/lightning/save.png" class="cms_save_plain icon-16" id="cms_save_' . $name . '" style="display:none">';
+            if (!empty($settings['multi_line'])) {
+                $output .= '<textarea id="cms_' . $name . '" style="display:none">' . $value . '</textarea>';
+            } else {
+                $output .= '<input type="text" id="cms_' . $name . '" value="' . $value . '" style="display:none" />';
+            }
+            $output .= '<span id="cms_display_' . $name . '">' . str_replace("\n", '<br>', $value) . '</span>';
+            return $output;
         } elseif (!empty($settings['norender'])) {
             return '';
         } else {

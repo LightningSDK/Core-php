@@ -8,10 +8,8 @@ use Lightning\Tools\ReCaptcha;
 <div class="row">
     <h1>Contact</h1>
 
-    <form action="contact" method="post" id="contact_form" data-abide>
+    <form method="post" id="contact_form" data-abide>
         <?= Form::renderTokenInput(); ?>
-
-        <h2>Contact Us:</h2>
 
         <div>
             <label>Your Name:
@@ -36,6 +34,7 @@ use Lightning\Tools\ReCaptcha;
         </div>
         <?=ReCaptcha::render()?>
         <br />
+        <input type="hidden" name="contact" value="true" />
         <input type="Submit" name="Submit" value="Send Message" class="button" />
     </form>
 </div>
