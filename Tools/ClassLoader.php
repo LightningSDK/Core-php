@@ -7,7 +7,7 @@ use Exception;
 class ClassLoader {
     protected static $loaded = false;
     protected static $classes;
-    protected static $loadedClasses = [];
+    protected static $classesRev;
     protected static $classLoader = [
         'Lightning\\Tools\\Configuration' => 'Lightning\\Tools\\Configuration',
         'Lightning\\Tools\\Data' => 'Lightning\\Tools\\Data',
@@ -27,6 +27,7 @@ class ClassLoader {
 
             // Load the class definitions.
             self::$classes = Configuration::get('classes');
+            self::$classesRev = array_flip(self::$classes);
             self::$loaded = true;
         }
 
@@ -39,13 +40,17 @@ class ClassLoader {
             self::loadClassFile(self::$classes[$classname]);
             // Alias the Lightning namespace to the Source namespace.
             class_alias(self::$classes[$classname], $classname);
-            self::$loadedClasses[$classname] = $classname;
+            return;
+        }
+
+        elseif (!empty(self::$classesRev[$classname])) {
+            // Load the Lightning version in the Overridden namespace.
+            self::classAutoloader(self::$classesRev[$classname]);
             return;
         }
 
         // Load the class.
         self::loadClassFile($classname);
-        self::$loadedClasses[$classname] = $classname;
 
         // If this was an overridable class, create the standard alias.
         if (!class_exists($classname, false) && class_exists($classname . 'Overridable', false)) {
@@ -80,9 +85,5 @@ class ClassLoader {
                 }
             }
         }
-    }
-
-    public static function updateOverridesFromConfiguration() {
-        self::$overridable = Configuration::get('overridable');
     }
 }

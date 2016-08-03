@@ -6,7 +6,6 @@ use Lightning\View\Pagination;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
 use Lightning\Tools\Singleton;
-use Lightning\Model\BlogPost;
 
 class BlogOverridable extends Singleton {
 
@@ -145,7 +144,7 @@ class BlogOverridable extends Singleton {
     }
 
     public function renderRecentList($remote=false) {
-        $list = BlogPostMain::getRecent();
+        $list = BlogPost::getRecent();
         $target = $remote ? "target='_blank'" : '';
         if (!empty($list)) {
             echo "<ul>";

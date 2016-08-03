@@ -17,7 +17,7 @@ class Singleton {
      *
      * @var Singleton
      */
-    protected static $instances = array();
+    protected static $instances = [];
 
     /**
      * A list of overidden classes for reference.
@@ -55,7 +55,11 @@ class Singleton {
      *   The new instance.
      */
     private static function getNewInstance($class) {
-        ClassLoader::classAutoloader($class);
+        // Load the class if it's not already loaded.
+        if (!class_exists($class)) {
+            ClassLoader::classAutoloader($class);
+        }
+
         // There may be additional args passed to this function.
         $args = func_get_args();
         array_shift($args);
@@ -98,7 +102,7 @@ class Singleton {
 
     protected static function getStaticName() {
         $class = get_called_class();
-        $class = str_replace('Overridable\\', '', $class);
+        $class = preg_replace('/\\Overridable$/', '', $class);
         if (!isset(self::$overrides)) {
             self::$overrides = array_flip(Configuration::get('classes', []));
         }
