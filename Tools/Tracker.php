@@ -7,6 +7,10 @@ use Lightning\View\Field\Time;
 
 class Tracker extends Singleton {
 
+    const SUBSCRIBE = 'Subscribe';
+    const REGISTER = 'Register';
+    const REGISTER_ERROR = 'Registration Error';
+
     /**
      * A list of trackers.
      *

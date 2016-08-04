@@ -114,7 +114,7 @@
             if (lightning.vars.google_analytics_id && trackingData.hasOwnProperty('ga')) {
                 ga('send', trackingData.ga,
                     trackingData.category ? trackingData.category : undefined,
-                    trackingData.action ? trackingData.action : undefined,
+                    trackingData.fb ? trackingData.fb : trackingData.action ? trackingData.action : undefined,
                     trackingData.label ? trackingData.label : undefined,
                     trackingData.value ? trackingData.value : undefined
                 );

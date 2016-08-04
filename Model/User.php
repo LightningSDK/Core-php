@@ -262,7 +262,7 @@ class UserOverridable extends Object {
      * @param string $pass
      *   The new password.
      *
-     * @return Array
+     * @return array
      *   When creation is successful:
      *      [Status of creation, user id]
      *   When not:
@@ -362,7 +362,7 @@ class UserOverridable extends Object {
             true
         )) {
             // If a result was returned, they were added to the list.
-            Tracker::trackEvent('Subscribe', $list_id, $this->id);
+            Tracker::trackEvent(Tracker::SUBSCRIBE, $list_id, $this->id);
             return true;
         } else {
             // They were already in the list.
@@ -820,7 +820,7 @@ class UserOverridable extends Object {
      *
      * @param string $email email
      * @param string $pass password
-     * @return Array
+     * @return array
      *   When successful:
      *      [Status, new user id]
      *   When not:
@@ -839,6 +839,7 @@ class UserOverridable extends Object {
 
             self::login($email, $pass);
             $user = ClientUser::getInstance();
+            Tracker::trackEvent(Tracker::REGISTER, 0, $user->id);
             $user->subscribe(Configuration::get('mailer.default_list'));
 
             // Merge with a previous anon user if necessary.
@@ -853,6 +854,8 @@ class UserOverridable extends Object {
                 'data'      => ['user_id' => ClientUser::getInstance()->id]
             ];
         } else {
+            Tracker::trackEvent(Tracker::REGISTER_ERROR);
+
             // Error
             return [
                 'success'   => false,
