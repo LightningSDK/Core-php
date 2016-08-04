@@ -122,6 +122,11 @@ class PageOverridable {
                 $template->set('content', $this->page);
             }
 
+            // Lightning JS will handle these trackers.
+            JS::set('google_analytics_id', Configuration::get('google_analytics_id'));
+            JS::set('facebook_pixel_id', Configuration::get('facebook_pixel_id'));
+
+            // @deprecated
             $template->set('google_analytics_id', Configuration::get('google_analytics_id'));
 
             // TODO: Remove these, they should be called directly from the template.
