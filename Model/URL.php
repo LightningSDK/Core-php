@@ -4,7 +4,7 @@ namespace Lightning\Model;
 
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
-use Overridable\Lightning\Tools\Request;
+use Lightning\Tools\Request;
 
 class URL extends Object {
     const TABLE = 'url';
