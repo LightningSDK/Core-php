@@ -10,7 +10,7 @@ use Lightning\Model\Object;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
 use Lightning\Tools\Language;
-use Lightning\Tools\Tracker;
+use Lightning\Tools\Tracker as TrackerTool;
 use Lightning\View\Field\Time;
 use Lightning\View\HTMLEditor\Markup;
 
@@ -139,7 +139,7 @@ class MessageOverridable extends Object {
         $this->unsubscribe = $unsubscribe;
 
         if (empty(self::$message_sent_id)) {
-            self::$message_sent_id = Tracker::getTrackerId('Email Sent');
+            self::$message_sent_id = TrackerTool::getTrackerId('Email Sent');
         }
 
         if ($default_name_settings = Configuration::get('mailer.default_name')) {

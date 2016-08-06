@@ -3,6 +3,12 @@
 namespace Lightning\Tools;
 
 class Data {
+
+    const GET = 1;
+    const SET = 2;
+    const PUSH = 3;
+    const REMOVE = 4;
+
     /**
      * Find a variable in a data set using a path locator.
      *
@@ -51,18 +57,29 @@ class Data {
      *   The hierarchy of values to fill.
      */
     public static function setInPath($var, $value, &$content) {
-        self::setInPathArray(explode('.', $var), $value, $content);
+        self::processInPathArray(explode('.', $var), $value, $content, self::SET);
     }
 
-    public static function setInPathArray($path, $value, &$content) {
+    public static function pushInPath($var, $value, &$content) {
+        self::processInPathArray(explode('.', $var), $value, $content, self::PUSH);
+    }
+
+    protected static function processInPathArray($path, $value, &$content, $action) {
         $next = array_shift($path);
         if (empty($path)) {
-            $content[$next] = $value;
+            switch ($action) {
+                case self::PUSH:
+                    $content[$next][] = $value;
+                    return;
+                case self::SET:
+                    $content[$next] = $value;
+                    return;
+            }
             return;
         } elseif (!isset($content[$next]) || !is_array($content[$next])) {
-            $content[$next] = array();
+            $content[$next] = [];
         }
-        self::setInPathArray($path, $value, $content[$next]);
+        self::processInPathArray($path, $value, $content[$next], $action);
     }
 
     /**

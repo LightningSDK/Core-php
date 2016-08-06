@@ -4,12 +4,16 @@ namespace Lightning\Tools;
 
 use Lightning\Tools\Security\Encryption;
 use Lightning\View\Field\Time;
+use Lightning\Model\Tracker as TrackerModel;
 
 class Tracker extends Singleton {
 
-    const SUBSCRIBE = 'Subscribe';
-    const REGISTER = 'Register';
-    const REGISTER_ERROR = 'Registration Error';
+    /**
+     * A list of events to be dispatched to the UI for google and/or facebook tracking.
+     *
+     * @var array
+     */
+    protected static $events;
 
     /**
      * A list of trackers.
@@ -106,10 +110,12 @@ class Tracker extends Singleton {
      *   A secondary value for the tracker.
      * @param integer $user_id
      *   The user committing the action.
+     *
+     * @deprecated
      */
     public static function trackEvent($tracker_name, $sub_id = 0, $user_id = -1) {
-        $tracker_id = self::getTrackerId($tracker_name);
-        self::trackEventID($tracker_id, $sub_id, $user_id);
+        $tracker = TrackerModel::loadByName($tracker_name);
+        $tracker->track($sub_id, $user_id);
     }
 
     /**
@@ -121,26 +127,12 @@ class Tracker extends Singleton {
      *   The tracker sub id.
      * @param $user_id
      *   The user id.
+     *
+     * @deprecated
      */
     public static function trackEventID($tracker_id, $sub_id = 0, $user_id = -1) {
-        if ($user_id == -1 || $user_id === false) {
-            $user_id = ClientUser::getInstance()->id;
-        }
-
-        $today = Time::today();
-
-        // Insert the event.
-        Database::getInstance()->insert(
-            'tracker_event',
-            [
-                'tracker_id' => $tracker_id,
-                'user_id' => $user_id ?: 0,
-                'sub_id' => $sub_id ?: 0,
-                'date' => $today,
-                'time' => time(),
-                'session_id' => Session::getInstance()->id,
-            ]
-        );
+        $tracker = TrackerModel::loadByID($tracker_id);
+        $tracker->track($sub_id, $user_id);
     }
 
     /**

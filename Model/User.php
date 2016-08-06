@@ -2,7 +2,6 @@
 
 namespace Lightning\Model;
 
-use Lightning\Model\Object;
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
@@ -15,9 +14,7 @@ use Lightning\Tools\Request;
 use Lightning\Tools\Scrub;
 use Lightning\Tools\Session;
 use Lightning\Tools\SocialDrivers\SocialMediaApi;
-use Lightning\Tools\Tracker;
 use Lightning\View\Field\Time;
-use Lightning\Model\Permissions;
 
 /**
  * Class User
@@ -362,7 +359,7 @@ class UserOverridable extends Object {
             true
         )) {
             // If a result was returned, they were added to the list.
-            Tracker::trackEvent(Tracker::SUBSCRIBE, $list_id, $this->id);
+            Tracker::loadByName(Tracker::SUBSCRIBE)->track($list_id, $this->id);
             return true;
         } else {
             // They were already in the list.
@@ -839,7 +836,7 @@ class UserOverridable extends Object {
 
             self::login($email, $pass);
             $user = ClientUser::getInstance();
-            Tracker::trackEvent(Tracker::REGISTER, 0, $user->id);
+            Tracker::loadByName(Tracker::REGISTER)->track(0, $user->id);
             $user->subscribe(Configuration::get('mailer.default_list'));
 
             // Merge with a previous anon user if necessary.
@@ -854,7 +851,7 @@ class UserOverridable extends Object {
                 'data'      => ['user_id' => ClientUser::getInstance()->id]
             ];
         } else {
-            Tracker::trackEvent(Tracker::REGISTER_ERROR);
+            Tracker::loadByName(Tracker::REGISTER_ERROR)->track();
 
             // Error
             return [

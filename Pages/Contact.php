@@ -16,10 +16,10 @@ use Lightning\Tools\Navigation;
 use Lightning\Tools\Output;
 use Lightning\Tools\ReCaptcha;
 use Lightning\Tools\Request;
-use Lightning\Tools\Tracker;
 use Lightning\View\Page as PageView;
 use Lightning\Model\User as UserModel;
 use Lightning\Model\Message;
+use Lightning\Model\Tracker;
 
 /**
  * A contact page handler.
@@ -101,7 +101,7 @@ class Contact extends PageView {
         // Send a message to the site contact.
         if (!empty($this->settings['always_notify']) || ($request_contact && $this->settings['contact'])) {
             $sent = $this->sendMessage();
-            Tracker::trackEvent('Contact Sent', URL::getCurrentUrlId(), $this->user->id);
+            Tracker::loadByName('Contact Sent')->track(URL::getCurrentUrlId(), $this->user->id);
             if (!$sent) {
                 Output::error('Your message could not be sent. Please try again later');
             } else {

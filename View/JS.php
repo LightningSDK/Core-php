@@ -129,6 +129,10 @@ class JS {
         Data::setInPath($var, $value, self::$vars);
     }
 
+    public static function push($var, $value) {
+        Data::pushInPath($var, $value, self::$vars);
+    }
+
     public static function getAll() {
         return self::$vars;
     }

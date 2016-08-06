@@ -15,14 +15,14 @@ class Messenger {
      *
      * @var array
      */
-    protected static $messages = array();
+    protected static $messages = [];
 
     /**
      * A list of errors to output.
      *
      * @var array
      */
-    protected static $errors = array();
+    protected static $errors = [];
 
     /**
      * Whether messages should be output immediately, ie for CLI.

@@ -13,6 +13,7 @@ use Lightning\Tools\Request;
 use Lightning\Tools\Session;
 use Lightning\Tools\Template;
 use Lightning\Model\Page as PageModel;
+use Lightning\Model\Tracker;
 
 /**
  * The basic html page handler.
@@ -94,6 +95,7 @@ class PageOverridable {
         // Load messages and errors from the query string.
         Messenger::loadFromQuery();
         Messenger::loadFromSession();
+        Tracker::loadFromSession();
         JS::add('/js/lightning.min.js');
         JS::startup('lightning.startup.init()');
         JS::startup('$(document).foundation()');

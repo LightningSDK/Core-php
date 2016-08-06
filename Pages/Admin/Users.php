@@ -8,10 +8,9 @@ use Lightning\Tools\ClientUser;
 use Lightning\Tools\Database;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Request;
+use Lightning\Tools\Session;
 use Lightning\View\Field\BasicHTML;
 use Lightning\View\Field\Text;
-use Lightning\View\HTML;
-use Overridable\Lightning\Tools\Session;
 
 class Users extends Table {
 
