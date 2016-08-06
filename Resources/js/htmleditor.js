@@ -1,23 +1,23 @@
 (function(){
-    var self;
-    lightning.htmleditor = {
+    var self = lightning.htmleditor = {
         editors: {},
         /**
          * Initialize editor settings.
          */
         init: function() {
-            for (var i in lightning.vars.htmleditors) {
-                if (lightning.vars.htmleditors[i].editor_type == 'tinymce') {
-                    lightning.vars.htmleditors[i].setup = self.tinymceSetup;
-                    if (lightning.vars.htmleditors[i].browser) {
-                        lightning.vars.htmleditors[i].file_browser_callback = self.imageBrowser;
+            var editors = lightning.vars.htmleditors;
+            for (var i in editors) {
+                if (editors[i].editor_type == 'tinymce') {
+                    editors[i].setup = self.tinymceSetup;
+                    if (editors[i].browser) {
+                        editors[i].file_browser_callback = self.imageBrowser;
                     }
 
                     // Activate any startup editors.
-                    if (lightning.vars.htmleditors[i].startup) {
+                    if (editors[i].startup) {
                         self.initEditor(i);
                     }
-                } else if (lightning.vars.htmleditors[i].editor_type == 'ckeditor') {
+                } else if (editors[i].editor_type == 'ckeditor') {
                     var x = function(j){
                         CKEDITOR.scriptLoader.queue(CKEDITOR.getUrl('config.js'), function(){
                             // Init the CKEditor Config
@@ -26,19 +26,19 @@
                             }
 
                             // Add any plugins specified for just this editor.
-                            if (lightning.vars.htmleditors[j].hasOwnProperty('plugins')) {
-                                lightning.vars.htmleditors[j].plugins = lightning.vars.htmleditors[j].plugins.replace(/\*/, CKEDITOR.config.plugins);
+                            if (editors[j].hasOwnProperty('plugins')) {
+                                editors[j].plugins = editors[j].plugins.replace(/\*/, CKEDITOR.config.plugins);
                             } else {
-                                lightning.vars.htmleditors[j].plugins = CKEDITOR.config.plugins;
+                                editors[j].plugins = CKEDITOR.config.plugins;
                             }
 
                             // If fullPage is requested, the divarea plugin must be removed.
-                            if (lightning.vars.htmleditors[j].hasOwnProperty('fullPage') && lightning.vars.htmleditors[j].fullPage) {
-                                lightning.vars.htmleditors[j].plugins = lightning.vars.htmleditors[j].plugins.replace('divarea', '');
+                            if (editors[j].hasOwnProperty('fullPage') && editors[j].fullPage) {
+                                editors[j].plugins = editors[j].plugins.replace('divarea', '');
                             }
 
                             // Activate any startup editors.
-                            if (lightning.vars.htmleditors[j].startup) {
+                            if (editors[j].startup) {
                                 self.initEditor(j);
                             }
                         });
@@ -50,7 +50,7 @@
                 $(this).find('.html_editor_presave').each(function(){
                     var field = $(this);
                     var id = $(this).prop('id').replace('save_', '');
-                    if (lightning.vars.htmleditors[id].editor_type == 'ckeditor') {
+                    if (editors[id].editor_type == 'ckeditor') {
                         field.val(self.getContent(id));
                     }
                 });
@@ -78,11 +78,20 @@
          * TODO: Change this to 'activateEditor'
          */
         initEditor: function(editor_id) {
-            if (lightning.vars.htmleditors[editor_id].editor_type == 'tinymce') {
-                tinymce.init(lightning.vars.htmleditors[editor_id]);
-            } else if (lightning.vars.htmleditors[editor_id].editor_type == 'ckeditor') {
-                $('#' + editor_id).attr('contenteditable', 'true');
-                self.editors[editor_id] = CKEDITOR.inline(editor_id, lightning.vars.htmleditors[editor_id]);
+            var editor = $('#' + editor_id);
+            var editor_settings = lightning.vars.htmleditors[editor_id];
+            if (editor_settings.content_rendered) {
+                // This has rendered markup, replace with the original markup.
+                editor.html(editor_settings.content);
+                // Remove the rendered content since it will no longer be relevant
+                // and will result in the original replacing the edited content.
+                delete editor_settings.content_rendered;
+            }
+            if (editor_settings.editor_type == 'tinymce') {
+                tinymce.init(editor_settings);
+            } else if (editor_settings.editor_type == 'ckeditor') {
+                editor.attr('contenteditable', 'true');
+                self.editors[editor_id] = CKEDITOR.inline(editor_id, editor_settings);
             }
         },
 
@@ -152,5 +161,4 @@
             return false;
         }
     };
-    self = lightning.htmleditor;
 })();

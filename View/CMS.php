@@ -44,8 +44,8 @@ class CMS {
             JS::set('token', Session::getInstance()->getToken());
             JS::set('cms.cms_' . $name . '.config', !empty($settings['config']) ? $settings['config'] : []);
             return
-                '<a href="javascript:lightning.cms.edit(\'cms_' . $name . '\')" class="button small" id="cms_edit_' . $name . '">Edit</a>'
-                . '<a href="javascript:lightning.cms.save(\'cms_' . $name . '\')" class="button small" style="display:none;" id="cms_save_' . $name . '">Save</a>'
+                '<img src="/images/lightning/pencil.png" class="cms_edit icon-16" id="cms_edit_' . $name . '">
+            <img src="/images/lightning/save.png" class="cms_save icon-16" id="cms_save_' . $name . '" style="display:none">'
                 . HTMLEditor::div('cms_' . $name,
                     [
                         'spellcheck' => true,

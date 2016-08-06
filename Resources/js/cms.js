@@ -1,15 +1,14 @@
 (function() {
-    var self;
-    lightning.cms = {
+    var self = lightning.cms = {
         edit: function (editor) {
-            lightning.htmleditor.initEditor(editor);
-            $('#' + editor.replace(/^cms_/, 'cms_edit_')).hide();
-            $('#' + editor.replace(/^cms_/, 'cms_save_')).show();
+            lightning.htmleditor.initEditor('cms_' + editor);
+            $('#cms_edit_' + editor).hide();
+            $('#cms_save_' + editor).show();
         },
 
         save: function (editor) {
             lightning.dialog.showLoader('Saving...');
-            lightning.htmleditor.deactivateEditor(editor);
+            lightning.htmleditor.deactivateEditor('cms_' + editor);
             $.ajax({
                 url: '/admin/cms',
                 type: 'POST',
@@ -18,11 +17,11 @@
                     cms: editor.replace(/^cms_/, ''),
                     token: lightning.vars.token,
                     action: "save",
-                    content: $('#' + editor).html()
+                    content: $('#cms_' + editor).html()
                 },
                 success: function (data) {
-                    $('#' + editor.replace(/^cms_/, 'cms_edit_')).show();
-                    $('#' + editor.replace(/^cms_/, 'cms_save_')).hide();
+                    $('#cms_edit_' + editor).show();
+                    $('#cms_save_' + editor).hide();
                     lightning.dialog.clear();
                     lightning.dialog.add('Saved!', 'message');
                 },
@@ -91,6 +90,14 @@
         },
 
         initPlain: function () {
+            $('.cms_edit').on('click', function(e) {
+                var id = $(e.target).attr('id').replace(/^cms_edit_/, '');
+                self.edit(id);
+            });
+            $('.cms_save').on('click', function(e) {
+                var id = $(e.target).attr('id').replace(/^cms_save_/, '');
+                self.save(id);
+            });
             $('.cms_edit_plain').on('click', function (e) {
                 var id = $(e.target).attr('id').replace(/^cms_edit_/, '');
                 self.editPlain(id);
@@ -186,5 +193,4 @@
             });
         }
     };
-    self = lightning.cms;
 })();
