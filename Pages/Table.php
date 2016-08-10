@@ -183,7 +183,7 @@ abstract class Table extends Page {
      *
      *   - accessControl - Injection into the $where query for available options for linking.
      *   - index - the name of a table for making many to many joins
-     *   - table - the name of the table with the foriegn data. if left empty, the key for this array will be used
+     *   - table - the name of the table with the foreign data. if left empty, the key for this array will be used
      *   - key - the primary key of the foreign table
      *   - index_fkey - if the columns on the index table and foriegn table have different names, 'key' is the name of the column on the index table and 'index_fkey' is the name of column on the foreign table.
      *   - display_column - the column in the foreign table to display as the value
@@ -431,7 +431,11 @@ abstract class Table extends Page {
 
     protected function validateAccess($id) {
         if (!empty($this->accessControl)) {
-            if (!Database::getInstance()->check($this->table,
+            if (!Database::getInstance()->check(
+                [
+                    'from' => $this->table,
+                    'join' => $this->getAccessTableJoins()
+                ],
                 array_merge($this->accessControl, [$this->getKey() => $id]))) {
                 Output::accessDenied();
             }
@@ -763,7 +767,8 @@ abstract class Table extends Page {
 
         if (!empty($new_values)) {
             $where = $this->accessRestrictions([$this->getKey() => $this->id]);
-            Database::getInstance()->update($this->table, $new_values, $where);
+            $table = ['from' => $this->table, 'join' => $this->getAccessTableJoins()];
+            Database::getInstance()->update($table, $new_values, $where);
         }
         $this->updateAccessTable();
         $this->setPostedLinks();
@@ -2350,9 +2355,9 @@ abstract class Table extends Page {
 
     protected function updateAccessTable() {
         if (isset($this->accessTable)) {
-            $accessTable_values = $this->getFieldValues($this->fields, true);
-            if (!empty($accessTable_values)) {
-                Database::getInstance()->update($this->accessTable, $accessTable_values, array_merge($this->accessTableWhere, [$this->getKey() => $this->id]));
+            $accessTableValues = $this->getFieldValues($this->fields, true);
+            if (!empty($accessTableValues)) {
+                Database::getInstance()->update($this->accessTable, $accessTableValues, array_merge($this->accessTableWhere, [$this->getKey() => $this->id]));
             }
         }
     }

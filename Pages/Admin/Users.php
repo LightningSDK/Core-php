@@ -53,14 +53,20 @@ class Users extends Table {
 
     protected $importable = true;
 
-    protected $links = array(
-        'message_list' => array(
+    protected $links = [
+        'message_list' => [
             'display_name' => 'Mailing Lists',
             'key' => 'message_list_id',
             'index' => 'message_list_user',
             'display_column' => 'name',
-        ),
-    );
+        ],
+        'user_tag' => [
+            'display_name' => 'Tags',
+            'key' => 'tag_id',
+            'index' => 'user_tag_tag',
+            'display_column' => 'name',
+        ]
+    ];
 
     protected $action_fields = array(
         'impersonate' => array(
