@@ -139,6 +139,11 @@ trait ObjectDataStorage {
      * @param array $data
      */
     public function setData($data) {
+        foreach ($data as $var => $value) {
+            if (empty($this->__data[$var]) || $this->__data[$var] != $value) {
+                $this->__changed[$var] = $var;
+            }
+        }
         $this->__data = $data;
     }
 
