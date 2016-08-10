@@ -17,6 +17,10 @@ use Lightning\Tools\SocialDrivers\Twitter;
 use Lightning\View\API;
 
 class User extends API {
+    public function get() {
+        return ['logged_in' => !ClientUser::getInstance()->isAnonymous()];
+    }
+
     public function postLogin() {
         $email = Request::post('email', 'email');
         $pass = Request::post('password');
