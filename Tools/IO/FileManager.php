@@ -7,10 +7,12 @@ use Lightning\Tools\Configuration;
 class FileManager {
     public static function getFileHandler($handler, $container) {
         $container = Configuration::get('imageBrowser.containers.' . $container);
+        $storage = $container['storage'];
+        $url = !empty($container['url']) ? $container['url'] : null;
         if (empty($handler)) {
-            return new File($container['storage'], $container['url']);
+            return new File($storage, $url);
         } else {
-            return new $handler($container['storage'], $container['url']);
+            return new $handler($storage, $url);
         }
     }
 }

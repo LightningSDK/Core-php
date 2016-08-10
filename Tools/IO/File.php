@@ -50,7 +50,7 @@ class File implements FileHandlerInterface {
         if ($offset == 0) {
             file_put_contents($this->root . '/' . $file, $contents);
         } else {
-            $file = fopen($this->root . '/' . $file, 'w');
+            $file = fopen($this->root . '/' . $file, 'r+');
             fseek($file, $offset);
             fwrite($file, $contents);
         }
