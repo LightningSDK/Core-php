@@ -25,6 +25,14 @@ use Lightning\Model\Tracker;
  * A contact page handler.
  *
  * @package Lightning\Pages
+ *
+ * To use this page handler, create a form that posts to the url attached.
+ * Fields that can be used include:
+ *   list: Subscribe the user to the list with this message_list_id.
+ *   optin: Subscribe the user to a default list.
+ *   contact: Boolean, whether to notify the site admins. This will send anyway if contact.always_notify is set to true in the configuration.
+ *   message: If set, a message with this message_id will be sent to the input user email.
+ *
  */
 class Contact extends PageView {
 
@@ -35,6 +43,11 @@ class Contact extends PageView {
      * @var UserModel
      */
     protected $user;
+
+    /**
+     * @var boolean
+     */
+    protected $request_contact = false;
 
     /**
      * @var array
@@ -54,17 +67,30 @@ class Contact extends PageView {
      * Send a posted contact request to the site admin.
      */
     public function post() {
-        $this->settings = Configuration::get('contact');
+        $this->loadVars();
+        $this->validateForm();
 
+        // Optin the user.
+        $this->optinUser();
+        $this->messageUser();
+        $this->messageSiteContact();
+        $this->redirect();
+    }
+
+    protected function loadVars() {
+        $this->settings = Configuration::get('contact');
+        $this->request_contact = Request::post('contact', 'boolean');
+    }
+
+    protected function validateForm() {
         // Check captcha if required.
-        $request_contact = Request::post('contact', 'boolean');
         if (
             !empty($this->settings['require_captcha'])
             && (
                 $this->settings['require_captcha'] === true
                 || (
                     $this->settings['require_captcha'] == 'contact_only'
-                    && $request_contact
+                    && $this->request_contact
                 )
             )
             && !ReCaptcha::verify()
@@ -78,8 +104,9 @@ class Contact extends PageView {
             Messenger::error('Please enter a valid email address.');
             return $this->get();
         }
+    }
 
-        // Optin the user.
+    protected function optinUser() {
         if ($list = Request::get('list', 'int')) {
             if (!Message::validateListID($list)) {
                 $list = Message::getDefaultListID();
@@ -91,19 +118,23 @@ class Contact extends PageView {
         if (!empty($list)) {
             $this->user->subscribe($list);
         }
+    }
 
+    protected function messageUser() {
         // Send a message to the user who just opted in.
         if ($message = Request::post('message', 'int')) {
             $mailer = new Mailer();
             $mailer->sendOne($message, $this->user);
         }
+    }
 
+    protected function messageSiteContact() {
         // Send a message to the site contact.
-        if (!empty($this->settings['always_notify']) || ($request_contact && $this->settings['contact'])) {
+        if (!empty($this->settings['always_notify']) || ($this->request_contact && $this->settings['contact'])) {
             $sent = $this->sendMessage();
             Tracker::loadByName('Contact Sent')->track(URL::getCurrentUrlId(), $this->user->id);
             if (!$sent) {
-                Output::error('Your message could not be sent. Please try again later');
+                Output::error('Your message could not be sent. Please try again later.');
             } else {
                 // Send an email to to have them test for spam.
                 if (!empty($this->settings['auto_responder'])) {
@@ -112,20 +143,20 @@ class Contact extends PageView {
                     if ($result && $this->settings['spam_test']) {
                         // Set the notice.
                         $this->setSuccessMessage(Language::translate('spam_test'));
-                        $this->redirect();
+                        return;
                     }
                 }
                 $this->setSuccessMessage(Language::translate('contact_sent'));
-                $this->redirect();
+                return;
             }
         } else {
             $this->setSuccessMessage(Language::translate('optin.success'));
-            $this->redirect();
+            return;
         }
     }
 
     public function redirect($params = []) {
-        if ($redirect = Request::post('redirect', 'url')) {
+        if ($redirect = Request::post('redirect')) {
             Navigation::redirect($redirect, $params);
         } else {
             Navigation::redirect('/message', $params);
