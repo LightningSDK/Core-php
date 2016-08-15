@@ -69,8 +69,6 @@ class Contact extends PageView {
     public function post() {
         $this->loadVars();
         $this->validateForm();
-
-        // Optin the user.
         $this->optinUser();
         $this->messageUser();
         $this->messageSiteContact();
