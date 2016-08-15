@@ -104,11 +104,17 @@ class CMS {
             JS::set('cms.baseUrl', $fh->getWebURL(''));
             JS::set('fileBrowser.type', Configuration::get('html_editor.browser'));
             JS::startup('lightning.cms.initImage();');
+            if (!isset($settings['style'])) {
+                $settings['style'] = [];
+            }
+            if (!empty($settings['norender'])) {
+                $settings['style']['display'] = 'none';
+            }
             return '<img src="/images/lightning/pencil.png" class="cms_edit_image icon-16" id="cms_edit_' . $name . '">
             <img src="/images/lightning/save.png" class="cms_save_image icon-16" id="cms_save_' . $name . '" style="display:none">'
             . '<input type="text" placeholder="classes" id="cms_' . $name . '_class" class="imagesCSS" name="' . $forced_classes . '" value="' . $added_classes . '" style="display:none" />'
             . '<img src="' . $content->url . '" id="cms_' . $name . '" class="' . $content->class . '" '
-            . (!empty($settings['norender']) ? 'style="display:none"' : '')
+            . 'style="' . HTML::implodeStyles($settings['style']) . '"'
             . ' />';
         } elseif (!empty($settings['norender'])) {
             return '';
