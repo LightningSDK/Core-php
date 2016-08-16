@@ -85,7 +85,10 @@ class CMS {
             $handler = FileManager::getFileHandler(!empty($settings['file_handler']) ? $settings['file_handler'] : '', $settings['location']);
             $content->url = $handler->getWebURL($content->content);
         }
+
+        // These are classes that are always applied and not visible in the text field.
         $forced_classes = !empty($settings['class']) ? $settings['class'] : '';
+        // These are added in the CMS text field.
         $added_classes = !empty($content->class) ? $content->class : '';
         if (!empty($settings['class'])) {
             $content->class .= ' ' . $settings['class'];
@@ -120,7 +123,11 @@ class CMS {
             return '';
         } else {
             if (!empty($content)) {
-                return '<img src="' . $content->url . '" class="' . $content->class . '" />';
+                $output = '<img src="' . $content->url . '" class="' . $content->class . '" />';
+                if (!empty($settings['link'])) {
+                    $output = '<a href="' . Scrub::toHTML($settings['link']) . '">' . $output . '</a>"';
+                }
+                return $output;
             }
         }
     }
