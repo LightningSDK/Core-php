@@ -2,6 +2,7 @@
 
 namespace Lightning\API;
 
+use Exception;
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Messenger;
@@ -83,20 +84,33 @@ class User extends API {
     public function postRegister() {
         $email = Request::post('email', 'email');
         $pass = Request::post('password');
-        
-        // Validate POST data
-        if (!$this->validateData($email, $pass)) {
-            // Immediately output all the errors
-            Output::error("Invalid Data");
+
+        if (empty($email)) {
+            throw new Exception('Invalid email');
+        }
+        if (empty($pass)) {
+            throw new Exception('Missing pasword');
+        }
+
+        $min_password_length = Configuration::get('user.min_password_length');
+        if (strlen($pass) < $min_password_length) {
+            throw new Exception("Passwords must be at least {$min_password_length} characters");
+        }
+
+        $data = [];
+        if ($name = Request::post('name')) {
+            $data['name'] = $name;
+        }
+        if ($first = Request::post('first')) {
+            $data['first'] = $first;
+        }
+        if ($last = Request::post('last')) {
+            $data['last'] = $last;
         }
         
         // Register user
-        $res = UserModel::register($email, $pass);
-        if ($res['success']) {
-            Output::json($res['data']);
-        } else {
-            Output::error($res['error']);
-        }
+        $user = UserModel::register($email, $pass, $data);
+        return ['user_id' => $user->id];
     }
 
     public function postReset() {
@@ -115,39 +129,5 @@ class User extends API {
     public function postLogout() {
         $user = ClientUser::getInstance();
         $user->logOut();
-    }
-    
-    /**
-     * Validates POST data (email, password and confirmation).
-     * 
-     * @param string $email
-     * @param string $pass
-     *
-     * @return boolean
-     */
-    protected function validateData($email, $pass) {
-        // Default value
-        $result = TRUE;
-        
-        // Are all fields filled?
-        if (is_null($email) OR is_null($pass)) {
-            Messenger::error('Please fill out all the fields');
-            $result = FALSE;
-        }
-        
-        // Is email correct?
-        if ($email === FALSE) {
-            Messenger::error('Please enter a valid email');
-            $result = FALSE;
-        }
-
-        // Are passwords strong enough? Check its length
-        $min_password_length = Configuration::get('user.min_password_length');
-        if (strlen($pass) < $min_password_length) {
-            Messenger::error("Passwords must be at least {$min_password_length} characters");
-            $result = FALSE;
-        }
-
-        return $result;
     }
 }

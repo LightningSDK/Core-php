@@ -6,7 +6,9 @@
 
 namespace Lightning\CLI;
 
+use Exception;
 use Lightning\Model\Role;
+use Lightning\Tools\Configuration;
 use Lightning\Tools\Scrub;
 use Lightning\Model\User as UserModel;
 
@@ -27,15 +29,15 @@ class User extends CLI {
             $email_input = $this->readline('Email: ');
         } while (!$email = Scrub::email($email_input));
 
+        $min_pass_length = Configuration::get('user.min_password_length');
         do {
             $password = $this->readline('Password: ', true);
-        } while (strlen($password) < 6);
+        } while (strlen($password) < $min_pass_length);
 
-        $res = UserModel::create($email, $password);
-        if ($res['success']) {
-            $user = UserModel::loadById($res['data']);
+        try {
+            $user = UserModel::create($email, $password);
             $user->addRole(Role::ADMIN);
-        } else {
+        } catch (Exception $e) {
             $this->out('Failed to create user.');
         }
     }

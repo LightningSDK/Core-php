@@ -67,8 +67,8 @@ class ClientUserOverridable extends Singleton {
      *   If the user is not logged in but this is a JSON request.
      */
     public static function requireLogin($action = '') {
-        if (self::getInstance()->id == 0) {
-            $query = array();
+        if (static::getInstance()->id == 0) {
+            $query = [];
             if (!empty($action)) {
                 $query['action'] = $action;
             }
