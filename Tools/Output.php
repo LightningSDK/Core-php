@@ -436,8 +436,11 @@ class Output {
 
     /**
      * Disable output buffering for streaming output.
+     *
+     * @param boolean $kickstart
+     *   Whether to output 9k of blank data to force apache to stream.
      */
-    public static function disableBuffering() {
+    public static function disableBuffering($kickstart = true) {
         if (function_exists('apache_setenv')) {
             apache_setenv('no-gzip', 1);
         }
@@ -451,7 +454,10 @@ class Output {
             ob_end_flush();
         }
         ob_implicit_flush(true);
-        echo str_repeat(' ', 9000);
+        if ($kickstart) {
+            // Send 9kb of output to force apache to start sending.
+            echo str_repeat(' ', 9000);
+        }
     }
 
     /**
@@ -467,7 +473,7 @@ class Output {
         if ($size) {
             header('Content-Length: ' . $size);
         }
-        Output::disableBuffering();
+        Output::disableBuffering(false);
     }
 
     /**
