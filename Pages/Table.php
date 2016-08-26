@@ -198,6 +198,25 @@ abstract class Table extends Page {
     protected $maxPerPage = 25;
     protected $listCount = 0;
     protected $page_number = 1;
+
+    /**
+     * A list of columns that will be represented as buttons, checkboxes, etc.
+     *
+     * Each item in the action fields array should be an array with a list of settings.
+     *
+     *   - display_name - The name to show at the top of the column.
+     *   - display_value - The text that will appear inside of a link or action field.
+     *   - type - The type of the field.
+     *     - link - A simple link to a new location ending with the line's primary key value
+     *     - html - Fully rendered HTML. This can be a constant string or a callable function.
+     *     - action - An action managed by the table, linking to the table handler page. IE /table?action=someAction&id=1, which will call the method getSomeAction() with $this->id = 1;
+     *     - function - deprecated version of action.
+     *     - checkbox - A rendered checkbox which will determine if this row is selected when applying an action to a group of rows.
+     *   - condition - A function that, when passed the row's values, will return true or false as to whether the cell should be rendered.
+     *   - action - If the type is action, this will be the name of the action in the link.
+     *
+     * @var array
+     */
     protected $action_fields = [];
     protected $custom_templates = [];
     protected $list_where;
