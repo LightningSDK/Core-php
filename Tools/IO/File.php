@@ -8,6 +8,7 @@ class File implements FileHandlerInterface {
     protected $web_root;
     protected $currentFile;
     protected $currentFileHandler;
+    protected $file;
 
     public function __construct($root, $web_root = null) {
         if ($root[0] == '/') {
@@ -32,6 +33,7 @@ class File implements FileHandlerInterface {
 
     public function readRange($file, $start, $end) {
         if (!empty($file) && $file != $this->file) {
+            $this->file = $file;
             $this->currentFile = $file;
             $this->currentFileHandler = fopen($this->root . '/' . $this->currentFile, 'r');
         }
@@ -44,16 +46,19 @@ class File implements FileHandlerInterface {
     }
 
     public function write($file, $contents, $offset = 0) {
+        // Make sure the directory exists.
         if (!file_exists(dirname($this->root . '/' . $file))) {
             mkdir(dirname($this->root . '/' . $file), 0777, true);
         }
-        if ($offset == 0) {
-            file_put_contents($this->root . '/' . $file, $contents);
-        } else {
-            $file = fopen($this->root . '/' . $file, 'r+');
-            fseek($file, $offset);
-            fwrite($file, $contents);
+
+        if (!empty($file) && $file != $this->file) {
+            $this->file = $file;
+            $this->currentFile = $file;
+            $this->currentFileHandler = fopen($this->root . '/' . $this->currentFile, 'r');
         }
+
+        fseek($this->currentFileHandler, $offset);
+        fwrite($this->currentFileHandler, $contents);
     }
 
     public function moveUploadedFile($file, $temp_file) {
