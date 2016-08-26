@@ -311,6 +311,7 @@ abstract class Table extends Page {
      * - type (type of the button out of available ones);
      * - text (text on the button);
      * - data (custom data);
+     *
      * @var array
      */
     protected $custom_buttons = [];
@@ -1204,6 +1205,8 @@ abstract class Table extends Page {
     protected function getDisplayName($field, $field_name) {
         if (isset($field['display_name'])) {
             return $field['display_name'];
+        } elseif (isset($field['display_value'])) {
+            return $field['display_value'];
         } else {
             return ucwords(str_replace('_', ' ', $field_name));
         }
@@ -1350,10 +1353,7 @@ abstract class Table extends Page {
         $output = '';
         foreach ($this->action_fields as $a => $action) {
             $output .= '<td>';
-            if (isset($action['column_name']))
-                $output .= $action['column_name'];
-            elseif (isset($action['display_name']))
-                $output .= $action['display_name']; else $output .= $a;
+            $output .= $this->getDisplayName($action, $a);
             switch ($action['type']) {
                 case 'link':
                 case 'html':
@@ -1386,11 +1386,8 @@ abstract class Table extends Page {
         foreach ($this->action_fields as $a => $action) {
             $output .= '<td>';
             // Get the display value for the column.
-            if (!empty($action['display_value'])) {
-                $link_content = $action['display_value'];
-            } else {
-                $link_content = $this->getDisplayName($action, $a);
-            }
+            $link_content = isset($action['display_value']) ? $action['display_value'] : $this->getDisplayName($action, $a);
+
             // Run a custom condition to see if this should be displayed at all.
             if (!empty($action['condition']) && is_callable($action['condition'])) {
                 if (!$action['condition']($row)) {
