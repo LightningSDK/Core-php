@@ -16,12 +16,11 @@ class Stats extends Line {
     protected $ajax = true;
 
     protected function hasAccess() {
-        ClientUser::requireAdmin();
-        return true;
+        return ClientUser::requireAdmin();
     }
 
     public function get() {
-        $message_id = Request::get('message_id', 'int');
+        $message_id = Request::get('message_id', Request::TYPE_INT);
         if (empty($message_id)) {
             Output::error('Message Not Found');
         }
