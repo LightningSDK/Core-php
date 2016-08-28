@@ -20,6 +20,7 @@ use Lightning\View\Page as PageView;
 use Lightning\Model\User as UserModel;
 use Lightning\Model\Message;
 use Lightning\Model\Tracker;
+use Lightning\Model\Contact as ContactModel;
 
 /**
  * A contact page handler.
@@ -40,6 +41,13 @@ class Contact extends PageView {
     protected $menuContext = 'contact';
 
     /**
+     * An ID of a list if the user is being subscribed.
+     *
+     * @var integer
+     */
+    protected $list;
+
+    /**
      * @var UserModel
      */
     protected $user;
@@ -47,12 +55,17 @@ class Contact extends PageView {
     /**
      * @var boolean
      */
-    protected $request_contact = false;
+    protected $requestContact = false;
 
     /**
      * @var array
      */
     protected $settings;
+
+    protected $userMessage = 0;
+    protected $userMessageSent = 0;
+    protected $contactAdmin = 0;
+    protected $contactAdminSent = 0;
 
     public function __construct() {
         parent::__construct();
@@ -72,12 +85,22 @@ class Contact extends PageView {
         $this->optinUser();
         $this->messageUser();
         $this->messageSiteContact();
+        (new ContactModel($this->getContactFields()))->save();
         $this->redirect();
     }
 
     protected function loadVars() {
         $this->settings = Configuration::get('contact');
-        $this->request_contact = Request::post('contact', 'boolean');
+        $this->requestContact = Request::post('contact', 'boolean');
+        $this->userMessage = Request::post('message', 'int');
+        if ($this->list = Request::get('list', Request::TYPE_INT, '', 0)) {
+            if (!Message::validateListID($this->list)) {
+                $this->list = Message::getDefaultListID();
+            }
+        }
+        if (empty($this->list) && Request::get('optin', 'boolean')) {
+            $this->list = Message::getDefaultListID();
+        }
     }
 
     protected function validateForm() {
@@ -88,7 +111,7 @@ class Contact extends PageView {
                 $this->settings['require_captcha'] === true
                 || (
                     $this->settings['require_captcha'] == 'contact_only'
-                    && $this->request_contact
+                    && $this->requestContact
                 )
             )
             && !ReCaptcha::verify()
@@ -105,30 +128,22 @@ class Contact extends PageView {
     }
 
     protected function optinUser() {
-        if ($list = Request::get('list', 'int')) {
-            if (!Message::validateListID($list)) {
-                $list = Message::getDefaultListID();
-            }
-        }
-        if (empty($list) && Request::get('optin', 'boolean')) {
-            $list = Message::getDefaultListID();
-        }
-        if (!empty($list)) {
-            $this->user->subscribe($list);
+        if (!empty($this->list)) {
+            $this->user->subscribe($this->list);
         }
     }
 
     protected function messageUser() {
         // Send a message to the user who just opted in.
-        if ($message = Request::post('message', 'int')) {
+        if ($this->userMessage) {
             $mailer = new Mailer();
-            $mailer->sendOne($message, $this->user);
+            $this->userMessageSent = $mailer->sendOne($this->userMessage, $this->user);
         }
     }
 
     protected function messageSiteContact() {
         // Send a message to the site contact.
-        if (!empty($this->settings['always_notify']) || ($this->request_contact && $this->settings['contact'])) {
+        if (!empty($this->settings['always_notify']) || ($this->requestContact && $this->settings['contact'])) {
             $sent = $this->sendMessage();
             Tracker::loadOrCreateByName('Contact Sent', Tracker::EMAIL)->track(URL::getCurrentUrlId(), $this->user->id);
             if (!$sent) {
@@ -151,6 +166,19 @@ class Contact extends PageView {
             $this->setSuccessMessage(Language::translate('optin.success'));
             return;
         }
+    }
+
+    public function getContactFields() {
+        return [
+            'user_id' => $this->user->id,
+            'time' => time(),
+            'contact' => $this->contactAdmin,
+            'contact_sent' => $this->contactAdminSent,
+            'list_id' => $this->list,
+            'user_message' => $this->userMessage,
+            'user_message_sent' => $this->userMessageSent,
+            'additional_fields' => json_encode($this->getAdditionalFields()),
+        ];
     }
 
     public function redirect($params = []) {
@@ -209,15 +237,47 @@ class Contact extends PageView {
      *   Whether the email was successfully sent.
      */
     public function sendMessage() {
+        $this->contactAdmin = 1;
         $mailer = new Mailer();
         foreach ($this->settings['to'] as $to) {
             $mailer->to($to);
         }
-        return $mailer
+        return $this->contactAdminSent = (integer) $mailer
             ->replyTo($this->user->email)
             ->subject($this->settings['subject'])
             ->message($this->getMessageBody())
             ->send();
+    }
+
+    protected function getAdditionalFields() {
+        static $values = null;
+        if ($values === null) {
+            $fields = array_combine(array_keys($_POST), array_keys($_POST));
+            $values = [
+                'Name' => Request::post('name'),
+                'Email' => $this->user->email,
+                'IP' => Request::server(Request::IP),
+            ];
+
+            unset($fields['token']);
+            unset($fields['name']);
+            unset($fields['email']);
+            unset($fields['contact']);
+            unset($fields['success']);
+            unset($fields['list']);
+            unset($fields['g-recaptcha-response']);
+            unset($fields['captcha_abide']);
+
+            foreach ($fields as $field) {
+                if (is_array($_POST[$field])) {
+                    $input = json_encode(Request::post($field, 'array'));
+                } else {
+                    $input = Request::post($field);
+                }
+                $values[ucfirst(preg_replace('/_/', ' ', $field))] = $input;
+            }
+        }
+        return $values;
     }
 
     /**
@@ -226,38 +286,17 @@ class Contact extends PageView {
      * @return string
      */
     protected function getMessageBody() {
-        $fields = array_combine(array_keys($_POST), array_keys($_POST));
-        $values = [
-            'Name' => Request::post('name'),
-            'Email' => $this->user->email,
-            'IP' => Request::server(Request::IP),
-        ];
-        $message = Request::post('message');
-
-        unset($fields['token']);
-        unset($fields['name']);
-        unset($fields['email']);
-        unset($fields['message']);
-        unset($fields['contact']);
-        unset($fields['success']);
-        unset($fields['list']);
-        unset($fields['g-recaptcha-response']);
-        unset($fields['captcha_abide']);
-
-        foreach ($fields as $field) {
-            if (is_array($_POST[$field])) {
-                $input = json_encode(Request::post($field, 'array'));
-            } else {
-                $input = Request::post($field);
-            }
-            $values[ucfirst(preg_replace('/_/', ' ', $field))] = $input;
-        }
+        $fields = $this->getAdditionalFields();
 
         $output = '';
-        foreach ($values as $key => $value) {
-            $output .= $key . ': ' . $value . "<br>\n";
+        foreach ($fields as $key => $value) {
+            if ($key != 'Message') {
+                $output .= $key . ': ' . $value . "<br>\n";
+            }
         }
-        $output .= "Message: <br>\n" . $message;
+        if (!empty($fields['Message'])) {
+            $output .= "Message: <br>\n" . $fields['Message'];
+        }
         return $output;
     }
 }
