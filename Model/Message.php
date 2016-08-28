@@ -6,11 +6,9 @@
 
 namespace Lightning\Model;
 
-use Lightning\Model\Object;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
 use Lightning\Tools\Language;
-use Lightning\Tools\Tracker as TrackerTool;
 use Lightning\View\Field\Time;
 use Lightning\View\HTMLEditor\Markup;
 
@@ -139,7 +137,7 @@ class MessageOverridable extends Object {
         $this->unsubscribe = $unsubscribe;
 
         if (empty(self::$message_sent_id)) {
-            self::$message_sent_id = TrackerTool::getTrackerId('Email Sent');
+            self::$message_sent_id = Tracker::loadOrCreateByName('Email Sent', Tracker::EMAIL)->id;
         }
 
         if ($default_name_settings = Configuration::get('mailer.default_name')) {
@@ -402,7 +400,8 @@ class MessageOverridable extends Object {
         
         if (!empty($this->message_id)) {
 
-            $tracking_image = TrackerTool::getTrackerImage('Email Opened', $this->message_id, $this->user->id);
+            $tracker = Tracker::loadOrCreateByName('Email Opened', Tracker::EMAIL);
+            $tracking_image = $tracker->getTrackerImage($this->message_id, $this->user->id);
             
             // Replace standard variables.
             $this->defaultVariables = [

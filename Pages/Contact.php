@@ -130,7 +130,7 @@ class Contact extends PageView {
         // Send a message to the site contact.
         if (!empty($this->settings['always_notify']) || ($this->request_contact && $this->settings['contact'])) {
             $sent = $this->sendMessage();
-            Tracker::loadByName('Contact Sent')->track(URL::getCurrentUrlId(), $this->user->id);
+            Tracker::loadOrCreateByName('Contact Sent', Tracker::EMAIL)->track(URL::getCurrentUrlId(), $this->user->id);
             if (!$sent) {
                 Output::error('Your message could not be sent. Please try again later.');
             } else {

@@ -4,6 +4,7 @@ namespace Lightning\Tools;
 
 use Lightning\Model\Message;
 use Lightning\Model\User;
+use Lightning\Model\Tracker as TrackerModel;
 
 /**
  * Include the PHPMailer
@@ -398,7 +399,7 @@ class Mailer {
         $this->message->setDefaultVars();
         $this->to($user);
         if ($this->sendMessage()) {
-            Tracker::trackEvent('Email Sent', $message_id, $user->id);
+            TrackerModel::loadOrCreateByName('Email Sent', TrackerModel::EMAIL)->track($message_id, $user->id);
             return true;
         } else {
             return false;
@@ -451,7 +452,8 @@ class Mailer {
                 $this->sentCount ++;
             }
             $this->mailer->ClearAddresses();
-            Tracker::trackEvent('Email Sent', $this->message->id, !empty($user['user_id']) ? $user['user_id'] : 0);
+            TrackerModel::loadOrCreateByName('Email Sent', TrackerModel::EMAIL)
+                ->track($this->message->id, !empty($user['user_id']) ? $user['user_id'] : 0);
         }
         echo "\n\n";
     }

@@ -359,7 +359,7 @@ class UserOverridable extends Object {
             true
         )) {
             // If a result was returned, they were added to the list.
-            Tracker::loadByName(Tracker::SUBSCRIBE)->track($list_id, $this->id);
+            Tracker::loadOrCreateByName(Tracker::SUBSCRIBE, Tracker::USER)->track($list_id, $this->id);
             return true;
         } else {
             // They were already in the list.
@@ -836,7 +836,7 @@ class UserOverridable extends Object {
 
             self::login($email, $pass);
             $user = ClientUser::getInstance();
-            Tracker::loadByName(Tracker::REGISTER)->track(0, $user->id);
+            Tracker::loadOrCreateByName(Tracker::REGISTER, Tracker::USER)->track(0, $user->id);
             $user->subscribe(Configuration::get('mailer.default_list'));
 
             // Merge with a previous anon user if necessary.
@@ -851,7 +851,7 @@ class UserOverridable extends Object {
                 'data'      => ['user_id' => ClientUser::getInstance()->id]
             ];
         } else {
-            Tracker::loadByName(Tracker::REGISTER_ERROR)->track();
+            Tracker::loadOrCreateByName(Tracker::REGISTER_ERROR, Tracker::ERROR)->track();
 
             // Error
             return [

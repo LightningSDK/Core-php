@@ -4,7 +4,7 @@ namespace Lightning\CLI;
 
 use Lightning\Model\User as UserModel;
 use Lightning\Tools\Database;
-use Lightning\Tools\Tracker;
+use Lightning\Model\Tracker;
 
 class BouncedEmail extends CLI {
     public function execute() {
@@ -18,17 +18,18 @@ class BouncedEmail extends CLI {
         // If this was a message failure.
         if (!empty($bounce_info[0]['recipient']) && preg_match('/5\.\d\.\d/', $bounce_info[0]['status'])) {
             $email = $bounce_info[0]['recipient'];
+            $bounce_tracker = Tracker::loadOrCreateByName('Email Bounced', Tracker::EMAIL);
 
             $user = UserModel::loadByEmail($email);
             if (!$user) {
                 // Bounced from an unknown recipient, ignore this.
-                Tracker::trackEvent('Email Bounced', 0, 0);
+                $bounce_tracker->track(0, 0);
                 return;
             }
 
             // Track the bounced event.
             // TODO: we can scan the email for a link to see if we know the message id.
-            Tracker::trackEvent('Email Bounced', 0, $user->user_id);
+            $bounce_tracker->track(0, $user->id);
 
             // Get the last 6 send/bounce events.
             // TODO: Also check for a reactivation email.
@@ -39,8 +40,8 @@ class BouncedEmail extends CLI {
                     'tracker_id' => array(
                         'IN',
                         array(
-                            Tracker::getTrackerId('Email Sent'),
-                            Tracker::getTrackerId('Email Bounced'),
+                            Tracker::loadOrCreateByName('Email Sent', Tracker::EMAIL)->id,
+                            $bounce_tracker->id,
                         ),
                     ),
                 ),
@@ -49,9 +50,8 @@ class BouncedEmail extends CLI {
             );
 
             $bounce_count = 0;
-            $bounce_id = Tracker::getTrackerId('Email Bounced');
             foreach ($mail_history as $history) {
-                if ($history['tracker_id'] == $bounce_id) {
+                if ($history['tracker_id'] == $bounce_tracker->id) {
                     $bounce_count++;
                 }
             }
@@ -60,7 +60,7 @@ class BouncedEmail extends CLI {
             if ($bounce_count >= 2) {
                 // TODO: Instead of '1' here, we should have a table like `tracker`
                 // that tracks tracker sub_ids by name.
-                Tracker::trackEvent('Deactivate User', 1, $user->user_id);
+                Tracker::loadOrCreateByName('Deactivate User', Tracker::EMAIL)->track(1, $user->id);
                 $user->unsubscribeAll();
             }
         }

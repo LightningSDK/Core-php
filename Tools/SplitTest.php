@@ -2,6 +2,7 @@
 
 namespace Lightning\Tools;
 
+use Lightning\Model\Tracker;
 use Lightning\View\JS;
 use stdClass;
 
@@ -43,6 +44,11 @@ class SplitTest {
                     $session->content->splitTest->{$name} = $option;
                     $session->save();
                 }
+
+                // Track the usage.
+                $split_test = \Lightning\Model\SplitTest::loadOrCreateByLocator($name);
+                $tracker = Tracker::loadOrCreateByName($name, 'Split Test');
+                $tracker->track($split_test->id);
             }
             self::$options[$name] = $option;
         }

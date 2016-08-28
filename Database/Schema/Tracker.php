@@ -8,20 +8,21 @@ class Tracker extends Schema {
     const TABLE = 'tracker';
 
     public function getColumns() {
-        return array(
+        return [
             'tracker_id' => $this->autoincrement(),
             'tracker_name' => $this->varchar(64),
-        );
+            'category' => $this->varchar(32),
+            'type' => $this->varchar(32),
+        ];
     }
 
     public function getKeys() {
-        return array(
+        return [
             'primary' => 'tracker_id',
-            'tracker_name' => array(
-                'columns' => array('tracker_name'),
+            'tracker_name' => [
+                'columns' => ['category', 'tracker_name'],
                 'unique' => true,
-                'size' => 5,
-            ),
-        );
+            ],
+        ];
     }
 }
