@@ -764,7 +764,7 @@ class Database extends Singleton {
             $output .= ' WHERE ' . $this->sqlImplode($query['where'], $values, ' AND ');
         }
         if (!empty($query['group_by'])) {
-            $output .= ' GROUP BY ' . $this->implodeFields($query['group_by']);
+            $output .= ' GROUP BY ' . $this->implodeFields($query['group_by'], false);
         }
         if (!empty($query['having'])) {
             $output .= ' HAVING ' . $this->sqlImplode($query['having'], $values, ' AND ');
@@ -1199,11 +1199,13 @@ class Database extends Singleton {
      *
      * @param array $fields
      *   A list of fields and their aliases to retrieve.
+     * @param boolean $use_alias
+     *   Whether to use an alias. This should be disabled in the event of expressions in an ORDER BY query.
      *
      * @return string
      *   The SQL query segment.
      */
-    protected function implodeFields($fields) {
+    protected function implodeFields($fields, $use_alias = true) {
         if (!is_array($fields)) {
             $fields = [$fields];
         }
@@ -1214,7 +1216,10 @@ class Database extends Singleton {
             }
             if (!empty($current) && !empty($field['expression'])) {
                 // Format of ['count' => ['expression' => 'COUNT(*)'))
-                $field = $field['expression'] . ' AS ' . $this->formatField($alias);
+                $field = $field['expression'];
+                if ($use_alias) {
+                    $field .= ' AS ' . $this->formatField($alias);
+                }
             }
             elseif (!empty($field) && is_array($field)) {
                 // Format of ['table' => ['column1', 'column2'))
@@ -1231,9 +1236,9 @@ class Database extends Singleton {
                 }
                 $field = $this->formatField($field);
 
-                if (!empty($alias) && !is_numeric($alias)) {
+                if (!empty($alias) && !is_numeric($alias) && $use_alias) {
                     // Format of ['alias' => 'column') to column as `alias`.
-                    $field = $field . ' AS `' . $alias . '`';
+                    $field .= ' AS ' . $this->formatField($alias);
                 }
             }
         }
