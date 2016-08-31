@@ -91,8 +91,8 @@ class Contact extends PageView {
 
     protected function loadVars() {
         $this->settings = Configuration::get('contact');
-        $this->requestContact = Request::post('contact', 'boolean');
-        $this->userMessage = Request::post('message', 'int');
+        $this->requestContact = Request::post('contact', Request::TYPE_BOOLEAN);
+        $this->userMessage = Request::post('message', Request::TYPE_INT, '', 0);
         if ($this->list = Request::get('list', Request::TYPE_INT, '', 0)) {
             if (!Message::validateListID($this->list)) {
                 $this->list = Message::getDefaultListID();
