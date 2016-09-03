@@ -1,38 +1,4 @@
 <?php
-/*
-  "table" class
-  provides basic interactivity with a database table (list, insert, update, delete)
-
-  minimal setup:
-
-	// Instanciate table interaction object
-  	$myTableObject = new table();
-  	// set the database table
-	$myTableObject->table = "changeme_database_table";
-	// set the primary key for the database table
-	$myTableObject->getKey() = "changeme_table_primary_index";
-    // process any database actions
-	$myTableObject->execute_task();
-	// output the database table to stdout
-	$myTableObject->render_table();
-
-  optional features: (set before ->execute_task() and ->render_table())
-
-	// set the sortorder for the list of rows
-	$myTableObject->sort = 'ORDER BY changeme_sort_column ASC, changeme_secondary_sort_column DESC';
-	// set a (m-n) relationship between the table and another table, allowing the joining table to be managed
-	// The foreign keys in the joining table must be named the same as in the joined tables' columns
-	$myTableObject->link[changeme_related_table_name] = ['index'=>'changeme_join_table_name', 'key'=>'changeme_related_table_foreign_key_name', "display_name"=>"changeme_display_column_from_related_table", "list"=>true);
-	// the relationship can even span to another database
-	$myTableObject->link[changeme_related_table_name] = ['database'=>'changeme_related_table_database', 'index'=>'changeme_join_table_name', 'key'=>'changeme_related_table_foreign_key_name', "display_name"=>"changeme_display_column_from_related_table", "list"=>true);
-	// set a column to be a lookup from another table (1-n relationship)
-	// the lookuptable key column must be named the same as the table's column
- 	$myTableObject->preset['changeme_table_foreign_key'] = ['type'=>'lookup', 'lookuptable'=>'changeme_related_table_name', 'display_name'=>'changeme_display_column_from_related_table');
-
-	// set this to true to allow for serial updates
-	$myTableObject->enable_serial_update = 1;
-
-*/
 
 namespace Lightning\Pages;
 
@@ -482,7 +448,7 @@ abstract class Table extends Page {
         if ($this->singularity) {
             // The user only has access to a single entry. ID is irrelevant.
             $this->getEdit();
-        } elseif (Request::query('id', 'int')) {
+        } elseif (Request::query('id', Request::TYPE_INT)) {
             $this->action = $this->defaultAction;
             if ($this->editable) {
                 $this->getEdit();
@@ -496,7 +462,7 @@ abstract class Table extends Page {
 
     public function getEdit() {
         $this->action = 'edit';
-        $this->id = $this->singularity ? $this->singularityID : Request::query('id', 'int');
+        $this->id = $this->singularity ? $this->singularityID : Request::query('id', Request::TYPE_INT);
 
         if (!$this->id) {
             Output::error('Invalid ID');
@@ -527,7 +493,7 @@ abstract class Table extends Page {
         if (!$this->editable || !$this->addable || $this->singularity) {
             Output::accessDenied();
         }
-        $this->id = Request::query('id', 'int');
+        $this->id = Request::query('id', Request::TYPE_INT);
         $this->getRow();
     }
 
@@ -655,7 +621,7 @@ abstract class Table extends Page {
         $this->action = 'list';
         $this->loadMainFields();
         $this->loadList();
-        Output::json(array('html' => $this->renderList(), 'd' => Request::get('i', 'int'), 'status' => 'success'));
+        Output::json(['html' => $this->renderList(), 'd' => Request::get('i', Request::TYPE_INT), 'status' => 'success']);
     }
 
     public function getDelete() {
@@ -771,7 +737,7 @@ abstract class Table extends Page {
     protected function afterDuplicate() {}
 
     public function postUpdate() {
-        $this->id = Request::post('id', 'int');
+        $this->id = Request::post('id', Request::TYPE_INT);
         $this->action = 'update';
         if (!$this->editable) {
             Output::accessDenied();
@@ -1145,7 +1111,7 @@ abstract class Table extends Page {
                     switch ($this->rowClick['type']) {
                         case 'url':
                         case 'action':
-                            JS::startup('$(".table_list").on("click", "tr", lightning.table.click)');
+                            JS::startup('$(".table_list").on("click", "tr", lightning.table.click)', ['/js/lightning.min.js']);
                             break;
                         case 'none':
                         default:
@@ -2474,7 +2440,7 @@ abstract class Table extends Page {
                         $val = bindec(strrev($vals));
                         break;
                     case 'bit':
-                        $val = ['bit' => decbin(Request::get($field['form_field'], 'int'))];
+                        $val = ['bit' => decbin(Request::get($field['form_field'], Request::TYPE_INT))];
                         break;
                     case 'text':
                     case 'mediumtext':
@@ -3302,7 +3268,7 @@ abstract class Table extends Page {
                 );
 
                 // GET INPUT ARRAY
-                $list = Request::get($link . '_input_array', 'explode', 'int');
+                $list = Request::get($link . '_input_array', Request::TYPE_EXPLODE, Request::TYPE_INT);
                 foreach ($list as $l) {
                     Database::getInstance()->insert(
                         $link_settings['index'],
