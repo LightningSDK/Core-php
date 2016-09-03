@@ -194,7 +194,13 @@ abstract class Table extends Page {
      */
     protected $links = [];
     protected $styles = [];
-    protected $sort;
+
+    /**
+     * A list of default sorting fields.
+     *
+     * @var array
+     */
+    protected $sort = [];
     protected $maxPerPage = 25;
     protected $listCount = 0;
     protected $page_number = 1;
@@ -359,7 +365,6 @@ abstract class Table extends Page {
     /**
      * Used when this table is editing child contents of a parent table.
      */
-    protected $sort_fields;
     protected $parentId;
 
     /**
@@ -417,20 +422,17 @@ abstract class Table extends Page {
 
         // load the sort fields
         if ($sort = Request::get('sort')) {
-            $field = explode(";", $sort);
-            $this->sort_fields = [];
-            $sort_strings = [];
+            $field = explode(';', $sort);
+            $new_sort = [];
             foreach ($field as $f) {
-                $f = explode(":", $f);
-                if (!empty($f[1]) && $f[1] == "D") {
-                    $this->sort_fields[$f[0]] = "D";
-                    $sort_strings[] = "`{$f[0]}` DESC";
+                $f = explode(':', $f);
+                if (!empty($f[1]) && $f[1] == 'D') {
+                    $new_sort[$f[0]] = 'DESC';
                 } else {
-                    $this->sort_fields[$f[0]] = "A";
-                    $sort_strings[] = "`{$f[0]}` ASC";
+                    $new_sort[$f[0]] = 'ASC';
                 }
             }
-            $this->sort = implode(",", $sort_strings);
+            $this->sort = $new_sort;
         }
 
         if (!empty($_SERVER['REQUEST_URI'])) {
@@ -2009,43 +2011,29 @@ abstract class Table extends Page {
             $vars = array_merge($vars, $other);
         }
 
-        // Search.
-        $sort = [];
-        if (is_array($this->sort_fields) && count($this->sort_fields) > 0) {
-            $sort_fields = [];
-            if (!empty($other['sort'])) {
-                foreach ($other['sort'] as $f => $d) {
-                    switch ($d) {
-                        case 'A': $sort_fields[$f] = 'A'; break;
-                        case 'D': $sort_fields[$f] = 'D'; break;
-                        case 'X':
-                            $sort_fields[$f] =
-                                (!empty($this->sort_fields[$f]) && $this->sort_fields[$f] == 'A')
-                                    ? 'D' : 'A';
-                            break;
-                    }
-                }
-            }
-            foreach ($sort_fields as $f => $d) {
-                $sort[] = ($d == 'D') ? $f . ':D' : $f;
-            }
-            if (!empty($sort)) {
-                $vars['sort'] = implode(';', $sort);
-            }
-        } elseif (!empty($other['sort'])) {
-            $sort = [];
-            foreach ($other['sort'] as $f => $d) {
+        // Conform the sorting variable.
+        if (!empty($vars['sort']) && is_array($vars['sort'])) {
+            $sort_strings = [];
+            foreach ($vars['sort'] as $f => $d) {
+                $direction = $d;
                 switch ($d) {
-                    case 'D': $sort[] = $f . ':D'; break;
-
-                    case 'A':
-                    default:  $sort[] = $f; break;
+                    case 'ASC':
+                        $direction = 'A';
+                        break;
+                    case 'DESC':
+                        $direction = 'D';
+                        break;
+                    case 'X':
+                        $direction =
+                            (!empty($this->sort[$f]) && $this->sort[$f] == 'ASC')
+                                ? 'D' : 'A';
+                        break;
                 }
+                $sort_strings[] = $f . ':' . $direction;
             }
-            $vars['sort'] = implode(';', $sort);
+            $vars['sort'] = implode(';', $sort_strings);
         }
 
-        // Put it all together
         return $vars;
     }
 

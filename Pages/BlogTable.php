@@ -15,7 +15,7 @@ class BlogTable extends Table {
 
     protected $trusted = true;
 
-    protected $sort = 'time DESC';
+    protected $sort = ['time' => 'DESC'];
 
     protected $links = [
         BlogPost::TABLE . BlogPost::CATEGORY_TABLE => [

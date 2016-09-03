@@ -89,7 +89,7 @@ class Messages extends Table {
         ],
     ];
 
-    protected $sort = 'message_id DESC';
+    protected $sort = ['message_id' => 'DESC'];
     protected $duplicatable = true;
 
     /**
