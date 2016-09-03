@@ -98,6 +98,7 @@ class Mailer {
      */
     public function __construct($verbose = false) {
         $this->mailer = new \PHPMailer(true);
+        $this->mailer->CharSet = 'UTF-8';
         $this->mailer->Sender = Configuration::get('mailer.bounce_address');
         $this->verbose = $verbose;
         if ($smtpHost = Configuration::get('mailer.smtp')) {
