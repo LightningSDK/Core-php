@@ -1129,7 +1129,7 @@ abstract class Table extends Page {
                 $output .= '</tbody>';
 
                 if ($this->action_fields_requires_submit()) {
-                    '<input type="submit" name="submit" value="Submit" class="button" />';
+                    '<input type="submit" name="submit" value="Submit" class="button medium" />';
                 }
                 $output .= "</table></div>";
                 if ($this->action_fields_requires_submit())
@@ -1516,7 +1516,7 @@ abstract class Table extends Page {
 
         $output .= '<tr><td colspan="2">';
         if ($this->action != 'view') {
-            $output .= '<input type="submit" name="sbmt" value="' . $this->button_names[$new_action] . '" class="button">';
+            $output .= '<input type="submit" name="sbmt" value="' . $this->button_names[$new_action] . '" class="button medium">';
         }
 
         // If exist render all custom buttons
@@ -1576,7 +1576,7 @@ abstract class Table extends Page {
                     break;
                 case self::CB_LINK:
                     $download = !empty($button['download']) ? 'download="' . $button['download'] . '"' : '';
-                    $output .= '<a href="' . $button['url'] . '" ' . $download . ' class="button">' . $button['text'] . '</a>';
+                    $output .= '<a href="' . $button['url'] . '" ' . $download . ' class="button medium">' . $button['text'] . '</a>';
             }
         }
         return $output;
@@ -1595,7 +1595,7 @@ abstract class Table extends Page {
      */
     protected function renderSubmitAndRedirect($button, $button_id) {
         // Output the button.
-        return "<input id='custombutton_{$button_id}' type='submit' name='submit' value='{$button['text']}' class='button'/>";
+        return "<input id='custombutton_{$button_id}' type='submit' name='submit' value='{$button['text']}' class='button medium'/>";
     }
 
     /**
@@ -1623,7 +1623,7 @@ abstract class Table extends Page {
                 $output .= '<tr><td colspan="2">';
                 $output .= $this->renderFieldInputOrValue($which_field, $field, $row);
                 if ($field['default_reset']) {
-                    $output .= '<input type="button" value="Reset to default" onclick="reset_field_value(\'' . $field['field'] . '\');" />';
+                    $output .= '<input type="button" value="Reset to default" onclick="lightning.table.resetField(\'' . $field['field'] . '\');" />';
                 }
                 $output .= '</td></tr>';
             } else {
@@ -1648,7 +1648,7 @@ abstract class Table extends Page {
             }
         }
         if (!empty($field['default_reset'])) {
-            $output .= "<input type='button' value='Reset to default' onclick='reset_field_value(\"{$field['field']}\");' />";
+            $output .= "<input type='button' value='Reset to default' onclick='lightning.table.resetField(\"{$field['field']}\");' />";
         }
         return $output;
     }
@@ -1803,7 +1803,7 @@ abstract class Table extends Page {
         // TODO: This doesn't return anything valuable. Is it used anywhere?
         $link_settings['web_location'] = $this->getImageLocationWeb($link_settings, '');
         JS::set('table.links.' . $link_id, $link_settings);
-        $output = '<span class="button add_image" id="add_image_' . $link_id . '">Add Image</span>';
+        $output = '<span class="button medium add_image" id="add_image_' . $link_id . '">Add Image</span>';
         $output .= '<span class="linked_images" id="linked_images_' . $link_id . '">';
         $link_settings['conform_name'] = false;
         foreach ($link_settings['active_list'] as $image) {
