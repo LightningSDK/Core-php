@@ -2,7 +2,7 @@
 
 namespace Lightning\Tools;
 
-class Logger extends Singleton {
+class LoggerOverridable extends Singleton {
 
     const SEVERITY_LOW = 1;
     const SEVERITY_MED = 2;
