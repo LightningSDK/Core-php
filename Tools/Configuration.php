@@ -64,6 +64,16 @@ class Configuration {
     }
 
     /**
+     * Merge new data into the configuration without replacing existing values.
+     *
+     * @param array $new_data
+     *   An array of new data to merge.
+     */
+    public static function softMerge($new_data) {
+        self::$configuration = array_replace_recursive($new_data, self::$configuration);
+    }
+
+    /**
      * Override the entire configuration with a new one.
      *
      * @param array $new_configuration
