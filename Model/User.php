@@ -332,7 +332,7 @@ class UserOverridable extends Object {
             $user_id = $user['user_id'];
             return static::loadById($user_id);
         } else {
-            $user_id = $db->insert('user', $options + $user_data + ['created' => Time::today()]);
+            $user_id = $db->insert('user', $options + $user_data + ['created' => time()]);
             $user = static::loadById($user_id);
             $user->new = true;
             return $user;
