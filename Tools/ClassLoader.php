@@ -26,7 +26,7 @@ class ClassLoader {
             }
 
             // Load the class definitions.
-            self::$classes = Configuration::get('classes');
+            self::$classes = Configuration::get('classes', []);
             self::$classesRev = array_flip(self::$classes);
             self::$loaded = true;
         }
