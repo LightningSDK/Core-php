@@ -201,6 +201,23 @@ abstract class Table extends Page {
     protected $importHandlers = [];
 
     /**
+     * A list of extra fields to import.
+     * These can be processed manually but will be selectable on the import page as if they were real columns
+     * in the table.
+     *
+     * @var array
+     */
+    protected $additionalImportFields = [];
+
+    /**
+     * A list of fields that should be inserted, even if they are not listed.
+     * In case additional fields are created during the validate process, they should be added here.
+     *
+     * @var array
+     */
+    protected $processedImportFields = [];
+
+    /**
      * @var CSVImport
      */
     protected $CSVImporter;
@@ -599,9 +616,10 @@ abstract class Table extends Page {
     protected function initCSVImporter() {
         $this->CSVImporter = new CSVImport();
         $this->CSVImporter->setTable($this->table);
-        $fields = $this->get_fields($this->table, $this->preset);
         $this->CSVImporter->setPrimaryKey($this->getKey());
-        $this->CSVImporter->setFields($fields);
+        $this->CSVImporter->setFields(array_keys($this->get_fields($this->table, $this->preset)));
+        $this->CSVImporter->setAdditionalFields($this->additionalImportFields);
+        $this->CSVImporter->setProcessedFields($this->processedImportFields);
         foreach ($this->importHandlers as $name => $handler) {
             $this->CSVImporter->setHandler($name, $handler);
         }
