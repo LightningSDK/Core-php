@@ -9,6 +9,20 @@ use Lightning\Model\Page;
 
 class CSVImport extends Page {
     protected $fields;
+
+    /**
+     * These fields will be available to import but will not be added to the database unless they are listed in $processedFields
+     *
+     * @var array
+     */
+    protected $additionalFields;
+
+    /**
+     * A list of fields that will always be imported, even if not selected. This is for fields that are created during the validation process.
+     *
+     * @var array
+     */
+    protected $processedFields;
     protected $key;
     protected $table;
     protected $handlers = [];
@@ -18,6 +32,11 @@ class CSVImport extends Page {
      * @var CSVIterator
      */
     protected $csv;
+
+    /**
+     * @var Database
+     */
+    protected $database;
     public $importAction = 'import';
     public $importAlignAction = 'import-align';
 
@@ -28,6 +47,14 @@ class CSVImport extends Page {
 
     public function setFields($fields) {
         $this->fields = $fields;
+    }
+
+    public function setAdditionalFields($fields) {
+        $this->additionalFields = $fields;
+    }
+
+    public function setProcessedFields($fields) {
+        $this->processedFields = $fields;
     }
 
     public function setTable($table) {
@@ -88,15 +115,17 @@ class CSVImport extends Page {
 
         $input_select = BasicHTML::select('%%', ['-1' => ''] + $header_row);
 
-        foreach ($this->fields as $field) {
+        $input_fields = array_merge($this->fields, $this->additionalFields);
+
+        foreach ($input_fields as $field) {
+            $field_string = $field;
+            $display_name = ucfirst(str_replace('_', ' ', $field_string));
+
             if (is_array($field)) {
                 $field_string = $field['field'];
                 if (!empty($field['display_name'])) {
                     $display_name = $field['display_name'];
                 }
-            } else {
-                $field_string = $field;
-                $display_name = ucfirst(str_replace('_', ' ', $field_string));
             }
 
             if ($field_string != $this->key) {
@@ -136,34 +165,51 @@ class CSVImport extends Page {
         $this->loadCSVFromCache();
 
         // Load the CSV, skip the first row if it's a header.
-        if (Request::post('header', 'int')) {
+        if (Request::post('header', Request::TYPE_INT)) {
             $this->csv->next();
         }
 
         // Process the alignment so we know which fields to import.
-        $alignment = Request::get('alignment', 'keyed_array', 'int');
+        $alignment = Request::get('alignment', Request::TYPE_KEYED_ARRAY, Request::TYPE_INT);
         $fields = [];
+        $additionalFields = [];
         foreach ($alignment as $field => $column) {
             if ($column != -1) {
-                $fields[$field] = $column;
+                if (in_array($field, $this->fields)) {
+                    // These fields are expected as input and will be inserted.
+                    $fields[$field] = $column;
+                } elseif (in_array($field, $this->additionalFields)) {
+                    // These fields are expected as input but will not be inserted.
+                    $additionalFields[$field] = $column;
+                }
             }
         }
+
+        // Get a list of fields that will be added to the database.
+        $output_fields = array_merge(array_keys($fields), $this->processedFields);
+        $output_fields = array_unique($output_fields);
 
         $this->database = Database::getInstance();
 
         $this->values = [];
+        $rows = 0;
+
         // While there is another row available.
         while ($this->csv->valid()) {
             // Get the current row.
             $row = $this->csv->current();
 
+            // Convert the row into field/value pairs.
+            $validate_row = [];
+            foreach ($fields as $field => $column) {
+                $validate_row[$field] = $row[$column];
+            }
+            foreach ($additionalFields as $field => $column) {
+                $validate_row[$field] = $row[$column];
+            }
+
             // See if there is a validate handler.
             if (is_callable($this->handlers['validate'])) {
-                // Convert the row into field/value pairs.
-                $validate_row = [];
-                foreach ($fields as $field => $column) {
-                    $validate_row[$field] = $row[$column];
-                }
 
                 // Call the validate method.
                 if (!call_user_func_array($this->handlers['validate'], [&$validate_row])) {
@@ -173,14 +219,16 @@ class CSVImport extends Page {
             }
 
             // Add the current row to the import list.
-            foreach ($fields as $field => $column) {
-                $this->values[$field][] = $row[$column];
+            foreach ($output_fields as $field) {
+                $this->values[$field][] = !empty($validate_row[$field]) ? $validate_row[$field] : '';
             }
 
             // If there are more than 100 rows, insert it before continuing.
-            if (count($this->values[$field]) >= 100) {
+            $rows++;
+            if ($rows >= 100) {
                 $this->processImportBatch();
                 $this->values = [];
+                $rows = 0;
             }
 
             $this->csv->next();
