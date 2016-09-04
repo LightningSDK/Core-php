@@ -1079,7 +1079,11 @@ abstract class Table extends Page {
 
     public function renderList() {
 
-        if (count($this->list) == 0 && empty($this->prefixRows)) {
+        if ((
+            (
+                is_object($this->list) && get_class($this->list) == 'PDOStatement' && $this->list->rowCount() == 0)
+                || (is_array($this->list) && count($this->list) == 0)
+            ) && empty($this->prefixRows)) {
             return "<p></p><p></p><p>There is nothing to show. <a href='" . $this->createUrl('new') . "'>Add a new entry</a></p><p></p><p></p>";
         }
 
