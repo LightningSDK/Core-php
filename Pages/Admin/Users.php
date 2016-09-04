@@ -79,7 +79,7 @@ class Users extends Table {
 
     protected $customImportFields;
 
-    public function initSettings() {
+    protected function initSettings() {
         $this->preset['password']['submit_function'] = function(&$output) {
             if ($pass = Request::post('password')) {
                 $salt = User::getSalt();
