@@ -1,40 +1,22 @@
 (function() {
-    var self;
-    lightning.cms = {
-        edit: function (editor) {
-            lightning.htmleditor.initEditor(editor);
-            $('#' + editor.replace(/^cms_/, 'cms_edit_')).hide();
-            $('#' + editor.replace(/^cms_/, 'cms_save_')).show();
-        },
-
-        save: function (editor) {
-            lightning.dialog.showLoader('Saving...');
-            lightning.htmleditor.deactivateEditor(editor);
-            $.ajax({
-                url: '/admin/cms',
-                type: 'POST',
-                dataType: 'json',
-                data: {
-                    cms: editor.replace(/^cms_/, ''),
-                    token: lightning.vars.token,
-                    action: "save",
-                    content: $('#' + editor).html()
-                },
-                success: function (data) {
-                    $('#' + editor.replace(/^cms_/, 'cms_edit_')).show();
-                    $('#' + editor.replace(/^cms_/, 'cms_save_')).hide();
-                    lightning.dialog.clear();
-                    lightning.dialog.add('Saved!', 'message');
-                },
-                error: function () {
-                    self.edit(editor);
-                    lightning.dialog.clear();
-                    lightning.dialog.add('The content could not be saved, please try again!', 'error');
-                }
+    var self = lightning.cms = {
+        init: function () {
+            $('.cms_edit').on('click', function(e) {
+                var id = $(e.target).attr('id').replace(/^cms_edit_/, '');
+                self.edit(id);
             });
-        },
-
-        initImage: function () {
+            $('.cms_save').on('click', function(e) {
+                var id = $(e.target).attr('id').replace(/^cms_save_/, '');
+                self.save(id);
+            });
+            $('.cms_edit_plain').on('click', function (e) {
+                var id = $(e.target).attr('id').replace(/^cms_edit_/, '');
+                self.editPlain(id);
+            });
+            $('.cms_save_plain').on('click', function (e) {
+                var id = $(e.target).attr('id').replace(/^cms_save_/, '');
+                self.savePlain(id);
+            });
             $('.cms_edit_image').on('click', function (e) {
                 var id = $(e.target).attr('id').replace(/^cms_edit_/, '');
                 self.editImage(id);
@@ -48,6 +30,39 @@
                 var id = textField.attr('id').replace('_class', '');
                 var classes = textField.attr('name') + ' ' + textField.val();
                 $('#' + id).removeClass().addClass(classes);
+            });
+        },
+
+        edit: function (editor) {
+            lightning.htmleditor.initEditor('cms_' + editor);
+            $('#cms_edit_' + editor).hide();
+            $('#cms_save_' + editor).show();
+        },
+
+        save: function (editor) {
+            lightning.dialog.showLoader('Saving...');
+            lightning.htmleditor.deactivateEditor('cms_' + editor);
+            $.ajax({
+                url: '/admin/cms',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    cms: editor.replace(/^cms_/, ''),
+                    token: lightning.vars.token,
+                    action: "save",
+                    content: $('#cms_' + editor).html()
+                },
+                success: function (data) {
+                    $('#cms_edit_' + editor).show();
+                    $('#cms_save_' + editor).hide();
+                    lightning.dialog.clear();
+                    lightning.dialog.add('Saved!', 'message');
+                },
+                error: function () {
+                    self.edit(editor);
+                    lightning.dialog.clear();
+                    lightning.dialog.add('The content could not be saved, please try again!', 'error');
+                }
             });
         },
 
@@ -87,17 +102,6 @@
                     lightning.dialog.clear();
                     lightning.dialog.add('The content could not be saved, please try again!', 'error');
                 }
-            });
-        },
-
-        initPlain: function () {
-            $('.cms_edit_plain').on('click', function (e) {
-                var id = $(e.target).attr('id').replace(/^cms_edit_/, '');
-                self.editPlain(id);
-            });
-            $('.cms_save_plain').on('click', function (e) {
-                var id = $(e.target).attr('id').replace(/^cms_save_/, '');
-                self.savePlain(id);
             });
         },
 
@@ -186,5 +190,4 @@
             });
         }
     };
-    self = lightning.cms;
 })();

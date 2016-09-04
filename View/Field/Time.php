@@ -262,11 +262,14 @@ class Time extends Field {
      *   The rendered HTML.
      */
     public static function minutePop($field, $value = '', $allow_zero = false, $attributes = array()) {
-        $values = array();
-        if ($allow_zero) {
-            $values[''] = '';
+        $values = array_combine(range(0, 9), range(0, 9));
+        foreach ($values as &$value) {
+            $value = '0' . $value;
         }
-        $values += array(0 => '00', 15 => 15, 30 => 30, 45 => 45);
+        $values += array_combine(range(10, 59), range(10, 59));
+        if ($allow_zero) {
+            $values = ['' => ''] + $values;
+        }
 
         // Set the default class.
         BasicHTML::setDefaultClass($attributes, 'timePop');

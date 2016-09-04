@@ -4,10 +4,9 @@ namespace Lightning\Pages\Mailing;
 
 use Lightning\Tools\ChartData;
 use Lightning\Tools\ClientUser;
-use Lightning\Tools\Database;
 use Lightning\Tools\Output;
 use Lightning\Tools\Request;
-use Lightning\Tools\Tracker;
+use Lightning\Model\Tracker;
 use Lightning\View\Chart\Line;
 use Lightning\View\Field\Time;
 use Lightning\View\JS;
@@ -17,12 +16,11 @@ class Stats extends Line {
     protected $ajax = true;
 
     protected function hasAccess() {
-        ClientUser::requireAdmin();
-        return true;
+        return ClientUser::requireAdmin();
     }
 
     public function get() {
-        $message_id = Request::get('message_id', 'int');
+        $message_id = Request::get('message_id', Request::TYPE_INT);
         if (empty($message_id)) {
             Output::error('Message Not Found');
         }
@@ -31,14 +29,13 @@ class Stats extends Line {
     }
 
     public function getGetData() {
-        $start = Request::get('start', 'int', null, -30);
-        $end = Request::get('end', 'int', null, 0);
-        $message_id = Request::get('message_id', 'int');
+        $start = Request::get('start', Request::TYPE_INT, null, -30);
+        $end = Request::get('end', Request::TYPE_INT, null, 0);
+        $message_id = Request::get('message_id', Request::TYPE_INT);
 
-        $tracker = new Tracker();
-        $email_sent = $tracker->getHistory(Tracker::getTrackerId('Email Sent'), $start, $end, $message_id);
-        $email_bounced = $tracker->getHistory(Tracker::getTrackerId('Email Bounced'), $start, $end, $message_id);
-        $email_opened = $tracker->getHistory(Tracker::getTrackerId('Email Opened'), $start, $end, $message_id);
+        $email_sent = Tracker::loadOrCreateByName('Email Sent')->getHistory(['start' => $start, 'end' => $end, 'sub_id' => $message_id]);
+        $email_bounced = Tracker::loadOrCreateByName('Email Bounced')->getHistory(['start' => $start, 'end' => $end, 'sub_id' => $message_id]);
+        $email_opened = Tracker::loadOrCreateByName('Email Opened')->getHistory(['start' => $start, 'end' => $end, 'sub_id' => $message_id]);
 
         $data = new ChartData(Time::today() + $start, Time::today() + $end);
         $data->addDataSet($email_sent, 'Sent');

@@ -150,7 +150,7 @@ class RequestOverridable {
     /**
      * Access GET/POST inputs from request.
      *
-     * @param $var
+     * @param string $var
      *   The name of the variable from $_REQUEST
      * @param string $type
      *   The type of data to allow. This will default to plain text.
@@ -179,13 +179,13 @@ class RequestOverridable {
     /**
      * Get a value from a cookie.
      *
-     * @param $var
+     * @param string $var
      * @param string $type
-     * @param $subtype
+     * @param string $subtype
      *
      * @return bool|float|int|string
      */
-    public static function cookie($var, $type='', $subtype='', $default = null) {
+    public static function cookie($var, $type = '', $subtype = '', $default = null) {
         $value = Data::getFromPath($var, $_COOKIE);
         if ($value === null) {
             return $default;
@@ -199,13 +199,13 @@ class RequestOverridable {
     /**
      * Gets a variable only if it's in the $_POST global.
      *
-     * @param $var
+     * @param string $var
      * @param string $type
-     * @param $subtype
+     * @param string $subtype
      *
      * @return bool|float|int|string
      */
-    public static function post($var, $type='', $subtype='', $default = null) {
+    public static function post($var, $type = '', $subtype = '', $default = null) {
         $value = Data::getFromPath($var, $_POST);
         if ($value === null) {
             return $default;
@@ -226,7 +226,7 @@ class RequestOverridable {
      *
      * @return mixed
      */
-    public static function query($var, $type='', $subtype='', $default = null) {
+    public static function query($var, $type = '', $subtype = '', $default = null) {
         $value = Data::getFromPath($var, $_GET);
         if ($value === null) {
             return $default;

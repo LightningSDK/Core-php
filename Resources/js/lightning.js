@@ -35,7 +35,7 @@ lightning.startup = {
         this.initNav();
         lightning.ajax.init();
         lightning.dialog.init();
-        lightning.splitTest.init();
+        lightning.tracker.init();
     },
 
     initNav: function() {
@@ -95,12 +95,16 @@ lightning.require = function(url, callback) {
  * Get a deep lightning variable using . notation.
  *
  * @param {string} locator
+ * @param {mixed} defaultValue
  *
  * @returns {*}
  */
-lightning.get = function(locator) {
+lightning.get = function(locator, defaultValue) {
     if (!locator) {
         return null;
+    }
+    if (typeof defaultValue == 'undefined') {
+        defaultValue = null;
     }
     locator = locator.split('.');
     var value = lightning.vars;
@@ -108,7 +112,7 @@ lightning.get = function(locator) {
         if (value.hasOwnProperty(locator[i])) {
             value = value[locator[i]];
         } else {
-            return null;
+            return defaultValue;
         }
     }
     return value;

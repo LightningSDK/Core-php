@@ -16,9 +16,7 @@ use Lightning\Tools\Request;
 use Lightning\Tools\Scrub;
 use Lightning\Tools\Session;
 use Lightning\Tools\SocialDrivers\SocialMediaApi;
-use Lightning\Tools\Tracker;
 use Lightning\View\Field\Time;
-use Lightning\Model\Permissions;
 
 /**
  * Class User
@@ -355,7 +353,7 @@ class UserOverridable extends Object {
             true
         )) {
             // If a result was returned, they were added to the list.
-            Tracker::trackEvent('Subscribe', $list_id, $this->id);
+            Tracker::loadOrCreateByName(Tracker::SUBSCRIBE, Tracker::USER)->track($list_id, $this->id);
             return true;
         } else {
             // They were already in the list.

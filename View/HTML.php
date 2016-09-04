@@ -26,6 +26,14 @@ class HTML {
         return $attribute_string;
     }
 
+    public static function implodeStyles($styles) {
+        $flat = '';
+        foreach ($styles as $k => $v) {
+            $flat .= ';' . $k . ':' . $v;
+        }
+        return $flat;
+    }
+
     public static function getFirstImage($html) {
         preg_match_all('/<img\s+.*?src=[\"\']?([^\"\' >]*)[\"\']?[^>]*>/i', $html, $matches, PREG_SET_ORDER);
         if(!empty($matches[0][1])) {

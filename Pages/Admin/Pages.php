@@ -46,7 +46,7 @@ class Pages extends Table {
         )
     );
 
-    public function initSettings() {
+    protected function initSettings() {
         $this->preset['url']['submit_function'] = function(&$output) {
             $output['url'] = Request::post('url', 'url') ?: Request::post('title', 'url');
         };

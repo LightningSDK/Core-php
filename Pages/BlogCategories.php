@@ -15,7 +15,7 @@ class BlogCategories extends Table {
         return true;
     }
 
-    public function initSettings() {
+    protected function initSettings() {
         Template::getInstance()->set('full_width', true);
         $this->preset['cat_url'] = [
             'submit_function' => function(&$output){

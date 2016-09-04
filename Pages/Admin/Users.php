@@ -8,6 +8,7 @@ use Lightning\Tools\ClientUser;
 use Lightning\Tools\Database;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Request;
+use Lightning\Tools\Session;
 use Lightning\View\Field\BasicHTML;
 use Lightning\View\Field\Text;
 use Lightning\Tools\Session;
@@ -32,47 +33,54 @@ class Users extends Table {
     ];
 
     protected $searchable = true;
-    protected $search_fields = array('email', 'first', 'last', 'user.user_id');
-    protected $preset = array(
-        'salt' => array(
+    protected $search_fields = ['email', 'first', 'last', 'user.user_id'];
+
+    protected $preset = [
+        'salt' => [
             'type' => 'hidden',
-        ),
-        'last_login' => array(
+        ],
+        'last_login' => [
             'type' => 'datetime',
             'editable' => false,
-        ),
-        'created' => array(
+        ],
+        'created' => [
             'type' => 'date',
             'editable' => false,
-        ),
-        'registered' => array(
+        ],
+        'registered' => [
             'type' => 'date',
             'editable' => false,
-        ),
-    );
+        ],
+    ];
 
     protected $importable = true;
 
-    protected $links = array(
-        'message_list' => array(
+    protected $links = [
+        'message_list' => [
             'display_name' => 'Mailing Lists',
             'key' => 'message_list_id',
             'index' => 'message_list_user',
             'display_column' => 'name',
-        ),
-    );
+        ],
+        'user_tag' => [
+            'display_name' => 'Tags',
+            'key' => 'tag_id',
+            'index' => 'user_tag_tag',
+            'display_column' => 'name',
+        ]
+    ];
 
-    protected $action_fields = array(
-        'impersonate' => array(
+    protected $action_fields = [
+        'impersonate' => [
             'type' => 'link',
             'url' => '/admin/users?action=impersonate&id=',
             'display_value' => '<img src="/images/lightning/user.png" border="0">',
-        ),
-    );
+        ],
+    ];
 
     protected $customImportFields;
 
-    public function initSettings() {
+    protected function initSettings() {
         $this->preset['password']['submit_function'] = function(&$output) {
             if ($pass = Request::post('password')) {
                 $salt = User::getSalt();
@@ -109,7 +117,7 @@ class Users extends Table {
         $db = Database::getInstance();
 
         if (!isset($mailing_list_id)) {
-            if (!$mailing_list_id = Request::get('message_list_id', 'int')) {
+            if (!$mailing_list_id = Request::get('message_list_id', Request::TYPE_INT)) {
                 // No default list was selected
                 if ($new_list = trim(Request::get('new_message_list'))) {
                     $mailing_list_id = $db->insert('message_list', ['name' => $new_list]);
@@ -137,7 +145,7 @@ class Users extends Table {
 
     public function getImpersonate() {
         $session = Session::getInstance();
-        $session->content->impersonate = Request::get('id', 'int');
+        $session->content->impersonate = Request::get('id', Request::TYPE_INT);
         $session->save();
         // TODO: This should call the User::loginRedirect() function.
         Navigation::redirect('/');

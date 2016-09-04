@@ -3,6 +3,7 @@
 namespace Lightning\Tools;
 
 use Lightning\Tools\Security\Encryption;
+use Lightning\Model\Tracker as TrackerModel;
 
 class Navigation {
     /**
@@ -27,6 +28,7 @@ class Navigation {
             }
         }
         Messenger::storeInSession();
+        TrackerModel::storeInSession();
         Output::sendCookies();
         if ($permanent) {
             http_response_code(301);

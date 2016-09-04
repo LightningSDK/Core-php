@@ -5,7 +5,7 @@ namespace Lightning\Pages;
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Output;
 use Lightning\Tools\Request;
-use Lightning\Tools\Tracker;
+use Lightning\Model\Tracker;
 use Lightning\View\API;
 use Lightning\View\Field\Time;
 
@@ -18,21 +18,22 @@ class AdminTracker extends API {
         $data = array(
             'datasets' => array(),
         );
-        $start = Request::get('start', 'int') ?: -30;
-        $end = Request::get('end', 'int') ?: 0;
+        $start = Request::get('start', Request::TYPE_INT) ?: -30;
+        $end = Request::get('end', Request::TYPE_INT) ?: 0;
         $sub_id = -1;
         $user_id = -1;
-        $tracker = NULL;
+        $tracker_id = NULL;
         foreach ($_GET['sets'] as $set) {
-            $tracker = isset($set['tracker']) ? intval($set['tracker']) : $tracker;
+            $tracker_id = isset($set['tracker']) ? intval($set['tracker']) : $tracker_id;
             $sub_id = isset($set['sub_id']) ? intval($set['sub_id']) : $sub_id;
             $user_id = isset($set['user_id']) ? intval($set['user_id']) : $user_id;
             if (empty($tracker)) {
                 throw new \Exception('Invalid tracker');
             }
+            $tracker = Tracker::loadByID($tracker_id);
             $data['datasets'][] = array(
-                'data' => array_values(Tracker::getHistory($tracker, $start, $end, $sub_id, $user_id)),
-                'label' => Tracker::getName($tracker),
+                'data' => array_values($tracker->getHistory(['start' => $start, 'end' => $end, 'sub_id' => $sub_id, 'user_id' => $user_id])),
+                'label' => $tracker->tracker_name,
             );
         }
         $data['labels'] = array();

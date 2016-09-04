@@ -11,9 +11,8 @@ use Lightning\Model\CMS as CMSModel;
 
 class CMS extends API {
 
-    protected function hasAccess() {
-        ClientUser::requireAdmin();
-        return true;
+    public function hasAccess() {
+        return ClientUser::requireAdmin();
     }
 
     /**

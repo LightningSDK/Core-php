@@ -1,38 +1,4 @@
 <?php
-/*
-  "table" class
-  provides basic interactivity with a database table (list, insert, update, delete)
-
-  minimal setup:
-
-	// Instanciate table interaction object
-  	$myTableObject = new table();
-  	// set the database table
-	$myTableObject->table = "changeme_database_table";
-	// set the primary key for the database table
-	$myTableObject->getKey() = "changeme_table_primary_index";
-    // process any database actions
-	$myTableObject->execute_task();
-	// output the database table to stdout
-	$myTableObject->render_table();
-
-  optional features: (set before ->execute_task() and ->render_table())
-
-	// set the sortorder for the list of rows
-	$myTableObject->sort = 'ORDER BY changeme_sort_column ASC, changeme_secondary_sort_column DESC';
-	// set a (m-n) relationship between the table and another table, allowing the joining table to be managed
-	// The foreign keys in the joining table must be named the same as in the joined tables' columns
-	$myTableObject->link[changeme_related_table_name] = ['index'=>'changeme_join_table_name', 'key'=>'changeme_related_table_foreign_key_name', "display_name"=>"changeme_display_column_from_related_table", "list"=>true);
-	// the relationship can even span to another database
-	$myTableObject->link[changeme_related_table_name] = ['database'=>'changeme_related_table_database', 'index'=>'changeme_join_table_name', 'key'=>'changeme_related_table_foreign_key_name', "display_name"=>"changeme_display_column_from_related_table", "list"=>true);
-	// set a column to be a lookup from another table (1-n relationship)
-	// the lookuptable key column must be named the same as the table's column
- 	$myTableObject->preset['changeme_table_foreign_key'] = ['type'=>'lookup', 'lookuptable'=>'changeme_related_table_name', 'display_name'=>'changeme_display_column_from_related_table');
-
-	// set this to true to allow for serial updates
-	$myTableObject->enable_serial_update = 1;
-
-*/
 
 namespace Lightning\Pages;
 
@@ -183,7 +149,7 @@ abstract class Table extends Page {
      *
      *   - accessControl - Injection into the $where query for available options for linking.
      *   - index - the name of a table for making many to many joins
-     *   - table - the name of the table with the foriegn data. if left empty, the key for this array will be used
+     *   - table - the name of the table with the foreign data. if left empty, the key for this array will be used
      *   - key - the primary key of the foreign table
      *   - index_fkey - if the columns on the index table and foriegn table have different names, 'key' is the name of the column on the index table and 'index_fkey' is the name of column on the foreign table.
      *   - display_column - the column in the foreign table to display as the value
@@ -194,10 +160,35 @@ abstract class Table extends Page {
      */
     protected $links = [];
     protected $styles = [];
-    protected $sort;
+
+    /**
+     * A list of default sorting fields.
+     *
+     * @var array
+     */
+    protected $sort = [];
     protected $maxPerPage = 25;
     protected $listCount = 0;
     protected $page_number = 1;
+
+    /**
+     * A list of columns that will be represented as buttons, checkboxes, etc.
+     *
+     * Each item in the action fields array should be an array with a list of settings.
+     *
+     *   - display_name - The name to show at the top of the column.
+     *   - display_value - The text that will appear inside of a link or action field.
+     *   - type - The type of the field.
+     *     - link - A simple link to a new location ending with the line's primary key value
+     *     - html - Fully rendered HTML. This can be a constant string or a callable function.
+     *     - action - An action managed by the table, linking to the table handler page. IE /table?action=someAction&id=1, which will call the method getSomeAction() with $this->id = 1;
+     *     - function - deprecated version of action.
+     *     - checkbox - A rendered checkbox which will determine if this row is selected when applying an action to a group of rows.
+     *   - condition - A function that, when passed the row's values, will return true or false as to whether the cell should be rendered.
+     *   - action - If the type is action, this will be the name of the action in the link.
+     *
+     * @var array
+     */
     protected $action_fields = [];
     protected $custom_templates = [];
     protected $list_where;
@@ -292,6 +283,7 @@ abstract class Table extends Page {
      * - type (type of the button out of available ones);
      * - text (text on the button);
      * - data (custom data);
+     *
      * @var array
      */
     protected $custom_buttons = [];
@@ -339,7 +331,6 @@ abstract class Table extends Page {
     /**
      * Used when this table is editing child contents of a parent table.
      */
-    protected $sort_fields;
     protected $parentId;
 
     /**
@@ -397,20 +388,17 @@ abstract class Table extends Page {
 
         // load the sort fields
         if ($sort = Request::get('sort')) {
-            $field = explode(";", $sort);
-            $this->sort_fields = [];
-            $sort_strings = [];
+            $field = explode(';', $sort);
+            $new_sort = [];
             foreach ($field as $f) {
-                $f = explode(":", $f);
-                if (!empty($f[1]) && $f[1] == "D") {
-                    $this->sort_fields[$f[0]] = "D";
-                    $sort_strings[] = "`{$f[0]}` DESC";
+                $f = explode(':', $f);
+                if (!empty($f[1]) && $f[1] == 'D') {
+                    $new_sort[$f[0]] = 'DESC';
                 } else {
-                    $this->sort_fields[$f[0]] = "A";
-                    $sort_strings[] = "`{$f[0]}` ASC";
+                    $new_sort[$f[0]] = 'ASC';
                 }
             }
-            $this->sort = implode(",", $sort_strings);
+            $this->sort = $new_sort;
         }
 
         if (!empty($_SERVER['REQUEST_URI'])) {
@@ -431,7 +419,11 @@ abstract class Table extends Page {
 
     protected function validateAccess($id) {
         if (!empty($this->accessControl)) {
-            if (!Database::getInstance()->check($this->table,
+            if (!Database::getInstance()->check(
+                [
+                    'from' => $this->table,
+                    'join' => $this->getAccessTableJoins()
+                ],
                 array_merge($this->accessControl, [$this->getKey() => $id]))) {
                 Output::accessDenied();
             }
@@ -456,7 +448,7 @@ abstract class Table extends Page {
         if ($this->singularity) {
             // The user only has access to a single entry. ID is irrelevant.
             $this->getEdit();
-        } elseif (Request::query('id', 'int')) {
+        } elseif (Request::query('id', Request::TYPE_INT)) {
             $this->action = $this->defaultAction;
             if ($this->editable) {
                 $this->getEdit();
@@ -470,7 +462,7 @@ abstract class Table extends Page {
 
     public function getEdit() {
         $this->action = 'edit';
-        $this->id = $this->singularity ? $this->singularityID : Request::query('id', 'int');
+        $this->id = $this->singularity ? $this->singularityID : Request::query('id', Request::TYPE_INT);
 
         if (!$this->id) {
             Output::error('Invalid ID');
@@ -501,7 +493,7 @@ abstract class Table extends Page {
         if (!$this->editable || !$this->addable || $this->singularity) {
             Output::accessDenied();
         }
-        $this->id = Request::query('id', 'int');
+        $this->id = Request::query('id', Request::TYPE_INT);
         $this->getRow();
     }
 
@@ -629,7 +621,7 @@ abstract class Table extends Page {
         $this->action = 'list';
         $this->loadMainFields();
         $this->loadList();
-        Output::json(array('html' => $this->renderList(), 'd' => Request::get('i', 'int'), 'status' => 'success'));
+        Output::json(['html' => $this->renderList(), 'd' => Request::get('i', Request::TYPE_INT), 'status' => 'success']);
     }
 
     public function getDelete() {
@@ -745,7 +737,7 @@ abstract class Table extends Page {
     protected function afterDuplicate() {}
 
     public function postUpdate() {
-        $this->id = Request::post('id', 'int');
+        $this->id = Request::post('id', Request::TYPE_INT);
         $this->action = 'update';
         if (!$this->editable) {
             Output::accessDenied();
@@ -763,7 +755,8 @@ abstract class Table extends Page {
 
         if (!empty($new_values)) {
             $where = $this->accessRestrictions([$this->getKey() => $this->id]);
-            Database::getInstance()->update($this->table, $new_values, $where);
+            $table = ['from' => $this->table, 'join' => $this->getAccessTableJoins()];
+            Database::getInstance()->update($table, $new_values, $where);
         }
         $this->updateAccessTable();
         $this->setPostedLinks();
@@ -1118,7 +1111,7 @@ abstract class Table extends Page {
                     switch ($this->rowClick['type']) {
                         case 'url':
                         case 'action':
-                            JS::startup('$(".table_list").on("click", "tr", lightning.table.click)');
+                            JS::startup('$(".table_list").on("click", "tr", lightning.table.click)', ['/js/lightning.min.js']);
                             break;
                         case 'none':
                         default:
@@ -1136,7 +1129,7 @@ abstract class Table extends Page {
                 $output .= '</tbody>';
 
                 if ($this->action_fields_requires_submit()) {
-                    '<input type="submit" name="submit" value="Submit" class="button" />';
+                    '<input type="submit" name="submit" value="Submit" class="button medium" />';
                 }
                 $output .= "</table></div>";
                 if ($this->action_fields_requires_submit())
@@ -1180,6 +1173,8 @@ abstract class Table extends Page {
     protected function getDisplayName($field, $field_name) {
         if (isset($field['display_name'])) {
             return $field['display_name'];
+        } elseif (isset($field['display_value'])) {
+            return $field['display_value'];
         } else {
             return ucwords(str_replace('_', ' ', $field_name));
         }
@@ -1326,10 +1321,7 @@ abstract class Table extends Page {
         $output = '';
         foreach ($this->action_fields as $a => $action) {
             $output .= '<td>';
-            if (isset($action['column_name']))
-                $output .= $action['column_name'];
-            elseif (isset($action['display_name']))
-                $output .= $action['display_name']; else $output .= $a;
+            $output .= $this->getDisplayName($action, $a);
             switch ($action['type']) {
                 case 'link':
                 case 'html':
@@ -1362,11 +1354,8 @@ abstract class Table extends Page {
         foreach ($this->action_fields as $a => $action) {
             $output .= '<td>';
             // Get the display value for the column.
-            if (!empty($action['display_value'])) {
-                $link_content = $action['display_value'];
-            } else {
-                $link_content = $this->getDisplayName($action, $a);
-            }
+            $link_content = isset($action['display_value']) ? $action['display_value'] : $this->getDisplayName($action, $a);
+
             // Run a custom condition to see if this should be displayed at all.
             if (!empty($action['condition']) && is_callable($action['condition'])) {
                 if (!$action['condition']($row)) {
@@ -1527,7 +1516,7 @@ abstract class Table extends Page {
 
         $output .= '<tr><td colspan="2">';
         if ($this->action != 'view') {
-            $output .= '<input type="submit" name="sbmt" value="' . $this->button_names[$new_action] . '" class="button">';
+            $output .= '<input type="submit" name="sbmt" value="' . $this->button_names[$new_action] . '" class="button medium">';
         }
 
         // If exist render all custom buttons
@@ -1587,7 +1576,7 @@ abstract class Table extends Page {
                     break;
                 case self::CB_LINK:
                     $download = !empty($button['download']) ? 'download="' . $button['download'] . '"' : '';
-                    $output .= '<a href="' . $button['url'] . '" ' . $download . ' class="button">' . $button['text'] . '</a>';
+                    $output .= '<a href="' . $button['url'] . '" ' . $download . ' class="button medium">' . $button['text'] . '</a>';
             }
         }
         return $output;
@@ -1606,7 +1595,7 @@ abstract class Table extends Page {
      */
     protected function renderSubmitAndRedirect($button, $button_id) {
         // Output the button.
-        return "<input id='custombutton_{$button_id}' type='submit' name='submit' value='{$button['text']}' class='button'/>";
+        return "<input id='custombutton_{$button_id}' type='submit' name='submit' value='{$button['text']}' class='button medium'/>";
     }
 
     /**
@@ -1634,7 +1623,7 @@ abstract class Table extends Page {
                 $output .= '<tr><td colspan="2">';
                 $output .= $this->renderFieldInputOrValue($which_field, $field, $row);
                 if ($field['default_reset']) {
-                    $output .= '<input type="button" value="Reset to default" onclick="reset_field_value(\'' . $field['field'] . '\');" />';
+                    $output .= '<input type="button" value="Reset to default" onclick="lightning.table.resetField(\'' . $field['field'] . '\');" />';
                 }
                 $output .= '</td></tr>';
             } else {
@@ -1659,7 +1648,7 @@ abstract class Table extends Page {
             }
         }
         if (!empty($field['default_reset'])) {
-            $output .= "<input type='button' value='Reset to default' onclick='reset_field_value(\"{$field['field']}\");' />";
+            $output .= "<input type='button' value='Reset to default' onclick='lightning.table.resetField(\"{$field['field']}\");' />";
         }
         return $output;
     }
@@ -1814,7 +1803,7 @@ abstract class Table extends Page {
         // TODO: This doesn't return anything valuable. Is it used anywhere?
         $link_settings['web_location'] = $this->getImageLocationWeb($link_settings, '');
         JS::set('table.links.' . $link_id, $link_settings);
-        $output = '<span class="button add_image" id="add_image_' . $link_id . '">Add Image</span>';
+        $output = '<span class="button medium add_image" id="add_image_' . $link_id . '">Add Image</span>';
         $output .= '<span class="linked_images" id="linked_images_' . $link_id . '">';
         $link_settings['conform_name'] = false;
         foreach ($link_settings['active_list'] as $image) {
@@ -1988,43 +1977,29 @@ abstract class Table extends Page {
             $vars = array_merge($vars, $other);
         }
 
-        // Search.
-        $sort = [];
-        if (is_array($this->sort_fields) && count($this->sort_fields) > 0) {
-            $sort_fields = [];
-            if (!empty($other['sort'])) {
-                foreach ($other['sort'] as $f => $d) {
-                    switch ($d) {
-                        case 'A': $sort_fields[$f] = 'A'; break;
-                        case 'D': $sort_fields[$f] = 'D'; break;
-                        case 'X':
-                            $sort_fields[$f] =
-                                (!empty($this->sort_fields[$f]) && $this->sort_fields[$f] == 'A')
-                                    ? 'D' : 'A';
-                            break;
-                    }
-                }
-            }
-            foreach ($sort_fields as $f => $d) {
-                $sort[] = ($d == 'D') ? $f . ':D' : $f;
-            }
-            if (!empty($sort)) {
-                $vars['sort'] = implode(';', $sort);
-            }
-        } elseif (!empty($other['sort'])) {
-            $sort = [];
-            foreach ($other['sort'] as $f => $d) {
+        // Conform the sorting variable.
+        if (!empty($vars['sort']) && is_array($vars['sort'])) {
+            $sort_strings = [];
+            foreach ($vars['sort'] as $f => $d) {
+                $direction = $d;
                 switch ($d) {
-                    case 'D': $sort[] = $f . ':D'; break;
-
-                    case 'A':
-                    default:  $sort[] = $f; break;
+                    case 'ASC':
+                        $direction = 'A';
+                        break;
+                    case 'DESC':
+                        $direction = 'D';
+                        break;
+                    case 'X':
+                        $direction =
+                            (!empty($this->sort[$f]) && $this->sort[$f] == 'ASC')
+                                ? 'D' : 'A';
+                        break;
                 }
+                $sort_strings[] = $f . ':' . $direction;
             }
-            $vars['sort'] = implode(';', $sort);
+            $vars['sort'] = implode(';', $sort_strings);
         }
 
-        // Put it all together
         return $vars;
     }
 
@@ -2350,9 +2325,9 @@ abstract class Table extends Page {
 
     protected function updateAccessTable() {
         if (isset($this->accessTable)) {
-            $accessTable_values = $this->getFieldValues($this->fields, true);
-            if (!empty($accessTable_values)) {
-                Database::getInstance()->update($this->accessTable, $accessTable_values, array_merge($this->accessTableWhere, [$this->getKey() => $this->id]));
+            $accessTableValues = $this->getFieldValues($this->fields, true);
+            if (!empty($accessTableValues)) {
+                Database::getInstance()->update($this->accessTable, $accessTableValues, array_merge($this->accessTableWhere, [$this->getKey() => $this->id]));
             }
         }
     }
@@ -2465,7 +2440,7 @@ abstract class Table extends Page {
                         $val = bindec(strrev($vals));
                         break;
                     case 'bit':
-                        $val = ['bit' => decbin(Request::get($field['form_field'], 'int'))];
+                        $val = ['bit' => decbin(Request::get($field['form_field'], Request::TYPE_INT))];
                         break;
                     case 'text':
                     case 'mediumtext':
@@ -3293,7 +3268,7 @@ abstract class Table extends Page {
                 );
 
                 // GET INPUT ARRAY
-                $list = Request::get($link . '_input_array', 'explode', 'int');
+                $list = Request::get($link . '_input_array', Request::TYPE_EXPLODE, Request::TYPE_INT);
                 foreach ($list as $l) {
                     Database::getInstance()->insert(
                         $link_settings['index'],

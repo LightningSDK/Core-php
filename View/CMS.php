@@ -41,11 +41,12 @@ class CMS {
         $content = CMSModel::loadByName($name);
         $content = (!empty($content) ? $content->content : (!empty($settings['default']) ? $settings['default'] : ''));
         if (ClientUser::getInstance()->isAdmin()) {
+            JS::startup('lightning.cms.init()');
             JS::set('token', Session::getInstance()->getToken());
             JS::set('cms.cms_' . $name . '.config', !empty($settings['config']) ? $settings['config'] : []);
             return
-                '<a href="javascript:lightning.cms.edit(\'cms_' . $name . '\')" class="button small" id="cms_edit_' . $name . '">Edit</a>'
-                . '<a href="javascript:lightning.cms.save(\'cms_' . $name . '\')" class="button small" style="display:none;" id="cms_save_' . $name . '">Save</a>'
+                '<img src="/images/lightning/pencil.png" class="cms_edit icon-16" id="cms_edit_' . $name . '">
+            <img src="/images/lightning/save.png" class="cms_save icon-16" id="cms_save_' . $name . '" style="display:none">'
                 . HTMLEditor::div('cms_' . $name,
                     [
                         'spellcheck' => true,
@@ -85,7 +86,10 @@ class CMS {
             $handler = FileManager::getFileHandler(!empty($settings['file_handler']) ? $settings['file_handler'] : '', $settings['location']);
             $content->url = $handler->getWebURL($content->content);
         }
+
+        // These are classes that are always applied and not visible in the text field.
         $forced_classes = !empty($settings['class']) ? $settings['class'] : '';
+        // These are added in the CMS text field.
         $added_classes = !empty($content->class) ? $content->class : '';
         if (!empty($settings['class'])) {
             $content->class .= ' ' . $settings['class'];
@@ -103,18 +107,28 @@ class CMS {
             $fh = FileManager::getFileHandler($settings['file_handler'], $settings['location']);
             JS::set('cms.baseUrl', $fh->getWebURL(''));
             JS::set('fileBrowser.type', Configuration::get('html_editor.browser'));
-            JS::startup('lightning.cms.initImage();');
+            JS::startup('lightning.cms.init()');
+            if (!isset($settings['style'])) {
+                $settings['style'] = [];
+            }
+            if (!empty($settings['norender'])) {
+                $settings['style']['display'] = 'none';
+            }
             return '<img src="/images/lightning/pencil.png" class="cms_edit_image icon-16" id="cms_edit_' . $name . '">
             <img src="/images/lightning/save.png" class="cms_save_image icon-16" id="cms_save_' . $name . '" style="display:none">'
             . '<input type="text" placeholder="classes" id="cms_' . $name . '_class" class="imagesCSS" name="' . $forced_classes . '" value="' . $added_classes . '" style="display:none" />'
             . '<img src="' . $content->url . '" id="cms_' . $name . '" class="' . $content->class . '" '
-            . (!empty($settings['norender']) ? 'style="display:none"' : '')
+            . 'style="' . HTML::implodeStyles($settings['style']) . '"'
             . ' />';
         } elseif (!empty($settings['norender'])) {
             return '';
         } else {
             if (!empty($content)) {
-                return '<img src="' . $content->url . '" class="' . $content->class . '" />';
+                $output = '<img src="' . $content->url . '" class="' . $content->class . '" />';
+                if (!empty($settings['link'])) {
+                    $output = '<a href="' . Scrub::toHTML($settings['link']) . '">' . $output . '</a>"';
+                }
+                return $output;
             }
         }
     }
@@ -131,7 +145,7 @@ class CMS {
         if (!empty($settings['display_only'])) {
             return $value;
         } elseif (ClientUser::getInstance()->isAdmin()) {
-            JS::startup('lightning.cms.initPlain()');
+            JS::startup('lightning.cms.init()');
             JS::set('token', Session::getInstance()->getToken());
             $output = '<img src="/images/lightning/pencil.png" class="cms_edit_plain icon-16" id="cms_edit_' . $name . '">'
             . '<img src="/images/lightning/save.png" class="cms_save_plain icon-16" id="cms_save_' . $name . '" style="display:none">';
@@ -173,7 +187,7 @@ class CMS {
         if (!empty($settings['display_only'])) {
             return implode(',', $value);
         } elseif (ClientUser::getInstance()->isAdmin()) {
-            JS::startup('lightning.cms.initPlain()');
+            JS::startup('lightning.cms.init()');
             JS::set('token', Session::getInstance()->getToken());
             return '<img src="/images/lightning/pencil.png" class="cms_edit_plain icon-16" id="cms_edit_' . $name . '">'
             . '<img src="/images/lightning/save.png" class="cms_save_plain icon-16" id="cms_save_' . $name . '" style="display:none">'

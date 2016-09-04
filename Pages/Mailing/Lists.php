@@ -48,7 +48,7 @@ class Lists extends Table {
         return true;
     }
 
-    public function initSettings() {
+    protected function initSettings() {
         $this->preset['subscribers'] = [
             'list_only' => true,
             'display_value' => [$this, 'getListCount'],

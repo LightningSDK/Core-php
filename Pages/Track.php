@@ -12,7 +12,7 @@ use Lightning\Tools\Logger;
 use Lightning\Tools\Output;
 use Lightning\Tools\Request;
 use Lightning\Tools\Security\Encryption;
-use Lightning\Tools\Tracker;
+use Lightning\Model\Tracker;
 
 /**
  * A page handler for the tracking image.
@@ -28,17 +28,17 @@ class Track extends Page {
      * The main page handler, outputs a 1x1 pixel image.
      */
     public function get() {
-        if ($t = Request::get('t', 'encrypted')) {
+        if ($t = Request::get('t', Request::TYPE_ENCRYPTED)) {
             // Track an encrypted link.
-            if (!Tracker::trackLink($t)) {
+            if (!Tracker::trackByEncryptedLink($t)) {
                 Logger::error('Failed to track encrypted link: ' . Encryption::aesDecrypt($t, Configuration::get('tracker.key')));
             }
         }
-        elseif (Configuration::get('tracker.allow_unencrypted') && $tracker = Request::get('tracker', 'int')) {
+        elseif (Configuration::get('tracker.allow_unencrypted') && $tracker_id = Request::get('tracker', Request::TYPE_INT)) {
             // Track an unencrypted link.
-            $user = Request::get('user', 'int') ?: ClientUser::createInstance()->id;
-            $sub = Request::get('sub', 'int');
-            Tracker::trackEventID($tracker, $sub, $user);
+            $user = Request::get('user', Request::TYPE_INT) ?: ClientUser::createInstance()->id;
+            $sub = Request::get('sub', Request::TYPE_INT);
+            Tracker::loadByID($tracker_id)->track($sub, $user);
         }
 
         // Output a single pixel image.
@@ -55,11 +55,11 @@ class Track extends Page {
 
         // TODO: These can be spoofed.
         // A verification method is needed.
-        $tracker = Request::post('tracker');
-        $sub = Request::post('id', 'int');
+        $tracker_id = Request::post('tracker');
+        $sub = Request::post('id', Request::TYPE_INT);
 
         // Track.
-        Tracker::trackEvent($tracker, $sub, $user);
+        Tracker::loadByID($tracker_id)->track($sub, $user);
 
         Output::json(Output::SUCCESS);
     }

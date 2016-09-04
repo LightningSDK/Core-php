@@ -44,6 +44,10 @@ trait ObjectDatabaseStorage {
         return $objects;
     }
 
+    public static function loadOptions($name_field, $where = []) {
+        return Database::getInstance()->selectColumn(static::TABLE, $name_field, $where, static::PRIMARY_KEY);
+    }
+
     /**
      * Load a single element by the PK ID.
      *

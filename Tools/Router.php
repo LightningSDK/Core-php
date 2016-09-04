@@ -59,7 +59,12 @@ class Router extends Singleton {
             return static::parseRoute($argv[1], true);
         } else {
             // Handle a web page request.
-            return static::parseRoute(Request::getLocation(), false);
+            $handler = static::parseRoute(Request::getLocation(), false);
+            if (is_array($handler) && !empty($handler['redirect'])) {
+                Navigation::redirect($handler['redirect']);
+            } else {
+                return $handler;
+            }
         }
     }
 }
