@@ -1,5 +1,38 @@
 (function() {
     var self = lightning.cms = {
+        init: function () {
+            $('.cms_edit').on('click', function(e) {
+                var id = $(e.target).attr('id').replace(/^cms_edit_/, '');
+                self.edit(id);
+            });
+            $('.cms_save').on('click', function(e) {
+                var id = $(e.target).attr('id').replace(/^cms_save_/, '');
+                self.save(id);
+            });
+            $('.cms_edit_plain').on('click', function (e) {
+                var id = $(e.target).attr('id').replace(/^cms_edit_/, '');
+                self.editPlain(id);
+            });
+            $('.cms_save_plain').on('click', function (e) {
+                var id = $(e.target).attr('id').replace(/^cms_save_/, '');
+                self.savePlain(id);
+            });
+            $('.cms_edit_image').on('click', function (e) {
+                var id = $(e.target).attr('id').replace(/^cms_edit_/, '');
+                self.editImage(id);
+            });
+            $('.cms_save_image').on('click', function (e) {
+                var id = $(e.target).attr('id').replace(/^cms_save_/, '');
+                self.saveImage(id);
+            });
+            $('.imagesCSS').keyup(function () {
+                var textField = $(this);
+                var id = textField.attr('id').replace('_class', '');
+                var classes = textField.attr('name') + ' ' + textField.val();
+                $('#' + id).removeClass().addClass(classes);
+            });
+        },
+
         edit: function (editor) {
             lightning.htmleditor.initEditor('cms_' + editor);
             $('#cms_edit_' + editor).hide();
@@ -30,23 +63,6 @@
                     lightning.dialog.clear();
                     lightning.dialog.add('The content could not be saved, please try again!', 'error');
                 }
-            });
-        },
-
-        initImage: function () {
-            $('.cms_edit_image').on('click', function (e) {
-                var id = $(e.target).attr('id').replace(/^cms_edit_/, '');
-                self.editImage(id);
-            });
-            $('.cms_save_image').on('click', function (e) {
-                var id = $(e.target).attr('id').replace(/^cms_save_/, '');
-                self.saveImage(id);
-            });
-            $('.imagesCSS').keyup(function () {
-                var textField = $(this);
-                var id = textField.attr('id').replace('_class', '');
-                var classes = textField.attr('name') + ' ' + textField.val();
-                $('#' + id).removeClass().addClass(classes);
             });
         },
 
@@ -86,25 +102,6 @@
                     lightning.dialog.clear();
                     lightning.dialog.add('The content could not be saved, please try again!', 'error');
                 }
-            });
-        },
-
-        initPlain: function () {
-            $('.cms_edit').on('click', function(e) {
-                var id = $(e.target).attr('id').replace(/^cms_edit_/, '');
-                self.edit(id);
-            });
-            $('.cms_save').on('click', function(e) {
-                var id = $(e.target).attr('id').replace(/^cms_save_/, '');
-                self.save(id);
-            });
-            $('.cms_edit_plain').on('click', function (e) {
-                var id = $(e.target).attr('id').replace(/^cms_edit_/, '');
-                self.editPlain(id);
-            });
-            $('.cms_save_plain').on('click', function (e) {
-                var id = $(e.target).attr('id').replace(/^cms_save_/, '');
-                self.savePlain(id);
             });
         },
 

@@ -41,6 +41,7 @@ class CMS {
         $content = CMSModel::loadByName($name);
         $content = (!empty($content) ? $content->content : (!empty($settings['default']) ? $settings['default'] : ''));
         if (ClientUser::getInstance()->isAdmin()) {
+            JS::startup('lightning.cms.init()');
             JS::set('token', Session::getInstance()->getToken());
             JS::set('cms.cms_' . $name . '.config', !empty($settings['config']) ? $settings['config'] : []);
             return
@@ -106,7 +107,7 @@ class CMS {
             $fh = FileManager::getFileHandler($settings['file_handler'], $settings['location']);
             JS::set('cms.baseUrl', $fh->getWebURL(''));
             JS::set('fileBrowser.type', Configuration::get('html_editor.browser'));
-            JS::startup('lightning.cms.initImage();');
+            JS::startup('lightning.cms.init()');
             if (!isset($settings['style'])) {
                 $settings['style'] = [];
             }
@@ -144,7 +145,7 @@ class CMS {
         if (!empty($settings['display_only'])) {
             return $value;
         } elseif (ClientUser::getInstance()->isAdmin()) {
-            JS::startup('lightning.cms.initPlain()');
+            JS::startup('lightning.cms.init()');
             JS::set('token', Session::getInstance()->getToken());
             $output = '<img src="/images/lightning/pencil.png" class="cms_edit_plain icon-16" id="cms_edit_' . $name . '">'
             . '<img src="/images/lightning/save.png" class="cms_save_plain icon-16" id="cms_save_' . $name . '" style="display:none">';
@@ -186,7 +187,7 @@ class CMS {
         if (!empty($settings['display_only'])) {
             return implode(',', $value);
         } elseif (ClientUser::getInstance()->isAdmin()) {
-            JS::startup('lightning.cms.initPlain()');
+            JS::startup('lightning.cms.init()');
             JS::set('token', Session::getInstance()->getToken());
             return '<img src="/images/lightning/pencil.png" class="cms_edit_plain icon-16" id="cms_edit_' . $name . '">'
             . '<img src="/images/lightning/save.png" class="cms_save_plain icon-16" id="cms_save_' . $name . '" style="display:none">'
