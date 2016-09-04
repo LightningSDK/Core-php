@@ -77,7 +77,8 @@ class Users extends Table {
         ],
     ];
 
-    protected $customImportFields;
+    protected $additionalImportFields = ['full_name'];
+    protected $processedImportFields = ['first', 'last', 'created'];
 
     protected function initSettings() {
         $this->preset['password']['submit_function'] = function(&$output) {
@@ -95,8 +96,21 @@ class Users extends Table {
         };
         $this->importHandlers = [
             'customImportFields' => [$this, 'customImportFields'],
+            'validate' => [$this, 'validateImportRow'],
             'importPostProcess' => [$this, 'importPostProcess'],
         ];
+    }
+
+    public function validateImportRow(&$row) {
+        // TODO: Scrub email here.
+        if (empty($row['email'])) {
+            return false;
+        }
+        if (!empty($row['full_name'])) {
+            User::parseNames($row);
+        }
+        $row['created'] = time();
+        return true;
     }
 
     /**
