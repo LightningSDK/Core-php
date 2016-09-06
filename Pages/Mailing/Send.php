@@ -36,7 +36,7 @@ class Send extends Page {
      * The main page with options to send emails or tests.
      */
     public function get() {
-        $message_id = Request::get('id', 'int');
+        $message_id = Request::get('id', Request::TYPE_INT);
         if (!$message_id || !$message = Database::getInstance()->selectRow('message', array('message_id' => $message_id))) {
             Messenger::error('Message not found.');
             return;
@@ -57,7 +57,7 @@ class Send extends Page {
         Output::setPlainText(true);
         Messenger::setVerbose(true);
         $mailer = new Mailer(true);
-        $mailer->sendBulk(Request::get('id', 'int'), false);
+        $mailer->sendBulk(Request::get('id', Request::TYPE_INT), false);
         exit;
     }
 
@@ -67,7 +67,7 @@ class Send extends Page {
     public function postSendCount() {
         Output::setPlainText(true);
         Messenger::setVerbose(true);
-        $message = new Message(Request::get('id', 'int'));
+        $message = new Message(Request::get('id', Request::TYPE_INT), true, false);
         echo 'Sending now will go to ' . $message->getUsersCount() . ' users.';
         exit;
     }
@@ -80,7 +80,7 @@ class Send extends Page {
         Output::setPlainText(true);
         Messenger::setVerbose(true);
         $mailer = new Mailer(true);
-        $mailer->sendBulk(Request::get('id', 'int'), true);
+        $mailer->sendBulk(Request::get('id', Request::TYPE_INT), true);
         exit;
     }
 }

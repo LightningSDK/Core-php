@@ -81,7 +81,7 @@ class BlogTable extends Table {
 
         $this->preset['user_id']['default'] = ClientUser::getInstance()->id;
         $this->preset['url']['submit_function'] = function(&$output) {
-            $output['url'] = Request::post('url', 'url') ?: Request::post('title', 'url');
+            $output['url'] = Request::post('url', Request::TYPE_URL) ?: Request::post('title', Request::TYPE_URL);
         };
         $this->preset['header_image'] = self::getHeaderImageSettings();
 

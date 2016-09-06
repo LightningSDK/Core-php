@@ -392,14 +392,14 @@ abstract class Table extends Page {
                 $this->preset[$backlinkname] = ['default' => $backlinkvalue];
             }
         }
-        if (isset($_POST['function'])) $this->function = $_POST['function'];
-        if (isset($_REQUEST['id'])) $this->id = Request::get('id');
-        if (isset($_REQUEST['page'])) $this->page_number = max(1, Request::get('page'));
+        $this->function = Request::post('function');
+        $this->id = Request::get('id', Request::TYPE_INT);
+        $this->page_number = max(1, Request::get('page', Request::TYPE_INT, '', 1));
 
         /*
          * serial_update comes as POST parameter
          */
-        $this->serial_update = Request::post('serialupdate', 'boolean');
+        $this->serial_update = Request::post('serialupdate', Request::TYPE_BOOLEAN);
 
         $this->refer_return = Request::get('refer_return');
 

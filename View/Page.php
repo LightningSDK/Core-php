@@ -230,7 +230,7 @@ class PageOverridable {
     public function validateToken() {
         // If this is a post request, there must be a valid token.
         if (!$this->ignoreToken && strtolower(Request::type()) == 'post') {
-            $token = Request::post('token', 'base64');
+            $token = Request::post('token', Request::TYPE_BASE64);
             return !empty($token) && $token == Session::getInstance()->getToken();
         } else {
             // This is not a POST request so it's not required.
