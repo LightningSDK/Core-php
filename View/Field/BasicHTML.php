@@ -66,7 +66,7 @@ class BasicHTML {
         $required = !empty($attributes['required']) ? 'required ' : '';
         foreach ($options as $value => $label) {
             $checked = $default === $value ? 'CHECKED="checked" ' : '';
-            $output .= '<label><input type="radio" name="' . $name . '" value="' . $value . '" ' . $checked . $required . ' /> ' . $label . '</label>';
+            $output .= '<label><input type="radio" name="' . $name . '" value="' . $value . '" ' . $checked . $required . ' /> <span>' . $label . '</span></label>';
         }
 
         return $output . '</div>';
