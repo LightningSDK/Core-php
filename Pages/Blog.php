@@ -7,6 +7,7 @@
 namespace Lightning\Pages;
 
 use Lightning\Model\Blog as BlogModel;
+use Lightning\Model\URL;
 use Lightning\Tools\Output;
 use Lightning\Tools\Request;
 use Lightning\Tools\Template;
@@ -95,7 +96,7 @@ class Blog extends Page {
         $this->setMeta('keywords', $post->keywords);
         $this->setMeta('description', $post->getShortBody(250, false));
         if ($image = $post->getHeaderImage()) {
-            $this->setMeta('image', $image);
+            $this->setMeta('image', URL::getAbsolute($image));
         }
     }
 }
