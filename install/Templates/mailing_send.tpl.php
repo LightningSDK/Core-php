@@ -7,6 +7,10 @@
         <input type="button" id='test_button' class="button medium" value="Send Test" onclick="lightning.admin.messages.send('test')" />
         <input type="button" id='test_button' class="button medium" value="Send Count" onclick="lightning.admin.messages.send('count')" />
         <input type="button" id='edit_button' class="button medium" value="Edit" onclick="document.location='/admin/mailing/messages?action=edit&id=<?=$message['message_id']?>'" />
+        <br>
+        <fieldset>
+            Send to random sample: <input type="text" name="size" id="sample_size" value="100" class="inline" style="display:inline;width:auto;margin:0;" /> <input type="button" id='edit_button' class="button medium" value="Send" style="margin:0;" onclick="lightning.admin.messages.send('random', $('#sample_size').val())" />
+        </fieldset>
     </div>
 <pre id='message_status'>
     Ready ...

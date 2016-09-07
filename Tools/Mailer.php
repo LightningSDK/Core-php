@@ -90,6 +90,9 @@ class Mailer {
      */
     protected $sentCount = 0;
 
+    protected $limit = 0;
+    protected $random = false;
+
     /**
      * Construct the mailer object.
      *
@@ -113,6 +116,14 @@ class Mailer {
             $this->mailer->DKIM_selector = Configuration::get('mailer.dkim_selector');
             $this->mailer->DKIM_passphrase = '';
         }
+    }
+
+    public function setRandom($random) {
+        $this->random = $random;
+    }
+
+    public function setLimit($limit) {
+        $this->limit = $limit;
     }
 
     /**
@@ -361,6 +372,8 @@ class Mailer {
             $this->message->setTest(true);
             $this->loadTestUsers();
         } else {
+            $this->message->setLimit($this->limit);
+            $this->message->setRandom($this->random);
             $this->users = $this->message->getUsers();
         }
 

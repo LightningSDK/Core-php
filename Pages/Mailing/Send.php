@@ -62,12 +62,26 @@ class Send extends Page {
     }
 
     /**
+     * Send the message to a random subset.
+     */
+    public function postSendRandom() {
+        Output::disableBuffering();
+        Output::setPlainText(true);
+        Messenger::setVerbose(true);
+        $mailer = new Mailer(true);
+        $mailer->setLimit(Request::post('count', Request::TYPE_INT));
+        $mailer->setRandom(true);
+        $mailer->sendBulk(Request::post('id', Request::TYPE_INT), false);
+        exit;
+    }
+
+    /**
      * Get a count of how many emails to be sent with output for XHR monitoring.
      */
     public function postSendCount() {
         Output::setPlainText(true);
         Messenger::setVerbose(true);
-        $message = new Message(Request::get('id', Request::TYPE_INT), true, false);
+        $message = new Message(Request::post('id', Request::TYPE_INT), true, false);
         echo 'Sending now will go to ' . $message->getUsersCount() . ' users.';
         exit;
     }
@@ -80,7 +94,7 @@ class Send extends Page {
         Output::setPlainText(true);
         Messenger::setVerbose(true);
         $mailer = new Mailer(true);
-        $mailer->sendBulk(Request::get('id', Request::TYPE_INT), true);
+        $mailer->sendBulk(Request::post('id', Request::TYPE_INT), true);
         exit;
     }
 }

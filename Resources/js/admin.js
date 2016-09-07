@@ -48,16 +48,24 @@ lightning.admin.messageEditor = {
     }
 };
 lightning.admin.messages = {
-    send: function(type) {
+    send: function(type, n) {
         // Start AJAX transmission.
         $('#message_status').html('Starting ...\n');
-        $('.mail_buttons').fadeOut();
+        var mail_buttons = $('.mail_buttons').fadeOut();
         var last_response_len = 0;
         var self = this;
+        var data = {
+            token: lightning.vars.token,
+            action: 'send-' + type,
+            id: lightning.vars.message_id
+        };
+        if (type == 'random') {
+            data.count = n;
+        }
         $.ajax({
-            url: '/admin/mailing/send?action=send-' + type + '&id=' + lightning.vars.message_id,
+            url: '/admin/mailing/send',
             dataType: 'text',
-            data: {token: lightning.vars.token},
+            data: data,
             type: 'POST',
             stream: true,
             xhrFields: {
@@ -68,10 +76,10 @@ lightning.admin.messages = {
                 }
             },
             complete: function() {
-                $('.mail_buttons').fadeIn();
+                mail_buttons.fadeIn();
             },
             error: function() {
-                $('.mail_buttons').fadeIn();
+                mail_buttons.fadeIn();
             }
         });
     },

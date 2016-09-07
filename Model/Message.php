@@ -119,6 +119,10 @@ class MessageOverridable extends Object {
      */
     protected $user;
 
+    protected $random = false;
+
+    protected $limit = 0;
+
     /**
      * Loads a message either from the database or create it from scratch for
      * custom messages.
@@ -147,6 +151,14 @@ class MessageOverridable extends Object {
         $this->setCombinedMessageTemplate();
         
         $this->loadVariablesFromTemplate();
+    }
+
+    public function setRandom($random) {
+        $this->random = $random;
+    }
+
+    public function setLimit($limit) {
+        $this->limit = $limit;
     }
 
     /**
@@ -520,6 +532,13 @@ class MessageOverridable extends Object {
                     }
                 }
             }
+        }
+
+        if (!empty($this->limit)) {
+            $query['limit'] = $this->limit;
+        }
+        if (!empty($this->random)) {
+            $query['order_by'] = [['expression' => 'RAND()']];
         }
 
         return $query;
