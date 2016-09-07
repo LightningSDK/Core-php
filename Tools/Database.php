@@ -776,7 +776,11 @@ class Database extends Singleton {
                 $query['order_by'] = [$query['order_by'] => 'ASC'];
             }
             foreach ($query['order_by'] as $field => $order) {
-                $orders[] = $this->formatField($field) . ' ' . $order;
+                if (is_array($order) && !empty($order['expression'])) {
+                    $orders[] = $order['expression'];
+                } else {
+                    $orders[] = $this->formatField($field) . ' ' . $order;
+                }
             }
             $output .= implode(',', $orders);
         }
