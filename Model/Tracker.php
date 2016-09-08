@@ -111,6 +111,9 @@ class TrackerOverridable extends Object {
             $user_id = ClientUser::getInstance()->id;
         }
 
+        $session = Session::getInstance(true, false);
+        $session_id = ($session && $session->id > 0) ? $session->id : 0;
+
         // Insert the event.
         Database::getInstance()->insert(
             'tracker_event',
@@ -120,7 +123,7 @@ class TrackerOverridable extends Object {
                 'sub_id' => $sub_id ?: 0,
                 'date' => Time::today(),
                 'time' => time(),
-                'session_id' => Session::getInstance()->id,
+                'session_id' => $session_id,
             ]
         );
 
