@@ -83,7 +83,7 @@ class BasicHTML {
         return $output . '</div>';
     }
 
-    public static function text($id, $value, $attributes = []) {
+    public static function text($id, $value = '', $attributes = []) {
         // This only applies to text fields.
         if (empty($attributes['max_length']) && !empty($attributes['size'])) {
             $attributes['max_length'] = $attributes['size'];
