@@ -1317,7 +1317,7 @@ class Database extends Singleton {
      *   The field => value pairs.
      * @param $values
      *   The current list of replacement values.
-     * @param string $concatenator
+     * @param string $glue
      *   The string used to concatenate (usually , or AND or OR)
      * @param boolean $setting
      *   If we are setting variables. (Helps in determining what to do with null values)
@@ -1325,7 +1325,7 @@ class Database extends Singleton {
      * @return string
      *   The query string segment.
      */
-    public function sqlImplode($array, &$values, $concatenator = ', ', $setting = false) {
+    public function sqlImplode($array, &$values, $glue = ', ', $setting = false) {
         $a2 = [];
         if (!is_array($array)) {
             $array = [$array];
@@ -1339,7 +1339,7 @@ class Database extends Singleton {
 
             // This might change from an and to an or.
             if ($field === '#operator') {
-                $concatenator = $v;
+                $glue = $v;
                 continue;
             }
             // This is if and AND/OR is explicitly grouped.
@@ -1453,7 +1453,7 @@ class Database extends Singleton {
                 $a2[] = "{$field} = ? ";
             }
         }
-        return implode($concatenator, $a2);
+        return implode($glue, $a2);
     }
 
     /**
