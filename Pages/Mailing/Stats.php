@@ -33,9 +33,9 @@ class Stats extends Line {
         $end = Request::get('end', Request::TYPE_INT, null, 0);
         $message_id = Request::get('message_id', Request::TYPE_INT);
 
-        $email_sent = Tracker::loadOrCreateByName('Email Sent')->getHistory(['start' => $start, 'end' => $end, 'sub_id' => $message_id]);
-        $email_bounced = Tracker::loadOrCreateByName('Email Bounced')->getHistory(['start' => $start, 'end' => $end, 'sub_id' => $message_id]);
-        $email_opened = Tracker::loadOrCreateByName('Email Opened')->getHistory(['start' => $start, 'end' => $end, 'sub_id' => $message_id]);
+        $email_sent = Tracker::loadOrCreateByName('Email Sent', Tracker::EMAIL)->getHistory(['start' => $start, 'end' => $end, 'sub_id' => $message_id]);
+        $email_bounced = Tracker::loadOrCreateByName('Email Bounced', Tracker::EMAIL)->getHistory(['start' => $start, 'end' => $end, 'sub_id' => $message_id]);
+        $email_opened = Tracker::loadOrCreateByName('Email Opened', Tracker::EMAIL)->getHistory(['start' => $start, 'end' => $end, 'sub_id' => $message_id]);
 
         $data = new ChartData(Time::today() + $start, Time::today() + $end);
         $data->addDataSet($email_sent, 'Sent');
