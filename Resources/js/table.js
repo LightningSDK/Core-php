@@ -12,9 +12,7 @@
             $('table.table_form_table').on('click', '.remove-link', function (e) {
                 var element = $(e.target);
                 self.removeLink(element.data('link'), element.data('link-item'));
-            }).on('click', '.add-link', function (e) {
-                self.addLink($(e.target).data('link'));
-            });
+            }).on('click', '.add-link', self.clickAddLink);
             self.filterContainer = $('.filters');
             self.filterContainer.on('change', 'select', self.search);
             self.filterContainer.on('click', '.remove', self.removeFilter);
@@ -145,6 +143,12 @@
                     }
                 });
             }, 500);
+        },
+
+        clickAddLink: function (e) {
+            var element = $(e.target);
+            var selection = element.closest('td').find('select option:selected');
+            self.addLink(element.data('link'), selection.val(), selection.html());
         },
 
         /**
