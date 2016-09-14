@@ -72,11 +72,13 @@ class Messages extends Table {
         'stats' => array(
             'type' => 'link',
             'url' => '/admin/mailing/stats?message_id=',
+            'display_name' => 'Stats',
             'display_value' => '<img src="/images/lightning/chart.png" border="0">',
         ),
         'send' => array(
             'type' => 'link',
             'url' => '/admin/mailing/send?id=',
+            'display_name' => 'Send',
             'display_value' => '<img src="/images/lightning/new_message.png" border="0">',
         ),
     );
