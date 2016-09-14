@@ -190,10 +190,8 @@ class Output {
         
         // If $data is a string, it is an error message.
         elseif (is_string($data)) {
-            $data = [
-                'status' => 'error',
-                'error' => $data,
-            ];
+            Messenger::error($data);
+            $data = ['status' => 'error'];
         }
         
         // The rest of these conditions assume $data is an array.
