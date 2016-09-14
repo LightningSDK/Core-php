@@ -100,6 +100,16 @@ $amber-low: rgb(255,205,1);
 }
 
 // Main table.
+table.table_form_table {
+  input {
+    margin: 0;
+  }
+  .list_user_tag span:hover {
+    background-color: #151a56;
+    color: white;
+  }
+}
+
 .table_form_table, #new_comment_box table{
   @include grid-column(12);
   td{
@@ -194,7 +204,8 @@ div.captcha_container {
 .chart_totals {
   clear: both;
 }
-.table_container {
+.autocomplete_options {
+  z-index: 5;
   max-height: 200px;
   overflow-y: scroll;
   position: absolute;

@@ -34,6 +34,12 @@ class Users extends Table {
     protected $searchable = true;
     protected $search_fields = ['email', 'first', 'last', 'user.user_id'];
 
+    protected $filters = [
+        'mailing_list' => [
+            'class' => 'Lightning\\Filter\\MailingList',
+        ],
+    ];
+
     protected $preset = [
         'salt' => [
             'type' => 'hidden',
@@ -66,6 +72,8 @@ class Users extends Table {
             'key' => 'tag_id',
             'index' => 'user_tag_tag',
             'display_column' => 'name',
+            'type' => 'autocomplete',
+            'create' => true,
         ]
     ];
 
