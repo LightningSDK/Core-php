@@ -1105,14 +1105,22 @@ class Database extends Singleton {
         }
         $row = $this->selectRow($table, $where, $field, $final);
 
-        reset($field);
-        return $row[key($field)];
+        if (!empty($row)) {
+            reset($field);
+            return $row[key($field)];
+        }
+
+        return null;
     }
 
     public function selectFieldQuery($query, $field) {
         $row = $this->selectRowQuery($query);
-        reset($row);
-        return $row[$field];
+        if (!empty($row)) {
+            reset($row);
+            return $row[$field];
+        }
+
+        return null;
     }
 
     /**
