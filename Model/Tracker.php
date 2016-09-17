@@ -383,7 +383,9 @@ class TrackerOverridable extends Object {
                 self::$events = array_merge(self::$events, json_decode(json_encode($session->content->trackerEvents), true));
 
                 // Add the events to the JS var
-                JS::set('trackerEvents', self::$events);
+                foreach (self::$events as $data) {
+                    JS::startup('lightning.tracker.trackOnStartup(' . json_encode($data) . ')');
+                }
 
                 // Delete the events so they aren't triggered twice.
                 unset($session->content->trackerEvents);
