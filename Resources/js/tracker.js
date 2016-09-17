@@ -1,5 +1,7 @@
 (function() {
     var self = lightning.tracker = {
+        ready: false,
+        queue: [],
         events: {
             pageView: {
                 ga: 'pageview',
@@ -87,18 +89,26 @@
 
                     // Track the pageview
                     self.track(self.events.pageView);
+                    self.ready = true;
+                    for (var i in self.queue) {
+                        self.trackOnStartup(self.queue[i]);
+                    }
                 });
             }
         },
 
         trackOnStartup: function (lightningEvent) {
-            type = lightningEvent.type;
-            // If the event isn't in the list, it's going to be tracked for google only and needs an action.
-            event = self.events.hasOwnProperty(type) ? self.events[type] : {action: type, ga:'event'};
-            self.track(event, {
-                category: lightningEvent.category,
-                label: lightningEvent.label,
-            });
+            if (self.ready) {
+                type = lightningEvent.type;
+                // If the event isn't in the list, it's going to be tracked for google only and needs an action.
+                event = self.events.hasOwnProperty(type) ? self.events[type] : {action: type, ga:'event'};
+                self.track(event, {
+                    category: lightningEvent.category,
+                    label: lightningEvent.label,
+                });
+            } else {
+                self.queue.push(lightningEvent);
+            }
         },
 
         /**
