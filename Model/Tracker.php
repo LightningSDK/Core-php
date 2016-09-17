@@ -141,7 +141,7 @@ class TrackerOverridable extends Object {
 
             // Add the events to the JS var
             self::$events[] = $data;
-            JS::push('trackerEvents', $data);
+            JS::startup('lightning.tracker.trackOnStartup(' . json_encode($data) . ')');
         }
     }
 
