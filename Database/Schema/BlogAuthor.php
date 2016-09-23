@@ -15,6 +15,7 @@ class BlogAuthor extends Schema {
             'author_name' => $this->varchar(64),
             'author_image' => $this->varchar(128),
             'author_url' => $this->varchar(128),
+            'twitter' => $this->varchar(128),
         );
     }
 

@@ -95,6 +95,7 @@ class Blog extends Page {
         $this->setMeta('title', $post->title);
         $this->setMeta('keywords', $post->keywords);
         $this->setMeta('description', $post->getShortBody(250, false));
+        $this->setMeta('twitter_creator', $post->twitter);
         if ($image = $post->getHeaderImage()) {
             $this->setMeta('image', URL::getAbsolute($image));
         }
