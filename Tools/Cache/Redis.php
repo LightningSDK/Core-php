@@ -18,6 +18,10 @@ class Redis extends CacheController {
     const UPDATE_ONLY = 'XX';
 
     protected $socket;
+
+    /**
+     * @var \Redis
+     */
     protected $connection;
 
     public function __construct($settings = []) {
@@ -31,12 +35,14 @@ class Redis extends CacheController {
     public function __destruct() {
         // Close the socket.
         if (!empty($this->connection)) {
-            fclose($this->connection);
+            $this->connection->close();
         }
     }
 
     public function get($key, $default = null) {
-        if ($result = $this->send('GET', $key)) {
+        $this->connect();
+
+        if ($result = $this->connection->get($key)) {
             return unserialize($result);
         } else {
             return $default;
@@ -44,67 +50,28 @@ class Redis extends CacheController {
     }
 
     public function set($key, $value, $ttl = null, $NXXX = '') {
+        $this->connect();
+
         if (empty($ttl)) {
             $ttl = Configuration::get('redis.default_ttl');
         }
-        $params = ['SET', $key, serialize($value)];
 
-        // @todo: This causes an error.
-//        if (!empty($ttl)) {
-//            if (!preg_match('|^[EP]X |', $ttl)) {
-//                $ttl = 'EX ' . $ttl;
-//            }
-//            $params[] = $ttl;
-//        }
-
-        if (!empty($NXXX)) {
-            $params[] = $NXXX;
+        if (empty($ttl)) {
+            return $this->connection->set($key, serialize($value));
+        } else {
+            return $this->connection->set($key, serialize($value), $ttl);
         }
-        return $this->send($params);
     }
 
-    public function delete() {
-        $args = func_get_args();
-        array_unshift($args, 'DEL');
-        return $this->send($args);
+    public function delete($keys) {
+        $this->connect();
+        $this->connection->delete($keys);
     }
 
-    public function send($args) {
-        if (!is_array($args)) {
-            $args = func_get_args();
-        }
-
+    protected function connect() {
         if (empty($this->connection)) {
-            $this->connection = stream_socket_client($this->socket, $error, $errstr);
+            $this->connection = new \Redis();
+            $this->connection->connect($this->socket);
         }
-
-        $cmd = '*' . count($args) . "\r\n";
-        foreach ($args as $item) {
-            $cmd .= '$' . strlen($item) . "\r\n" . $item . "\r\n";
-        }
-        fwrite($this->connection, $cmd);
-
-        return $this->getResponse();
-    }
-
-    public function getResponse() {
-        $line = fgets($this->connection);
-        list($type, $result) = array($line[0], substr($line, 1, strlen($line) - 3));
-        if ($type == '-') { // error message
-            throw new Exception($result);
-        } elseif ($type == '$') { // bulk reply
-            if ($result == -1) {
-                $result = null;
-            } else {
-                $line = fread($this->connection, $result + 2);
-                $result = substr($line, 0, strlen($line) - 2);
-            }
-        } elseif ($type == '*') { // multi-bulk reply
-            $count = ( int ) $result;
-            for ($i = 0, $result = array(); $i < $count; $i++) {
-                $result[] = $this->getResponse();
-            }
-        }
-        return $result;
     }
 }
