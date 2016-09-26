@@ -23,7 +23,6 @@ use Lightning\View\Field\BasicHTML;
 use Lightning\View\Field\Checkbox;
 use Lightning\View\Field\FileBrowser;
 use Lightning\View\Field\Location;
-use Lightning\View\Field\Text;
 use Lightning\View\Field\Time;
 use Lightning\View\HTMLEditor\HTMLEditor;
 use Lightning\View\JS;
@@ -1955,7 +1954,7 @@ abstract class Table extends Page {
 
     protected function renderLinkedTableEditableSelectedBoxes($link_id, &$link_settings) {
         // Create the hidden array field.
-        $value = implode(',', PHP::getArrayPropertyValues($init, $link_settings['key'])) . ',';
+        $value = implode(',', PHP::getArrayPropertyValues($link_settings['active_list'], $link_settings['key'])) . ',';
         $output = BasicHTML::hidden($link_id . '_input_array', $value);
 
         $output .= "<br /><div id='{$link_id}_list_container'>";
@@ -3102,11 +3101,13 @@ abstract class Table extends Page {
             }
 
             // Add field filters.
-            foreach ($this->filterQuery as $filter_values) {
-                if (!empty($this->filters[$filter_values['filter']])) {
-                    $settings = $this->filters[$filter_values['filter']];
-                    $filter = new $settings['class']($settings);
-                    $filter->filterQuery($query, $filter_values);
+            if (!empty($this->filterQuery)) {
+                foreach ($this->filterQuery as $filter_values) {
+                    if (!empty($this->filters[$filter_values['filter']])) {
+                        $settings = $this->filters[$filter_values['filter']];
+                        $filter = new $settings['class']($settings);
+                        $filter->filterQuery($query, $filter_values);
+                    }
                 }
             }
         }
