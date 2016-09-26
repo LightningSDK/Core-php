@@ -33,7 +33,6 @@ $conf = array(
     'redis' => [
         'socket' => 'localhost:6379',
         'default_ttl' => 600,
-
     ],
     'language' => 'en_us',
     'template_dir' => 'Source/Templates',
