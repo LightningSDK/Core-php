@@ -3075,9 +3075,6 @@ abstract class Table extends Page {
         if (!empty($this->list_where)) {
             $query['where'] = array_merge($this->list_where, $query['where']);
         }
-        if (!empty($this->accessControl)) {
-            $query['where'] = array_merge($this->accessControl, $query['where']);
-        }
         if ($this->action == "autocomplete" && $field = Request::post('field')) {
             $this->accessControl[$this->fullField($field)] = ['LIKE', Request::post('st') . '%'];
         }
@@ -3143,6 +3140,11 @@ abstract class Table extends Page {
         }
 
         $query['join'] = array_unique($query['join']);
+
+        // Most important
+        if (!empty($this->accessControl)) {
+            $query['where'] = array_merge($this->accessControl, $query['where']);
+        }
 
         // Get the page count.
         $this->listCount = Database::getInstance()->countQuery([
