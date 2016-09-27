@@ -156,8 +156,8 @@ class PageOverridable {
             JS::set('menu_context', $this->menuContext);
             $template->render($this->template);
         } catch (Exception $e) {
-            echo 'Error rendering template: ' . $e;
-            exit;
+            echo 'Error rendering template: ' . $this->template . '<br>';
+            throw $e;
         }
     }
 
