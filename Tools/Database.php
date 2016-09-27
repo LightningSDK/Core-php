@@ -207,42 +207,16 @@ class Database extends Singleton {
      *   When a mysql error occurs.
      */
     public function errorHandler($error, $sql) {
-        $errors = [];
-
-        // Add a header.
-        $errors[] = "MYSQL ERROR ($error[0]:$error[1]): $error[2]";
-        // Add the full query.
-        $errors[] = $sql;
-
-        // Show the stack trace.
-        $backtrace = debug_backtrace();
-        foreach($backtrace as $call) {
-            if (empty($call['file'])) {
-                $errors[] = 'Called from: ' . $call['class'] . ' : ' . $call['function'];
-            } elseif (!preg_match('/class_database\.php$/', $call['file'])) {
-                $errors[] = 'Called from: ' . $call['file'] . ' : ' . $call['line'];
-            }
-        }
-
-        // Show actual mysql error.
-        $errors[] = $error[2];
-
-        // Log the error:
-        foreach ($errors as $e) {
-            Logger::error($e);
-        }
-        Logger::error($sql);
-
-        // If set to verbose, show the errors to the user.
         if ($this->verbose) {
-            // Add a footer.
-            foreach ($errors as $e) {
-                Messenger::error($e);
-            }
+            $exception = new Exception("MYSQL ERROR ($error[0]:$error[1]): $error[2] @ $sql");
+        } else {
+            $exception = new Exception("***** MYSQL ERROR *****");
         }
+
+        Logger::exception($exception);
 
         // Throw a general exception for all users.
-        throw new Exception("***** MYSQL ERROR *****");
+        throw $exception;
     }
 
     /**
