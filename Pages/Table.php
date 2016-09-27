@@ -3517,6 +3517,8 @@ abstract class Table extends Page {
                     else // edit should show full text
                         return $v;
                     break;
+                case 'json':
+                    return '<pre>' . json_encode(json_decode($v, true), JSON_PRETTY_PRINT) . '</pre>';
                 case 'time':
                     return Time::printTime($v);
                     break;
