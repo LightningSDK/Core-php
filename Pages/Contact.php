@@ -257,6 +257,7 @@ class Contact extends PageView {
                 'Name' => Request::post('name'),
                 'Email' => $this->user->email,
                 'IP' => Request::server(Request::IP),
+                'URL' => $this->getReferer(),
             ];
 
             unset($fields['token']);
@@ -267,6 +268,7 @@ class Contact extends PageView {
             unset($fields['list']);
             unset($fields['g-recaptcha-response']);
             unset($fields['captcha_abide']);
+            unset($fields['url']);
 
             foreach ($fields as $field) {
                 if (is_array($_POST[$field])) {
@@ -278,6 +280,14 @@ class Contact extends PageView {
             }
         }
         return $values;
+    }
+
+    protected function getReferer() {
+        if ($url = Request::post('URL')) {
+            return $url;
+        } else {
+            return Request::getHeader('REFERER');
+        }
     }
 
     /**
