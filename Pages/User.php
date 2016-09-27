@@ -305,7 +305,7 @@ class User extends Page {
     }
 
     public function loginRedirect($page = null, $params = array()) {
-        $redirect = Request::post('redirect', 'urlencoded') ?: Request::query('redirect');
+        $redirect = Request::post('redirect', Request::TYPE_URL_ENCODED);
         if ($redirect && !preg_match('|^[/?]user|', $redirect)) {
             Navigation::redirect($redirect, $params);
         } elseif (!empty($page)) {
