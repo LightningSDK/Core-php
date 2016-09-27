@@ -37,7 +37,7 @@ class Send extends Page {
      */
     public function get() {
         $message_id = Request::get('id', Request::TYPE_INT);
-        if (!$message_id || !$message = Database::getInstance()->selectRow('message', array('message_id' => $message_id))) {
+        if (!$message_id || !$message = Database::getInstance()->selectRow('message', ['message_id' => $message_id])) {
             Messenger::error('Message not found.');
             return;
         }
