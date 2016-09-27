@@ -153,6 +153,7 @@ $conf = [
             'admin/rolesdashboard' => 'Lightning\\Pages\\Admin\\RolesDashboard',
             'admin/roles' => 'Lightning\\Pages\\Admin\\Roles',
             'admin/permissions' => 'Lightning\\Pages\\Admin\\Permissions',
+            'admin/contact' => 'Lightning\\Pages\\Admin\\Contact',
 
             // Image admin
             'elfinder' => 'Lightning\\API\\ElFinder',
