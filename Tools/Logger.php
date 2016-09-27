@@ -127,7 +127,7 @@ class LoggerOverridable extends Singleton {
         $started = false;
         $output = [];
         foreach ($trace as $row) {
-            if ($started || (!empty($row['file']) && !empty($errfile) && $row['file'] == $errfile && $row['line'] == $errline)) {
+            if ($started || (!empty($row['file']) && $row['file'] == $errfile)) {
                 $started = true;
                 $line = '    in ' . (!empty($row['file']) ? $row['file'] : '?') . ' on line ' . (!empty($row['line']) ? $row['line'] : '?');
                 $output[] = $line;
