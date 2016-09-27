@@ -12,7 +12,7 @@ class Session extends Schema {
         return array(
             'session_id' => $this->autoincrement(),
             'session_key' => $this->char(128),
-            'session_ip' => $this->int(true),
+            'session_ip' => $this->varchar(45),
             'last_ping' =>  $this->int(true),
             'user_id' => $this->int(true),
             'state' => $this->int(true, Schema::TINYINT),

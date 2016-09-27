@@ -7,6 +7,10 @@ class RequestOverridable {
     const X_FORWARDED_FOR = 'X-Forwarded-For';
     const X_FORWARDED_PROTO = 'X-Forwarded-Proto';
     const IP = 'ip';
+
+    /**
+     * @deprecated
+     */
     const IP_INT = 'ip_int';
 
     const TYPE_BOOLEAN_INT = 'boolean-int';
@@ -310,7 +314,7 @@ class RequestOverridable {
      * @return string
      *   IP address.
      */
-    protected static function getIP() {
+    public static function getIP() {
         $forwarded_header = self::getHeader(self::X_FORWARDED_FOR);
         return $forwarded_header ?: $_SERVER['REMOTE_ADDR'];
     }

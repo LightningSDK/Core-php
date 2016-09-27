@@ -30,10 +30,10 @@ class AuditLog {
         ];
         self::init();
         if (self::$config['type'] == 'file') {
-            $string = implode(' ', [$log_data['type'], Request::server(Request::IP), $log_data['user_id'], $log_data['admin_user'], json_encode($log_data['data'])]);
+            $string = implode(' ', [$log_data['type'], Request::getIP(), $log_data['user_id'], $log_data['admin_user'], json_encode($log_data['data'])]);
             Logger::message($string, self::$config['path']);
         } else {
-            $log_data['ip'] = Request::server(Request::IP_INT);
+            $log_data['ip'] = Request::getIP();
             $log_data['time'] = time();
             switch (self::$config['type']) {
                 case 'sql':

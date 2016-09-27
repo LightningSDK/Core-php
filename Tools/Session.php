@@ -64,7 +64,7 @@ class SessionOverridable extends SingletonObject {
             );
             // If the session is only allowed on one IP.
             if (Configuration::get('session.single_ip')) {
-                $session_criteria['session_ip'] = Request::server('ip_int');
+                $session_criteria['session_ip'] = Request::getIP();
             }
 
             // See if the session exists.
@@ -135,7 +135,7 @@ class SessionOverridable extends SingletonObject {
         }
         $session_details['session_key'] = $new_sess_key;
         $session_details['last_ping'] = time();
-        $session_details['session_ip'] = Request::server('ip_int');
+        $session_details['session_ip'] = Request::getIP();
         $session_details['user_id'] = $user_id;
         $session_details['state'] = 0 | ($remember ? static::STATE_REMEMBER : 0);
         $session_details['form_token'] = $new_token;
