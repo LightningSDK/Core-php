@@ -19,7 +19,7 @@ class Daemon extends CLI {
      *
      * @var array
      */
-    protected $jobs = array();
+    protected $jobs = [];
 
     /**
      * Whether to keep the daemon running.
@@ -47,7 +47,7 @@ class Daemon extends CLI {
      *
      * @var array
      */
-    protected $signalQueue = array();
+    protected $signalQueue = [];
 
     /**
      * The time the daemon was started.
@@ -68,7 +68,7 @@ class Daemon extends CLI {
      *
      * @var array
      */
-    protected $threads = array();
+    protected $threads = [];
 
     /**
      * The timezone offset in seconds.
@@ -240,7 +240,7 @@ class Daemon extends CLI {
 
         // Make sure 'threads' is an array.
         if (empty($job['threads']) || !is_array($job['threads'])) {
-            $job['threads'] = array();
+            $job['threads'] = [];
         }
 
         // Make sure there are no threads
