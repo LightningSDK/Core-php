@@ -305,7 +305,7 @@ class SessionOverridable extends SingletonObject {
      *   The number of sessions removed.
      */
     public static function clearExpiredSessions() {
-        $timeouts = array();
+        $timeouts = [];
         $timeouts[static::STATE_ANONYMOUS] = Configuration::get('session.anonymous_ttl', 86400);
         $timeouts[static::STATE_REMEMBER] = Configuration::get('session.remember_ttl', $timeouts[static::STATE_ANONYMOUS]);
         $timeouts[static::STATE_PASSWORD] = Configuration::get('session.password_ttl', $timeouts[static::STATE_REMEMBER]);
