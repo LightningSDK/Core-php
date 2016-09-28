@@ -110,7 +110,7 @@ $conf = [
         'log' => '../logs/cli.log',
     ],
     'jobs' => [
-        'session_cleanup' => [
+        'session-cleanup' => [
             'class' => 'Lightning\\Jobs\\UserCleanup',
             'offset' => 7200, // 2 am server time
             'interval' => 86400,
