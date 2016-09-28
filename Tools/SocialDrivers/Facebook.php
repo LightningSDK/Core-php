@@ -37,6 +37,10 @@ class Facebook extends SocialMediaApi {
         return $fb;
     }
 
+    public function getService() {
+        return $this->service;
+    }
+
     public function loadProfile() {
         if (empty($this->profile)) {
             $request = new FacebookRequest($this->service, 'GET', '/me');
@@ -159,7 +163,7 @@ class Facebook extends SocialMediaApi {
     }
 
     /**
-     * Return a list of managable pages.
+     * Return a list of manageable pages.
      */
     public function getPages() {
         $request = new FacebookRequest($this->service, 'GET', '/me/accounts');
@@ -227,8 +231,7 @@ class Facebook extends SocialMediaApi {
         JS::add('//connect.facebook.net/en_US/sdk.js');
         JS::set('token', Session::getInstance()->getToken());
         JS::set('social.authorize', $authorize);
-        JS::set('social.facebook.appid', Configuration::get('social.facebook.appid'));
-        JS::set('social.facebook.scope', Configuration::get('social.facebook.scope'));
+        SDK::init();
         JS::startup('lightning.social.initLogin()', '//connect.facebook.net/en_US/sdk.js');
 
         return '<span class="social-signin facebook"><i class="fa fa-facebook"></i><span> Sign in with Facebook</span></span>';
