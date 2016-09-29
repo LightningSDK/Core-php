@@ -281,30 +281,6 @@ class User extends Page {
         }
     }
 
-    public function getChangePass() {
-    }
-
-    /**
-     * @todo this method needs to be updated.
-     */
-    public function postChangePass() {
-        $template = Template::getInstance();
-        $user = ClientUser::getInstance();
-        $template->set('content', 'user_reset');
-        if ($_POST['new_pass'] == $_POST['new_pass_conf']) {
-            if (isset($_POST['new_pass'])) {
-                if ($user->change_temp_pass($_POST['email'], $_POST['new_pass'], $_POST['code'])) {
-                    $template->set("password_changed", true);
-                }
-            } else {
-                $template->set("change_password", true);
-            }
-        } else {
-            Messenger::error('Your password is not secure. Please pick a more secure password.');
-            $template->set("change_password", true);
-        }
-    }
-
     public function loginRedirect($page = null, $params = []) {
         $redirect = Request::post('redirect', Request::TYPE_URL_ENCODED);
         if ($redirect && !preg_match('|^[/?]user|', $redirect)) {
