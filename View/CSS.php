@@ -5,9 +5,9 @@ namespace Lightning\View;
 use Lightning\Tools\Configuration;
 
 class CSS {
-    protected static $included_files = array();
-    protected static $inline_styles = array();
-    protected static $startup_styles = array();
+    protected static $included_files = [];
+    protected static $inline_styles = [];
+    protected static $startup_styles = [];
 
     /**
      * Add a CSS file to be included in the HTML.
@@ -20,14 +20,14 @@ class CSS {
             $files = [$files];
         }
         foreach ($files as $file) {
-            self::$included_files[$file] = array('file' => $file, 'type' => $type, 'rendered' => false);
+            self::$included_files[$file] = ['file' => $file, 'type' => $type, 'rendered' => false];
         }
     }
 
     public static function inline($block) {
         $hash = md5($block);
         if (empty(self::$inline_styles[$hash])) {
-            self::$inline_styles[$hash] = array('block' => $block, 'rendered' => false);
+            self::$inline_styles[$hash] = ['block' => $block, 'rendered' => false];
         }
     }
 

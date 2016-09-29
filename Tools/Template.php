@@ -185,10 +185,10 @@ class Template extends Singleton {
     public function setCache($page, $ttl = null, $size = null) {
         $ttl = $ttl ?: (Configuration::get('page.cache.ttl')) ?: Cache::MONTH;
         $size = $size ?: (Configuration::get('page.cache.size')) ?: Cache::MEDIUM;
-        $this->cache[$page] = array(
+        $this->cache[$page] = [
             'ttl' => $ttl,
             'size' => $size,
-        );
+        ];
     }
 
     /**

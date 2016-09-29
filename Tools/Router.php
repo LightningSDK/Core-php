@@ -14,7 +14,7 @@ class Router extends Singleton {
      *
      * @var array
      */
-    protected static $routes = array();
+    protected static $routes = [];
 
     /**
      * Get the page handler for the current URL.

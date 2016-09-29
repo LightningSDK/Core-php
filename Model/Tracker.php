@@ -205,12 +205,12 @@ class TrackerOverridable extends Object {
      */
     public function getTrackerLink($sub_id = 0, $user_id = -1, $track_once = false) {
         // Generate a json encoded string with the tracking data.
-        $string = json_encode(array(
+        $string = json_encode([
             'tracker' => $this->id,
             'sub' => $sub_id,
             'user' => $user_id > -1 ? $user_id : ClientUser::getInstance()->id,
             'track_once' => $track_once
-        ));
+        ]);
 
         // Encrypt the string with the public key.
         return urlencode(Encryption::aesEncrypt($string, Configuration::get('tracker.key')));

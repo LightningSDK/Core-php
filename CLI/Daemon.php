@@ -117,8 +117,8 @@ class Daemon extends CLI {
             }
 
             // This is the child thread.
-            pcntl_signal(SIGCHLD, array($this, 'handlerSIGCHLD'));
-            pcntl_signal(SIGTERM, array($this, 'handlerSIGTERM'));
+            pcntl_signal(SIGCHLD, [$this, 'handlerSIGCHLD']);
+            pcntl_signal(SIGTERM, [$this, 'handlerSIGTERM']);
         }
 
         // Loop infinitely, checking for jobs.

@@ -9,7 +9,7 @@ use Lightning\View\JS;
 class Pie extends Base {
     protected $renderer = 'Pie';
 
-    public function __construct($id = null, $settings = array()) {
+    public function __construct($id = null, $settings = []) {
         // Import the settings.
         if ($id) {
             $this->id = $id;

@@ -14,7 +14,7 @@ class Configuration extends Page {
         $template = Template::getInstance();
 
         $config_files = Config::getConfigurations();
-        $config_data = array();
+        $config_data = [];
         foreach ($config_files as $source => $file) {
             $config_data[$source] = Config::getConfigurationData($file);
         }
@@ -24,10 +24,10 @@ class Configuration extends Page {
                 $config,
                 function(&$val) use ($source) {
                     if (!is_array($val)) {
-                        $val = array(
-                            '#source' => array($source),
-                            '#value' => array($val)
-                        );
+                        $val = [
+                            '#source' => [$source],
+                            '#value' => [$val]
+                        ];
                     }
                 }
             );
@@ -40,7 +40,7 @@ class Configuration extends Page {
         $template->set('rendered_content', $output);
     }
 
-    protected function processSettingsForm($config, $key = 'Config', $path = array()) {
+    protected function processSettingsForm($config, $key = 'Config', $path = []) {
         ClientUser::requireAdmin();
         $output = '<li><input name="" value="' . $key . '" /></li>';
 

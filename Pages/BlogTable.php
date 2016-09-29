@@ -47,7 +47,7 @@ class BlogTable extends Table {
         ],
     ];
 
-    protected $preset = array(
+    protected $preset = [
         'user_id' => [
             'type' => 'hidden'
         ],
@@ -63,7 +63,7 @@ class BlogTable extends Table {
             'type' => 'html',
             'div' => true,
         ],
-    );
+    ];
 
     protected function hasAccess() {
         ClientUser::requireAdmin();

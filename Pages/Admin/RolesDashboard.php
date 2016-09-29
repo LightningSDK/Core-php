@@ -26,15 +26,15 @@ class RolesDashboard extends Page {
         $db = Database::getInstance();
 
         $template->set('roles', $db->selectAll(
-            array(
+            [
                 'from' => 'role'
-            )
+            ]
         ));
 
         $template->set('permissions', $db->selectAll(
-            array(
+            [
                 'from' => 'permission'
-            )
+            ]
         ));
     }
 
@@ -43,27 +43,27 @@ class RolesDashboard extends Page {
      */
     public function postUpgradeRoles(){
         $users = Database::getInstance()->selectAll(
-            array(
+            [
                 'from' => 'user',
-                'join' => array(
-                    array(
+                'join' => [
+                    [
                         'LEFT JOIN',
                         'user_role',
                         'ON user_role.user_id = user.user_id'
-                    )
-                )
-            ),
-            array(),
-            array('user.user_id', 'user.type', 'user_role.role_id')
+                    ]
+                ]
+            ],
+            [],
+            ['user.user_id', 'user.type', 'user_role.role_id']
         );
 
         // because of we add new role, roles numbers are differ from user.types
         // so we use this array to make their conformity
-        $typesToRoles = array(
+        $typesToRoles = [
             '3' => 2, // View Images
             '4' => 3, // View Stats
             '5' => 1  // Admin
-        );
+        ];
 
         // assigning roles
         $i = 0;
@@ -73,10 +73,10 @@ class RolesDashboard extends Page {
                 // insert
                 if (array_key_exists($user['type'], $typesToRoles) ) {
                     if ( empty($user['role_id']) OR $user['role_id'] == NULL) {
-                        $values = array(
+                        $values = [
                             'role_id' => $typesToRoles[$user['type']],
                             'user_id' => $user['user_id']
-                        );
+                        ];
                         Database::getInstance()->insert('user_role', $values);
                         $i++;
                     }

@@ -20,7 +20,7 @@ class PageOverridable extends Object {
     }
 
     public static function getSitemapUrls() {
-        $urls = array();
+        $urls = [];
 
         // Load the pages.
         $web_root = Configuration::get('web_root');
@@ -37,12 +37,12 @@ class PageOverridable extends Object {
                 case 3: $fr="annually"; break;
             }
 
-            $urls[] = array(
+            $urls[] = [
                 'loc' => $web_root . "/{$p['url']}.html",
                 'lastmod' => date('Y-m-d', $p['last_update']),
                 'changefreq' => $fr,
                 'priority' => $p['priority'] / 100,
-            );
+            ];
         }
 
         return $urls;

@@ -59,9 +59,9 @@ class SessionOverridable extends SingletonObject {
      */
     public static function createInstance($create_session = true) {
         if ($session_key = static::loadRequestSessionKey()) {
-            $session_criteria = array(
-                'session_key' => array('LIKE', $session_key)
-            );
+            $session_criteria = [
+                'session_key' => ['LIKE', $session_key]
+            ];
             // If the session is only allowed on one IP.
             if (Configuration::get('session.single_ip')) {
                 $session_criteria['session_ip'] = Request::getIP();
@@ -126,8 +126,8 @@ class SessionOverridable extends SingletonObject {
      *
      * @return session
      */
-    public static function create($user_id=0, $remember=false) {
-        $session_details = array();
+    public static function create($user_id = 0, $remember = false) {
+        $session_details = [];
         $new_sess_key = static::getNewSessionId();
         $new_token = Random::getInstance()->get(64, Random::BASE64);
         if (empty($new_sess_key) || empty($new_token)) {
@@ -162,7 +162,7 @@ class SessionOverridable extends SingletonObject {
     /**
      * Set the user to the session.
      *
-     * @param $user_id
+     * @param integer $user_id
      *   The new user id.
      */
     public function setUser($user_id) {
@@ -172,8 +172,9 @@ class SessionOverridable extends SingletonObject {
     /**
      * Checks for password access.
      *
-     * @param int $state
-     * @return bool
+     * @param integer $state
+     *
+     * @return boolean
      */
     public function getState($state) {
         return (($state & $this->state) == $state);
@@ -190,7 +191,7 @@ class SessionOverridable extends SingletonObject {
     /**
      * Remove a state.
      *
-     * @property integer $state
+     * @param integer $state
      *   The state value to set. Should be a value of 2^(n-1) so the first bit is 1,
      *   2nd bit is 2, 3rd bit is 4, etc.
      */
@@ -290,11 +291,11 @@ class SessionOverridable extends SingletonObject {
         );
         // Delete sessions that are not in the remember state.
         Database::getInstance()->delete('session',
-            array(
+            [
                 'user_id' => $this->user_id,
                 'state' => ['!&', self::STATE_REMEMBER],
                 'session_id' => ['!=', $exception],
-            )
+            ]
         );
     }
 

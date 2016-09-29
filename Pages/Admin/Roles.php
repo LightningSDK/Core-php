@@ -24,11 +24,11 @@ class Roles extends Table {
     }
 
     protected function initSettings() {
-        $this->links['permission'] = array(
+        $this->links['permission'] = [
             'display_name'   => 'Permission',
             'key'            => 'permission_id',
             'index'          => 'role_permission',
             'display_column' => 'name',
-        );
+        ];
     }
 }

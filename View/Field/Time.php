@@ -175,7 +175,7 @@ class Time extends Field {
 
     public static function datePop($field, $value, $allow_zero, $first_year = 0) {
         if (!$allow_zero && ($value == 0 || $value == '')) {
-            $date = array(date('m'), date('d'), date('Y'));
+            $date = [date('m'), date('d'), date('Y')];
         } else {
             $date = explode('/', jdtogregorian($value));
         }
@@ -218,22 +218,22 @@ class Time extends Field {
         }
 
         if (empty($value)) {
-            $time = array(0,0,0,0,0,0,0);
+            $time = [0,0,0,0,0,0,0];
         } else {
             $date = new DateTime('@' . $value, new DateTimeZone('UTC'));
             $time = explode('/', $date->format('m/d/Y/h/i/s/a'));
         }
-        $output = self::monthPop($field."_m", $time[0], $allow_zero, '', array('class' => 'dateTimePop')) . ' / ';
-        $output .= self::dayPop($field."_d", $time[1], $allow_zero, array('class' => 'dateTimePop')) . ' / ';
-        $output .= self::yearPop($field."_y", $time[2], $allow_zero, $first_year, null, array('class' => 'dateTimePop')) . ' at ';
-        $output .= self::hourPop($field."_h", $time[3], $allow_zero, array('class' => 'dateTimePop')) . ':';
-        $output .= self::minutePop($field."_i", empty($value) ? null : $time[4], $allow_zero, array('class' => 'dateTimePop')) . ' ';
-        $output .= self::APPop($field."_a", $time[6], $allow_zero, array('class' => 'dateTimePop'));
+        $output = self::monthPop($field."_m", $time[0], $allow_zero, '', ['class' => 'dateTimePop']) . ' / ';
+        $output .= self::dayPop($field."_d", $time[1], $allow_zero, ['class' => 'dateTimePop']) . ' / ';
+        $output .= self::yearPop($field."_y", $time[2], $allow_zero, $first_year, null, ['class' => 'dateTimePop']) . ' at ';
+        $output .= self::hourPop($field."_h", $time[3], $allow_zero, ['class' => 'dateTimePop']) . ':';
+        $output .= self::minutePop($field."_i", empty($value) ? null : $time[4], $allow_zero, ['class' => 'dateTimePop']) . ' ';
+        $output .= self::APPop($field."_a", $time[6], $allow_zero, ['class' => 'dateTimePop']);
         return $output;
     }
 
-    public static function hourPop($field, $value = '', $allow_zero = false, $attributes = array()) {
-        $values = array();
+    public static function hourPop($field, $value = '', $allow_zero = false, $attributes = []) {
+        $values = [];
         if ($allow_zero) {
             $values[''] = '';
         }
@@ -261,7 +261,7 @@ class Time extends Field {
      * @return string
      *   The rendered HTML.
      */
-    public static function minutePop($field, $value = '', $allow_zero = false, $attributes = array()) {
+    public static function minutePop($field, $value = '', $allow_zero = false, $attributes = []) {
         $values = array_combine(range(0, 9), range(0, 9));
         foreach ($values as &$value) {
             $value = '0' . $value;
@@ -293,12 +293,12 @@ class Time extends Field {
      * @return string
      *   The rendered HTML
      */
-    public static function APPop($field, $value = '', $allow_zero = false, $attributes = array()) {
-        $values = array();
+    public static function APPop($field, $value = '', $allow_zero = false, $attributes = []) {
+        $values = [];
         if ($allow_zero) {
             $values[''] = '';
         }
-        $values += array('AM' => 'AM', 'PM' => 'PM');
+        $values += ['AM' => 'AM', 'PM' => 'PM'];
 
         // Set the default class.
         BasicHTML::setDefaultClass($attributes, 'timePop');
@@ -307,8 +307,8 @@ class Time extends Field {
         return BasicHTML::select($field, $values, strtoupper($value), $attributes);
     }
 
-    public static function dayPop($field, $day=0, $allow_zero = false, $attributes = array()) {
-        $values = array();
+    public static function dayPop($field, $day=0, $allow_zero = false, $attributes = []) {
+        $values = [];
         if ($allow_zero) {
             $values[''] = '';
         }
@@ -321,8 +321,8 @@ class Time extends Field {
         return BasicHTML::select($field, $values, intval($day), $attributes);
     }
 
-    public static function monthPop($field, $month = 0, $allow_zero = false, $attributes = array()) {
-        $values = array();
+    public static function monthPop($field, $month = 0, $allow_zero = false, $attributes = []) {
+        $values = [];
         if ($allow_zero) {
             $values[''] = '';
         }
@@ -336,8 +336,8 @@ class Time extends Field {
         return BasicHTML::select($field, $values, intval($month), $attributes);
     }
 
-    public static function yearPop($field, $year = 0, $allow_zero = false, $first_year = null, $last_year = null, $attributes = array()) {
-        $values = array();
+    public static function yearPop($field, $year = 0, $allow_zero = false, $first_year = null, $last_year = null, $attributes = []) {
+        $values = [];
         if ($allow_zero) {
             $values[''] = '';
         }

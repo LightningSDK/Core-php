@@ -9,11 +9,11 @@ class PermissionContent extends Content {
     protected $table = 'permission';
 
     public function getContent() {
-        return array(
-            array(
+        return [
+            [
                 'permission_id' => 1,
                 'name' => 'all',
-            ),
-        );
+            ],
+        ];
     }
 }

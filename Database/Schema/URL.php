@@ -8,15 +8,15 @@ class URL extends Schema {
     const TABLE = 'url';
 
     public function getColumns() {
-        return array(
+        return [
             'url_id' => $this->autoincrement(),
             'url' => $this->varchar(255),
-        );
+        ];
     }
 
     public function getKeys() {
-        return array(
+        return [
             'primary' => 'url_id',
-        );
+        ];
     }
 }

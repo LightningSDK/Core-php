@@ -1,17 +1,17 @@
 <?php
 
-$conf = array(
-    'template' => array(
+$conf = [
+    'template' => [
         'default' => 'template'
-    ),
-    'routes' => array(
-        'cli_only' => array(
+    ],
+    'routes' => [
+        'cli_only' => [
             'database' => 'Lightning\\CLI\\Database',
             'user' => 'Lightning\\CLI\\User',
             'security' => 'Lightning\\CLI\\Security',
-        ),
-    ),
-    'session' => array(
+        ],
+    ],
+    'session' => [
         'remember_ttl' => 2592000, // 30 Days
         'password_ttl' => 432000, // 5 Days
         'app_ttl' => 7776000, // 90 Days
@@ -19,17 +19,17 @@ $conf = array(
         'user_convert' => [
             'tracker_event' => 'tracker_event',
         ]
-    ),
-    'user' => array(
+    ],
+    'user' => [
         'login_url' => '/',
         'logout_url' => '/',
-    ),
-    'ckfinder' => array(
+    ],
+    'ckfinder' => [
         'content' => '/content/',
-    ),
-    'page' => array(
+    ],
+    'page' => [
         'modification_date' => true,
-    ),
+    ],
     'redis' => [
         'socket' => 'localhost:6379',
         'default_ttl' => 600,
@@ -38,4 +38,4 @@ $conf = array(
     'template_dir' => 'Source/Templates',
     'temp_dir' => HOME_PATH . '/../tmp',
     'random_engine' => MCRYPT_DEV_URANDOM,
-);
+];

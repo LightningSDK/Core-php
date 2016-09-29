@@ -1,5 +1,5 @@
 <?php
-$language = array(
+$language = [
     'contact_sent' => 'Your message has been sent.',
     'unsubscribe' => 'You&rsquo;re receiving this as you previously enquired with us about a product or business or you&rsquo;re a friend through social media. To stop receiving these emails, '
         .'<a href="{LINK}">click here</a>',
@@ -9,4 +9,4 @@ $language = array(
     ],
     'saved' => 'Your data has been saved!',
     'reset' => 'Your password has been reset. Please check your email for a temporary password.',
-);
+];

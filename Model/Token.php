@@ -84,7 +84,7 @@ class TokenOverridable extends SingletonObject{
         $db = Database::getInstance();
         do {
             $token = Random::get(32, Random::BASE64);
-        } while ($db->check('action_token', array('key' => $token)));
+        } while ($db->check('action_token', ['key' => $token]));
         // MAKE SURE THERE IS A SESSION
         if (!is_object($session) || !$session->id) {
             $session = Session::getInstance();
@@ -92,20 +92,20 @@ class TokenOverridable extends SingletonObject{
         // MAKE SURE WE HAVE A USER ID
         $user_id = $user->id;
         // INSERT THE TOKEN
-        if ($id = $db->insert('action_token', array(
+        if ($id = $db->insert('action_token', [
             'time' => $time,
             'user_id' => $user_id,
             'session_id' => $session->id,
             'key' => $token
-        ))) {
+        ])) {
             // SET MY DETAILS
-            return new static(array(
+            return new static([
                 'token_id' => $id,
                 'time' => $time,
                 'user_id' => $user_id,
                 'session_id' => $session->id,
                 'key' => $token
-            ));
+            ]);
         } else {
             throw new Exception('Could not create token.');
         }

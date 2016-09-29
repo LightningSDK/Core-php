@@ -6,7 +6,7 @@ class StaticCache extends CacheController {
 
     protected static $cache = [];
 
-    public function __construct($settings = array()) {
+    public function __construct($settings = []) {
 
     }
 

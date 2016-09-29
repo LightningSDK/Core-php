@@ -101,7 +101,7 @@ class Page extends PageView {
         $template->set('content', 'page');
 
         // PREPARE FORM DATA CONTENTS
-        foreach (array('title', 'keywords') as $field) {
+        foreach (['title', 'keywords'] as $field) {
             if (!empty($this->fullPage[$field])) {
                 $this->setMeta($field, html_entity_decode($this->fullPage[$field]));
             }
@@ -158,7 +158,7 @@ class Page extends PageView {
         $url = Request::post('url', 'url');
 
         // Create an array of the new values.
-        $new_values = array(
+        $new_values = [
             'title' => $title,
             'url' => !empty($url) ? $url : Scrub::url($title),
             'menu_context' => Request::post('menu_context'),
@@ -168,14 +168,14 @@ class Page extends PageView {
             'body' => Request::post('page_body', 'html', '', '', true),
             'last_update' => time(),
             'layout' => Request::post('layout', 'int'),
-        );
+        ];
 
         // Save the page.
         $update_values = $new_values;
         unset($update_values['url']);
         PageModel::insertOrUpdate($new_values, $update_values);
 
-        $output = array();
+        $output = [];
         $output['url'] = $new_values['url'];
         $output['page_id'] = $page_id;
         $output['title'] = $title;
@@ -194,10 +194,10 @@ class Page extends PageView {
      *   The rendered HTML.
      */
     public static function layoutOptions($default) {
-        $options = array(
+        $options = [
             0 => 'Right Column',
             1 => 'Full Width',
-        );
+        ];
         return BasicHTML::select('page_layout', $options, intval($default));
     }
 }

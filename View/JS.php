@@ -20,7 +20,7 @@ class JS {
      *
      * An array of script files to include.
      */
-    protected static $included_scripts = array();
+    protected static $included_scripts = [];
 
     /**
      * Whether the initial JS has been run.
@@ -34,14 +34,14 @@ class JS {
      *
      * A list of scripts to add into a script tag.
      */
-    protected static $inline_scripts = array();
+    protected static $inline_scripts = [];
 
     /**
      * @var array
      *
      * A list of vars to be output as a JS object, accessible by JS.
      */
-    protected static $vars = array();
+    protected static $vars = [];
 
     /**
      * @var boolean
@@ -55,7 +55,7 @@ class JS {
      *
      * A list of scripts to run when the page is ready.
      */
-    protected static $startup_scripts = array();
+    protected static $startup_scripts = [];
 
     /**
      * Add a JS file to be included in the HTML.
@@ -75,13 +75,13 @@ class JS {
         foreach ($files as $file) {
             $path = is_array($file) ? $file['file'] : $file;
             $async = isset($file['async']) ? $file['async'] : $async;
-            self::$included_scripts[$path] = array(
+            self::$included_scripts[$path] = [
                 'file' => $path,
                 'rendered' => false,
                 'async' => $async,
                 'versioning' => $versioning,
                 'id' => $id,
-            );
+            ];
         }
     }
 
@@ -94,7 +94,7 @@ class JS {
     public static function inline($script) {
         $hash = md5($script);
         if (empty(self::$inline_scripts[$hash])) {
-            self::$inline_scripts[$hash] = array('script' => $script, 'rendered' => false);
+            self::$inline_scripts[$hash] = ['script' => $script, 'rendered' => false];
         }
     }
 

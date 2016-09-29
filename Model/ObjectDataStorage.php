@@ -176,7 +176,7 @@ trait ObjectDataStorage {
         if ($create_new) {
             $values = $this->__data;
         } else {
-            $values = array();
+            $values = [];
             foreach ($this->__changed as $val) {
                 $values[$val] = $this->__data[$val];
             }

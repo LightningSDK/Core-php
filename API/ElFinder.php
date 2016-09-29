@@ -59,19 +59,19 @@ class ElFinder extends API {
 			$path .= $subdirectory . '/';
 			$url .= $subdirectory . '/';
 		}
-		$opts = array(
-			'roots' => array(
-				array(
+		$opts = [
+			'roots' => [
+				[
 					'driver'        => 'LocalFileSystem',           // driver for accessing file system (REQUIRED)
 					'path'          => $path,                       // path to files (REQUIRED)
 					'URL'           => $url,                        // URL to files (REQUIRED)
-					'uploadDeny'    => array('all'),                // All Mimetypes not allowed to upload
-					'uploadAllow'   => array('image', 'text/plain'),// Mimetype `image` and `text/plain` allowed to upload
-					'uploadOrder'   => array('deny', 'allow'),      // allowed Mimetype `image` and `text/plain` only
+					'uploadDeny'    => ['all'],                     // All Mimetypes not allowed to upload
+					'uploadAllow'   => ['image', 'text/plain'],     // Mimetype `image` and `text/plain` allowed to upload
+					'uploadOrder'   => ['deny', 'allow'],           // allowed Mimetype `image` and `text/plain` only
 					'accessControl' => 'access'                     // disable and hide dot starting files (OPTIONAL)
-				)
-			)
-		);
+				]
+			]
+		];
 
 		$connector = new \elFinderConnector(new \elFinder($opts));
 		$connector->run();

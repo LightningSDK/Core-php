@@ -9,7 +9,7 @@ class Page extends Schema {
     const TABLE = 'page';
 
     public function getColumns() {
-        return array(
+        return [
             'page_id' => $this->autoincrement(),
             'title' => $this->varchar(255),
             'url' => $this->varchar(128),
@@ -23,16 +23,16 @@ class Page extends Schema {
             'layout' => $this->int(true, Schema::TINYINT),
             'priority' => $this->int(true),
             'last_update' => $this->int(true),
-        );
+        ];
     }
 
     public function getKeys() {
-        return array(
+        return [
             'primary' => 'page_id',
-            'url' => array(
-                'columns' => array('url'),
+            'url' => [
+                'columns' => ['url'],
                 'unique' => true,
-            ),
-        );
+            ],
+        ];
     }
 }

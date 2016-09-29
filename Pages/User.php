@@ -249,7 +249,7 @@ class User extends Page {
         } elseif (!$user = UserModel::loadByEmail($email)) {
             Output::error('User does not exist.');
         } elseif ($user->sendResetLink()) {
-            Navigation::redirect('message', array('msg' => 'reset'));
+            Navigation::redirect('message', ['msg' => 'reset']);
         }
     }
 
@@ -304,7 +304,7 @@ class User extends Page {
         }
     }
 
-    public function loginRedirect($page = null, $params = array()) {
+    public function loginRedirect($page = null, $params = []) {
         $redirect = Request::post('redirect', Request::TYPE_URL_ENCODED);
         if ($redirect && !preg_match('|^[/?]user|', $redirect)) {
             Navigation::redirect($redirect, $params);

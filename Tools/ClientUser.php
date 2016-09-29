@@ -68,7 +68,7 @@ class ClientUserOverridable extends Singleton {
      */
     public static function requireLogin($action = '') {
         if (self::getInstance()->id == 0) {
-            $query = array();
+            $query = [];
             if (!empty($action)) {
                 $query['action'] = $action;
             }

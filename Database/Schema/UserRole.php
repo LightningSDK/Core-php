@@ -9,18 +9,18 @@ class UserRole extends Schema {
     const TABLE = 'user_role';
 
     public function getColumns() {
-        return array(
+        return [
             'user_id' => $this->int(true),
             'role_id' => $this->int(true),
-        );
+        ];
     }
 
     public function getKeys() {
-        return array(
-            'user_role' => array(
-                'columns' => array('user_id', 'role_id'),
+        return [
+            'user_role' => [
+                'columns' => ['user_id', 'role_id'],
                 'unique' => true,
-            ),
-        );
+            ],
+        ];
     }
 }

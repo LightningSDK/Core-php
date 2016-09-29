@@ -50,13 +50,13 @@ class Output {
 
     protected static $jsonCookies = false;
 
-    protected static $statusStrings = array(
+    protected static $statusStrings = [
         1 => 'access denied',
         2 => 'success',
         3 => 'error',
-    );
+    ];
     
-    protected static $httpErrorMessages = array(
+    protected static $httpErrorMessages = [
         100 => 'Continue',
         101 => 'Switching Protocols',
         102 => 'Processing',
@@ -109,7 +109,7 @@ class Output {
         511 => 'Network Authentication Required',
         598 => 'Network read timeout error',
         599 => 'Network connect timeout error'
-    );
+    ];
 
     /**
      * Determine if the output should be json.
@@ -231,12 +231,12 @@ class Output {
     }
 
     public static function jsonData($data, $include_cookies = false) {
-        $output = array(
+        $output = [
             'data' => $data,
             'status' => 'success',
             'errors' => Messenger::getErrors(),
             'messages' => Messenger::getMessages(),
-        );
+        ];
         if ($include_cookies) {
             $output['cookies'] = self::$cookies;
         }
@@ -254,10 +254,10 @@ class Output {
         if (Configuration::get('debug')) {
             $database = Database::getInstance(false);
             if ($database) {
-                $output['database'] = array(
+                $output['database'] = [
                     'queries' => $database->getQueries(),
                     'time' => Performance::timeReport(),
-                );
+                ];
             }
         }
 
@@ -284,11 +284,11 @@ class Output {
      *   The error() function will determine if json should be output based on the headers.
      */
     public static function jsonError($error = '') {
-        $data = array(
+        $data = [
             'errors' => Messenger::getErrors(),
             'messages' => Messenger::getMessages(),
             'status' => 'error',
-        );
+        ];
 
         if (!empty($error)) {
             $data['errors'][] = $error;

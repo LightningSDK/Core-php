@@ -15,9 +15,9 @@ class AdminTracker extends API {
     }
 
     public function getTrackerStats() {
-        $data = array(
-            'datasets' => array(),
-        );
+        $data = [
+            'datasets' => [],
+        ];
         $start = Request::get('start', Request::TYPE_INT) ?: -30;
         $end = Request::get('end', Request::TYPE_INT) ?: 0;
         $sub_id = -1;
@@ -31,12 +31,12 @@ class AdminTracker extends API {
                 throw new \Exception('Invalid tracker');
             }
             $tracker = Tracker::loadByID($tracker_id);
-            $data['datasets'][] = array(
+            $data['datasets'][] = [
                 'data' => array_values($tracker->getHistory(['start' => $start, 'end' => $end, 'sub_id' => $sub_id, 'user_id' => $user_id])),
                 'label' => $tracker->tracker_name,
-            );
+            ];
         }
-        $data['labels'] = array();
+        $data['labels'] = [];
         $start += Time::today();
         $end += Time::today();
         for ($i = $start; $i <= $end; $i++) {

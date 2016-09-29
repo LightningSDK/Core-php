@@ -228,7 +228,7 @@ class Twitter extends SocialMediaApi {
         $connection = new TwitterOAuth($appId, $secret);
         $oauth_callback = Configuration::get('social.twitter.oauth_callback', null)
             ?: Configuration::get('web_root') . '/user/twitterauth';
-        $request_token = $connection->oauth('oauth/request_token', array('oauth_callback' => $oauth_callback));
+        $request_token = $connection->oauth('oauth/request_token', ['oauth_callback' => $oauth_callback]);
 
         // Save the token to the session.
         $session = Session::getInstance();
@@ -239,7 +239,7 @@ class Twitter extends SocialMediaApi {
         $session->content->twitter->oauth_token_secret = $request_token['oauth_token_secret'];
         $session->save();
 
-        $url = $connection->url('oauth/authorize', array('oauth_token' => $request_token['oauth_token']));
+        $url = $connection->url('oauth/authorize', ['oauth_token' => $request_token['oauth_token']]);
         JS::set('social.twitter.signin_url', $url);
         return '<span class="social-signin twitter"><i class="fa fa-twitter"></i><span> Sign in with Twitter</span></span>';
     }

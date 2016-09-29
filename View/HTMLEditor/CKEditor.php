@@ -79,7 +79,7 @@ class CKEditor {
      * @return string
      *   The output HTML.
      */
-    public static function iframe($id, $options = array()) {
+    public static function iframe($id, $options = []) {
         self::init();
         self::initSettings($id, $options);
         JS::set('htmleditors.' . $id, $options);

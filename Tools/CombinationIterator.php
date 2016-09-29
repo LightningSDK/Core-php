@@ -27,7 +27,7 @@ class CombinationIterator implements Iterator {
             }
             if (!is_array($v)) {
                 // Make sure a single value is wrapped in an array.
-                $this->iterators[$k] = array($v);
+                $this->iterators[$k] = [$v];
             } else {
                 // Make sure arrays are numeric.
                 $this->iterators[$k] = array_values($v);
@@ -72,7 +72,7 @@ class CombinationIterator implements Iterator {
      *   The current item.
      */
     public function current() {
-        $return = array();
+        $return = [];
         for ($i = 0; $i < count($this->positions); $i++) {
             $return[] = $this->iterators[$i][$this->positions[$i]];
         }

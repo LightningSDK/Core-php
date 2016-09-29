@@ -16,8 +16,8 @@ class Text extends Field {
      * @return string
      *   The rendered HTML.
      */
-    public static function textField($id, $value, $options = array()) {
-        $attributes['class'] = !empty($options['classes']) ? $options['classes'] : array();
+    public static function textField($id, $value, $options = []) {
+        $attributes['class'] = !empty($options['classes']) ? $options['classes'] : [];
         if (isset($options['autocomplete'])) {
             $attributes['autocomplete'] = empty($options['autocomplete']) ? 'off' : 'on';
         }

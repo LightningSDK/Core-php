@@ -34,7 +34,7 @@
                 </table>
             </div>
             <?= HTMLEditor::div('page_display',
-                array('spellcheck' => true, 'content' => $full_page['body_rendered'], 'browser' => true, 'startup' => false)
+                ['spellcheck' => true, 'content' => $full_page['body_rendered'], 'browser' => true, 'startup' => false]
             ); ?>
         <?php else: ?>
             <?= $full_page['body_rendered']; ?>

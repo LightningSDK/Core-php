@@ -14,51 +14,51 @@ class Pages extends Table {
     }
 
     protected $searchable = true;
-    protected $search_fields = array('title', 'url', 'body');
+    protected $search_fields = ['title', 'url', 'body'];
 
     protected $nav = 'admin_pages';
     protected $table = 'page';
     protected $sortable = true;
     protected $trusted = true;
-    protected $preset = array(
-        'page_id' => array(
+    protected $preset = [
+        'page_id' => [
             'type' => 'hidden',
-        ),
-        'keywords' => array(
+        ],
+        'keywords' => [
             'unlisted' => true,
             'type' => 'textarea',
-        ),
-        'description' => array(
+        ],
+        'description' => [
             'unlisted' => true,
             'type' => 'textarea',
-        ),
-        'body' => array(
+        ],
+        'body' => [
             'upload' => true,
             'type' => 'html',
             'div' => true,
-        ),
-        'site_map' => array(
+        ],
+        'site_map' => [
             'type' => 'checkbox',
             'default' => true,
-        ),
-        'last_update' => array(
+        ],
+        'last_update' => [
             'type' => 'datetime',
-        )
-    );
+        ]
+    ];
 
     protected function initSettings() {
         $this->preset['url']['submit_function'] = function(&$output) {
             $output['url'] = Request::post('url', 'url') ?: Request::post('title', 'url');
         };
 
-        $this->action_fields = array(
-            'view' => array(
+        $this->action_fields = [
+            'view' => [
                 'display_name' => 'View',
                 'type' => 'html',
                 'html' => function($row) {
                     return '<a href="/' . $row['url'] . '.html"><img src="/images/lightning/resume.png" /></a>';
                 }
-            ),
-        );
+            ],
+        ];
     }
 }

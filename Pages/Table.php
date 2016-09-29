@@ -1430,7 +1430,7 @@ abstract class Table extends Page {
             switch ($action['type']) {
                 case 'function':
                     // Have table call a function.
-                    $output .= "<a href='" . $this->createUrl("action", $row[$this->getKey()], $a, array("ra" => $this->action)) . "'>{$link_content}</a>";
+                    $output .= "<a href='" . $this->createUrl("action", $row[$this->getKey()], $a, ['ra' => $this->action]) . "'>{$link_content}</a>";
                     break;
                 case 'link':
                     $output .= "<a href='{$action['url']}{$row[$this->getKey()]}'>{$link_content}</a>";

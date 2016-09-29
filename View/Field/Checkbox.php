@@ -6,12 +6,12 @@ use Lightning\View\HTML;
 
 class Checkbox {
     public static function render($name, $value = '', $checked = false, $attributes = []) {
-        $attributes += array(
+        $attributes += [
             'type' => 'checkbox',
             'value' => $value,
             'name' => $name,
             'id' => $name,
-        );
+        ];
         if ($checked) {
             $attributes['checked'] = 'CHECKED';
         }

@@ -254,7 +254,7 @@ class Scrub {
             $config->set('CSS.AllowTricky', true);
             $config->set('HTML.Trusted', true);
             $config->set('Attr.EnableID', true);
-            $config->set('Attr.AllowedFrameTargets', array('_blank'));
+            $config->set('Attr.AllowedFrameTargets', ['_blank']);
             $allowed_tags = self::SCRUB_BASIC_HTML . ',' . self::SCRUB_ADVANCED_HTML;
         } else {
             $config->set('CSS.Trusted', false);
