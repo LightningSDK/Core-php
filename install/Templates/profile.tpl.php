@@ -15,7 +15,7 @@ use Lightning\View\Field\Checkbox;
                     First Name:
                 </td>
                 <td>
-                    <input type="text" name="first" value="<?=ClientUser::getInstance()->first;?>">
+                    <input type="text" name="first" value="<?=$user->first;?>">
                 </td>
             </tr>
             <tr>
@@ -23,7 +23,7 @@ use Lightning\View\Field\Checkbox;
                     Last Name:
                 </td>
                 <td>
-                    <input type="text" name="last" value="<?=ClientUser::getInstance()->last;?>">
+                    <input type="text" name="last" value="<?=$user->last;?>">
                 </td>
             </tr>
         </table>
@@ -53,6 +53,22 @@ use Lightning\View\Field\Checkbox;
                 </td>
                 <td>
                     <input type="password" name="new_password_confirm" value="">
+                </td>
+            </tr>
+        </table>
+    </fieldset>
+    <fieldset>
+        <legend>Time Zone:</legend>
+        <table class="small-12">
+            <tr>
+                <td>
+                    Select your time zone:
+                </td>
+                <td>
+                    <?php
+                    $list = DateTimeZone::listIdentifiers();
+                    array_unshift($list, '');
+                    echo \Lightning\View\Field\BasicHTML::select('timezone', array_combine($list, $list), $user->timezone); ?>
                 </td>
             </tr>
         </table>

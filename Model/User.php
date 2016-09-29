@@ -24,6 +24,7 @@ use Lightning\View\Field\Time;
  * @property string $email
  * @property string $first
  * @property string $last
+ * @property string $timezone
  * @property object $content
  * @property string $password
  * @property string $salt
