@@ -88,6 +88,7 @@ class ClientUserOverridable extends Singleton {
             }
             return false;
         } else {
+            Session::impliedInitialization();
             return true;
         }
     }

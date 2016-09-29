@@ -28,6 +28,7 @@ class SessionOverridable extends SingletonObject {
     const PRIMARY_KEY = 'session_id';
 
     protected $__json_encoded_fields = ['content'];
+    protected static $initialized = false;
 
     /**
      * Get the current session.
@@ -41,6 +42,11 @@ class SessionOverridable extends SingletonObject {
      *   The current session.
      */
     public static function getInstance($create_object = true, $create_session = true) {
+        // If $create_session is true, the session is or will be initialized.
+        if ($create_session) {
+            static::$initialized = true;
+        }
+
         return parent::getInstance($create_object, $create_session);
     }
 
@@ -357,5 +363,13 @@ class SessionOverridable extends SingletonObject {
      */
     public function blank_session () {
         Output::clearCookie(Configuration::get('session.cookie'));
+    }
+
+    public static function isInitialized() {
+        return static::$initialized;
+    }
+
+    public static function impliedInitialization() {
+        static::$initialized = true;
     }
 }

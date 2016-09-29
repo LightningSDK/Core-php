@@ -182,6 +182,10 @@ class Form {
      *   The full HTML.
      */
     public static function renderTokenInput() {
-        return BasicHTML::hidden('token', Session::getInstance()->getToken());
+        if (Session::isInitialized()) {
+            return BasicHTML::hidden('token', Session::getInstance()->getToken());
+        } else {
+            return '<small class="error" style="display: block">Session Not Initialized</small>';
+        }
     }
 }
