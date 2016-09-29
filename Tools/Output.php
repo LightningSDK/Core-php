@@ -5,10 +5,10 @@
  */
 
 namespace Lightning\Tools;
-use Lightning\Pages\Message;
 use Lightning\Pages\Page as PageView;
 use Lightning\Model\Page as PageModel;
 use Lightning\View\JS;
+use Exception;
 
 /**
  * Class Output
@@ -402,16 +402,23 @@ class Output {
      *   Whether the cookie can only be used over https.
      * @param boolean $httponly
      *   Whether the cookie can only be used as an http header.
+     *
+     * @throws Exception
+     *   If the headers have already been sent.
      */
     public static function setCookie($cookie, $value, $ttl = null, $path = '/', $domain = null, $secure = null, $httponly = true) {
-        $settings = array(
+        if (headers_sent()) {
+            throw new Exception('Headers already sent.');
+        }
+
+        $settings = [
             'value' => $value,
             'ttl' => $ttl ? $ttl + time() : 0,
             'path' => $path,
             'domain' => $domain !== null ? $domain : Configuration::get('cookie_domain'),
             'secure' => $secure !== null ? $secure : (!empty($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] == 1 || strtolower($_SERVER['HTTPS']) == 'on')),
             'httponly' => $httponly,
-        );
+        ];
 
         if (isset(self::$cookies[$cookie])) {
             self::$cookies[$cookie] = $settings + self::$cookies[$cookie];
