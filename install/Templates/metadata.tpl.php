@@ -1,4 +1,7 @@
 <?php
+use Lightning\Model\URL;
+use Lightning\Tools\Configuration;
+use Lightning\Tools\Request;
 use Lightning\Tools\Scrub;
 ?>
 <link rel="icon" href="/favicon.png" type="image/x-icon">
@@ -10,6 +13,10 @@ use Lightning\Tools\Scrub;
     <?php endif; ?>
     <meta name="robots" content="ALL, INDEX, FOLLOW" />
     <meta name="copyright" content="http://LightningSDK.net Copyright (c) 2016">
+    <meta name="og:url" content="<?= Scrub::toHTML(!empty($meta['url']) ? $meta['url'] : Request::getURL()); ?>" />
+    <?php if ($appid = Configuration::get('social.facebook.appid')): ?>
+        <meta name="og:app_id" content="<?= Scrub::toHTML($appid); ?>" />
+    <?php endif; ?>
     <?php if (!empty($meta['keywords'])): ?>
         <meta name="keywords" content="<?= Scrub::toHTML($meta['keywords']); ?>" />
     <?php endif; ?>
@@ -28,8 +35,8 @@ use Lightning\Tools\Scrub;
         <meta name="twitter:creator" content="@<?= $meta['twitter_creator']; ?>">
     <?php endif; ?>
     <?php if (!empty($meta['image'])): ?>
-        <meta property="og:image" content="<?= Scrub::toHTML($meta['image']); ?>" />
+        <meta property="og:image" content="<?= Scrub::toHTML(URL::getAbsolute($meta['image'])); ?>" />
         <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:image" content="<?= Scrub::toHTML($meta['image']); ?>">
+        <meta name="twitter:image" content="<?= Scrub::toHTML(URL::getAbsolute($meta['image'])); ?>">
     <?php endif; ?>
 <?php endif; ?>
