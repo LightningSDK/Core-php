@@ -4,6 +4,7 @@ namespace Lightning\Pages;
 
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
+use Lightning\Tools\Form;
 use Lightning\Tools\Output;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
@@ -21,7 +22,6 @@ use Lightning\Model\User as UserModel;
 class User extends Page {
 
     protected $page = 'user';
-    protected $ignoreToken = true;
     protected $rightColumn = false;
 
     protected function hasAccess() {
@@ -29,8 +29,9 @@ class User extends Page {
     }
 
     public function get() {
+        Form::requiresToken();
         $user = ClientUser::getInstance();
-        Template::getInstance()->set('redirect', Scrub::toURL(Request::get('redirect', 'string')));
+        Template::getInstance()->set('redirect', Scrub::toURL(Request::get('redirect', Request::TYPE_STRING)));
         if ($user->id > 0) {
             // USER IS LOGGED IN, REDIRECT TO THE DEFAULT PAGE
             $this->loginRedirect();
@@ -51,7 +52,7 @@ class User extends Page {
     public function getRegister() {
         $template = Template::getInstance();
         $template->set('action', 'register');
-        $template->set('redirect', Scrub::toURL(Request::get('redirect', 'string')));
+        $template->set('redirect', Scrub::toURL(Request::get('redirect', Request::TYPE_STRING)));
     }
 
     /**
@@ -60,7 +61,7 @@ class User extends Page {
      */
     public function postRegister() {
 
-        $email = Request::post('email', 'email');
+        $email = Request::post('email', Request::TYPE_EMAIL);
         $pass = Request::post('password');
         $pass2 = Request::post('password2');
         
@@ -84,7 +85,7 @@ class User extends Page {
 
         // See if they are being added to a specific list.
         $default_list = Configuration::get('mailer.default_list', 0);
-        $mailing_list = Request::post('list_id', 'int', null, $default_list);
+        $mailing_list = Request::post('list_id', Request::TYPE_INT, null, $default_list);
         if (!empty($mailing_list)) {
             $user = UserModel::loadByEmail($email);
             $user->subscribe($mailing_list);
@@ -146,7 +147,7 @@ class User extends Page {
      * Handle the user attempting to log in.
      */
     public function postLogin() {
-        $email = Request::post('email', 'email');
+        $email = Request::post('email', Request::TYPE_EMAIL);
         $pass = Request::post('password');
         $login_result = UserModel::login($email, $pass);
         if (!$login_result) {
@@ -224,7 +225,7 @@ class User extends Page {
      * Confirm the user account via the confirmation link.
      */
     public function getConfirm() {
-        if ($cyphserstring = Request::get('u', 'encrypted')) {
+        if ($cyphserstring = Request::get('u', Request::TYPE_ENCRYPTED)) {
             $user = UserModel::loadByEncryptedUserReference($cyphserstring);
             $user->setConfirmed();
             Messenger::message('Your account ' . $user->email . ' has been confirmed.');
@@ -244,7 +245,7 @@ class User extends Page {
      * @todo This is not secure. There should be a security question and email should just be a link.
      */
     public function postReset() {
-        if (!$email = Request::get('email', 'email')) {
+        if (!$email = Request::get('email', Request::TYPE_EMAIL)) {
             Output::error('Invalid email');
         } elseif (!$user = UserModel::loadByEmail($email)) {
             Output::error('User does not exist.');
@@ -254,7 +255,7 @@ class User extends Page {
     }
 
     public function getSetPassword() {
-        $key = Request::get('key', 'base64');
+        $key = Request::get('key', Request::TYPE_BASE64);
         if ($user = UserModel::loadByTempKey($key)) {
             Template::getInstance()->set('action', 'set_password');
             Template::getInstance()->set('key', $key);
@@ -265,7 +266,7 @@ class User extends Page {
     }
 
     public function postSetPassword() {
-        if ($user = UserModel::loadByTempKey(Request::get('key', 'base64'))) {
+        if ($user = UserModel::loadByTempKey(Request::get('key', Request::TYPE_BASE64))) {
             if (($pass = Request::post('password')) && $pass == Request::post('password2')) {
                 $user->setPass($pass);
                 $user->registerToSession();
