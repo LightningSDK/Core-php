@@ -12,7 +12,10 @@ class Contact extends Table {
 
     protected $sort = ['time' => 'DESC'];
     protected $preset = [
-        'time' => 'datetime',
+        'time' => [
+            'type' => 'datetime',
+            'timezone' => 'user',
+        ],
         'additional_fields' => 'json',
         'contact' => 'checkbox',
         'contact_sent' => 'checkbox',

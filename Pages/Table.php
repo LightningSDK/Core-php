@@ -4,6 +4,7 @@ namespace Lightning\Pages;
 
 use Exception;
 use Lightning\Tools\Cache\FileCache;
+use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\CSVImport;
 use Lightning\Tools\Database;
@@ -2539,10 +2540,10 @@ abstract class Table extends Page {
                         $val = Time::getDate($field['form_field'], !empty($field['allow_blank']));
                         break;
                     case 'time':
-                        $val = Time::getTime($field['form_field'], !empty($field['allow_blank']));
+                        $val = Time::getTime($field['form_field'], !empty($field['allow_blank']), !empty($field['timezone']) ? $field['timezone'] : null);
                         break;
                     case 'datetime':
-                        $val = Time::getDateTime($field['form_field'], !empty($field['allow_blank']));
+                        $val = Time::getDateTime($field['form_field'], !empty($field['allow_blank']), !empty($field['timezone']) ? $field['timezone'] : null);
                         break;
                     case 'checkbox':
                         $val = ( integer ) Request::get($field['form_field'], 'boolean');
@@ -3525,10 +3526,10 @@ abstract class Table extends Page {
                     return Time::printTime($v);
                     break;
                 case 'date':
-                    return Time::printDate($v);
+                    return Time::printDate($v, !empty($field['timezone']) ? $field['timezone'] : null);
                     break;
                 case 'datetime':
-                    return Time::printDateTime($v);
+                    return Time::printDateTime($v, !empty($field['timezone']) ? $field['timezone'] : null);
                     break;
                 case 'checkbox':
                     if ($html) {
@@ -3799,7 +3800,12 @@ abstract class Table extends Page {
                 return $return;
                 break;
             case 'time':
-                return Time::timePop($field['form_field'], $field['Value'], !empty($field['allow_blank']));
+                return Time::timePop(
+                    $field['form_field'],
+                    $field['Value'],
+                    !empty($field['allow_blank']),
+                    !empty($field['timezone']) ? $field['timezone'] : null
+                );
                 break;
             case 'date':
                 $return = Time::datePop(
@@ -3811,7 +3817,13 @@ abstract class Table extends Page {
                 return $return;
                 break;
             case 'datetime':
-                return Time::dateTimePop($field['form_field'], $field['Value'], !empty($field['allow_blank']), isset($field['start_year']) ? $field['start_year'] : date('Y') - 10);
+                return Time::dateTimePop(
+                    $field['form_field'],
+                    $field['Value'],
+                    !empty($field['allow_blank']),
+                    isset($field['start_year']) ? $field['start_year'] : date('Y') - 10,
+                    !empty($field['timezone']) ? $field['timezone'] : null
+                );
                 break;
             case 'lookup':
             case 'yesno':
