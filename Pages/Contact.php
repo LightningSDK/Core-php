@@ -33,6 +33,7 @@ use Lightning\Model\Contact as ContactModel;
  *   optin: Subscribe the user to a default list.
  *   contact: Boolean, whether to notify the site admins. This will send anyway if contact.always_notify is set to true in the configuration.
  *   message: If set, a message with this message_id will be sent to the input user email.
+ *   redirect: The success page.
  *
  */
 class Contact extends PageView {
