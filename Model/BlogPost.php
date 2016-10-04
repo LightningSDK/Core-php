@@ -7,6 +7,7 @@ use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
 use Lightning\Tools\IO\FileManager;
 use Lightning\View\HTML;
+use Lightning\View\HTMLEditor\Markup;
 use Lightning\View\Text;
 
 class BlogPostOverridable extends Object {
@@ -97,12 +98,20 @@ class BlogPostOverridable extends Object {
         if ($this->shorten_body || $force_short) {
             return $this->getShortBody();
         } else {
-            return $this->body;
+            return $this->getRenderedBody();
         }
     }
 
+    protected function getRenderedBody() {
+        static $rendered_body = null;
+        if ($rendered_body === null) {
+            $rendered_body = Markup::render($this->body);
+        }
+        return $rendered_body;
+    }
+
     public function getShortBody($length = 250, $allow_html = true) {
-        return Text::shorten($allow_html ? $this->body : strip_tags($this->body), $length);
+        return Text::shorten($allow_html ? Markup::render($this->body) : strip_tags(Markup::render($this->body)), $length);
     }
 
     public function getAuthorName() {
