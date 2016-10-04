@@ -1732,7 +1732,7 @@ abstract class Table extends Page {
             }
 
             // DISPLAY NAME ON THE LEFT
-            $output .= '<tr><td>' . $this->getDisplayName($link, $link_settings) . '</td><td>';
+            $output .= '<tr><td>' . $this->getDisplayName($link_settings, $link) . '</td><td>';
 
             // LOAD THE LINKED ROWS
             // The local key is the primary key column by default or another specified column.
