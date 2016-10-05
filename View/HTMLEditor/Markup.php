@@ -3,6 +3,7 @@
 namespace Lightning\View\HTMLEditor;
 
 use DOMDocument;
+use Lightning\Tools\Configuration;
 use Lightning\Tools\Template;
 use Lightning\View\Video\YouTube;
 
@@ -10,6 +11,7 @@ class Markup {
     public static function render($content, $vars = []) {
         // Replace special tags
         $matches = [];
+        $renderers = Configuration::get('markup.renderers');
         preg_match_all('|{{.*}}|', $content, $matches);
         foreach ($matches[0] as $match) {
             if (!empty($match)) {
@@ -32,6 +34,12 @@ class Markup {
                         if ($element->getAttribute('flex')) {
                             $output = '<div class="flex-video ' . ($element->getAttribute('widescreen') ? 'widescreen' : '') . '">' . $output . '</div>';
                         }
+                        break;
+                    default:
+                        if (isset($renderers[$element->nodeName])) {
+                            $output = call_user_func([$renderers[$element->nodeName], 'render'], $element, $vars);
+                        }
+                        break;
                 }
                 $content = str_replace(
                     $match,
