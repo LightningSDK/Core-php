@@ -8383,6 +8383,11 @@ table.table_form_table .list_user_tag span:hover {
   margin: 0;
 }
 
+.page-edit-links {
+  margin: 20px;
+  position: absolute;
+}
+
 .categories_box {
   border: 1px solid #ccc;
   border-radius: 3px;

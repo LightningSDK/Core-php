@@ -507,7 +507,8 @@ class Output {
             $full_page['description'] = '';
             $full_page['url'] = $response_code;
             $full_page['body'] = '';
-            $full_page['layout'] = 0;
+            $full_page['full_width'] = 0;
+            $full_page['right_column'] = 1;
             $full_page['site_map'] = 0;
             $full_page['error'] = 404;
         }

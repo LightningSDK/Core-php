@@ -22,12 +22,12 @@ class Scrub {
      *
      * @todo enable align|allowfullscreen for iframe
      */
-    const SCRUB_ADVANCED_HTML = 'input[type|value|checked|src],select,option[value],form[target|action|method],textarea,iframe[frameborder|src|height|width],a[target]';
+    const SCRUB_ADVANCED_HTML = 'input[type|value|checked|src],select,option[value],form[target|action|method],textarea,iframe[frameborder|src|height|width],a[target],section[style],div[style]';
 
     /**
      * Allowed CSS rules.
      */
-    const SCRUB_BASIC_CSS = 'height,width,color,background-color,vertical-align,text-align,margin,margin-left,margin-right,margin-top,margin-bottom,padding,padding-left,margin-right,margin-top,margin-bottom,border,border-left,border-right,border-top,border-bottom,float,font-size,display';
+    const SCRUB_BASIC_CSS = 'height,width,min-height,min-width,max-height,max-width,color,background-color,background-size,background-image,vertical-align,text-align,margin,margin-left,margin-right,margin-top,margin-bottom,padding,padding-left,margin-right,margin-top,margin-bottom,border,border-left,border-right,border-top,border-bottom,float,font-size,display';
 
     /**
      * Convert text to HTML safe output.
@@ -215,14 +215,7 @@ class Scrub {
      *   The validated text without any HTML.
      */
     public static function text($text) {
-        $purifier = HTMLPurifierWrapper::getInstance();
-        $config = HTMLPurifierConfig::createDefault();
-
-        $config->set('HTML.Allowed', '');
-        $config->set('CSS.AllowedProperties','');
-        $config->set('Core.EscapeNonASCIICharacters',true);
-
-        return $purifier->purify($text, $config);
+        return htmlentities(strip_tags($text));
     }
 
     /**
@@ -278,7 +271,12 @@ class Scrub {
         $config->set('CSS.AllowedProperties', $allowed_css);
         $config->set('Core.EscapeNonASCIICharacters', true);
 
-        return $purifier->purify( $html, $config );
+        if ($trusted) {
+            $def = $config->getHTMLDefinition(true);
+            $def->addElement('section', 'Block', 'Flow', 'Common');
+        }
+
+        return $purifier->purify($html, $config);
     }
 
     /**

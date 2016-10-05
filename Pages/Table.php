@@ -25,6 +25,7 @@ use Lightning\View\Field\Checkbox;
 use Lightning\View\Field\FileBrowser;
 use Lightning\View\Field\Location;
 use Lightning\View\Field\Time;
+use Lightning\View\HTML;
 use Lightning\View\HTMLEditor\HTMLEditor;
 use Lightning\View\JS;
 use Lightning\View\Page;
@@ -1630,8 +1631,18 @@ abstract class Table extends Page {
                     $output .= $this->renderSubmitAndRedirect($button, $button_id);
                     break;
                 case self::CB_LINK:
-                    $download = !empty($button['download']) ? 'download="' . $button['download'] . '"' : '';
-                    $output .= '<a href="' . $button['url'] . '" ' . $download . ' class="button medium">' . $button['text'] . '</a>';
+                    $attributes = [
+                        'href' => $button['url'],
+                        'class' => 'button medium',
+                    ];
+
+                    if (!empty($button['download'])) {
+                        $attributes['download'] = $button['download'];
+                    }
+                    if (!empty($button['target'])) {
+                        $attributes['target'] = $button['target'];
+                    }
+                    $output .= '<a ' . HTML::implodeAttributes($attributes) . '>' . $button['text'] . '</a>';
             }
         }
         return $output;

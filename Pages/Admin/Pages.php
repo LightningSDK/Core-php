@@ -43,13 +43,30 @@ class Pages extends Table {
         ],
         'last_update' => [
             'type' => 'datetime',
-        ]
+        ],
+        'right_column' => [
+            'type' => 'checkbox',
+            'default' => true,
+        ],
+        'full_width' => 'checkbox',
     ];
 
     protected function initSettings() {
         $this->preset['url']['submit_function'] = function(&$output) {
             $output['url'] = Request::post('url', 'url') ?: Request::post('title', 'url');
         };
+
+        if (!empty($this->id)) {
+            $this->getRow();
+            $this->custom_buttons['view'] = [
+                'url' => '/' . $this->list['url'] . '.html',
+                'type' => Table::CB_LINK,
+                'target' => '_blank',
+                'text' => 'View',
+            ];
+        } else if (Request::get('action') == 'new') {
+            $this->preset['url']['default'] = Request::get('url');
+        }
 
         $this->action_fields = [
             'view' => [
