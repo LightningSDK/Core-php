@@ -159,6 +159,14 @@ table.table_form_table {
   position: absolute;
 }
 
+// Allows editors to see hidden reveal modals.
+.editor-active .reveal-modal {
+  display: block;
+  visibility: visible;
+  position: inherit !important;
+  border: 2px solid red;
+}
+
 // Table linked options selection.
 .categories_box {
   border: 1px solid #ccc;

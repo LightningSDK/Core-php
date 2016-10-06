@@ -2557,7 +2557,7 @@ abstract class Table extends Page {
                         $val = Time::getDateTime($field['form_field'], !empty($field['allow_blank']), !empty($field['timezone']) ? $field['timezone'] : null);
                         break;
                     case 'checkbox':
-                        $val = ( integer ) Request::get($field['form_field'], 'boolean');
+                        $val = Request::get($field['form_field'], Request::TYPE_BOOLEAN_INT);
                         break;
                     case 'checklist':
                         $vals = '';
@@ -2582,16 +2582,20 @@ abstract class Table extends Page {
                     case 'longtext':
                     case 'div':
                     case 'html':
-                        $val = Request::get($field['form_field'],
-                            'html',
-                            !empty($field['allowed_html']) ? $field['allowed_html'] : '',
-                            !empty($field['allowed_css']) ? $field['allowed_css'] : '',
-                            !empty($field['trusted']) || $this->trusted,
-                            !empty($field['full_page'])
-                        );
+                        if ($this->trusted || !empty($field['trusted'])) {
+                            $val = Request::get($field['form_field'], Request::TYPE_TRUSTED_HTML);
+                        } else {
+                            $val = Request::get($field['form_field'],
+                                Request::TYPE_HTML,
+                                !empty($field['allowed_html']) ? $field['allowed_html'] : '',
+                                !empty($field['allowed_css']) ? $field['allowed_css'] : '',
+                                !empty($field['trusted']) || $this->trusted,
+                                !empty($field['full_page'])
+                            );
+                        }
                         break;
                     case 'json':
-                        $val = Request::post($field['form_field'], 'json_string');
+                        $val = Request::post($field['form_field'], Request::TYPE_JSON_STRING);
                         break;
                     case 'int':
                     case 'float':
@@ -2617,7 +2621,7 @@ abstract class Table extends Page {
                 ((!isset($field[$sanitize_field]) || $field[$sanitize_field] !== false)
                     || (!isset($field['sanitize']) || $field['sanitize'] !== false))
             ) {
-                $val = $this->input_sanitize($val, $html);
+                $val = $this->sanitizeInput($val, $html);
             }
 
             // If this value is required.
@@ -2944,23 +2948,23 @@ abstract class Table extends Page {
     // get the int val of a specific bit - ie convert 1 (2nd col form right or 10) to 2
     // this way you can search for the 2nd bit column in a checklist with: "... AND col&".table::get_bit_int(2)." > 0"
     public static function get_bit_int($bit) {
-        bindec("1" . str_repeat("0", $bit));
+        bindec('1' . str_repeat('0', $bit));
     }
 
-    protected function input_sanitize($val, $allow_html = false) {
+    protected function sanitizeInput($val, $allow_html = false) {
 
         $val = stripslashes($val);
 
         if ($allow_html === true && $this->trusted) {
-            $clean_html = Scrub::html($val, '', '', TRUE);
-        }
-        elseif ($allow_html === true) {
+            $clean_html = Scrub::trustedHTML($val);
+        } elseif ($allow_html === true) {
             $clean_html = Scrub::html($val);
-        }
-        elseif ($allow_html)
+        } elseif ($allow_html) {
             $clean_html = Scrub::html($val, $allow_html);
-        else
+        } else {
             $clean_html = Scrub::text($val);
+        }
+
         return $clean_html;
     }
 

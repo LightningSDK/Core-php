@@ -29,6 +29,7 @@ class RequestOverridable {
     const TYPE_BASE64 = 'base64';
     const TYPE_ENCRYPTED = 'encrypted';
     const TYPE_HTML = 'html';
+    const TYPE_TRUSTED_HTML = 'trustedHTML';
     const TYPE_JSON = 'json';
     const TYPE_JSON_STRING = 'json_string';
     const TYPE_URL_ENCODED = 'url_encoded';
@@ -329,7 +330,7 @@ class RequestOverridable {
      *
      * @return bool|float|int|string
      */
-    protected static function clean($data, $type = 'text') {
+    protected static function clean($data, $type = self::TYPE_TEXT) {
         if (get_magic_quotes_gpc()) {
             $data = stripslashes($data);
         }
@@ -387,6 +388,7 @@ class RequestOverridable {
             case self::TYPE_BASE64:
             case self::TYPE_ENCRYPTED:
             case self::TYPE_HTML:
+            case self::TYPE_TRUSTED_HTML:
             case self::TYPE_JSON:
             case self::TYPE_JSON_STRING:
                 $args = func_get_args();
@@ -395,7 +397,7 @@ class RequestOverridable {
                     $args[0] = str_replace(' ', '+', $args[0]);
                 }
                 // Remove the second item, the type.
-                if (count($args) > 2) {
+                if (count($args) > 1) {
                     unset($args[1]);
                     $args = array_values($args);
                 }

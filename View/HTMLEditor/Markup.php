@@ -12,7 +12,7 @@ class Markup {
         // Replace special tags
         $matches = [];
         $renderers = Configuration::get('markup.renderers');
-        preg_match_all('|{{.*}}|', $content, $matches);
+        preg_match_all('|{{.*}}|sU', $content, $matches);
         foreach ($matches[0] as $match) {
             if (!empty($match)) {
                 // Convert to HTML and parse it.
