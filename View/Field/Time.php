@@ -95,6 +95,12 @@ class Time extends Field {
         } else {
             if ($timezone == 'user') {
                 $timezone = ClientUser::getInstance()->timezone;
+                if (empty($timezone)) {
+                    $timezone = date_default_timezone_get();
+                }
+                if (empty($timezone)) {
+                    return 0;
+                }
             }
             $tz = new DateTimeZone($timezone);
             $now = new DateTime('now', $tz);
