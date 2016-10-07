@@ -439,6 +439,13 @@ class UserOverridable extends Object {
         return Database::getInstance()->insert('user', $user_details);
     }
 
+    public function __set($var, $value) {
+        if ($var == 'email') {
+            $value = strtolower($value);
+        }
+        parent::__set($var, $value);
+    }
+
     /**
      * Update a user's password.
      *
