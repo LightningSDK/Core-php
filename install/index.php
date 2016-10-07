@@ -27,4 +27,5 @@ try {
     $errors = Messenger::getErrors();
     array_unshift($errors, $e->getMessage());
     echo implode("\n", $errors) . "\n";
+    \Lightning\Tools\Logger::exception($e);
 }
