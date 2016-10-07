@@ -2,6 +2,7 @@
 
 namespace Lightning\Pages;
 
+use Exception;
 use Lightning\Model\Subscription;
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Database;
@@ -58,6 +59,14 @@ class Profile extends Page {
         }
         $user->save();
 
+        try {
+            $user->email = Request::get('email', Request::TYPE_EMAIL);
+            $user->save();
+        } catch (Exception $e) {
+            // The email could not be set.
+            Messenger::error('An account with that email already exists.');
+        }
+
         // Update mailing list preferences.
         $new_lists = Request::get('subscribed', 'array', 'int', []);
         $new_lists = array_combine($new_lists, $new_lists);
@@ -87,8 +96,6 @@ class Profile extends Page {
             $db->insertMultiple('message_list_user', ['message_list_id' => $add_lists, 'user_id' => $user->id], true);
         }
 
-        if (count(Messenger::getErrors()) == 0) {
-            Navigation::redirect(null, ['msg' => 'saved']);
-        }
+        Navigation::redirect();
     }
 }
