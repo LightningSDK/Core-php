@@ -20,6 +20,7 @@ class Pages extends Table {
     protected $table = 'page';
     protected $sortable = true;
     protected $trusted = true;
+    protected $duplicatable = true;
     protected $preset = [
         'page_id' => [
             'type' => 'hidden',
