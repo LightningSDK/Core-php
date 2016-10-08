@@ -21,7 +21,7 @@ use Lightning\Model\User as UserModel;
 
 class User extends Page {
 
-    protected $page = 'user';
+    protected $page = ['user', 'Lightning'];
     protected $rightColumn = false;
 
     protected function hasAccess() {
