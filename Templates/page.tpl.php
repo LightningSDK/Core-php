@@ -7,7 +7,11 @@
 
         if (!empty($editable)): ?>
             <div class="page-edit-links">
-                <a href='/admin/pages?action=edit&return-to-view=true&id=<?= $full_page['page_id']; ?>' class="button medium">Edit This Page</a>
+                <?php if (!empty($full_page['page_id'])): ?>
+                    <a href='/admin/pages?action=edit&action-after=view&id=<?= $full_page['page_id']; ?>' class="button medium">Edit This Page</a>
+                <?php else: ?>
+                    <a href='/admin/pages?action=new&action-after=view&url=<?= \Lightning\Tools\Scrub::toHTML($full_page['url']); ?>' class="button medium">Create This Page</a>
+                <?php endif; ?>
             </div>
         <?php endif; ?>
 

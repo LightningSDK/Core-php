@@ -2,8 +2,10 @@
 
 namespace Lightning\Pages\Admin;
 
+use Lightning\Model\Page;
 use Lightning\Pages\Table;
 use Lightning\Tools\ClientUser;
+use Lightning\Tools\Navigation;
 use Lightning\Tools\Request;
 use Source\Model\Permissions;
 
@@ -78,5 +80,10 @@ class Pages extends Table {
                 }
             ],
         ];
+    }
+
+    public function getView() {
+        $this->getRow();
+        Navigation::redirect('/' . $this->list['url'] . '.html');
     }
 }

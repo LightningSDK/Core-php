@@ -299,6 +299,7 @@ abstract class Table extends Page {
      * @var array
      */
     protected $action_after = ['insert' => 'list', 'update' => 'list'];
+    protected $postActionAfter;
 
     /**
      * Extra buttons added to from. Array structure:
@@ -407,6 +408,8 @@ abstract class Table extends Page {
         $this->serial_update = Request::post('serialupdate', Request::TYPE_BOOLEAN);
 
         $this->refer_return = Request::get('refer_return');
+
+        $this->postActionAfter = Request::get('action-after');
 
         // load the sort fields
         if ($sort = Request::get('sort')) {
@@ -903,6 +906,8 @@ abstract class Table extends Page {
 
         if ($this->submit_redirect && $redirect = Request::get('redirect')) {
             Navigation::redirect($redirect);
+        } elseif ($action = Request::get('action-after')) {
+            $this->redirect(['action' => $action, 'id' => $this->id]);
         } elseif (!empty($this->redirectAfter[$this->action])) {
             Navigation::redirect($this->createUrl($this->redirectAfter[$this->action]));
         } elseif ($this->submit_redirect && isset($this->action_after[$this->action])) {
@@ -1204,6 +1209,14 @@ abstract class Table extends Page {
             }
             return $output;
         }
+    }
+
+    protected function renderHiddenTableFields() {
+        $output = '';
+        if ($this->postActionAfter) {
+            $output = '<input type="hidden" name="action-after" value="' . Scrub::toHTML($this->postActionAfter) . '" />';
+        }
+        return $output;
     }
 
     protected function renderListHeader() {
@@ -1538,6 +1551,7 @@ abstract class Table extends Page {
                 $output .= '<input type="hidden" name="lightning_table_duplicate" value="' . $this->id . '" />';
             }
             $output .= Form::renderTokenInput();
+            $output .= $this->renderHiddenTableFields();
             if ($return = Request::get('return', 'urlencoded')) {
                 $output .= BasicHTML::hidden('table_return', $return);
             }
