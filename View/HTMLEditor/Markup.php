@@ -37,7 +37,11 @@ class Markup {
                         break;
                     default:
                         if (isset($renderers[$element->nodeName])) {
-                            $output = call_user_func([$renderers[$element->nodeName], 'render'], $element, $vars);
+                            $options = [];
+                            foreach ($element->attributes as $attr => $value) {
+                                $options[$attr] = $element->getAttribute($attr);
+                            }
+                            $output = call_user_func([$renderers[$element->nodeName], 'renderMarkup'], $options, $vars);
                         }
                         break;
                 }
