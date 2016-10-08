@@ -7,7 +7,7 @@ use Lightning\Tools\Template;
 use Lightning\View\JS;
 
 abstract class JSONEditor extends Page {
-    public $page = 'json_editor';
+    public $page = ['json_editor', 'Lightning'];
 
     public function get() {
         Template::getInstance()->set('jsoneditor', $this);

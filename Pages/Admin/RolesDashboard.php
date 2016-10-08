@@ -10,7 +10,7 @@ use Lightning\View\Page;
 
 class RolesDashboard extends Page {
 
-    protected $page = 'admin/roles_dashboard';
+    protected $page = ['admin/roles_dashboard', 'Lightning'];
 
     public function hasAccess() {
         ClientUser::requireAdmin();

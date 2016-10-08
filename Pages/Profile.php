@@ -14,7 +14,7 @@ use Lightning\View\Page;
 
 class Profile extends Page {
 
-    protected $page = 'profile';
+    protected $page = ['profile', 'Lightning'];
 
     protected $nav = 'profile';
 

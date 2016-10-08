@@ -43,7 +43,7 @@ class Send extends Page {
         }
 
         $template = Template::getInstance();
-        $template->set('content', 'mailing_send');
+        $template->set('content', ['mailing_send', 'Lightning']);
         $template->set('message', $message);
         JS::set('message_id', $message['message_id']);
         JS::addSessionToken();

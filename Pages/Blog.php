@@ -22,7 +22,7 @@ use Lightning\Model\BlogPost;
 class Blog extends Page {
 
     protected $nav = 'blog';
-    protected $page = 'blog';
+    protected $page = ['blog', 'Lightning'];
 
     protected function hasAccess() {
         return true;

@@ -88,7 +88,7 @@ class Page extends PageView {
         }
 
         // Set the page template.
-        $template->set('content', 'page');
+        $template->set('content', ['page', 'Lightning']);
 
         // PREPARE FORM DATA CONTENTS
         foreach (['title', 'keywords'] as $field) {

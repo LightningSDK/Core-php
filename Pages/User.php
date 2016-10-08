@@ -39,7 +39,7 @@ class User extends Page {
     }
 
     public function getModal() {
-        Template::getInstance()->setTemplate('modal');
+        Template::getInstance()->setTemplate(['modal', 'Lightning']);
         if (!ClientUser::getInstance()->isAnonymous() && !Request::get('social', Request::TYPE_BOOLEAN)) {
             Messenger::message('You are already signed in.');
             $this->page = '';

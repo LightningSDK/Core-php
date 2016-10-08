@@ -12,14 +12,6 @@ use Lightning\View\Field\Checkbox;
         <table class="small-12">
             <tr>
                 <td>
-                    Email:
-                </td>
-                <td>
-                    <input type="text" name="email" value="<?=$user->email;?>">
-                </td>
-            </tr>
-            <tr>
-                <td>
                     First Name:
                 </td>
                 <td>

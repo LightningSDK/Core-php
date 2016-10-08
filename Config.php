@@ -2,7 +2,7 @@
 
 $conf = [
     'template' => [
-        'default' => 'template'
+        'default' => ['template', 'Lightning'],
     ],
     'routes' => [
         'cli_only' => [

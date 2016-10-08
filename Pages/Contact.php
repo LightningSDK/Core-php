@@ -38,7 +38,7 @@ use Lightning\Model\Contact as ContactModel;
  */
 class Contact extends PageView {
 
-    protected $page = 'contact';
+    protected $page = ['contact', 'Lightning'];
     protected $menuContext = 'contact';
 
     /**

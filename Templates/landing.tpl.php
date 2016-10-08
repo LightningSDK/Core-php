@@ -3,6 +3,6 @@
 <?php
 
 $opt_in_redirect = '/message?msg=optin';
-$this->build('optin');
+$this->build(['optin', 'Lightning']);
 
 ?>

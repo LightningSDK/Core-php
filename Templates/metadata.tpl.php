@@ -4,7 +4,7 @@ use Lightning\Tools\Configuration;
 use Lightning\Tools\Request;
 use Lightning\Tools\Scrub;
 ?>
-<link rel="icon" href="/favicon.png" type="image/x-icon">
+<link rel="icon" href="<?= Configuration::get('favicon') ?: '/favicon.png'; ?>" type="image/x-icon">
 <?php if (!empty($meta)): ?>
     <?php if (!empty($meta['title'])): ?>
         <title><?= Scrub::toHTML($meta['title']); ?></title>

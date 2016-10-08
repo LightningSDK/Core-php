@@ -17,7 +17,7 @@ use Lightning\Model\SocialAuth;
 
 class Share extends Page {
 
-    protected $page = 'admin/social/share';
+    protected $page = ['admin/social/share', 'Lightning'];
 
     protected $type;
     protected $id;

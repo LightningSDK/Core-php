@@ -277,7 +277,11 @@ class Template extends Singleton {
             return $this->template_dir . $template;
         }
         elseif (is_array($template)) {
-            return HOME_PATH . '/Modules/' . $template[1] . '/Templates/' . $template[0];
+            if ($template[1] == 'Lightning') {
+                return HOME_PATH . '/Lightning/Templates/' . $template[0];
+            } else {
+                return HOME_PATH . '/Modules/' . $template[1] . '/Templates/' . $template[0];
+            }
         }
     }
 

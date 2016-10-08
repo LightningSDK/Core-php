@@ -2,14 +2,12 @@
     <div id='inner-content' class="content_panel padding">
         <?php
 
-        use Lightning\Pages\Page;
         use Lightning\Tools\Configuration;
-        use Lightning\View\HTMLEditor\HTMLEditor;
         use Lightning\View\SocialLinks;
 
         if (!empty($editable)): ?>
             <div class="page-edit-links">
-                <a href='/admin/pages?action=edit&id=<?= $full_page['page_id']; ?>' class="button medium">Edit This Page</a>
+                <a href='/admin/pages?action=edit&return-to-view=true&id=<?= $full_page['page_id']; ?>' class="button medium">Edit This Page</a>
             </div>
         <?php endif; ?>
 
