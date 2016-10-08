@@ -14,13 +14,15 @@ class CSS {
      *
      * @param string|array $files
      *   The relative path to the file from the current URL request.
+     * @param array $options
+     *   A list of options.
      */
-    public static function add($files, $type = '') {
+    public static function add($files, $options = []) {
         if (!is_array($files)) {
             $files = [$files];
         }
         foreach ($files as $file) {
-            self::$included_files[$file] = ['file' => $file, 'type' => $type, 'rendered' => false];
+            self::$included_files[$file] = ['file' => $file, 'options' => $options, 'rendered' => false];
         }
     }
 
@@ -41,8 +43,21 @@ class CSS {
                     $concatenator = strpos($file['file'], '?') !== false ? '&' : '?';
                     $file_name .= $concatenator . 'v=' .$version;
                 }
-                // TODO: add $file[1] for media type. media="screen"
-                $output .= '<link rel="stylesheet" type="text/css" href="' . $file_name . '" />';
+
+                // Create attributes for tag.
+                $attributes = [
+                    'rel' => 'stylesheet',
+                    'type' => 'text/css',
+                    'href' => $file_name,
+                ];
+                if (!empty($file['options']['id'])) {
+                    $attributes['id'] = $file['options']['id'];
+                }
+                if (!empty($file['options']['media'])) {
+                    $attributes['media'] = $file['options']['media'];
+                }
+
+                $output .= '<link ' . HTML::implodeAttributes($attributes) . ' />';
                 $file['rendered'] = true;
             }
         }
