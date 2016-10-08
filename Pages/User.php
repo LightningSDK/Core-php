@@ -204,7 +204,7 @@ class User extends Page {
      * Unsubscribe the user from all mailing lists.
      */
     public function getUnsubscribe() {
-        $this->page = 'unsubscribe_confirm';
+        $this->page = ['unsubscribe_confirm', 'Lightning'];
         Template::getInstance()->set('user_token', Request::get('u', 'encrypted'));
     }
 
