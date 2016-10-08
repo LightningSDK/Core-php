@@ -29,7 +29,7 @@ class Blog extends Page {
     }
 
     public function get() {
-        $blog_id = Request::get('id', 'int') | Request::get('blog_id', 'int');
+        $blog_id = Request::get('id', Request::TYPE_INT) | Request::get('blog_id', Request::TYPE_INT);
         $path = explode('/', Request::getLocation());
 
         $blog = BlogModel::getInstance();

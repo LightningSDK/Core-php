@@ -21,7 +21,7 @@ class CMS extends API {
     public function postSave() {
         if (ClientUser::getInstance()->isAdmin()) {
             $name = Request::post('cms');
-            $content = Request::post('content', 'html', '', '', true);
+            $content = Request::post('content', Request::TYPE_HTML, '', '', true);
             CMSModel::insertOrUpdate(
                 ['name' => $name, 'content' => $content, 'last_modified' => time()],
                 ['content' => $content, 'last_modified' => time()]
