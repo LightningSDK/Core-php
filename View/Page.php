@@ -28,7 +28,7 @@ class PageOverridable {
     /**
      * The template file.
      *
-     * @var string
+     * @var string|array
      */
     protected $template;
 
@@ -52,6 +52,13 @@ class PageOverridable {
      * @var array
      */
     protected $params = [];
+
+    /**
+     * A template for the content within the page template.
+     *
+     * @var string|array
+     */
+    protected $page;
 
     /**
      * Whether to display the right column.
@@ -81,6 +88,11 @@ class PageOverridable {
      */
     protected $menuContext = '';
 
+    /**
+     * An array of meta data for the rendered page.
+     *
+     * @var array
+     */
     protected $meta = [];
 
     /**
