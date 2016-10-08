@@ -45,21 +45,24 @@
                             <?=$post->getBody()?>
                         <?php endif; ?>
                     </div>
-                    <?= SocialLinks::render($post->getURL()); ?>
-                </div>
-                <?php if (!$blog->isList()): ?>
-                    <?php if(!empty($post->author_image)): ?>
-                        <div class="author">
-                            <img src="<?= $post->author_image; ?>">
-                            <div class="info">
+                    <?php if (!$blog->isList() && !empty($post->author_image)): ?>
+                        <div class="author row panel">
+                            <h3>About the author:</h3>
+                            <div class="small-12 medium-4 column">
+                                <img src="<?= $post->author_image; ?>">
+                            </div>
+                            <div class="info small-12 medium-8 column">
                                 <h4><?= $post->author_name; ?></h4>
                                 <p><?= $post->author_description; ?></p>
-                                <a href="<?= $post->getAuthorLink(); ?>">ALL FROM <?= $post->author_name; ?> <i class="fa fa-angle-right"></i></a>
+                                <a href="<?= $post->getAuthorLink(); ?>">See all posts from <?= $post->author_name; ?> <i class="fa fa-angle-right"></i></a>
                             </div>
                         </div>
                     <?php endif; ?>
-                    <?= \Lightning\View\Facebook\Comments::render(); ?>
-                <?php endif; ?>
+                    <?= SocialLinks::render($post->getURL()); ?>
+                    <?php if (!$blog->isList()): ?>
+                        <?= \Lightning\View\Facebook\Comments::render(); ?>
+                    <?php endif; ?>
+                </div>
             </div>
         <?php endforeach; ?>
         <?=$blog->pagination()?>
