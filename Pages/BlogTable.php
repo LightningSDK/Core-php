@@ -2,6 +2,7 @@
 
 namespace Lightning\Pages;
 
+use Lightning\Model\Permissions;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Request;
 use Lightning\Tools\ClientUser;
@@ -66,8 +67,7 @@ class BlogTable extends Table {
     ];
 
     protected function hasAccess() {
-        ClientUser::requireAdmin();
-        return true;
+        return ClientUser::requirePermission(Permissions::EDIT_BLOG);
     }
 
     protected function afterPost() {

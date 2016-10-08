@@ -17,6 +17,7 @@ use Lightning\Tools\Session;
 use Lightning\Tools\Template;
 use Lightning\View\JS;
 use Lightning\View\Page;
+use Source\Model\Permissions;
 
 /**
  * A page handler for the send message controls and callbacks.
@@ -28,8 +29,7 @@ class Send extends Page {
      * Require admin privileges.
      */
     public function hasAccess() {
-        ClientUser::requireAdmin();
-        return true;
+        return ClientUser::requirePermission(Permissions::SEND_MAIL_MESSAGES);
     }
 
     /**

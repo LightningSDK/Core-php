@@ -11,6 +11,7 @@ use Lightning\Tools\Request;
 use Lightning\Tools\Session;
 use Lightning\View\Field\BasicHTML;
 use Lightning\View\Field\Text;
+use Source\Model\Permissions;
 
 class Users extends Table {
 
@@ -19,8 +20,7 @@ class Users extends Table {
     protected $table = 'user';
 
     protected function hasAccess() {
-        ClientUser::requireAdmin();
-        return true;
+        return ClientUser::requirePermission(Permissions::EDIT_USERS);
     }
 
     protected $custom_buttons = [

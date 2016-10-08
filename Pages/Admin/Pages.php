@@ -5,12 +5,12 @@ namespace Lightning\Pages\Admin;
 use Lightning\Pages\Table;
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Request;
+use Source\Model\Permissions;
 
 class Pages extends Table {
 
     public function hasAccess() {
-        ClientUser::requireAdmin();
-        return true;
+        return ClientUser::requirePermission(Permissions::EDIT_PAGES);
     }
 
     protected $searchable = true;

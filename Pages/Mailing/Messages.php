@@ -6,6 +6,7 @@
 
 namespace Lightning\Pages\Mailing;
 
+use Lightning\Model\Permissions;
 use Lightning\Pages\Table;
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Database;
@@ -98,8 +99,7 @@ class Messages extends Table {
      * Require admin privileges.
      */
     public function hasAccess() {
-        ClientUser::requireAdmin();
-        return true;
+        return ClientUser::requirePermission(Permissions::EDIT_MAIL_MESSAGES);
     }
 
     public function __construct() {
