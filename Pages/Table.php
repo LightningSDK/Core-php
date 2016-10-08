@@ -1158,19 +1158,19 @@ abstract class Table extends Page {
 
                 // add form if required
                 if ($this->action_fields_requires_submit()) {
-                    $output .= "<form action='" . $this->createUrl() . "' method='POST'>";
+                    $output .= '<form action="' . $this->createUrl() . '" method="POST">';
                     $output .= Form::renderTokenInput();
                 }
-                $output .= "<div class='list_table_container'>";
+                $output .= '<div class="list_table_container">';
                 $output .= '<table cellspacing="0" cellpadding="3" border="0" width="100%">';
 
                 // SHOW HEADER
-                $output .= "<thead><tr>";
+                $output .= '<thead><tr>';
                 $output .= $this->renderListHeader();
 
                 // SHOW ACTION HEADER
                 $output .= $this->render_action_fields_headers();
-                $output .= "</tr></thead>";
+                $output .= '</tr></thead>';
 
                 // Initialize the click handler.
                 if (!empty($this->rowClick)) {
@@ -1195,11 +1195,11 @@ abstract class Table extends Page {
                 $output .= '</tbody>';
 
                 if ($this->action_fields_requires_submit()) {
-                    '<input type="submit" name="submit" value="Submit" class="button medium" />';
+                    $output .= '<input type="submit" name="submit" value="Submit" class="button medium" />';
                 }
-                $output .= "</table></div>";
+                $output .= '</table></div>';
                 if ($this->action_fields_requires_submit())
-                    $output .= "</form>";
+                    $output .= '</form>';
                 $output .= $pagination->render();
             }
             return $output;
