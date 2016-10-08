@@ -105,7 +105,7 @@ class Template extends Singleton {
     /**
      * Render a template and it's main page content.
      *
-     * @param string $template
+     * @param string|array $template
      *   The main template to render within the template.
      * @param bool $return_as_string
      *   When TRUE, the output will be returned instead of output.
