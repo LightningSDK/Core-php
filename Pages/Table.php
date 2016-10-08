@@ -45,7 +45,7 @@ abstract class Table extends Page {
      */
     const TABLE = '';
 
-    protected $page = 'table';
+    protected $page = ['table', 'Lightning'];
 
     protected $fullWidth = true;
 
