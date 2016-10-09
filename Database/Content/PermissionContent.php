@@ -16,23 +16,23 @@ class PermissionContent extends Content {
             ],
             [
                 'permission_id' => 2,
-                'name' => 'edit_pages',
+                'name' => 'edit pages',
             ],
             [
                 'permission_id' => 3,
-                'name' => 'edit_blog',
+                'name' => 'edit blog',
             ],
             [
                 'permission_id' => 4,
-                'name' => 'edit_mail_messages',
+                'name' => 'edit mail messages',
             ],
             [
                 'permission_id' => 5,
-                'name' => 'send_mail_messages',
+                'name' => 'send mail messages',
             ],
             [
                 'permission_id' => 6,
-                'name' => 'edit_users',
+                'name' => 'edit users',
             ],
         ];
     }
