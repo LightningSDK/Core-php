@@ -8,19 +8,17 @@ use Lightning\Pages\Table;
 class Roles extends Table {
     protected $table = 'role';
 
-
     protected $search_fields = [
         'role_id',
         'name',
     ];
 
     protected $searchable = true;
-    protected $sort       = 'role_id ASC';
+    protected $sort       = 'role_id';
     protected $rowClick   = ['type' => 'none'];
 
     protected function hasAccess() {
-        ClientUser::requireAdmin();
-        return true;
+        return ClientUser::requireAdmin();
     }
 
     protected function initSettings() {
