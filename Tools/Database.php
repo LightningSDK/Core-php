@@ -1641,4 +1641,52 @@ class Database extends Singleton {
                 return '%' . $value . '%';
         }
     }
+
+    public static function filterQuery(&$start_query, $filter_query) {
+        // Make sure both joins are wrapped in arrays.
+        if (!is_numeric(key($start_query['join']))) {
+            $start_query['join'] = [$start_query['join']];
+        }
+        if (!is_numeric(key($filter_query['join']))) {
+            $filter_query['join'] = [$filter_query['join']];
+        }
+
+        // Merge checking for duplicates.
+        foreach ($filter_query['join'] as $join) {
+            $match = false;
+            foreach ($start_query['join'] as $j) {
+                if ($join == $j) {
+                    $match = true;
+                }
+            }
+            if (!$match) {
+                $start_query['join'][] = $join;
+            }
+        }
+
+        // Merge where queries.
+        $start_query['where'] = array_merge($start_query['where'], $filter_query['where']);
+
+        // Make sure the correct fields are added.
+        foreach ($filter_query['select'] as $table => $fields) {
+            if (empty($start_query['select'][$table])) {
+                // Make sure the final query has the table.
+                $start_query['select'][$table] = [];
+            } elseif ($start_query['select'][$table] == ['*'] || $fields = ['*']) {
+                // If either query wants all the fields, set the final query.
+                $start_query['select'][$table] = ['*'];
+                continue;
+            } elseif (!is_array($start_query['select'][$table])) {
+                // Make sure the final query select for the table is an array.
+                $start_query['select'][$table] = [$start_query['select'][$table]];
+            }
+
+            if (!is_array($fields)) {
+                $fields = [$fields];
+            }
+
+            // Merge the fields
+            $start_query['select'][$table] = array_merge($start_query['select'][$table], $fields);
+        }
+    }
 }

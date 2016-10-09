@@ -652,6 +652,7 @@ abstract class Table extends Page {
      * Ajax search, outputs HTML table replacement.
      */
     public function getSearch() {
+        Output::setJson(true);
         $this->action = 'list';
         $this->loadMainFields();
         $this->loadList();
@@ -3066,18 +3067,7 @@ abstract class Table extends Page {
     }
 
     /**
-     * loadList() obtains all the rows from the table
-
-     * Constructs a database query based on the following class variables:
-     * @param string $table->table			the table to query
-     * @param string $table->parentLink		the table name of the parent link (foreign key table)
-     * @param string $table->parentId		the id (foreign key) of the parentLink with which to link
-     * @param string $table->list_where		?
-     * @param string $table->accessControl	?
-     * @param string $table->sort			names of columns, separated by commas to sort by.
-
-     * @return stores result in $list class variable (no actual return result from the method)
-
+     * Build a query to select the list of entries.
      */
     protected function loadList() {
 
@@ -3087,17 +3077,28 @@ abstract class Table extends Page {
         }
 
         $query = [
-            'select' => [],
+            'select' => [$this->table => ['*']],
             'from' => $this->table,
             'join' => [],
             'where' => [],
-            'limit' => $this->maxPerPage,
-            'page' => $this->page_number,
             'indexed_by' => $this->getKey()
         ];
 
-        // Build the query.
+        // Add joins.
         $query['join'] = $this->getAccessTableJoins();
+        // TODO: This should be simplified with Database::filterQuery();
+        if ($this->joins) {
+            $query['join'] = array_merge($query['join'], $this->joins);
+            if (!empty($this->joinFields)) {
+                $query['fields'] = array_merge($query['fields'], $this->joinFields);
+            } else {
+                foreach ($this->joins as $join) {
+                    // Add default table joins.
+                    $table = isset($join[1]) ? $join[1] : (isset($join['join']) ? $join['join'] : (isset($join['left_join']) ? $join['left_join'] : ''));
+                    $query['fields'][] = [$table => ['*']];
+                }
+            }
+        }
 
         if ($this->parentLink && $this->parentId) {
             $query['where'][$this->parentLink] = $this->parentId;
@@ -3114,6 +3115,7 @@ abstract class Table extends Page {
                 $query['where'] = array_merge($this->subset[$this->cur_subset], $query['where']);
             }
         }
+
         if ($this->action == 'list' OR $this->action == 'export') {
             $this->additional_action_vars['ste'] = Request::get('ste');
             $this->filterQuery = Request::get('filter', Request::TYPE_ARRAY, Request::TYPE_ASSOC_ARRAY);
@@ -3133,7 +3135,8 @@ abstract class Table extends Page {
                     if (!empty($this->filters[$filter_values['filter']])) {
                         $settings = $this->filters[$filter_values['filter']];
                         $filter = new $settings['class']($settings);
-                        $filter->filterQuery($query, $filter_values);
+                        $filter_query = $filter->filterQuery($filter_values);
+                        Database::filterQuery($query, $filter_query);
                     }
                 }
             }
@@ -3148,20 +3151,6 @@ abstract class Table extends Page {
             }
         }
 
-        // Add the default joins.
-        if ($this->joins) {
-            $query['join'] = array_merge($query['join'], $this->joins);
-            if (!empty($this->joinFields)) {
-                $query['fields'] = array_merge($query['fields'], $this->joinFields);
-            } else {
-                foreach ($this->joins as $join) {
-                    // Add default table joins.
-                    $table = isset($join[1]) ? $join[1] : (isset($join['join']) ? $join['join'] : (isset($join['left_join']) ? $join['left_join'] : ''));
-                    $query['fields'][] = [$table => ['*']];
-                }
-            }
-        }
-
         if ($this->action == "autocomplete") {
             $query['fields'][] = [$this->getKey() => "`{$_POST['field']}`,`{$this->getKey()}`"];
             $query['order_by']['field'] = 'ASC';
@@ -3169,19 +3158,22 @@ abstract class Table extends Page {
             $query['fields'][] = [$this->table => ['*']];
         }
 
-        $query['join'] = array_unique($query['join']);
-
         // Most important
         if (!empty($this->accessControl)) {
             $query['where'] = array_merge($this->accessControl, $query['where']);
         }
 
+        // Limit to one entry per primary key of the original table.
+        $query['group_by'] = $this->getKey(true);
+
         // Get the page count.
-        $this->listCount = Database::getInstance()->countQuery([
-            'from' => $query['from'],
-            'join' => $query['join'],
-            'where' => $query['where'],
-        ]);
+        $this->listCount = Database::getInstance()->countQuery($query + ['as' => 'query'], true);
+
+        // Add limits
+        $query += [
+            'limit' => $this->maxPerPage,
+            'page' => $this->page_number,
+        ];
 
         // Get the list.
         $this->list = Database::getInstance()->selectQuery($query);

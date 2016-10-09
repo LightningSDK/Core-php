@@ -38,6 +38,12 @@ class Users extends Table {
         'mailing_list' => [
             'class' => 'Lightning\\Filter\\MailingList',
         ],
+        'roles' => [
+            'class' => 'Lightning\\Filter\\Roles',
+        ],
+        'permissions' => [
+            'class' => 'Lightning\\Filter\\Permissions',
+        ],
     ];
 
     protected $preset = [
