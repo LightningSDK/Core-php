@@ -23,6 +23,9 @@ class Token extends \Lightning\Model\TokenOverridable {}
 class Tracker extends \Lightning\Model\TrackerOverridable {}
 class User extends \Lightning\Model\UserOverridable {}
 
+namespace Lightning\Model\Mailing;
+class Lists extends \Lightning\Model\Mailing\ListsOverridable {}
+
 namespace Lightning\Tools;
 
 class ClientUser extends \Lightning\Tools\ClientUserOverridable {}
