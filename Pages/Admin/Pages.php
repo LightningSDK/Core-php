@@ -2,7 +2,6 @@
 
 namespace Lightning\Pages\Admin;
 
-use Lightning\Model\Page;
 use Lightning\Pages\Table;
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Navigation;
@@ -58,6 +57,15 @@ class Pages extends Table {
         $this->preset['url']['submit_function'] = function(&$output) {
             $output['url'] = Request::post('url', Request::TYPE_URL) ?: Request::post('title', Request::TYPE_URL);
         };
+
+        if (\Lightning\Tools\Configuration::get('css.editable')) {
+            $this->custom_buttons['css'] = [
+                'url' => '/admin/css',
+                'type' => Table::CB_LINK,
+                'target' => '_blank',
+                'text' => 'Edit CSS',
+            ];
+        }
 
         if (!empty($this->id)) {
             $this->getRow();

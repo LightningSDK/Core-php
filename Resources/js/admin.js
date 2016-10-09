@@ -89,3 +89,49 @@ lightning.admin.messages = {
         $container.animate({ scrollTop: $container.attr("scrollHeight") }, 500);
     }
 };
+
+(function(){
+    var self = lightning.admin.css = {
+        css_id: null,
+        version: 0,
+        init: function () {
+            $('#css-preview').click(self.preview);
+            $('#css-save').click(self.save);
+        },
+        update: function (url) {
+            $('link#managed_css').prop('href', url);
+        },
+        preview: function () {
+            if (self.css_id == undefined) {
+                self.css_id = parseInt(Math.random() * 1000000);
+            }
+            $.ajax({
+                url: '/admin/css',
+                type: 'POST',
+                data: {
+                    action: 'preview',
+                    scss: $('#scss_content').val(),
+                    id: self.css_id,
+                    token: lightning.vars.token,
+                },
+                success: function (data) {
+                    window.opener.lightning.admin.css.update('/admin/css?id=' + self.css_id + '&v=' + (self.version++) + '&action=preview');
+                }
+            });
+        },
+        save: function() {
+            $.ajax({
+                url: '/admin/css',
+                type: 'POST',
+                data: {
+                    action: 'save',
+                    scss: $('#scss_content').val(),
+                    token: lightning.vars.token,
+                },
+                success: function(data) {
+                    window.opener.lightning.admin.css.update(data.url + '?pv=' + (self.version++));
+                }
+            });
+        }
+    };
+})();
