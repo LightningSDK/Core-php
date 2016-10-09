@@ -48,12 +48,12 @@
                 newFilter.append($('<div class="small-11 medium-5 column"></div>').append(field));
             }
             self.filterContainer.append(newFilter);
-            this.search();
+            self.search();
         },
 
         removeFilter: function(e) {
             $(e.target).closest('.filter').remove();
-            this.search();
+            self.search();
         },
 
         /**
