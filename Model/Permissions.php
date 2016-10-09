@@ -2,7 +2,7 @@
 
 namespace Lightning\Model;
 
-class PermissionsOverridable {
+class PermissionsOverridable extends Object {
     /**
      * Default permission for admins.
      */
@@ -13,4 +13,7 @@ class PermissionsOverridable {
     const SEND_MAIL_MESSAGES = 5;
     const EDIT_USERS = 6;
     const EDIT_CMS = 7;
+
+    const TABLE = 'permission';
+    const PRIMARY_KEY = 'permission_id';
 }
