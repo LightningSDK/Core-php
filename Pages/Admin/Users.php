@@ -67,11 +67,20 @@ class Users extends Table {
     protected $importable = true;
 
     protected $links = [
+        'roles' => [
+            'display_name' => 'Roles',
+            'key' => 'role_id',
+            'table' => 'role',
+            'index' => 'user_role',
+            'display_column' => 'name',
+            'list' => 'compact',
+        ],
         'message_list' => [
             'display_name' => 'Mailing Lists',
             'key' => 'message_list_id',
             'index' => 'message_list_user',
             'display_column' => 'name',
+            'list' => 'compact',
         ],
         'user_tag' => [
             'display_name' => 'Tags',
@@ -80,6 +89,7 @@ class Users extends Table {
             'display_column' => 'name',
             'type' => 'autocomplete',
             'create' => true,
+            'list' => 'compact'
         ]
     ];
 
