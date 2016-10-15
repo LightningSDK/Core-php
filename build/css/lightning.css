@@ -8383,11 +8383,6 @@ table.table_form_table .list_user_tag span:hover {
   margin: 0;
 }
 
-.page-edit-links {
-  margin: 20px;
-  position: absolute;
-}
-
 .editor-active .reveal-modal {
   display: block;
   visibility: visible;
@@ -8908,6 +8903,12 @@ ul.tags a:hover:before {
 
 .cms_edit_image, .cms_save_image {
   position: relative !important;
+  z-index: 500;
+}
+
+.page-edit-links {
+  margin: 20px;
+  position: absolute;
   z-index: 500;
 }
 

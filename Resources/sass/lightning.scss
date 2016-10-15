@@ -154,11 +154,6 @@ table.table_form_table {
   }
 }
 
-.page-edit-links {
-  margin: 20px;
-  position: absolute;
-}
-
 // Allows editors to see hidden reveal modals.
 .editor-active .reveal-modal {
   display: block;
@@ -610,6 +605,12 @@ ul.tags{
   position: relative !important;
   z-index: 500;
 }
+.page-edit-links {
+  margin: 20px;
+  position: absolute;
+  z-index: 500;
+}
+
 pre.debug {
   white-space: pre-wrap;
 }
