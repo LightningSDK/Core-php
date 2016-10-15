@@ -30,10 +30,10 @@ class YouTube {
 
     public static function renderMarkup($options, $vars) {
         $output = YouTube::render($options['id'], [
-            'autoplay' => $options['autoplay'] ? true : false,
+            'autoplay' => !empty($options['autoplay']) ? true : false,
         ]);
-        if ($options['flex']) {
-            $output = '<div class="flex-video ' . ($options['widescreen'] ? 'widescreen' : '') . '">' . $output . '</div>';
+        if (!empty($options['flex'])) {
+            $output = '<div class="flex-video ' . (!empty($options['widescreen']) ? 'widescreen' : '') . '">' . $output . '</div>';
         }
         return $output;
     }
