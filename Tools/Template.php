@@ -131,6 +131,19 @@ class Template extends Singleton {
     }
 
     /**
+     * Markup renderer.
+     *
+     * @param array $options
+     * @param array $vars
+     *
+     * @return string
+     */
+    public static function renderMarkup($options, $vars) {
+        $sub_template = new Template();
+        return $sub_template->render($options['name'], true);
+    }
+
+    /**
      * Set a variable so it's accessible within the template.
      *
      * @param string $name

@@ -34,6 +34,13 @@ $conf = [
         'socket' => 'localhost:6379',
         'default_ttl' => 600,
     ],
+    'markup' => [
+        'renderers' => [
+            'form' => 'Lightning\\View\\Form',
+            'template' => 'Lightning\\Tools\\Template',
+            'youtube' => 'Lightning\\View\\Video\\YouTube',
+        ],
+    ],
     'language' => 'en_us',
     'template_dir' => 'Source/Templates',
     'temp_dir' => HOME_PATH . '/../tmp',
