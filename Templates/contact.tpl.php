@@ -9,8 +9,6 @@ use Lightning\Tools\ReCaptcha;
     <h1>Contact</h1>
 
     <form method="post" id="contact_form" data-abide>
-        <?= Form::renderTokenInput(); ?>
-
         <div>
             <label>Your Name:
                 <input type="text" name="name" id='name' value="<?=Field::defaultValue('name');?>" required />
