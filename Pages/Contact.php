@@ -8,7 +8,6 @@ namespace Lightning\Pages;
 
 use Lightning\Model\URL;
 use Lightning\Tools\Configuration;
-use Lightning\Tools\Form;
 use Lightning\Tools\Language;
 use Lightning\Tools\Mailer;
 use Lightning\Tools\Messenger;
@@ -97,12 +96,13 @@ class Contact extends PageView {
      */
     protected $contactAdminSent = 0;
 
+    protected $ignoreToken = true;
+
     /**
      * Override the constructor to initialize the form token.
      */
     public function __construct() {
         parent::__construct();
-        Form::requiresToken();
     }
 
     protected function hasAccess() {
