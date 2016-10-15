@@ -16,7 +16,7 @@ use Lightning\View\Page;
 
 class Auth extends Page {
 
-    protected $page = 'admin/social/auth';
+    protected $page = ['admin/social/auth', 'Lightning'];
 
     public function __construct() {
         parent::__construct();

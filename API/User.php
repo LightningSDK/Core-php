@@ -26,14 +26,14 @@ class User extends API {
         $email = Request::post('email', 'email');
         $pass = Request::post('password');
         $login_result = UserModel::login($email, $pass);
-        $data = array();
+        $data = [];
         if (!$login_result) {
             // BAD PASSWORD COMBO
             Messenger::error('Invalid password.');
         } else {
             $session = Session::getInstance();
             $session->setState(Session::STATE_APP);
-            $data['cookies'] = array('session' => $session->session_key);
+            $data['cookies'] = ['session' => $session->session_key];
             $data['user_id'] = ClientUser::getInstance()->id;
             Output::setJsonCookies(true);
             return $data;
@@ -80,7 +80,7 @@ class User extends API {
         $social_api->afterLogin();
 
         // Output the new cookie.
-        $data['cookies'] = array('session' => Session::getInstance()->session_key);
+        $data['cookies'] = ['session' => Session::getInstance()->session_key];
         $data['user_id'] = ClientUser::getInstance()->id;
         Output::json($data);
     }

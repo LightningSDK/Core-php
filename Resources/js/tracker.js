@@ -1,5 +1,7 @@
 (function() {
     var self = lightning.tracker = {
+        ready: false,
+        queue: [],
         events: {
             pageView: {
                 ga: 'pageview',
@@ -87,34 +89,25 @@
 
                     // Track the pageview
                     self.track(self.events.pageView);
-
-                    var events = lightning.get('trackerEvents');
-                    var type;
-                    var event;
-                    if (events) {
-                        for (var i in events) {
-                            type = events[i].type;
-                            // If the event isn't in the list, it's going to be tracked for google only and needs an action.
-                            event = self.events.hasOwnProperty(type) ? self.events[type] : {action: type, ga:'event'};
-                            self.track(event, {
-                                category: events[i].category,
-                                label: events[i].label,
-                            });
-                        }
-                    }
-
-                    // Track the split tests
-                    // TODO: These should be tracked in the backend which will relay to the code above.
-                    var splitTests = lightning.get('splitTest');
-                    if (splitTests) {
-                        for (var i in splitTests) {
-                            self.track(self.events.splitTest, {
-                                category: i,
-                                action: lightning.vars.splitTest[i],
-                            });
-                        }
+                    self.ready = true;
+                    for (var i in self.queue) {
+                        self.trackOnStartup(self.queue[i]);
                     }
                 });
+            }
+        },
+
+        trackOnStartup: function (lightningEvent) {
+            if (self.ready) {
+                type = lightningEvent.type;
+                // If the event isn't in the list, it's going to be tracked for google only and needs an action.
+                event = self.events.hasOwnProperty(type) ? self.events[type] : {action: type, ga:'event'};
+                self.track(event, {
+                    category: lightningEvent.category,
+                    label: lightningEvent.label,
+                });
+            } else {
+                self.queue.push(lightningEvent);
             }
         },
 

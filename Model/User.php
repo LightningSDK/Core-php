@@ -26,6 +26,7 @@ use Lightning\View\Field\Time;
  * @property string $email
  * @property string $first
  * @property string $last
+ * @property string $timezone
  * @property object $content
  * @property string $password
  * @property string $salt
@@ -65,7 +66,7 @@ class UserOverridable extends Object {
      * @return User|boolean
      */
     public static function loadByEmail($email) {
-        if ($details = Database::getInstance()->selectRow('user', array('email' => array('LIKE', $email)))) {
+        if ($details = Database::getInstance()->selectRow('user', ['email' => ['LIKE', $email]])) {
             return new static($details);
         }
         return false;
@@ -78,7 +79,7 @@ class UserOverridable extends Object {
      * @return User|boolean
      */
     public static function loadById($user_id) {
-        if ($details = Database::getInstance()->selectRow('user', array('user_id' => $user_id))) {
+        if ($details = Database::getInstance()->selectRow('user', ['user_id' => $user_id])) {
             return new static($details);
         }
         return false;
@@ -93,25 +94,29 @@ class UserOverridable extends Object {
      */
     public static function loadByTempKey($key) {
         if ($details = Database::getInstance()->selectRow(
-            array(
+            [
                 'from' => 'user_temp_key',
-                'join' => array(
+                'join' => [
                     'LEFT JOIN',
                     'user',
                     'using (`user_id`)',
-                )
-            ),
-            array(
+                ]
+            ],
+            [
                 'temp_key' => $key,
                 // The key is only good for 24 hours.
-                'time' => array('>=', time() - static::TEMP_KEY_TTL),
-            )
+                'time' => ['>=', time() - static::TEMP_KEY_TTL],
+            ]
         )) {
             return new static ($details);
         }
         return false;
     }
 
+    /**
+     * @deprecated
+     * @param $values
+     */
     public function update($values) {
         $this->__data = $values + $this->__data;
         Database::getInstance()->update('user', $values, ['user_id' => $this->id]);
@@ -225,7 +230,7 @@ class UserOverridable extends Object {
             $user_id = ClientUser::getInstance()->id;
             $salt = ClientUser::getInstance()->salt;
         } elseif (!$salt) {
-            $user = Database::getInstance()->selectRow('user', array('user_id' => $user_id));
+            $user = Database::getInstance()->selectRow('user', ['user_id' => $user_id]);
             $salt = $user['salt'];
         }
         // TODO: This should be stronger.
@@ -326,7 +331,7 @@ class UserOverridable extends Object {
             $user_id = $user['user_id'];
             return static::loadById($user_id);
         } else {
-            $user_id = $db->insert('user', $options + $user_data + ['created' => Time::today()]);
+            $user_id = $db->insert('user', $options + $user_data + ['created' => time()]);
             $user = static::loadById($user_id);
             $user->new = true;
             return $user;
@@ -345,11 +350,11 @@ class UserOverridable extends Object {
     public function subscribe($list_id) {
         if (Database::getInstance()->insert(
             'message_list_user',
-            array(
+            [
                 'message_list_id' => $list_id,
                 'user_id' => $this->id,
                 'time' => time(),
-            ),
+            ],
             true
         )) {
             // If a result was returned, they were added to the list.
@@ -408,13 +413,13 @@ class UserOverridable extends Object {
      */
     protected static function insertUser($email, $pass = null, $data = []) {
         $time = time();
-        $user_details = array(
+        $user_details = [
             'email' => Scrub::email(strtolower($email)),
             'created' => $time,
             'confirmed' => static::requiresConfirmation() ? static::UNCONFIRMED : static::CONFIRMED,
             // TODO: Need to get the referrer id.
             'referrer' => 0,
-        ) + $data;
+        ] + $data;
         if ($pass) {
             $salt = static::getSalt();
             $user_details['password'] = static::passHash($pass, $salt);
@@ -423,6 +428,13 @@ class UserOverridable extends Object {
         }
         $user_id = Database::getInstance()->insert('user', $user_details);
         return static::loadById($user_id);
+    }
+
+    public function __set($var, $value) {
+        if ($var == 'email') {
+            $value = strtolower($value);
+        }
+        parent::__set($var, $value);
     }
 
     /**
@@ -437,11 +449,14 @@ class UserOverridable extends Object {
      *
      * @return boolean
      *   Whether the password was updated.
+     *
+     * TODO: This should never be called with email or user_id, and should only change the current
+     * user's password. it should not modify the database until $user->save() is called.
      */
-    public function setPass($pass, $email='', $user_id = 0) {
+    public function setPass($pass, $email = '', $user_id = 0) {
         if ($email != '') {
             $where['email'] = strtolower($email);
-        } elseif ($user_id>0) {
+        } elseif ($user_id > 0) {
             $where['user_id'] = $user_id;
         } else {
             $where['user_id'] = $this->id;
@@ -450,10 +465,10 @@ class UserOverridable extends Object {
         $salt = $this->getSalt();
         return (boolean) Database::getInstance()->update(
             'user',
-            array(
-                'password' => $this->passHash($pass,$salt),
-                'salt' => bin2hex($salt),
-            ),
+            [
+                'password' => $this->password = $this->passHash($pass,$salt),
+                'salt' => $this->salt = bin2hex($salt),
+            ],
             $where
         );
     }
@@ -463,7 +478,7 @@ class UserOverridable extends Object {
      */
     public function admin_create($email, $first_name='', $last_name='') {
         $today = gregoriantojd(date('m'), date('d'), date('Y'));
-        $user_info = Database::getInstance()->selectRow('user', array('email' => strtolower($email)));
+        $user_info = Database::getInstance()->selectRow('user', ['email' => strtolower($email)]);
         if ($user_info['password'] != '') {
             // user exists with password
             // return user_id
@@ -533,8 +548,8 @@ class UserOverridable extends Object {
      * @param array $data
      *   The user input data.
      */
-    protected static function parseNames(&$data) {
-        if (!empty($data['full_name'])) {
+    public static function parseNames(&$data) {
+        if (isset($data['full_name'])) {
             $name = explode(' ', $data['full_name'], 2);
             $data['first'] = $name[0];
             if (!empty($name[1])) {
@@ -552,15 +567,15 @@ class UserOverridable extends Object {
         $reset_key = base64_encode($this->getSalt());
         Database::getInstance()->insert(
             'user_temp_key',
-            array(
+            [
                 'user_id' => $this->id,
                 'temp_key' => $reset_key,
                 'time' => time(),
-            ),
-            array(
+            ],
+            [
                 'temp_key' => $reset_key,
                 'time' => time(),
-            )
+            ]
         );
 
         // Send a message.
@@ -577,23 +592,23 @@ class UserOverridable extends Object {
     public function removeTempKey() {
         Database::getInstance()->delete(
             'user_temp_key',
-            array(
+            [
                 'user_id' => $this->id,
-            )
+            ]
         );
     }
 
     public static function removeExpiredTempKeys() {
         return Database::getInstance()->delete(
             'user_temp_key',
-            array(
-                'time' => array('<', time() - static::TEMP_KEY_TTL)
-            )
+            [
+                'time' => ['<', time() - static::TEMP_KEY_TTL]
+            ]
         );
     }
 
     public static function find_by_email($email) {
-        return Database::getInstance()->selectRow('user', array('email' => strtolower($email)));
+        return Database::getInstance()->selectRow('user', ['email' => strtolower($email)]);
     }
 
     /**
@@ -797,9 +812,9 @@ class UserOverridable extends Object {
      */
     public function merge_users($anon_user) {
         // FIRST MAKE SURE THIS USER IS ANONYMOUS
-        if (Database::getInstance()->check('user', array('user_id' => $anon_user, 'email' => ''))) {
+        if (Database::getInstance()->check('user', ['user_id' => $anon_user, 'email' => ''])) {
             // TODO: Basic information should be moved here, but this function should be overriden.
-            Database::getInstance()->delete('user', array('user_id' => $anon_user));
+            Database::getInstance()->delete('user', ['user_id' => $anon_user]);
         }
     }
 
@@ -852,31 +867,31 @@ class UserOverridable extends Object {
         }
         $this->permissions = Database::getInstance()->selectColumnQuery([
             'from' => 'user',
-            'join' => array(
-                array(
+            'join' => [
+                [
                     'LEFT JOIN',
                     'user_role',
                     'ON user_role.user_id = user.user_id'
-                ),
-                array(
+                ],
+                [
                     'LEFT JOIN',
                     'role_permission',
                     'ON role_permission.role_id=user_role.role_id',
-                ),
-                array(
+                ],
+                [
                     'LEFT JOIN',
                     'permission',
                     'ON role_permission.permission_id=permission.permission_id',
-                ),
-                array(
+                ],
+                [
                     'JOIN',
                     'role',
                     'ON  user_role.role_id=role.role_id',
-                )
-            ),
-            'where' => array(
-                array('user.user_id' => $this->id),
-            ),
+                ]
+            ],
+            'where' => [
+                ['user.user_id' => $this->id],
+            ],
             'select' => ['permission.permission_id', 'permission.permission_id'],
         ]);
     }

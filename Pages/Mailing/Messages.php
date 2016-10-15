@@ -6,6 +6,7 @@
 
 namespace Lightning\Pages\Mailing;
 
+use Lightning\Model\Permissions;
 use Lightning\Pages\Table;
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Database;
@@ -25,61 +26,63 @@ class Messages extends Table {
 
     protected $table = 'message';
 
-    protected $preset = array(
-        'never_resend' => array(
+    protected $preset = [
+        'never_resend' => [
             'type' => 'checkbox',
             'default' => 1,
-        ),
-        'template_id' => array(
+        ],
+        'template_id' => [
             'type' => 'lookup',
             'item_display_name' => 'title',
             'lookuptable'=>'message_template',
             'display_column'=>'title',
             'edit_only'=>true
-        ),
-        'send_date' => array(
+        ],
+        'send_date' => [
             'type' => 'datetime',
             'allow_blank' => true,
-        ),
-        'body' => array(
+        ],
+        'body' => [
             'type' => 'html',
             'editor' => 'full',
             'upload' => true,
             'url' => 'full',
-        )
-    );
+        ]
+    ];
 
-    protected $links = array(
-        'message_criteria' => array(
+    protected $links = [
+        'message_criteria' => [
             'list' => true,
             'index' => 'message_message_criteria',
             'key' => 'message_criteria_id',
             'option_name' => 'criteria_name',
             'display_name' => 'Criteria',
             'display_column' => 'criteria_name',
-        ),
-        'message_list' => array(
+        ],
+        'message_list' => [
             'list' => true,
             'index' => 'message_message_list',
             'key' => 'message_list_id',
             'option_name' => 'name',
             'display_name' => 'Lists',
             'display_column' => 'name',
-        ),
-    );
+        ],
+    ];
 
-    protected $action_fields = array(
-        'stats' => array(
+    protected $action_fields = [
+        'stats' => [
             'type' => 'link',
             'url' => '/admin/mailing/stats?message_id=',
+            'display_name' => 'Stats',
             'display_value' => '<img src="/images/lightning/chart.png" border="0">',
-        ),
-        'send' => array(
+        ],
+        'send' => [
             'type' => 'link',
             'url' => '/admin/mailing/send?id=',
+            'display_name' => 'Send',
             'display_value' => '<img src="/images/lightning/new_message.png" border="0">',
-        ),
-    );
+        ],
+    ];
 
     protected $custom_buttons = [
         'send' => [
@@ -96,8 +99,7 @@ class Messages extends Table {
      * Require admin privileges.
      */
     public function hasAccess() {
-        ClientUser::requireAdmin();
-        return true;
+        return ClientUser::requirePermission(Permissions::EDIT_MAIL_MESSAGES);
     }
 
     public function __construct() {
@@ -118,15 +120,15 @@ class Messages extends Table {
 
         // Find all the criteria added to this message
         $criteria_list = $db->select(
-            array(
+            [
                 'from' => 'message_message_criteria',
-                'join' => array(
+                'join' => [
                     'JOIN',
                     'message_criteria',
                     'USING (message_criteria_id)',
-                ),
-            ),
-            array('message_id' => $this->id)
+                ],
+            ],
+            ['message_id' => $this->id]
         );
 
         // See if any variables have been set.
@@ -135,17 +137,17 @@ class Messages extends Table {
             if (!empty($c['variables'])) {
                 // See what variables are required.
                 $vars = explode(',', $c['variables']);
-                $var_data = array();
+                $var_data = [];
                 foreach($vars as $v) {
                     $var_data[$v] = Request::post('var_' . $c['message_criteria_id'] . '_' . $v);
                 }
                 $db->update(
                     'message_message_criteria',
-                    array('field_values' => json_encode($var_data)),
-                    array(
+                    ['field_values' => json_encode($var_data)],
+                    [
                         'message_id' => Request::post('id', 'int'),
                         'message_criteria_id' => $c['message_criteria_id'],
-                    )
+                    ]
                 );
             }
         }
@@ -153,27 +155,27 @@ class Messages extends Table {
 
     public function getFields() {
         $cl = Request::get('criteria_list', 'explode', 'int');
-        $output = array();
+        $output = [];
         if (!empty($cl)) {
-            $fields = Database::getInstance()->select('message_criteria', array('message_criteria_id' => array('IN', $cl)));
+            $fields = Database::getInstance()->select('message_criteria', ['message_criteria_id' => ['IN', $cl]]);
             foreach($fields as $f) {
                 if (!empty($f['variables'])) {
                     $values = Database::getInstance()->selectRow(
                         'message_message_criteria',
-                        array(
+                        [
                             'message_id' => Request::get('message_id', 'int'),
                             'message_criteria_id' => $f['message_criteria_id'],
-                        )
+                        ]
                     );
-                    $output[] = array(
+                    $output[] = [
                         'criteria_id' => $f['message_criteria_id'],
                         'variables' => explode(',',$f['variables']),
                         'values' => json_decode($values['field_values']),
-                    );
+                    ];
                 }
             }
         }
 
-        Output::json(array('criteria' => $output));
+        Output::json(['criteria' => $output]);
     }
 }

@@ -2,8 +2,8 @@
 
 namespace Lightning\Pages\Admin;
 
+use Lightning\Model\Permissions;
 use Lightning\Tools\ClientUser;
-use Lightning\Tools\Database;
 use Lightning\Tools\Output;
 use Lightning\Tools\Request;
 use Lightning\View\API;
@@ -12,7 +12,7 @@ use Lightning\Model\CMS as CMSModel;
 class CMS extends API {
 
     public function hasAccess() {
-        return ClientUser::requireAdmin();
+        return ClientUser::requirePermission(Permissions::EDIT_CMS);
     }
 
     /**
@@ -21,7 +21,7 @@ class CMS extends API {
     public function postSave() {
         if (ClientUser::getInstance()->isAdmin()) {
             $name = Request::post('cms');
-            $content = Request::post('content', 'html', '', '', true);
+            $content = Request::post('content', Request::TYPE_HTML, '', '', true);
             CMSModel::insertOrUpdate(
                 ['name' => $name, 'content' => $content, 'last_modified' => time()],
                 ['content' => $content, 'last_modified' => time()]

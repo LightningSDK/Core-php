@@ -14,7 +14,7 @@ class Permissions extends Table {
     ];
 
     protected $searchable = true;
-    protected $sort       = 'permission_id ASC';
+    protected $sort       = 'permission_id';
     protected $rowClick   = ['type' => 'none'];
 
     protected function hasAccess() {

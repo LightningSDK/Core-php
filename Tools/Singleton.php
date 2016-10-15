@@ -63,7 +63,7 @@ class Singleton {
         // There may be additional args passed to this function.
         $args = func_get_args();
         array_shift($args);
-        return call_user_func_array(array($class, 'createInstance'), $args);
+        return call_user_func_array([$class, 'createInstance'], $args);
     }
 
     protected static function createInstance() {

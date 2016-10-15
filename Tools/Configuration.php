@@ -17,7 +17,7 @@ class Configuration {
      *
      * @var array
      */
-    protected static $configuration = array();
+    protected static $configuration = [];
 
     /**
      * Get a config variable's value.
@@ -118,10 +118,10 @@ class Configuration {
      *   A list of files.
      */
     public static function getConfigurations() {
-        return array(
+        return [
             'source' => CONFIG_PATH . '/config.inc.php',
             'internal' => HOME_PATH . '/Lightning/Config.php'
-        );
+        ];
     }
 
     /**

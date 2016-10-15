@@ -14,7 +14,7 @@ abstract class Base extends Page {
     protected $numberFormat = 'float';
     protected $width = 600;
     protected $height = 450;
-    protected $page = 'chart';
+    protected $page = ['chart', 'Lightning'];
     protected $ajax = false;
 
     public function __construct() {

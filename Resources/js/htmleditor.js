@@ -18,7 +18,7 @@
                         self.initEditor(i);
                     }
                 } else if (editors[i].editor_type == 'ckeditor') {
-                    var x = function(j){
+                    (function(j){
                         CKEDITOR.scriptLoader.queue(CKEDITOR.getUrl('config.js'), function(){
                             // Init the CKEditor Config
                             if (typeof CKEDITOR.editorConfig == "function") {
@@ -42,7 +42,7 @@
                                 self.initEditor(j);
                             }
                         });
-                    }(i);
+                    })(i);
                 }
             }
             // For div based editors, a presave function must be called to include it in the form.
@@ -87,6 +87,7 @@
                 // and will result in the original replacing the edited content.
                 delete editor_settings.content_rendered;
             }
+            editor.addClass('editor-active');
             if (editor_settings.editor_type == 'tinymce') {
                 tinymce.init(editor_settings);
             } else if (editor_settings.editor_type == 'ckeditor') {
@@ -102,6 +103,8 @@
          *   The name of the editor.
          */
         deactivateEditor: function(editor_id) {
+            var editor = $('#' + editor_id);
+            editor.removeClass('editor-active');
             if (lightning.vars.htmleditors[editor_id].editor_type == 'tinymce') {
                 for (var i in tinymce.editors) {
                     if (tinymce.editors[i].id == editor_id) {

@@ -125,7 +125,7 @@ class ChartData {
      */
     public function output() {
         if (empty($this->data)) {
-            $this->data[] = array();
+            $this->data[] = [];
         }
 
         $colors = new ColorIterator();
@@ -141,9 +141,9 @@ class ChartData {
             $colors->next();
         }
 
-        $output = array(
+        $output = [
             'datasets' => array_values($this->data)
-        );
+        ];
         if (!empty($this->Xlabels)) {
             $output['labels'] = $this->Xlabels;
         }

@@ -9,7 +9,7 @@ class Blog extends Schema {
     const TABLE = 'blog';
 
     public function getColumns() {
-        return array(
+        return [
             'blog_id' => $this->autoincrement(),
             'user_id' => $this->int(true),
             'time' => $this->int(true),
@@ -18,16 +18,16 @@ class Blog extends Schema {
             'keywords' => $this->varchar(255),
             'header_image' => $this->varchar(255),
             'body' => $this->text(Schema::MEDIUMTEXT),
-        );
+        ];
     }
 
     public function getKeys() {
-        return array(
+        return [
             'primary' => 'blog_id',
-            'url' => array(
-                'columns' => array('url'),
+            'url' => [
+                'columns' => ['url'],
                 'unique' => true,
-            ),
-        );
+            ],
+        ];
     }
 }

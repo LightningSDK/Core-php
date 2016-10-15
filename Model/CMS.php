@@ -28,7 +28,7 @@ class CMSOverridable extends Object {
      * @return CMS
      */
     public static function loadByName($name) {
-        $content = Database::getInstance()->selectRow(static::TABLE, array('name' => $name));
+        $content = Database::getInstance()->selectRow(static::TABLE, ['name' => $name]);
         if ($content) {
             return new static($content);
         } else {

@@ -2,11 +2,11 @@
 
 namespace Lightning\Tools\Cache;
 
-class StaticCache extends BaseCache {
+class StaticCache extends CacheController {
 
     protected static $cache = [];
 
-    public function __construct($settings = array()) {
+    public function __construct($settings = []) {
 
     }
 

@@ -48,16 +48,24 @@ lightning.admin.messageEditor = {
     }
 };
 lightning.admin.messages = {
-    send: function(type) {
+    send: function(type, n) {
         // Start AJAX transmission.
         $('#message_status').html('Starting ...\n');
-        $('.mail_buttons').fadeOut();
+        var mail_buttons = $('.mail_buttons').fadeOut();
         var last_response_len = 0;
         var self = this;
+        var data = {
+            token: lightning.vars.token,
+            action: 'send-' + type,
+            id: lightning.vars.message_id
+        };
+        if (type == 'random') {
+            data.count = n;
+        }
         $.ajax({
-            url: '/admin/mailing/send?action=send-' + type + '&id=' + lightning.vars.message_id,
+            url: '/admin/mailing/send',
             dataType: 'text',
-            data: {token: lightning.vars.token},
+            data: data,
             type: 'POST',
             stream: true,
             xhrFields: {
@@ -68,10 +76,10 @@ lightning.admin.messages = {
                 }
             },
             complete: function() {
-                $('.mail_buttons').fadeIn();
+                mail_buttons.fadeIn();
             },
             error: function() {
-                $('.mail_buttons').fadeIn();
+                mail_buttons.fadeIn();
             }
         });
     },
@@ -81,3 +89,49 @@ lightning.admin.messages = {
         $container.animate({ scrollTop: $container.attr("scrollHeight") }, 500);
     }
 };
+
+(function(){
+    var self = lightning.admin.css = {
+        css_id: null,
+        version: 0,
+        init: function () {
+            $('#css-preview').click(self.preview);
+            $('#css-save').click(self.save);
+        },
+        update: function (url) {
+            $('link#managed_css').prop('href', url);
+        },
+        preview: function () {
+            if (self.css_id == undefined) {
+                self.css_id = parseInt(Math.random() * 1000000);
+            }
+            $.ajax({
+                url: '/admin/css',
+                type: 'POST',
+                data: {
+                    action: 'preview',
+                    scss: $('#scss_content').val(),
+                    id: self.css_id,
+                    token: lightning.vars.token,
+                },
+                success: function (data) {
+                    window.opener.lightning.admin.css.update('/admin/css?id=' + self.css_id + '&v=' + (self.version++) + '&action=preview');
+                }
+            });
+        },
+        save: function() {
+            $.ajax({
+                url: '/admin/css',
+                type: 'POST',
+                data: {
+                    action: 'save',
+                    scss: $('#scss_content').val(),
+                    token: lightning.vars.token,
+                },
+                success: function(data) {
+                    window.opener.lightning.admin.css.update(data.url + '?pv=' + (self.version++));
+                }
+            });
+        }
+    };
+})();

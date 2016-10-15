@@ -21,7 +21,7 @@ class Location {
         if ($start = self::zipToCoordinates($zip)) {
             return self::areaQuery($start['lat'], $start['long'], $miles);
         }
-        return array();
+        return [];
     }
 
     /**
@@ -34,7 +34,7 @@ class Location {
      *   The longitude and latitude.
      */
     public static function zipToCoordinates($zip) {
-        return Database::getInstance()->selectRow('zipcode', array('zip' => $zip));
+        return Database::getInstance()->selectRow('zipcode', ['zip' => $zip]);
     }
 
     /**
@@ -60,10 +60,10 @@ class Location {
         $lonE = rad2deg(deg2rad($long) + atan2(sin(deg2rad(90)) * sin($miles / $r) * cos(deg2rad($lat)), cos($miles / $r) - sin(deg2rad($lat)) * sin(deg2rad($latN))));
         $lonW = rad2deg(deg2rad($long) + atan2(sin(deg2rad(270)) * sin($miles / $r) * cos(deg2rad($lat)), cos($miles / $r) - sin(deg2rad($lat)) * sin(deg2rad($latN))));
 
-        return array(
-            'lat' => array('BETWEEN', $latS, $latN),
-            'long' => array('BETWEEN', $lonW, $lonE),
-        );
+        return [
+            'lat' => ['BETWEEN', $latS, $latN],
+            'long' => ['BETWEEN', $lonW, $lonE],
+        ];
     }
 
     /**
@@ -96,7 +96,7 @@ class Location {
     }
 
     public static function getStateOptions() {
-        return array(
+        return [
             'AL' => 'Alabama','AK' => 'Alaska','AZ' => 'Arizona','AR' => 'Arkansas','CA' => 'California',
             'CO' => 'Colorado','CT' => 'Connecticut','DE' => 'Delaware','DC' => 'District of Columbia',
             'FL' => 'Florida','GA' => 'Georgia','HI' => 'Hawaii','ID' => 'Idaho','IL' => 'Illinois',
@@ -109,7 +109,7 @@ class Location {
             'RI' => 'Rhode Island','SC' => 'South Carolina','SD' => 'South Dakota',
             'TN' => 'Tennessee','TX' => 'Texas','UT' => 'Utah','VT' => 'Vermont','VA' => 'Virginia',
             'WA' => 'Washington','WV' => 'West Virginia','WI' => 'Wisconsin','WY' => 'Wyoming'
-        );
+        ];
     }
 
     /**
@@ -139,7 +139,7 @@ class Location {
     }
 
     public static function getCountryOptions() {
-        return array(
+        return [
             "US"=>"United States","CA"=>"Canada","UK"=>"United Kingdom","AC"=>"Ascension Island",
             "AF"=>"Afghanistan","AL"=>"Albania","DZ"=>"Algeria","AD"=>"Andorra","AO"=>"Angola",
             "AI"=>"Anguilla","AQ"=>"Antarctica","AG"=>"Antigua And Barbuda","AR"=>"Argentina Republic",
@@ -198,6 +198,6 @@ class Location {
             "VE"=>"Venezuela","VN"=>"Viet Nam","VI"=>"Virgin Islands (USA)",
             "WF"=>"Wallis And Futuna Islands","EH"=>"Western Sahara","YE"=>"Yemen",
             "YU"=>"Yugoslavia","ZR"=>"Zaire","ZM"=>"Zambia","ZW"=>"Zimbabwe"
-        );
+        ];
     }
 }

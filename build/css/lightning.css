@@ -8329,6 +8329,14 @@ th.hide-for-touch {
   margin-right: 10px;
 }
 
+table.table_form_table input {
+  margin: 0;
+}
+table.table_form_table .list_user_tag span:hover {
+  background-color: #151a56;
+  color: white;
+}
+
 .table_form_table, #new_comment_box table {
   padding-left: 0.9375rem;
   padding-right: 0.9375rem;
@@ -8373,6 +8381,13 @@ th.hide-for-touch {
   border: 0;
   padding: 0;
   margin: 0;
+}
+
+.editor-active .reveal-modal {
+  display: block;
+  visibility: visible;
+  position: inherit !important;
+  border: 2px solid red;
 }
 
 .categories_box {
@@ -8430,7 +8445,8 @@ div.captcha_container input {
   clear: both;
 }
 
-.table_container {
+.autocomplete_options {
+  z-index: 5;
   max-height: 200px;
   overflow-y: scroll;
   position: absolute;
@@ -8438,7 +8454,7 @@ div.captcha_container input {
   border: 1px solid #cccccc;
   padding: 5px;
 }
-.table_container span {
+.autocomplete_options span {
   display: block;
 }
 
@@ -8887,6 +8903,12 @@ ul.tags a:hover:before {
 
 .cms_edit_image, .cms_save_image {
   position: relative !important;
+  z-index: 500;
+}
+
+.page-edit-links {
+  margin: 20px;
+  position: absolute;
   z-index: 500;
 }
 

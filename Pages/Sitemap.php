@@ -9,7 +9,7 @@ use Lightning\View\API;
 
 class Sitemap extends API {
 
-    protected $urls = array();
+    protected $urls = [];
 
     public function get() {
         print '<?xml version="1.0" encoding="UTF-8"?>

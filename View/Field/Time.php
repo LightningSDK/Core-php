@@ -4,6 +4,7 @@ namespace Lightning\View\Field;
 
 use DateTime;
 use DateTimeZone;
+use Lightning\Tools\ClientUser;
 use Lightning\Tools\Request;
 use Lightning\View\Field;
 
@@ -88,6 +89,25 @@ class Time extends Field {
         return self::$days[$day];
     }
 
+    public static function getTimeZoneOffset($timezone) {
+        if (empty($timezone)) {
+            return 0;
+        } else {
+            if ($timezone == 'user') {
+                $timezone = ClientUser::getInstance()->timezone;
+                if (empty($timezone)) {
+                    $timezone = date_default_timezone_get();
+                }
+                if (empty($timezone)) {
+                    return 0;
+                }
+            }
+            $tz = new DateTimeZone($timezone);
+            $now = new DateTime('now', $tz);
+            return $tz->getOffset($now);
+        }
+    }
+
     /**
      * Get the number of minutes into the day.
      *
@@ -108,66 +128,105 @@ class Time extends Field {
         return ($hours * 60) + $minutes;
     }
 
-    public static function getTime($id, $allow_blank = true) {
-        $h = Request::get($id .'_h', 'int');
-        $i = Request::get($id .'_i');
+    /**
+     * Get an int time from the posted input.
+     *
+     * @param $id
+     * @param bool $allow_blank
+     * @param null $timezone
+     * @return int
+     */
+    public static function getTime($id, $allow_blank = true, $timezone = null) {
+        $h = Request::get($id .'_h', Request::TYPE_INT);
+        $i = Request::get($id .'_i', Request::TYPE_INT);
         $a = Request::get($id .'_a');
         if (empty($h)) {
             if ($allow_blank) {
                 return 0;
             } else {
-                $time = explode("/",date("h/i/a",time()));
+                $time = explode('/', date('h/i/a', time()));
                 $h = $time[0];
                 $i = $time[1];
                 $a = $time[2];
             }
         }
-        return self::getMinutes($h, $i, $a);
+
+        // Get offset in minutes.
+        $offset = self::getTimeZoneOffset($timezone) / 60;
+
+        // Subtract the offset from the input time.
+        $time = self::getMinutes($h, $i, $a) - $offset;
+
+        // Normalize the time.
+        $time = self::normalizeTime($time);
+
+        return $time;
     }
 
-    public static function getDateTime($id, $allow_blank = true) {
-        $m = Request::get($id .'_m', 'int');
-        $d = Request::get($id .'_d', 'int');
-        $y = Request::get($id .'_y', 'int');
-        $h = Request::get($id .'_h', 'int');
+    public static function getDateTime($id, $allow_blank = true, $timezone = null) {
+        $m = Request::get($id . '_m', Request::TYPE_INT);
+        $d = Request::get($id . '_d', Request::TYPE_INT);
+        $y = Request::get($id . '_y', Request::TYPE_INT);
+        $h = Request::get($id . '_h', Request::TYPE_INT);
         if ($h == 12) {
             $h = 0;
         }
-        $i = str_pad(Request::get($id .'_i', 'int'), 2, 0, STR_PAD_LEFT);
+        $i = str_pad(Request::get($id .'_i', Request::TYPE_INT), 2, 0, STR_PAD_LEFT);
         $h += Request::get($id . '_a', '', '', 'AM') == 'AM' ? 0 : 12;
 
         if ($allow_blank && (empty($m) || empty($d) || empty($y) || empty($h))) {
             return 0;
         }
 
-        return gmmktime($h, $i, 0, $m, $d, $y);
+        // Get offset.
+        $offset = self::getTimeZoneOffset($timezone);
+
+        // Subtract the offset from the input time.
+        return gmmktime($h, $i, 0, $m, $d, $y) - $offset;
+    }
+
+    public static function normalizeTime($time) {
+        while ($time > 0) {
+            $time -= 60 * 24;
+        }
+        while ($time < 0) {
+            $time += 60 * 24;
+        }
+        return $time;
     }
 
     public static function printDate($value) {
-        if ($value == 0) return '';
-        $date = explode('/',jdtogregorian($value));
-        return "{$date[0]}/{$date[1]}/{$date[2]}";
-    }
-
-    public static function printTime($value) {
         if ($value == 0) {
             return '';
         }
+        return jdtogregorian($value);
+    }
+
+    public static function printTime($value, $timezone = null) {
+        if ($value == 0) {
+            return '';
+        }
+
+        // Add the offset in minutes.
+        $value += self::getTimeZoneOffset($timezone) / 60;
+        $value = self::normalizeTime($value);
+
         $i = str_pad($value % 60, 2, 0, STR_PAD_LEFT);
         $h = ($value - $i) / 60;
         if ($h > 12) {
-            $a = "PM";
+            $a = 'PM';
             $h -= 12;
         } else {
-            $a = "AM";
+            $a = 'AM';
         }
         return "{$h}:{$i} {$a}";
     }
 
-    public static function printDateTime($value) {
+    public static function printDateTime($value, $timezone = null) {
         if (empty($value)) {
             return '';
         } else {
+            $value += self::getTimeZoneOffset($timezone);
             $date = new Datetime('@' . $value, new DateTimeZone('UTC'));
             return $date->format('m/d/Y h:ia');
         }
@@ -175,7 +234,7 @@ class Time extends Field {
 
     public static function datePop($field, $value, $allow_zero, $first_year = 0) {
         if (!$allow_zero && ($value == 0 || $value == '')) {
-            $date = array(date('m'), date('d'), date('Y'));
+            $date = [date('m'), date('d'), date('Y')];
         } else {
             $date = explode('/', jdtogregorian($value));
         }
@@ -187,53 +246,56 @@ class Time extends Field {
         return $output;
     }
 
-    public static function timePop($field, $value = null, $allow_zero = false) {
+    public static function timePop($field, $value = null, $allow_zero = false, $timezone = null) {
         if (!$allow_zero && empty($value)) {
-            $time = explode("/", date("h/i/a", time()));
+            $time = explode('/', date('h/i/a', time()));
             $h = $time[0];
             $i = $time[1];
             $a = $time[2];
             if ($a == 'PM') $h += 12;
             $value = ($h * 60) + $i;
         } else {
+            $value += self::getTimeZoneOffset($timezone) / 60;
+            self::normalizeTime($value);
             $i = $value % 60;
             $h = ($value - $i) / 60;
             if ($h > 12) {
-                $a = "PM";
+                $a = 'PM';
                 $h -= 12;
             } else {
-                $a = "AM";
+                $a = 'AM';
             }
         }
 
-        $output = self::hourPop($field."_h", $h, $allow_zero) . ':';
+        $output = self::hourPop($field . '_h', $h, $allow_zero) . ':';
         $output .= self::minutePop($field . '_i', empty($value) ? '' : $i, $allow_zero);
         $output .= ' ' . self::APPop($field . '_a', $a, $allow_zero);
         return $output;
     }
 
-    public static function dateTimePop($field, $value, $allow_zero, $first_year = 0) {
+    public static function dateTimePop($field, $value, $allow_zero, $first_year = 0, $timezone = null) {
         if (!$allow_zero && empty($value)) {
             $value = time();
         }
 
         if (empty($value)) {
-            $time = array(0,0,0,0,0,0,0);
+            $time = [0,0,0,0,0,0,0];
         } else {
+            $value += self::getTimeZoneOffset($timezone);
             $date = new DateTime('@' . $value, new DateTimeZone('UTC'));
             $time = explode('/', $date->format('m/d/Y/h/i/s/a'));
         }
-        $output = self::monthPop($field."_m", $time[0], $allow_zero, '', array('class' => 'dateTimePop')) . ' / ';
-        $output .= self::dayPop($field."_d", $time[1], $allow_zero, array('class' => 'dateTimePop')) . ' / ';
-        $output .= self::yearPop($field."_y", $time[2], $allow_zero, $first_year, null, array('class' => 'dateTimePop')) . ' at ';
-        $output .= self::hourPop($field."_h", $time[3], $allow_zero, array('class' => 'dateTimePop')) . ':';
-        $output .= self::minutePop($field."_i", empty($value) ? null : $time[4], $allow_zero, array('class' => 'dateTimePop')) . ' ';
-        $output .= self::APPop($field."_a", $time[6], $allow_zero, array('class' => 'dateTimePop'));
+        $output = self::monthPop($field . "_m", $time[0], $allow_zero, ['class' => 'dateTimePop']) . ' / ';
+        $output .= self::dayPop($field . "_d", $time[1], $allow_zero, ['class' => 'dateTimePop']) . ' / ';
+        $output .= self::yearPop($field . "_y", $time[2], $allow_zero, $first_year, null, ['class' => 'dateTimePop']) . ' at ';
+        $output .= self::hourPop($field . "_h", $time[3], $allow_zero, ['class' => 'dateTimePop']) . ':';
+        $output .= self::minutePop($field . "_i", empty($value) ? null : $time[4], $allow_zero, ['class' => 'dateTimePop']) . ' ';
+        $output .= self::APPop($field . "_a", $time[6], $allow_zero, ['class' => 'dateTimePop']);
         return $output;
     }
 
-    public static function hourPop($field, $value = '', $allow_zero = false, $attributes = array()) {
-        $values = array();
+    public static function hourPop($field, $value = '', $allow_zero = false, $attributes = []) {
+        $values = [];
         if ($allow_zero) {
             $values[''] = '';
         }
@@ -261,7 +323,7 @@ class Time extends Field {
      * @return string
      *   The rendered HTML.
      */
-    public static function minutePop($field, $value = '', $allow_zero = false, $attributes = array()) {
+    public static function minutePop($field, $value = '', $allow_zero = false, $attributes = []) {
         $values = array_combine(range(0, 9), range(0, 9));
         foreach ($values as &$value) {
             $value = '0' . $value;
@@ -293,12 +355,12 @@ class Time extends Field {
      * @return string
      *   The rendered HTML
      */
-    public static function APPop($field, $value = '', $allow_zero = false, $attributes = array()) {
-        $values = array();
+    public static function APPop($field, $value = '', $allow_zero = false, $attributes = []) {
+        $values = [];
         if ($allow_zero) {
             $values[''] = '';
         }
-        $values += array('AM' => 'AM', 'PM' => 'PM');
+        $values += ['AM' => 'AM', 'PM' => 'PM'];
 
         // Set the default class.
         BasicHTML::setDefaultClass($attributes, 'timePop');
@@ -307,8 +369,8 @@ class Time extends Field {
         return BasicHTML::select($field, $values, strtoupper($value), $attributes);
     }
 
-    public static function dayPop($field, $day=0, $allow_zero = false, $attributes = array()) {
-        $values = array();
+    public static function dayPop($field, $day = 0, $allow_zero = false, $attributes = []) {
+        $values = [];
         if ($allow_zero) {
             $values[''] = '';
         }
@@ -321,8 +383,8 @@ class Time extends Field {
         return BasicHTML::select($field, $values, intval($day), $attributes);
     }
 
-    public static function monthPop($field, $month = 0, $allow_zero = false, $attributes = array()) {
-        $values = array();
+    public static function monthPop($field, $month = 0, $allow_zero = false, $attributes = []) {
+        $values = [];
         if ($allow_zero) {
             $values[''] = '';
         }
@@ -336,8 +398,8 @@ class Time extends Field {
         return BasicHTML::select($field, $values, intval($month), $attributes);
     }
 
-    public static function yearPop($field, $year = 0, $allow_zero = false, $first_year = null, $last_year = null, $attributes = array()) {
-        $values = array();
+    public static function yearPop($field, $year = 0, $allow_zero = false, $first_year = null, $last_year = null, $attributes = []) {
+        $values = [];
         if ($allow_zero) {
             $values[''] = '';
         }

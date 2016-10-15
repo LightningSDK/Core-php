@@ -66,7 +66,7 @@ class BasicHTML {
         $required = !empty($attributes['required']) ? 'required ' : '';
         foreach ($options as $value => $label) {
             $checked = $default === $value ? 'CHECKED="checked" ' : '';
-            $output .= '<label><input type="radio" name="' . $name . '" value="' . $value . '" ' . $checked . $required . ' /> ' . $label . '</label>';
+            $output .= '<label><input type="radio" name="' . $name . '" value="' . $value . '" ' . $checked . $required . ' /> <span>' . $label . '</span></label>';
         }
 
         return $output . '</div>';
@@ -83,7 +83,7 @@ class BasicHTML {
         return $output . '</div>';
     }
 
-    public static function text($id, $value, $attributes = []) {
+    public static function text($id, $value = '', $attributes = []) {
         // This only applies to text fields.
         if (empty($attributes['max_length']) && !empty($attributes['size'])) {
             $attributes['max_length'] = $attributes['size'];

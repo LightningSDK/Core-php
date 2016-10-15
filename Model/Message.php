@@ -40,7 +40,7 @@ class MessageOverridable extends Object {
      *
      * @var array
      */
-    protected $customVariables = array();
+    protected $customVariables = [];
 
     /**
      * The combined template and message without variables filled.
@@ -54,21 +54,21 @@ class MessageOverridable extends Object {
      *
      * @var array
      */
-    protected $defaultVariables = array();
+    protected $defaultVariables = [];
 
     /**
      * Custom variables to replace in the message, read from templates.
      *
      * @var array
      */
-    protected $internalCustomVariables = array();
+    protected $internalCustomVariables = [];
 
     /**
      * The formatted message contents.
      *
      * @var array
      */
-    protected $formattedMessage = array();
+    protected $formattedMessage = [];
 
     /**
      * The mailing lists that will receive the message.
@@ -120,6 +120,20 @@ class MessageOverridable extends Object {
     protected $user;
 
     /**
+     * Whether to deliver a random subset.
+     *
+     * @var boolean
+     */
+    protected $random = false;
+
+    /**
+     * Whether to limit the number of deliveries.
+     *
+     * @var integer
+     */
+    protected $limit = 0;
+
+    /**
      * Loads a message either from the database or create it from scratch for
      * custom messages.
      *
@@ -147,6 +161,14 @@ class MessageOverridable extends Object {
         $this->setCombinedMessageTemplate();
         
         $this->loadVariablesFromTemplate();
+    }
+
+    public function setRandom($random) {
+        $this->random = $random;
+    }
+
+    public function setLimit($limit) {
+        $this->limit = $limit;
     }
 
     /**
@@ -195,7 +217,7 @@ class MessageOverridable extends Object {
      * @param array $values
      *   A list of variable values keyed by variable names.
      */
-    public function resetCustomVariables($values = array()) {
+    public function resetCustomVariables($values = []) {
         $this->customVariables = $values;
     }
 
@@ -203,7 +225,7 @@ class MessageOverridable extends Object {
      * Parse the template for {VARIABLE=VALUE} tags.
      */
     protected function loadVariablesFromTemplate() {
-        $set_variable = array();
+        $set_variable = [];
         preg_match_all('/{([a-z_]+)=(.*)}/imU', $this->combinedMessageTemplate, $set_variable);
         foreach ($set_variable[1] as $index => $var) {
             // Save the variable value.
@@ -252,10 +274,10 @@ class MessageOverridable extends Object {
      * This function creates it.
      */
     protected function setDefaultTemplate() {
-        $this->template = array(
+        $this->template = [
             'subject' => 'A message from ' . Configuration::get('site.name'),
             'body' => '{CONTENT_BODY}',
-        );
+        ];
     }
 
     /**
@@ -522,6 +544,13 @@ class MessageOverridable extends Object {
             }
         }
 
+        if (!empty($this->limit)) {
+            $query['limit'] = $this->limit;
+        }
+        if (!empty($this->random)) {
+            $query['order_by'] = [['expression' => 'RAND()']];
+        }
+
         return $query;
     }
 
@@ -601,7 +630,7 @@ class MessageOverridable extends Object {
     public function setTemplate($template_id) {
         $this->template = Database::getInstance()->selectRow(
             'message_template',
-            array('template_id' => $template_id)
+            ['template_id' => $template_id]
         );
     }
 }

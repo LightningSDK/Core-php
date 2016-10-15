@@ -14,30 +14,30 @@ class ListUsers extends Table {
     protected $key = 'user_id';
 
     protected $accessTable = 'message_list_user';
-    protected $fields = array(
-        'user_id' => array(),
-        'email' => array(
+    protected $fields = [
+        'user_id' => [],
+        'email' => [
             'type' => 'email',
-        ),
-        'last' => array(
+        ],
+        'last' => [
             'type' => 'string',
-        ),
-        'first' => array(
+        ],
+        'first' => [
             'type' => 'string',
-        ),
-    );
+        ],
+    ];
 
-    protected $action_fields = array(
-        'select' => array(
+    protected $action_fields = [
+        'select' => [
             'type' => 'checkbox',
             'display_name' => '',
-        )
-    );
+        ]
+    ];
 
-    protected $rowClick = array(
+    protected $rowClick = [
         'type' => 'url',
         'url' => '/admin/users?id=',
-    );
+    ];
 
     protected $editable = false;
     protected $deleteable = false;
@@ -48,15 +48,15 @@ class ListUsers extends Table {
         $list_id = Request::get('list', 'int');
         if ($list_id === 0) {
             Template::getInstance()->set('title', 'Users not on any mailing list.');
-            $this->accessTableWhere = array(
-                'message_list_id' => array('IS NULL'),
-            );
+            $this->accessTableWhere = [
+                'message_list_id' => ['IS NULL'],
+            ];
         } elseif ($list_id > 0) {
-            $list = Database::getInstance()->selectField('name', 'message_list', array('message_list_id' => $list_id));
+            $list = Database::getInstance()->selectField('name', 'message_list', ['message_list_id' => $list_id]);
             Template::getInstance()->set('title', "Users on list {$list}.");
-            $this->accessTableWhere = array(
+            $this->accessTableWhere = [
                 'message_list_id' => $list_id,
-            );
+            ];
         } else {
             Template::getInstance()->set('title', 'All users on all lists.');
         }

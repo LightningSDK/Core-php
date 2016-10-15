@@ -45,11 +45,13 @@ class SplitTest {
                     $session->save();
                 }
 
-                // Track the usage.
-                $split_test = \Lightning\Model\SplitTest::loadOrCreateByLocator($name);
-                $tracker = Tracker::loadOrCreateByName($name, 'Split Test');
-                $tracker->track($split_test->id);
             }
+            // Track the usage.
+            $split_test = \Lightning\Model\SplitTest::loadOrCreateByLocator($name);
+            $tracker = Tracker::loadOrCreateByName($name, 'Split Test');
+            $tracker->track($split_test->id);
+
+            // Save the split reference.
             self::$options[$name] = $option;
         }
 

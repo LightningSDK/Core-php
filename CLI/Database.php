@@ -47,11 +47,13 @@ class Database extends CLI {
             'Lightning\\Database\\' . $type . '\\' => HOME_PATH . '/Lightning/Database/' . $type,
             'Source\\Database\\' . $type . '\\' => HOME_PATH . '/Source/Database/' . $type,
         ];
+
         if (file_exists(HOME_PATH . '/Modules')) {
             foreach (scandir(HOME_PATH . '/Modules') as $module) {
                 $directories['Modules\\' . $module . '\\Database\\' . $type . '\\'] = HOME_PATH . '/Modules/' . $module . '/Database/' . $type;
             }
         }
+
         foreach ($directories as $path => $dir) {
             if (file_exists($dir)) {
                 $files = scandir($dir);

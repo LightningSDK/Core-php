@@ -81,7 +81,12 @@ class TrackerOverridable extends Object {
         $string = Encryption::aesDecrypt($tracker_string, Configuration::get('tracker.key'));
         if ($data = json_decode($string, true)) {
             // Track the data.
-            static::loadByID($data['tracker'])->track($data['sub'], $data['user']);
+            $tracker = static::loadByID($data['tracker']);
+            if (!empty($data['track_once'])) {
+                $tracker->trackOnce($data['sub'], $data['user']);
+            } else {
+                $tracker->track($data['sub'], $data['user']);
+            }
             return true;
         }
 
@@ -111,6 +116,9 @@ class TrackerOverridable extends Object {
             $user_id = ClientUser::getInstance()->id;
         }
 
+        $session = Session::getInstance(true, false);
+        $session_id = ($session && $session->id > 0) ? $session->id : 0;
+
         // Insert the event.
         Database::getInstance()->insert(
             'tracker_event',
@@ -120,7 +128,7 @@ class TrackerOverridable extends Object {
                 'sub_id' => $sub_id ?: 0,
                 'date' => Time::today(),
                 'time' => time(),
-                'session_id' => Session::getInstance()->id,
+                'session_id' => $session_id,
             ]
         );
 
@@ -133,7 +141,34 @@ class TrackerOverridable extends Object {
 
             // Add the events to the JS var
             self::$events[] = $data;
-            JS::push('trackerEvents', $data);
+            JS::startup('lightning.tracker.trackOnStartup(' . json_encode($data) . ')');
+        }
+    }
+
+    /**
+     * Track this event, only if the user or session hasn't already tracked it.
+     *
+     * @param integer $sub_id
+     * @param integer $user_id
+     */
+    public function trackOnce($sub_id, $user_id = null) {
+        if ($user_id === null) {
+            $user_id = ClientUser::getInstance()->id;
+        }
+
+        $criteria = [
+            'tracker_id' => $this->id,
+            'user_id' => $user_id ?: 0,
+            'sub_id' => $sub_id ?: 0,
+        ];
+
+        if (empty($user_id)) {
+            $session = Session::getInstance(true, false);
+            $criteria['session_id'] = ($session && $session->id > 0) ? $session->id : 0;
+        }
+
+        if (!Database::getInstance()->check('tracker_event', $criteria)) {
+            $this->track($sub_id, $user_id);
         }
     }
 
@@ -144,12 +179,14 @@ class TrackerOverridable extends Object {
      *   The subtracker id.
      * @param $user_id
      *   The user id.
+     * @param boolean $track_once
+     *   Whether to ignore duplicate requests.
      *
      * @return string
      *   The rendered HTML.
      */
-    public function getTrackerImage($sub_id = 0, $user_id = -1) {
-        $url = Configuration::get('web_root') . '/track?t=' . $this->getTrackerLink($sub_id, $user_id);
+    public function getTrackerImage($sub_id = 0, $user_id = -1, $track_once = true) {
+        $url = Configuration::get('web_root') . '/track?t=' . $this->getTrackerLink($sub_id, $user_id, $track_once);
         return '<img src="' . $url . '" border="0" height="0" width="0" />';
     }
 
@@ -160,17 +197,20 @@ class TrackerOverridable extends Object {
      *   The tracker sub id or * if any is permitted.
      * @param $user_id
      *   The user id.
+     * @param boolean $track_once
+     *   Whether to ignore duplicate requests.
      *
      * @return string
      *   Then encrypted data.
      */
-    public function getTrackerLink($sub_id = 0, $user_id = -1) {
+    public function getTrackerLink($sub_id = 0, $user_id = -1, $track_once = false) {
         // Generate a json encoded string with the tracking data.
-        $string = json_encode(array(
+        $string = json_encode([
             'tracker' => $this->id,
             'sub' => $sub_id,
             'user' => $user_id > -1 ? $user_id : ClientUser::getInstance()->id,
-        ));
+            'track_once' => $track_once
+        ]);
 
         // Encrypt the string with the public key.
         return urlencode(Encryption::aesEncrypt($string, Configuration::get('tracker.key')));
@@ -343,7 +383,9 @@ class TrackerOverridable extends Object {
                 self::$events = array_merge(self::$events, json_decode(json_encode($session->content->trackerEvents), true));
 
                 // Add the events to the JS var
-                JS::set('trackerEvents', self::$events);
+                foreach (self::$events as $data) {
+                    JS::startup('lightning.tracker.trackOnStartup(' . json_encode($data) . ')');
+                }
 
                 // Delete the events so they aren't triggered twice.
                 unset($session->content->trackerEvents);

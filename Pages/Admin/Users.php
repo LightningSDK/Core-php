@@ -12,6 +12,7 @@ use Lightning\Tools\Session;
 use Lightning\View\Field\BasicHTML;
 use Lightning\View\Field\Text;
 use Lightning\Tools\Session;
+use Source\Model\Permissions;
 
 class Users extends Table {
 
@@ -20,8 +21,7 @@ class Users extends Table {
     protected $table = 'user';
 
     protected function hasAccess() {
-        ClientUser::requireAdmin();
-        return true;
+        return ClientUser::requirePermission(Permissions::EDIT_USERS);
     }
 
     protected $custom_buttons = [
@@ -34,6 +34,18 @@ class Users extends Table {
 
     protected $searchable = true;
     protected $search_fields = ['email', 'first', 'last', 'user.user_id'];
+
+    protected $filters = [
+        'mailing_list' => [
+            'class' => 'Lightning\\Filter\\MailingList',
+        ],
+        'roles' => [
+            'class' => 'Lightning\\Filter\\Roles',
+        ],
+        'permissions' => [
+            'class' => 'Lightning\\Filter\\Permissions',
+        ],
+    ];
 
     protected $preset = [
         'salt' => [
@@ -56,17 +68,29 @@ class Users extends Table {
     protected $importable = true;
 
     protected $links = [
+        'roles' => [
+            'display_name' => 'Roles',
+            'key' => 'role_id',
+            'table' => 'role',
+            'index' => 'user_role',
+            'display_column' => 'name',
+            'list' => 'compact',
+        ],
         'message_list' => [
             'display_name' => 'Mailing Lists',
             'key' => 'message_list_id',
             'index' => 'message_list_user',
             'display_column' => 'name',
+            'list' => 'compact',
         ],
         'user_tag' => [
             'display_name' => 'Tags',
             'key' => 'tag_id',
             'index' => 'user_tag_tag',
             'display_column' => 'name',
+            'type' => 'autocomplete',
+            'create' => true,
+            'list' => 'compact'
         ]
     ];
 
@@ -78,7 +102,8 @@ class Users extends Table {
         ],
     ];
 
-    protected $customImportFields;
+    protected $additionalImportFields = ['full_name'];
+    protected $processedImportFields = ['first', 'last', 'created'];
 
     protected function initSettings() {
         $this->preset['password']['submit_function'] = function(&$output) {
@@ -96,8 +121,21 @@ class Users extends Table {
         };
         $this->importHandlers = [
             'customImportFields' => [$this, 'customImportFields'],
+            'validate' => [$this, 'validateImportRow'],
             'importPostProcess' => [$this, 'importPostProcess'],
         ];
+    }
+
+    public function validateImportRow(&$row) {
+        // TODO: Scrub email here.
+        if (empty($row['email'])) {
+            return false;
+        }
+        if (!empty($row['full_name'])) {
+            User::parseNames($row);
+        }
+        $row['created'] = time();
+        return true;
     }
 
     /**

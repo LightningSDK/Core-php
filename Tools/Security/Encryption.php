@@ -4,11 +4,11 @@ namespace Lightning\Tools\Security;
 
 class EncryptionOverridable {
     public static function generateKeyPair($bits = 1024, $type = OPENSSL_KEYTYPE_RSA, $digest = 'sha512') {
-        $config = array(
+        $config = [
             'digest_alg' => $digest,
             'private_key_bits' => $bits,
             'private_key_type' => $type,
-        );
+        ];
 
         // Create the private and public key
         $res = openssl_pkey_new($config);

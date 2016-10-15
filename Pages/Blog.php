@@ -7,6 +7,7 @@
 namespace Lightning\Pages;
 
 use Lightning\Model\Blog as BlogModel;
+use Lightning\Model\URL;
 use Lightning\Tools\Output;
 use Lightning\Tools\Request;
 use Lightning\Tools\Template;
@@ -21,14 +22,14 @@ use Lightning\Model\BlogPost;
 class Blog extends Page {
 
     protected $nav = 'blog';
-    protected $page = 'blog';
+    protected $page = ['blog', 'Lightning'];
 
     protected function hasAccess() {
         return true;
     }
 
     public function get() {
-        $blog_id = Request::get('id', 'int') | Request::get('blog_id', 'int');
+        $blog_id = Request::get('id', Request::TYPE_INT) | Request::get('blog_id', Request::TYPE_INT);
         $path = explode('/', Request::getLocation());
 
         $blog = BlogModel::getInstance();
@@ -94,8 +95,9 @@ class Blog extends Page {
         $this->setMeta('title', $post->title);
         $this->setMeta('keywords', $post->keywords);
         $this->setMeta('description', $post->getShortBody(250, false));
+        $this->setMeta('twitter_creator', $post->twitter);
         if ($image = $post->getHeaderImage()) {
-            $this->setMeta('image', $image);
+            $this->setMeta('image', URL::getAbsolute($image));
         }
     }
 }

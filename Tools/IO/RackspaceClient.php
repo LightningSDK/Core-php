@@ -29,10 +29,10 @@ class RackspaceClient implements FileHandlerInterface {
     protected function connect() {
         if (empty($this->client)) {
             $configuration = Configuration::get('rackspace');
-            $this->client = new Rackspace(Rackspace::US_IDENTITY_ENDPOINT, array(
+            $this->client = new Rackspace(Rackspace::US_IDENTITY_ENDPOINT, [
                 'username' => $configuration['username'],
                 'apiKey'   => $configuration['key']
-            ));
+            ]);
             $this->service = $this->client->objectStoreService(null, 'DFW');
         }
     }

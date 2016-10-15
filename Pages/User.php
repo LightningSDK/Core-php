@@ -4,6 +4,7 @@ namespace Lightning\Pages;
 
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
+use Lightning\Tools\Form;
 use Lightning\Tools\Output;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
@@ -20,8 +21,7 @@ use Lightning\Model\User as UserModel;
 
 class User extends Page {
 
-    protected $page = 'user';
-    protected $ignoreToken = true;
+    protected $page = ['user', 'Lightning'];
     protected $rightColumn = false;
 
     protected function hasAccess() {
@@ -29,8 +29,9 @@ class User extends Page {
     }
 
     public function get() {
+        Form::requiresToken();
         $user = ClientUser::getInstance();
-        Template::getInstance()->set('redirect', Scrub::toURL(Request::get('redirect', 'string')));
+        Template::getInstance()->set('redirect', Scrub::toURL(Request::get('redirect', Request::TYPE_STRING)));
         if ($user->id > 0) {
             // USER IS LOGGED IN, REDIRECT TO THE DEFAULT PAGE
             $this->loginRedirect();
@@ -38,7 +39,7 @@ class User extends Page {
     }
 
     public function getModal() {
-        Template::getInstance()->setTemplate('modal');
+        Template::getInstance()->setTemplate(['modal', 'Lightning']);
         if (!ClientUser::getInstance()->isAnonymous() && !Request::get('social', Request::TYPE_BOOLEAN)) {
             Messenger::message('You are already signed in.');
             $this->page = '';
@@ -51,7 +52,7 @@ class User extends Page {
     public function getRegister() {
         $template = Template::getInstance();
         $template->set('action', 'register');
-        $template->set('redirect', Scrub::toURL(Request::get('redirect', 'string')));
+        $template->set('redirect', Scrub::toURL(Request::get('redirect', Request::TYPE_STRING)));
     }
 
     /**
@@ -60,7 +61,7 @@ class User extends Page {
      */
     public function postRegister() {
 
-        $email = Request::post('email', 'email');
+        $email = Request::post('email', Request::TYPE_EMAIL);
         $pass = Request::post('password');
         $pass2 = Request::post('password2');
         
@@ -84,7 +85,7 @@ class User extends Page {
 
         // See if they are being added to a specific list.
         $default_list = Configuration::get('mailer.default_list', 0);
-        $mailing_list = Request::post('list_id', 'int', null, $default_list);
+        $mailing_list = Request::post('list_id', Request::TYPE_INT, null, $default_list);
         if (!empty($mailing_list)) {
             $user = UserModel::loadByEmail($email);
             $user->subscribe($mailing_list);
@@ -146,7 +147,7 @@ class User extends Page {
      * Handle the user attempting to log in.
      */
     public function postLogin() {
-        $email = Request::post('email', 'email');
+        $email = Request::post('email', Request::TYPE_EMAIL);
         $pass = Request::post('password');
         $login_result = UserModel::login($email, $pass);
         if (!$login_result) {
@@ -203,7 +204,7 @@ class User extends Page {
      * Unsubscribe the user from all mailing lists.
      */
     public function getUnsubscribe() {
-        $this->page = 'unsubscribe_confirm';
+        $this->page = ['unsubscribe_confirm', 'Lightning'];
         Template::getInstance()->set('user_token', Request::get('u', 'encrypted'));
     }
 
@@ -224,7 +225,7 @@ class User extends Page {
      * Confirm the user account via the confirmation link.
      */
     public function getConfirm() {
-        if ($cyphserstring = Request::get('u', 'encrypted')) {
+        if ($cyphserstring = Request::get('u', Request::TYPE_ENCRYPTED)) {
             $user = UserModel::loadByEncryptedUserReference($cyphserstring);
             $user->setConfirmed();
             Messenger::message('Your account ' . $user->email . ' has been confirmed.');
@@ -244,17 +245,17 @@ class User extends Page {
      * @todo This is not secure. There should be a security question and email should just be a link.
      */
     public function postReset() {
-        if (!$email = Request::get('email', 'email')) {
+        if (!$email = Request::get('email', Request::TYPE_EMAIL)) {
             Output::error('Invalid email');
         } elseif (!$user = UserModel::loadByEmail($email)) {
             Output::error('User does not exist.');
         } elseif ($user->sendResetLink()) {
-            Navigation::redirect('message', array('msg' => 'reset'));
+            Navigation::redirect('message', ['msg' => 'reset']);
         }
     }
 
     public function getSetPassword() {
-        $key = Request::get('key', 'base64');
+        $key = Request::get('key', Request::TYPE_BASE64);
         if ($user = UserModel::loadByTempKey($key)) {
             Template::getInstance()->set('action', 'set_password');
             Template::getInstance()->set('key', $key);
@@ -265,7 +266,7 @@ class User extends Page {
     }
 
     public function postSetPassword() {
-        if ($user = UserModel::loadByTempKey(Request::get('key', 'base64'))) {
+        if ($user = UserModel::loadByTempKey(Request::get('key', Request::TYPE_BASE64))) {
             if (($pass = Request::post('password')) && $pass == Request::post('password2')) {
                 $user->setPass($pass);
                 $user->registerToSession();
@@ -280,32 +281,8 @@ class User extends Page {
         }
     }
 
-    public function getChangePass() {
-    }
-
-    /**
-     * @todo this method needs to be updated.
-     */
-    public function postChangePass() {
-        $template = Template::getInstance();
-        $user = ClientUser::getInstance();
-        $template->set('content', 'user_reset');
-        if ($_POST['new_pass'] == $_POST['new_pass_conf']) {
-            if (isset($_POST['new_pass'])) {
-                if ($user->change_temp_pass($_POST['email'], $_POST['new_pass'], $_POST['code'])) {
-                    $template->set("password_changed", true);
-                }
-            } else {
-                $template->set("change_password", true);
-            }
-        } else {
-            Messenger::error('Your password is not secure. Please pick a more secure password.');
-            $template->set("change_password", true);
-        }
-    }
-
-    public function loginRedirect($page = null, $params = array()) {
-        $redirect = Request::post('redirect', 'urlencoded') ?: Request::query('redirect');
+    public function loginRedirect($page = null, $params = []) {
+        $redirect = Request::post('redirect', Request::TYPE_URL_ENCODED);
         if ($redirect && !preg_match('|^[/?]user|', $redirect)) {
             Navigation::redirect($redirect, $params);
         } elseif (!empty($page)) {

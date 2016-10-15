@@ -9,11 +9,11 @@ class RoleContent extends Content {
     protected $table = 'role';
 
     public function getContent() {
-        return array(
-            array(
+        return [
+            [
                 'role_id' => 1,
                 'name' => 'Admin',
-            ),
-        );
+            ],
+        ];
     }
 }

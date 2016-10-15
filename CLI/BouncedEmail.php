@@ -35,17 +35,17 @@ class BouncedEmail extends CLI {
             // TODO: Also check for a reactivation email.
             $mail_history = Database::getInstance()->select(
                 'tracker_event',
-                array(
+                [
                     'user_id' => $user->user_id,
-                    'tracker_id' => array(
+                    'tracker_id' => [
                         'IN',
-                        array(
+                        [
                             Tracker::loadOrCreateByName('Email Sent', Tracker::EMAIL)->id,
                             $bounce_tracker->id,
-                        ),
-                    ),
-                ),
-                array(),
+                        ],
+                    ],
+                ],
+                [],
                 'ORDER BY date DESC LIMIT 6'
             );
 

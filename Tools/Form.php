@@ -8,9 +8,9 @@ use Lightning\View\Field\BasicHTML;
 
 class Form {
     protected $id = 'form';
-    protected $fields = array();
-    protected $settings = array();
-    protected $submittedValues = array();
+    protected $fields = [];
+    protected $settings = [];
+    protected $submittedValues = [];
     protected $valid;
 
     public function __construct($id = null, $fields = null, $settings = null) {
@@ -65,7 +65,7 @@ class Form {
             $default = !empty($this->fields[$field]['default']) ? $this->fields[$field]['default'] : '';
         }
         // See if there are any additional attributes.
-        $attributes = !empty($this->fields[$field]['attributes']) ? $this->fields[$field]['attributes'] : array();
+        $attributes = !empty($this->fields[$field]['attributes']) ? $this->fields[$field]['attributes'] : [];
 
         // Make sure the name and id exist.
         switch ($this->fields[$field]['type']) {
@@ -182,6 +182,10 @@ class Form {
      *   The full HTML.
      */
     public static function renderTokenInput() {
-        return BasicHTML::hidden('token', Session::getInstance()->getToken());
+        if (Session::isInitialized()) {
+            return BasicHTML::hidden('token', Session::getInstance()->getToken());
+        } else {
+            return '<small class="error" style="display: block">Session Not Initialized</small>';
+        }
     }
 }

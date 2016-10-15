@@ -19,15 +19,15 @@ use Lightning\Tools\Output;
  */
 class RestClient {
 
-    protected $vars = array();
-    protected $headers = array();
+    protected $vars = [];
+    protected $headers = [];
     protected $results;
     protected $debug = false;
-    protected $auto_template = array();
+    protected $auto_template = [];
     protected $last_action = NULL;
     protected $raw;
     protected $status;
-    protected $cookies = array();
+    protected $cookies = [];
     protected $CAInfo;
     protected $sendJSON = false;
     protected $sendData;
@@ -110,7 +110,7 @@ class RestClient {
 
     public function getErrors() {
         if (!isset($this->results['errors'])) {
-            return array();
+            return [];
         }
         else {
             return $this->results['errors'];
@@ -212,7 +212,7 @@ class RestClient {
 
     protected function cookieImplode($cookies) {
         // @TODO: Does this need sanitization?
-        $a2 = array();
+        $a2 = [];
         foreach ($cookies as $k => $v) {
             $a2[] = "{$k}={$v}";
         }

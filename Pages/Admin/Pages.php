@@ -4,61 +4,94 @@ namespace Lightning\Pages\Admin;
 
 use Lightning\Pages\Table;
 use Lightning\Tools\ClientUser;
+use Lightning\Tools\Navigation;
 use Lightning\Tools\Request;
+use Source\Model\Permissions;
 
 class Pages extends Table {
 
     public function hasAccess() {
-        ClientUser::requireAdmin();
-        return true;
+        return ClientUser::requirePermission(Permissions::EDIT_PAGES);
     }
 
     protected $searchable = true;
-    protected $search_fields = array('title', 'url', 'body');
+    protected $search_fields = ['title', 'url', 'body'];
 
     protected $nav = 'admin_pages';
     protected $table = 'page';
     protected $sortable = true;
     protected $trusted = true;
-    protected $preset = array(
-        'page_id' => array(
+    protected $duplicatable = true;
+    protected $preset = [
+        'page_id' => [
             'type' => 'hidden',
-        ),
-        'keywords' => array(
+        ],
+        'keywords' => [
             'unlisted' => true,
             'type' => 'textarea',
-        ),
-        'description' => array(
+        ],
+        'description' => [
             'unlisted' => true,
             'type' => 'textarea',
-        ),
-        'body' => array(
+        ],
+        'body' => [
             'upload' => true,
             'type' => 'html',
             'div' => true,
-        ),
-        'site_map' => array(
+        ],
+        'site_map' => [
             'type' => 'checkbox',
             'default' => true,
-        ),
-        'last_update' => array(
+        ],
+        'last_update' => [
             'type' => 'datetime',
-        )
-    );
+        ],
+        'right_column' => [
+            'type' => 'checkbox',
+            'default' => true,
+        ],
+        'full_width' => 'checkbox',
+    ];
 
     protected function initSettings() {
         $this->preset['url']['submit_function'] = function(&$output) {
-            $output['url'] = Request::post('url', 'url') ?: Request::post('title', 'url');
+            $output['url'] = Request::post('url', Request::TYPE_URL) ?: Request::post('title', Request::TYPE_URL);
         };
 
-        $this->action_fields = array(
-            'view' => array(
+        if (\Lightning\Tools\Configuration::get('css.editable')) {
+            $this->custom_buttons['css'] = [
+                'url' => '/admin/css',
+                'type' => Table::CB_LINK,
+                'target' => '_blank',
+                'text' => 'Edit CSS',
+            ];
+        }
+
+        if (!empty($this->id)) {
+            $this->getRow();
+            $this->custom_buttons['view'] = [
+                'url' => '/' . $this->list['url'] . '.html',
+                'type' => Table::CB_LINK,
+                'target' => '_blank',
+                'text' => 'View',
+            ];
+        } else if (Request::get('action') == 'new') {
+            $this->preset['url']['default'] = Request::get('url', Request::TYPE_URL);
+        }
+
+        $this->action_fields = [
+            'view' => [
                 'display_name' => 'View',
                 'type' => 'html',
                 'html' => function($row) {
                     return '<a href="/' . $row['url'] . '.html"><img src="/images/lightning/resume.png" /></a>';
                 }
-            ),
-        );
+            ],
+        ];
+    }
+
+    public function getView() {
+        $this->getRow();
+        Navigation::redirect('/' . $this->list['url'] . '.html');
     }
 }

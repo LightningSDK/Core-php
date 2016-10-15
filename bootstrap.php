@@ -17,7 +17,7 @@ use Lightning\Tools\Performance;
 
 // Set the autoloader to the Lightning autoloader.
 require_once HOME_PATH . '/Lightning/Tools/ClassLoader.php';
-spl_autoload_register(array('Lightning\\Tools\\ClassLoader', 'classAutoloader'));
+spl_autoload_register(['Lightning\\Tools\\ClassLoader', 'classAutoloader']);
 
 Performance::startTimer();
 

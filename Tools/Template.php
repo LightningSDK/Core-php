@@ -105,7 +105,7 @@ class Template extends Singleton {
     /**
      * Render a template and it's main page content.
      *
-     * @param string $template
+     * @param string|array $template
      *   The main template to render within the template.
      * @param bool $return_as_string
      *   When TRUE, the output will be returned instead of output.
@@ -128,6 +128,19 @@ class Template extends Singleton {
         } else {
             print $this->build($template, false);
         }
+    }
+
+    /**
+     * Markup renderer.
+     *
+     * @param array $options
+     * @param array $vars
+     *
+     * @return string
+     */
+    public static function renderMarkup($options, $vars) {
+        $sub_template = new Template();
+        return $sub_template->render($options['name'], true);
     }
 
     /**
@@ -185,10 +198,10 @@ class Template extends Singleton {
     public function setCache($page, $ttl = null, $size = null) {
         $ttl = $ttl ?: (Configuration::get('page.cache.ttl')) ?: Cache::MONTH;
         $size = $size ?: (Configuration::get('page.cache.size')) ?: Cache::MEDIUM;
-        $this->cache[$page] = array(
+        $this->cache[$page] = [
             'ttl' => $ttl,
             'size' => $size,
-        );
+        ];
     }
 
     /**
@@ -277,7 +290,11 @@ class Template extends Singleton {
             return $this->template_dir . $template;
         }
         elseif (is_array($template)) {
-            return HOME_PATH . '/Modules/' . $template[1] . '/Templates/' . $template[0];
+            if ($template[1] == 'Lightning') {
+                return HOME_PATH . '/Lightning/Templates/' . $template[0];
+            } else {
+                return HOME_PATH . '/Modules/' . $template[1] . '/Templates/' . $template[0];
+            }
         }
     }
 

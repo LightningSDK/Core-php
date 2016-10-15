@@ -28,7 +28,7 @@ class PageOverridable {
     /**
      * The template file.
      *
-     * @var string
+     * @var string|array
      */
     protected $template;
 
@@ -52,6 +52,13 @@ class PageOverridable {
      * @var array
      */
     protected $params = [];
+
+    /**
+     * A template for the content within the page template.
+     *
+     * @var string|array
+     */
+    protected $page;
 
     /**
      * Whether to display the right column.
@@ -81,6 +88,11 @@ class PageOverridable {
      */
     protected $menuContext = '';
 
+    /**
+     * An array of meta data for the rendered page.
+     *
+     * @var array
+     */
     protected $meta = [];
 
     /**
@@ -147,13 +159,17 @@ class PageOverridable {
 
             // Load default metadata.
             $this->meta += Configuration::get('meta_data');
+            if ($twitter = Configuration::get('social.twitter.url')) {
+                $this->meta['twitter_site'] = $twitter;
+                $this->meta['twitter_creator'] = $twitter;
+            }
             $template->set('meta', $this->meta);
 
             JS::set('menu_context', $this->menuContext);
             $template->render($this->template);
         } catch (Exception $e) {
-            echo 'Error rendering template: ' . $e;
-            exit;
+            echo 'Error rendering template: ' . $this->template . '<br>';
+            throw $e;
         }
     }
 
@@ -230,7 +246,7 @@ class PageOverridable {
     public function validateToken() {
         // If this is a post request, there must be a valid token.
         if (!$this->ignoreToken && strtolower(Request::type()) == 'post') {
-            $token = Request::post('token', 'base64');
+            $token = Request::post('token', Request::TYPE_BASE64);
             return !empty($token) && $token == Session::getInstance()->getToken();
         } else {
             // This is not a POST request so it's not required.

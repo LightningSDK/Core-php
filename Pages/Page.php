@@ -59,18 +59,8 @@ class Page extends PageView {
             if (Configuration::get('page.modification_date') && $this->fullPage['last_update'] > 0) {
                 header("Last-Modified: ".gmdate("D, d M Y H:i:s", $this->fullPage['last_update'])." GMT");
             }
-        } elseif ($this->new) {
-            $this->fullPage['title'] = '';
-            $this->fullPage['keywords'] = '';
-            $this->fullPage['description'] = '';
-            $this->fullPage['url'] = '';
-            $this->fullPage['body'] = 'This is your new page.';
-            $this->fullPage['layout'] = 0;
-            $this->fullPage['site_map'] = 1;
-            HTMLEditor::init();
-            JS::startup('lightning.page.edit();');
         } elseif ($this->fullPage = PageModel::loadByURL('404')) {
-            $this->fullPage['site_map'] = 1;
+            $this->fullPage['page_id'] = false;
             http_response_code(404);
         } else {
             // This should still be editable because we know it's within the .html handler.
@@ -98,10 +88,10 @@ class Page extends PageView {
         }
 
         // Set the page template.
-        $template->set('content', 'page');
+        $template->set('content', ['page', 'Lightning']);
 
         // PREPARE FORM DATA CONTENTS
-        foreach (array('title', 'keywords') as $field) {
+        foreach (['title', 'keywords'] as $field) {
             if (!empty($this->fullPage[$field])) {
                 $this->setMeta($field, html_entity_decode($this->fullPage[$field]));
             }
@@ -128,8 +118,13 @@ class Page extends PageView {
         }
 
         $template->set('page_header', $this->fullPage['title']);
-        $this->fullWidth = $this->fullPage['layout'] == 1;
+        $this->fullWidth = $this->fullPage['full_width'] == 1;
+        $this->rightColumn = $this->fullPage['right_column'] == 1;
         $template->set('full_page', $this->fullPage);
+
+        if (!empty($this->fullPage['template'])) {
+            $template->setTemplate($this->fullPage['template']);
+        }
     }
 
     public function setPage($page) {
@@ -139,65 +134,10 @@ class Page extends PageView {
     public function getNew() {
         // Prepare the template for a new page.
         $template = Template::getInstance();
-        $template->set('action','new');
+        $template->set('action', 'new');
         $this->new = true;
 
         // Prepare the form.
         $this->get();
-    }
-
-    public function postSave() {
-        $user = ClientUser::getInstance();
-
-        if (!$user->isAdmin()) {
-            Output::accessDenied();
-        }
-
-        $page_id = Request::post('page_id', 'int');
-        $title = Request::post('title');
-        $url = Request::post('url', 'url');
-
-        // Create an array of the new values.
-        $new_values = array(
-            'title' => $title,
-            'url' => !empty($url) ? $url : Scrub::url($title),
-            'menu_context' => Request::post('menu_context'),
-            'keywords' => Request::post('keywords'),
-            'description' => Request::post('description'),
-            'site_map' => Request::post('sitemap', 'int'),
-            'body' => Request::post('page_body', 'html', '', '', true),
-            'last_update' => time(),
-            'layout' => Request::post('layout', 'int'),
-        );
-
-        // Save the page.
-        $update_values = $new_values;
-        unset($update_values['url']);
-        PageModel::insertOrUpdate($new_values, $update_values);
-
-        $output = array();
-        $output['url'] = $new_values['url'];
-        $output['page_id'] = $page_id;
-        $output['title'] = $title;
-        $output['page_body'] = $new_values['body'];
-        $output['body_rendered'] = Markup::render($new_values['body']);
-        Output::json($output);
-    }
-
-    /**
-     * Create a dropdown selection of page layouts.
-     *
-     * @param integer $default
-     *   The current selected layout.
-     *
-     * @return string
-     *   The rendered HTML.
-     */
-    public static function layoutOptions($default) {
-        $options = array(
-            0 => 'Right Column',
-            1 => 'Full Width',
-        );
-        return BasicHTML::select('page_layout', $options, intval($default));
     }
 }

@@ -12,7 +12,7 @@ class LoggerOverridable extends Singleton {
     protected static $logFile;
     protected static $securityLogFile;
 
-    protected static $errorTypes = array(
+    protected static $errorTypes = [
         E_ERROR           => 'error',
         E_WARNING         => 'warning',
         E_PARSE           => 'parsing error',
@@ -24,7 +24,7 @@ class LoggerOverridable extends Singleton {
         E_USER_ERROR      => 'user error',
         E_USER_WARNING    => 'user warning',
         E_USER_NOTICE     => 'user notice'
-    );
+    ];
 
     public static function init() {
         if (Configuration::get('site.logtype') == 'stacktrace') {
@@ -127,7 +127,7 @@ class LoggerOverridable extends Singleton {
         $started = false;
         $output = [];
         foreach ($trace as $row) {
-            if ($started || (!empty($row['file']) && !empty($errfile) && $row['file'] == $errfile && $row['line'] == $errline)) {
+            if ($started || (!empty($row['file']) && $row['file'] == $errfile)) {
                 $started = true;
                 $line = '    in ' . (!empty($row['file']) ? $row['file'] : '?') . ' on line ' . (!empty($row['line']) ? $row['line'] : '?');
                 $output[] = $line;

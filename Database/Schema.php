@@ -75,37 +75,38 @@ abstract class Schema implements SchemaInterface {
     }
 
     protected function varchar($size) {
-        return array(
+        return [
             'type' => 'varchar',
             'size' => $size,
-        );
+        ];
     }
 
     protected function char($size) {
-        return array(
+        return [
             'type' => 'char',
             'size' => $size,
-        );
+        ];
     }
 
     protected function text($size = self::TEXT) {
-        return array(
+        return [
             'type' => $size,
-        );
+            'null' => true,
+        ];
     }
 
     protected function int($unsigned = false, $size = self::INT) {
-        return array(
+        return [
             'type' => $size,
             'unsigned' => $unsigned,
-        );
+        ];
     }
 
     protected function autoincrement() {
-        return array(
+        return [
             'type' => 'int',
             'unsigned' => true,
             'auto_increment' => true,
-        );
+        ];
     }
 }

@@ -27,4 +27,14 @@ class YouTube {
         $autoplay = !empty($settings['autoplay']) ? 'data-autoplay="true"' : '';
         return '<div class="youtube" id="' . $video_id . '" ' . $autoplay . '></div>';
     }
+
+    public static function renderMarkup($options, $vars) {
+        $output = YouTube::render($options['id'], [
+            'autoplay' => !empty($options['autoplay']) ? true : false,
+        ]);
+        if (!empty($options['flex'])) {
+            $output = '<div class="flex-video ' . (!empty($options['widescreen']) ? 'widescreen' : '') . '">' . $output . '</div>';
+        }
+        return $output;
+    }
 }

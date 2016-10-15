@@ -8,7 +8,6 @@ namespace Lightning\Pages;
 
 use Lightning\Model\URL;
 use Lightning\Tools\Configuration;
-use Lightning\Tools\Form;
 use Lightning\Tools\Language;
 use Lightning\Tools\Mailer;
 use Lightning\Tools\Messenger;
@@ -33,11 +32,12 @@ use Lightning\Model\Contact as ContactModel;
  *   optin: Subscribe the user to a default list.
  *   contact: Boolean, whether to notify the site admins. This will send anyway if contact.always_notify is set to true in the configuration.
  *   message: If set, a message with this message_id will be sent to the input user email.
+ *   redirect: The success page.
  *
  */
 class Contact extends PageView {
 
-    protected $page = 'contact';
+    protected $page = ['contact', 'Lightning'];
     protected $menuContext = 'contact';
 
     /**
@@ -48,28 +48,61 @@ class Contact extends PageView {
     protected $list;
 
     /**
+     * The User object for the user who submitted the form.
+     *
      * @var UserModel
      */
     protected $user;
 
     /**
+     * Whether the site contacts should be notified.
+     *
      * @var boolean
      */
     protected $requestContact = false;
 
     /**
+     * A list of settings for the contact form.
+     *
      * @var array
      */
     protected $settings;
 
+    /**
+     * If set, a message with this ID will be sent to the user who submitted the contact form.
+     *
+     * @var integer
+     */
     protected $userMessage = 0;
+
+    /**
+     * Set to 1 if the user message was successfully sent.
+     *
+     * @var integer
+     */
     protected $userMessageSent = 0;
+
+    /**
+     * Set to 1 if the site contact will be sent a message.
+     *
+     * @var integer
+     */
     protected $contactAdmin = 0;
+
+    /**
+     * Set to 1 if the site contact was successfully sent.
+     *
+     * @var integer
+     */
     protected $contactAdminSent = 0;
 
+    protected $ignoreToken = true;
+
+    /**
+     * Override the constructor to initialize the form token.
+     */
     public function __construct() {
         parent::__construct();
-        Form::requiresToken();
     }
 
     protected function hasAccess() {
@@ -89,6 +122,9 @@ class Contact extends PageView {
         $this->redirect();
     }
 
+    /**
+     * Load some variables from the form submission.
+     */
     protected function loadVars() {
         $this->settings = Configuration::get('contact');
         $this->requestContact = Request::post('contact', Request::TYPE_BOOLEAN);
@@ -98,11 +134,14 @@ class Contact extends PageView {
                 $this->list = Message::getDefaultListID();
             }
         }
-        if (empty($this->list) && Request::get('optin', 'boolean')) {
+        if (empty($this->list) && Request::get('optin', Request::TYPE_BOOLEAN)) {
             $this->list = Message::getDefaultListID();
         }
     }
 
+    /**
+     * Run some checks on the form to make sure the required fields are submitted.
+     */
     protected function validateForm() {
         // Check captcha if required.
         if (
@@ -127,12 +166,18 @@ class Contact extends PageView {
         }
     }
 
+    /**
+     * If the settings direct it, this will subscribe the user to a mailing list.
+     */
     protected function optinUser() {
         if (!empty($this->list)) {
             $this->user->subscribe($this->list);
         }
     }
 
+    /**
+     * If the settings direct it, this will send a message to the user who filled in the contact form.
+     */
     protected function messageUser() {
         // Send a message to the user who just opted in.
         if ($this->userMessage) {
@@ -141,6 +186,9 @@ class Contact extends PageView {
         }
     }
 
+    /**
+     * If the settings direct it, this will send a contact notification to the site contacts.
+     */
     protected function messageSiteContact() {
         // Send a message to the site contact.
         if (!empty($this->settings['always_notify']) || ($this->requestContact && $this->settings['contact'])) {
@@ -152,7 +200,7 @@ class Contact extends PageView {
                 // Send an email to to have them test for spam.
                 if (!empty($this->settings['auto_responder'])) {
                     $auto_responder_mailer = new Mailer();
-                    $result = $auto_responder_mailer->sendOne($this->settings['auto_responder'], UserModel::loadByEmail($this->getSender()) ?: new UserModel(array('email' => $this->getSender())));
+                    $result = $auto_responder_mailer->sendOne($this->settings['auto_responder'], UserModel::loadByEmail($this->getSender()) ?: new UserModel(['email' => $this->getSender()]));
                     if ($result && $this->settings['spam_test']) {
                         // Set the notice.
                         $this->setSuccessMessage(Language::translate('spam_test'));
@@ -168,6 +216,11 @@ class Contact extends PageView {
         }
     }
 
+    /**
+     * Get the fields for the contact table.
+     *
+     * @return array
+     */
     public function getContactFields() {
         return [
             'user_id' => $this->user->id,
@@ -181,6 +234,13 @@ class Contact extends PageView {
         ];
     }
 
+    /**
+     * Redirect to the next page. If a redirect field is set in the form, it will go there. If not, it will redirect
+     * to the /message page.
+     *
+     * @param array $params
+     *   Additional query parameters.
+     */
     public function redirect($params = []) {
         if ($redirect = Request::post('redirect')) {
             Navigation::redirect($redirect, $params);
@@ -191,6 +251,9 @@ class Contact extends PageView {
 
     /**
      * Add a custom message from the form input.
+     *
+     * @param string $default
+     *   The default success message.
      */
     protected function setSuccessMessage($default) {
         if ($this->settings['custom_message'] && $message = Request::post('success')) {
@@ -210,15 +273,15 @@ class Contact extends PageView {
     protected function getSender() {
         if ($name = Request::post('name', '', '', '')) {
             $name_parts = explode(' ', $name, 2);
-            $name = array('first' => $name_parts[0]);
+            $name = ['first' => $name_parts[0]];
             if (!empty($name_parts[1])) {
                 $name['last'] = $name_parts[1];
             }
         } else {
-            $name = array(
+            $name = [
                 'first' => Request::post('first', '', '', ''),
                 'last' => Request::post('last', '', '', ''),
-            );
+            ];
         }
 
         // Add the user to the database.
@@ -249,6 +312,11 @@ class Contact extends PageView {
             ->send();
     }
 
+    /**
+     * Get a list of fields submitted to the form, excluding control fields.
+     *
+     * @return array
+     */
     protected function getAdditionalFields() {
         static $values = null;
         if ($values === null) {
@@ -257,6 +325,7 @@ class Contact extends PageView {
                 'Name' => Request::post('name'),
                 'Email' => $this->user->email,
                 'IP' => Request::server(Request::IP),
+                'URL' => $this->getReferer(),
             ];
 
             unset($fields['token']);
@@ -267,6 +336,7 @@ class Contact extends PageView {
             unset($fields['list']);
             unset($fields['g-recaptcha-response']);
             unset($fields['captcha_abide']);
+            unset($fields['url']);
 
             foreach ($fields as $field) {
                 if (is_array($_POST[$field])) {
@@ -278,6 +348,19 @@ class Contact extends PageView {
             }
         }
         return $values;
+    }
+
+    /**
+     * Get the submission URL. If not explicitly supplied in the form, it will try to get it from the HTTP header.
+     *
+     * @return string
+     */
+    protected function getReferer() {
+        if ($url = Request::post('URL')) {
+            return $url;
+        } else {
+            return Request::getHeader('REFERER');
+        }
     }
 
     /**

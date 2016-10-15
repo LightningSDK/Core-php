@@ -5,6 +5,7 @@
  */
 
 namespace Lightning\Tools;
+use tidy;
 
 /**
  * A helper for data sanitization.
@@ -22,12 +23,12 @@ class Scrub {
      *
      * @todo enable align|allowfullscreen for iframe
      */
-    const SCRUB_ADVANCED_HTML = 'input[type|value|checked|src],select,option[value],form[target|action|method],textarea,iframe[frameborder|src|height|width],a[target]';
+    const SCRUB_ADVANCED_HTML = 'input[type|value|checked|src],select,option[value],form[target|action|method],textarea,iframe[frameborder|src|height|width],a[target],section[style],div[style]';
 
     /**
      * Allowed CSS rules.
      */
-    const SCRUB_BASIC_CSS = 'height,width,color,background-color,vertical-align,text-align,margin,margin-left,margin-right,margin-top,margin-bottom,padding,padding-left,margin-right,margin-top,margin-bottom,border,border-left,border-right,border-top,border-bottom,float,font-size,display';
+    const SCRUB_BASIC_CSS = 'height,width,min-height,min-width,max-height,max-width,color,background-color,background-size,background-image,vertical-align,text-align,margin,margin-left,margin-right,margin-top,margin-bottom,padding,padding-left,margin-right,margin-top,margin-bottom,border,border-left,border-right,border-top,border-bottom,float,font-size,display';
 
     /**
      * Convert text to HTML safe output.
@@ -215,14 +216,7 @@ class Scrub {
      *   The validated text without any HTML.
      */
     public static function text($text) {
-        $purifier = HTMLPurifierWrapper::getInstance();
-        $config = HTMLPurifierConfig::createDefault();
-
-        $config->set('HTML.Allowed', '');
-        $config->set('CSS.AllowedProperties','');
-        $config->set('Core.EscapeNonASCIICharacters',true);
-
-        return $purifier->purify($text, $config);
+        return htmlentities(strip_tags($text));
     }
 
     /**
@@ -247,30 +241,23 @@ class Scrub {
         $purifier = HTMLPurifierWrapper::getInstance();
         $config = HTMLPurifierConfig::createDefault();
 
-        if ($full_page) {
-            return $html;
-        } elseif ($trusted) {
-            $config->set('CSS.Trusted', true);
-            $config->set('CSS.AllowTricky', true);
-            $config->set('HTML.Trusted', true);
-            $config->set('Attr.EnableID', true);
-            $config->set('Attr.AllowedFrameTargets', array('_blank'));
-            $allowed_tags = self::SCRUB_BASIC_HTML . ',' . self::SCRUB_ADVANCED_HTML;
+        if ($full_page || $trusted) {
+            return static::trustedHTML($html, $full_page);
+        }
+
+        $config->set('CSS.Trusted', false);
+        $config->set('HTML.Trusted', false);
+        $config->set('Attr.EnableID', false);
+
+        if (!empty($allowed_tags) && $allowed_tags == '.') {
+            $allowed_tags = self::SCRUB_BASIC_HTML . ',' . substr($allowed_tags, 1);
         } else {
-            $config->set('CSS.Trusted', false);
-            $config->set('HTML.Trusted', false);
-            $config->set('Attr.EnableID', false);
-            if (!empty($allowed_tags) && $allowed_tags == '.') {
-                $allowed_tags = self::SCRUB_BASIC_HTML . ',' . substr($allowed_tags, 1);
-            } else {
-                $allowed_tags = self::SCRUB_BASIC_HTML;
-            }
+            $allowed_tags = self::SCRUB_BASIC_HTML;
         }
 
         if (!empty($allowed_css) && $allowed_css[0] == '.') {
             $allowed_css = self::SCRUB_BASIC_CSS . ',' . substr($allowed_css, 1);
-        }
-        elseif (empty($allowed_css)) {
+        } elseif (empty($allowed_css)) {
             $allowed_css = self::SCRUB_BASIC_CSS;
         }
 
@@ -278,7 +265,26 @@ class Scrub {
         $config->set('CSS.AllowedProperties', $allowed_css);
         $config->set('Core.EscapeNonASCIICharacters', true);
 
-        return $purifier->purify( $html, $config );
+        return $purifier->purify($html, $config);
+    }
+
+    /**
+     * When HTML is trusted, this function just validates it, ensuring that all tags are closed.
+     * @param string $html
+     *   The full html.
+     * @param boolean $full_page
+     *   If set, the html and body tags will be ensured to be present.
+     *
+     * @return string
+     *   Validated HTML.
+     */
+    public static function trustedHTML($html, $full_page = false) {
+        $tidy = new tidy();
+        $settings = [];
+        if (!$full_page) {
+            $settings['show-body-only'] = true;
+        }
+        return $tidy->repairString($html, $settings);
     }
 
     /**

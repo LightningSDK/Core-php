@@ -9,7 +9,7 @@ use Lightning\View\JS;
 class Line extends Base {
     protected $renderer = 'Line';
 
-    public function __construct($id = null, $settings = array()) {
+    public function __construct($id = null, $settings = []) {
         // Import the settings.
         if ($id) {
             $this->id = $id;

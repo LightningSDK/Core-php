@@ -3,6 +3,8 @@
 namespace Lightning\View\HTMLEditor;
 
 use DOMDocument;
+use DOMElement;
+use Lightning\Tools\Configuration;
 use Lightning\Tools\Template;
 use Lightning\View\Video\YouTube;
 
@@ -10,7 +12,8 @@ class Markup {
     public static function render($content, $vars = []) {
         // Replace special tags
         $matches = [];
-        preg_match_all('|{{.*}}|', $content, $matches);
+        $renderers = Configuration::get('markup.renderers');
+        preg_match_all('|{{.*}}|sU', $content, $matches);
         foreach ($matches[0] as $match) {
             if (!empty($match)) {
                 // Convert to HTML and parse it.
@@ -20,19 +23,14 @@ class Markup {
                 $dom->loadHTML($match_html);
                 $element = $dom->getElementsByTagName('body')->item(0)->childNodes->item(0);
                 $output = '';
-                switch ($element->nodeName) {
-                    case 'template':
-                        $sub_template = new Template();
-                        $output = $sub_template->render($element->getAttribute('name'), true);
-                        break;
-                    case 'youtube':
-                        $output = YouTube::render($element->getAttribute('id'), [
-                            'autoplay' => $element->getAttribute('autoplay') ? true : false,
-                        ]);
-                        if ($element->getAttribute('flex')) {
-                            $output = '<div class="flex-video ' . ($element->getAttribute('widescreen') ? 'widescreen' : '') . '">' . $output . '</div>';
-                        }
+
+                // If a renderer exists, run it.
+                if (isset($renderers[$element->nodeName])) {
+                    // First convert the attributes to an array.
+                    $options = static::getAttributeArray($element);
+                    $output = call_user_func([$renderers[$element->nodeName], 'renderMarkup'], $options, $vars);
                 }
+
                 $content = str_replace(
                     $match,
                     $output,
@@ -69,6 +67,14 @@ class Markup {
         }
 
         return $content;
+    }
+
+    protected static function getAttributeArray(DOMElement $element) {
+        $options = [];
+        foreach ($element->attributes as $attr => $value) {
+            $options[$attr] = $element->getAttribute($attr);
+        }
+        return $options;
     }
 
     /**

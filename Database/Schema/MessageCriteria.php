@@ -9,7 +9,7 @@ class MessageCriteria extends Schema {
     const TABLE = 'message_criteria';
 
     public function getColumns() {
-        return array(
+        return [
             'message_criteria_id' => $this->autoincrement(),
             'criteria_name' => $this->varchar(255),
             'join' => $this->varchar(255),
@@ -17,7 +17,7 @@ class MessageCriteria extends Schema {
             'select' => $this->varchar(255),
             'group_by' => $this->varchar(255),
             'having' => $this->varchar(255),
-        );
+        ];
     }
 
     public function getKeys() {

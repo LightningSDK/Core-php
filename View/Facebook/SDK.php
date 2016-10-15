@@ -2,6 +2,7 @@
 
 namespace Lightning\View\Facebook;
 
+use Lightning\Tools\Configuration;
 use Lightning\View\JS;
 
 class SDK {
@@ -14,7 +15,10 @@ class SDK {
         }
         self::$inited = true;
 
-        JS::add('//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.6&appId=247438262089646');
+        $appid = Configuration::get('social.facebook.appid');
+        JS::add('//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.6&appId=' . $appid);
+        JS::set('social.facebook.appid', $appid);
+        JS::set('social.facebook.scope', Configuration::get('social.facebook.scope'));
 
         return '<div id="fb-root"></div>';
     }

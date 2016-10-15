@@ -11,16 +11,16 @@ class Subscription {
 
     public static function getUserLists($user_id) {
         return Database::getInstance()->selectIndexed(
-            array(
+            [
                 'from' => 'message_list_user',
-                'join' => array(
+                'join' => [
                     'JOIN',
                     'message_list',
                     'USING(message_list_id)',
-                )
-            ),
+                ]
+            ],
             'message_list_id',
-            array('user_id' => $user_id)
+            ['user_id' => $user_id]
         );
     }
 }

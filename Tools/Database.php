@@ -207,42 +207,16 @@ class Database extends Singleton {
      *   When a mysql error occurs.
      */
     public function errorHandler($error, $sql) {
-        $errors = [];
-
-        // Add a header.
-        $errors[] = "MYSQL ERROR ($error[0]:$error[1]): $error[2]";
-        // Add the full query.
-        $errors[] = $sql;
-
-        // Show the stack trace.
-        $backtrace = debug_backtrace();
-        foreach($backtrace as $call) {
-            if (empty($call['file'])) {
-                $errors[] = 'Called from: ' . $call['class'] . ' : ' . $call['function'];
-            } elseif (!preg_match('/class_database\.php$/', $call['file'])) {
-                $errors[] = 'Called from: ' . $call['file'] . ' : ' . $call['line'];
-            }
-        }
-
-        // Show actual mysql error.
-        $errors[] = $error[2];
-
-        // Log the error:
-        foreach ($errors as $e) {
-            Logger::error($e);
-        }
-        Logger::error($sql);
-
-        // If set to verbose, show the errors to the user.
         if ($this->verbose) {
-            // Add a footer.
-            foreach ($errors as $e) {
-                Messenger::error($e);
-            }
+            $exception = new Exception("MYSQL ERROR ($error[0]:$error[1]): $error[2] @ $sql");
+        } else {
+            $exception = new Exception("***** MYSQL ERROR *****");
         }
+
+        Logger::exception($exception);
 
         // Throw a general exception for all users.
-        throw new Exception("***** MYSQL ERROR *****");
+        throw $exception;
     }
 
     /**
@@ -776,7 +750,11 @@ class Database extends Singleton {
                 $query['order_by'] = [$query['order_by'] => 'ASC'];
             }
             foreach ($query['order_by'] as $field => $order) {
-                $orders[] = $this->formatField($field) . ' ' . $order;
+                if (is_array($order) && !empty($order['expression'])) {
+                    $orders[] = $order['expression'];
+                } else {
+                    $orders[] = $this->formatField($field) . ' ' . $order;
+                }
             }
             $output .= implode(',', $orders);
         }
@@ -1101,14 +1079,22 @@ class Database extends Singleton {
         }
         $row = $this->selectRow($table, $where, $field, $final);
 
-        reset($field);
-        return $row[key($field)];
+        if (!empty($row)) {
+            reset($field);
+            return $row[key($field)];
+        }
+
+        return null;
     }
 
     public function selectFieldQuery($query, $field) {
         $row = $this->selectRowQuery($query);
-        reset($row);
-        return $row[$field];
+        if (!empty($row)) {
+            reset($row);
+            return $row[$field];
+        }
+
+        return null;
     }
 
     /**
@@ -1313,7 +1299,7 @@ class Database extends Singleton {
      *   The field => value pairs.
      * @param $values
      *   The current list of replacement values.
-     * @param string $concatenator
+     * @param string $glue
      *   The string used to concatenate (usually , or AND or OR)
      * @param boolean $setting
      *   If we are setting variables. (Helps in determining what to do with null values)
@@ -1321,7 +1307,7 @@ class Database extends Singleton {
      * @return string
      *   The query string segment.
      */
-    public function sqlImplode($array, &$values, $concatenator = ', ', $setting = false) {
+    public function sqlImplode($array, &$values, $glue = ', ', $setting = false) {
         $a2 = [];
         if (!is_array($array)) {
             $array = [$array];
@@ -1335,7 +1321,7 @@ class Database extends Singleton {
 
             // This might change from an and to an or.
             if ($field === '#operator') {
-                $concatenator = $v;
+                $glue = $v;
                 continue;
             }
             // This is if and AND/OR is explicitly grouped.
@@ -1449,7 +1435,7 @@ class Database extends Singleton {
                 $a2[] = "{$field} = ? ";
             }
         }
-        return implode($concatenator, $a2);
+        return implode($glue, $a2);
     }
 
     /**
@@ -1653,6 +1639,54 @@ class Database extends Singleton {
                 return $value . '%';
             case self::WILDCARD_EITHER:
                 return '%' . $value . '%';
+        }
+    }
+
+    public static function filterQuery(&$start_query, $filter_query) {
+        // Make sure both joins are wrapped in arrays.
+        if (!is_numeric(key($start_query['join']))) {
+            $start_query['join'] = [$start_query['join']];
+        }
+        if (!is_numeric(key($filter_query['join']))) {
+            $filter_query['join'] = [$filter_query['join']];
+        }
+
+        // Merge checking for duplicates.
+        foreach ($filter_query['join'] as $join) {
+            $match = false;
+            foreach ($start_query['join'] as $j) {
+                if ($join == $j) {
+                    $match = true;
+                }
+            }
+            if (!$match) {
+                $start_query['join'][] = $join;
+            }
+        }
+
+        // Merge where queries.
+        $start_query['where'] = array_merge($start_query['where'], $filter_query['where']);
+
+        // Make sure the correct fields are added.
+        foreach ($filter_query['select'] as $table => $fields) {
+            if (empty($start_query['select'][$table])) {
+                // Make sure the final query has the table.
+                $start_query['select'][$table] = [];
+            } elseif ($start_query['select'][$table] == ['*'] || $fields = ['*']) {
+                // If either query wants all the fields, set the final query.
+                $start_query['select'][$table] = ['*'];
+                continue;
+            } elseif (!is_array($start_query['select'][$table])) {
+                // Make sure the final query select for the table is an array.
+                $start_query['select'][$table] = [$start_query['select'][$table]];
+            }
+
+            if (!is_array($fields)) {
+                $fields = [$fields];
+            }
+
+            // Merge the fields
+            $start_query['select'][$table] = array_merge($start_query['select'][$table], $fields);
         }
     }
 }

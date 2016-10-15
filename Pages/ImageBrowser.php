@@ -13,7 +13,7 @@ use Lightning\Tools\Request;
 
 class ImageBrowser extends Page {
 
-    protected $template = 'template_blank';
+    protected $template = ['template_blank', 'Lightning'];
     protected $page = 'image_browser';
     protected $containers;
     protected $thumbSize;

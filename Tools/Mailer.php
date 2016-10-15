@@ -25,7 +25,7 @@ class Mailer {
      *
      * @var array
      */
-    protected $customVariables = array();
+    protected $customVariables = [];
 
     /**
      * The PHPMailer object.
@@ -53,7 +53,7 @@ class Mailer {
      *
      * @var array
      */
-    protected $users = array();
+    protected $users = [];
 
     /**
      * Whether to output the to addresses as messages are being send.
@@ -90,6 +90,9 @@ class Mailer {
      */
     protected $sentCount = 0;
 
+    protected $limit = 0;
+    protected $random = false;
+
     /**
      * Construct the mailer object.
      *
@@ -115,6 +118,14 @@ class Mailer {
         }
     }
 
+    public function setRandom($random) {
+        $this->random = $random;
+    }
+
+    public function setLimit($limit) {
+        $this->limit = $limit;
+    }
+
     /**
      * Set the value for a custom variable.
      *
@@ -133,7 +144,7 @@ class Mailer {
      * @param array $values
      *   A list of variable values keyed by variable names.
      */
-    public function resetCustomVariables($values = array()) {
+    public function resetCustomVariables($values = []) {
         $this->customVariables = $values;
     }
 
@@ -314,9 +325,9 @@ class Mailer {
         // Load the test users.
         $users = Configuration::get('mailer.test');
         if (empty($users)) {
-            $this->users = array();
+            $this->users = [];
         } else {
-            $this->users = Database::getInstance()->selectAll('user', array('email' => array('IN', $users)));
+            $this->users = Database::getInstance()->selectAll('user', ['email' => ['IN', $users]]);
         }
 
         // Load the spam test users.
@@ -324,14 +335,14 @@ class Mailer {
         $spam_test_emails = Configuration::get('mailer.spam_test');
         if (is_array($spam_test_emails)) {
             foreach ($spam_test_emails as $spam_test) {
-                $this->users[] = array(
+                $this->users[] = [
                     'email' => $spam_test,
                     'first' => 'Spam',
                     'last' => 'Test',
                     'from' => $spam_test_from,
                     'user_id' => 0,
                     'salt' => 'na',
-                );
+                ];
             }
         }
     }
@@ -361,6 +372,8 @@ class Mailer {
             $this->message->setTest(true);
             $this->loadTestUsers();
         } else {
+            $this->message->setLimit($this->limit);
+            $this->message->setRandom($this->random);
             $this->users = $this->message->getUsers();
         }
 

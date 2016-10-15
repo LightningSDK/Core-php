@@ -110,7 +110,7 @@ $conf = [
         'log' => '../logs/cli.log',
     ],
     'jobs' => [
-        'session_cleanup' => [
+        'session-cleanup' => [
             'class' => 'Lightning\\Jobs\\UserCleanup',
             'offset' => 7200, // 2 am server time
             'interval' => 86400,
@@ -150,9 +150,9 @@ $conf = [
             'admin/pages' => 'Lightning\\Pages\\Admin\\Pages',
             'admin/users' => 'Lightning\\Pages\\Admin\\Users',
             'admin/cms' => 'Lightning\\Pages\\Admin\\CMS',
-            'admin/rolesdashboard' => 'Lightning\\Pages\\Admin\\RolesDashboard',
             'admin/roles' => 'Lightning\\Pages\\Admin\\Roles',
             'admin/permissions' => 'Lightning\\Pages\\Admin\\Permissions',
+            'admin/contact' => 'Lightning\\Pages\\Admin\\Contact',
 
             // Image admin
             'elfinder' => 'Lightning\\API\\ElFinder',

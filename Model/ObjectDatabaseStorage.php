@@ -11,7 +11,7 @@ trait ObjectDatabaseStorage {
      *
      * @param array $data
      */
-    public function __construct($data = array()) {
+    public function __construct($data = []) {
         $this->__data = $data;
         $this->initJSONEncodedFields();
     }

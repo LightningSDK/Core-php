@@ -4,6 +4,7 @@ namespace Lightning\Pages;
 
 use Exception;
 use Lightning\Tools\Cache\FileCache;
+use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\CSVImport;
 use Lightning\Tools\Database;
@@ -13,6 +14,7 @@ use Lightning\Tools\IO\FileManager;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Output;
+use Lightning\Tools\PHP;
 use Lightning\Tools\Request;
 use Lightning\Tools\Scrub;
 use Lightning\Tools\Security\Encryption;
@@ -22,8 +24,8 @@ use Lightning\View\Field\BasicHTML;
 use Lightning\View\Field\Checkbox;
 use Lightning\View\Field\FileBrowser;
 use Lightning\View\Field\Location;
-use Lightning\View\Field\Text;
 use Lightning\View\Field\Time;
+use Lightning\View\HTML;
 use Lightning\View\HTMLEditor\HTMLEditor;
 use Lightning\View\JS;
 use Lightning\View\Page;
@@ -43,7 +45,7 @@ abstract class Table extends Page {
      */
     const TABLE = '';
 
-    protected $page = 'table';
+    protected $page = ['table', 'Lightning'];
 
     protected $fullWidth = true;
 
@@ -73,6 +75,8 @@ abstract class Table extends Page {
      * A list of rows, or a list of values of a single row.
      */
     protected $list;
+
+    protected $currentRow = 0;
 
     /**
      * A list of field definitions, to override the defaults read from the database.
@@ -190,7 +194,7 @@ abstract class Table extends Page {
      * @var array
      */
     protected $action_fields = [];
-    protected $custom_templates = [];
+    protected $customTemplates = [];
     protected $list_where;
 
     protected $importable = false;
@@ -199,6 +203,23 @@ abstract class Table extends Page {
      */
     protected $importCache;
     protected $importHandlers = [];
+
+    /**
+     * A list of extra fields to import.
+     * These can be processed manually but will be selectable on the import page as if they were real columns
+     * in the table.
+     *
+     * @var array
+     */
+    protected $additionalImportFields = [];
+
+    /**
+     * A list of fields that should be inserted, even if they are not listed.
+     * In case additional fields are created during the validate process, they should be added here.
+     *
+     * @var array
+     */
+    protected $processedImportFields = [];
 
     /**
      * @var CSVImport
@@ -232,7 +253,6 @@ abstract class Table extends Page {
      * @var
      */
     protected $serial_update = false;
-    protected $custom_template_directory = "table_templates/";
     protected $editable = true;
     protected $deleteable = true;
     protected $addable = true;
@@ -262,6 +282,8 @@ abstract class Table extends Page {
 
     protected $subset = [];
     protected $search_fields = [];
+    protected $filters = [];
+    protected $filterQuery;
     protected $searchWildcard = Database::WILDCARD_AFTER;
     protected $submit_redirect = true;
     protected $additional_action_vars = [];
@@ -277,6 +299,7 @@ abstract class Table extends Page {
      * @var array
      */
     protected $action_after = ['insert' => 'list', 'update' => 'list'];
+    protected $postActionAfter;
 
     /**
      * Extra buttons added to from. Array structure:
@@ -375,16 +398,18 @@ abstract class Table extends Page {
                 $this->preset[$backlinkname] = ['default' => $backlinkvalue];
             }
         }
-        if (isset($_POST['function'])) $this->function = $_POST['function'];
-        if (isset($_REQUEST['id'])) $this->id = Request::get('id');
-        if (isset($_REQUEST['page'])) $this->page_number = max(1, Request::get('page'));
+        $this->function = Request::post('function');
+        $this->id = Request::get('id', Request::TYPE_INT);
+        $this->page_number = max(1, Request::get('page', Request::TYPE_INT, '', 1));
 
         /*
          * serial_update comes as POST parameter
          */
-        $this->serial_update = Request::post('serialupdate', 'boolean');
+        $this->serial_update = Request::post('serialupdate', Request::TYPE_BOOLEAN);
 
         $this->refer_return = Request::get('refer_return');
+
+        $this->postActionAfter = Request::get('action-after');
 
         // load the sort fields
         if ($sort = Request::get('sort')) {
@@ -413,7 +438,11 @@ abstract class Table extends Page {
 
         $this->fillDetaultSettings();
 
-        Template::getInstance()->set('full_width', true);
+        // Setup the template.
+        $template = Template::getInstance();
+        $template->set('table', $this);
+        $template->set('full_width', true);
+
         parent::__construct();
     }
 
@@ -571,6 +600,10 @@ abstract class Table extends Page {
         $this->CSVImporter = new CSVImport();
     }
 
+    public function getId() {
+        return $this->id;
+    }
+
     /**
      * The file upload is posted here.
      */
@@ -599,9 +632,10 @@ abstract class Table extends Page {
     protected function initCSVImporter() {
         $this->CSVImporter = new CSVImport();
         $this->CSVImporter->setTable($this->table);
-        $fields = $this->get_fields($this->table, $this->preset);
         $this->CSVImporter->setPrimaryKey($this->getKey());
-        $this->CSVImporter->setFields($fields);
+        $this->CSVImporter->setFields(array_keys($this->get_fields($this->table, $this->preset)));
+        $this->CSVImporter->setAdditionalFields($this->additionalImportFields);
+        $this->CSVImporter->setProcessedFields($this->processedImportFields);
         foreach ($this->importHandlers as $name => $handler) {
             $this->CSVImporter->setHandler($name, $handler);
         }
@@ -618,6 +652,7 @@ abstract class Table extends Page {
      * Ajax search, outputs HTML table replacement.
      */
     public function getSearch() {
+        Output::setJson(true);
         $this->action = 'list';
         $this->loadMainFields();
         $this->loadList();
@@ -632,31 +667,80 @@ abstract class Table extends Page {
     }
 
     public function getAutocomplete() {
-        // Initialize some variables.
-        $this->loadMainFields();
+        Output::setJson(true);
         $field = Request::get('field');
-        $string = Request::get('st');
-        $autocomplete = $this->fields[$field]['autocomplete'];
+        $type = Request::get('type');
+        $search = Request::get('search');
 
-        $where = [];
-        if (!empty($autocomplete['search'])) {
-            if (!is_array($autocomplete['search'])) {
-                $autocomplete['search'] = [$autocomplete['search']];
-            }
-            $where = Database::getMultiFieldSearch($autocomplete['search'], explode(' ', $string));
-        }
-        $results = Database::getInstance()->selectIndexed(
-            $this->fields[$field]['autocomplete']['table'],
-            $autocomplete['field'],
-            $where,
-            [],
-            'LIMIT 50'
-        );
+        switch ($type) {
+            case 'field':
+                $this->loadMainFields();
+                $autocomplete = $this->fields[$field]['autocomplete'];
 
-        if (!empty($autocomplete['display_value']) && is_callable($autocomplete['display_value'])) {
-            array_walk($results, $autocomplete['display_value']);
+                $where = [];
+                if (!empty($autocomplete['search'])) {
+                    if (!is_array($autocomplete['search'])) {
+                        $autocomplete['search'] = [$autocomplete['search']];
+                    }
+                    $where = Database::getMultiFieldSearch($autocomplete['search'], explode(' ', $search));
+                }
+                $results = Database::getInstance()->selectIndexed(
+                    $this->fields[$field]['autocomplete']['table'],
+                    $autocomplete['field'],
+                    $where,
+                    [],
+                    'LIMIT 50'
+                );
+
+                if (!empty($autocomplete['display_value']) && is_callable($autocomplete['display_value'])) {
+                    array_walk($results, $autocomplete['display_value']);
+                }
+                break;
+
+            case 'link':
+                $link_settings = $this->links[$field];
+                $results = Database::getInstance()->selectColumnQuery([
+                    'select' => [$link_settings['key'], $link_settings['display_column']],
+                    'from' => $link_settings['table'],
+                    'where' => Database::getMultiFieldSearch([$link_settings['display_column']], explode(' ', $search)),
+                    'limit' => 50,
+                    'order_by' => $link_settings['display_column'],
+                ]);
+                break;
         }
-        Output::json(array('results' => $results));
+
+        Output::json(['results' => $results]);
+    }
+
+    public function postCreateLink() {
+        Output::setJson(true);
+
+        $link = Request::get('link');
+
+        if (empty($this->links[$link])) {
+            throw new Exception('Invalid Link');
+        }
+        $settings = $this->links[$link];
+        if (empty($settings['create'])) {
+            throw new Exception('Can not create link');
+        }
+
+        $value = Request::get('value');
+
+        $db = Database::getInstance();
+        if ($link = $db->selectField($settings['key'], $settings['table'], [$settings['display_column'] => ['LIKE', $value]])) {
+            Output::json([
+                'id' => $link,
+                'new' => false,
+            ]);
+        } else {
+            $id = $db->insert($settings['table'], [$settings['display_column'] => $value]);
+            Output::json([
+                'id' => $id,
+                'new' => true,
+                'value' => $value
+            ]);
+        }
     }
 
     public function postDelete() {
@@ -823,6 +907,8 @@ abstract class Table extends Page {
 
         if ($this->submit_redirect && $redirect = Request::get('redirect')) {
             Navigation::redirect($redirect);
+        } elseif ($action = Request::get('action-after')) {
+            $this->redirect(['action' => $action, 'id' => $this->id]);
         } elseif (!empty($this->redirectAfter[$this->action])) {
             Navigation::redirect($this->createUrl($this->redirectAfter[$this->action]));
         } elseif ($this->submit_redirect && isset($this->action_after[$this->action])) {
@@ -840,10 +926,6 @@ abstract class Table extends Page {
      * Prepend the output by setting the page templates, etc.
      */
     public function output() {
-        // Setup the template.
-        $template = Template::getInstance();
-        $template->set('table', $this);
-
         // Call finalize the output.
         parent::output();
     }
@@ -921,11 +1003,11 @@ abstract class Table extends Page {
                     $this->renderPopReturn();
                     break;
                 case 'view':
-                    $output .= $this->render_action_header();
+                    $output .= $this->renderActionHeader();
                 case 'edit':
                 case 'duplicate':
                 case 'new':
-                    $output .= $this->render_form();
+                    $output .= $this->renderForm();
                     break;
                 // DELETE CONFIRMATION
                 case 'delete':
@@ -944,16 +1026,13 @@ abstract class Table extends Page {
                     break;
                 case 'list':
                 default:
-                    if ($this->searchable) {
-                        $output .= $this->renderSearchForm();
-                    }
+                    $output .= $this->renderSearchForm();
                     $this->loadList();
-                    $output .= $this->render_action_header();
+                    $output .= $this->renderActionHeader();
                     $output .= '<div class="table_list">';
                     $output .= $this->renderList();
                     $output .= '</div>';
                     break;
-
             }
         }
 
@@ -965,9 +1044,23 @@ abstract class Table extends Page {
     }
 
     protected function renderSearchForm() {
-        // @todo namespace this
-        JS::inline('table_search_i=0;table_search_d=0;');
-        return 'Search: <input type="text" name="table_search" id="table_search" value="' . Scrub::toHTML(Request::get('ste')) . '" />';
+        $output = '';
+        if ($this->searchable) {
+            // @todo namespace this
+            JS::inline('table_search_i=0;table_search_d=0;');
+            $output .= 'Search: <input type="text" name="table_search" id="table_search" value="' . Scrub::toHTML(Request::get('ste')) . '" />';
+        }
+        if (!empty($this->filters)) {
+            $output .= '<div class="filters"></div><div class="text-right">Add Filter: ';
+            $filter_options = ['' => ''];
+            foreach ($this->filters as $filter_name => $options) {
+                $filter = new $options['class']($options);
+                $filter_options[$filter_name] = $filter->display_name;
+                JS::set('table.filters.' . $filter_name, $filter->getSettings());
+            }
+            $output .= BasicHTML::select('filters', $filter_options) . '</div>';
+        }
+        return $output;
     }
 
     public function renderPopReturn() {
@@ -1002,26 +1095,18 @@ abstract class Table extends Page {
     }
 
     protected function renderHeader() {
-        if (isset($this->custom_templates[$this->action . '_header'])) {
-            $template = $this->load_template($this->custom_template_directory . $this->custom_templates[$this->action . '_header']);
-            $template = $this->template_item_vars($template, $this->id);
-        } elseif ($this->header != '') {
-            $template = "<h1>{$this->header}</h1>";
+        if (!empty($this->customTemplates[$this->action . '_header'])) {
+            return $this->renderTemplate($this->customTemplates[$this->action . '_header']);
+        } elseif (!empty($this->header)) {
+            return '<h1>' . $this->header . '</h1>';
         }
-
-        if (is_array($this->template_vars)) {
-            foreach ($this->template_vars as $key => $val) {
-                $template = str_replace('{' . $key . '}', $val, $template);
-            }
-        }
-        return !empty($template) ? $template : '';
+        return '';
     }
 
-    public function render_action_header() {
+    public function renderActionHeader() {
         $output = '';
-        if (isset($this->custom_templates[$this->action . '_action_header'])) {
-            if ($this->custom_templates[$this->action . '_action_header'] != '')
-                $output .= $this->load_template($this->custom_template_directory . $this->custom_templates[$this->action . '_action_header']);
+        if (!empty($this->customTemplates[$this->action . '_action_header'])) {
+            $output = $this->renderTemplate($this->customTemplates[$this->action . '_action_header']);
         } else {
             if ($this->addable && empty($this->singularity)) {
                 $output .= "<a href='" . $this->createUrl('new') . "'><img src='/images/lightning/new.png' border='0' title='Add New' /></a>";
@@ -1033,8 +1118,6 @@ abstract class Table extends Page {
                 $output .= "<a href='{$this->createUrl('export')}' onclick='event.preventDefault(); lightning.table.export(this)'><img src='/images/lightning/detach.png' border='0' title='Export' /></a><br />";
             }
             $output .= $this->renderCustomHeaderButtons();
-        }
-        if (!empty($output)) {
             $output .= '<br />';
         }
         return $output;
@@ -1061,50 +1144,39 @@ abstract class Table extends Page {
 
     public function renderList() {
 
-        if (count($this->list) == 0 && empty($this->prefixRows)) {
+        if ((
+            (
+                is_object($this->list) && get_class($this->list) == 'PDOStatement' && $this->list->rowCount() == 0)
+                || (is_array($this->list) && count($this->list) == 0)
+            ) && empty($this->prefixRows)) {
             return "<p></p><p></p><p>There is nothing to show. <a href='" . $this->createUrl('new') . "'>Add a new entry</a></p><p></p><p></p>";
         }
 
-        $output = '';
-        if (isset($this->custom_templates[$this->action . '_item'])) {
-            // load the template
-            $template = $this->load_template($this->custom_template_directory . $this->custom_templates[$this->action . '_item']);
-            foreach ($this->list as $row) {
-                // create temp instance for this row
-                $this_item_output = $template;
-                // replace variables
-                foreach ($this->fields as $field) {
-                    if ($this->whichField($field)) {
-                        $this_item_output = str_replace('{' . $field['field'] . '}', $this->printFieldValue($field, $row), $this_item_output);
-                    }
-                }
-                // replace functional links
-                $this_item_output = $this->template_item_vars($this_item_output, $row[$this->getKey()]);
-                $output .= $this_item_output;
-            }
-            return $output;
+        if (!empty($this->customTemplates[$this->action . '_item'])) {
+            return $this->renderTemplate($this->customTemplates[$this->action . '_item']);
         } else {
-            // show pagination
+            // Show pagination
+            // TODO: Move this into a template.
             $pagination = $this->getPagination();
-            $output .= $pagination->render();
+            $output = $pagination->render();
             // if there is something to list
             if (count($this->list) > 0 || !empty($this->prefixRows)) {
 
                 // add form if required
                 if ($this->action_fields_requires_submit()) {
-                    $output .= "<form action='" . $this->createUrl() . "' method='POST'>";
+                    $output .= '<form action="' . $this->createUrl() . '" method="POST">';
                     $output .= Form::renderTokenInput();
                 }
-                $output .= "<div class='list_table_container'>";
+                $output .= '<div class="list_table_container">';
                 $output .= '<table cellspacing="0" cellpadding="3" border="0" width="100%">';
 
                 // SHOW HEADER
-                $output .= "<thead><tr>";
+                $output .= '<thead><tr>';
                 $output .= $this->renderListHeader();
 
                 // SHOW ACTION HEADER
                 $output .= $this->render_action_fields_headers();
-                $output .= "</tr></thead>";
+                $output .= '</tr></thead>';
 
                 // Initialize the click handler.
                 if (!empty($this->rowClick)) {
@@ -1129,15 +1201,23 @@ abstract class Table extends Page {
                 $output .= '</tbody>';
 
                 if ($this->action_fields_requires_submit()) {
-                    '<input type="submit" name="submit" value="Submit" class="button medium" />';
+                    $output .= '<input type="submit" name="submit" value="Submit" class="button medium" />';
                 }
-                $output .= "</table></div>";
+                $output .= '</table></div>';
                 if ($this->action_fields_requires_submit())
-                    $output .= "</form>";
+                    $output .= '</form>';
                 $output .= $pagination->render();
             }
             return $output;
         }
+    }
+
+    protected function renderHiddenTableFields() {
+        $output = '';
+        if ($this->postActionAfter) {
+            $output = '<input type="hidden" name="action-after" value="' . Scrub::toHTML($this->postActionAfter) . '" />';
+        }
+        return $output;
     }
 
     protected function renderListHeader() {
@@ -1366,7 +1446,7 @@ abstract class Table extends Page {
             switch ($action['type']) {
                 case 'function':
                     // Have table call a function.
-                    $output .= "<a href='" . $this->createUrl("action", $row[$this->getKey()], $a, array("ra" => $this->action)) . "'>{$link_content}</a>";
+                    $output .= "<a href='" . $this->createUrl("action", $row[$this->getKey()], $a, ['ra' => $this->action]) . "'>{$link_content}</a>";
                     break;
                 case 'link':
                     $output .= "<a href='{$action['url']}{$row[$this->getKey()]}'>{$link_content}</a>";
@@ -1415,48 +1495,16 @@ abstract class Table extends Page {
      * @return string
      *   The fully rendered HTML content.
      */
-    protected function render_form() {
-        if (isset($this->custom_templates[$this->action . '_item'])) {
+    protected function renderForm() {
+        if (!empty($this->customTemplates[$this->action . '_item'])) {
             // Render the form using HTML templates.
-            $template = $this->load_template($this->custom_template_directory . $this->custom_templates[$this->action . '_item']);
-            foreach ($this->fields as $field) {
-                switch ($this->whichField($field)) {
-                    case 'edit':
-                        $template = str_replace('{' . $field['field'] . '}', $this->renderEditField($field, $this->list), $template);
-                        break;
-                    case 'display':
-                        $template = str_replace('{' . $field['field'] . '}', $this->printFieldValue($field, $this->list), $template);
-                        break;
-                    case false:
-                        $template = str_replace('{' . $field['field'] . '}', '', $template);
-                }
-            }
-            $template = $this->template_item_vars($template, $this->id);
-            return $template;
+            return $this->renderTemplate($this->customTemplates[$this->action . '_item']);
         } else {
             // Render the form in a table as basic HTML.
-            $output = '';
+            // TODO: Put this into a template.
+            $output = $this->renderFormOpen();
 
-            if ($this->action == 'new' || $this->action == 'duplicate') {
-                $new_action = 'insert';
-            } else {
-                $new_action = 'update';
-            }
-            if ($this->action != 'view') {
-                $multipart_header = $this->hasUploadfield() ? 'enctype="multipart/form-data"' : '';
-                $output .= '<form action="' . $this->createUrl() . '" id="form_' . $this->table . '" method="POST" ' . $multipart_header . '><input type="hidden" name="action" id="action" value="' . $new_action . '" />';
-                if ($this->action == 'duplicate') {
-                    $output .= '<input type="hidden" name="lightning_table_duplicate" value="' . $this->id . '" />';
-                }
-                $output .= Form::renderTokenInput();
-                if ($return = Request::get('return', 'urlencoded')) {
-                    $output .= BasicHTML::hidden('table_return', $return);
-                }
-            }
-            // use the ID if we are editing a current one
-            if ($this->action == "edit") {
-                $output .= '<input type="hidden" name="id" id="id" value="' . $this->id . '" />';
-            }
+            // Header options.
             if ($this->action == "view" && !$this->readOnly) {
                 if ($this->editable !== false) {
                     $output .= "<a href='" . $this->createUrl('edit', $this->id) . "'><img src='/images/lightning/edit.png' border='0' /></a>";
@@ -1483,40 +1531,61 @@ abstract class Table extends Page {
             $output .= $this->render_form_linked_tables();
 
             // Render all submission buttons
-            $output .= $this->renderButtons($new_action);
+            $output .= '<tr><td colspan="2">' . $this->renderButtons() . '</td></tr>';
 
             $output .= implode('', $hidden_fields);
 
-            $output .= '</td></tr></table>';
-            if ($this->action != 'view') {
-                $output .= '</form>';
-            }
+            $output .= '</table>';
+            $output .= $this->renderFormClose();
 
             return $output;
         }
     }
 
-    /**
-     * Renders all submission buttons of the form.
-     * Depending on action performing, it will output also
-     * other types of buttons, plus any needed fields and links
-     *
-     * @param string $new_action
-     *   Alternative name of the action processing
-     *
-     * @return string
-     */
-    protected function renderButtons($new_action) {
-        /*
-         * Submit button has name parameter as 'sbmt' by purpose.
-         * When it is 'submit', form doesn't get submitted by javascript
-         * submit() function.
-         */
+    public function renderFormOpen() {
         $output = '';
 
-        $output .= '<tr><td colspan="2">';
         if ($this->action != 'view') {
-            $output .= '<input type="submit" name="sbmt" value="' . $this->button_names[$new_action] . '" class="button medium">';
+            $multipart_header = $this->hasUploadfield() ? 'enctype="multipart/form-data"' : '';
+            $output .= '<form action="' . $this->createUrl() . '" id="form_' . $this->table . '" method="POST" ' . $multipart_header . '><input type="hidden" name="action" id="action" value="' . $this->getNewAction() . '" />';
+            if ($this->action == 'duplicate') {
+                $output .= '<input type="hidden" name="lightning_table_duplicate" value="' . $this->id . '" />';
+            }
+            $output .= Form::renderTokenInput();
+            $output .= $this->renderHiddenTableFields();
+            if ($return = Request::get('return', 'urlencoded')) {
+                $output .= BasicHTML::hidden('table_return', $return);
+            }
+        }
+        // use the ID if we are editing a current one
+        if ($this->action == "edit") {
+            $output .= '<input type="hidden" name="id" id="id" value="' . $this->id . '" />';
+        }
+
+        return $output;
+    }
+
+    public function renderFormClose() {
+        if ($this->action != 'view') {
+            return '</form>';
+        }
+        return '';
+    }
+
+    protected function getNewAction() {
+        if ($this->action == 'new' || $this->action == 'duplicate') {
+            return 'insert';
+        } else {
+            return 'update';
+        }
+    }
+
+    public function renderButtons() {
+        $output = '';
+
+        if ($this->action != 'view') {
+            // Submit button has name parameter as 'sbmt' by purpose. When it is 'submit', form doesn't submit by javascript.
+            $output .= '<input type="submit" name="sbmt" value="' . $this->button_names[$this->getNewAction()] . '" class="button medium">';
         }
 
         // If exist render all custom buttons
@@ -1524,21 +1593,23 @@ abstract class Table extends Page {
 
         if ($this->action != 'view') {
             if ($this->cancel) {
-                $output .= "<input type='button' name='cancel' value='{$this->button_names['cancel']}' onclick='document.location=\"" . $this->createUrl() . "\";' />";
+                $output .= '<input type="button" name="cancel" value="' . $this->button_names['cancel'] . '" onclick="document.location=\'' . $this->createUrl() . '\';" />';
             }
             if ($this->refer_return) {
                 $output .= '<input type="hidden" name="refer_return" value="' . $this->refer_return . '" />';
             }
-            if ($new_action == 'update' && $this->enable_serial_update) {
+            if ($this->getNewAction() == 'update' && $this->enable_serial_update) {
                 $output .= '<input type="checkbox" name="serialupdate" value="true" checked="checked" /> Edit Next Record';
             }
             $output .= $this->form_buttons_after;
         }
-        if ($this->action == "view" && !$this->readOnly) {
-            if ($this->editable !== false)
-                $output .= "<a href='" . $this->createUrl('edit', $this->id) . "'><img src='/images/lightning/edit.png' border='0' /></a>";
-            if ($this->deleteable !== false)
-                $output .= "<a href='" . $this->createUrl('delete', $this->id) . "'><img src='/images/lightning/remove.png' border='0' /></a>";
+        if ($this->action == 'view' && !$this->readOnly) {
+            if ($this->editable !== false) {
+                $output .= '<a href="' . $this->createUrl('edit', $this->id) . '"><img src="/images/lightning/edit.png" border="0" /></a>';
+            }
+            if ($this->deleteable !== false) {
+                $output .= '<a href="' . $this->createUrl('delete', $this->id) . '"><img src="/images/lightning/remove.png" border="0" /></a>';
+            }
         }
 
         return $output;
@@ -1575,8 +1646,18 @@ abstract class Table extends Page {
                     $output .= $this->renderSubmitAndRedirect($button, $button_id);
                     break;
                 case self::CB_LINK:
-                    $download = !empty($button['download']) ? 'download="' . $button['download'] . '"' : '';
-                    $output .= '<a href="' . $button['url'] . '" ' . $download . ' class="button medium">' . $button['text'] . '</a>';
+                    $attributes = [
+                        'href' => $button['url'],
+                        'class' => 'button medium',
+                    ];
+
+                    if (!empty($button['download'])) {
+                        $attributes['download'] = $button['download'];
+                    }
+                    if (!empty($button['target'])) {
+                        $attributes['target'] = $button['target'];
+                    }
+                    $output .= '<a ' . HTML::implodeAttributes($attributes) . '>' . $button['text'] . '</a>';
             }
         }
         return $output;
@@ -1614,7 +1695,7 @@ abstract class Table extends Page {
         $output = '';
         if ($which_field = $this->whichField($field)) {
             // double column width row
-            if ($field['type'] == "note") {
+            if ($field['type'] == 'note') {
                 $output = '<tr><td colspan="2"><h3>';
                 $output .= !empty($field['note']) ? $field['note'] : $field['display_name'];
                 $output .= '</h3></td></tr>';
@@ -1639,9 +1720,9 @@ abstract class Table extends Page {
 
     protected function renderFieldInputOrValue($which_field, $field, $row) {
         $output = '';
-        if ($which_field == "display") {
+        if ($which_field == 'display') {
             $output = $this->printFieldValue($field, $row);
-        } elseif ($which_field == "edit") {
+        } elseif ($which_field == 'edit') {
             $output = $this->renderEditField($field, $row);
             if (!empty($field['note'])) {
                 $output .= $field['note'];
@@ -1651,6 +1732,20 @@ abstract class Table extends Page {
             $output .= "<input type='button' value='Reset to default' onclick='lightning.table.resetField(\"{$field['field']}\");' />";
         }
         return $output;
+    }
+
+    /**
+     * Render a field by name for templates.
+     *
+     * @param string $field_name
+     *
+     * @return string
+     */
+    public function renderField($field_name) {
+        $field = $this->fields[$field_name];
+        $which_field = $this->whichField($field);
+        $row = !empty($this->id) ? $this->list : $this->list[$this->currentRow];
+        return $this->renderFieldInputOrValue($which_field, $field, $row);
     }
 
     // THIS IS CALLED TO RENDER LINKED TABLES IN view/edit/new MODE
@@ -1663,11 +1758,7 @@ abstract class Table extends Page {
             }
 
             // DISPLAY NAME ON THE LEFT
-            if (isset($link_settings['display_name'])) {
-                $output .= "<tr><td>{$link_settings['display_name']}</td><td>";
-            } else {
-                $output .= "<tr><td>{$link}</td><td>";
-            }
+            $output .= '<tr><td>' . $this->getDisplayName($link_settings, $link) . '</td><td>';
 
             // LOAD THE LINKED ROWS
             // The local key is the primary key column by default or another specified column.
@@ -1676,6 +1767,7 @@ abstract class Table extends Page {
             $local_id = ($this->table) ? $this->list[$local_key] : $this->id;
 
             // If there is a local key ID and no active list, load it.
+            // active_list is the list of attached items.
             if ($local_id > 0 && !isset($link_settings['active_list'])) {
                 $link_settings['active_list'] = $this->load_all_active_list($link_settings, $local_id);
             } elseif (empty($local_id)) {
@@ -1686,24 +1778,33 @@ abstract class Table extends Page {
             $link_settings['row_count'] = count($link_settings['active_list']);
 
             // IN EDIT/NEW MODE, SHOW A FULL FORM
-            if ($this->action == "edit" || $this->action == "new") {
+            if ($this->action == 'edit' || $this->action == 'new') {
                 // IN EDIT MODE WITH THE full_form OPTION, SHOW THE FORM WITH ADD/REMOVE LINKS
                 if (!empty($link_settings['full_form'])) {
                     // editable forms (1 to many)
                     $output .= $this->render_full_linked_table_editable($link, $link_settings);
                 } else {
                     // drop down menu (many to many)
-                    if (!empty($link_settings['type']) && $link_settings['type'] == 'image') {
-                        $output .= $this->render_linked_table_editable_image($link, $link_settings);
-                    } else {
-                        $output .= $this->render_linked_table_editable_select($link, $link_settings);
+                    if (empty($link_settings['type'])) {
+                        $link_settings['type'] = 'select';
+                    }
+                    switch ($link_settings['type']) {
+                        case 'image':
+                            $output .= $this->renderLinkedTableEditableImage($link, $link_settings);
+                            break;
+                        case 'autocomplete':
+                            $output .= $this->renderLinkedTableEditableAutocomplete($link, $link_settings);
+                            break;
+                        default;
+                            $output .= $this->renderLinkedTableEditableSelect($link, $link_settings);
+                            break;
                     }
                 }
             }
 
             // FULL FORM MODE INDICATES THAT THE LINKED TABLE IS A SUB TABLE OF THE MAIN TABLE - A 1(table) TO MANY (subtable) RELATIONSHIP
             // for view mode, if "display" is set, use the "display" template
-            elseif ($this->action == "view" && is_array($link_settings['active_list'])) {
+            elseif ($this->action == 'view') {
                 if (isset($link_settings['display'])) {
                     // IN VIEW MODE WITH THE full_form OPTION, JUST SHOW ALL THE DATA
                     // loop for each entry
@@ -1741,6 +1842,8 @@ abstract class Table extends Page {
                 }
                 // LIST MODE
             }
+
+            $output .= '</td></tr>';
         }
 
         return $output;
@@ -1797,7 +1900,7 @@ abstract class Table extends Page {
      *
      * @return string
      */
-    protected function render_linked_table_editable_image($link_id, &$link_settings) {
+    protected function renderLinkedTableEditableImage($link_id, &$link_settings) {
         HTMLEditor::init(true);
         JS::startup('lightning.table.init()');
         // TODO: This doesn't return anything valuable. Is it used anywhere?
@@ -1817,16 +1920,36 @@ abstract class Table extends Page {
         return $output;
     }
 
+    protected function renderLinkedTableEditableAutocomplete($link_id, &$link_settings) {
+
+        if (!empty($link_settings['create'])) {
+            JS::set('table_data.links.' . $link_id . '.create', true);
+            JS::addSessionToken();
+        }
+
+        // Create a search box.
+        $output = BasicHTML::text($link_id . '_autocomplete', '', [
+            'class' => 'autocomplete_link',
+            'data-name' => $link_id,
+            'data-type' => 'link',
+        ]);
+
+        $output .= $this->renderLinkedTableEditableSelectedBoxes($link_id, $link_settings);
+
+        return $output;
+    }
+
     /**
      * this renders a linked table showing a list of all available options, and a list of
      * all items that are already added to this table item
      * this is a many to many - where you can add any of the options from loadAllLinkOptions()
      * but you can't edit the actual content unless you go to the table page for that table
      *
+     * @param $link_id
      * @param $link_settings
      * @return string
      */
-    protected function render_linked_table_editable_select($link_id, &$link_settings) {
+    protected function renderLinkedTableEditableSelect($link_id, &$link_settings) {
         // show list of options to ad
         // IN REGULAR MODE IF edit_js? IS TURNED ON
         $output = '';
@@ -1851,17 +1974,23 @@ abstract class Table extends Page {
             $output .= "<a onclick='lightning.table.newPop(\"{$location}\",\"{$link_id}\",\"{$link_settings['display_column']}\")'>Add New Item</a>";
         }
 
-        // create the hidden array field
-        $output .= "<input type='hidden' name='{$link_id}_input_array' id='{$link_id}_input_array' value='";
-        foreach ($link_settings['active_list'] as $init)
-            $output .= $init[$link_settings['key']] . ",";
-        $output .= "' /><br /><div id='{$link_id}_list_container'>";
+        $output .= $this->renderLinkedTableEditableSelectedBoxes($link_id, $link_settings);
+
+        return $output;
+    }
+
+    protected function renderLinkedTableEditableSelectedBoxes($link_id, &$link_settings) {
+        // Create the hidden array field.
+        $value = implode(',', PHP::getArrayPropertyValues($link_settings['active_list'], $link_settings['key'])) . ',';
+        $output = BasicHTML::hidden($link_id . '_input_array', $value);
+
+        $output .= "<br /><div id='{$link_id}_list_container'>";
         // create each item as a viewable deleteable box
         foreach ($link_settings['active_list'] as $init) {
             $output .= "<div class='{$link_id}_box table_link_box_selected' id='{$link_id}_box_{$init[$link_settings['key']]}'>{$init[$link_settings['display_column']]}
 						<i class='remove-link fa fa-close' data-link='{$link_id}' data-link-item='{$init[$link_settings['key']]}' ></i></div>";
         }
-        $output .= "</div></td></tr>";
+        $output .= '</div>';
         return $output;
     }
 
@@ -2008,18 +2137,9 @@ abstract class Table extends Page {
         return $this->action_file . (!empty($parameters) ? ('?' . http_build_query($parameters)) : '');
     }
 
-    public function load_template($file) {
-        if ($file == '') return;
-        $template = file_get_contents($file);
-        $template = str_replace('{table_link_new}', $this->createUrl("new"), $template);
-        $template = str_replace('{table_header}', $this->header, $template);
-        $template = str_replace('{parentId}', intval($this->parentId), $template);
-
-        // additional action vars
-        foreach ($this->additional_action_vars as $f => $v)
-            $template = str_replace('{' . $f . '}', $v, $template);
-
-        return $template;
+    public function renderTemplate($template) {
+        // Use the global template so any set variables are already set.
+        return Template::getInstance()->render($template, true);
     }
 
     public function template_item_vars($template, $id) {
@@ -2148,42 +2268,55 @@ abstract class Table extends Page {
 
     // is the field editable in these forms
     protected function userInputNew(&$field) {
-        if (isset($field['render_' . $this->action . '_field']))
+        if (isset($field['render_' . $this->action . '_field'])) {
             return true;
-        if ($field['type'] == "note")
+        }
+        if ($field['type'] == 'note') {
             return true;
-        if ($field['type'] == 'hidden' || (!empty($field['hidden']) && $field['hidden'] == 'true'))
+        }
+        if ($field['type'] == 'hidden' || (!empty($field['hidden']) && $field['hidden'] == 'true')) {
             return false;
-        if ($field['field'] == $this->getKey() && empty($field['editable']))
+        }
+        if ($field['field'] == $this->getKey() && empty($field['editable'])) {
             return false;
-        if ($field['field'] == $this->parentLink)
+        }
+        if ($field['field'] == $this->parentLink) {
             return false;
+        }
         if (isset($field['insertable']) && $field['insertable'] == false) {
             return false;
         }
-        if (!empty($field['editable']) && $field['editable'] === false) {
+        if (isset($field['editable']) && $field['editable'] === false) {
             return false;
         }
-        if (!empty($field['list_only']))
+        if (!empty($field['list_only'])) {
             return false;
+        }
         return true;
     }
 
     protected function userInputEdit(&$field) {
-        if (isset($field['render_' . $this->action . '_field']))
+        if (isset($field['render_' . $this->action . '_field'])) {
             return true;
-        if ($field['type'] == "note")
+        }
+        if ($field['type'] == "note") {
             return true;
-        if ($field['field'] == $this->getKey())
+        }
+        if ($field['field'] == $this->getKey()) {
             return false;
-        if ($field['field'] == $this->parentLink)
+        }
+        if ($field['field'] == $this->parentLink) {
             return false;
-        if (isset($field['editable']) && $field['editable'] === false)
+        }
+        if (isset($field['editable']) && $field['editable'] === false) {
             return false;
-        if (!empty($field['list_only']))
+        }
+        if (!empty($field['list_only'])) {
             return false;
-        if (!empty($field['set_on_new']))
+        }
+        if (!empty($field['set_on_new'])) {
             return false;
+        }
         return true;
     }
 
@@ -2198,26 +2331,32 @@ abstract class Table extends Page {
         if (
             (!empty($field['display_value']) && is_callable($field['display_value']))
             || (!empty($field['display_new_value']) && is_callable($field['display_new_value']))
-        )
+        ) {
             return true;
-        if ($field['field'] == $this->parentLink)
+        }
+        if ($field['field'] == $this->parentLink) {
             return false;
-        if ((!empty($field['type']) && $field['type'] == 'hidden') || !empty($field['hidden']))
+        }
+        if ((!empty($field['type']) && $field['type'] == 'hidden') || !empty($field['hidden'])) {
             return false;
+        }
         return true;
     }
 
     protected function userDisplayEdit(&$field) {
-        if (!empty($field['list_only']))
+        if (!empty($field['list_only'])) {
             return false;
+        }
         // TODO: This should be replaced by an overriding method in the child class.
         if (
             (!empty($field['display_value']) && is_callable($field['display_value']))
             || (!empty($field['display_edit_value']) && is_callable($field['display_edit_value']))
-        )
+        ) {
             return true;
-        if ($field['field'] == $this->parentLink)
+        }
+        if ($field['field'] == $this->parentLink) {
             return false;
+        }
         return true;
     }
 
@@ -2226,14 +2365,18 @@ abstract class Table extends Page {
         if (
             (!empty($field['display_value']) && is_callable($field['display_value']))
             || (!empty($field['displayList_value']) && is_callable($field['displayList_value']))
-        )
+        ) {
             return true;
-        if ($field['field'] == $this->parentLink)
+        }
+        if ($field['field'] == $this->parentLink) {
             return false;
-        if ((!empty($field['type']) && $field['type'] == 'hidden') || !empty($field['hidden']))
+        }
+        if ((!empty($field['type']) && $field['type'] == 'hidden') || !empty($field['hidden'])) {
             return false;
-        if (!empty($field['unlisted']))
+        }
+        if (!empty($field['unlisted'])) {
             return false;
+        }
         return true;
     }
 
@@ -2248,16 +2391,21 @@ abstract class Table extends Page {
         if (
             (!empty($field['display_value']) && is_callable($field['display_value']))
             || (!empty($field['displayView_value']) && is_callable($field['displayView_value']))
-        )
+        ) {
             return true;
-        if ($field['type'] == "note" && $field['view'])
+        }
+        if ($field['type'] == "note" && $field['view']) {
             return true;
-        if ($field['field'] == $this->parentLink)
+        }
+        if ($field['field'] == $this->parentLink) {
             return false;
-        if ((!empty($field['type']) && $field['type'] == 'hidden') || !empty($field['hidden']))
+        }
+        if ((!empty($field['type']) && $field['type'] == 'hidden') || !empty($field['hidden'])) {
             return false;
-        if (!empty($field['list_only']))
+        }
+        if (!empty($field['list_only'])) {
             return false;
+        }
         return true;
     }
 
@@ -2337,9 +2485,9 @@ abstract class Table extends Page {
         $dependenciesMet = true;
         foreach ($field_list as $f => $field) {
             // check for settings that override user input
-            if ($this->action == "insert" && !$this->setValueOnNew($field)) {
+            if ($this->action == 'insert' && !$this->setValueOnNew($field)) {
                 continue;
-            } elseif ($this->action == "update" && !$this->setValueOnUpdate($field)) {
+            } elseif ($this->action == 'update' && !$this->setValueOnUpdate($field)) {
                 continue;
             }
             if ($field['type'] == 'note') {
@@ -2349,7 +2497,7 @@ abstract class Table extends Page {
                 continue;
             }
 
-            if (!empty($field['table']) && $field['table'] == "access" && !$accessTable) {
+            if (!empty($field['table']) && $field['table'] == 'access' && !$accessTable) {
                 continue;
             } elseif (!isset($field['table']) && $accessTable) {
                 continue;
@@ -2360,7 +2508,9 @@ abstract class Table extends Page {
             $html = false;
             $ignore = false;
 
-            if (!isset($field['form_field'])) $field['form_field'] = $field['field'];
+            if (!isset($field['form_field'])) {
+                $field['form_field'] = $field['field'];
+            }
             // GET THE FIELD VALUE
 
             // OVERRIDES
@@ -2368,7 +2518,7 @@ abstract class Table extends Page {
             if (!empty($field['value'])) {
                 // Fixed value.
                 $val = $field['value'];
-            } elseif (!empty($field['force_default_new']) && $this->action == "insert") {
+            } elseif (!empty($field['force_default_new']) && $this->action == 'insert') {
                 // Fixed default value.
                 $val = $field['default'];
             } elseif ($this->parentLink == $field['field']) {
@@ -2416,13 +2566,13 @@ abstract class Table extends Page {
                         $val = Time::getDate($field['form_field'], !empty($field['allow_blank']));
                         break;
                     case 'time':
-                        $val = Time::getTime($field['form_field'], !empty($field['allow_blank']));
+                        $val = Time::getTime($field['form_field'], !empty($field['allow_blank']), !empty($field['timezone']) ? $field['timezone'] : null);
                         break;
                     case 'datetime':
-                        $val = Time::getDateTime($field['form_field'], !empty($field['allow_blank']));
+                        $val = Time::getDateTime($field['form_field'], !empty($field['allow_blank']), !empty($field['timezone']) ? $field['timezone'] : null);
                         break;
                     case 'checkbox':
-                        $val = ( integer ) Request::get($field['form_field'], 'boolean');
+                        $val = Request::get($field['form_field'], Request::TYPE_BOOLEAN_INT);
                         break;
                     case 'checklist':
                         $vals = '';
@@ -2447,16 +2597,20 @@ abstract class Table extends Page {
                     case 'longtext':
                     case 'div':
                     case 'html':
-                        $val = Request::get($field['form_field'],
-                            'html',
-                            !empty($field['allowed_html']) ? $field['allowed_html'] : '',
-                            !empty($field['allowed_css']) ? $field['allowed_css'] : '',
-                            !empty($field['trusted']) || $this->trusted,
-                            !empty($field['full_page'])
-                        );
+                        if ($this->trusted || !empty($field['trusted'])) {
+                            $val = Request::get($field['form_field'], Request::TYPE_TRUSTED_HTML);
+                        } else {
+                            $val = Request::get($field['form_field'],
+                                Request::TYPE_HTML,
+                                !empty($field['allowed_html']) ? $field['allowed_html'] : '',
+                                !empty($field['allowed_css']) ? $field['allowed_css'] : '',
+                                !empty($field['trusted']) || $this->trusted,
+                                !empty($field['full_page'])
+                            );
+                        }
                         break;
                     case 'json':
-                        $val = Request::post($field['form_field'], 'json_string');
+                        $val = Request::post($field['form_field'], Request::TYPE_JSON_STRING);
                         break;
                     case 'int':
                     case 'float':
@@ -2482,7 +2636,7 @@ abstract class Table extends Page {
                 ((!isset($field[$sanitize_field]) || $field[$sanitize_field] !== false)
                     || (!isset($field['sanitize']) || $field['sanitize'] !== false))
             ) {
-                $val = $this->input_sanitize($val, $html);
+                $val = $this->sanitizeInput($val, $html);
             }
 
             // If this value is required.
@@ -2809,23 +2963,23 @@ abstract class Table extends Page {
     // get the int val of a specific bit - ie convert 1 (2nd col form right or 10) to 2
     // this way you can search for the 2nd bit column in a checklist with: "... AND col&".table::get_bit_int(2)." > 0"
     public static function get_bit_int($bit) {
-        bindec("1" . str_repeat("0", $bit));
+        bindec('1' . str_repeat('0', $bit));
     }
 
-    protected function input_sanitize($val, $allow_html = false) {
+    protected function sanitizeInput($val, $allow_html = false) {
 
         $val = stripslashes($val);
 
         if ($allow_html === true && $this->trusted) {
-            $clean_html = Scrub::html($val, '', '', TRUE);
-        }
-        elseif ($allow_html === true) {
+            $clean_html = Scrub::trustedHTML($val);
+        } elseif ($allow_html === true) {
             $clean_html = Scrub::html($val);
-        }
-        elseif ($allow_html)
+        } elseif ($allow_html) {
             $clean_html = Scrub::html($val, $allow_html);
-        else
+        } else {
             $clean_html = Scrub::text($val);
+        }
+
         return $clean_html;
     }
 
@@ -2913,18 +3067,7 @@ abstract class Table extends Page {
     }
 
     /**
-     * loadList() obtains all the rows from the table
-
-     * Constructs a database query based on the following class variables:
-     * @param string $table->table			the table to query
-     * @param string $table->parentLink		the table name of the parent link (foreign key table)
-     * @param string $table->parentId		the id (foreign key) of the parentLink with which to link
-     * @param string $table->list_where		?
-     * @param string $table->accessControl	?
-     * @param string $table->sort			names of columns, separated by commas to sort by.
-
-     * @return stores result in $list class variable (no actual return result from the method)
-
+     * Build a query to select the list of entries.
      */
     protected function loadList() {
 
@@ -2933,19 +3076,35 @@ abstract class Table extends Page {
             return;
         }
 
-        // Build the query.
-        $where = [];
-        $fields = [];
-        $join = $this->getAccessTableJoins();
+        $query = [
+            'select' => [$this->table => ['*']],
+            'from' => $this->table,
+            'join' => [],
+            'where' => [],
+            'indexed_by' => $this->getKey()
+        ];
+
+        // Add joins.
+        $query['join'] = $this->getAccessTableJoins();
+        // TODO: This should be simplified with Database::filterQuery();
+        if ($this->joins) {
+            $query['join'] = array_merge($query['join'], $this->joins);
+            if (!empty($this->joinFields)) {
+                $query['fields'] = array_merge($query['fields'], $this->joinFields);
+            } else {
+                foreach ($this->joins as $join) {
+                    // Add default table joins.
+                    $table = isset($join[1]) ? $join[1] : (isset($join['join']) ? $join['join'] : (isset($join['left_join']) ? $join['left_join'] : ''));
+                    $query['fields'][] = [$table => ['*']];
+                }
+            }
+        }
 
         if ($this->parentLink && $this->parentId) {
-            $where[$this->parentLink] = $this->parentId;
+            $query['where'][$this->parentLink] = $this->parentId;
         }
         if (!empty($this->list_where)) {
-            $where = array_merge($this->list_where, $where);
-        }
-        if (!empty($this->accessControl)) {
-            $where = array_merge($this->accessControl, $where);
+            $query['where'] = array_merge($this->list_where, $query['where']);
         }
         if ($this->action == "autocomplete" && $field = Request::post('field')) {
             $this->accessControl[$this->fullField($field)] = ['LIKE', Request::post('st') . '%'];
@@ -2953,69 +3112,71 @@ abstract class Table extends Page {
 
         if ($this->cur_subset) {
             if ($this->subset[$this->cur_subset]) {
-                $where = array_merge($this->subset[$this->cur_subset], $where);
+                $query['where'] = array_merge($this->subset[$this->cur_subset], $query['where']);
             }
         }
+
         if ($this->action == 'list' OR $this->action == 'export') {
             $this->additional_action_vars['ste'] = Request::get('ste');
-            $where[] = Database::getMultiFieldSearch($this->search_fields, explode(' ', Request::get('ste')), $this->searchWildcard);
+            $this->filterQuery = Request::get('filter', Request::TYPE_ARRAY, Request::TYPE_ASSOC_ARRAY);
+
+            // Add the text search.
+            if (!empty($this->additional_action_vars['ste'])) {
+                $query['where'][] = Database::getMultiFieldSearch(
+                    $this->search_fields,
+                    explode(' ', $this->additional_action_vars['ste']),
+                    $this->searchWildcard
+                );
+            }
+
+            // Add field filters.
+            if (!empty($this->filterQuery)) {
+                foreach ($this->filterQuery as $filter_values) {
+                    if (!empty($this->filters[$filter_values['filter']])) {
+                        $settings = $this->filters[$filter_values['filter']];
+                        $filter = new $settings['class']($settings);
+                        $filter_query = $filter->filterQuery($filter_values);
+                        Database::filterQuery($query, $filter_query);
+                    }
+                }
+            }
         }
 
-        // get the page count
-        $this->listCount = Database::getInstance()->count(
-            [
-                'from' => $this->table,
-                'join' => $join,
-            ],
-            $where
-        );
-
-        $start = (max(1, $this->page_number) - 1) * $this->maxPerPage;
-
-        // validate the sort order
+        // Prepare the sort order.
         if (!empty($this->sort)) {
             if (is_array($this->sort)) {
-                foreach ($this->sort as $f => $d) {
-                    $sorts[] = $f . ' '  . $d . ' ';
-                }
-                $sort = ' ORDER BY ' . implode(',', $sorts);
+                $query['order_by'] = $this->sort;
             } else {
-                $sort = ' ORDER BY ' . $this->sort;
-            }
-        } else {
-            $sort = '';
-        }
-
-        if ($this->joins) {
-            $join = array_merge($join, $this->joins);
-            if (!empty($this->joinFields)) {
-                $fields = array_merge($fields, $this->joinFields);
-            } else {
-                foreach ($this->joins as $join) {
-                    // set for every joined table
-                    $table = isset($join[1]) ? $join[1] : (isset($join['join']) ? $join['join'] : (isset($join['left_join']) ? $join['left_join'] : ''));
-                    $fields[] = [$table => ['*']];
-                }
+                $query['order_by'] = [$this->sort => 'ASC'];
             }
         }
 
         if ($this->action == "autocomplete") {
-            $fields[] = [$this->getKey() => "`{$_POST['field']}`,`{$this->getKey()}`"];
-            $sort = "ORDER BY `{$_POST['field']}` ASC";
+            $query['fields'][] = [$this->getKey() => "`{$_POST['field']}`,`{$this->getKey()}`"];
+            $query['order_by']['field'] = 'ASC';
         } else {
-            $fields[] = [$this->table => ['*']];
+            $query['fields'][] = [$this->table => ['*']];
         }
 
-        $this->list = Database::getInstance()->selectIndexed(
-            [
-                'from' => $this->table,
-                'join' => $join,
-            ],
-            $this->getKey(),
-            $where,
-            $fields,
-            $sort . ' LIMIT ' . $start . ', ' . $this->maxPerPage
-        );
+        // Most important
+        if (!empty($this->accessControl)) {
+            $query['where'] = array_merge($this->accessControl, $query['where']);
+        }
+
+        // Limit to one entry per primary key of the original table.
+        $query['group_by'] = $this->getKey(true);
+
+        // Get the page count.
+        $this->listCount = Database::getInstance()->countQuery($query + ['as' => 'query'], true);
+
+        // Add limits
+        $query += [
+            'limit' => $this->maxPerPage,
+            'page' => $this->page_number,
+        ];
+
+        // Get the list.
+        $this->list = Database::getInstance()->selectQuery($query);
     }
 
     protected function loadFullListCursor() {
@@ -3128,24 +3289,25 @@ abstract class Table extends Page {
     }
 
     protected function js_init_data() {
-        $table_data = ['vars' => []];
+        JS::set('table_data.vars', []);
         if ($this->rowClick) {
-            $table_data['rowClick'] = $this->rowClick;
-            if (isset($this->table_url))
-                $table_data['table'] = $this->table;
-            if ($this->parentLink)
-                $table_data['parentLink'] = $this->parentLink;
-            if ($this->parentId)
-                $table_data['parentId'] = $this->parentId;
-            $table_data['action_file'] = $this->action_file;
-            if (count($this->additional_action_vars) > 0)
-                $table_data['vars'] = $this->additional_action_vars;
+            JS::set('table_data.rowClick', $this->rowClick);
+            JS::set('table_data.action_file', $this->action_file);
+            if (isset($this->table_url)) {
+                JS::set('table_data.table', $this->table);
+            }
+            if ($this->parentLink) {
+                JS::set('table_data.parentLink', $this->parentLink);
+            }
+            if ($this->parentId) {
+                JS::set('table_data.parentId', $this->parentId);
+            }
+            if (count($this->additional_action_vars) > 0) {
+                JS::set('table_data.vars', $this->additional_action_vars);
+            }
         }
         $js_startup = '';
         foreach ($this->fields as $f => $field) {
-            if (!empty($field['autocomplete'])) {
-                $js_startup .= '$(".table_autocomplete").keyup(lightning.table.autocomplete);';
-            }
             if (!empty($field['default_reset'])) {
                 $table_data['defaults'][$f] = $field['default'];
             }
@@ -3169,7 +3331,6 @@ abstract class Table extends Page {
             JS::startup('lightning.table.init()');
         }
 
-        JS::inline('var table_data = ' . json_encode($table_data));
         if ($js_startup) {
             JS::startup($js_startup);
         }
@@ -3380,14 +3541,16 @@ abstract class Table extends Page {
                     else // edit should show full text
                         return $v;
                     break;
+                case 'json':
+                    return '<pre>' . json_encode(json_decode($v, true), JSON_PRETTY_PRINT) . '</pre>';
                 case 'time':
                     return Time::printTime($v);
                     break;
                 case 'date':
-                    return Time::printDate($v);
+                    return Time::printDate($v, !empty($field['timezone']) ? $field['timezone'] : null);
                     break;
                 case 'datetime':
-                    return Time::printDateTime($v);
+                    return Time::printDateTime($v, !empty($field['timezone']) ? $field['timezone'] : null);
                     break;
                 case 'checkbox':
                     if ($html) {
@@ -3658,7 +3821,12 @@ abstract class Table extends Page {
                 return $return;
                 break;
             case 'time':
-                return Time::timePop($field['form_field'], $field['Value'], !empty($field['allow_blank']));
+                return Time::timePop(
+                    $field['form_field'],
+                    $field['Value'],
+                    !empty($field['allow_blank']),
+                    !empty($field['timezone']) ? $field['timezone'] : null
+                );
                 break;
             case 'date':
                 $return = Time::datePop(
@@ -3670,7 +3838,13 @@ abstract class Table extends Page {
                 return $return;
                 break;
             case 'datetime':
-                return Time::dateTimePop($field['form_field'], $field['Value'], !empty($field['allow_blank']), isset($field['start_year']) ? $field['start_year'] : date('Y') - 10);
+                return Time::dateTimePop(
+                    $field['form_field'],
+                    $field['Value'],
+                    !empty($field['allow_blank']),
+                    isset($field['start_year']) ? $field['start_year'] : date('Y') - 10,
+                    !empty($field['timezone']) ? $field['timezone'] : null
+                );
                 break;
             case 'lookup':
             case 'yesno':
@@ -3769,10 +3943,13 @@ abstract class Table extends Page {
                 $options['size'] = $array[2];
             default:
                 if (!empty($field['autocomplete'])) {
-                    $options['classes'] = ['table_autocomplete'];
+                    $options['class'] = ['autocomplete_field'];
+                    $options['data-name'] = $field['form_field'];
+                    $options['data-type'] = 'field';
                     $options['autocomplete'] = false;
                 }
-                return Text::textfield($field['form_field'], $field['Value'], $options);
+
+                return BasicHTML::text($field['form_field'], $field['Value'], $options);
                 break;
         }
     }

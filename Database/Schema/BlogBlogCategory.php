@@ -9,20 +9,20 @@ class BlogBlogCategory extends Schema {
     const TABLE = 'blog_blog_category';
 
     public function getColumns() {
-        return array(
+        return [
             'blog_id' => $this->int(true),
             'cat_id' => $this->int(true),
-        );
+        ];
     }
 
     public function getKeys() {
-        return array(
-            'blog_id' => array(
-                'columns' => array('blog_id'),
-            ),
-            'cat_id' => array(
-                'columns' => array('cat_id'),
-            ),
-        );
+        return [
+            'blog_id' => [
+                'columns' => ['blog_id'],
+            ],
+            'cat_id' => [
+                'columns' => ['cat_id'],
+            ],
+        ];
     }
 }

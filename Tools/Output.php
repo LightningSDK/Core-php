@@ -5,10 +5,10 @@
  */
 
 namespace Lightning\Tools;
-use Lightning\Pages\Message;
 use Lightning\Pages\Page as PageView;
 use Lightning\Model\Page as PageModel;
 use Lightning\View\JS;
+use Exception;
 
 /**
  * Class Output
@@ -50,13 +50,13 @@ class Output {
 
     protected static $jsonCookies = false;
 
-    protected static $statusStrings = array(
+    protected static $statusStrings = [
         1 => 'access denied',
         2 => 'success',
         3 => 'error',
-    );
+    ];
     
-    protected static $httpErrorMessages = array(
+    protected static $httpErrorMessages = [
         100 => 'Continue',
         101 => 'Switching Protocols',
         102 => 'Processing',
@@ -109,7 +109,7 @@ class Output {
         511 => 'Network Authentication Required',
         598 => 'Network read timeout error',
         599 => 'Network connect timeout error'
-    );
+    ];
 
     /**
      * Determine if the output should be json.
@@ -190,10 +190,8 @@ class Output {
         
         // If $data is a string, it is an error message.
         elseif (is_string($data)) {
-            $data = [
-                'status' => 'error',
-                'error' => $data,
-            ];
+            Messenger::error($data);
+            $data = ['status' => 'error'];
         }
         
         // The rest of these conditions assume $data is an array.
@@ -233,12 +231,12 @@ class Output {
     }
 
     public static function jsonData($data, $include_cookies = false) {
-        $output = array(
+        $output = [
             'data' => $data,
             'status' => 'success',
             'errors' => Messenger::getErrors(),
             'messages' => Messenger::getMessages(),
-        );
+        ];
         if ($include_cookies) {
             $output['cookies'] = self::$cookies;
         }
@@ -256,10 +254,10 @@ class Output {
         if (Configuration::get('debug')) {
             $database = Database::getInstance(false);
             if ($database) {
-                $output['database'] = array(
+                $output['database'] = [
                     'queries' => $database->getQueries(),
                     'time' => Performance::timeReport(),
-                );
+                ];
             }
         }
 
@@ -286,11 +284,11 @@ class Output {
      *   The error() function will determine if json should be output based on the headers.
      */
     public static function jsonError($error = '') {
-        $data = array(
+        $data = [
             'errors' => Messenger::getErrors(),
             'messages' => Messenger::getMessages(),
             'status' => 'error',
-        );
+        ];
 
         if (!empty($error)) {
             $data['errors'][] = $error;
@@ -404,16 +402,23 @@ class Output {
      *   Whether the cookie can only be used over https.
      * @param boolean $httponly
      *   Whether the cookie can only be used as an http header.
+     *
+     * @throws Exception
+     *   If the headers have already been sent.
      */
     public static function setCookie($cookie, $value, $ttl = null, $path = '/', $domain = null, $secure = null, $httponly = true) {
-        $settings = array(
+        if (headers_sent()) {
+            throw new Exception('Headers already sent.');
+        }
+
+        $settings = [
             'value' => $value,
             'ttl' => $ttl ? $ttl + time() : 0,
             'path' => $path,
             'domain' => $domain !== null ? $domain : Configuration::get('cookie_domain'),
             'secure' => $secure !== null ? $secure : (!empty($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] == 1 || strtolower($_SERVER['HTTPS']) == 'on')),
             'httponly' => $httponly,
-        );
+        ];
 
         if (isset(self::$cookies[$cookie])) {
             self::$cookies[$cookie] = $settings + self::$cookies[$cookie];
@@ -502,7 +507,8 @@ class Output {
             $full_page['description'] = '';
             $full_page['url'] = $response_code;
             $full_page['body'] = '';
-            $full_page['layout'] = 0;
+            $full_page['full_width'] = 0;
+            $full_page['right_column'] = 1;
             $full_page['site_map'] = 0;
             $full_page['error'] = 404;
         }

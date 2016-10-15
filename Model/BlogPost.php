@@ -7,6 +7,7 @@ use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
 use Lightning\Tools\IO\FileManager;
 use Lightning\View\HTML;
+use Lightning\View\HTMLEditor\Markup;
 use Lightning\View\Text;
 
 class BlogPostOverridable extends Object {
@@ -19,16 +20,16 @@ class BlogPostOverridable extends Object {
 
     public static function loadPosts($where = [], $join = [], $limit = '') {
         return Database::getInstance()->selectAll(
-            array(
+            [
                 'from' => self::TABLE,
                 'join' => array_merge($join, self::joinAuthorCatTables()),
-            ),
+            ],
             $where,
-            array(
+            [
                 static::TABLE . '.*',
                 'blog_author.*',
                 'categories' => ['expression' => 'GROUP_CONCAT(blog_blog_category.cat_id)']
-            ),
+            ],
             'GROUP BY ' . self::TABLE . '.blog_id ORDER BY time DESC ' . $limit
         );
     }
@@ -42,15 +43,16 @@ class BlogPostOverridable extends Object {
     }
 
     protected static function joinAuthorCatTables() {
-        return array(
+        return [
             // Join categories
-            array('LEFT JOIN',
+            [
+                'LEFT JOIN',
                 static::TABLE . '_blog_category',
                 'ON ' . self::TABLE . '_blog_category.blog_id = ' . self::TABLE . '.blog_id'
-            ),
+            ],
             // Join author
-            array('LEFT JOIN', 'blog_author', 'ON blog_author.user_id = ' . self::TABLE . '.user_id')
-        );
+            ['LEFT JOIN', 'blog_author', 'ON blog_author.user_id = ' . self::TABLE . '.user_id']
+        ];
     }
 
     public function getTrueHeaderImage() {
@@ -96,12 +98,20 @@ class BlogPostOverridable extends Object {
         if ($this->shorten_body || $force_short) {
             return $this->getShortBody();
         } else {
-            return $this->body;
+            return $this->getRenderedBody();
         }
     }
 
+    protected function getRenderedBody() {
+        static $rendered_body = null;
+        if ($rendered_body === null) {
+            $rendered_body = Markup::render($this->body);
+        }
+        return $rendered_body;
+    }
+
     public function getShortBody($length = 250, $allow_html = true) {
-        return Text::shorten($allow_html ? $this->body : strip_tags($this->body), $length);
+        return Text::shorten($allow_html ? Markup::render($this->body) : strip_tags(Markup::render($this->body)), $length);
     }
 
     public function getAuthorName() {
@@ -158,16 +168,16 @@ class BlogPostOverridable extends Object {
         static $categories = [];
         if (empty($categories[$order][$sort_direction])) {
             $categories[$order][$sort_direction] = Database::getInstance()->selectAll(
-                array(
+                [
                     'from' => self::TABLE . self::BLOG_CATEGORY_TABLE,
-                    'join' => array('JOIN', self::TABLE . self::CATEGORY_TABLE, 'USING (cat_id)'),
-                ),
-                array(),
-                array(
-                    'count' => array('expression' => 'COUNT(*)'),
+                    'join' => ['JOIN', self::TABLE . self::CATEGORY_TABLE, 'USING (cat_id)'],
+                ],
+                [],
+                [
+                    'count' => ['expression' => 'COUNT(*)'],
                     'category',
                     'cat_url'
-                ),
+                ],
                 'GROUP BY cat_id ORDER BY `' . $order . '` ' . $sort_direction . ' LIMIT 10'
             );
         }

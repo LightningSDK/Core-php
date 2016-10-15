@@ -68,16 +68,18 @@ class BlogOverridable extends Singleton {
         $join = [];
         $where = [];
         if ($this->y != 0) {
-            if ($this->m > 0) // SELECT A MONTH
-                $where['time'] = array('BETWEEN', mktime(0,0,0,$this->m,1,$this->y), mktime(0,0,0,$this->m+1,1,$this->y));
-            else
-                $where['time'] = array('BETWEEN', mktime(0,0,0,1,1,$this->y), mktime(0,0,0,1,1,$this->y+1));
+            if ($this->m > 0) {
+                // SELECT A MONTH
+                $where['time'] = ['BETWEEN', mktime(0,0,0,$this->m,1,$this->y), mktime(0,0,0,$this->m+1,1,$this->y)];
+            } else {
+                $where['time'] = ['BETWEEN', mktime(0,0,0,1,1,$this->y), mktime(0,0,0,1,1,$this->y+1)];
+            }
         }
 
         elseif ($search_field == 'category') {
             $join[] = [
                 'JOIN',
-                array('cat_search' => BlogPost::TABLE . '_blog_category'),
+                ['cat_search' => BlogPost::TABLE . '_blog_category'],
                 'ON cat_search.blog_id = ' . BlogPost::TABLE . '.blog_id'
             ];
             $where['cat_search.cat_id'] = $search_value;
@@ -218,14 +220,14 @@ class BlogOverridable extends Singleton {
             'GROUP BY blog_id'
         );
 
-        $urls = array();
+        $urls = [];
         foreach($blogs as $b) {
-            $urls[] = array(
+            $urls[] = [
                 'loc' => $web_root . "/{$b['url']}.htm",
                 'lastmod' => date("Y-m-d", $b['blog_time'] ?: time()),
                 'changefreq' => 'yearly',
                 'priority' => .3,
-            );
+            ];
         }
         return $urls;
     }

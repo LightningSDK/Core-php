@@ -19,9 +19,9 @@ use Lightning\Tools\Output;
  */
 class Client extends RestClient {
 
-    protected $vars = array('actions' => array());
+    protected $vars = ['actions' => []];
 
-    protected $load = array();
+    protected $load = [];
 
     /**
      * Gets a var from the returned data.
@@ -154,14 +154,14 @@ class Client extends RestClient {
         if (isset($this->results['cookies']) && is_array($this->results['cookies'])) {
             foreach ($this->results['cookies'] as $cookie=>$params) {
                 if ($cookie == '') continue;
-                $params += array(
+                $params += [
                     'value' => null,
                     'ttl' => null,
                     'path' => null,
                     'domain' => null,
                     'secure' => null,
                     'httponly' => null,
-                );
+                ];
                 Output::setCookie($cookie, $params['value'], $params['ttl'], $params['path'], $params['domain'], $params['secure'], $params['httponly']);
             }
         }

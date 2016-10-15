@@ -4,7 +4,7 @@ namespace Lightning\Tools\Cache;
 
 use Lightning\Tools\Configuration;
 
-class FileCache extends BaseCache {
+class FileCache extends CacheController {
 
     protected $fileName;
 

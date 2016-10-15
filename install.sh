@@ -26,21 +26,25 @@ shouldInstall() {
     done
 }
 
+AUTOINSTALL_SOURCE=false
+
 # Create the source paths
 if [ ! -d $DIR/Source ]; then
     echo "Making Source Directory"
     mkdir $DIR/Source
     cp $DIR/Lightning/install/.htaccess-protected $DIR/Source/.htaccess
+    mkdir $DIR/Templates
+    AUTOINSTALL_SOURCE=true
 fi
 
 # Install the cache directory.
 if [ ! -d $DIR/cache ]; then
     echo "Creating cache directory"
-    cp -r $DIR/Lightning/install/cache $DIR/
+    cp -r $DIR/cache
+    cp $DIR/Lightning/install/.htaccess-protected $DIR/Source/.htaccess
 fi
 
-# Start the install process.
-if [ `shouldInstall "Install PHP dependencies and set permissions?"` -eq 1 ]
+if [ `shouldInstall "Install PHP dependencies and set permissions? These are required to run Lightning."` -eq 1 ]
 then
     cd $DIR/Lightning
     git submodule update --init Vendor/BounceHandler
@@ -50,7 +54,7 @@ then
     chmod 777 $DIR/Lightning/Vendor/htmlpurifier/library/HTMLPurifier/DefinitionCache/Serializer
 fi
 
-if [ `shouldInstall "Install compass and foundation dependencies? This is needed for advanced scss includes in your source files. But not required."` -eq 1 ]
+if [ `shouldInstall "Install compass and foundation dependencies? This is needed for advanced scss includes in your source files. But not required for basic scss."` -eq 1 ]
 then
     cd $DIR/Lightning
     git submodule update --init Vendor/compass
@@ -201,6 +205,20 @@ then
     cp $DIR/install/.htaccess-router $DIR/.htaccess
 fi
 
+# Create the source paths
+if [ ! -d $DIR/Source ]; then
+    echo "Making Source Directory"
+    mkdir $DIR/Source
+    cp $DIR/Lightning/install/.htaccess-protected $DIR/Source/.htaccess
+fi
+
+# Install the cache directory.
+if [ ! -d $DIR/cache ]; then
+    echo "Creating cache directory"
+    cp -r $DIR/Lightning/install/cache $DIR/
+    cp $DIR/Lightning/install/.htaccess-protected $DIR/Source/.htaccess
+fi
+
 # Install the sample config file as active.
 # TODO: Add option to reset database config
 if [ ! -f $DIR/Source/Config/config.inc.php ]; then
@@ -232,21 +250,14 @@ then
     $DIR/Lightning/lightning database import-defaults
 fi
 
-if [ `shouldInstall "Install/reset default templates and images?"` -eq 1 ]
+if [ AUTOINSTALL_SOURCE = true ] || [ `shouldInstall "Install/reset default images?"` -eq 1 ]
 then
-    # Install main templates.
-    echo "Copying default templates to source folder."
-    cp -rf $DIR/Lightning/install/Templates $DIR/Source/
-
+    # Install main images.
     echo "Copying default images to web root."
     cp -rf $DIR/Lightning/install/images $DIR/
-elif [ `shouldInstall "Install missing default templates and images?"` -eq 1 ]
+elif [ AUTOINSTALL_SOURCE = true ] || [ `shouldInstall "Install missing default images?"` -eq 1 ]
 then
-    # Install main templates.
-    # The difference is that this won't replace any templates.
-    echo "Copying default templates to source folder."
-    cp -r $DIR/Lightning/install/Templates $DIR/Source/
-
+    # The difference is that this won't replace any images.
     echo "Copying default images to web root."
     cp -r $DIR/Lightning/install/images $DIR/
 fi

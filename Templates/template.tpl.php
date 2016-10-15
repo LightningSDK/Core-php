@@ -14,7 +14,7 @@ use Lightning\View\CSS;
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <?= $this->build('metadata'); ?>
+    <?= $this->build(['metadata', 'Lightning']); ?>
     <?= $this->renderHeader(); ?>
 </head>
 <body class="antialiased hide-extras">
@@ -102,7 +102,7 @@ use Lightning\View\CSS;
                         endif; ?>
                     </div>
                     <div class="small-12 medium-4 columns right-column">
-                        <?php $this->build('right_column'); ?>
+                        <?php $this->build(['right_column', 'Lightning']); ?>
                     </div>
                 <?php else: ?>
                     <div class="large-12 columns">
