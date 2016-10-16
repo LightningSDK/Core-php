@@ -2,6 +2,9 @@
 
 $conf = [
     'database' => 'mysql:user=user;password=pass;host=localhost;dbname=db',
+    'mongo' => [
+        'default' => 'mongodb://localhost:27017',
+    ],
     'user' => [
         'cookie_domain' => '',
         // Generate a new key by going to the Lightning directory and running
