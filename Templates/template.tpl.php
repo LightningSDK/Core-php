@@ -88,35 +88,28 @@ use Lightning\View\CSS;
                 </nav>
             <?php endif; ?>
         </div>
-        <section role="main" class="scroll-container">
-            <div class="row">
-                <?php if (empty($full_width)): ?>
-                    <div class="medium-8 columns">
-                        <?php if (!empty($page_header)): ?>
-                            <h1 id="page_header"><?=$page_header?></h1>
-                        <?php
-                        endif;
-                        echo Messenger::renderErrorsAndMessages();
-                        if (!empty($content)) :
-                            $this->build($content);
-                        endif; ?>
-                    </div>
-                    <div class="small-12 medium-4 columns right-column">
-                        <?php $this->build(['right_column', 'Lightning']); ?>
-                    </div>
-                <?php else: ?>
+        <section role="main" class="scroll-container row">
+            <?php if (Messenger::hasErrors() || Messenger::hasMessages()): ?>
+                <div class="row">
                     <div class="large-12 columns">
-                        <?php if (!empty($page_header)): ?>
-                            <h1 id="page_header"><?=$page_header?></h1>
-                        <?php
-                        endif;
-                        echo Messenger::renderErrorsAndMessages();
-                        if (!empty($content)) :
-                            $this->build($content);
-                        endif; ?>
+                        <?= Messenger::renderErrorsAndMessages(); ?>
                     </div>
-                <?php endif; ?>
+                </div>
+            <?php endif; ?>
+            <div class="<?= !empty($full_width) || empty($right_column) ? 'medium-12' : 'medium-8'; ?> columns">
+                <?php if (!empty($page_header)): ?>
+                    <h1 id="page_header"><?=$page_header?></h1>
+                    <?php
+                endif;
+                if (!empty($content)) :
+                    $this->build($content);
+                endif; ?>
             </div>
+            <?php if (empty($full_width) && !empty($right_column)): ?>
+                <div class="medium-4 columns right-column hide-for-print">
+                    <?php $this->build('right_column'); ?>
+                </div>
+            <?php endif; ?>
         </section>
     </div>
 </div>
