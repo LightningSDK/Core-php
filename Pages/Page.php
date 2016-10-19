@@ -120,6 +120,10 @@ class Page extends PageView {
         $template->set('page_header', $this->fullPage['title']);
         $this->fullWidth = $this->fullPage['full_width'] == 1;
         $this->rightColumn = $this->fullPage['right_column'] == 1;
+        $this->hideHeader = !empty($this->fullPage['hide_header']);
+        $this->hideMenu = !empty($this->fullPage['hide_menu']);
+        $this->hideFooter = !empty($this->fullPage['hide_footer']);
+        // Pass the page object.
         $template->set('full_page', $this->fullPage);
 
         if (!empty($this->fullPage['template'])) {

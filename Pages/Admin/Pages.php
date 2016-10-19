@@ -50,6 +50,9 @@ class Pages extends Table {
             'type' => 'checkbox',
             'default' => true,
         ],
+        'hide_header' => 'checkbox',
+        'hide_menu' => 'checkbox',
+        'hide_footer' => 'checkbox',
         'full_width' => 'checkbox',
     ];
 

@@ -79,6 +79,10 @@ class PageOverridable {
      */
     protected $fullWidth = false;
 
+    protected $hideHeader = false;
+    protected $hideMenu = false;
+    protected $hideFooter = false;
+
     /**
      * Which menu should be marked as 'active'.
      *
@@ -151,6 +155,9 @@ class PageOverridable {
             $template->set('blog', Blog::getInstance());
             $template->set('full_width', $this->fullWidth);
             $template->set('right_column', $this->rightColumn);
+            $template->set('hide_header', $this->hideHeader);
+            $template->set('hide_menu', $this->hideMenu);
+            $template->set('hide_footer', $this->hideFooter);
 
             // Include the site title into the page title for meta data.
             if (!empty($this->meta['title']) && $site_title = Configuration::get('meta_data.title')) {

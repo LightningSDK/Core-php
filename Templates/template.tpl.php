@@ -1,12 +1,7 @@
 <!doctype html>
 <?php
 use Lightning\Tools\ClientUser;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Database;
 use Lightning\Tools\Messenger;
-use Lightning\Tools\Performance;
-use Lightning\View\JS;
-use Lightning\View\CSS;
 ?>
 <!--[if IE 9]><html class="lt-ie10" lang="en" > <![endif]-->
 <html class="no-js" lang="en" dir="ltr">
@@ -21,40 +16,44 @@ use Lightning\View\CSS;
 <div class="marketing off-canvas-wrap" data-offcanvas>
     <div class="inner-wrap">
 
-        <div class="row">
-            <div class="small-12">
-                <h1>Welcome!</h1>
+        <?php if (empty($hide_header)): ?>
+            <div class="row">
+                <div class="small-12">
+                    <h1>Welcome!</h1>
+                </div>
             </div>
-        </div>
+        <?php endif; ?>
         <div class="row">
-            <nav class="top-bar" data-topbar>
-                <section class="top-bar-section">
-                    <ul class="title-area">
-                        <li class="name">
-                            <h1><a href="/">Your new site</a></h1>
-                        </li>
-                        <!-- Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone -->
-                        <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
-                    </ul>
+            <?php if (empty($hide_menu)): ?>
+                <nav class="top-bar" data-topbar>
                     <section class="top-bar-section">
-                        <ul class="right">
-                            <li class="home"><a href="/">Home</a></li>
-                            <li class="blog"><a href="/blog">Blog</a></li>
-                            <li class="contact"><a href="/contact">Contact</a></li>
-                            <li>
-                                <?php if (ClientUser::getInstance()->isImpersonating()): ?>
-                                    <a href="/user?action=stop-impersonating">Return to Admin User</a>
-                                <?php endif; ?>
-                                <?php if (ClientUser::getInstance()->id > 0): ?>
-                                    <a href="/user?action=logout">Log Out</a>
-                                <?php else: ?>
-                                    <a href="/user">Log In</a>
-                                <?php endif; ?>
+                        <ul class="title-area">
+                            <li class="name">
+                                <h1><a href="/">Your new site</a></h1>
                             </li>
+                            <!-- Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone -->
+                            <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
                         </ul>
+                        <section class="top-bar-section">
+                            <ul class="right">
+                                <li class="home"><a href="/">Home</a></li>
+                                <li class="blog"><a href="/blog">Blog</a></li>
+                                <li class="contact"><a href="/contact">Contact</a></li>
+                                <li>
+                                    <?php if (ClientUser::getInstance()->isImpersonating()): ?>
+                                        <a href="/user?action=stop-impersonating">Return to Admin User</a>
+                                    <?php endif; ?>
+                                    <?php if (ClientUser::getInstance()->id > 0): ?>
+                                        <a href="/user?action=logout">Log Out</a>
+                                    <?php else: ?>
+                                        <a href="/user">Log In</a>
+                                    <?php endif; ?>
+                                </li>
+                            </ul>
+                        </section>
                     </section>
-                </section>
-            </nav>
+                </nav>
+            <?php endif; ?>
             <?php if (ClientUser::getInstance()->isAdmin()): ?>
                 <nav class="top-bar" data-topbar>
                     <ul class="title-area">
@@ -118,6 +117,11 @@ use Lightning\View\CSS;
                 <?php endif; ?>
             </div>
         </section>
+        <?php if (empty($hide_footer)): ?>
+            <section class="footer">
+                
+            </section>
+        <?php endif; ?>
     </div>
 </div>
 <?= $this->renderFooter(); ?>
