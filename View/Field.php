@@ -27,4 +27,26 @@ class Field {
         $default = Request::get($var, $type) !== null ? Request::get($var, $type) : $alt_default;
         return Scrub::toHTML($default);
     }
+
+    public static function renderMarkup($options) {
+        $attributes = [
+            'placeholder' => !empty($options['placeholder']) ? $options['placeholder'] : '',
+            'name' => !empty($options['name']) ? $options['name'] : '',
+            'value' => !empty($options['value']) ? $options['value'] : '',
+            'type' => !empty($options['type']) ? $options['type'] : 'text',
+            'class' => !empty($options['class']) ? $options['class'] : '',
+        ];
+        if ($options['type'] == 'submit' && empty($attributes['name'])) {
+            $attributes['name'] = 'submit';
+        }
+        if (isset($options['required'])) {
+            $attributes['required'] = '';
+        }
+        $field = '<input ' . HTML::implodeAttributes($attributes) . '>';
+        if (!empty($options['label'])) {
+            $field = '<label>' . $options['label'] . $field . '</label>';
+        }
+        $error = !empty($options['error']) ? '<small class="error">' . $options['error'] . '</small>' : '';
+        return '<div>' . $field . $error . '</div>';
+    }
 }

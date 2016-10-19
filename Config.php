@@ -39,6 +39,7 @@ $conf = [
             'form' => 'Lightning\\View\\Form',
             'template' => 'Lightning\\Tools\\Template',
             'youtube' => 'Lightning\\View\\Video\\YouTube',
+            'input' => 'Lightning\\View\\Field',
         ],
     ],
     'language' => 'en_us',
