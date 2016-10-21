@@ -17,7 +17,7 @@ class Markup {
         foreach ($matches[0] as $match) {
             if (!empty($match)) {
                 // Convert to HTML and parse it.
-                $match_html = '<' . trim($match, '{} ') . '/>';
+                $match_html = '<' . trim(preg_replace('/(\r?\n)/', ' ', $match), '{} ') . '/>';
                 $dom = new DOMDocument();
                 libxml_use_internal_errors(true);
                 $dom->loadHTML($match_html);
