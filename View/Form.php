@@ -24,7 +24,7 @@ class Form {
         // Loop through basic, unedited options.
         foreach (['list', 'contact', 'success', 'redirect', 'message'] as $option) {
             if (isset($options[$option])) {
-                $output .= '<input type="hidden" name="list" value="' . $options[$option] . '">';
+                $output .= '<input type="hidden" name="' . $option . '" value="' . $options[$option] . '">';
             }
         }
 
