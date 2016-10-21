@@ -3781,6 +3781,11 @@ abstract class Table extends Page {
                 }
                 $config['content'] = $field['Value'];
                 $config['startup'] = true;
+
+                // These prevent CKEditor from adding content which breaks bracketed markup.
+                $config['fillEmptyBlocks'] = false;
+                $config['ignoreEmptyParagraph'] = false;
+
                 if (!empty($field['div'])) {
                     return HTMLEditor::div($field['form_field'], $config);
                 } else {
