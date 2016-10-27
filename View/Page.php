@@ -143,6 +143,10 @@ class PageOverridable {
             // Lightning JS will handle these trackers.
             JS::set('google_analytics_id', Configuration::get('google_analytics_id'));
             JS::set('facebook_pixel_id', Configuration::get('facebook_pixel_id'));
+            JS::set('google_adwords', Configuration::get('google_adwords', []));
+            if (Configuration::get('debug')) {
+                JS::set('debug', true);
+            }
 
             // @deprecated
             $template->set('google_analytics_id', Configuration::get('google_analytics_id'));

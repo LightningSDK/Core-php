@@ -77,23 +77,20 @@
         },
 
         createUrl: function (action, id) {
-            var vars = [];
-            vars.push('action=' + encodeURIComponent(action));
-            vars.push('id=' + encodeURIComponent(id));
+            var vars = {
+                action: action,
+                id: id
+            };
             if (lightning.vars.table_data.table) {
-                vars.push('table=' + encodeURIComponent(table_data.table));
+                vars.table = table_data.table;
             }
             if (lightning.vars.table_data.parent_link) {
-                vars.push(table_data.parent_link + '=' + encodeURIComponent(lightning.vars.table_data.parent_id));
+                vars[table_data.parent_link] = lightning.vars.table_data.parent_id;
             }
             if (lightning.vars.table_data.vars) {
-                for (var i in lightning.vars.table_data.vars) {
-                    if (lightning.vars.table_data.vars[i] != null) {
-                        vars.push(i + '=' + encodeURIComponent(lightning.vars.table_data.vars[i]));
-                    }
-                }
+                $.extend(vars, lightning.vars.table_data.vars);
             }
-            return url = "?" + vars.join("&");
+            return url = '?' + lightning.buildQuery(vars);
         },
 
         /**

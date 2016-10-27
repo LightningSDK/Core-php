@@ -152,3 +152,10 @@ lightning.hash = function(q) {
     return lightning.getFromURL('hash', q);
 };
 lightning.modules = {};
+lightning.buildQuery = function(parameters) {
+    var pairs = [];
+    for (var i in parameters) {
+        pairs.push(encodeURIComponent(i) + '=' + encodeURIComponent(parameters[i]));
+    }
+    return pairs.join('&');
+};
