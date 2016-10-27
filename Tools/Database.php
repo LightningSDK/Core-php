@@ -270,9 +270,9 @@ class Database extends Singleton {
      */
     public function timeReport() {
         return [
-            'Total MySQL Queries: ' . $this->query_count,
-            'Total MySQL Time: ' . number_format($this->mysql_time, 4),
-            'Total MySQL PHP Time: ' . number_format($this->php_time, 4),
+            'Total MySQL Queries' => $this->query_count,
+            'Total MySQL Time' => number_format($this->mysql_time, 4),
+            'Total MySQL PHP Time' => number_format($this->php_time, 4),
         ];
     }
 

@@ -229,8 +229,8 @@ class Template extends Singleton {
         if (ClientUser::getInstance()->isAdmin()) {
             echo '<pre class="debug">';
             $database = Database::getInstance();
-            print_r($database->getQueries());
             print_r(Performance::timeReport());
+            print_r($database->getQueries());
             echo '</pre>';
         }
     }
