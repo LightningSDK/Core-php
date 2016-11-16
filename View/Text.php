@@ -2,8 +2,12 @@
 
 namespace Lightning\View;
 
+use Lightning\View\HTMLEditor\Markup;
+
 class Text {
     public static function shorten($body, $length = 250) {
+        $body = Markup::removeAll($body);
+
         $body = str_replace('<', ' <', $body);
         $body = strip_tags($body);
         if (strlen($body) <= $length) {

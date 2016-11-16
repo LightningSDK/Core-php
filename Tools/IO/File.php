@@ -48,13 +48,16 @@ class File implements FileHandlerInterface {
     public function write($file, $contents, $offset = 0) {
         // Make sure the directory exists.
         if (!file_exists(dirname($this->root . '/' . $file))) {
-            mkdir(dirname($this->root . '/' . $file), 0777, true);
+            mkdir(dirname($this->root . '/' . $file), 0660, true);
         }
 
         if (!empty($file) && $file != $this->file) {
             $this->file = $file;
             $this->currentFile = $file;
-            $this->currentFileHandler = fopen($this->root . '/' . $this->currentFile, 'r');
+            if (!file_exists($this->root . '/' . $this->currentFile)) {
+                touch($this->root . '/' . $this->currentFile);
+            }
+            $this->currentFileHandler = fopen($this->root . '/' . $this->currentFile, 'r+');
         }
 
         fseek($this->currentFileHandler, $offset);
