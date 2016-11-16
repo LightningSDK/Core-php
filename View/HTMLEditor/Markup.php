@@ -69,6 +69,20 @@ class Markup {
         return $content;
     }
 
+    public static function removeAll($content) {
+        preg_match_all('|{{.*}}|sU', $content, $matches);
+        foreach ($matches[0] as $match) {
+            if (!empty($match)) {
+                $content = str_replace(
+                    $match,
+                    '',
+                    $content
+                );
+            }
+        }
+        return $content;
+    }
+
     protected static function getAttributeArray(DOMElement $element) {
         $options = [];
         foreach ($element->attributes as $attr => $value) {
