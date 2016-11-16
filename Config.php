@@ -41,6 +41,11 @@ $conf = [
             'youtube' => 'Lightning\\View\\Video\\YouTube',
         ],
     ],
+    'file_cache' => [
+        'user' => 'www-data',
+        'group' => 'www-data',
+        'perms' => 0755,
+    ],
     'language' => 'en_us',
     'template_dir' => 'Source/Templates',
     'temp_dir' => HOME_PATH . '/../tmp',

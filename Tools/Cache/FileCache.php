@@ -39,6 +39,22 @@ class FileCache extends CacheController {
     public function write() {
         // TODO: create database with TTL so this can be purged.
         file_put_contents($this->fileName, serialize($this->value));
+        $perms = Configuration::get('file_cache');
+        if (!empty($perms['user'])) {
+            chown($this->fileName, $perms['user']);
+        } else {
+            chown($this->fileName, fileowner(HOME_PATH . '/index.php'));
+        }
+        if (!empty($perms['group'])) {
+            chgrp($this->fileName, $perms['group']);
+        } else {
+            chgrp($this->fileName, filegroup(HOME_PATH . '/index.php'));
+        }
+        if (!empty($perms['perms'])) {
+            chmod($this->fileName, $perms['perms']);
+        } else {
+            chmod($this->fileName, fileperms(HOME_PATH . '/index.php'));
+        }
     }
 
     public function resetTTL() {
@@ -83,5 +99,22 @@ class FileCache extends CacheController {
 
     public function getReference() {
         return $this->reference;
+    }
+
+    public function set($name, $value) {
+        $this->setName($name);
+        $this->value = $value;
+        $this->write();
+
+        // Clear OpCache.
+        if (function_exists('opcache_invalidate')) {
+            opcache_invalidate($this->fileName, true);
+        }
+    }
+
+    public function get($name, $default = null) {
+        $this->setName($name);
+        $this->value = $this->read();
+        return $this->value;
     }
 }
