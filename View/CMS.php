@@ -126,7 +126,7 @@ class CMS {
             if (!empty($content)) {
                 $output = '<img src="' . $content->url . '" class="' . $content->class . '" />';
                 if (!empty($settings['link'])) {
-                    $output = '<a href="' . Scrub::toHTML($settings['link']) . '">' . $output . '</a>"';
+                    $output = '<a href="' . Scrub::toHTML($settings['link']) . '">' . $output . '</a>';
                 }
                 return $output;
             }

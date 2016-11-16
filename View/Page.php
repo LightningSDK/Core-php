@@ -79,6 +79,10 @@ class PageOverridable {
      */
     protected $fullWidth = false;
 
+    protected $hideHeader = false;
+    protected $hideMenu = false;
+    protected $hideFooter = false;
+
     /**
      * Which menu should be marked as 'active'.
      *
@@ -139,6 +143,10 @@ class PageOverridable {
             // Lightning JS will handle these trackers.
             JS::set('google_analytics_id', Configuration::get('google_analytics_id'));
             JS::set('facebook_pixel_id', Configuration::get('facebook_pixel_id'));
+            JS::set('google_adwords', Configuration::get('google_adwords', []));
+            if (Configuration::get('debug')) {
+                JS::set('debug', true);
+            }
 
             // @deprecated
             $template->set('google_analytics_id', Configuration::get('google_analytics_id'));
@@ -151,6 +159,9 @@ class PageOverridable {
             $template->set('blog', Blog::getInstance());
             $template->set('full_width', $this->fullWidth);
             $template->set('right_column', $this->rightColumn);
+            $template->set('hide_header', $this->hideHeader);
+            $template->set('hide_menu', $this->hideMenu);
+            $template->set('hide_footer', $this->hideFooter);
 
             // Include the site title into the page title for meta data.
             if (!empty($this->meta['title']) && $site_title = Configuration::get('meta_data.title')) {

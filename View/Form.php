@@ -10,15 +10,21 @@ class Form {
         }
 
         // Render the open form tag.
-        $action = empty($options['action']) ? '/contact' : $options['action'];
-        $output = '<form action="' . $action . '" method="POST">';
+        $form_attributes = [
+            'method' => 'POST',
+            'action' => empty($options['action']) ? '/contact' : $options['action'],
+        ];
+        if (isset($options['abide'])) {
+            $form_attributes['data-abide'] = '';
+        }
+        $output = '<form ' . HTML::implodeAttributes($form_attributes) . '>';
         \Lightning\Tools\Form::requiresToken();
         $output .= \Lightning\Tools\Form::renderTokenInput();
 
         // Loop through basic, unedited options.
-        foreach (['list', 'contact', 'success', 'redirect'] as $option) {
+        foreach (['list', 'contact', 'success', 'redirect', 'message'] as $option) {
             if (isset($options[$option])) {
-                $output .= '<input type="hidden" name="list" value="' . $options[$option] . '">';
+                $output .= '<input type="hidden" name="' . $option . '" value="' . $options[$option] . '">';
             }
         }
 

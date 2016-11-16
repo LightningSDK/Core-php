@@ -104,7 +104,7 @@ abstract class Table extends Page {
      *   - replace - for a file or image, whether the previous upload should be replaced.
      *   - browser boolean - whether to use the file browser for selection. If not, a file upload field will be used. Note that if using the browser, the file extension will be saved, but this is intended to change once the file browser supports multiple file sizes.
      *   - images array - a list of images for the image type. The key of this array is not used, and all elements from the main $field array are added to each image as default values.
-     *     - original booleam - whether this is should be stored as the original, unmodified image
+     *     - original boolean - whether this is should be stored as the original, unmodified image
      *     - image_preprocess callable (source image resources) - A function that can modify the input image before other processes are called.
      *     - quality integer - the jpeg image compression quality (default 75).
      *     - image_postprocess callable (source image resources) - A function that can modify the input image after other processes are called.
@@ -3781,6 +3781,11 @@ abstract class Table extends Page {
                 }
                 $config['content'] = $field['Value'];
                 $config['startup'] = true;
+
+                // These prevent CKEditor from adding content which breaks bracketed markup.
+                $config['fillEmptyBlocks'] = false;
+                $config['ignoreEmptyParagraph'] = false;
+
                 if (!empty($field['div'])) {
                     return HTMLEditor::div($field['form_field'], $config);
                 } else {

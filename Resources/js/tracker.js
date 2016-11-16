@@ -5,7 +5,8 @@
         events: {
             pageView: {
                 ga: 'pageview',
-                fb: 'PageView'
+                fb: 'PageView',
+                action: 'pageView',
             },
             viewContent: {
                 fb: 'ViewContent',
@@ -17,26 +18,31 @@
                 fb: 'AddToCart',
                 ga: 'event',
                 category: 'Store',
+                action: 'addToCart',
             },
             addToWishlist: {
                 fb: 'AddToWishlist',
                 ga: 'event',
                 category: 'Store',
+                action: 'addToWishlist',
             },
             initiateCheckout: {
                 fb: 'InitiateCheckout',
                 ga: 'event',
                 category: 'Store',
+                action: 'initiateCheckout',
             },
             addPaymentInfo: {
                 fb: 'AddPaymentInfo',
                 ga: 'event',
                 category: 'Store',
+                action: 'addPaymentInfo',
             },
             purchase: {
                 fb: 'Purchase',
                 ga: 'event',
                 category: 'Store',
+                action: 'purchase',
             },
             optin: {
                 fb: 'Lead',
@@ -121,15 +127,48 @@
             $.extend(trackingData, eventType, data);
 
             if (lightning.vars.google_analytics_id && trackingData.hasOwnProperty('ga')) {
-                ga('send', trackingData.ga,
-                    trackingData.category ? trackingData.category : undefined,
-                    trackingData.fb ? trackingData.fb : trackingData.action ? trackingData.action : undefined,
-                    trackingData.label ? trackingData.label : undefined,
-                    trackingData.value ? trackingData.value : undefined
-                );
+                var ga_data = $.extend({
+                    ccategory: null,
+                    action: trackingData.fb ? trackingData.fb : trackingData.action ? trackingData.action : null,
+                    label: null,
+                    value: null,
+                }, trackingData);
+                if (lightning.vars.debug) {
+                    console.log('Google Analytics Tracker: ', ga_data);
+                } else {
+                    ga('send', ga_data.ga,
+                        ga_data.category,
+                        ga_data.action,
+                        ga_data.label,
+                        ga_data.value
+                    );
+                }
             }
             if (lightning.vars.facebook_pixel_id && trackingData.hasOwnProperty('fb')) {
-                fbq('track', trackingData.fb);
+                if (lightning.vars.debug) {
+                    console.log('Facebook Tracker: ', trackingData.fb);
+                } else {
+                    fbq('track', trackingData.fb);
+                }
+            }
+            if (
+                lightning.vars.google_adwords
+                && trackingData.label
+                && lightning.vars.google_adwords[trackingData.label]
+            ) {
+                var query = $.extend({}, lightning.vars.google_adwords[trackingData.label]);
+                var conversion = query.conversion;
+                delete query.conversion;
+                var imageurl = '//www.googleadservices.com/pagead/conversion/'
+                    + conversion
+                    + '/?script=0&'
+                    + lightning.buildQuery(query);
+                if (lightning.vars.debug) {
+                    console.log('Google Adwords Tracker: ' + imageurl)
+                } else {
+                    var image = new Image(1, 1);
+                    image.src = imageurl;
+                }
             }
         }
     };
