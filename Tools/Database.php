@@ -207,15 +207,14 @@ class Database extends Singleton {
      *   When a mysql error occurs.
      */
     public function errorHandler($error, $sql) {
-        if ($this->verbose) {
-            $exception = new Exception("MYSQL ERROR ($error[0]:$error[1]): $error[2] @ $sql");
-        } else {
-            $exception = new Exception("***** MYSQL ERROR *****");
-        }
-
+        // Log a verbose exception.
+        $exception = new Exception("MYSQL ERROR ($error[0]:$error[1]): $error[2] @ $sql");
         Logger::exception($exception);
 
         // Throw a general exception for all users.
+        if (!$this->verbose) {
+            $exception = new Exception("***** MYSQL ERROR *****");
+        }
         throw $exception;
     }
 
