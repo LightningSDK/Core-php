@@ -4,6 +4,7 @@ namespace Lightning\View;
 
 use Exception;
 use Lightning\Model\Blog;
+use Lightning\Model\URL;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Language;
 use Lightning\Tools\Messenger;
@@ -173,6 +174,10 @@ class PageOverridable {
             if ($twitter = Configuration::get('social.twitter.url')) {
                 $this->meta['twitter_site'] = $twitter;
                 $this->meta['twitter_creator'] = $twitter;
+            }
+            // Meta image must be an a full, absolute URL.
+            if (!empty($this->meta['image'])) {
+                $this->meta['image'] = URL::getAbsolute($this->meta['image']);
             }
             $template->set('meta', $this->meta);
 
