@@ -114,7 +114,11 @@ class Facebook extends SocialMediaApi {
                 $this->storeSessionData();
             }
         } else {
-            $this->service = FacebookSession::newSessionFromSignedRequest(new SignedRequest($token['token']));
+            if (strpos($this->token['token'], '.') !== false) {
+                $this->service = FacebookSession::newSessionFromSignedRequest(new SignedRequest($token['token']));
+            } else {
+                $this->service = new FacebookSession($this->token['token']);
+            }
             $this->profile = $this->loadProfile();
             $this->social_id = $this->service->getUserID();
         }
