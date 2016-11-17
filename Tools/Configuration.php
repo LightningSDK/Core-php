@@ -88,6 +88,7 @@ class Configuration {
      */
     protected static function loadConfiguration() {
         if (empty(self::$configuration)) {
+            // Load each configuration file.
             foreach (self::getConfigurations() as $config_file) {
                 if (file_exists($config_file)) {
                     self::$configuration = array_replace_recursive(
@@ -96,6 +97,18 @@ class Configuration {
                     );
                 } else {
                     echo "not found $config_file";
+                }
+            }
+
+            // Load module configurations.
+            if (!empty(self::$configuration['modules']['include'])) {
+                foreach (self::$configuration['modules']['include'] as $module) {
+                    if (file_exists(HOME_PATH . '/Modules/' . $module . '/config.php')) {
+                        self::$configuration = array_replace_recursive(
+                            require_once HOME_PATH . '/Modules/' . $module . '/config.php',
+                            self::$configuration
+                        );
+                    }
                 }
             }
         }
