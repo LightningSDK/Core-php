@@ -59,6 +59,9 @@
             splitTest: {
                 ga: 'event',
                 label: 'Split Test',
+            },
+            event: {
+                ga: 'event',
             }
         },
 
@@ -105,9 +108,9 @@
 
         trackOnStartup: function (lightningEvent) {
             if (self.ready) {
-                type = lightningEvent.type;
+                var type = lightningEvent.type;
                 // If the event isn't in the list, it's going to be tracked for google only and needs an action.
-                event = self.events.hasOwnProperty(type) ? self.events[type] : {action: type, ga:'event'};
+                var event = self.events.hasOwnProperty(type) ? self.events[type] : {action: type, ga:'event'};
                 self.track(event, {
                     category: lightningEvent.category,
                     label: lightningEvent.label,
@@ -128,7 +131,7 @@
 
             if (lightning.vars.google_analytics_id && trackingData.hasOwnProperty('ga')) {
                 var ga_data = $.extend({
-                    ccategory: null,
+                    category: null,
                     action: trackingData.fb ? trackingData.fb : trackingData.action ? trackingData.action : null,
                     label: null,
                     value: null,
