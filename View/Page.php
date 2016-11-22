@@ -3,6 +3,7 @@
 namespace Lightning\View;
 
 use Exception;
+use Lightning\Model\Blacklist;
 use Lightning\Model\Blog;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Language;
@@ -223,18 +224,18 @@ class PageOverridable {
             // If there is a requested action.
             if ($action = Request::get('action')) {
                 $method = Request::convertFunctionName($request_type, $action);
-                if (method_exists($this, $method)) {
-                    $this->{$method}();
-                } else {
-                    throw new Exception('There was an error processing your submission.');
-                }
             } else {
-                if (method_exists($this, $request_type)) {
-                    $this->$request_type();
-                } else {
-                    // TODO: show 302
-                    throw new Exception('Method not available');
+                $method = $request_type;
+            }
+
+            if (method_exists($this, $method)) {
+                if ($method != 'get') {
+                    Blacklist::checkBlacklist();
                 }
+                $this->{$method}();
+            } else {
+                // TODO: show 302
+                throw new Exception('Method not available');
             }
         } catch (Exception $e) {
             Output::error($e->getMessage());

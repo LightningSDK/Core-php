@@ -327,4 +327,12 @@ class Scrub {
             return null;
         }
     }
+
+    public static function ipToHex($string) {
+        $bin = inet_pton($string);
+        if ($bin !== false) {
+            return strtoupper(bin2hex($bin));
+        }
+        return false;
+    }
 }
