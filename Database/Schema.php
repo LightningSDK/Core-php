@@ -81,6 +81,13 @@ abstract class Schema implements SchemaInterface {
         ];
     }
 
+    protected function varbinary($size) {
+        return [
+            'type' => 'varbinary',
+            'size' => $size,
+        ];
+    }
+
     protected function char($size) {
         return [
             'type' => 'char',
