@@ -54,7 +54,7 @@
                             <div class="info small-12 medium-8 column">
                                 <h4><?= $post->author_name; ?></h4>
                                 <p><?= $post->author_description; ?></p>
-                                <a href="<?= $post->getAuthorLink(); ?>">See all posts from <?= $post->author_name; ?> <i class="fa fa-angle-right"></i></a>
+                                <a href="<?= $post->getAuthorLink(); ?>">See all posts from <?= $post->getAuthorName(); ?> <i class="fa fa-angle-right"></i></a>
                             </div>
                         </div>
                     <?php endif; ?>
