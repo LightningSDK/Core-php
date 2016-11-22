@@ -19,6 +19,7 @@
       multiple_opened : false,
       bg_class : 'reveal-modal-bg',
       root_element : 'body',
+      no_scroll: false,
       open : function(){},
       opened : function(){},
       close : function(){},
@@ -49,7 +50,7 @@
           S = self.S;
 
       S(this.scope)
-        .off('.reveal')
+        .off('.fndtn.reveal')
         .on('click.fndtn.reveal', '[' + this.add_namespace('data-reveal-id') + ']:not([disabled])', function (e) {
           e.preventDefault();
 
@@ -164,12 +165,20 @@
       if (!modal.hasClass('open')) {
         var open_modal = self.S('[' + self.attr_name() + '].open');
 
-        if (typeof modal.data('css-top') === 'undefined') {
-          modal.data('css-top', parseInt(modal.css('top'), 10))
-            .data('offset', this.cache_offset(modal));
-        }
+        // if (typeof modal.data('css-top') === 'undefined') {
+        //   modal.data('css-top', parseInt(modal.css('top'), 10))
+        //     .data('offset', this.cache_offset(modal));
+        // }
 
         modal.attr('tabindex','0').attr('aria-hidden','false');
+
+        if(settings.no_scroll){//added 10/9/15, prevents annoying scroll positioning bug with position: absolute; reveals
+          var $body = $('body');
+          $body.on('open.fndtn.reveal', function(){
+            $body.css('overflow', 'hidden')
+                 .off('open.fndtn.reveal');
+          });
+        }
 
         this.key_up_on(modal);    // PATCH #3: turning on key up capture only when a reveal window is open
 
@@ -178,7 +187,8 @@
           if (e.namespace !== 'fndtn.reveal') return;
         });
 
-        modal.on('open.fndtn.reveal').trigger('open.fndtn.reveal');
+        modal.trigger('open.fndtn.reveal');
+
 
         if (open_modal.length < 1) {
           this.toggle_bg(modal, true);
@@ -255,6 +265,14 @@
       if (open_modals.length > 0) {
 
         modal.removeAttr('tabindex','0').attr('aria-hidden','true');
+
+        if(settings.no_scroll){//added 10/9/15, prevents annoying scroll positioning bug with position: absolute; reveals
+          var $body = $('body');
+          $body.on('close.fndtn.reveal', function(){
+            $body.css('overflow', 'auto')
+                 .off('close.fndtn.reveal');
+          });
+        }
 
         this.locked = true;
         this.key_up_off(modal);   // PATCH #3: turning on key up capture only when a reveal window is open
@@ -343,9 +361,9 @@
           this.locked = false;
         }
         if (animData.pop) {
-          css.top = $(window).scrollTop() - el.data('offset') + 'px';
+          // css.top = $(window).scrollTop() - el.data('offset') + 'px';
           var end_css = {
-            top: $(window).scrollTop() + el.data('css-top') + 'px',
+            // top: $(window).scrollTop() + el.data('css-top') + 'px',
             opacity: 1
           };
 
@@ -360,7 +378,7 @@
           }, settings.animation_speed / 2);
         }
 
-        css.top = $(window).scrollTop() + el.data('css-top') + 'px';
+        // css.top = $(window).scrollTop() + el.data('css-top') + 'px';
 
         if (animData.fade) {
           var end_css = {opacity: 1};
@@ -412,7 +430,7 @@
         }
         if (animData.pop) {
           var end_css = {
-            top: - $(window).scrollTop() - el.data('offset') + 'px',
+            // top: - $(window).scrollTop() - el.data('offset') + 'px',
             opacity: 0
           };
 
@@ -488,13 +506,13 @@
       return str;
     },
 
-    cache_offset : function (modal) {
-      var offset = modal.show().height() + parseInt(modal.css('top'), 10) + modal.scrollY;
-
-      modal.hide();
-
-      return offset;
-    },
+    // cache_offset : function (modal) {
+    //   var offset = modal.show().height() + parseInt(modal.css('top'), 10) + modal.scrollY;
+    //
+    //   modal.hide();
+    //
+    //   return offset;
+    // },
 
     off : function () {
       $(this.scope).off('.fndtn.reveal');
