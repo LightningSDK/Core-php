@@ -42,7 +42,7 @@ class Facebook extends SocialMediaApi {
     }
 
     public function loadProfile() {
-        if (empty($this->profile)) {
+        if (empty($this->profile) && !empty($this->service)) {
             $request = new FacebookRequest($this->service, 'GET', '/me');
             $this->profile = $request->execute()->getGraphObject()->asArray();
         }
