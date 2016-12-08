@@ -151,18 +151,54 @@ trait ObjectDataStorage {
      * Convert JSON encoded fields to objects.
      */
     protected function initJSONEncodedFields() {
-        foreach ($this->__json_encoded_fields as $field) {
-            if (!empty($this->__data[$field])) {
-                if (is_string($this->__data[$field])) {
-                    $this->__json_encoded_source[$field] = $this->__data[$field];
-                    $this->__data[$field] = json_decode($this->__data[$field]) ?: new stdClass();
-                } elseif (is_array($this->__data[$field]) || is_object($this->__data[$field])) {
-                    $this->__json_encoded_source[$field] = json_encode($this->__data[$field]);
-                    $this->__data[$field] = json_decode($this->__json_encoded_source[$field]) ?: new stdClass();
-                }
-            } else {
-                $this->__data[$field] = new stdClass();
+        foreach ($this->__json_encoded_fields as $field => $settings) {
+            if (is_numeric($field)) {
+                $field = $settings;
+                $settings = [];
             }
+            if (!empty($this->__data[$field])) {
+                // If there is a value set.
+                $this->__json_encoded_source[$field] = $this->getJSONEncodedValue($this->__data[$field]) ?: '';
+                $this->__data[$field] = $this->getJSONDecodedValue($this->__data[$field]) ?: $this->getJSONEncodedDefault($settings);
+            } else {
+                // Get the default value.
+                $this->__data[$field] = $this->getJSONEncodedDefault($settings);
+            }
+        }
+    }
+
+    private function getJSONEncodedValue($value) {
+        if (is_object($value) || is_array($value)) {
+            return json_encode($value);
+        } else {
+            return $value;
+        }
+    }
+
+    private function getJSONDecodedValue($value, $settings) {
+        $assoc = (!empty($settings['type']) && $settings['type'] == 'array');
+        if (is_string($value)) {
+            return json_decode($value, $assoc);
+        } elseif (is_object($value) || is_array($value)) {
+            return json_decode(json_encode($value), $assoc);
+        } else {
+            return null;
+        }
+    }
+
+    private function getJSONEncodedDefault($settings) {
+        if (!empty($settings['default'])) {
+            return $settings['default'];
+        } elseif (!empty($settings['type'])) {
+            switch ($settings['type']) {
+                case 'array':
+                    return [];
+                case 'object':
+                default:
+                    return new stdClass();
+            }
+        } else {
+            return new stdClass();
         }
     }
 
@@ -182,7 +218,11 @@ trait ObjectDataStorage {
             }
         }
 
-        foreach ($this->__json_encoded_fields as $field) {
+        foreach ($this->__json_encoded_fields as $field => $settings) {
+            if (is_numeric($field)) {
+                $field = $settings;
+                $settings = [];
+            }
             $encoded = json_encode($this->__data[$field]);
             if (!empty($encoded) && (
                     $create_new
