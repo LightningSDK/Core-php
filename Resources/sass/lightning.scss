@@ -202,13 +202,6 @@ div.captcha_container {
   }
 }
 
-.button.red {
-  background-color: #88000b;
-  color: white;
-}
-.button.red:hover {
-  background-color: #c60012;
-}
 .chart_totals {
   clear: both;
 }
@@ -397,6 +390,7 @@ ul.tags{
   width: 10px;
   display: inline-block;
 }
+
 .button {
   outline:none;
   font-size: 24px; font-weight: bold;
@@ -503,6 +497,19 @@ ul.tags{
     display: inline;
     font-weight: 500;
   }
+  &.form-inline {
+    font-size: 1rem;
+    width: 100%;
+    padding: 0;
+    height: 2.3125rem;
+    line-height: 2.3125rem;
+  }
+}
+span.form-inline {
+  font-size: 1rem;
+  width: 100%;
+  height: 2.3125rem;
+  line-height: 2.3125rem;
 }
 
 // Social Signing Buttons
