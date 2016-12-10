@@ -159,7 +159,7 @@ trait ObjectDataStorage {
             if (!empty($this->__data[$field])) {
                 // If there is a value set.
                 $this->__json_encoded_source[$field] = $this->getJSONEncodedValue($this->__data[$field]) ?: '';
-                $this->__data[$field] = $this->getJSONDecodedValue($this->__data[$field]) ?: $this->getJSONEncodedDefault($settings);
+                $this->__data[$field] = $this->getJSONDecodedValue($this->__data[$field], $settings) ?: $this->getJSONEncodedDefault($settings);
             } else {
                 // Get the default value.
                 $this->__data[$field] = $this->getJSONEncodedDefault($settings);
