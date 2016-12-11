@@ -262,4 +262,10 @@ then
     cp -r $DIR/Lightning/install/images $DIR/
 fi
 
+if [ AUTOINSTALL_SOURCE = true ] || [ `shouldInstall "Create an admin user?"` -eq 1 ]
+then
+    # Install main images.
+    $DIR/Lightning/lightning user create-admin
+fi
+
 echo "Lightning Installation Complete."

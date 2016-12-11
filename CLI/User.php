@@ -20,16 +20,23 @@ class User extends CLI {
      * Create an admin account. Will prompt for email address and password.
      */
     public function executeCreateAdmin() {
-        do {
-            if (!empty($email_input)) {
-                $this->out('That is not a valid email.');
-            }
-            $email_input = $this->readline('Email: ');
-        } while (!$email = Scrub::email($email_input));
 
-        do {
-            $password = $this->readline('Password: ', true);
-        } while (strlen($password) < 6);
+        if (empty($this->parameters['user']) || !$email = Scrub::email($this->parameters['user'])) {
+            do {
+                if (!empty($email_input)) {
+                    $this->out('That is not a valid email.');
+                }
+                $email_input = $this->readline('Email: ');
+            } while (!$email = Scrub::email($email_input));
+        }
+
+        if (empty($this->parameters['password'])) {
+            do {
+                $password = $this->readline('Password: ', true);
+            } while (strlen($password) < 6);
+        } else {
+            $password = $this->parameters['password'];
+        }
 
         $res = UserModel::create($email, $password);
         if ($res['success']) {

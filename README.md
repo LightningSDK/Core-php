@@ -9,28 +9,18 @@ git init
 # Add the Lightning repo
 git submodule add git@github.com:macdabby/Lightning.git
 
-# Download the dependencies
-cd Lightning
-
 # Run the main install script.
-./1install.sh
-
-# Install dependencies for building your project css and js files.
-./2install-project-dependencies.sh
-
-# Install dependencies for building lightning files.
-# This is not required if you do not intend to tweak or contribute.
-./3install-dependencies-ubuntu.sh
-
-# Install the base template package - This can be done to reset the site at any time.
-./4install-templates.sh
+This will walk you through all the installation options, including connecting to the database and creating an admin user. You should already have a MySQL database set up with a username and password before starting this script.
+Lightning/install.sh
 
 # Install default content.
-./lightning database import-defaults
+This is part of the installation process, but at any time you can import default data by running this script.
+Lightning/lightning database import-defaults
 
 # Create an admin user.
-./lightning user create-admin
+This is part of the installation process, but you can always add a new admin user by running this script.
+Lightning/lightning user create-admin
 
 # Build the CSS and JS files
-cd ../Source/Resources
-grunt
+cd Source/Resources
+gulp

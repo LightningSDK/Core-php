@@ -58,23 +58,17 @@ class CLI {
     protected function parseArgs($args) {
         foreach ($args as $key => $arg) {
             if (substr($arg, 0, 2) == '--') {
-                echo '.--.';
-                $next_arg = $args[$key + 1];
-                echo 'next=' . $next_arg;
-                if ($next_arg[0] == '-') {
-                    $this->flags[substr($arg, 2)] = true;
+                if (strpos($arg, '=') !== false) {
+                    $arg = explode('=', $arg, 2);
+                    $this->parameters[substr($arg[0], 2)] = $arg[1];
                 } else {
+                    $next_arg = $args[$key + 1];
                     $this->parameters[substr($arg, 2)] = $next_arg;
                     next($args);
                 }
             } elseif ($arg[0] == '-') {
-                echo '.-.';
-                if (strlen($arg) > 2) {
-                    $this->parameters[$arg[1]] = substr($arg, 2);
-                } else {
-                    // Get the value form the parameter after
-                    $this->parameters[$arg[1]] = $args[$key + 1];
-                    next($args);
+                for ($i = 1; $i < strlen($arg); $i++) {
+                    $this->flags[$arg[$i]] = true;
                 }
             }
         }
