@@ -24,3 +24,32 @@ Lightning/lightning user create-admin
 # Build the CSS and JS files
 cd Source/Resources
 gulp
+
+# Nginx Configuration
+Make sure to set your own domain, root directory, and php socket.
+server {
+    server_name fqdn.com;
+    root /var/www/lightning_site;
+
+    index index.php;
+
+    # Add any static file paths here
+    location ~ /(css/|fonts/|images/|js/|flash/|favicon\.(png|ico)) {
+        try_files $uri /404.html;
+    }
+
+    location /admin {
+        client_max_body_size 512M;
+        include        fastcgi_params;
+        fastcgi_param  QUERY_STRING     request=$uri&$query_string;
+        fastcgi_param  SCRIPT_FILENAME  $document_root/index.php;
+        fastcgi_pass   unix:/run/php/php7.0-fpm.sock;
+    }
+
+    location / {
+        include        fastcgi_params;
+        fastcgi_param  QUERY_STRING     request=$uri&$query_string;
+        fastcgi_param  SCRIPT_FILENAME  $document_root/index.php;
+        fastcgi_pass   unix:/run/php/php7.0-fpm.sock;
+    }
+}
