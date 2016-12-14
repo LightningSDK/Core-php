@@ -23,8 +23,12 @@ class Performance {
 
         // TODO: Add times for MongoDB.
 
-        $output['Total PHP Time'] = number_format(microtime(true) - self::$startTime, 4);
+        $output['Total PHP Time'] = self::getRunningTime();
 
         return $output;
+    }
+
+    public static function getRunningTime() {
+        return number_format(microtime(true) - self::$startTime, 4);
     }
 }
