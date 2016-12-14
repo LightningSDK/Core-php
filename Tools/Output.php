@@ -450,7 +450,7 @@ class Output {
             apache_setenv('no-gzip', 1);
         }
         // For apache.
-        @ini_set('zlib.output_compression', "Off");
+        @ini_set('zlib.output_compression', 'Off');
         @ini_set('implicit_flush', 1);
         // For nginx.
         header('X-Accel-Buffering: no');
