@@ -85,6 +85,21 @@ class JS {
         }
     }
 
+    public static function addResource($files, $module, $async = true, $versioning = true, $id = '') {
+        if (!is_array($files)) {
+            $files = [$files];
+        }
+
+        foreach ($files as &$file) {
+            $modules_files = Configuration::get('js.' . $module);
+            // This has to be separate because the file should have a . in the name which breaks the config path.
+            if (empty($modules_files[$file])) {
+                throw new \Exception('Compiled JS reference not found for: ' . $file . '.js');
+            }
+            self::add('/js/' . $modules_files[$file], $async, $versioning, $id);
+        }
+    }
+
     /**
      * Add an inline script to run as the page loads or to set variables.
      *
