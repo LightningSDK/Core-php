@@ -9,6 +9,7 @@ $conf = [
             'database' => 'Lightning\\CLI\\Database',
             'user' => 'Lightning\\CLI\\User',
             'security' => 'Lightning\\CLI\\Security',
+            'gulp' => 'Lightning\\CLI\\Gulp',
         ],
     ],
     'session' => [
