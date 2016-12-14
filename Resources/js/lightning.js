@@ -151,7 +151,9 @@ lightning.query = function(q) {
 lightning.hash = function(q) {
     return lightning.getFromURL('hash', q);
 };
-lightning.modules = {};
+if (!lightning.modules) {
+    lightning.modules = {};
+}
 lightning.buildQuery = function(parameters) {
     var pairs = [];
     for (var i in parameters) {
