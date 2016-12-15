@@ -20,6 +20,14 @@ class Configuration {
     protected static $configuration = [];
 
     /**
+     * Flag to tell if the configuration is loaded. The configuration is considered loaded if loadConfiguration() has
+     * been called, even if it has not been completed, to prevent a recursive loop.
+     *
+     * @var boolean
+     */
+    protected static $loaded = false;
+
+    /**
      * Get a config variable's value.
      *
      * @param string $variable
@@ -87,14 +95,12 @@ class Configuration {
      * Load the configuration from the configuration.inc.php file.
      */
     protected static function loadConfiguration() {
-        if (empty(self::$configuration)) {
+        if (!self::$loaded) {
+            self::$loaded = true;
             // Load each configuration file.
             foreach (self::getConfigurations() as $config_file) {
                 if (file_exists($config_file)) {
-                    self::$configuration = array_replace_recursive(
-                        self::getConfigurationData($config_file),
-                        self::$configuration
-                    );
+                    self::softMerge(self::getConfigurationData($config_file));
                 } else {
                     echo "not found $config_file";
                 }
@@ -104,10 +110,7 @@ class Configuration {
             if (!empty(self::$configuration['modules']['include'])) {
                 foreach (self::$configuration['modules']['include'] as $module) {
                     if (file_exists(HOME_PATH . '/Modules/' . $module . '/config.php')) {
-                        self::$configuration = array_replace_recursive(
-                            require_once HOME_PATH . '/Modules/' . $module . '/config.php',
-                            self::$configuration
-                        );
+                        self::softMerge(require_once HOME_PATH . '/Modules/' . $module . '/config.php');
                     }
                 }
             }
