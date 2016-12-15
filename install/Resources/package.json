@@ -2,21 +2,21 @@
     "name": "lightning",
     "version": "1.0.0",
     "devDependencies": {
-        "grunt": "~0.4.4",
-        "grunt-contrib-clean": "~0.5.0",
-        "grunt-contrib-copy": "~0.5.0",
-        "grunt-contrib-uglify": "~0.4.0",
-        "grunt-contrib-watch": "~0.6.1",
-        "grunt-sass": "~1.1.0",
-        "grunt-contrib-compass": "~1.0.1",
-        "grunt-contrib-rename": "0.0.2"
+        "gulp": "^3.9.1",
+        "gulp-add-src": "^0.2.0",
+        "gulp-clean-css": "^2.0.12",
+        "gulp-compass": "^2.1.0",
+        "gulp-concat": "^2.6.0",
+        "gulp-rename": "^1.2.2",
+        "gulp-shell": "^0.5.2",
+        "gulp-uglify": "^1.5.4",
+        "gulp-watch": "^4.3.8"
     },
     "repository": {
         "type": "git",
         "url": "git://github.com/macdabby/lightning.git"
     },
     "description": "LightningSDK",
-    "main": "Gruntfile.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
     },

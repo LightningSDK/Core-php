@@ -88,7 +88,7 @@ then
         sudo apt-get -y install python-software-properties curl
         curl -sL https://deb.nodesource.com/setup | sudo bash -
 
-        # install ruby for compass and grunt
+        # Install ruby for compass.
         sudo apt-get -y install ruby-full python-software-properties python g++ make nodejs
         if [[ -f /etc/debian_version ]]; then
           sudo apt-get -y install bundler rubygems
@@ -96,7 +96,7 @@ then
           sudo apt-get -y install ruby-bundler ruby
         fi
     elif [[ "$PLATFORM" == 'Darwin' ]]; then
-        # install ruby for mac
+        # Install ruby for mac.
         \curl -L https://get.rvm.io | bash -s stable
     fi
 
@@ -136,6 +136,8 @@ then
     git submodule update --init Vendor/twitterapiclient
 fi
 
+GULP_BUILD=false
+
 # Copy Source/Resources.
 if [ ! -d $DIR/Source/Resources -o `shouldInstall "Install or Reset the Source/Resources file?"` -eq 1 ]
 then
@@ -146,11 +148,8 @@ then
         sudo apt-get -y nodejs build-essential
     fi
 
-    # Install lightning dependencies with grunt
-    cd $DIR/Source/Resources
-    npm install grunt grunt-cli
-    npm install
-    grunt build
+    # Install lightning dependencies with gulp
+    GULP_BUILD=true
 fi
 
 if [ `shouldInstall "Install ckeditor?"` -eq 1 ]
@@ -165,9 +164,15 @@ then
     unzip ckeditor_4.5.9_standard.zip
     if [[ ! -f $DIR/Source/Resources/sass/ckeditor_contents.scss ]]; then
         cp $DIR/js/ckeditor/content.css $DIR/Source/Resources/sass/ckeditor_contents.scss
-        cd $DIR/Source/Resources
-        grunt build
+        GULP_BUILD=true
     fi
+fi
+
+if [ $GULP_BUILD ]
+then
+    cd $DIR/Source/Resources
+    npm install
+    gulp build
 fi
 
 if [ `shouldInstall "Install ckfinder?"` -eq 1 ]
