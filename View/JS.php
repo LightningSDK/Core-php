@@ -71,6 +71,7 @@ class JS {
         if (!is_array($files)) {
             $files = [$files];
         }
+        $files = self::getCompiledScripts($files);
 
         foreach ($files as $file) {
             $path = is_array($file) ? $file['file'] : $file;
@@ -85,19 +86,27 @@ class JS {
         }
     }
 
-    public static function addResource($files, $module, $async = true, $versioning = true, $id = '') {
-        if (!is_array($files)) {
-            $files = [$files];
-        }
+    protected static function getCompiledScripts($resources) {
+        $compiled_scripts = [];
+        foreach ($resources as $module => $scripts) {
+            if (is_numeric($module)) {
+                // If ths index is numeric, this is not a resource but a literal script name.
+                $compiled_scripts[] = $scripts;
+            } else {
+                if (!is_array($scripts)) {
+                    $scripts = [$scripts];
+                }
 
-        foreach ($files as &$file) {
-            $modules_files = Configuration::get('js.' . $module);
-            // This has to be separate because the file should have a . in the name which breaks the config path.
-            if (empty($modules_files[$file])) {
-                throw new \Exception('Compiled JS reference not found for: ' . $file . '.js');
+                $modules_files = Configuration::get('js.' . $module);
+                foreach ($scripts as $script) {
+                    if (empty($modules_files[$script])) {
+                        throw new \Exception('Compiled JS reference not found for: ' . $script);
+                    }
+                    $compiled_scripts[] = '/js/' . $modules_files[$script];
+                }
             }
-            self::add('/js/' . $modules_files[$file], $async, $versioning, $id);
         }
+        return array_unique($compiled_scripts);
     }
 
     /**
@@ -124,6 +133,9 @@ class JS {
     public static function startup($script, $requires = []) {
         $hash = md5($script);
         if (empty(self::$startup_scripts[$hash])) {
+            if (!empty($requires)) {
+                $requires = self::getCompiledScripts($requires);
+            }
             self::$startup_scripts[$hash] = ['script' => $script, 'requires' => $requires, 'rendered' => false];
         }
     }
