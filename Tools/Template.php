@@ -140,7 +140,12 @@ class Template extends Singleton {
      */
     public static function renderMarkup($options, $vars) {
         $sub_template = new Template();
-        return $sub_template->render($options['name'], true);
+        if (!empty($options['module'])) {
+            $template = [$options['name'], $options['module']];
+        } else {
+            $template = $options['name'];
+        }
+        return $sub_template->render($template, true);
     }
 
     /**
