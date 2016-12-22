@@ -153,7 +153,7 @@ class EncryptionOverridable {
             $privateKey = self::convertPrivateKey($privateKey);
         }
         $key_resource = openssl_get_privatekey($privateKey);
-        openssl_sign($data, $signature, $key_resource, OPENSSL_ALGO_SHA512)
+        openssl_sign($data, $signature, $key_resource, OPENSSL_ALGO_SHA512);
         return base64_encode($signature);
     }
 
