@@ -3,6 +3,11 @@
 namespace Lightning\Tools\Security;
 
 class EncryptionOverridable {
+    const PKCS1 = 1;
+    const PKCS7 = 7;
+    const SSH = 20;
+    const LIGHTNING = 21;
+
     public static function generateKeyPair($bits = 1024, $type = OPENSSL_KEYTYPE_RSA, $digest = 'sha512') {
         $config = [
             'digest_alg' => $digest,
@@ -23,27 +28,34 @@ class EncryptionOverridable {
         return ['public' => $pubKey, 'private' => $privKey];
     }
 
-    public static function shortenKey($key) {
+    public static function shortenKey($key, $format = self::LIGHTNING) {
+        $public = preg_match('/BEGIN PUBLIC/', $key);
         $key = preg_replace('|-----.*-----|', '', $key);
         $key = preg_replace( '/\r|\n/', '', $key);
-        return $key;
+        return ($public ? 'LPUB*' : 'L*') . $key;
     }
 
-    public static function lengthenPublicKey($key) {
+    public static function convertPublicKey($key) {
+        if (strstr($key, 'LPUB*')) {
+            $key = preg_replace('|^LPUB\*|', '', $key);
+        }
         return "-----BEGIN PUBLIC KEY-----\n"
             . wordwrap($key, 64, "\n", true)
             . "\n-----END PUBLIC KEY-----";
     }
 
-    public static function lengthenPrivateKey($key) {
-        return "-----BEGIN PRIVATE KEY-----\n"
+    public static function convertPrivateKey($key) {
+        if (strstr($key, 'L*')) {
+            $key = preg_replace('|^L\*|', '', $key);
+        }
+        return "-----BEGIN RSA PRIVATE KEY-----\n"
             . wordwrap($key, 64, "\n", true)
-            . "\n-----END PRIVATE KEY-----";
+            . "\n-----END RSA PRIVATE KEY-----";
     }
 
     public static function publicEncrypt($pubKey, $data) {
         if (!strstr($pubKey, 'BEGIN PUBLIC KEY')) {
-            $pubKey = self::lengthenPublicKey($pubKey);
+            $pubKey = self::convertPublicKey($pubKey);
         }
         $key_resource = openssl_get_publickey($pubKey);
         openssl_public_encrypt($data, $crypttext, $key_resource);
@@ -52,7 +64,7 @@ class EncryptionOverridable {
 
     public static function publicDecrypt($pubKey, $data) {
         if (!strstr($pubKey, 'BEGIN PUBLIC KEY')) {
-            $pubKey = self::lengthenPublicKey($pubKey);
+            $pubKey = self::convertPublicKey($pubKey);
         }
         $key_resource = openssl_get_publickey($pubKey);
         openssl_public_decrypt(base64_decode($data), $cleartext, $key_resource);
@@ -60,8 +72,8 @@ class EncryptionOverridable {
     }
 
     public static function privateEncrypt($privateKey, $data) {
-        if (!strstr($privateKey, 'BEGIN PRIVATE KEY')) {
-            $privateKey = self::lengthenPrivateKey($privateKey);
+        if (!strstr($privateKey, 'BEGIN PRIVATE RSA KEY')) {
+            $privateKey = self::convertPrivateKey($privateKey);
         }
         $key_resource = openssl_get_privatekey($privateKey);
         openssl_private_encrypt($data, $crypttext, $key_resource);
@@ -69,8 +81,8 @@ class EncryptionOverridable {
     }
 
     public static function privateDecrypt($privateKey, $data) {
-        if (!strstr($privateKey, 'BEGIN PRIVATE KEY')) {
-            $privateKey = self::lengthenPrivateKey($privateKey);
+        if (!strstr($privateKey, 'BEGIN PRIVATE RSA KEY')) {
+            $privateKey = self::convertPrivateKey($privateKey);
         }
         $key_resource = openssl_get_privatekey($privateKey);
         openssl_private_decrypt(base64_decode($data), $cleartext, $key_resource);
@@ -134,5 +146,22 @@ class EncryptionOverridable {
     public static function checkSaltHash($data, $salt_hash) {
         list($salt, $hash) = explode(':', $salt_hash);
         return $hash == base64_encode(hash('sha256', $data . base64_decode($salt), true));
+    }
+
+    public static function sign($data, $privateKey) {
+        if (!strstr($privateKey, 'BEGIN PRIVATE RSA KEY')) {
+            $privateKey = self::convertPrivateKey($privateKey);
+        }
+        $key_resource = openssl_get_privatekey($privateKey);
+        openssl_sign($data, $signature, $key_resource, OPENSSL_ALGO_SHA512)
+        return base64_encode($signature);
+    }
+
+    public static function checkSignature($data, $pubKey, $signature) {
+        if (!strstr($pubKey, 'BEGIN PUBLIC KEY')) {
+            $pubKey = self::convertPublicKey($pubKey);
+        }
+        $key_resource = openssl_get_publickey($pubKey);
+        return (boolean) openssl_verify($data, base64_decode($signature), $key_resource, OPENSSL_ALGO_SHA512);
     }
 }
