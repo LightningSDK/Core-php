@@ -54,6 +54,7 @@ class Pages extends Table {
         'hide_menu' => 'checkbox',
         'hide_footer' => 'checkbox',
         'full_width' => 'checkbox',
+        'use_parser' => 'checkbox',
     ];
 
     protected function initSettings() {

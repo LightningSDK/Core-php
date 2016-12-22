@@ -26,6 +26,7 @@ class Page extends Schema {
             'hide_footer' => $this->int(true, Schema::TINYINT),
             'right_column' => $this->int(true, Schema::TINYINT),
             'full_width' => $this->int(true, Schema::TINYINT),
+            'use_parser' => $this->int(true, Schema::TINYINT),
             'priority' => $this->int(true),
             'last_update' => $this->int(true),
         ];
