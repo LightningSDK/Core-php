@@ -172,7 +172,11 @@ class Form {
      * Make sure a session is started so there can be a token.
      */
     public static function requiresToken() {
-        Session::getInstance(true);
+        try {
+            Session::getInstance(true);
+        } catch (Exception $e) {
+            return '<small class="error" style="display: block">Session Not Initialized</small>';
+        }
     }
 
     /**

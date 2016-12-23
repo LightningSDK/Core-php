@@ -2,6 +2,7 @@
 
 namespace Lightning\Tools;
 
+use Exception;
 use Lightning\Tools\Security\Random;
 
 /**
@@ -42,12 +43,14 @@ class SessionOverridable extends SingletonObject {
      *   The current session.
      */
     public static function getInstance($create_object = true, $create_session = true) {
-        // If $create_session is true, the session is or will be initialized.
-        if ($create_session) {
+        $session = parent::getInstance($create_object, $create_session);
+
+        // If the session has been initialized, make sure to mark it.
+        if ($session) {
             static::$initialized = true;
         }
 
-        return parent::getInstance($create_object, $create_session);
+        return $session;
     }
 
     protected static function loadRequestSessionKey() {
