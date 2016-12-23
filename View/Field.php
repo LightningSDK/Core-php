@@ -36,7 +36,7 @@ class Field {
             'type' => !empty($options['type']) ? $options['type'] : 'text',
             'class' => !empty($options['class']) ? $options['class'] : '',
         ];
-        if ($options['type'] == 'submit' && empty($attributes['name'])) {
+        if (!empty($options['type']) && $options['type'] == 'submit' && empty($attributes['name'])) {
             $attributes['name'] = 'submit';
         }
         if (isset($options['required'])) {
