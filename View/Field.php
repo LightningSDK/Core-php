@@ -28,6 +28,19 @@ class Field {
         return Scrub::toHTML($default);
     }
 
+    /**
+     * Markup renderer for inline templating.
+     *
+     * @param array $options
+     *   - placeholder - string - For text fields, this is a preview within the text field.
+     *   - name - string - The field name
+     *   - value - string - The default value
+     *   - type - string - The field type. Can be text, password, checkbox, radio
+     *   - class - string - Classes to add to the field.
+     *
+     * @return string
+     *   Rendered HTML
+     */
     public static function renderMarkup($options) {
         $attributes = [
             'placeholder' => !empty($options['placeholder']) ? $options['placeholder'] : '',
