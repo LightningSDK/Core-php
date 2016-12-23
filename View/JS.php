@@ -88,6 +88,9 @@ class JS {
 
     protected static function getCompiledScripts($resources) {
         $compiled_scripts = [];
+        if (!is_array($resources)) {
+            $resources = [$resources];
+        }
         foreach ($resources as $module => $scripts) {
             if (is_numeric($module)) {
                 // If ths index is numeric, this is not a resource but a literal script name.
