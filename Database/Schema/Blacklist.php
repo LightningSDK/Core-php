@@ -18,7 +18,7 @@ class Blacklist extends Schema {
 
     public function getKeys() {
         return [
-            'primary' => 'blog_id',
+            'primary' => 'black_list_id',
             'ip_start' => [
                 'columns' => ['ip_start'],
                 'unique' => false,
