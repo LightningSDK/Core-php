@@ -90,8 +90,9 @@ then
         gem install bundle
     elif [[ "$PLATFORM" == 'Linux' ]]; then
         # add repo for nodejs
-        sudo apt-get -y install python-software-properties curl ruby-full python-software-properties python g++ make nodejs unzip
+        sudo apt-get -y install python-software-properties curl ruby-full python-software-properties python g++ make unzip
         sudo curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+        sudo apt-get -y install nodejs
 
         # Install ruby for compass.
         if [[ -f /etc/debian_version ]]; then
