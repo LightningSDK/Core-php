@@ -180,7 +180,7 @@ then
     wget http://download.cksource.com/CKEditor/CKEditor/CKEditor%204.5.9/ckeditor_4.5.9_standard.zip
     unzip ckeditor_4.5.9_standard.zip
     if [[ ! -f $DIR/Source/Resources/sass/ckeditor_contents.scss ]]; then
-        cp $DIR/js/ckeditor/content.css $DIR/Source/Resources/sass/ckeditor_contents.scss
+        cp $DIR/js/ckeditor/contents.css $DIR/Source/Resources/sass/ckeditor_contents.scss
         GULP_BUILD=true
     fi
 fi
@@ -188,8 +188,8 @@ fi
 if [ $GULP_BUILD ]
 then
     cd $DIR/Source/Resources
-    npm cache clean
-    npm install
+    sudo npm cache clean
+    sudo npm install
     gulp build
 fi
 
