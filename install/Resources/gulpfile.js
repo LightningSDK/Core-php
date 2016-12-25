@@ -7,20 +7,30 @@ var concat = require('gulp-concat');
 var rename = require("gulp-rename");
 var cleanCSS = require('gulp-clean-css');
 var gzip = require('gulp-gzip');
+var fs = require('fs');
 
 gulp.task('compass', function() {
+    var import_paths = [
+        '../../Lightning/Vendor/foundation/scss',
+        '../../Lightning/Vendor/compass/frameworks/compass/stylesheets',
+        '../../Lightning/Resources/sass',
+        '../../Lightning/Resources/node_modules/grunt-sass/node_modules/node-sass/test/fixtures/spec/spec/libsass/bourbon/lib',
+        '../../Modules',
+        '../../Lightning/build/scss',
+        '../../Lightning/Vendor/Font-Awesome/scss',
+    ];
+    var valid_paths = [];
+    for (var p in import_paths) {
+        if (fs.existsSync(import_paths[p])) {
+            valid_paths.push(import_paths[p])
+        }
+    }
+
     var compass_settings = {
         css: '../../css',
         sass: 'sass',
         image: '../../images',
         import_path: [
-            '../../Lightning/Vendor/foundation/scss',
-            '../../Lightning/Vendor/compass/frameworks/compass/stylesheets',
-            '../../Lightning/Resources/sass',
-            '../../Lightning/Resources/node_modules/grunt-sass/node_modules/node-sass/test/fixtures/spec/spec/libsass/bourbon/lib',
-            '../../Modules',
-            '../../Lightning/build/scss',
-            '../../Lightning/Vendor/Font-Awesome/scss',
         ],
         font: '../../fonts',
     };
