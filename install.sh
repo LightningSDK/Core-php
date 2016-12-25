@@ -70,12 +70,8 @@ then
     git submodule update --init Vendor/foundation
 fi
 
-if [ `shouldInstall "Install lightning source dependencies? This is needed if you intend to rebuild lightning files." $INSTALL_SOURCE_DEPENDENCIES` -eq 1 ]
+if [ `shouldInstall "Install system dependencies like gulp, node, ruby, compass? These are required for building compiled CSS and JS" $INSTALL_SYSTEM_DEPENDENCIES` -eq 1 ]
 then
-    cd $DIR/Lightning
-    git submodule update --init Vendor/compass
-    git submodule update --init Vendor/foundation
-
     if [[ "$PLATFORM" == 'RedHat' ]]; then
         # todo: pick repo based on centos version in /etc/redhat-release
         # 5.x
@@ -94,14 +90,15 @@ then
         gem install bundle
     elif [[ "$PLATFORM" == 'Linux' ]]; then
         # add repo for nodejs
-        sudo apt-get -y install python-software-properties curl
-        curl -sL https://deb.nodesource.com/setup | sudo bash -
+        sudo apt-get -y install python-software-properties curl ruby-full python-software-properties python g++ make nodejs unzip
+        sudo curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
 
         # Install ruby for compass.
-        sudo apt-get -y install ruby-full python-software-properties python g++ make nodejs
         if [[ -f /etc/debian_version ]]; then
+          # Debian
           sudo apt-get -y install bundler rubygems
         else
+          # Ubuntu
           sudo apt-get -y install ruby-bundler ruby
         fi
     elif [[ "$PLATFORM" == 'Darwin' ]]; then
@@ -109,12 +106,23 @@ then
         \curl -L https://get.rvm.io | bash -s stable
     fi
 
+    # Install dependencies
+    cd $DIR/Lightning
+    git submodule update --init Vendor/compass
+    git submodule update --init Vendor/foundation
+
     # Install gems.
     sudo gem install sass
     sudo gem install compass
     sudo gem install foundation
 
-    # Some git repos will rime out on git://
+    sudo npm install -g gulp-cli
+fi
+
+if [ `shouldInstall "Install lightning source dependencies? This is needed if you intend to rebuild lightning files." $INSTALL_SOURCE_DEPENDENCIES` -eq 1 ]
+then
+
+    # Some git repos will time out on git://
     git config --global url.https://.insteadOf git://
 
     # Install foundation dependencies with npm and bower.
@@ -153,9 +161,8 @@ then
     echo "Linking compass files"
     cp -r ${DIR}/Lightning/install/Resources ${DIR}/Source/
 
-    if [[ "$PLATFORM" == 'Linux' ]]; then
-        sudo apt-get -y nodejs build-essential
-    fi
+    cd ${DIR}/Source/Resources
+    npm install
 
     # Install lightning dependencies with gulp
     GULP_BUILD=true
