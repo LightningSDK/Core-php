@@ -188,6 +188,7 @@ fi
 if [ $GULP_BUILD ]
 then
     cd $DIR/Source/Resources
+    npm cache clean
     npm install
     gulp build
 fi
