@@ -11,6 +11,16 @@ fi
 shouldInstall() {
     CONTINUE=0
 
+    if [[ $2 = "true" ]]
+    then
+        CONTINUE=1
+        echo 1
+    elif [[ $2 = "false" ]]
+    then
+        CONTINUE=1
+        echo 0
+    fi
+
     while [ $CONTINUE != 1 ]
     do
         read -p "$1 [Y/n] " response
@@ -40,11 +50,10 @@ fi
 # Install the cache directory.
 if [ ! -d $DIR/cache ]; then
     echo "Creating cache directory"
-    cp -r $DIR/cache
-    cp $DIR/Lightning/install/.htaccess-protected $DIR/Source/.htaccess
+    mkdir $DIR/cache
+    cp $DIR/Lightning/install/.htaccess-protected $DIR/cache/.htaccess
 fi
-
-if [ `shouldInstall "Install PHP dependencies and set permissions? These are required to run Lightning."` -eq 1 ]
+if [ `shouldInstall "Install PHP dependencies and set permissions? These are required to run Lightning." $INSTALL_PHP_DEPENDENCIES` -eq 1 ]
 then
     cd $DIR/Lightning
     git submodule update --init Vendor/BounceHandler
@@ -54,14 +63,14 @@ then
     chmod 777 $DIR/Lightning/Vendor/htmlpurifier/library/HTMLPurifier/DefinitionCache/Serializer
 fi
 
-if [ `shouldInstall "Install compass and foundation dependencies? This is needed for advanced scss includes in your source files. But not required for basic scss."` -eq 1 ]
+if [ `shouldInstall "Install compass and foundation dependencies? This is needed for advanced scss includes in your source files. But not required for basic scss." $INSTALL_VENDOR` -eq 1 ]
 then
     cd $DIR/Lightning
     git submodule update --init Vendor/compass
     git submodule update --init Vendor/foundation
 fi
 
-if [ `shouldInstall "Install lightning source dependencies? This is needed if you intend to rebuild lightning files."` -eq 1 ]
+if [ `shouldInstall "Install lightning source dependencies? This is needed if you intend to rebuild lightning files." $INSTALL_SOURCE_DEPENDENCIES` -eq 1 ]
 then
     cd $DIR/Lightning
     git submodule update --init Vendor/compass
@@ -128,7 +137,7 @@ then
     grunt
 fi
 
-if [ `shouldInstall "Install social signin dependencies?"` -eq 1 ]
+if [ `shouldInstall "Install social signin dependencies?" $INSTALL_SOCIAL_SIGNIN_DEPENDENCIES` -eq 1 ]
 then
     cd $DIR/Lightning
     git submodule update --init Vendor/googleapiclient
@@ -139,7 +148,7 @@ fi
 GULP_BUILD=false
 
 # Copy Source/Resources.
-if [ ! -d $DIR/Source/Resources -o `shouldInstall "Install or Reset the Source/Resources file?"` -eq 1 ]
+if [ ! -d $DIR/Source/Resources -o `shouldInstall "Install or Reset the Source/Resources file?" $INSTALL_DEFAULT_SOURCE` -eq 1 ]
 then
     echo "Linking compass files"
     cp -r ${DIR}/Lightning/install/Resources ${DIR}/Source/
@@ -152,7 +161,7 @@ then
     GULP_BUILD=true
 fi
 
-if [ `shouldInstall "Install ckeditor?"` -eq 1 ]
+if [ `shouldInstall "Install ckeditor?" $INSTALL_CK_EDITOR` -eq 1 ]
 then
     cd $DIR
     if [[ ! -d js ]]
@@ -175,13 +184,13 @@ then
     gulp build
 fi
 
-if [ `shouldInstall "Install ckfinder?"` -eq 1 ]
+if [ `shouldInstall "Install ckfinder?" $INSTALL_CKFINDER` -eq 1 ]
 then
     # Install ckfinder
     echo 'Missing install instructions'
 fi
 
-if [ `shouldInstall "Install tinymce?"` -eq 1 ]
+if [ `shouldInstall "Install tinymce?" $INSTALL_TINYMCE` -eq 1 ]
 then
     cd $DIR/js
     wget http://download.ephox.com/tinymce/community/tinymce_4.3.4.zip
@@ -191,7 +200,7 @@ then
     rm -rf tinymce-remove
 fi
 
-if [ `shouldInstall "Install elfinder?"` -eq 1 ]
+if [ `shouldInstall "Install elfinder?" $INSTALL_ELFINDER` -eq 1 ]
 then
     cd $DIR/js
     wget https://github.com/Studio-42/elFinder/archive/2.1.12.zip -O elfinder-2.1.12.zip
@@ -200,12 +209,12 @@ then
     cp $DIR/Lightning/install/elfinder/elfinder.html $DIR/js/elfinder/elfinder.html
 fi
 
-if [ `shouldInstall "Install Lightning index file?"` -eq 1 ]
+if [ `shouldInstall "Install Lightning index file?" $INSTALL_INDEX` -eq 1 ]
 then
     cp $DIR/Lightning/install/index.php $DIR/index.php
 fi
 
-if [ `shouldInstall "Install root .htaccess file for Apache web server?"` -eq 1 ]
+if [ `shouldInstall "Install root .htaccess file for Apache web server?" $INSTALL_HTACCESS` -eq 1 ]
 then
     cp $DIR/install/.htaccess-router $DIR/.htaccess
 fi
@@ -214,13 +223,6 @@ fi
 if [ ! -d $DIR/Source ]; then
     echo "Making Source Directory"
     mkdir $DIR/Source
-    cp $DIR/Lightning/install/.htaccess-protected $DIR/Source/.htaccess
-fi
-
-# Install the cache directory.
-if [ ! -d $DIR/cache ]; then
-    echo "Creating cache directory"
-    cp -r $DIR/Lightning/install/cache $DIR/
     cp $DIR/Lightning/install/.htaccess-protected $DIR/Source/.htaccess
 fi
 
@@ -236,18 +238,20 @@ if [ ! -f $DIR/Source/Config/config.inc.php ]; then
     cp -r $DIR/Lightning/install/Config/* $DIR/Source/Config/
 
     #Collect database information.
+    if [[ -z "$DBHOST" ]]; then
     echo -n "Database host: "; read DBHOST
     echo -n "Database name: "; read DBNAME
-    echo -n "Database user: "; read USER
-    echo -n "Database password: "; read -s PASS
+    echo -n "Database user: "; read DBUSER
+    echo -n "Database password: "; read -s DBPASS
+    fi
 
     echo "Copying sample config file to Source/Config with DB configuration"
     # TODO: This needs to be escaped to prevent sed from using the original line.
-    sed "s|'database.*,|'database' => 'mysql:user=${USER};password=${PASS};host=${DBHOST};dbname=${DBNAME}',|"\
+    sed "s|'database.*,|'database' => 'mysql:user=${DBUSER};password=${DBPASS};host=${DBHOST};dbname=${DBNAME}',|"\
         <$DIR/Lightning/install/Config/config.inc.php >$DIR/Source/Config/config.inc.php
 fi
 
-if [ `shouldInstall "Install default database?"` -eq 1 ]
+if [ `shouldInstall "Install default database?" $INSTALL_DATABASE` -eq 1 ]
 then
     # Conform the databases
     echo "Conforming the database"
@@ -255,7 +259,7 @@ then
     $DIR/Lightning/lightning database import-defaults
 fi
 
-if [ AUTOINSTALL_SOURCE = true ] || [ `shouldInstall "Install/reset default images?"` -eq 1 ]
+if [ AUTOINSTALL_SOURCE = true ] || [ `shouldInstall "Install/reset default images?" $INSTALL_DEFAULT_IMAGES` -eq 1 ]
 then
     # Install main images.
     echo "Copying default images to web root."
@@ -267,10 +271,18 @@ then
     cp -r $DIR/Lightning/install/images $DIR/
 fi
 
-if [ AUTOINSTALL_SOURCE = true ] || [ `shouldInstall "Create an admin user?"` -eq 1 ]
+if [ AUTOINSTALL_SOURCE = true ] || [ `shouldInstall "Create an admin user?" $CREATE_ADMIN` -eq 1 ]
 then
-    # Install main images.
-    $DIR/Lightning/lightning user create-admin
+    # Create admin.
+    echo "Creating admin user."
+    if [[ ! -z "$ADMIN_EMAIL" ]]; then
+        ADMIN_PARAMS=" --user $ADMIN_EMAIL "
+    fi
+    if [[ ! -z "$ADMIN_PASSWORD" ]]; then
+        ADMIN_PARAMS="$ADMIN_PARAMS --password $ADMIN_PASSWORD "
+    fi
+    echo "$DIR/Lightning/lightning user create-admin $ADMIN_PARAMS"
+    $DIR/Lightning/lightning user create-admin $ADMIN_PARAMS
 fi
 
 echo "Lightning Installation Complete."
