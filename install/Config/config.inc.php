@@ -15,6 +15,9 @@ $conf = [
     'session' => [
         'single_ip' => true,
     ],
+    'template' => [
+        'default' => ['template', 'Lightning'],
+    ],
     'social' => [
         'store_images' => true,
         'facebook' => [

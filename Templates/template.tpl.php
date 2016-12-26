@@ -88,38 +88,46 @@ use Lightning\Tools\Messenger;
             <?php endif; ?>
         </div>
         <section role="main" class="scroll-container">
-            <div class="row">
-                <?php if (empty($full_width)): ?>
-                    <div class="medium-8 columns">
-                        <?php if (!empty($page_header)): ?>
-                            <h1 id="page_header"><?=$page_header?></h1>
-                        <?php
-                        endif;
-                        echo Messenger::renderErrorsAndMessages();
-                        if (!empty($content)) :
-                            $this->build($content);
-                        endif; ?>
-                    </div>
-                    <div class="small-12 medium-4 columns right-column">
-                        <?php $this->build(['right_column', 'Lightning']); ?>
-                    </div>
-                <?php else: ?>
-                    <div class="large-12 columns">
-                        <?php if (!empty($page_header)): ?>
-                            <h1 id="page_header"><?=$page_header?></h1>
-                        <?php
-                        endif;
-                        echo Messenger::renderErrorsAndMessages();
-                        if (!empty($content)) :
-                            $this->build($content);
-                        endif; ?>
-                    </div>
-                <?php endif; ?>
-            </div>
+            <?php if (empty($full_width)): ?>
+                <div class="row">
+                    <?php if (!empty($right_column)): ?>
+                        <div class="medium-8 columns">
+                            <?php if (!empty($page_header)): ?>
+                                <h1 id="page_header"><?=$page_header?></h1>
+                            <?php
+                            endif;
+                            echo Messenger::renderErrorsAndMessages();
+                            if (!empty($content)) :
+                                $this->build($content);
+                            endif; ?>
+                        </div>
+                        <div class="small-12 medium-4 columns right-column">
+                            <?php $this->build(['right_column', 'Lightning']); ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="large-12 columns">
+                            <?php if (!empty($page_header)): ?>
+                                <h1 id="page_header"><?=$page_header?></h1>
+                            <?php
+                            endif;
+                            echo Messenger::renderErrorsAndMessages();
+                            if (!empty($content)) :
+                                $this->build($content);
+                            endif; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            <?php else: ?>
+                <?php
+                echo Messenger::renderErrorsAndMessages();
+                if (!empty($content)) :
+                    $this->build($content);
+                endif; ?>
+            <?php endif; ?>
         </section>
         <?php if (empty($hide_footer)): ?>
             <section class="footer">
-                
+                <div class="text-center">&copy; My Great Website!</div>
             </section>
         <?php endif; ?>
     </div>
