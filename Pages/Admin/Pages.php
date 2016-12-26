@@ -6,7 +6,7 @@ use Lightning\Pages\Table;
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Request;
-use Source\Model\Permissions;
+use Lightning\Model\Permissions;
 
 class Pages extends Table {
 
