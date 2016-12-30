@@ -141,6 +141,8 @@ class TrackerOverridable extends Object {
 
             // Add the events to the JS var
             self::$events[] = $data;
+
+            // TODO: This should add the data to a variable and just call the function without parameters.
             JS::startup('lightning.tracker.trackOnStartup(' . json_encode($data) . ')');
         }
     }
