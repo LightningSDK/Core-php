@@ -3097,12 +3097,12 @@ abstract class Table extends Page {
         if ($this->joins) {
             $query['join'] = array_merge($query['join'], $this->joins);
             if (!empty($this->joinFields)) {
-                $query['fields'] = array_merge($query['fields'], $this->joinFields);
+                $query['select'] = array_merge($query['select'], $this->joinFields);
             } else {
                 foreach ($this->joins as $join) {
                     // Add default table joins.
                     $table = isset($join[1]) ? $join[1] : (isset($join['join']) ? $join['join'] : (isset($join['left_join']) ? $join['left_join'] : ''));
-                    $query['fields'][] = [$table => ['*']];
+                    $query['select'][] = [$table => ['*']];
                 }
             }
         }
