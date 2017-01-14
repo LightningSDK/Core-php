@@ -3463,7 +3463,7 @@ abstract class Table extends Page {
         if (!empty($field['render_' . $this->action . '_field']) && is_callable($field['render_' . $this->action . '_field'])) {
             return $field['render_' . $this->action . '_field']($row);
         } elseif (!empty($field['display_value']) && is_callable($field['display_value'])) {
-            return call_user_func($field['display_value'], $row);
+            return call_user_func_array($field['display_value'], [&$row]);
         } else {
             switch (preg_replace('/\([0-9]+\)/', '', $field['type'])) {
                 case 'lookup':
