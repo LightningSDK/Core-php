@@ -987,7 +987,6 @@ abstract class Table extends Page {
     public function render() {
         $output = '';
         $this->loadMainFields();
-        $this->check_default_rowClick();
         $output .= $this->renderHeader();
 
         if ($this->action == 'new' && !$this->addable) {
@@ -3287,12 +3286,6 @@ abstract class Table extends Page {
             default:
                 $this->action = "list";
                 break;
-        }
-    }
-
-    protected function check_default_rowClick() {
-        if (!isset($this->rowClick) && $this->editable) {
-            $this->rowClick = ['type' => 'action', 'action' => 'edit'];
         }
     }
 
