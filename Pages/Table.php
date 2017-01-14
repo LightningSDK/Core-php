@@ -306,6 +306,7 @@ abstract class Table extends Page {
      * - type (type of the button out of available ones);
      * - text (text on the button);
      * - data (custom data);
+     * - href (for link buttons)
      *
      * @var array
      */
@@ -316,6 +317,7 @@ abstract class Table extends Page {
      */
     const CB_SUBMITANDREDIRECT = 1;
     const CB_LINK = 2;
+    const CB_ACTION_LINK = 3;
 
     protected $function_after = [];
     protected $table_descriptions = "table_descriptions/";
@@ -1645,11 +1647,17 @@ abstract class Table extends Page {
                     // Submit & Redirect button
                     $output .= $this->renderSubmitAndRedirect($button, $button_id);
                     break;
+                case self::CB_ACTION_LINK:
                 case self::CB_LINK:
                     $attributes = [
                         'href' => $button['url'],
                         'class' => 'button medium',
                     ];
+
+                    if ($button['type'] == self::CB_ACTION_LINK) {
+                        $attributes['href'] .= (strpos($attributes['href'], '?') !== false ? '&' : '?')
+                            . 'id' . self::PRIMARY_KEY . '=' . $this->id;
+                    }
 
                     if (!empty($button['download'])) {
                         $attributes['download'] = $button['download'];
