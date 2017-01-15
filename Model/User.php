@@ -61,26 +61,26 @@ class UserOverridable extends Object {
      * Load a user by their email.
      *
      * @param $email
-     * @return User|boolean
+     * @return static
      */
     public static function loadByEmail($email) {
         if ($details = Database::getInstance()->selectRow('user', ['email' => ['LIKE', $email]])) {
             return new static($details);
         }
-        return false;
+        return null;
     }
 
     /**
      * Load a user by their ID.
      *
      * @param $user_id
-     * @return User|boolean
+     * @return static
      */
     public static function loadById($user_id) {
         if ($details = Database::getInstance()->selectRow('user', ['user_id' => $user_id])) {
             return new static($details);
         }
-        return false;
+        return null;
     }
 
     /**
@@ -88,7 +88,7 @@ class UserOverridable extends Object {
      *
      * @param string $key
      *   A temporary access key.
-     * @return User|boolean
+     * @return static
      */
     public static function loadByTempKey($key) {
         if ($details = Database::getInstance()->selectRow(
@@ -108,7 +108,7 @@ class UserOverridable extends Object {
         )) {
             return new static ($details);
         }
-        return false;
+        return null;
     }
 
     /**
@@ -123,7 +123,7 @@ class UserOverridable extends Object {
     /**
      * Create a new anonymous user.
      *
-     * @return User
+     * @return static
      */
     public static function anonymous() {
         return new static(['user_id' => 0]);
@@ -322,7 +322,7 @@ class UserOverridable extends Object {
      * @param array $update
      *   Which values to update the user if the email already exists.
      *
-     * @return User
+     * @return static
      */
     public static function addUser($email, $options = [], $update = []) {
         $user_data = [];
@@ -388,20 +388,22 @@ class UserOverridable extends Object {
     public function randomPass() {
         $alphabet = "abcdefghijkmnpqrstuvwxyz";
         $arrangement = "aaaaaaaAAAAnnnnn";
-        $pass = "";
-        for($i = 0; $i < strlen($arrangement); $i++) {
-            if ($arrangement[$i] == "a")
-                $char = $alphabet[rand(0,25)];
-            else if ($arrangement[$i] == "A")
-                $char = strtoupper($alphabet[rand(0,(strlen($alphabet)-1))]);
-            else if ($arrangement[$i] == "n")
-                $char = rand(0,9);
-            if (rand(0,1) == 0)
-                $pass .= $char;
-            else
-                $pass = $char.$pass;
+        $pass = [];
+        for ($i = 0; $i < strlen($arrangement); $i++) {
+            switch ($arrangement[$i]) {
+                case 'a':
+                    $pass[] = $alphabet[rand(0,25)];
+                    break;
+                case 'A':
+                    $pass[] = strtoupper($alphabet[rand(0,(strlen($alphabet)-1))]);
+                    break;
+                case 'n':
+                default:
+                    $pass[] = rand(0,9);
+            }
         }
-        return $pass;
+        shuffle($pass);
+        return implode($pass);
     }
 
     /**
@@ -753,7 +755,7 @@ class UserOverridable extends Object {
      * @param string $cypher_string
      *   The encrypted email address.
      *
-     * @return bool|User
+     * @return static
      *   The user if loading was successful.
      */
     public static function loadByEncryptedUserReference($cypher_string) {
@@ -866,7 +868,7 @@ class UserOverridable extends Object {
                 'data'      => ['user_id' => ClientUser::getInstance()->id]
             ];
         } else {
-            Tracker::loadOrCreateByName(Tracker::REGISTER_ERROR, Tracker::ERROR)->track();
+            Tracker::loadOrCreateByName(Tracker::REGISTER_ERROR, Tracker::ERROR)->track(0);
 
             // Error
             return [
