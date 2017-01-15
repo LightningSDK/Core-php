@@ -2,6 +2,7 @@
 
 namespace Lightning\Tools;
 
+use Exception;
 use Lightning\Model\Message;
 use Lightning\Model\User;
 use Lightning\Model\Tracker as TrackerModel;
@@ -400,11 +401,17 @@ class Mailer {
      *
      * @return boolean
      *   Whether the message was sent successfully.
+     *
+     * @throws Exception
+     *   If the user can not be found.
      */
     public function sendOne($message_id, $user) {
         $this->built = false;
         if (is_string($user)) {
             $user = User::addUser($user);
+        }
+        if (empty($user)) {
+            throw new Exception('Invalid User');
         }
         $this->clearAddresses();
         $this->loadMessage($message_id);
