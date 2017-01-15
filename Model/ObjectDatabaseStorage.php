@@ -21,9 +21,11 @@ trait ObjectDatabaseStorage {
      * Load an array of objects.
      *
      * @param array $where
+     *   A condition to be passed to the query.
      * @param array $fields
      * @param string $final
-     * @param boolean|string $keyed
+     * @param boolean $keyed
+     *   Whether to key the list by the primary ID.
      *
      * @return array
      */
@@ -44,6 +46,17 @@ trait ObjectDatabaseStorage {
         return $objects;
     }
 
+    /**
+     * Select a list of available options with value of column $name_field, keyed by the primary key.
+     *
+     * @param string $name_field
+     *   The field to use as values.
+     * @param array $where
+     *   A query filter.
+     *
+     * @return array
+     *   A list of available options, keyed be the primary key.
+     */
     public static function loadOptions($name_field, $where = []) {
         return Database::getInstance()->selectColumn(static::TABLE, $name_field, $where, static::PRIMARY_KEY);
     }
@@ -54,7 +67,7 @@ trait ObjectDatabaseStorage {
      * @param integer $id
      *   The ID of the object.
      *
-     * @return boolean|Object
+     * @return static
      *   The new object
      */
     public static function loadByID($id) {
