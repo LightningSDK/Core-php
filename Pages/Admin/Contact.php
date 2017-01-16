@@ -20,7 +20,10 @@ class Contact extends Table {
         'contact' => 'checkbox',
         'contact_sent' => 'checkbox',
         'user_message_sent' => 'checkbox',
+        'spam' => 'checkbox',
     ];
+
+    protected $accessControl = ['spam' => 0];
 
     public function hasAccess() {
         return ClientUser::requireAdmin();

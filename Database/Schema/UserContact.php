@@ -12,12 +12,13 @@ class UserContact extends Schema {
             'contact_id' => $this->autoincrement(),
             'user_id' => $this->int(true),
             'time' => $this->int(true),
-            'contact' => $this->int(self::TINYINT),
-            'contact_sent' => $this->int(self::TINYINT),
+            'contact' => $this->int(true, self::TINYINT),
+            'contact_sent' => $this->int(true, self::TINYINT),
             'list_id' => $this->int(),
             'user_message' => $this->int(),
-            'user_message_sent' => $this->int(self::TINYINT),
+            'user_message_sent' => $this->int(true, self::TINYINT),
             'additional_fields' => $this->text(),
+            'spam' => $this->int(true, self::TINYINT),
         ];
     }
 
