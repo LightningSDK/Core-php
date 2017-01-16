@@ -370,7 +370,7 @@ class Mailer {
         );
 
         if ($test) {
-            $this->message->setTest(true);
+            $this->message->setTest();
             $this->loadTestUsers();
         } else {
             $this->message->setLimit($this->limit);
