@@ -102,6 +102,10 @@ class Template extends Singleton {
         return isset($this->vars[$var]);
     }
 
+    public function setData($vars) {
+        $this->vars = $vars;
+    }
+
     /**
      * Render a template and it's main page content.
      *

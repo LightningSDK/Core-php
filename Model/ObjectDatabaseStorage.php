@@ -74,7 +74,7 @@ trait ObjectDatabaseStorage {
         if ($data = Database::getInstance()->selectRow(static::TABLE, [static::PRIMARY_KEY => $id])) {
             return new static($data);
         } else {
-            return false;
+            return null;
         }
     }
 

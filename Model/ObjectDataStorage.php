@@ -158,7 +158,7 @@ trait ObjectDataStorage {
             }
             if (!empty($this->__data[$field])) {
                 // If there is a value set.
-                $this->__json_encoded_source[$field] = $this->getJSONEncodedValue($this->__data[$field]) ?: '';
+                $this->__json_encoded_source[$field] = $this->getJSONEncodedValue($this->__data[$field], $settings) ?: '';
                 $this->__data[$field] = $this->getJSONDecodedValue($this->__data[$field], $settings) ?: $this->getJSONEncodedDefault($settings);
             } else {
                 // Get the default value.
@@ -167,15 +167,20 @@ trait ObjectDataStorage {
         }
     }
 
-    private function getJSONEncodedValue($value) {
+    private function getJSONEncodedValue($value, $settings) {
         if (is_object($value) || is_array($value)) {
-            return json_encode($value);
-        } else {
-            return $value;
+            $value = json_encode($value);
+            if (!empty($settings['base64'])) {
+                $value = base64_encode($value);
+            }
         }
+        return $value;
     }
 
     private function getJSONDecodedValue($value, $settings) {
+        if (!empty($settings['base64'])) {
+            $value = base64_decode($value);
+        }
         $assoc = (!empty($settings['type']) && $settings['type'] == 'array');
         if (is_string($value)) {
             return json_decode($value, $assoc);
@@ -223,7 +228,7 @@ trait ObjectDataStorage {
                 $field = $settings;
                 $settings = [];
             }
-            $encoded = json_encode($this->__data[$field]);
+            $encoded = $this->getJSONEncodedValue($this->__data[$field], $settings);
             if (!empty($encoded) && (
                     $create_new
                     || empty($this->__json_encoded_source[$field])
