@@ -57,6 +57,62 @@ lightning.startup = {
     }
 };
 
+lightning.js = {
+    queue: [],
+    loaded: {},
+    loadScript: function(scriptURL) {
+        lightning.js.loaded[scriptURL] = false;
+        var script = document.createElement('script');
+        script.src = scriptURL;
+        script.type = 'text/javascript';
+        script.async = 'true';
+        script.onload = script.onreadystatechange = function() {
+            var rs = this.readyState;
+            if (rs && rs != 'complete' && rs != 'loaded') return;
+            lightning.js.loaded[scriptURL] = true;
+            lightning.js.trigger();
+        };
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(script, s);
+    },
+    require: function(urls, callback) {
+        if (typeof urls == "string") {
+            urls = [urls];
+        }
+
+        lightning.js.queue.push({
+            urls: urls,
+            callback: callback,
+            triggered: false
+        });
+
+        var queueID = lightning.js.queue.length - 1;
+
+        for (var i in urls) {
+            if (!lightning.js.loaded.hasOwnProperty(urls[i])) {
+                // Any scripts that are not already included can be included here.
+                lightning.js.loadScript(urls[i]);
+            }
+        }
+
+        lightning.js.trigger();
+    },
+    trigger: function() {
+        // Iterate over each queued item.
+        for (var i in lightning.js.queue) {
+            // See if all scripts are loaded.
+            if (!lightning.js.queue[i].triggered) {
+                for (var j in lightning.js.queue[i].urls) {
+                    // Trigger the script.
+                    if (lightning.js.loaded[lightning.js.queue[i].urls[j]]) {
+                        lightning.js.queue[i].triggered = true;
+                        lightning.js.queue[i].callback();
+                    }
+                }
+            }
+        }
+    }
+};
 /**
  * Force external scripts to load asynchronously before executing a callback.
  *
@@ -65,30 +121,8 @@ lightning.startup = {
  * @param callback
  *   A method to call when all the JS files have loaded.
  */
-lightning.require = function(url, callback) {
-    if (typeof url == "string") {
-        url = [url];
-    }
-    var script_count = url.length;
-    var scripts_loaded = 0;
-    for (var i in url) {
-        var script = document.createElement('script');
-        script.src = url[i];
-        script.type = 'text/javascript';
-        script.async = 'true';
-        script.onload = script.onreadystatechange = function() {
-            var rs = this.readyState;
-            if (rs && rs != 'complete' && rs != 'loaded') return;
-            scripts_loaded ++;
-            if (scripts_loaded == script_count) {
-                try { callback() } catch (e) {
-                    console.error(e);
-                }
-            }
-        };
-        var s = document.getElementsByTagName('script')[0];
-        s.parentNode.insertBefore(script, s);
-    }
+lightning.require = function(urls, callback){
+    lightning.js.require(urls, callback);
 };
 
 /**

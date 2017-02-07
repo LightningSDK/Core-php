@@ -50,6 +50,11 @@
                 category: 'User',
                 action: 'optin',
             },
+            contact: {
+                ga: 'event',
+                category: 'Email',
+                label: 'Contact Sent',
+            },
             register: {
                 fb: 'CompleteRegistration',
                 ga: 'event',
@@ -90,7 +95,13 @@
                 lightning.require(scripts, function () {
                     // Init the trackers
                     if (lightning.vars.google_analytics_id) {
-                        ga('create', lightning.vars.google_analytics_id, 'auto');
+                        var waitForGA = setTimeout(function(){
+                            if (ga) {
+                                ga('create', lightning.vars.google_analytics_id, 'auto');
+                            } else {
+                                waitForGA();
+                            }
+                        }, 100);
                     }
                     if (lightning.vars.facebook_pixel_id) {
                         fbq('init', lightning.vars.facebook_pixel_id);
