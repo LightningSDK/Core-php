@@ -305,8 +305,13 @@ class Contact extends PageView {
         foreach ($this->settings['to'] as $to) {
             $mailer->to($to);
         }
+
+        // Set the reply-to as the user who is sending the contact for easy reply.
+        if (!isset($this->settings['reply_to_sender']) || $this->settings['reply_to_sender'] !== false) {
+            $mailer->replyTo($this->user->email);
+        }
+
         return $this->contactAdminSent = (integer) $mailer
-            ->replyTo($this->user->email)
             ->subject($this->settings['subject'])
             ->message($this->getMessageBody())
             ->send();
