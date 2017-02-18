@@ -73,6 +73,10 @@
         /**
          * Load the tracking scripts
          */
+        initted: {
+            'google-analytics': false,
+            'facebook': false
+        },
         init: function () {
             var scripts = [];
             if (lightning.vars.google_analytics_id) {
@@ -97,7 +101,11 @@
                     if (lightning.vars.google_analytics_id) {
                         var waitForGA = setTimeout(function(){
                             if (ga) {
+                                if (lightning.vars.debug) {
+                                    console.log('Creating GA: ', lightning.vars.google_analytics_id);
+                                }
                                 ga('create', lightning.vars.google_analytics_id, 'auto');
+                                self.initted['google-analytics'] = true;
                             } else {
                                 waitForGA();
                             }
@@ -105,6 +113,7 @@
                     }
                     if (lightning.vars.facebook_pixel_id) {
                         fbq('init', lightning.vars.facebook_pixel_id);
+                        self.initted['facebook'] = true;
                     }
 
                     // Track the pageview
@@ -147,24 +156,39 @@
                     label: null,
                     value: null,
                 }, trackingData);
-                if (lightning.vars.debug) {
-                    console.log('Google Analytics Tracker: ', ga_data);
-                } else {
-                    ga('send', ga_data.ga,
-                        ga_data.category,
-                        ga_data.action,
-                        ga_data.label,
-                        ga_data.value
-                    );
-                }
+                var waitForGA = function(){
+                    if (self.initted['google-analytics']) {
+                        if (lightning.vars.debug) {
+                            console.log('Google Analytics Tracker: ', ga_data);
+                        } else {
+                            ga('send', ga_data.ga,
+                                ga_data.category,
+                                ga_data.action,
+                                ga_data.label,
+                                ga_data.value
+                            );
+                        }
+                    } else {
+                        setTimeout(waitForGA, 100);
+                    }
+                };
+                waitForGA();
             }
             if (lightning.vars.facebook_pixel_id && trackingData.hasOwnProperty('fb')) {
-                if (lightning.vars.debug) {
-                    console.log('Facebook Tracker: ', trackingData.fb);
-                } else {
-                    fbq('track', trackingData.fb);
-                }
+                var waitForFB = function(){
+                    if (self.initted['facebook']) {
+                        if (lightning.vars.debug) {
+                            console.log('Facebook Tracker: ', trackingData.fb);
+                        } else {
+                            fbq('track', trackingData.fb);
+                        }
+                    } else {
+                        setTimeout(waitForFB, 100);
+                    }
+                };
+                waitForFB();
             }
+
             if (
                 lightning.vars.google_adwords
                 && trackingData.label
