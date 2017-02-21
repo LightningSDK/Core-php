@@ -157,6 +157,7 @@
             }
             form.append('<input type="hidden" name="action" value="' + site + '-login">');
             form.append($('<input type="hidden" name="' + type + '-token">').val(token));
+            $(document.body).append(form);
             form.submit();
         }
     };
