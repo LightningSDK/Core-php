@@ -222,9 +222,9 @@ div.captcha_container {
 .loading-container {
   position: relative;
   overflow: hidden;
-  z-index: 500;
   transition: all .5s ease;
   .white-veil {
+    z-index: 500;
     width: 100%;
     height: 100%;
     opacity: 0;
@@ -234,6 +234,18 @@ div.captcha_container {
     background-color: white;
     transition: all .5s ease;
   }
+}
+
+.spinner {
+  &:before {
+    content: ' ';
+    background: url(/images/lightning/cog-spinner.gif) center no-repeat;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  width: 100%;
+  height: 100%;
 }
 
 /* DIALOG BOX */

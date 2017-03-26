@@ -15,13 +15,25 @@
             if (container) {
                 existingVeil = container.children('.white-veil');
                 if (existingVeil.length == 0) {
-                    container.prepend('<div class="white-veil"></div>');
+                    container.prepend('<div class="white-veil"><div class="spinner"></div></div>');
                 }
             }
             existingVeil = container.children('.white-veil');
-            existingVeil.css('opacity', .5);
 
-            console.log('sending ajax' + url);
+            setTimeout(function(){
+                existingVeil.show();
+                existingVeil.css('opacity', .5);
+            }, 100);
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: form.serializeArray(),
+                success: function(data){
+                    // Hide the container
+                    container.fadeOut();
+                }
+            });
         },
 
         init: function() {
