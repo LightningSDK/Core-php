@@ -218,6 +218,24 @@ div.captcha_container {
   }
 }
 
+/* AJAX FORMS */
+.loading-container {
+  position: relative;
+  overflow: hidden;
+  z-index: 500;
+  transition: all .5s ease;
+  .white-veil {
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: white;
+    transition: all .5s ease;
+  }
+}
+
 /* DIALOG BOX */
 #dialog_box_inner{
   overflow: hidden;
@@ -246,7 +264,20 @@ div.captcha_container {
     white-space: nowrap;
   }
 }
-.header_name{text-align:right;clear:both;margin-bottom:5px;color:white;font-size:12pt;}
+.header_name{
+  text-align:right;
+  clear:both;
+  margin-bottom:5px;
+  color:white;
+  font-size:12pt;
+}
+
+.frame {
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  padding: 10px;
+  margin: 10px;
+}
 
 /**
  * Success/Error messages
@@ -606,6 +637,9 @@ span.form-inline {
 .cover {
   background-size: cover;
   background-position: center;
+}
+.inline-block {
+  display: inline-block !important;
 }
 
 .cms_edit_image, .cms_save_image {

@@ -31,11 +31,12 @@ lightning.format = {
  */
 lightning.startup = {
     init: function() {
-        this.initForms();
+        $(document).foundation();
         this.initNav();
         lightning.ajax.init();
         lightning.dialog.init();
         lightning.tracker.init();
+        lightning.forms.init();
     },
 
     initNav: function() {
@@ -43,17 +44,6 @@ lightning.startup = {
         if (menu_context) {
             $('nav .' + menu_context).addClass('active');
         }
-    },
-
-    initForms: function() {
-        $('.captcha_container').closest('form').submit(function(){
-            var self = $(this);
-            return self && (function(){
-                    var valid = grecaptcha.getResponse().length != 0;
-                    $('#captcha_abide').val(valid ? 1 : '');
-                    return valid;
-                })();
-        });
     }
 };
 

@@ -116,7 +116,6 @@ class PageOverridable {
         Tracker::loadFromSession();
         JS::add('/js/lightning.min.js');
         JS::startup('lightning.startup.init()');
-        JS::startup('$(document).foundation()');
         CSS::add('/css/lightning.css');
         CSS::add('/css/font-awesome.min.css');
         CSS::add('/css/site.css');
