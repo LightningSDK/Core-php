@@ -313,13 +313,17 @@ class MessageOverridable extends Object {
         return Database::getInstance()->check('message_list', ['message_list_id' => $id]);
     }
 
-    public static function getDefaultListID() {
+    public static function getListIDByName($name) {
         $db = Database::getInstance();
-        $list = $db->selectField('message_list_id', 'message_list', ['name' => 'Default']);
+        $list = $db->selectField('message_list_id', 'message_list', ['name' => $name]);
         if (!$list) {
-            $list = $db->insert('message_list', ['name' => 'Default']);
+            $list = $db->insert('message_list', ['name' => $name]);
         }
         return $list;
+    }
+
+    public static function getDefaultListID() {
+        return static::getListIDByName('Default');
     }
 
     /**
