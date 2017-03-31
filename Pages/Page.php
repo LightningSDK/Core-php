@@ -123,6 +123,7 @@ class Page extends PageView {
         $this->hideHeader = !empty($this->fullPage['hide_header']);
         $this->hideMenu = !empty($this->fullPage['hide_menu']);
         $this->hideFooter = !empty($this->fullPage['hide_footer']);
+        $this->share = !empty($this->fullPage['hide_share']);
         // Pass the page object.
         $template->set('full_page', $this->fullPage);
 

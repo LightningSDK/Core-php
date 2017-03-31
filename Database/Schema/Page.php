@@ -23,6 +23,7 @@ class Page extends Schema {
             'frequency' => $this->int(true, Schema::TINYINT),
             'hide_header' => $this->int(true, Schema::TINYINT),
             'hide_menu' => $this->int(true, Schema::TINYINT),
+            'hide_social' => $this->int(true, Schema::TINYINT),
             'hide_footer' => $this->int(true, Schema::TINYINT),
             'right_column' => $this->int(true, Schema::TINYINT),
             'full_width' => $this->int(true, Schema::TINYINT),

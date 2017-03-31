@@ -17,7 +17,7 @@
 
         <?= $full_page['body_rendered']; ?>
 
-        <?php if (!empty($full_page['error'])): ?>
+        <?php if (!empty($full_page['error']) && !empty($share)): ?>
             <div class="social-share"><?= SocialLinks::render(Configuration::get('web_root') . '/' . (!empty($full_page['url']) ? $full_page['url'] . '.html' : '')); ?></div>
         <?php endif; ?>
     </div>
