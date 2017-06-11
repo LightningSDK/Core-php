@@ -178,12 +178,14 @@ class Output {
             $data = ['status' => 'error'];
         }
         elseif ($data == self::LOGIN_REQUIRED) {
+            Session::getInstance();
+            Output::sendCookies();
             $template = Template::getInstance();
             $template->set('modal', true);
-            $template->set('content', 'user');
+            $template->set('content', ['user', 'Lightning']);
             $data = [
                 'status' => 'login_required',
-                'content' => $template->render('modal', true),
+                'content' => $template->render(['modal', 'Lightning'], true),
             ];
             $data += self::getJSONJSOutput();
         }

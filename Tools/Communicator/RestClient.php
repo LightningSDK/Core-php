@@ -46,8 +46,11 @@ class RestClient {
 
     /**
      * Initialize some vars.
+     *
+     * @param string $server_address
+     *   The base URL for the api.
      */
-    public function __construct($server_address) {
+    public function __construct($server_address = '') {
         $this->serverAddress = $server_address;
         $this->verbose = Configuration::get('debug', false);
     }
