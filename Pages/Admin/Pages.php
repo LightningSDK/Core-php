@@ -56,6 +56,7 @@ class Pages extends Table {
         'hide_footer' => 'checkbox',
         'full_width' => 'checkbox',
         'use_parser' => 'checkbox',
+        'modules' => 'json',
     ];
 
     protected function initSettings() {

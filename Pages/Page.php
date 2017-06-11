@@ -74,6 +74,16 @@ class Page extends PageView {
         $user = ClientUser::getInstance();
         $template = Template::getInstance();
 
+        // Init modules
+        if (!empty($this->fullPage['modules'])) {
+            $modules = json_decode($this->fullPage['modules'], true);
+            foreach ($modules as $module) {
+                if ($init_method = Configuration::get('modules.' . $module . '.init_view')) {
+                    call_user_func($init_method);
+                }
+            }
+        }
+
         // Replace special tags.
         $this->fullPage['body_rendered'] = Markup::render($this->fullPage['body']);
 

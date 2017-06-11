@@ -11,11 +11,15 @@ class PageOverridable extends Object {
     const PRIMARY_KEY = 'page_id';
     const TABLE = 'page';
 
+    protected $__json_encoded_fields = ['modules'];
+
     public static function loadByURL($url) {
+        // TODO: This should return an object
         return Database::getInstance()->selectRow(self::TABLE, ['url' => ['LIKE', $url]]);
     }
 
     public static function selectAllPages() {
+        // TODO: This should return an object
         return Database::getInstance()->select(self::TABLE, ['site_map' => 1]);
     }
 

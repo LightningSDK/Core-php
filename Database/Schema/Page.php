@@ -30,6 +30,7 @@ class Page extends Schema {
             'use_parser' => $this->int(true, Schema::TINYINT),
             'priority' => $this->int(true),
             'last_update' => $this->int(true),
+            'modules' => $this->text(),
         ];
     }
 
