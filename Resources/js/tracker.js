@@ -99,15 +99,18 @@
                 lightning.require(scripts, function () {
                     // Init the trackers
                     if (lightning.vars.google_analytics_id) {
+                        var startTime = new Date();
                         var waitForGA = setTimeout(function(){
-                            if (ga) {
+                            if (typeof ga !== 'undefined') {
                                 if (lightning.vars.debug) {
                                     console.log('Creating GA: ', lightning.vars.google_analytics_id);
                                 }
                                 ga('create', lightning.vars.google_analytics_id, 'auto');
                                 self.initted['google-analytics'] = true;
                             } else {
-                                waitForGA();
+                                if (new Date() - startTime < 10000) {
+                                    waitForGA();
+                                }
                             }
                         }, 100);
                     }
