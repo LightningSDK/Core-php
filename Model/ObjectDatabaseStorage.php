@@ -16,7 +16,6 @@ trait ObjectDatabaseStorage {
         $this->initJSONEncodedFields();
     }
 
-
     /**
      * Load an array of objects.
      *
