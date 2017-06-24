@@ -65,8 +65,15 @@ lightning.js = {
         var s = document.getElementsByTagName('script')[0];
         s.parentNode.insertBefore(script, s);
     },
+
+    /**
+     * Execute a callback as soon as all required JS scripts are loaded.
+     *
+     * @param {array|string} urls
+     * @param {function} callback
+     */
     require: function(urls, callback) {
-        if (typeof urls == "string") {
+        if (typeof urls === "string") {
             urls = [urls];
         }
 
@@ -75,8 +82,6 @@ lightning.js = {
             callback: callback,
             triggered: false
         });
-
-        var queueID = lightning.js.queue.length - 1;
 
         for (var i in urls) {
             if (!lightning.js.loaded.hasOwnProperty(urls[i])) {
@@ -87,25 +92,32 @@ lightning.js = {
 
         lightning.js.trigger();
     },
+
+    /**
+     *
+     */
     trigger: function() {
         // Iterate over each queued item.
+        queue:
         for (var i in lightning.js.queue) {
             // See if all scripts are loaded.
             if (!lightning.js.queue[i].triggered) {
                 for (var j in lightning.js.queue[i].urls) {
                     // Trigger the script.
-                    if (lightning.js.loaded[lightning.js.queue[i].urls[j]]) {
-                        lightning.js.queue[i].triggered = true;
-                        lightning.js.queue[i].callback();
+                    if (!lightning.js.loaded[lightning.js.queue[i].urls[j]]) {
+                         continue queue;
                     }
                 }
+                lightning.js.queue[i].triggered = true;
+                lightning.js.queue[i].callback();
             }
         }
     }
 };
+
 /**
  * Force external scripts to load asynchronously before executing a callback.
- *
+ * @deprecated
  * @param {string|array} url
  *   A URL or array of urls of JS files.
  * @param callback
