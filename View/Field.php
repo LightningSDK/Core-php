@@ -2,6 +2,7 @@
 
 namespace Lightning\View;
 
+use Lightning\Tools\ReCaptcha;
 use Lightning\Tools\Request;
 use Lightning\Tools\Scrub;
 
@@ -49,6 +50,11 @@ class Field {
             'type' => !empty($options['type']) ? $options['type'] : 'text',
             'class' => !empty($options['class']) ? $options['class'] : '',
         ];
+
+        if ($attributes['type'] == 'invisibleRecaptcha') {
+            return ReCaptcha::renderInvisible($attributes['value'], $attributes['class']);
+        }
+
         if (!empty($options['type']) && $options['type'] == 'submit' && empty($attributes['name'])) {
             $attributes['name'] = 'submit';
         }

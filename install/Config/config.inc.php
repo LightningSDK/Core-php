@@ -103,6 +103,10 @@ $conf = [
     'recaptcha' => [
         'public' => '',
         'private' => '',
+        'invisible' => [
+            'public' => '',
+            'private' => '',
+        ],
     ],
     'web_root' => 'http://www.Website.com',
     'daemon' => [
