@@ -200,7 +200,7 @@ class Contact extends PageView {
                 // Send an email to to have them test for spam.
                 if (!empty($this->settings['auto_responder'])) {
                     $auto_responder_mailer = new Mailer();
-                    $result = $auto_responder_mailer->sendOne($this->settings['auto_responder'], UserModel::loadByEmail($this->getSender()) ?: new UserModel(['email' => $this->getSender()]));
+                    $result = $auto_responder_mailer->sendOne($this->settings['auto_responder'], $this->user);
                     if ($result && $this->settings['spam_test']) {
                         // Set the notice.
                         $this->setSuccessMessage(Language::translate('spam_test'));
