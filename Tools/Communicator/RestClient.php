@@ -19,6 +19,8 @@ use Lightning\Tools\Output;
  */
 class RestClient {
 
+    const CONTENT_TYPE_JSON = 'application/json';
+
     protected $vars = [];
     protected $headers = [];
     protected $results;
@@ -82,6 +84,10 @@ class RestClient {
         if ($auto_pass_to_template) {
             $this->auto_template[] = $var;
         }
+    }
+
+    public function unset($var) {
+        unset($this->vars[$var]);
     }
 
     public function setMultiple($vars) {
@@ -153,9 +159,6 @@ class RestClient {
      * @throws Exception
      */
     protected function connect($vars, $post = true, $path = null) {
-
-        $headers = [];
-
         // This is useful for forwarding an XDEBUG request to another server for debugging.
         if ($this->forwardCookies) {
             $this->cookies += $_COOKIE;
@@ -171,10 +174,7 @@ class RestClient {
         }
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_POST, (int) $post);
-        $headers[] = 'Accept: application/json';
-        foreach ($this->headers as $h => $v) {
-            $headers[] = $h . ': ' . $v;
-        }
+        $this->setHeader('Accept', self::CONTENT_TYPE_JSON);
 
         // Options for basic authentication.
         if (!empty($this->user)) {
@@ -185,7 +185,7 @@ class RestClient {
         if ($post) {
             if ($this->sendJSON) {
                 $content = json_encode($vars);
-                $headers[] = 'Content-Type: application/json';
+                $this->setHeader('Content-Type', self::CONTENT_TYPE_JSON);
             } elseif (!empty($this->sendData)) {
                 $content =& $this->sendData;
             } else {
@@ -202,7 +202,14 @@ class RestClient {
             curl_setopt($curl, CURLOPT_CAINFO, $this->CAInfo);
         }
 
+        // Add the headers to the request.
+        $headers = [];
+        foreach ($this->headers as $h => $v) {
+            $headers[] = $h . ': ' . $v;
+        }
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+
+        // Send the request.
         $this->raw = curl_exec($curl);
         $this->status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         $error = curl_error($curl);
