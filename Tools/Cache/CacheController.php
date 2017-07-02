@@ -65,8 +65,17 @@ abstract class CacheController implements CacheControllerInterface {
         }
     }
 
+    /**
+     * Retrieve a cached item.
+     *
+     * @param $key
+     * @param null $default
+     *
+     * @return mixed|null
+     *   The stored value or null if nothing was stored.
+     */
     public function get($key, $default = null) {
-
+        return null;
     }
 
     public function set($key, $value) {
