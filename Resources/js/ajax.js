@@ -34,7 +34,9 @@ lightning.ajax = {
             return;
         }
 
-        lightning.dialog.clear();
+        if (!settings.hasOwnProperty('persist_dialog') || settings.persist_dialog === false) {
+            lightning.dialog.clear();
+        }
 
         // Add standard messages to the dialog.
         if (data && data.messages && data.messages.length > 0) {
