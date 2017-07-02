@@ -169,7 +169,7 @@ class PageOverridable {
             }
 
             // Load default metadata.
-            $this->meta += Configuration::get('meta_data');
+            $this->meta += Configuration::get('meta_data', []);
             if ($twitter = Configuration::get('social.twitter.url')) {
                 $this->meta['twitter_site'] = $twitter;
                 $this->meta['twitter_creator'] = $twitter;
