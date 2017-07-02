@@ -118,6 +118,8 @@ lightning.js = {
 /**
  * Force external scripts to load asynchronously before executing a callback.
  * @deprecated
+ *   Use lightning.js.require
+ *
  * @param {string|array} url
  *   A URL or array of urls of JS files.
  * @param callback
