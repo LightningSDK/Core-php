@@ -13,6 +13,7 @@ use Lightning\Tools\Configuration;
  */
 class Cache {
 
+    const DEFAULT = 0;
     const TEMPORARY = 1;
     const MINUTE = 60;
     const HOUR = 3600;
@@ -47,16 +48,20 @@ class Cache {
      * @return CacheController
      *   An instance of the cache controller
      */
-    protected static function getInstance($ttl = self::TEMPORARY, $size = self::MEDIUM) {
-        if ($ttl == self::TEMPORARY) {
-            // Static Cache
-            return new StaticCache();
+    protected static function getInstance($ttl = self::DEFAULT, $size = self::MEDIUM) {
+        if ($ttl == self::DEFAULT) {
+            if ($class = Configuration::get('cache.default.handler')) {
+                return new $class();
+            }
         } elseif ($ttl == self::PERMANENT) {
             if ($class = Configuration::get('cache.permanent.handler')) {
                 return new $class();
             } else {
                 return new FileCache();
             }
+        } else {
+            // Default fallback.
+            return new StaticCache();
         }
     }
 }
