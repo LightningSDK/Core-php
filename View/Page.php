@@ -127,8 +127,6 @@ class PageOverridable {
         }
     }
 
-    public function get() {}
-
     /**
      * Prepare the output and tell the template to render.
      */
