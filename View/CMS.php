@@ -154,7 +154,7 @@ class CMS {
             } else {
                 $output .= '<input type="text" id="cms_' . $name . '" value="' . $value . '" style="display:none" />';
             }
-            $output .= '<span id="cms_display_' . $name . '">' . str_replace("\n", '<br>', $value) . '</span>';
+            $output .= '<span id="cms_display_' . $name . '">' . $value . '</span>';
             return $output;
         } elseif (!empty($settings['norender'])) {
             return '';
