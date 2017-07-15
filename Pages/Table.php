@@ -50,6 +50,13 @@ abstract class Table extends Page {
     protected $fullWidth = true;
 
     /**
+     * @var Database
+     *
+     * A reference to the database for this table.
+     */
+    protected $database;
+
+    /**
      * @deprecated - see const TABLE
      */
     protected $table;
@@ -127,6 +134,10 @@ abstract class Table extends Page {
      *     - background array - the background color when discarding an alpha channel. This will be in the format of an array of 3 integers [0, 0, 0,] to [255, 255, 255]
      *     - file_prefix string - prefixed to the stored file name (can include additional path info)
      *     - file_suffix - suffixed to the file name before the file extension.
+     *   - lookup
+     *     - lookuptable - the table to load the data
+     *     - lookupkey - the key column for the data
+     *     - display_column - the display column
      *
      * @var array
      */
@@ -382,6 +393,9 @@ abstract class Table extends Page {
     protected $createdMessage;
 
     public function __construct($options = []) {
+
+        $this->database = Database::getInstance();
+
         // TODO: Remove this when the properties are removed:
         if (empty($this->table) && !empty(static::TABLE)) {
             $this->table = static::TABLE;
@@ -450,7 +464,7 @@ abstract class Table extends Page {
 
     protected function validateAccess($id) {
         if (!empty($this->accessControl)) {
-            if (!Database::getInstance()->check(
+            if (!$this->database->check(
                 [
                     'from' => $this->table,
                     'join' => $this->getAccessTableJoins()
@@ -686,7 +700,7 @@ abstract class Table extends Page {
                     }
                     $where = Database::getMultiFieldSearch($autocomplete['search'], explode(' ', $search));
                 }
-                $results = Database::getInstance()->selectIndexed(
+                $results = $this->database->selectIndexed(
                     $this->fields[$field]['autocomplete']['table'],
                     $autocomplete['field'],
                     $where,
@@ -701,7 +715,7 @@ abstract class Table extends Page {
 
             case 'link':
                 $link_settings = $this->links[$field];
-                $results = Database::getInstance()->selectColumnQuery([
+                $results = $this->database->selectColumnQuery([
                     'select' => [$link_settings['key'], $link_settings['display_column']],
                     'from' => $link_settings['table'],
                     'where' => Database::getMultiFieldSearch([$link_settings['display_column']], explode(' ', $search)),
@@ -729,14 +743,13 @@ abstract class Table extends Page {
 
         $value = Request::get('value');
 
-        $db = Database::getInstance();
-        if ($link = $db->selectField($settings['key'], $settings['table'], [$settings['display_column'] => ['LIKE', $value]])) {
+        if ($link = $this->database->selectField($settings['key'], $settings['table'], [$settings['display_column'] => ['LIKE', $value]])) {
             Output::json([
                 'id' => $link,
                 'new' => false,
             ]);
         } else {
-            $id = $db->insert($settings['table'], [$settings['display_column'] => $value]);
+            $id = $this->database->insert($settings['table'], [$settings['display_column'] => $value]);
             Output::json([
                 'id' => $id,
                 'new' => true,
@@ -765,7 +778,7 @@ abstract class Table extends Page {
             }
 
             // Delete the entry.
-            Database::getInstance()->delete($this->table, [$this->getKey() => $this->id]);
+            $this->database->delete($this->table, [$this->getKey() => $this->id]);
         }
 
         // Redirect.
@@ -787,7 +800,7 @@ abstract class Table extends Page {
         if ($this->singularity) {
             $values[$this->singularity] = $this->singularityID;
         }
-        $this->id = Database::getInstance()->insert($this->table, $values, $this->update_on_duplicate_key ? $values : true);
+        $this->id = $this->database->insert($this->table, $values, $this->update_on_duplicate_key ? $values : true);
         if ($this->createdMessage !== false) {
             Messenger::message($this->createdMessage ?: 'The ' . $this->table . ' has been created.');
         }
@@ -842,7 +855,7 @@ abstract class Table extends Page {
         if (!empty($new_values)) {
             $where = $this->accessRestrictions([$this->getKey() => $this->id]);
             $table = ['from' => $this->table, 'join' => $this->getAccessTableJoins()];
-            Database::getInstance()->update($table, $new_values, $where);
+            $this->database->update($table, $new_values, $where);
         }
         $this->updateAccessTable();
         $this->setPostedLinks();
@@ -859,7 +872,7 @@ abstract class Table extends Page {
 
         if ($this->enable_serial_update && $this->serial_update) {
             // Get the next id in the table
-            $nextkey = Database::getInstance()->selectField(
+            $nextkey = $this->database->selectField(
                 ['nextkey' => ['expression' => "MIN({$this->getKey()})"]],
                 $this->table,
                 [
@@ -967,7 +980,7 @@ abstract class Table extends Page {
      */
     public function getKey($useTableName = FALSE) {
         if (empty($this->key) && !empty($this->table)) {
-            $result = Database::getInstance()->query("SHOW KEYS FROM `{$this->table}` WHERE Key_name = 'PRIMARY'");
+            $result = $this->database->query("SHOW KEYS FROM `{$this->table}` WHERE Key_name = 'PRIMARY'");
             $result = $result->fetch();
             $this->key = $result['Column_name'];
         }
@@ -1317,7 +1330,7 @@ abstract class Table extends Page {
                 $links = $this->load_all_active_list($link_settings, $row[$this->getKey()]);
             }
             else {
-                $links = Database::getInstance()->select($link, [$this->getKey() => $row[$this->getKey()]]);
+                $links = $this->database->select($link, [$this->getKey() => $row[$this->getKey()]]);
             }
 
             $output .= '<td>';
@@ -2025,7 +2038,7 @@ abstract class Table extends Page {
             if (!empty($link_settings['accessControl'])) {
                 $where += $link_settings['accessControl'];
             }
-            return Database::getInstance()->selectAllQuery([
+            return $this->database->selectAllQuery([
                 'from' => $table,
                 'join' => $join,
                 'where' => $where,
@@ -2034,7 +2047,7 @@ abstract class Table extends Page {
         } else {
             // @TODO: remove this, it should be a 'lookup' type instead.
             // 1 to many - each remote table will have a column linking it back to this table
-            return Database::getInstance()->selectAll($link_settings['table'], [$local_key => $row_id]);
+            return $this->database->selectAll($link_settings['table'], [$local_key => $row_id]);
         }
     }
 
@@ -2045,7 +2058,7 @@ abstract class Table extends Page {
      */
     protected function loadAllLinkOptions(&$link_settings) {
         $where = !empty($link_settings['accessControl']) ? $link_settings['accessControl'] : [];
-        $link_settings['options'] = Database::getInstance()->selectAll($link_settings['table'], $where, [], 'ORDER BY ' . $link_settings['display_column']);
+        $link_settings['options'] = $this->database->selectAll($link_settings['table'], $where, [], 'ORDER BY ' . $link_settings['display_column']);
     }
 
     /**
@@ -2186,7 +2199,7 @@ abstract class Table extends Page {
      */
     protected function get_fields($table, $preset) {
         if (!empty($table)) {
-            $fields = Database::getInstance()->query("SHOW COLUMNS FROM `{$table}`")->fetchAll(Database::FETCH_ASSOC);
+            $fields = $this->database->query("SHOW COLUMNS FROM `{$table}`")->fetchAll(Database::FETCH_ASSOC);
         } else {
             $fields = [];
         }
@@ -2482,7 +2495,7 @@ abstract class Table extends Page {
         if (isset($this->accessTable)) {
             $accessTableValues = $this->getFieldValues($this->fields, true);
             if (!empty($accessTableValues)) {
-                Database::getInstance()->update($this->accessTable, $accessTableValues, array_merge($this->accessTableWhere, [$this->getKey() => $this->id]));
+                $this->database->update($this->accessTable, $accessTableValues, array_merge($this->accessTableWhere, [$this->getKey() => $this->id]));
             }
         }
     }
@@ -3049,7 +3062,7 @@ abstract class Table extends Page {
         $fields = array_merge(["{$this->table}.*"], $this->joinFields);
 
         if ($this->table) {
-            $this->list = Database::getInstance()->selectRowQuery([
+            $this->list = $this->database->selectRowQuery([
                 'from' => $this->table,
                 'join' => $join,
                 'where' => $where,
@@ -3174,7 +3187,7 @@ abstract class Table extends Page {
         $query['group_by'] = $this->getKey(true);
 
         // Get the page count.
-        $this->listCount = Database::getInstance()->countQuery($query + ['as' => 'query'], true);
+        $this->listCount = $this->database->countQuery($query + ['as' => 'query'], true);
 
         // Add limits
         $query += [
@@ -3183,11 +3196,11 @@ abstract class Table extends Page {
         ];
 
         // Get the list.
-        $this->list = Database::getInstance()->selectQuery($query);
+        $this->list = $this->database->selectQuery($query);
     }
 
     protected function loadFullListCursor() {
-        $this->list = Database::getInstance()->select($this->table);
+        $this->list = $this->database->select($this->table);
     }
 
     protected function executeTask() {
@@ -3223,7 +3236,7 @@ abstract class Table extends Page {
 
         // check for a singularity, only allow edit/update (this means a user only has access to one of these entries, so there is no list view)
         if ($this->singularity) {
-            $row = Database::getInstance()->selectRow($this->table, [$this->singularity => $this->singularityID]);
+            $row = $this->database->selectRow($this->table, [$this->singularity => $this->singularityID]);
             if (count($row) > 0) $singularity_exists = true;
             if ($singularity_exists) $this->id = $row[$this->getKey()];
             // there can be no "new", "delete", "delconf", "list"
@@ -3369,7 +3382,7 @@ abstract class Table extends Page {
                 foreach ($filenames as &$filename) {
                     $filename = $handler->relativeFilename($filename);
                 }
-                Database::getInstance()->insertMultiple($link_settings['table'],
+                $this->database->insertMultiple($link_settings['table'],
                     [
                         $link_settings['key'] => $this->id,
                         $link_settings['display_column'] => $filenames,
@@ -3377,7 +3390,7 @@ abstract class Table extends Page {
                     true
                 );
                 // Remove old links.
-                Database::getInstance()->delete($link_settings['table'],
+                $this->database->delete($link_settings['table'],
                     [
                         $link_settings['key'] => $this->id,
                         $link_settings['display_column'] => ['NOT IN', $filenames],
@@ -3395,20 +3408,20 @@ abstract class Table extends Page {
                     // delete
                     $deleteable = preg_replace('/,$/', '', $_POST['delete_subtable_' . $link]);
                     if ($deleteable != '') {
-                        Database::getInstance()->delete(
+                        $this->database->delete(
                             $link,
                             [$link_settings['key'] => ['IN', $deleteable], $local_key => $local_id]
                         );
                     }
                     // update
-                    $list = Database::getInstance()->selectAll($link, [$local_key => $local_id], []);
+                    $list = $this->database->selectAll($link, [$local_key => $local_id], []);
                     foreach ($list as $l) {
                         foreach ($link_settings['fields'] as $f => $field) {
                             $link_settings['fields'][$f]['field'] = $f;
                             $link_settings['fields'][$f]['form_field'] = "st_{$link}_{$f}_{$l[$link_settings['key']]}";
                         }
                         $field_values = $this->getFieldValues($link_settings['fields']);
-                        Database::getInstance()->update($link, $field_values, [$local_key => $local_id, $link_settings['key'] => $l[$link_settings['key']]]);
+                        $this->database->update($link, $field_values, [$local_key => $local_id, $link_settings['key'] => $l[$link_settings['key']]]);
                     }
                 }
                 // insert new
@@ -3419,12 +3432,12 @@ abstract class Table extends Page {
                         $link_settings['fields'][$f]['form_field'] = "st_{$link}_{$f}_-{$i}";
                     }
                     $field_values = $this->getFieldValues($link_settings['fields']);
-                    Database::getInstance()->insert($link, $field_values, [$local_key => $local_id]);
+                    $this->database->insert($link, $field_values, [$local_key => $local_id]);
                 }
             }
             elseif ($link_settings['index']) {
                 // CLEAR OUT OLD SETTINGS
-                Database::getInstance()->delete(
+                $this->database->delete(
                     $link_settings['index'],
                     [$this->getKey() => $this->id]
                 );
@@ -3432,7 +3445,7 @@ abstract class Table extends Page {
                 // GET INPUT ARRAY
                 $list = Request::get($link . '_input_array', Request::TYPE_EXPLODE, Request::TYPE_INT);
                 foreach ($list as $l) {
-                    Database::getInstance()->insert(
+                    $this->database->insert(
                         $link_settings['index'],
                         [
                             $this->getKey() => $this->id,
@@ -3479,7 +3492,7 @@ abstract class Table extends Page {
                                 $filter = $field['accessControl'] + $filter;
                             }
                             // TODO: implement a cache or join in the main query to prevent multiple query execution.
-                            $value = Database::getInstance()->selectRow(
+                            $value = $this->database->selectRow(
                                 $field['lookuptable'],
                                 $filter,
                                 [
@@ -3864,7 +3877,7 @@ abstract class Table extends Page {
                         $filter = $field['accessControl'] + $filter;
                     }
 
-                    $options = Database::getInstance()->selectColumn(
+                    $options = $this->database->selectColumn(
                         // todo: rename these for consistency.
                         $field['lookuptable'],
                         $field['display_column'],
