@@ -300,5 +300,11 @@ class PageOverridable {
         if (isset($settings['full_width'])) {
             $this->fullWidth = $settings['full_width'];
         }
+        if (isset($settings['hide_menu'])) {
+            $this->hideMenu = $settings['hide_menu'];
+        }
+        if (isset($settings['hide_social'])) {
+            $this->share = !$settings['hide_social'];
+        }
     }
 }
