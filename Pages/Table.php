@@ -103,7 +103,7 @@ abstract class Table extends Page {
      *   - value mixed - An absolute value that will always be used whether inserting or updating. This can not be overridden by user input.
      *   - force_default_new boolean - Forces new entries to use the default value. Prevents tampering with a field that has hidden and default set.
      *   - note string - Adds text under the field to help the user understand the input.
-     *   - edit_value mixed - A value or callable. If a callable, the entire row will be passed as a parameter.
+     *   - edit_value mixed - The value to show in the field while editing an existing entry. A value or callable. If a callable, the entire row will be passed as a parameter.
      *   - unlisted boolean - if set to true, this field will not appear on the list view
      *   - render_list_field - Will render the field in the list view.
      *   - render_edit_field - Will render the edit field. Must also render form fields if necessary.
@@ -138,6 +138,15 @@ abstract class Table extends Page {
      *     - lookuptable - the table to load the data
      *     - lookupkey - the key column for the data
      *     - display_column - the display column
+     *   - insert_function - A function to calculate the value on insert.
+     *       The input will be an array containing the values to be inserted into the database.
+     *       It is expected to get it's input values directly from the request.
+     *   - modified_function - A function to calculate the value on update
+     *       See previous
+     *   - submit_function - A function to calculate the value on update or insert
+     *       See previous
+     *   - insertable - whether a user can provide a value for this field when inserting. This will default to the same value as editable.
+     *   - editable - whether a user can provide a value for this field when editing. Default is true.
      *
      * @var array
      */
