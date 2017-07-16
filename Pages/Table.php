@@ -2303,6 +2303,9 @@ abstract class Table extends Page {
         if ($field['type'] == 'note') {
             return true;
         }
+        if (!empty($field['insertable']) == true) {
+            return true;
+        }
         if ($field['type'] == 'hidden' || (!empty($field['hidden']) && $field['hidden'] == 'true')) {
             return false;
         }
