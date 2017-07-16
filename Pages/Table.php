@@ -424,7 +424,7 @@ abstract class Table extends Page {
             }
         }
         $this->function = Request::post('function');
-        $this->id = Request::get('id', Request::TYPE_INT);
+        $this->id = Request::get('id');
         $this->page_number = max(1, Request::get('page', Request::TYPE_INT, '', 1));
 
         /*
@@ -502,7 +502,7 @@ abstract class Table extends Page {
         if ($this->singularity) {
             // The user only has access to a single entry. ID is irrelevant.
             $this->getEdit();
-        } elseif (Request::query('id', Request::TYPE_INT)) {
+        } elseif (Request::query('id')) {
             $this->action = $this->defaultAction;
             if ($this->editable) {
                 $this->getEdit();
@@ -516,7 +516,7 @@ abstract class Table extends Page {
 
     public function getEdit() {
         $this->action = 'edit';
-        $this->id = $this->singularity ? $this->singularityID : Request::query('id', Request::TYPE_INT);
+        $this->id = $this->singularity ? $this->singularityID : Request::query('id');
 
         if (!$this->id) {
             Output::error('Invalid ID');
@@ -547,7 +547,7 @@ abstract class Table extends Page {
         if (!$this->editable || !$this->addable || $this->singularity) {
             Output::accessDenied();
         }
-        $this->id = Request::query('id', Request::TYPE_INT);
+        $this->id = Request::query('id');
         $this->getRow();
     }
 
@@ -845,7 +845,7 @@ abstract class Table extends Page {
     protected function afterDuplicate() {}
 
     public function postUpdate() {
-        $this->id = Request::post('id', Request::TYPE_INT);
+        $this->id = Request::post('id');
         $this->action = 'update';
         if (!$this->editable) {
             Output::accessDenied();
@@ -2118,9 +2118,9 @@ abstract class Table extends Page {
         $vars = [];
         if ($action == 'list') {
             $vars['page'] = $id;
-        } elseif ($id > 0) {
+        } elseif (!empty($id)) {
             $vars['id'] = $id;
-        } elseif ($this->id > 0) {
+        } elseif (!empty($this->id) > 0) {
             $vars['id'] = $this->id;
         }
         if ($action != '') $vars['action'] = $action;
@@ -3234,7 +3234,7 @@ abstract class Table extends Page {
         if ($action == "action" && isset($this->action_fields[$_GET['f']])) {
             switch ($this->action_fields[$_GET['f']]['type']) {
                 case "function":
-                    $this->id = intval($_GET['id']);
+                    $this->id = Request::get('id');
                     $this->getRow();
                     $this->action_fields[$_GET['f']]['function']($this->list);
                     header("Location: " . $this->createUrl($_GET['ra'], $row[$this->getKey()]));
