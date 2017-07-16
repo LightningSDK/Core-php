@@ -3482,8 +3482,9 @@ abstract class Table extends Page {
         }
 
         // set the default value if new
-        if ($this->action == "new" && isset($field['default']))
+        if ($this->action == "new" && isset($field['default'])) {
             $v = $field['default'];
+        }
 
         if (!empty($field['render_' . $this->action . '_field']) && is_callable($field['render_' . $this->action . '_field'])) {
             return $field['render_' . $this->action . '_field']($row);
