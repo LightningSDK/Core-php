@@ -54,11 +54,15 @@ class Page extends PageView {
 
         // LOAD PAGE DETAILS
         if ($this->fullPage = PageModel::loadByURL($content_locator)) {
-            header('HTTP/1.0 200 OK');
-            $this->menuContext = $this->fullPage['menu_context'];
-            if (Configuration::get('page.modification_date') && $this->fullPage['last_update'] > 0) {
-                header("Last-Modified: ".gmdate("D, d M Y H:i:s", $this->fullPage['last_update'])." GMT");
+            if (preg_match('/^[0-9]{3}$/', $content_locator)) {
+                http_response_code($content_locator);
+            } else {
+                header('HTTP/1.0 200 OK');
+                if (Configuration::get('page.modification_date') && $this->fullPage['last_update'] > 0) {
+                    header("Last-Modified: ".gmdate("D, d M Y H:i:s", $this->fullPage['last_update'])." GMT");
+                }
             }
+            $this->menuContext = $this->fullPage['menu_context'];
         } elseif ($this->fullPage = PageModel::loadByURL('404')) {
             $this->fullPage['page_id'] = false;
             http_response_code(404);
