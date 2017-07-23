@@ -462,6 +462,16 @@ ul.tags{
       box-shadow: inset 0 .25em 3px 0 #a92e00;
     }
   }
+  &.black {
+    color: white !important;
+    background-color: #000;
+    &:hover {
+      background-color: #444;
+    }
+    &:active {
+      background-color: #222;
+    }
+  }
   &.red {
     color: white !important;
     background-color: #c80000;
@@ -634,6 +644,9 @@ span.form-inline {
     }
     &.linkedin {
       background-color: #166eab;
+    }
+    &.pinterest {
+      background-color: #bd081c;
     }
     &.email {
       background-color: #646f72;
