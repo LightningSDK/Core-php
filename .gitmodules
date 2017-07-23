@@ -13,9 +13,6 @@
 [submodule "Vendor/compass"]
 	path = Vendor/compass
 	url = https://github.com/Compass/compass
-[submodule "Vendor/ckeditor"]
-	path = Vendor/ckeditor
-	url = https://github.com/ckeditor/ckeditor-releases.git
 [submodule "Vendor/plancakeEmailParser"]
 	path = Vendor/plancakeEmailParser
 	url = https://github.com/macdabby/official-library-php-email-parser.git

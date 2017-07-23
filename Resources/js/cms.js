@@ -50,7 +50,7 @@
                     cms: editor.replace(/^cms_/, ''),
                     token: lightning.vars.token,
                     action: "save",
-                    content: $('#cms_' + editor).html()
+                    content: lightning.htmleditor.editors['cms_' + editor].getData()
                 },
                 success: function (data) {
                     $('#cms_edit_' + editor).show();
