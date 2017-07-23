@@ -115,6 +115,10 @@
                 self.sharePop('https://plus.google.com/share?url=' + url);
             } else if (el.is('.linkedin')) {
                 self.sharePop('http://www.linkedin.com/shareArticle?mini=true&url=' + url);
+            } else if (el.is('.pinterest')) {
+                self.sharePop('http://pinterest.com/pin/create/button/?url=' + url
+                    + '&media=' + encodeURIComponent($('meta[property="og:image"]').attr('content'))
+                    + '&description=' + encodeURIComponent($('meta[property="og:description"]').attr('content')));
             }
         },
         sharePop: function(url) {

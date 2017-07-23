@@ -6,7 +6,7 @@
 
         initIframe: function(id) {
             window.onmessage = function(e) {
-                if (typeof e.data == 'object' && e.data.hasOwnProperty('height')) {
+                if (typeof e.data === 'object' && e.data.hasOwnProperty('height')) {
                     if (e.data.animate) {
                         $('#' + id).animate({'height': e.data.height});
                     } else {
@@ -23,8 +23,8 @@
         },
 
         resize: function(animate) {
-            if (typeof animate == undefined) {
-                animate = false
+            if (typeof animate === 'undefined') {
+                animate = false;
             }
             window.parent.postMessage({
                 'height': self.container.height(),
