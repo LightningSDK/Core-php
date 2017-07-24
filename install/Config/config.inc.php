@@ -37,6 +37,14 @@ $conf = [
             'client_id' => '',
             'secret' => '',
         ],
+        'share' => [
+            'facebook' => true,
+            'google' => true,
+            'twitter' => true,
+            'pinterest' => false,
+            'linkedin' => true,
+            'email' => true,
+        ],
     ],
     'site' => [
         'mail_from' => 'donotreply@Website.com',
