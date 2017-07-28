@@ -23,6 +23,7 @@ class Blog extends Page {
 
     protected $nav = 'blog';
     protected $page = ['blog', 'Lightning'];
+    protected $share = false;
 
     protected function hasAccess() {
         return true;
