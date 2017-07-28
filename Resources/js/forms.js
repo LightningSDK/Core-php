@@ -54,10 +54,17 @@
             }
             $('.invisible-recaptcha').each(function() {
                 var form = $(this).closest('form');
-                grecaptcha.render(this, {
-                    'sitekey' : lightning.get('invisibleRecaptcha.publicKey'),
-                    'callback' : function(token){
+                var id = grecaptcha.render(this, {
+                    sitekey : lightning.get('invisibleRecaptcha.publicKey'),
+                    size: 'invisible',
+                    callback : function(token) {
                         form.submit();
+                    }
+                });
+                form.on('submit', function() {
+                    if (form.find('.error:visible').length === 0 && form.find('.g-recaptcha-response').val() === '') {
+                        grecaptcha.execute(id);
+                        return false;
                     }
                 });
             });

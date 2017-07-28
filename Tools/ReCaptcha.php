@@ -45,8 +45,10 @@ class ReCaptcha {
     }
 
     public static function renderInvisible($text = 'Submit', $class = '') {
-//        static::loadJS(true);
-        return '<input type="hidden" name="recaptcha-type" value="invisible"/><button class="g-recaptcha invisible-recaptcha ' . $class . '">' . $text . '</button>';
+        static::loadJS(true);
+        return '<input type="hidden" name="recaptcha-type" value="invisible"/>
+                <div class="g-recaptcha invisible-recaptcha"></div>
+                <button class=" ' . $class . '" >' . $text . '</button>';
     }
 
     /**
