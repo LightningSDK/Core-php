@@ -12,4 +12,8 @@ class Message extends Page {
     protected function hasAccess() {
         return true;
     }
+
+    public function get() {
+        
+    }
 }
