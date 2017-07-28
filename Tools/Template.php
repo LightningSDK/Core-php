@@ -127,11 +127,7 @@ class Template extends Singleton {
             $template = $this->template;
         }
 
-        if ($return_as_string) {
-            return $this->build($template, true);
-        } else {
-            print $this->build($template, false);
-        }
+        return $this->build($template, $return_as_string);
     }
 
     /**
@@ -271,15 +267,23 @@ class Template extends Singleton {
                 $cache->value = $this->_include($template, true);
             }
 
-            // Return or output.
-            if ($return_as_string) {
-                return $cache->value;
-            } else {
-                print $cache->value;
-            }
+            $value = $cache->value;
         } else {
             // Return or output without cache.
-            return $this->_include($template, $return_as_string);
+            $value = $this->_include($template, true);
+        }
+
+        if (Configuration::get('debug')) {
+            // Wrap template with debug information.
+            $value = '<!-- START TEMPLATE ' . json_encode($template) . '.tpl.php -->' . $value . '<!-- END TEMPLATE ' . json_encode($template) . '.tpl.php -->';
+        }
+
+        // Return or output.
+        if ($return_as_string) {
+            return $value;
+        } else {
+            print $value;
+            return '';
         }
     }
 
