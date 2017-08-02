@@ -30,9 +30,15 @@ use Lightning\Tools\ReCaptcha;
                 <textarea name="message" cols="70" rows="5"><?=Field::defaultValue('name', null, 'text');?></textarea><br />
             </label>
         </div>
-        <?=ReCaptcha::render()?>
-        <br />
         <input type="hidden" name="contact" value="true" />
-        <input type="Submit" name="Submit" value="Send Message" class="button" />
+        <br />
+        <?php if (\Lightning\Tools\Configuration::get('invisibleRecaptcha.publicKey')) : ?>
+        <?=ReCaptcha::renderInvisible('Send Message', 'button');?>
+        <?php elseif (\Lightning\Tools\Configuration::get('recaptcha.public')): ?>
+            <?=ReCaptcha::render()?>
+            <input type="Submit" name="Submit" value="Send Message" class="button" />
+        <?php else: ?>
+            <input type="Submit" name="Submit" value="Send Message" class="button" />
+        <?php endif; ?>
     </form>
 </div>

@@ -109,6 +109,10 @@ class Contact extends PageView {
         return true;
     }
 
+    public function get() {
+
+    }
+
     /**
      * Send a posted contact request to the site admin.
      */
