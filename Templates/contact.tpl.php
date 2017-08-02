@@ -31,11 +31,11 @@ use Lightning\Tools\ReCaptcha;
             </label>
         </div>
         <input type="hidden" name="contact" value="true" />
-        <br />
-        <?php if (\Lightning\Tools\Configuration::get('invisibleRecaptcha.publicKey')) : ?>
+        <?php if (\Lightning\Tools\Configuration::get('recaptcha.invisible.public')) : ?>
         <?=ReCaptcha::renderInvisible('Send Message', 'button');?>
         <?php elseif (\Lightning\Tools\Configuration::get('recaptcha.public')): ?>
             <?=ReCaptcha::render()?>
+            <br />
             <input type="Submit" name="Submit" value="Send Message" class="button" />
         <?php else: ?>
             <input type="Submit" name="Submit" value="Send Message" class="button" />
