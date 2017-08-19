@@ -118,4 +118,33 @@ class ClientUserOverridable extends Singleton {
         }
         return true;
     }
+
+    public static function getReferrer($prioritizeSession = false) {
+        $session = Session::getInstance(true, false);
+
+        // There is no session, there can't be a referrer.
+        if (empty($session)) {
+            return false;
+        }
+
+        // If the session referrer is more important.
+        if ($prioritizeSession && !empty($session->content->referrer)) {
+            return $session->content->referrer;
+        }
+
+        // If the user referrer is present.
+        if ($clientUser = static::getInstance()) {
+            // This is a known user with a referrer
+            if (!empty($clientUser->referrer)) {
+                return $clientUser->referrer;
+            }
+        }
+
+        // If there is a session referrer.
+        if (!empty($session->content->referrer)) {
+            return $session->content->referrer;
+        }
+
+        return false;
+    }
 }

@@ -125,6 +125,13 @@ class PageOverridable {
         if (!empty($this->js)) {
             JS::add($this->js);
         }
+
+        // For referral tracking
+        if (($ref = Request::get('ref', Request::TYPE_INT)) && Configuration::get('user.track_referrer')) {
+            $session = Session::getInstance();
+            $session->content->referrer = $ref;
+            $session->save();
+        }
     }
 
     /**

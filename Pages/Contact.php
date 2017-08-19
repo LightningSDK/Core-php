@@ -98,13 +98,6 @@ class Contact extends PageView {
 
     protected $ignoreToken = true;
 
-    /**
-     * Override the constructor to initialize the form token.
-     */
-    public function __construct() {
-        parent::__construct();
-    }
-
     protected function hasAccess() {
         return true;
     }
@@ -289,7 +282,7 @@ class Contact extends PageView {
         }
 
         // Add the user to the database.
-        $email = Request::post('email', 'email');
+        $email = Request::post('email', Request::TYPE_EMAIL);
         if (empty($email)) {
             return false;
         }
