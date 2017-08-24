@@ -331,8 +331,11 @@ class Output {
      *
      * @param string $error
      *   An error to output to the user.
+     * @param integer $response_code
+     *   The HTTP response code.
      */
-    public static function error($error) {
+    public static function error($error, $response_code = 400) {
+        http_response_code($response_code);
         if (static::isJSONRequest()) {
             static::json($error);
         } elseif (static::$isPlainText || Request::isCLI()) {
