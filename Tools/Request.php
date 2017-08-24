@@ -253,9 +253,7 @@ class RequestOverridable {
      * @return mixed
      */
     public static function json($var, $type='', $subtype='', $default = null) {
-        if (self::$parsedInput === null && $json = file_get_contents('php://input')) {
-            self::$parsedInput = json_decode($json, true) ?: [];
-        }
+        self::parseJson();
 
         if (!isset(self::$parsedInput[$var])) {
             return $default;
@@ -263,6 +261,17 @@ class RequestOverridable {
         $args = func_get_args();
         $args[0] = self::$parsedInput[$var];
         return call_user_func_array('self::clean', $args);
+    }
+
+    public static function allJson() {
+        self::parseJson();
+        return self::$parsedInput;
+    }
+
+    protected static function parseJson() {
+        if (self::$parsedInput === null && $json = file_get_contents('php://input')) {
+            self::$parsedInput = json_decode($json, true) ?: [];
+        }
     }
 
     /**
