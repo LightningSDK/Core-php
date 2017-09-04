@@ -51,6 +51,13 @@ class RequestOverridable {
     protected static $parsedInput = null;
 
     /**
+     * The raw body input
+     *
+     * @var string
+     */
+    protected static $body = null;
+
+    /**
      * Get the HTTP request type.
      *
      * @return string
@@ -274,9 +281,25 @@ class RequestOverridable {
     }
 
     protected static function parseJson() {
-        if (self::$parsedInput === null && $json = file_get_contents('php://input')) {
-            self::$parsedInput = json_decode($json, true) ?: [];
+        if (self::$parsedInput === null && self::hasBody()) {
+            self::$parsedInput = json_decode(self::$body, true) ?: [];
         }
+    }
+
+    protected static function loadBody() {
+        if (self::$body === null) {
+            self::$body = file_get_contents('php://input');
+        }
+    }
+
+    protected static function hasBody() {
+        self::loadBody();
+        return !empty(self::$body);
+    }
+
+    public static function getBody() {
+        self::loadBody();
+        return self::$body;
     }
 
     /**
