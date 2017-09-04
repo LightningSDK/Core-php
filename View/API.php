@@ -37,7 +37,7 @@ class APIOverridable extends Page {
 
             // If there is a requested action.
             if ($action = Request::get('action')) {
-                $method = Request::convertFunctionName($request_type, $action);
+                $method = Request::convertFunctionName($action, $request_type);
                 if (method_exists($this, $method)) {
                     $output = $this->{$method}();
                 }

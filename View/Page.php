@@ -229,7 +229,7 @@ class PageOverridable {
 
             // If there is a requested action.
             if ($action = Request::get('action')) {
-                $method = Request::convertFunctionName($request_type, $action);
+                $method = Request::convertFunctionName($action, $request_type);
             } else {
                 $method = $request_type;
             }

@@ -32,7 +32,7 @@ class CLI {
      */
     public function execute() {
         global $argv;
-        $func = Request::convertFunctionName('execute', $argv[2]);
+        $func = Request::convertFunctionName($argv[2], 'execute');
         if (method_exists($this, $func)) {
             $args = count($argv) > 3 ? array_slice($argv, 3) : [];
             $this->parseArgs($args);
