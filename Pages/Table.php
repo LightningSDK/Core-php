@@ -2219,6 +2219,9 @@ abstract class Table extends Page {
             $return_fields[$column] = [];
             foreach ($field as $key => $value) {
                 $return_fields[$column][strtolower($key)] = $value;
+                if ($key == 'Type') {
+                    $return_fields[$column]['sql_type'] = $value;
+                }
             }
         }
 
@@ -2596,6 +2599,10 @@ abstract class Table extends Page {
                         break;
                     case 'date':
                         $val = Time::getDate($field['form_field'], !empty($field['allow_blank']));
+                        if ($field['sql_type'] == 'date') {
+                            $val = explode('/', jdtogregorian($val));
+                            $val = $val[2] . '-' . $val[0] . '-' . $val[1];
+                        }
                         break;
                     case 'time':
                         $val = Time::getTime($field['form_field'], !empty($field['allow_blank']), !empty($field['timezone']) ? $field['timezone'] : null);
@@ -3574,6 +3581,11 @@ abstract class Table extends Page {
                     return Time::printTime($v);
                     break;
                 case 'date':
+                    if ($field['sql_type'] == 'date') {
+                        // Convert from MySQL date format.
+                        $seg = explode('-', $v);
+                        $v = gregoriantojd($seg[1], $seg[2], $seg[0]);
+                    }
                     return Time::printDate($v, !empty($field['timezone']) ? $field['timezone'] : null);
                     break;
                 case 'datetime':
@@ -3861,6 +3873,11 @@ abstract class Table extends Page {
                 );
                 break;
             case 'date':
+                if ($field['sql_type'] == 'date' && !empty($field['Value'])) {
+                    // Convert from MySQL date format.
+                    $seg = explode('-', $v);
+                    $field['Value'] = gregoriantojd($seg[1], $seg[2], $seg[0]);
+                }
                 $return = Time::datePop(
                     $field['form_field'],
                     !empty($field['Value']) ? $field['Value'] : 0,
