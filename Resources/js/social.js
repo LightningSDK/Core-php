@@ -116,9 +116,16 @@
             } else if (el.is('.linkedin')) {
                 self.sharePop('http://www.linkedin.com/shareArticle?mini=true&url=' + url);
             } else if (el.is('.pinterest')) {
-                self.sharePop('http://pinterest.com/pin/create/button/?url=' + url
-                    + '&media=' + encodeURIComponent($('meta[property="og:image"]').attr('content'))
-                    + '&description=' + encodeURIComponent($('meta[property="og:description"]').attr('content')));
+                url = 'http://pinterest.com/pin/create/button/?url=' + url;
+                var media = encodeURIComponent($('meta[property="og:image"]').attr('content'));
+                if (media !== '' && media !== 'undefined') {
+                    url += '&media=' + media;
+                }
+                var description = encodeURIComponent($('meta[property="og:description"]').attr('content'));
+                if (description !== '' && description !== 'undefined') {
+                    url += '&description=' + media;
+                }
+                self.sharePop(url);
             }
         },
         sharePop: function(url) {
