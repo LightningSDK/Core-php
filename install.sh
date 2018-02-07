@@ -177,8 +177,8 @@ then
         mkdir js
     fi
     cd $DIR/js
-    wget http://download.cksource.com/CKEditor/CKEditor/CKEditor%204.7.1/ckeditor_4.7.1_standard.zip
-    unzip ckeditor_4.7.1_standard.zip
+    wget http://download.cksource.com/CKEditor/CKEditor/CKEditor%204.8.0/ckeditor_4.8.0_standard.zip
+    unzip ckeditor_4.8.0_standard.zip
     if [[ ! -f $DIR/Source/Resources/sass/ckeditor_contents.scss ]]; then
         cp $DIR/js/ckeditor/contents.css $DIR/Source/Resources/sass/ckeditor_contents.scss
         GULP_BUILD=true
