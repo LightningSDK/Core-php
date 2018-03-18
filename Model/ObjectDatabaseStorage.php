@@ -46,6 +46,30 @@ trait ObjectDatabaseStorage {
     }
 
     /**
+     * Load objects using an array query.
+     *
+     * @param array $query
+     *
+     * @return array
+     *   A list of objects found
+     */
+    public static function loadByQuery($query, $keyed = null) {
+        $objects = [];
+        $results = Database::getInstance()->queryArray($query);
+
+        $key = ($keyed === true) ? static::PRIMARY_KEY : $keyed;
+        foreach ($results as $result) {
+            if (!empty($key)) {
+                $objects[$result[$key]] = new static($result);
+            } else {
+                $objects[] = new static($result);
+            }
+        }
+
+        return $objects;
+    }
+
+    /**
      * Select a list of available options with value of column $name_field, keyed by the primary key.
      *
      * @param string $name_field
