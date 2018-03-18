@@ -90,6 +90,20 @@ class Blog extends Page {
     }
 
     /**
+     * Render a widget.
+     *
+     * @param $options
+     * @param $vars
+     * @return string
+     */
+    public static function renderMarkup($options, $vars) {
+        $template = new Template();
+        $blog = BlogPost::loadByID($options['id']);
+        $template->set('blog', $blog);
+        return $template->render(['blog-preview', 'Lightning'], true);
+    }
+
+    /**
      * @param BlogPost $post
      */
     protected function setBlogMetaData($post) {

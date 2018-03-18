@@ -41,6 +41,7 @@ $conf = [
             'template' => 'Lightning\\Tools\\Template',
             'youtube' => 'Lightning\\View\\Video\\YouTube',
             'input' => 'Lightning\\View\\Field',
+            'blog' => 'Lightning\\Pages\\Blog',
         ],
     ],
     'language' => 'en_us',

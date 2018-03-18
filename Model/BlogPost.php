@@ -55,6 +55,11 @@ class BlogPostOverridable extends Object {
         ];
     }
 
+    /**
+     * Loads the image that was explicitly set as the header image.
+     *
+     * @return bool|string
+     */
     public function getTrueHeaderImage() {
         if (!empty($this->header_image)) {
             // Image from upload.
@@ -66,6 +71,12 @@ class BlogPostOverridable extends Object {
         return false;
     }
 
+    /**
+     * Gets any image that can be used for the header.
+     *
+     * @return string|null
+     *   An absolute file url.
+     */
     public function getHeaderImage() {
         $header_image = NULL;
         if ($image = $this->getTrueHeaderImage()) {

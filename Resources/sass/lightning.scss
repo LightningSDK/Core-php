@@ -322,6 +322,22 @@ div.captcha_container {
   height:300px;
   background-size: cover;
 }
+.blog-preview {
+  .preview {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    min-height: 300px;
+    .headline {
+      position: absolute;
+      bottom: 0;
+      color: white;
+      background-color: #162547;
+      padding: 10px;
+      font-size: 32px;
+    }
+  }
+}
 
 ul.tags{
   margin:0;

@@ -82,7 +82,7 @@ trait ObjectDataStorage {
                     return $this->__data[static::PRIMARY_KEY];
                 } else {
                     return false;
-                };
+                }
                 break;
             default:
                 if (isset($this->__data[$var])) {
