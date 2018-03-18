@@ -5,8 +5,7 @@ namespace Lightning\View\HTMLEditor;
 use DOMDocument;
 use DOMElement;
 use Lightning\Tools\Configuration;
-use Lightning\Tools\Template;
-use Lightning\View\Video\YouTube;
+use Exception;
 
 class Markup {
     public static function render($content, $vars = []) {
@@ -21,7 +20,23 @@ class Markup {
                 $dom = new DOMDocument();
                 libxml_use_internal_errors(true);
                 $dom->loadHTML($match_html);
-                $element = $dom->getElementsByTagName('body')->item(0)->childNodes->item(0);
+
+                // For most HTML elements, a body wrapper will automatically be added. We have to remove it.
+                $body = $dom->getElementsByTagName('body');
+                if ($body->length > 0) {
+                    $element = $body->item(0)->childNodes->item(0);
+                } else {
+                    // If it's not in the body, we have to find it explicitly.
+                    // This is the case for {{script ...}}
+                    $nameMatch = [];
+                    preg_match('/{{([a-z]+)/', $match, $nameMatch);
+                    $element = $dom->getElementsByTagName($nameMatch[1]);
+                    if ($element->length > 0) {
+                        $element = $element->item(0);
+                    } else {
+                        throw new Exception('Could not find reconstructed DOM elemnet.');
+                    }
+                }
                 $output = '';
 
                 // If a renderer exists, run it.

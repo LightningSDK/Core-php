@@ -42,6 +42,8 @@ $conf = [
             'youtube' => 'Lightning\\View\\Video\\YouTube',
             'input' => 'Lightning\\View\\Field',
             'blog' => 'Lightning\\Pages\\Blog',
+            'script' => 'Lightning\\View\\Script',
+            'iframe' => 'Lightning\\View\\Iframe',
         ],
     ],
     'language' => 'en_us',
