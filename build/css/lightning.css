@@ -8268,6 +8268,11 @@ th.hide-for-touch {
   text-decoration: inherit;
 }
 
+.vertical-spacing {
+  margin-top: 50px !important;
+  margin-bottom: 50px !important;
+}
+
 .messenger {
   border: 1px solid;
   color: black;
@@ -8573,10 +8578,13 @@ div.captcha_container input {
 .blog-preview .preview .headline {
   position: absolute;
   bottom: 0;
-  color: white;
   background-color: #162547;
-  padding: 10px;
-  font-size: 32px;
+  padding: 20px;
+  font-size: .8em;
+  line-height: .9;
+}
+.blog-preview .preview .headline a {
+  color: white;
 }
 
 ul.tags {
