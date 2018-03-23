@@ -47,6 +47,7 @@ class Messages extends Table {
             'editor' => 'full',
             'upload' => true,
             'url' => 'full',
+            'trusted' => true,
         ]
     ];
 

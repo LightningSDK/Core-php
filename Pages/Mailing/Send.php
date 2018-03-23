@@ -25,6 +25,9 @@ use Source\Model\Permissions;
  * @package Lightning\Pages\Mailing
  */
 class Send extends Page {
+
+    protected $rightColumn = false;
+
     /**
      * Require admin privileges.
      */
