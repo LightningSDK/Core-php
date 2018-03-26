@@ -4,7 +4,6 @@ namespace Lightning\Pages;
 
 use Exception;
 use Lightning\Tools\Cache\FileCache;
-use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\CSVImport;
 use Lightning\Tools\Database;
@@ -19,7 +18,6 @@ use Lightning\Tools\Request;
 use Lightning\Tools\Scrub;
 use Lightning\Tools\Security\Encryption;
 use Lightning\Tools\Template;
-use Lightning\View\Field;
 use Lightning\View\Field\BasicHTML;
 use Lightning\View\Field\Checkbox;
 use Lightning\View\Field\FileBrowser;

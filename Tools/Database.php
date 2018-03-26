@@ -547,7 +547,7 @@ class Database extends Singleton {
      *   The table to insert to.
      * @param array $data
      *   An array where each item corresponds to a column.
-     *   The value may be a string or an array of multiple values.
+     *   The value may be a string, int or an array of multiple values.
      * @param array|boolean $existing
      *   TRUE to ignore, or an array of field names from which to copy
      *   update the value with the value from $data if the unique key exists.
