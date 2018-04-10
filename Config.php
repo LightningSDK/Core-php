@@ -46,6 +46,10 @@ $conf = [
             'iframe' => 'Lightning\\View\\Iframe',
         ],
     ],
+    'sitemap' => [
+        'pages' => 'Lightning\\Model\\Page',
+        'blog' => 'Lightning\\Model\\Blog',
+    ],
     'language' => 'en_us',
     'template_dir' => 'Source/Templates',
     'temp_dir' => HOME_PATH . '/../tmp',
