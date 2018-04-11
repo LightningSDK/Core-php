@@ -744,19 +744,7 @@ class Database extends Singleton {
             $output .= ' HAVING ' . $this->sqlImplode($query['having'], $values, ' AND ');
         }
         if (!empty($query['order_by'])) {
-            $output .= ' ORDER BY ';
-            $orders = [];
-            if (is_string($query['order_by'])) {
-                $query['order_by'] = [$query['order_by'] => 'ASC'];
-            }
-            foreach ($query['order_by'] as $field => $order) {
-                if (is_array($order) && !empty($order['expression'])) {
-                    $orders[] = $order['expression'];
-                } else {
-                    $orders[] = $this->formatField($field) . ' ' . $order;
-                }
-            }
-            $output .= implode(',', $orders);
+            $output .= ' ORDER BY ' . $this->parseOrder($query['order_by'], $values);
         }
         if (!empty($query['limit'])) {
             if (is_array($query['limit'])) {
@@ -771,6 +759,29 @@ class Database extends Singleton {
         }
 
         return $output;
+    }
+
+    protected function parseOrder($orderBy, &$values) {
+        // Ensure the order clause is an array
+        if (is_string($orderBy)) {
+            $orderBy = [$orderBy => 'ASC'];
+        }
+
+        $orders = [];
+        foreach ($orderBy as $field => $order) {
+            if (is_array($order) && !empty($order['expression'])) {
+                // This order is an expression
+                $orders[] = $order['expression'];
+            } elseif (is_array($order)) {
+                // This order is an array of IDs in a specific order
+                $orders[] = 'field(' . implode(',', array_merge(['`' . $field . '`'], array_fill(0, count($order), '?'))) . ')';
+                $values = array_merge($values, $order);
+            } else {
+                // The array is a simple field and direction
+                $orders[] = $this->formatField($field) . ' ' . $order;
+            }
+        }
+        return implode(',', $orders);
     }
 
     /**

@@ -55,6 +55,7 @@ trait ObjectDatabaseStorage {
      */
     public static function loadByQuery($query, $keyed = null) {
         $objects = [];
+        $query = $query + ['from' => static::TABLE];
         $results = Database::getInstance()->queryArray($query);
 
         $key = ($keyed === true) ? static::PRIMARY_KEY : $keyed;
