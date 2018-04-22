@@ -8,8 +8,15 @@ use Lightning\Tools\Mailer;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Output;
 use Lightning\Tools\Request;
+use Lightning\Tools\Scrub;
 use Lightning\View\API;
 
+/**
+ * Class Optin
+ * @package Lightning\API
+ *
+ * @deprecated use Lighting\API\Contact instead
+ */
 class Optin extends API {
     public function post() {
         $name = Request::get('name');
@@ -32,7 +39,8 @@ class Optin extends API {
             $this->userMessageSent = $mailer->sendOne($message, $user);
         }
 
-        Messenger::message('Thank you for subscribing.');
+        $message = isset($POST['success']) ? Scrub::toHTML($_POST['success']) : 'Thank you for subscribing.';
+        Messenger::message($message);
 
         return Output::SUCCESS;
     }

@@ -224,7 +224,9 @@ class PageOverridable {
             }
 
             // Outputs an error if this is a POST request without a valid token.
-            $this->requireToken();
+            if ($this->requiresToken()) {
+                $this->requireToken();
+            }
 
             // If there is a requested action.
             if ($action = Request::get('action')) {
@@ -246,6 +248,10 @@ class PageOverridable {
             Output::error($e->getMessage());
         }
         $this->output();
+    }
+
+    public function requiresToken() {
+        return !$this->ignoreToken && strtolower(Request::type()) == 'post';
     }
 
     /**
