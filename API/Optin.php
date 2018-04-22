@@ -39,7 +39,7 @@ class Optin extends API {
             $this->userMessageSent = $mailer->sendOne($message, $user);
         }
 
-        $message = isset($POST['success']) ? Scrub::toHTML($_POST['success']) : 'Thank you for subscribing.';
+        $message = array_key_exists('success', $_POST) ? Scrub::toHTML($_POST['success']) : 'Thank you for subscribing.';
         Messenger::message($message);
 
         return Output::SUCCESS;
