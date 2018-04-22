@@ -6,10 +6,11 @@ use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\IO\FileManager;
 use Lightning\Tools\Scrub;
-use Lightning\Tools\Session;
 use Lightning\Model\CMS as CMSModel;
+use Lightning\Tools\Session\BrowserSession;
 use Lightning\View\HTMLEditor\HTMLEditor;
 use Lightning\View\HTMLEditor\Markup;
+use Lightning\Tools\Form as FormTool;
 
 class CMS {
 
@@ -42,7 +43,7 @@ class CMS {
         $content = (!empty($content) ? $content->content : (!empty($settings['default']) ? $settings['default'] : ''));
         if (ClientUser::getInstance()->isAdmin()) {
             JS::startup('lightning.cms.init()');
-            JS::set('token', Session::getInstance()->getToken());
+            JS::set('token', FormTool::getToken());
             JS::set('cms.cms_' . $name . '.config', !empty($settings['config']) ? $settings['config'] : []);
             return
                 '<img src="/images/lightning/pencil.png" class="cms_edit icon-16" id="cms_edit_' . $name . '">
@@ -98,7 +99,7 @@ class CMS {
         if (!empty($settings['display_only'])) {
             return $content->url;
         } elseif (ClientUser::getInstance()->isAdmin()) {
-            JS::set('token', Session::getInstance()->getToken());
+            JS::set('token', FormTool::getToken());
             // TODO: This will need extra slashes if using the File handler.
             JS::set('cms.basepath', $settings['location']);
             if (empty($settings['file_handler'])) {
@@ -146,7 +147,7 @@ class CMS {
             return $value;
         } elseif (ClientUser::getInstance()->isAdmin()) {
             JS::startup('lightning.cms.init()');
-            JS::set('token', Session::getInstance()->getToken());
+            JS::set('token', FormTool::getToken());
             $output = '<img src="/images/lightning/pencil.png" class="cms_edit_plain icon-16" id="cms_edit_' . $name . '">'
             . '<img src="/images/lightning/save.png" class="cms_save_plain icon-16" id="cms_save_' . $name . '" style="display:none">';
             if (!empty($settings['multi_line'])) {
@@ -188,7 +189,7 @@ class CMS {
             return implode(',', $value);
         } elseif (ClientUser::getInstance()->isAdmin()) {
             JS::startup('lightning.cms.init()');
-            JS::set('token', Session::getInstance()->getToken());
+            JS::set('token', FormTool::getToken());
             return '<img src="/images/lightning/pencil.png" class="cms_edit_plain icon-16" id="cms_edit_' . $name . '">'
             . '<img src="/images/lightning/save.png" class="cms_save_plain icon-16" id="cms_save_' . $name . '" style="display:none">'
             . '<input type="text" id="cms_' . $name . '" value="' . json_encode($value) . '" style="display:none" />'

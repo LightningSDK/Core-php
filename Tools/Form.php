@@ -3,6 +3,7 @@
 namespace Lightning\Tools;
 
 use Exception;
+use Lightning\Tools\Session\BrowserSession;
 use Lightning\View\Field;
 use Lightning\View\Field\BasicHTML;
 
@@ -86,15 +87,6 @@ class Form {
         }
     }
 
-    public static function validateToken() {
-        $expected = Session::getInstance()->getToken();
-        $actual = Request::post('token', 'base64');
-        if (empty($actual) || $actual != $expected) {
-            throw new Exception('Invalid Token.');
-        }
-        return true;
-    }
-
     /**
      * Fill the post array. For setting defaults without overwriting the actual defaults.
      *
@@ -173,7 +165,7 @@ class Form {
      */
     public static function requiresToken() {
         try {
-            Session::getInstance(true);
+            static::getToken();
         } catch (Exception $e) {
             return '<small class="error" style="display: block">Session Not Initialized</small>';
         }
@@ -186,10 +178,27 @@ class Form {
      *   The full HTML.
      */
     public static function renderTokenInput() {
-        if (Session::isInitialized()) {
-            return BasicHTML::hidden('token', Session::getInstance()->getToken());
-        } else {
+        try {
+            return BasicHTML::hidden('token', static::getToken());
+        } catch (Exception $e) {
             return '<small class="error" style="display: block">Session Not Initialized</small>';
         }
+    }
+
+    public static function getToken() {
+        return BrowserSession::getInstance()->getFormToken();
+    }
+
+    /**
+     * @return bool
+     * @throws Exception
+     */
+    public static function validateToken() {
+        $expected = static::getToken();
+        $requestToken = Request::post('token', 'base64');
+        if (empty($requestToken) || $requestToken != $expected) {
+            throw new Exception(Language::translate('invalid_token'));
+        }
+        return true;
     }
 }

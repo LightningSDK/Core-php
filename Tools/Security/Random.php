@@ -41,7 +41,11 @@ class RandomOverridable extends Singleton {
         switch (self::getEngine()) {
             case MCRYPT_DEV_URANDOM:
             case MCRYPT_DEV_RANDOM:
-                $random = mcrypt_create_iv($size, self::$engine);
+                if (function_exists('random_bytes')) {
+                    $random = random_bytes($size);
+                } else {
+                    $random = mcrypt_create_iv($size, self::$engine);
+                }
                 break;
             default:
                 $random = mt_rand();

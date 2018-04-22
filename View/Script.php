@@ -17,14 +17,18 @@ class Script {
      */
     public static function renderMarkup($options) {
 
-        if (empty($options['src'])) {
-            throw new Exception('Missing iFrame source.');
+        if (empty($options['src']) && empty($options['body'])) {
+            throw new Exception('Missing script source or body.');
         }
 
-        $attributes = [
-            'src' => !empty($options['src']) ? $options['src'] : '',
-        ];
+        $attributes = [];
 
-        return '<script ' . HTML::implodeAttributes($attributes) . '></script>';
+        if (!empty($options['src'])) {
+            $attributes['src'] = $options['src'];
+        }
+
+        $body = !empty($options['body']) ? $options['body'] : '';
+
+        return '<script ' . HTML::implodeAttributes($attributes) . '>' . $body . '</script>';
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 namespace Lightning\Tools;
+use Lightning\Tools\Session\DBSession;
 use stdClass;
 
 /**
@@ -128,7 +129,7 @@ class Messenger {
             return;
         }
 
-        $session = Session::getInstance();
+        $session = DBSession::getInstance();
         if (!empty(self::$messages)) {
             if (empty($session->content->messages)) {
                 $session->content->messages = new stdClass();
@@ -148,7 +149,7 @@ class Messenger {
      * Load messages and errors from the session.
      */
     public static function loadFromSession() {
-        if ($session = Session::getInstance(true, false)) {
+        if ($session = DBSession::getInstance(true, false)) {
 
             $session_messages = !empty($session->content->messages->messages) ? $session->content->messages->messages : [];
             $session_errors = !empty($session->content->messages->errors) ? $session->content->messages->errors : [];

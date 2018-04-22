@@ -546,7 +546,7 @@ ul.tags{
     &:hover {
       background-color: #2eae1c;
     }
-    &:active{
+    &:active {
       background-color: #247417;
     }
     &.bevel {
@@ -560,6 +560,28 @@ ul.tags{
     &.bevel:active {
       @include background(linear-gradient(#247417, #2eae1c));
       box-shadow: inset 0 .25em 3px 0 #154811;
+    }
+  }
+  &.grey {
+    color: white !important;
+    background-color: #a5a5a5;
+    &:hover {
+      background-color: #a5a5a5;
+    }
+    &:active{
+      background-color: #a4a4a4;
+    }
+    &.bevel {
+      @include background(linear-gradient(#a5a5a5, #a4a4a4));
+      box-shadow: inset 0px -.25em 0 0 #888888;
+    }
+    &.bevel:hover {
+      @include background(linear-gradient(#a5a5a5, #a4a4a4));
+      box-shadow: inset 0px -.25em 0 0 #888888;
+    }
+    &.bevel:active {
+      @include background(linear-gradient(#a4a4a4, #a5a5a5));
+      box-shadow: inset 0 .25em 3px 0 #888888;
     }
   }
   &.small {

@@ -4,8 +4,10 @@ namespace Lightning\Tools\SocialDrivers;
 
 use Abraham\TwitterOAuth\TwitterOAuth;
 use Lightning\Tools\Configuration;
+use Lightning\Tools\Form;
 use Lightning\Tools\Output;
-use Lightning\Tools\Session;
+use Lightning\Tools\Session\BrowserSession;
+use Lightning\Tools\Session\DBSession;
 use Lightning\View\JS;
 use Lightning\Tools\Request;
 use stdClass;
@@ -39,7 +41,7 @@ class Twitter extends SocialMediaApi {
      */
     public static function createInstance($token = null, $authorize = true) {
         if (empty($token)) {
-            $session = Session::getInstance(true, false);
+            $session = DBSession::getInstance(true, false);
             if (!empty($session->content->twitter->token)) {
                 $token = $session->content->twitter->token;
             }
@@ -71,7 +73,7 @@ class Twitter extends SocialMediaApi {
     }
 
     public function storeSessionData() {
-        $session = Session::getInstance();
+        $session = DBSession::getInstance();
         if (empty($session->content->twitter)) {
             $session->content->twitter = new stdClass();
         }
@@ -88,7 +90,7 @@ class Twitter extends SocialMediaApi {
      */
     public static function getAccessToken($verify = true) {
         self::loadAutoLoader();
-        $session = Session::getInstance();
+        $session = DBSession::getInstance();
 
         if ($verify) {
             $request_token = [
@@ -219,7 +221,7 @@ class Twitter extends SocialMediaApi {
      *   The HTML building the sign in button.
      */
     public static function loginButton($authorize = false) {
-        JS::set('token', Session::getInstance()->getToken());
+        JS::set('token', Form::getToken());
         JS::startup('lightning.social.initLogin()');
 
         self::loadAutoLoader();

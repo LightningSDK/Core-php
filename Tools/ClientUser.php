@@ -8,6 +8,7 @@ namespace Lightning\Tools;
 
 use Exception;
 use Lightning\Model\User;
+use Lightning\Tools\Session\DBSession;
 
 /**
  * A singleton for the global user.
@@ -34,7 +35,7 @@ class ClientUserOverridable extends Singleton {
      */
     public static function createInstance() {
         // If a session is found.
-        $session = Session::getInstance(true, false);
+        $session = DBSession::getInstance(true, false);
         if ($session && $session->user_id > 0) {
             // If we are logged into someone elses account.
             if (!empty($session->content->impersonate)) {
@@ -88,7 +89,7 @@ class ClientUserOverridable extends Singleton {
             }
             return false;
         } else {
-            Session::impliedInitialization();
+            DBSession::impliedInitialization();
             return true;
         }
     }
@@ -110,6 +111,8 @@ class ClientUserOverridable extends Singleton {
      * @param integer $permission
      *
      * @return boolean
+     *
+     * @throws Exception
      */
     public static function requirePermission($permission) {
         self::requireLogin();
@@ -120,7 +123,7 @@ class ClientUserOverridable extends Singleton {
     }
 
     public static function getReferrer($prioritizeSession = false) {
-        $session = Session::getInstance(true, false);
+        $session = DBSession::getInstance(true, false);
 
         // There is no session, there can't be a referrer.
         if (empty($session)) {

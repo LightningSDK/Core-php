@@ -6,12 +6,11 @@ use Exception;
 use Lightning\Model\Blacklist;
 use Lightning\Model\Blog;
 use Lightning\Tools\Configuration;
-use Lightning\Tools\Language;
+use Lightning\Tools\Form as FormTool;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Output;
 use Lightning\Tools\Request;
-use Lightning\Tools\Session;
 use Lightning\Tools\Template;
 use Lightning\Model\Page as PageModel;
 use Lightning\Model\Tracker;
@@ -249,27 +248,11 @@ class PageOverridable {
         $this->output();
     }
 
-    public function requireToken() {
-        if (!$this->validateToken()) {
-            Output::error(Language::translate('invalid_token'));
-        }
-    }
-
     /**
-     * Make sure a valid token has been received.
-     *
-     * @return boolean
-     *   Whether the token is valid.
+     * @throws Exception
      */
-    public function validateToken() {
-        // If this is a post request, there must be a valid token.
-        if (!$this->ignoreToken && strtolower(Request::type()) == 'post') {
-            $token = Request::post('token', Request::TYPE_BASE64);
-            return !empty($token) && $token == Session::getInstance()->getToken();
-        } else {
-            // This is not a POST request so it's not required.
-            return true;
-        }
+    public function requireToken() {
+        FormTool::validateToken();
     }
 
     /**

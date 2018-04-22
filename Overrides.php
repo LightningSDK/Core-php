@@ -31,7 +31,10 @@ namespace Lightning\Tools;
 class ClientUser extends \Lightning\Tools\ClientUserOverridable {}
 class Logger extends \Lightning\Tools\LoggerOverridable {}
 class Request extends \Lightning\Tools\RequestOverridable {}
-class Session extends \Lightning\Tools\SessionOverridable {}
+
+namespace Lightning\Tools\Session;
+class DBSession extends \Lightning\Tools\Session\DBSessionOverridable {}
+class BrowserSession extends \Lightning\Tools\Session\BrowserSessionOverridable {}
 
 namespace Lightning\Tools\Security;
 

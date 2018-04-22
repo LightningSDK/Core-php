@@ -9,7 +9,9 @@ use Google_Service_Plus_ActivityObject;
 use Google_Service_Plus_ActivityObjectAttachments;
 use Google_Service_PlusDomains;
 use Lightning\Tools\Configuration;
+use Lightning\Tools\Form;
 use Lightning\Tools\Session;
+use Lightning\Tools\Session\BrowserSession;
 use Lightning\View\JS;
 use stdClass;
 
@@ -205,7 +207,7 @@ class Google extends SocialMediaApi {
     }
 
     public static function loginButton($authorize = false) {
-        JS::set('token', Session::getInstance()->getToken());
+        JS::set('token', Form::getToken());
         JS::set('social.authorize', $authorize);
         JS::set('social.google.client_id', Configuration::get('social.google.client_id'));
         JS::set('social.google.scope', Configuration::get('social.google.scope'));

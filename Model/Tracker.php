@@ -4,11 +4,10 @@ namespace Lightning\Model;
 
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
-use Lightning\Tools\Data;
 use Lightning\Tools\Database;
 use Lightning\Tools\Request;
 use Lightning\Tools\Security\Encryption;
-use Lightning\Tools\Session;
+use Lightning\Tools\Session\DBSession;
 use Lightning\View\Field\Time;
 use Lightning\View\JS;
 
@@ -116,7 +115,7 @@ class TrackerOverridable extends Object {
             $user_id = ClientUser::getInstance()->id;
         }
 
-        $session = Session::getInstance(true, false);
+        $session = DBSession::getInstance(true, false);
         $session_id = ($session && $session->id > 0) ? $session->id : 0;
 
         // Insert the event.
@@ -165,7 +164,7 @@ class TrackerOverridable extends Object {
         ];
 
         if (empty($user_id)) {
-            $session = Session::getInstance(true, false);
+            $session = DBSession::getInstance(true, false);
             $criteria['session_id'] = ($session && $session->id > 0) ? $session->id : 0;
         }
 
@@ -370,7 +369,7 @@ class TrackerOverridable extends Object {
             return;
         }
 
-        $session = Session::getInstance();
+        $session = DBSession::getInstance();
         $session->content->trackerEvents = self::$events;
         $session->save();
     }
@@ -379,7 +378,7 @@ class TrackerOverridable extends Object {
      * Load messages and errors from the session.
      */
     public static function loadFromSession() {
-        if ($session = Session::getInstance(true, false)) {
+        if ($session = DBSession::getInstance(true, false)) {
             if (!empty($session->content->trackerEvents)) {
                 // Load the events.
                 self::$events = array_merge(self::$events, json_decode(json_encode($session->content->trackerEvents), true));

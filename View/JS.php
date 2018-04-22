@@ -8,7 +8,7 @@ namespace Lightning\View;
 
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Data;
-use Lightning\Tools\Session;
+use Lightning\Tools\Form as FormTool;
 
 /**
  * Class JS
@@ -171,7 +171,7 @@ class JS {
      * Add the session token as a JS accessible variable.
      */
     public static function addSessionToken() {
-        self::set('token', Session::getInstance()->getToken());
+        self::set('token', FormTool::getToken());
     }
 
     /**

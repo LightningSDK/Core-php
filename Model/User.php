@@ -560,14 +560,14 @@ class UserOverridable extends Object {
      *   The user input data.
      */
     public static function parseNames(&$data) {
-        if (isset($data['full_name'])) {
+        if (!empty($data['full_name'])) {
             $name = explode(' ', $data['full_name'], 2);
             $data['first'] = $name[0];
             if (!empty($name[1])) {
                 $data['last'] = $name[1];
             }
-            unset($data['full_name']);
         }
+        unset($data['full_name']);
     }
 
     /**

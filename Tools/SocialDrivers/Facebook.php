@@ -7,8 +7,10 @@ use Facebook\Entities\SignedRequest;
 use Facebook\FacebookRequest;
 use Facebook\FacebookSession;
 use Lightning\Tools\Configuration;
+use Lightning\Tools\Form;
 use Lightning\Tools\Scrub;
 use Lightning\Tools\Session;
+use Lightning\Tools\Session\BrowserSession;
 use Lightning\Tools\Template;
 use Lightning\View\Facebook\SDK;
 use Lightning\View\JS;
@@ -233,7 +235,7 @@ class Facebook extends SocialMediaApi {
 
     public static function loginButton($authorize = false) {
         JS::add('//connect.facebook.net/en_US/sdk.js');
-        JS::set('token', Session::getInstance()->getToken());
+        JS::set('token', Form::getToken());
         JS::set('social.authorize', $authorize);
         SDK::init();
         JS::startup('lightning.social.initLogin()', '//connect.facebook.net/en_US/sdk.js');
