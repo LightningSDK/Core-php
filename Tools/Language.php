@@ -2,13 +2,15 @@
 
 namespace Lightning\Tools;
 
+use Lightning\Tools\Session\DBSession;
+
 class Language {
 
     protected static $inited = false;
 
     protected static $language;
 
-    public static function init() {
+    protected static function init() {
         if (empty(self::$language)) {
             $language = [];
             include_once CONFIG_PATH . '/lang.' . Configuration::get('language') . '.php';

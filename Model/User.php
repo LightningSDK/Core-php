@@ -12,7 +12,7 @@ use Lightning\Tools\Security\Encryption;
 use Lightning\Tools\Security\Random;
 use Lightning\Tools\Request;
 use Lightning\Tools\Scrub;
-use Lightning\Tools\Session;
+use Lightning\Tools\Session\DBSession;
 use Lightning\Tools\SocialDrivers\SocialMediaApi;
 use Lightning\View\Field\Time;
 
@@ -136,7 +136,7 @@ class UserOverridable extends Object {
      *   Whether the current user is impersonated.
      */
     public function isImpersonating() {
-        $session = Session::getInstance(true, false);
+        $session = DBSession::getInstance(true, false);
         return $session && !empty($session->content->impersonate);
     }
 
@@ -146,7 +146,7 @@ class UserOverridable extends Object {
      */
     public function impersonatingParentUser() {
         if ($this->isImpersonating()) {
-            return Session::getInstance()->user_id;
+            return DBSession::getInstance()->user_id;
         }
         return null;
     }
@@ -651,7 +651,7 @@ class UserOverridable extends Object {
         if ($temp_user = static::loadByEmail($email)) {
             // user found
             if ($temp_user->checkPass($password)) {
-                $temp_user->registerToSession($remember, $auth_only ?: Session::STATE_PASSWORD);
+                $temp_user->registerToSession($remember, $auth_only ?: DBSession::STATE_PASSWORD);
                 return true;
             } else {
                 Logger::security('Bad Password', Logger::SEVERITY_HIGH);
@@ -666,15 +666,15 @@ class UserOverridable extends Object {
     public function destroy() {
         // TODO: Remove the current user's session.
         $this->__data = [];
-        Session::reset();
+        DBSession::reset();
     }
 
-    public function registerToSession($remember = false, $state = Session::STATE_PASSWORD) {
+    public function registerToSession($remember = false, $state = DBSession::STATE_PASSWORD) {
         // We need to create a new session if:
         //  There is no session
         //  The session is blank
         //  The session user is not set to this user
-        $session = Session::getInstance(true, false);
+        $session = DBSession::getInstance(true, false);
         // If there is a session, there is cleanup work to do.
         if (is_object($session) && $session->user_id == 0) {
             // If this is an anonymous session, we want to update any tables with session reference to user reference.
@@ -697,8 +697,8 @@ class UserOverridable extends Object {
             if (is_object($session) && !empty($session->id)) {
                 $session->destroy();
             }
-            $session = Session::create($this->id, $remember);
-            Session::setInstance($session);
+            $session = DBSession::create($this->id, $remember);
+            DBSession::setInstance($session);
         }
 
         // Set the user id and state.
@@ -717,7 +717,7 @@ class UserOverridable extends Object {
      * Destroy a user object and end the session.
      */
     public function logOut() {
-        $session = Session::getInstance();
+        $session = DBSession::getInstance();
         if ($this->id > 0 && is_object($session)) {
             $session::destroyInstance();
         }

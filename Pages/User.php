@@ -10,7 +10,7 @@ use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Request;
 use Lightning\Tools\Scrub;
-use Lightning\Tools\Session;
+use Lightning\Tools\Session\DBSession;
 use Lightning\Tools\SocialDrivers\Facebook;
 use Lightning\Tools\SocialDrivers\Google;
 use Lightning\Tools\SocialDrivers\SocialMediaApi;
@@ -293,7 +293,7 @@ class User extends Page {
     }
 
     public function getStopImpersonating() {
-        $session = Session::getInstance();
+        $session = DBSession::getInstance();
         if (ClientUser::getInstance()->isImpersonating()) {
             if (!empty($session->content->impersonate)) {
                 unset($session->content->impersonate);

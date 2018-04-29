@@ -11,6 +11,7 @@ use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Output;
 use Lightning\Tools\Request;
+use Lightning\Tools\Session\DBSession;
 use Lightning\Tools\Template;
 use Lightning\Model\Page as PageModel;
 use Lightning\Model\Tracker;
@@ -127,7 +128,7 @@ class PageOverridable {
 
         // For referral tracking
         if (($ref = Request::get('ref', Request::TYPE_INT)) && Configuration::get('user.track_referrer')) {
-            $session = Session::getInstance();
+            $session = DBSession::getInstance();
             $session->content->referrer = $ref;
             $session->save();
         }

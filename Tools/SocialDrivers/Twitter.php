@@ -233,7 +233,7 @@ class Twitter extends SocialMediaApi {
         $request_token = $connection->oauth('oauth/request_token', ['oauth_callback' => $oauth_callback]);
 
         // Save the token to the session.
-        $session = Session::getInstance();
+        $session = DBSession::getInstance();
         if (empty($session->content->twitter)) {
             $session->content->twitter = new stdClass();
         }

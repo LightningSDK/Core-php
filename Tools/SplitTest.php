@@ -3,6 +3,7 @@
 namespace Lightning\Tools;
 
 use Lightning\Model\Tracker;
+use Lightning\Tools\Session\DBSession;
 use Lightning\View\JS;
 use stdClass;
 
@@ -26,7 +27,7 @@ class SplitTest {
      *   The rendered content.
      */
     public static function render($name, $options, $sticky = true) {
-        $session = Session::getInstance();
+        $session = DBSession::getInstance();
 
         if (array_key_exists($name, self::$options)) {
             $option = self::$options[$name];

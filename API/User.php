@@ -7,8 +7,8 @@ use Lightning\Tools\Configuration;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Output;
 use Lightning\Tools\Request;
-use Lightning\Tools\Session;
 use Lightning\Model\User as UserModel;
+use Lightning\Tools\Session\DBSession;
 use Lightning\Tools\SocialDrivers\Facebook;
 use Lightning\Tools\SocialDrivers\Google;
 use Lightning\Tools\SocialDrivers\SocialMediaApi;
@@ -30,8 +30,8 @@ class User extends API {
             // BAD PASSWORD COMBO
             Messenger::error('Invalid password.');
         } else {
-            $session = Session::getInstance();
-            $session->setState(Session::STATE_APP);
+            $session = DBSession::getInstance();
+            $session->setState(DBSession::STATE_APP);
             $data['cookies'] = ['session' => $session->session_key];
             $data['user_id'] = ClientUser::getInstance()->id;
             Output::setJsonCookies(true);
@@ -79,7 +79,7 @@ class User extends API {
         $social_api->afterLogin();
 
         // Output the new cookie.
-        $data['cookies'] = ['session' => Session::getInstance()->session_key];
+        $data['cookies'] = ['session' => DBSession::getInstance()->session_key];
         $data['user_id'] = ClientUser::getInstance()->id;
         Output::json($data);
     }

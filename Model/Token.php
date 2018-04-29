@@ -9,7 +9,7 @@ use Lightning\Tools\ClientUser;
 use Lightning\Tools\Database;
 use Lightning\Tools\Request;
 use Lightning\Tools\Security\Random;
-use Lightning\Tools\Session;
+use Lightning\Tools\Session\DBSession;
 use Lightning\Tools\SingletonObject;
 
 class TokenOverridable extends SingletonObject{
@@ -79,7 +79,7 @@ class TokenOverridable extends SingletonObject{
     static function create() {
         $time = time();
         // CREATE A NEW UNIQUE TOKEN
-        $session = Session::getInstance();
+        $session = DBSession::getInstance();
         $user = ClientUser::getInstance();
         $db = Database::getInstance();
         do {
@@ -87,7 +87,7 @@ class TokenOverridable extends SingletonObject{
         } while ($db->check('action_token', ['key' => $token]));
         // MAKE SURE THERE IS A SESSION
         if (!is_object($session) || !$session->id) {
-            $session = Session::getInstance();
+            $session = DBSession::getInstance();
         }
         // MAKE SURE WE HAVE A USER ID
         $user_id = $user->id;

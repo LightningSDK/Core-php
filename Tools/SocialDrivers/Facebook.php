@@ -9,9 +9,7 @@ use Facebook\FacebookSession;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Form;
 use Lightning\Tools\Scrub;
-use Lightning\Tools\Session;
-use Lightning\Tools\Session\BrowserSession;
-use Lightning\Tools\Template;
+use Lightning\Tools\Session\DBSession;
 use Lightning\View\Facebook\SDK;
 use Lightning\View\JS;
 use stdClass;
@@ -30,7 +28,7 @@ class Facebook extends SocialMediaApi {
         if (!empty($token)) {
             $fb->setToken($token, $authorize);
         } else {
-            $session = Session::getInstance(true, false);
+            $session = DBSession::getInstance(true, false);
             if (!empty($session->content->facebook->token)) {
                 $fb->setToken((array) $session->content->facebook->token, $authorize);
             }
@@ -131,7 +129,7 @@ class Facebook extends SocialMediaApi {
     }
 
     public function storeSessionData() {
-        $session = Session::getInstance();
+        $session = DBSession::getInstance();
         if (empty($session->content->facebook)) {
             $session->content->facebook = new stdClass();
         }

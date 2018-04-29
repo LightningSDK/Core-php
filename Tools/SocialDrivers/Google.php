@@ -10,8 +10,7 @@ use Google_Service_Plus_ActivityObjectAttachments;
 use Google_Service_PlusDomains;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Form;
-use Lightning\Tools\Session;
-use Lightning\Tools\Session\BrowserSession;
+use Lightning\Tools\Session\DBSession;
 use Lightning\View\JS;
 use stdClass;
 
@@ -39,7 +38,7 @@ class Google extends SocialMediaApi {
         if (!empty($token)) {
             $google->setToken($token, $authorize);
         } else {
-            $session = Session::getInstance(true, false);
+            $session = DBSession::getInstance(true, false);
             if (!empty($session->content->google->token)) {
                 $google->setToken($session->content->google->token, $authorize);
             }
@@ -79,7 +78,7 @@ class Google extends SocialMediaApi {
     }
 
     public function storeSessionData() {
-        $session = Session::getInstance();
+        $session = DBSession::getInstance();
         if (empty($session->content->google)) {
             $session->content->google = new stdClass();
         }

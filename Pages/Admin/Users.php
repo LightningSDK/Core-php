@@ -8,7 +8,7 @@ use Lightning\Tools\ClientUser;
 use Lightning\Tools\Database;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Request;
-use Lightning\Tools\Session;
+use Lightning\Tools\Session\DBSession;
 use Lightning\View\Field\BasicHTML;
 use Lightning\View\Field\Text;
 use Source\Model\Permissions;
@@ -181,7 +181,7 @@ class Users extends Table {
     }
 
     public function getImpersonate() {
-        $session = Session::getInstance();
+        $session = DBSession::getInstance();
         $session->content->impersonate = Request::get('id', Request::TYPE_INT);
         $session->save();
         // TODO: This should call the User::loginRedirect() function.
