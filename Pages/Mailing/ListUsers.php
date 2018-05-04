@@ -10,8 +10,8 @@ use Lightning\Tools\Template;
 
 class ListUsers extends Table {
 
-    protected $table = 'user';
-    protected $key = 'user_id';
+    const TABLE = 'user';
+    const PRIMARY_KEY = 'user_id';
 
     protected $accessTable = 'message_list_user';
     protected $fields = [

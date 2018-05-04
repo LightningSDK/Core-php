@@ -5,13 +5,13 @@ namespace Lightning\View;
 use Exception;
 use Lightning\Model\Blacklist;
 use Lightning\Model\Blog;
+use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Form as FormTool;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Output;
 use Lightning\Tools\Request;
-use Lightning\Tools\Session\DBSession;
 use Lightning\Tools\Template;
 use Lightning\Model\Page as PageModel;
 use Lightning\Model\Tracker;
@@ -126,12 +126,7 @@ class PageOverridable {
             JS::add($this->js);
         }
 
-        // For referral tracking
-        if (($ref = Request::get('ref', Request::TYPE_INT)) && Configuration::get('user.track_referrer')) {
-            $session = DBSession::getInstance();
-            $session->content->referrer = $ref;
-            $session->save();
-        }
+        ClientUser::trackReferrer();
     }
 
     /**

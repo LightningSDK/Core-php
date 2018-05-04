@@ -2,6 +2,7 @@
 
 namespace Lightning\Pages;
 
+use Exception;
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Form;
@@ -72,22 +73,17 @@ class User extends Page {
         }
 
         // Register user
-        $res = UserModel::register($email, $pass2);
-        if (!$res['success']) {
-            if ($res['error'] == 'exists') {
-                Messenger::error('An account with that email already exists. Please try again. if you lost your password, click <a href="/user?action=reset&email=' . urlencode($email) . '">here</a>');
-                return $this->getRegister();
-            } else {
-                Messenger::error('User could not be created');
-                return $this->getRegister();
-            }
+        try {
+            $user = UserModel::register($email, $pass2);
+        } catch (Exception $e) {
+            Messenger::error('Could not register that account, please try again. if you lost your password, click <a href="/user?action=reset&email=' . urlencode($email) . '">here</a>');
+            return $this->getRegister();
         }
 
         // See if they are being added to a specific list.
         $default_list = Configuration::get('mailer.default_list', 0);
         $mailing_list = Request::post('list_id', Request::TYPE_INT, null, $default_list);
         if (!empty($mailing_list)) {
-            $user = UserModel::loadByEmail($email);
             $user->subscribe($mailing_list);
         }
 
@@ -269,6 +265,9 @@ class User extends Page {
         if ($user = UserModel::loadByTempKey(Request::get('key', Request::TYPE_BASE64))) {
             if (($pass = Request::post('password')) && $pass == Request::post('password2')) {
                 $user->setPass($pass);
+                $user->save();
+                // This is needed for password recovery to log the user in.
+                // TODO: Use login() instead.
                 $user->registerToSession();
                 $user->removeTempKey();
                 $this->loginRedirect();

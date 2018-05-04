@@ -17,7 +17,6 @@ class Users extends Table {
 
     const TABLE = 'user';
     const PRIMARY_KEY = 'user_id';
-    protected $table = 'user';
 
     protected function hasAccess() {
         return ClientUser::requirePermission(Permissions::EDIT_USERS);
@@ -167,11 +166,11 @@ class Users extends Table {
         $time = time();
 
         // This will only update users that were just added.
-        $db->update('user', ['created' => $time], ['user_id' => ['IN', $ids]]);
+        $db->update(self::TABLE, ['created' => $time], ['user_id' => ['IN', $ids]]);
 
         // This will add all the users to the mailing list.
         if (!empty($mailing_list_id)) {
-            $user_ids = $db->selectColumn('user', 'user_id', ['email' => ['IN', $values['email']]]);
+            $user_ids = $db->selectColumn(self::TABLE, 'user_id', ['email' => ['IN', $values['email']]]);
             $db->insertMultiple('message_list_user', [
                 'user_id' => $user_ids,
                 'message_list_id' => $mailing_list_id,

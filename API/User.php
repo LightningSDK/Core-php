@@ -2,6 +2,7 @@
 
 namespace Lightning\API;
 
+use Exception;
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Messenger;
@@ -84,6 +85,13 @@ class User extends API {
         Output::json($data);
     }
 
+    /**
+     * Register a user.
+     *
+     * @return int
+     *
+     * @throws Exception
+     */
     public function postRegister() {
         $email = Request::post('email', 'email');
         $pass = Request::post('password');
@@ -95,12 +103,8 @@ class User extends API {
         }
         
         // Register user
-        $res = UserModel::register($email, $pass);
-        if ($res['success']) {
-            Output::json($res['data']);
-        } else {
-            Output::error($res['error']);
-        }
+        $user = UserModel::register($email, $pass);
+        return Output::SUCCESS;
     }
 
     public function postReset() {

@@ -2,6 +2,7 @@
 
 namespace Lightning\Model;
 
+use Exception;
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
@@ -25,10 +26,14 @@ use Lightning\View\Field\Time;
  * @property string $first
  * @property string $last
  * @property string $timezone
- * @property object $content
+ * @property integer $created
+ * @property integer $registered
+ * @property integer $last_login
+ * @property integer $last_active
  * @property string $password
  * @property string $salt
  * @property boolean $new
+ * @property integer $referrer
  */
 class UserOverridable extends Object {
 
@@ -64,7 +69,7 @@ class UserOverridable extends Object {
      * @return static
      */
     public static function loadByEmail($email) {
-        if ($details = Database::getInstance()->selectRow('user', ['email' => ['LIKE', $email]])) {
+        if ($details = Database::getInstance()->selectRow(self::TABLE, ['email' => ['LIKE', $email]])) {
             return new static($details);
         }
         return null;
@@ -77,7 +82,7 @@ class UserOverridable extends Object {
      * @return static
      */
     public static function loadById($user_id) {
-        if ($details = Database::getInstance()->selectRow('user', ['user_id' => $user_id])) {
+        if ($details = Database::getInstance()->selectRow(self::TABLE, ['user_id' => $user_id])) {
             return new static($details);
         }
         return null;
@@ -96,7 +101,7 @@ class UserOverridable extends Object {
                 'from' => 'user_temp_key',
                 'join' => [
                     'LEFT JOIN',
-                    'user',
+                    self::TABLE,
                     'using (`user_id`)',
                 ]
             ],
@@ -117,7 +122,7 @@ class UserOverridable extends Object {
      */
     public function update($values) {
         $this->__data = $values + $this->__data;
-        Database::getInstance()->update('user', $values, ['user_id' => $this->id]);
+        Database::getInstance()->update(self::TABLE, $values, ['user_id' => $this->id]);
     }
 
     /**
@@ -190,7 +195,7 @@ class UserOverridable extends Object {
             $salt = $this->salt;
             $hashed_pass = $this->password;
         }
-        if ($hashed_pass == $this->passHash($pass, pack('H*', $salt))) {
+        if ($hashed_pass == $this->passHash($pass, $salt)) {
             return true;
         }
         else {
@@ -210,7 +215,7 @@ class UserOverridable extends Object {
      *   The hashed password.
      */
     public static function passHash($pass, $salt) {
-        return hash('sha256', $pass . $salt);
+        return hash('sha256', $pass . pack('H*', $salt));
     }
 
     /**
@@ -220,7 +225,7 @@ class UserOverridable extends Object {
      *   A binary string of salt.
      */
     public static function getSalt() {
-        return Random::getInstance()->get(32, Random::BIN);
+        return Random::getInstance()->get(32, Random::HEX);
     }
 
     public static function urlKey($user_id = -1, $salt = null) {
@@ -228,7 +233,7 @@ class UserOverridable extends Object {
             $user_id = ClientUser::getInstance()->id;
             $salt = ClientUser::getInstance()->salt;
         } elseif (!$salt) {
-            $user = Database::getInstance()->selectRow('user', ['user_id' => $user_id]);
+            $user = Database::getInstance()->selectRow(self::TABLE, ['user_id' => $user_id]);
             $salt = $user['salt'];
         }
         // TODO: This should be stronger.
@@ -241,7 +246,7 @@ class UserOverridable extends Object {
      * This should happen on each page load.
      */
     public function ping() {
-        Database::getInstance()->update('user', ['last_active' => time()], ['user_id' => $this->id]);
+        Database::getInstance()->update(self::TABLE, ['last_active' => time()], ['user_id' => $this->id]);
     }
 
     /**
@@ -252,68 +257,87 @@ class UserOverridable extends Object {
      */
     public function load_info($force = false) {
         if (!isset($this->__data) || $force) {
-            $this->__data = Database::getInstance()->selectRow('user', ['user_id' => $this->id]);
+            $this->__data = Database::getInstance()->selectRow(self::TABLE, ['user_id' => $this->id]);
         }
     }
 
     /**
-     * Create a new user.
+     * Registers user, create the user, subscribe them and sign in.
+     *
+     * @param string $email email
+     * @param string $pass password
+     *
+     * @return User
+     *
+     * @throws Exception
+     */
+    public static function register($email, $pass) {
+        // Save current user for further anonymous check
+        $user = ClientUser::getInstance();
+        $previous_user = $user->id;
+
+        // Try to create a user or throw exception.
+        $user = self::create($email, $pass);
+
+        // Register the user to the session
+        self::login($email, $pass);
+        $user = ClientUser::getInstance();
+        Tracker::loadOrCreateByName(Tracker::REGISTER, Tracker::USER)->track(0, $user->id);
+        $user->subscribe(Configuration::get('mailer.default_list'));
+
+        // Merge with a previous anon user if necessary.
+        if ($previous_user != 0) {
+            // TODO: This should only happen if the user is a placeholder.
+            $user->merge_users($previous_user);
+        }
+
+        return $user;
+    }
+
+    /**
+     * Registers a new user or sets a password if a user is only in the mailing list.
      *
      * @param string $email
      *   The user's email address.
      * @param string $pass
      *   The new password.
+     * @param array $data
+     *   Other fields
      *
-     * @return array
-     *   When creation is successful:
-     *      [Status of creation, user id]
-     *   When not:
-     *      [Status of creation, Error short code]
+     * @return User
+     *   The user object if it was successfully registered
+     *
+     * @throws Exception
+     *   If the user is already registered
      */
-    public static function create($email, $pass) {
-        if (Database::getInstance()->check('user', ['email' => strtolower($email), 'password' => ['!=', '']])) {
+    public static function create($email, $pass, $data = []) {
+        $user = User::loadByEmail($email);
+        if ($user && $user->password) {
             // An account already exists with that email.
-            return [
-                'success'   => false,
-                'error'     => 'A user with that email already exists.'
-            ];
-        } elseif ($user_info = Database::getInstance()->selectRow('user', ['email' => strtolower($email), 'password' => ''])) {
-            // EMAIL EXISTS IN MAILING LIST ONLY
-            $updates = [];
-            // Set the referrer.
-            if ($ref = Request::cookie('ref', 'int')) {
-                $updates['referrer'] = $ref;
+            throw new Exception('A user with that email already exists');
+        } elseif ($user) {
+            // The user is only in a mailing list.
+            if ($user->referrer == 0 && $ref = ClientUser::getReferrer()) {
+                // Set the referrer.
+                $user->referrer = $ref;
             }
-            $user = new self($user_info);
-            $user->setPass($pass, '', $user_info['user_id']);
-            $updates['registered'] = Time::today();
-            Database::getInstance()->update('user', $updates, ['user_id' => $user_info['user_id']]);
-            $user->sendConfirmationEmail();
-            return [
-                'success'   => true,
-                'data'      => $user_info['user_id']
-            ];
+            $user->setPass($pass);
+            $user->registered = time();
+            $user->save();
         } else {
-            // EMAIL IS NOT IN MAILING LIST AT ALL
-            $user_id = static::insertUser($email, $pass);
-            $updates = [];
-            if ($ref = Request::cookie('ref', 'int')) {
-                $updates['referrer'] = $ref;
-            }
-            if (!empty($updates)) {
-                Database::getInstance()->update('user', $updates, ['user_id' => $user_id]);
-            }
-            $user = static::loadById($user_id);
-            $user->sendConfirmationEmail();
-            return [
-                'success'   => true,
-                'data'      => $user_id
-            ];
+            // The user is not in the DB at all.
+            $user = static::insertUser([
+                'email' => $email,
+                'pass' => $pass,
+            ] + $data);
         }
+
+        $user->sendConfirmationEmail();
+        return $user;
     }
 
     /**
-     * Make sure that a user's email is listed in the database.
+     * Ensure a user is in the database, creates the user if it does not exist.
      *
      * @param string $email
      *   The user's email.
@@ -322,26 +346,72 @@ class UserOverridable extends Object {
      * @param array $update
      *   Which values to update the user if the email already exists.
      *
-     * @return static
+     * @return User
+     *
+     * @throws Exception
+     *   If the user could not be created
      */
     public static function addUser($email, $options = [], $update = []) {
         $user_data = [];
         $user_data['email'] = strtolower($email);
         static::parseNames($options);
         static::parseNames($update);
-        $db = Database::getInstance();
-        if ($user = $db->selectRow('user', $user_data)) {
-            if ($update) {
-                $db->update('user', $update, $user_data);
+        if ($user = User::loadByEmail($email)) {
+            foreach ($update as $key => $val) {
+                $user->$key = $val;
             }
-            $user_id = $user['user_id'];
-            return static::loadById($user_id);
+            $user->save();
+            return $user;
         } else {
-            $user_id = $db->insert('user', $options + $user_data + ['created' => time()]);
-            $user = static::loadById($user_id);
-            $user->new = true;
+            $user = static::insertUser($options + $user_data);
             return $user;
         }
+    }
+
+    /**
+     * Creates a new user. Throws an exception if the user exists at all.
+     *
+     * @param array $data
+     *   The new user data
+     *
+     * @return User
+     *   The new user.
+     *
+     * @throws Exception
+     *   On invalid email.
+     */
+    protected static function insertUser($data) {
+        $email = Scrub::email(strtolower($data['email']));
+        if (empty($email)) {
+            throw new Exception('Invalid email!');
+        }
+
+        $time = time();
+        $data = [
+                'email' => $email,
+                'created' => $time,
+                'confirmed' => static::requiresConfirmation() ? static::UNCONFIRMED : static::CONFIRMED,
+                'referrer' => ClientUser::getReferrer(),
+            ] + $data;
+        if (isset($data['pass'])) {
+            $rawPass = $data['pass'];
+        }
+        $user = new User($data);
+        if (!empty($rawPass)) {
+            $user->setPass($rawPass);
+            $user->registered = $time;
+        }
+        $user->save();
+
+        if ($user->id) {
+            $user->new = true;
+        } else {
+            // Track the error
+            Tracker::loadOrCreateByName(Tracker::REGISTER_ERROR, Tracker::ERROR)->track(0);
+            throw new Exception('Could not create user');
+        }
+
+        return $user;
     }
 
     /**
@@ -406,41 +476,6 @@ class UserOverridable extends Object {
         return implode($pass);
     }
 
-    /**
-     * Insert a new user if he doesn't already exist.
-     *
-     * @param string $email
-     *   The new email
-     * @param string $pass
-     *   The new password
-     * @param string $first_name
-     *   The first name
-     * @param string $last_name
-     *   The last name.
-     *
-     * @return integer
-     *   The new user's ID.
-     */
-    protected static function insertUser($email, $pass = NULL, $first_name = '', $last_name = '') {
-        $time = time();
-        $user_details = [
-            'email' => Scrub::email(strtolower($email)),
-            'first' => $first_name,
-            'last' => $last_name,
-            'created' => $time,
-            'confirmed' => static::requiresConfirmation() ? static::UNCONFIRMED : static::CONFIRMED,
-            // TODO: Need to get the referrer id.
-            'referrer' => 0,
-        ];
-        if ($pass) {
-            $salt = static::getSalt();
-            $user_details['password'] = static::passHash($pass, $salt);
-            $user_details['salt'] = bin2hex($salt);
-            $user_details['registered'] = $time;
-        }
-        return Database::getInstance()->insert('user', $user_details);
-    }
-
     public function __set($var, $value) {
         if ($var == 'email') {
             $value = strtolower($value);
@@ -453,74 +488,57 @@ class UserOverridable extends Object {
      *
      * @param string $pass
      *   The new password.
-     * @param string $email
-     *   Their email if updating by email.
-     * @param integer $user_id
-     *   The user_id if updating by user_id.
-     *
-     * @return boolean
-     *   Whether the password was updated.
-     *
-     * TODO: This should never be called with email or user_id, and should only change the current
-     * user's password. it should not modify the database until $user->save() is called.
      */
-    public function setPass($pass, $email = '', $user_id = 0) {
-        if ($email != '') {
-            $where['email'] = strtolower($email);
-        } elseif ($user_id > 0) {
-            $where['user_id'] = $user_id;
-        } else {
-            $where['user_id'] = $this->id;
-        }
-
-        $salt = $this->getSalt();
-        return (boolean) Database::getInstance()->update(
-            'user',
-            [
-                'password' => $this->password = $this->passHash($pass,$salt),
-                'salt' => $this->salt = bin2hex($salt),
-            ],
-            $where
-        );
+    public function setPass($pass) {
+        $this->salt = $this->getSalt();
+        $this->password = $this->passHash($pass, $this->salt);
     }
 
     /**
      * Has to be redone. Not currently in use.
+     *
+     * @param $email
+     * @param string $first_name
+     * @param string $last_name
+     *
+     * @return int|User
+     *
+     * @throws Exception
      */
     public function admin_create($email, $first_name='', $last_name='') {
         $today = gregoriantojd(date('m'), date('d'), date('Y'));
-        $user_info = Database::getInstance()->selectRow('user', ['email' => strtolower($email)]);
-        if ($user_info['password'] != '') {
+        $user = User::loadByEmail($email);
+        if ($user->password) {
             // user exists with password
             // return user_id
-            return $user_info['user_id'];
-        } else if (isset($user_info['password'])) {
+            return $user->id;
+        } elseif ($user->id) {
             // user exists without password
             // set password, send email
             $randomPass = $this->randomPass();
-            $this->setPass($randomPass, $email);
+            $user->setPass($randomPass);
+            $user->save();
             $mailer = new Mailer();
             $mailer
                 ->to($email)
                 ->subject('New Account')
                 ->message("Your account has been created with a temporary password. Your temporary password is: {$randomPass}\n\nTo reset your password, log in with your temporary password and click 'my profile'. Follow the instructions to reset your new password.")
                 ->send();
-            Database::getInstance()->update(
-                'user',
-                [
-                    'registered' => $today,
-                    'confirmed' => static::requiresConfirmation() ? static::UNCONFIRMED : static::CONFIRMED,
-                ],
-                [
-                    'user_id' => $user_info['user_id'],
-                ]
-            );
-            return $user_info['user_id'];
+            $user->registered = time();
+            $user->confirmed = static::requiresConfirmation() ? static::UNCONFIRMED : static::CONFIRMED;
+            $user->save();
+            return $user->id;
         } else {
             // user does not exist
             // create user with random password, send email to activate
-            $randomPass = $this->randomPass();
-            $user_id = $this->insertUser($email, $randomPass, $first_name, $last_name);
+            $randomPass =
+            $data = [
+                'email' => $email,
+                'pass' => $this->randomPass(),
+                'first' => $first_name,
+                'last' => $last_name,
+            ];
+            $user_id = static::insertUser($data);
             $mailer = new Mailer();
             $mailer
                 ->to($email)
@@ -528,7 +546,7 @@ class UserOverridable extends Object {
                 ->message("Your account has been created with a temporary password. Your temporary password is: {$randomPass}\n\nTo reset your password, log in with your temporary password and click 'my profile'. Follow the instructions to reset your new password.")
                 ->send();
             Database::getInstance()->update(
-                'user',
+                self::TABLE,
                 [
                     'registered' => $today,
                     'confirmed' => static::requiresConfirmation() ? static::UNCONFIRMED : static::CONFIRMED,
@@ -598,7 +616,7 @@ class UserOverridable extends Object {
     }
 
     /**
-     * Delete the temoporary password reset key.
+     * Delete the temporary password reset key.
      */
     public function removeTempKey() {
         Database::getInstance()->delete(
@@ -619,7 +637,7 @@ class UserOverridable extends Object {
     }
 
     public static function find_by_email($email) {
-        return Database::getInstance()->selectRow('user', ['email' => strtolower($email)]);
+        return Database::getInstance()->selectRow(self::TABLE, ['email' => strtolower($email)]);
     }
 
     /**
@@ -669,6 +687,12 @@ class UserOverridable extends Object {
         DBSession::reset();
     }
 
+    /**
+     * @param bool $remember
+     * @param int $state
+     *
+     * TODO: Make private, require the user of login() instead.
+     */
     public function registerToSession($remember = false, $state = DBSession::STATE_PASSWORD) {
         // We need to create a new session if:
         //  There is no session
@@ -823,58 +847,9 @@ class UserOverridable extends Object {
      */
     public function merge_users($anon_user) {
         // FIRST MAKE SURE THIS USER IS ANONYMOUS
-        if (Database::getInstance()->check('user', ['user_id' => $anon_user, 'email' => ''])) {
+        if (Database::getInstance()->check(self::TABLE, ['user_id' => $anon_user, 'email' => ''])) {
             // TODO: Basic information should be moved here, but this function should be overriden.
-            Database::getInstance()->delete('user', ['user_id' => $anon_user]);
-        }
-    }
-
-    /**
-     * Registers user
-     *
-     * @param string $email email
-     * @param string $pass password
-     * @return array
-     *   When successful:
-     *      [Status, new user id]
-     *   When not:
-     *      [Status, error short code]
-     *
-     * @todo This should return the user object, with other data contained inside.
-     */
-    public static function register($email, $pass) {
-        // Save current user for further anonymous check
-        $user = ClientUser::getInstance();
-        $previous_user = $user->id;
-
-        // Try to create a user or abort with error message
-        $res = self::create($email, $pass);
-        if ($res['success']) {
-
-            self::login($email, $pass);
-            $user = ClientUser::getInstance();
-            Tracker::loadOrCreateByName(Tracker::REGISTER, Tracker::USER)->track(0, $user->id);
-            $user->subscribe(Configuration::get('mailer.default_list'));
-
-            // Merge with a previous anon user if necessary.
-            if ($previous_user != 0) {
-                // TODO: This should only happen if the user is a placeholder.
-                $user->merge_users($previous_user);
-            }
-
-            // Success
-            return [
-                'success'   => true,
-                'data'      => ['user_id' => ClientUser::getInstance()->id]
-            ];
-        } else {
-            Tracker::loadOrCreateByName(Tracker::REGISTER_ERROR, Tracker::ERROR)->track(0);
-
-            // Error
-            return [
-                'success'   => false,
-                'error'     => $res['error']
-            ];
+            Database::getInstance()->delete(self::TABLE, ['user_id' => $anon_user]);
         }
     }
 
@@ -891,7 +866,7 @@ class UserOverridable extends Object {
             return;
         }
         $this->permissions = Database::getInstance()->selectColumnQuery([
-            'from' => 'user',
+            'from' => self::TABLE,
             'join' => [
                 [
                     'LEFT JOIN',

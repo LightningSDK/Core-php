@@ -6,6 +6,7 @@
 
 namespace Lightning\CLI;
 
+use Exception;
 use Lightning\Model\Role;
 use Lightning\Tools\Scrub;
 use Lightning\Model\User as UserModel;
@@ -49,11 +50,11 @@ class User extends CLI {
 
     public function executeSetPassword() {
         if (empty($this->parameters['user']) || !Scrub::email($this->parameters['user'])) {
-            throw new \Exception('Invalid email');
+            throw new Exception('Invalid email');
         }
         $user = UserModel::loadByEmail($this->parameters['user']);
         if (empty($user)) {
-            throw new \Exception('Invalid user');
+            throw new Exception('Invalid user');
         }
 
         if (empty($this->parameters['password'])) {
@@ -65,5 +66,6 @@ class User extends CLI {
         }
 
         $user->setPass($password);
+        $user->save();
     }
 }

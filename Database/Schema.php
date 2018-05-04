@@ -8,6 +8,7 @@ abstract class Schema implements SchemaInterface {
 
     const INT = 'int';
     const TINYINT = 'tinyint';
+    const BIGINT = 'bigint';
 
     const TINYTEXT = 'tinytext';
     const TEXT = 'text';

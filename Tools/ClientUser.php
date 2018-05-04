@@ -8,6 +8,7 @@ namespace Lightning\Tools;
 
 use Exception;
 use Lightning\Model\User;
+use Lightning\Tools\Session\BrowserSession;
 use Lightning\Tools\Session\DBSession;
 
 /**
@@ -123,16 +124,11 @@ class ClientUserOverridable extends Singleton {
     }
 
     public static function getReferrer($prioritizeSession = false) {
-        $session = DBSession::getInstance(true, false);
+        $session = BrowserSession::getInstance();
 
         // There is no session, there can't be a referrer.
-        if (empty($session)) {
-            return false;
-        }
-
-        // If the session referrer is more important.
         if ($prioritizeSession && !empty($session->content->referrer)) {
-            return $session->content->referrer;
+            return $session->referrer;
         }
 
         // If the user referrer is present.
@@ -144,10 +140,21 @@ class ClientUserOverridable extends Singleton {
         }
 
         // If there is a session referrer.
-        if (!empty($session->content->referrer)) {
-            return $session->content->referrer;
+        if (!empty($session->referrer)) {
+            return $session->referrer;
         }
 
-        return false;
+        return 0;
+    }
+
+    /**
+     * If a referrer code is present, track it.
+     */
+    public static function trackReferrer() {
+        if ($ref = Request::get('ref', Request::TYPE_INT)) {
+            $session = BrowserSession::getInstance();
+            $session->referrer = $ref;
+            $session->save();
+        }
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Lightning\Tools\Session;
 
+use Exception;
 use Lightning\Model\ObjectDataStorage;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Output;
@@ -36,10 +37,16 @@ class BrowserSessionOverridable extends SingletonObject {
         }
     }
 
+    /**
+     * Get the form token value
+     *
+     * @return string
+     * @throws Exception
+     */
     public function getFormToken() {
         if (empty($this->form_token)) {
             static::generateFormToken();
-            $this->setCookie();
+            $this->save();
         }
 
         return $this->form_token;
@@ -59,8 +66,10 @@ class BrowserSessionOverridable extends SingletonObject {
 
     /**
      * Output the cookie to the requesting web server (for relay to the client).
+     *
+     * @throws Exception
      */
-    public function setCookie() {
+    public function save() {
         if (!empty($this->__data)) {
             $value = Encryption::aesEncrypt(
                 json_encode($this->__data),
