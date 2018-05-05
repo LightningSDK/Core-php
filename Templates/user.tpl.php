@@ -45,8 +45,8 @@
     <?php if (empty($action) || $action == "login"): ?>
         <div class="small-12 <?= empty($action) ? 'medium-6' : 'medium-6 medium-offset-3'; ?> column">
             <fieldset>
-                <legend>Log In with your email and password</legend>
-                <form action="/user" method="post" id="register" data-abide>
+                <legend>Log in with your email and password</legend>
+                <form action="/user" method="post" id="login" data-abide>
                     <?= Form::renderTokenInput(); ?>
                     <div>
                         <label>Your Email:

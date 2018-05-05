@@ -187,7 +187,7 @@ class RestClient {
                 $content = json_encode($vars);
                 $this->setHeader('Content-Type', self::CONTENT_TYPE_JSON);
             } elseif (!empty($this->sendData)) {
-                $content =& $this->sendData;
+                $content = http_build_query($this->sendData);
             } else {
                 $content = http_build_query($vars);
             }

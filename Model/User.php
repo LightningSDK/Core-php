@@ -395,6 +395,7 @@ class UserOverridable extends Object {
             ] + $data;
         if (isset($data['pass'])) {
             $rawPass = $data['pass'];
+            unset($data['pass']);
         }
         $user = new User($data);
         if (!empty($rawPass)) {
