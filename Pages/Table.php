@@ -3905,13 +3905,15 @@ abstract class Table extends Page {
                         $filter = $field['accessControl'] + $filter;
                     }
 
-                    $options = $this->database->selectColumn(
-                        // todo: rename these for consistency.
-                        $field['lookuptable'],
-                        $field['display_column'],
-                        $filter,
-                        !empty($field['lookupkey']) ? $field['lookupkey'] : $field['field']
-                    );
+                    $options = $this->database->selectColumnQuery([
+                        'select' => [
+                            !empty($field['lookupkey']) ? $field['lookupkey'] : $field['field'],
+                            $field['display_column'],
+                        ],
+                        'from' => $field['lookuptable'],
+                        'where' => $filter,
+                        'limit' => !empty($field['limit']) ? $field['limit'] : 1000,
+                    ]);
                 }
                 elseif ($field['type'] == 'yesno') {
                     $options = [1 => 'No', 2 => 'Yes'];

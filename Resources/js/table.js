@@ -227,8 +227,9 @@
 
         autocompleteCache: {
             field: {},
-            link: {},
+            link: {}
         },
+
         autocomplete: function () {
             var field = $(this);
             var field_name = field.data('name');
@@ -241,7 +242,10 @@
             }
 
             // If there is already an equal search in progress, quit.
-            if (self.autocompleteCache[type][field_name] && self.autocompleteCache[type][field_name].lastFetch == search) {
+            if (
+                self.autocompleteCache[type][field_name]
+                && self.autocompleteCache[type][field_name].lastFetch === search
+            ) {
                 return;
             }
 
@@ -256,30 +260,39 @@
                     action: 'autocomplete',
                     field: field.data('name'),
                     type: type,
-                    search: search,
+                    search: search
                 },
                 success: function (data) {
-                    if (search == self.autocompleteCache[type][field_name].lastFetch) {
+                    if (search === self.autocompleteCache[type][field_name].lastFetch) {
                         self.autocompleteDropdown(field_name, type, data.results);
                     }
-                },
+                }
             });
         },
 
         autocompleteDropdown: function (field, type, list) {
-            $('.autocomplete_options').each(function () {
-                if ($(this).attr('id') != "table_container_" + field) {
+            // This is a dynamically created div
+            var autocomplete_options = $('.autocomplete_options');
+            autocomplete_options.each(function () {
+                if ($(this).attr('id') !== 'table_container_' + field) {
+                    // If it already exists for another field, remove it.
                     $(this).remove();
                 } else {
+                    // If it already exists for this field, empty it.
                     $('#list_' + field).empty();
                 }
             });
-            if ($('.autocomplete_options').length == 0) {
-                $('#' + field + '_autocomplete').after('<div id="table_container_' + field + '" class="autocomplete_options" data-field="' + field + '" data-type="' + type + '"><div id="list_' + field + '"></div></div>');
+            // Create the autocomplete container after #_{field}_autocomplete
+            if (autocomplete_options.length === 0) {
+                var element = $('#' + field + '_autocomplete');
+                if (element.length === 0) {
+                    element = $('#' + field);
+                }
+                element.after('<div id="table_container_' + field + '" class="autocomplete_options" data-field="' + field + '" data-type="' + type + '"><div id="list_' + field + '"></div></div>');
             }
 
             var container = $('#list_' + field);
-            if (type == 'link' && lightning.get('table_data.links.' + field + '.create')) {
+            if (type === 'link' && lightning.get('table_data.links.' + field + '.create')) {
                 container.append('<span class="create">Create a new entry</span>');
                 container.on('click', '.create', self.setAutocompleteCreateNew);
             }
@@ -323,7 +336,7 @@
                     action: 'create-link',
                     link: field_name,
                     value: value,
-                    token: lightning.vars.token,
+                    token: lightning.vars.token
                 },
                 success: function(data){
                     // Remove the list.
