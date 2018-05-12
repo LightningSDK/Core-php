@@ -192,6 +192,7 @@ class RestClient {
                 $content = http_build_query($vars);
             }
             curl_setopt($curl, CURLOPT_POSTFIELDS, $content);
+            $this->signBodyContents($content);
         }
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         if (!empty($this->cookies)) {
@@ -219,6 +220,12 @@ class RestClient {
             throw new Exception($error);
         }
     }
+
+    /**
+     * Overridable placeholder method.
+     * @param $content
+     */
+    protected function signBodyContents(&$content) {}
 
     protected function cookieImplode($cookies) {
         // @TODO: Does this need sanitization?
