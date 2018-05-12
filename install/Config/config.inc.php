@@ -178,5 +178,11 @@ $conf = [
             'test' => 'Source\\CLI\\Test',
         ],
     ],
-    'language' => 'en_us',
+    'language' => [
+        'default' => 'en_us',
+        'available' => [
+            'en_us' => 'English',
+        ],
+        'url_method' => 'subdomain',
+    ],
 ];
