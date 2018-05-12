@@ -117,14 +117,29 @@ class Configuration {
 
             // Load module configurations.
             if (!empty(self::$configuration['modules']['include'])) {
-                foreach (self::$configuration['modules']['include'] as $module) {
+                $includeModules = self::$configuration['modules']['include'];
+                for ($i = 0; $i < count($includeModules); $i++) {
+                    $module = $includeModules[$i];
                     if (file_exists(HOME_PATH . '/Modules/' . $module . '/config.php')) {
-                        self::softMerge(require HOME_PATH . '/Modules/' . $module . '/config.php');
+                        $moduleConfig = require HOME_PATH . '/Modules/' . $module . '/config.php';
+                        self::softMerge($moduleConfig);
+                        if (!empty($moduleConfig['modules']['include'])) {
+                            foreach ($moduleConfig['modules']['include'] as $include) {
+                                if (!in_array($include, $includeModules)) {
+                                    $includeModules[] = $include;
+                                }
+                            }
+                        }
                     }
                 }
             }
             self::$loaded = true;
+            self::$loading = false;
         }
+    }
+
+    public static function reload() {
+        static::loadConfiguration();
     }
 
     /**
