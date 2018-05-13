@@ -3994,6 +3994,7 @@ abstract class Table extends Page {
                 $options['size'] = $array[2];
             default:
                 if (!empty($field['autocomplete'])) {
+                    JS::startup('lightning.table.init()');
                     $options['class'] = ['autocomplete_field'];
                     $options['data-name'] = $field['form_field'];
                     $options['data-type'] = 'field';
