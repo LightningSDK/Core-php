@@ -6,7 +6,9 @@ use Lightning\Tools\ClientUser;
 use Lightning\Pages\Table;
 
 class Permissions extends Table {
-    protected $table = 'permission';
+
+    const TABLE = 'permission';
+    const PRIMARY_KEY = 'permission_id';
 
     protected $search_fields = [
         'permission_id',

@@ -24,8 +24,6 @@ class Messages extends Table {
     const TABLE = 'message';
     const PRIMARY_KEY = 'message_id';
 
-    protected $table = 'message';
-
     protected $preset = [
         'never_resend' => [
             'type' => 'checkbox',

@@ -10,6 +10,14 @@ use Lightning\Model\Permissions;
 
 class Pages extends Table {
 
+    const TABLE = 'pages';
+    const PRIMARY_KEY = 'page_id';
+
+    /**
+     * @return boolean
+     *
+     * @throws \Exception
+     */
     public function hasAccess() {
         return ClientUser::requirePermission(Permissions::EDIT_PAGES);
     }
@@ -18,7 +26,6 @@ class Pages extends Table {
     protected $search_fields = ['title', 'url', 'body'];
 
     protected $nav = 'admin_pages';
-    protected $table = 'page';
     protected $sortable = true;
     protected $trusted = true;
     protected $duplicatable = true;
@@ -63,6 +70,8 @@ class Pages extends Table {
         $this->preset['url']['submit_function'] = function(&$output) {
             $output['url'] = Request::post('url', Request::TYPE_URL) ?: Request::post('title', Request::TYPE_URL);
         };
+
+        $this->preset['language'] = \Lightning\Tools\Configuration::get('language.available');
 
         if (\Lightning\Tools\Configuration::get('css.editable')) {
             $this->custom_buttons['css'] = [

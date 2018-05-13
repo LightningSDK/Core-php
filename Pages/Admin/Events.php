@@ -6,8 +6,9 @@ use Lightning\Pages\Table;
 use Lightning\Tools\ClientUser;
 
 class Events extends Table {
-    protected $table = 'calendar';
-    protected $key = 'event_id';
+
+    const TABLE = 'calendar';
+    const PRIMARY_KEY = 'event_id';
 
     protected $preset = [
         'start_date' => 'date',

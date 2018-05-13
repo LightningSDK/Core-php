@@ -18,7 +18,9 @@ use Lightning\Tools\Output;
  */
 class Lists extends Table {
 
-    protected $table = 'message_list';
+    const TABLE = 'message_list';
+    const PRIMARY_KEY = 'message_list_id';
+
     protected $preset = [
         'message_list_id' => [
             'type' => 'hidden',

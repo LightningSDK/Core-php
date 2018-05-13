@@ -946,6 +946,8 @@ abstract class Table extends Page {
 
     /**
      * Prepend the output by setting the page templates, etc.
+     *
+     * @throws Exception
      */
     public function output() {
         // Call finalize the output.

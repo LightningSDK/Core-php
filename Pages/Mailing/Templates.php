@@ -6,7 +6,9 @@ use Lightning\Pages\Table;
 use Lightning\Tools\ClientUser;
 
 class Templates extends Table {
-    protected $table = 'message_template';
+
+    const TABLE = 'message_template';
+
     protected $preset = [
         'body' => [
             'type' => 'html',

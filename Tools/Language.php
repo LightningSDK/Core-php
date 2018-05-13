@@ -56,7 +56,7 @@ class Language {
     public static function switchTo($new_language) {
         if (self::get() !== $new_language) {
             $session = BrowserSession::getInstance();
-            $session->content->language = $new_language;
+            $session->language = $new_language;
             $session->save();
         }
     }
@@ -69,8 +69,8 @@ class Language {
      */
     public static function get() {
         $session = BrowserSession::getInstance();
-        if (!empty($session->content->language)) {
-            return $session->content->language;
+        if (!empty($session->language)) {
+            return $session->language;
         } else {
             return Configuration::get('language.default');
         }
@@ -84,7 +84,7 @@ class Language {
      */
     public static function isDefault() {
         $session = BrowserSession::getInstance();
-        return empty($session->content->language) || ($session->content->language === Configuration::get('language.default'));
+        return empty($session->language) || ($session->language === Configuration::get('language.default'));
     }
 
     /**

@@ -6,7 +6,9 @@ use Lightning\Tools\ClientUser;
 use Lightning\Pages\Table;
 
 class Roles extends Table {
-    protected $table = 'role';
+
+    const TABLE = 'role';
+    const PRIMARY_KEY = 'role_id';
 
     protected $search_fields = [
         'role_id',

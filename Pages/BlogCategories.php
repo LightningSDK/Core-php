@@ -3,12 +3,12 @@
 namespace Lightning\Pages;
 
 use Lightning\Tools\Request;
-use Lightning\Tools\Scrub;
 use Lightning\Tools\Template;
 use Lightning\Tools\ClientUser;
 
 class BlogCategories extends Table {
-    protected $table = 'blog_category';
+
+    const TABLE = 'blog_category';
 
     public function hasAccess() {
         ClientUser::requireAdmin();
