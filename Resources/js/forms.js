@@ -25,14 +25,20 @@
                 existingVeil.css('opacity', .5);
             }, 100);
 
+            var successCallback = function(data) {
+                container.fadeOut();
+            };
+
+            var successCallbackName = form.data('ajax-success');
+            if (successCallbackName && window[successCallbackName]) {
+                successCallback = window[successCallbackName];
+            }
+
             $.ajax({
                 url: url,
                 type: 'POST',
                 data: form.serializeArray(),
-                success: function(data){
-                    // Hide the container
-                    container.fadeOut();
-                }
+                success: successCallback
             });
         },
 
