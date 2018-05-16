@@ -19,6 +19,8 @@ use Lightning\Model\User as UserModel;
 class User extends CLI {
     /**
      * Create an admin account. Will prompt for email address and password.
+     *
+     * @throws Exception
      */
     public function executeCreateAdmin() {
 
@@ -39,15 +41,23 @@ class User extends CLI {
             $password = $this->parameters['password'];
         }
 
-        $res = UserModel::create($email, $password);
-        if ($res['success']) {
-            $user = UserModel::loadById($res['data']);
+        $user = UserModel::register($email, $password);
+        if ($user) {
             $user->addRole(Role::ADMIN);
         } else {
             $this->out('Failed to create user.');
         }
     }
 
+    /**
+     * Set a user's password
+     *
+     * example usage:
+     *
+     * lighting user set-password --user={user-email}
+     *
+     * @throws Exception
+     */
     public function executeSetPassword() {
         if (empty($this->parameters['user']) || !Scrub::email($this->parameters['user'])) {
             throw new Exception('Invalid email');

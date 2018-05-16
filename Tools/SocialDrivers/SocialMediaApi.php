@@ -4,6 +4,7 @@ namespace Lightning\Tools\SocialDrivers;
 
 use Exception;
 use Lightning\Model\User;
+use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Mongo;
 use Lightning\Tools\Request;
@@ -64,6 +65,10 @@ abstract class SocialMediaApiOverridable extends Singleton implements SocialMedi
         if (!$this->authorize || $userData = $this->getProfile()) {
             // Create a user.
             $user_settings = $this->getLightningUserData();
+            if ($ref = ClientUser::getReferrer()) {
+                // Set the referrer.
+                $user_settings['referrer'] = $ref;
+            }
             $this->user = User::addUser($this->getLightningEmail(), $user_settings, $user_settings);
 
             // This requires mongodb.

@@ -7,6 +7,7 @@
 namespace Lightning\Pages;
 
 use Lightning\Model\URL;
+use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Language;
 use Lightning\Tools\Mailer;
@@ -265,20 +266,26 @@ class Contact extends PageView {
     /**
      * Load the user data and save it into a user entry.
      *
-     * @return UserModel|boolean
+     * @return bool
+     * @throws \Exception
      */
     protected function getSender() {
-        if ($name = Request::post('name', '', '', '')) {
-            $name_parts = explode(' ', $name, 2);
-            $name = ['first' => $name_parts[0]];
+        if ($data = Request::post('name', '', '', '')) {
+            $name_parts = explode(' ', $data, 2);
+            $data = ['first' => $name_parts[0]];
             if (!empty($name_parts[1])) {
-                $name['last'] = $name_parts[1];
+                $data['last'] = $name_parts[1];
             }
         } else {
-            $name = [
+            $data = [
                 'first' => Request::post('first', '', '', ''),
                 'last' => Request::post('last', '', '', ''),
             ];
+        }
+
+        if ($ref = ClientUser::getReferrer()) {
+            // Set the referrer.
+            $data['referrer'] = $ref;
         }
 
         // Add the user to the database.
@@ -286,7 +293,7 @@ class Contact extends PageView {
         if (empty($email)) {
             return false;
         }
-        $this->user = UserModel::addUser($email, $name);
+        $this->user = UserModel::addUser($email, $data);
         return true;
     }
 

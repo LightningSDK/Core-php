@@ -103,7 +103,7 @@ class User extends API {
         }
         
         // Register user
-        $user = UserModel::register($email, $pass);
+        $user = UserModel::registerAndSignIn($email, $pass);
         return Output::SUCCESS;
     }
 

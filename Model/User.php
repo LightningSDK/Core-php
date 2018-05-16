@@ -271,13 +271,13 @@ class UserOverridable extends Object {
      *
      * @throws Exception
      */
-    public static function register($email, $pass) {
+    public static function registerAndSignIn($email, $pass, $data = []) {
         // Save current user for further anonymous check
         $user = ClientUser::getInstance();
         $previous_user = $user->id;
 
         // Try to create a user or throw exception.
-        $user = self::create($email, $pass);
+        $user = self::register($email, $pass, $data);
 
         // Register the user to the session
         self::login($email, $pass);
@@ -310,23 +310,19 @@ class UserOverridable extends Object {
      * @throws Exception
      *   If the user is already registered
      */
-    public static function create($email, $pass, $data = []) {
+    public static function register($email, $pass, $data = []) {
         $user = User::loadByEmail($email);
         if ($user && $user->password) {
             // An account already exists with that email.
             throw new Exception('A user with that email already exists');
         } elseif ($user) {
             // The user is only in a mailing list.
-            if ($user->referrer == 0 && $ref = ClientUser::getReferrer()) {
-                // Set the referrer.
-                $user->referrer = $ref;
-            }
             $user->setPass($pass);
             $user->registered = time();
             $user->save();
         } else {
             // The user is not in the DB at all.
-            $user = static::insertUser([
+            $user = static::create([
                 'email' => $email,
                 'pass' => $pass,
             ] + $data);
@@ -357,13 +353,11 @@ class UserOverridable extends Object {
         static::parseNames($options);
         static::parseNames($update);
         if ($user = User::loadByEmail($email)) {
-            foreach ($update as $key => $val) {
-                $user->$key = $val;
-            }
-            $user->save();
+            // If the user already exists, return it. This does not log in, but should
+            // be treated as sensitive data.
             return $user;
         } else {
-            $user = static::insertUser($options + $user_data);
+            $user = static::create($options + $user_data);
             return $user;
         }
     }
@@ -380,7 +374,7 @@ class UserOverridable extends Object {
      * @throws Exception
      *   On invalid email.
      */
-    protected static function insertUser($data) {
+    protected static function create($data) {
         $email = Scrub::email(strtolower($data['email']));
         if (empty($email)) {
             throw new Exception('Invalid email!');
@@ -539,7 +533,7 @@ class UserOverridable extends Object {
                 'first' => $first_name,
                 'last' => $last_name,
             ];
-            $user_id = static::insertUser($data);
+            $user_id = static::create($data);
             $mailer = new Mailer();
             $mailer
                 ->to($email)

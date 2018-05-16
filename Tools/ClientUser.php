@@ -123,6 +123,10 @@ class ClientUserOverridable extends Singleton {
         return true;
     }
 
+    /**
+     * @param bool $prioritizeSession
+     * @return int|mixed
+     */
     public static function getReferrer($prioritizeSession = false) {
         $session = BrowserSession::getInstance();
 

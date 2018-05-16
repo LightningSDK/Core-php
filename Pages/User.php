@@ -74,7 +74,12 @@ class User extends Page {
 
         // Register user
         try {
-            $user = UserModel::register($email, $pass2);
+            $data = [];
+            if ($ref = ClientUser::getReferrer()) {
+                // Set the referrer.
+                $data['referrer'] = $ref;
+            }
+            $user = UserModel::registerAndSignIn($email, $pass2, $data);
         } catch (Exception $e) {
             Messenger::error('Could not register that account, please try again. if you lost your password, click <a href="/user?action=reset&email=' . urlencode($email) . '">here</a>');
             return $this->getRegister();
