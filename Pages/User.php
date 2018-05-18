@@ -271,6 +271,8 @@ class User extends Page {
             if (($pass = Request::post('password')) && $pass == Request::post('password2')) {
                 $user->setPass($pass);
                 $user->save();
+                Messenger::message('Your password has been updated.');
+
                 // This is needed for password recovery to log the user in.
                 // TODO: Use login() instead.
                 $user->registerToSession();
