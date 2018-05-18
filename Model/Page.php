@@ -2,7 +2,6 @@
 
 namespace Lightning\Model;
 
-use Lightning\Model\Object;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
 

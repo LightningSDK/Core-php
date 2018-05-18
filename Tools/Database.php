@@ -207,15 +207,17 @@ class Database extends Singleton {
      *   When a mysql error occurs.
      */
     public function errorHandler($error, $sql) {
+        $error_string = "MYSQL ERROR ($error[0]:$error[1]): $error[2] @ $sql";
         if ($this->verbose) {
-            $exception = new Exception("MYSQL ERROR ($error[0]:$error[1]): $error[2] @ $sql");
+            $exception = new Exception($error_string);
         } else {
             $exception = new Exception("***** MYSQL ERROR *****");
+            Logger::error($error_string);
         }
 
         Logger::exception($exception);
 
-        // Throw a general exception for all users.
+        // Throw a general xception for all users.
         throw $exception;
     }
 
@@ -283,6 +285,8 @@ class Database extends Singleton {
      *   The rendered query.
      * @param array $vars
      *   A list of replacement variables.
+     *
+     * @throws Exception
      */
     private function _query($query, $vars = []) {
         if ($this->readOnly) {
@@ -332,6 +336,8 @@ class Database extends Singleton {
      *   A list of replacement variables.
      *
      * @return PDOStatement
+     *
+     * @throws Exception
      */
     public function query($query, $vars = []) {
         $this->_query($query, $vars);

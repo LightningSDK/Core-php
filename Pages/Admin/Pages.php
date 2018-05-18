@@ -10,7 +10,7 @@ use Lightning\Model\Permissions;
 
 class Pages extends Table {
 
-    const TABLE = 'pages';
+    const TABLE = 'page';
     const PRIMARY_KEY = 'page_id';
 
     /**

@@ -374,7 +374,7 @@ class UserOverridable extends Object {
      * @throws Exception
      *   On invalid email.
      */
-    protected static function create($data) {
+    public static function create($data) {
         $email = Scrub::email(strtolower($data['email']));
         if (empty($email)) {
             throw new Exception('Invalid email!');
