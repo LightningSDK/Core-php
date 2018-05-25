@@ -320,6 +320,10 @@ class Scrub {
         return json_decode($string);
     }
 
+    public static function objectToAssocArray($object) {
+        return json_decode(json_encode($object), true);
+    }
+
     public static function json_string($string) {
         if (null !== json_decode($string)) {
             return $string;

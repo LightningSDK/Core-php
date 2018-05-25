@@ -64,6 +64,12 @@ $conf = [
         'bcc' => [],
         'optin' => false,
     ],
+    'messages' => [
+        'spamFilters' => [
+            \Lightning\Tools\Messages\BlackList::class,
+        ],
+        'maxAllowableScore' => 5,
+    ],
     'mailer' => [
         'test' => [],
         'spam_test' => [],

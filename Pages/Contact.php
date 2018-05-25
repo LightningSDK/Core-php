@@ -6,16 +6,21 @@
 
 namespace Lightning\Pages;
 
+use Exception;
 use Lightning\Model\URL;
 use Lightning\Tools\ClientUser;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Language;
 use Lightning\Tools\Mailer;
+use Lightning\Tools\Messages\SpamFilter;
 use Lightning\Tools\Messenger;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Output;
 use Lightning\Tools\ReCaptcha;
 use Lightning\Tools\Request;
+use Lightning\Tools\Scrub;
+use Lightning\Tools\Security\Encryption;
+use Lightning\Tools\Template;
 use Lightning\View\Page as PageView;
 use Lightning\Model\User as UserModel;
 use Lightning\Model\Message;
@@ -40,6 +45,12 @@ class Contact extends PageView {
 
     protected $page = ['contact', 'Lightning'];
     protected $menuContext = 'contact';
+    protected $share = false;
+
+    /**
+     * @var ContactModel
+     */
+    protected $contact;
 
     /**
      * An ID of a list if the user is being subscribed.
@@ -54,6 +65,13 @@ class Contact extends PageView {
      * @var UserModel
      */
     protected $user;
+
+    /**
+     * Additional values to be stored in message.
+     *
+     * @var array
+     */
+    protected $values;
 
     /**
      * Whether the site contacts should be notified.
@@ -109,14 +127,29 @@ class Contact extends PageView {
 
     /**
      * Send a posted contact request to the site admin.
+     *
+     * @throws Exception
      */
     public function post() {
+        // Initialize and validate
         $this->loadVars();
         $this->validateForm();
+
+        // Create a contact entry
+        $this->contact = new ContactModel($this->getContactFields());
+        $this->contact->save();
+
+        // Subscribe the user
         $this->optinUser();
+
+        // Send messages to the user and site contacts
         $this->messageUser();
         $this->messageSiteContact();
-        (new ContactModel($this->getContactFields()))->save();
+
+        // Update the contact information
+        $this->contact->setData($this->getContactFields());
+
+        // Redirect the user
         $this->redirect();
     }
 
@@ -139,6 +172,8 @@ class Contact extends PageView {
 
     /**
      * Run some checks on the form to make sure the required fields are submitted.
+     *
+     * @throws Exception
      */
     protected function validateForm() {
         // Check captcha if required.
@@ -175,6 +210,8 @@ class Contact extends PageView {
 
     /**
      * If the settings direct it, this will send a message to the user who filled in the contact form.
+     *
+     * @throws Exception
      */
     protected function messageUser() {
         // Send a message to the user who just opted in.
@@ -186,16 +223,21 @@ class Contact extends PageView {
 
     /**
      * If the settings direct it, this will send a contact notification to the site contacts.
+     *
+     * @throws Exception
      */
     protected function messageSiteContact() {
         // Send a message to the site contact.
         if (!empty($this->settings['always_notify']) || ($this->requestContact && $this->settings['contact'])) {
             $sent = $this->sendMessage();
-            Tracker::loadOrCreateByName('Contact Sent', Tracker::EMAIL)->track(URL::getCurrentUrlId(), $this->user->id);
             if (!$sent) {
                 Output::error('Your message could not be sent. Please try again later.');
             } else {
+                // Count the email ass sent.
+                Tracker::loadOrCreateByName('Contact Sent', Tracker::EMAIL)->track(URL::getCurrentUrlId(), $this->user->id);
+
                 // Send an email to to have them test for spam.
+                // TODO: This should be moved to the message sent to the user.
                 if (!empty($this->settings['auto_responder'])) {
                     $auto_responder_mailer = new Mailer();
                     $result = $auto_responder_mailer->sendOne($this->settings['auto_responder'], $this->user);
@@ -228,7 +270,7 @@ class Contact extends PageView {
             'list_id' => $this->list,
             'user_message' => $this->userMessage,
             'user_message_sent' => $this->userMessageSent,
-            'additional_fields' => json_encode($this->getAdditionalFields()),
+            'additional_fields' => $this->getAdditionalFields(),
         ];
     }
 
@@ -315,9 +357,23 @@ class Contact extends PageView {
             $mailer->replyTo($this->user->email);
         }
 
+        $subject = $this->settings['subject'];
+        $message = $this->getMessageBody();
+
+        // Append "flasg as spam" link
+        $encryptedMessageId = Encryption::aesEncrypt($this->contact->id, Configuration::get('user.key'));
+        $message .= '<br><br><br>';
+        $message .= '<a href="' . Configuration::get('web_root') . '/contact?action=spam&message=' . $encryptedMessageId . '">Mark this message as spam</a>';
+
+        if (SpamFilter::getScore($this->getAdditionalFields())
+            > Configuration::get('messages.maxAllowableScore')
+        ) {
+            $subject = 'SPAM: ' . $subject;
+        }
+
         return $this->contactAdminSent = (integer) $mailer
-            ->subject($this->settings['subject'])
-            ->message($this->getMessageBody())
+            ->subject($subject)
+            ->message($message)
             ->send();
     }
 
@@ -327,10 +383,9 @@ class Contact extends PageView {
      * @return array
      */
     protected function getAdditionalFields() {
-        static $values = null;
-        if ($values === null) {
+        if ($this->values === null) {
             $fields = array_combine(array_keys($_POST), array_keys($_POST));
-            $values = [
+            $this->values = [
                 'Name' => Request::post('name'),
                 'Email' => $this->user->email,
                 'IP' => Request::server(Request::IP),
@@ -353,10 +408,10 @@ class Contact extends PageView {
                 } else {
                     $input = Request::post($field);
                 }
-                $values[ucfirst(preg_replace('/_/', ' ', $field))] = $input;
+                $this->values[ucfirst(preg_replace('/_/', ' ', $field))] = $input;
             }
         }
-        return $values;
+        return $this->values;
     }
 
     /**
@@ -389,6 +444,49 @@ class Contact extends PageView {
         if (!empty($fields['Message'])) {
             $output .= "Message: <br>\n" . $fields['Message'];
         }
+
         return $output;
+    }
+
+    /**
+     * Flag a message as spam
+     *
+     * Query parameters:
+     *   message: encrypted message ID
+     *
+     * @throws Exception
+     */
+    public function getSpam() {
+        $input = Request::get('message', Request::TYPE_ENCRYPTED);
+        $id = Encryption::aesDecrypt($input, Configuration::get('user.key'));
+        $message = \Lightning\Model\Contact::loadByID($id);
+        if (empty($message)) {
+            throw new Exception('Invalid message');
+        }
+
+        $template = Template::getInstance();
+        $template->set('values', $input);
+        $template->set('confirmationMessage', 'Are you sure you want to mark this message as spam?');
+        $template->set('successAction', 'spam');
+        $this->page = ['confirmation', 'Lightning'];
+    }
+
+    /**
+     * Confirm that this message is to be marked as spam
+     *
+     * @throws Exception
+     */
+    public function postSpam() {
+        $input = Request::post('message', Request::TYPE_ENCRYPTED);
+        $id = Encryption::aesDecrypt($input, Configuration::get('user.key'));
+        $message = \Lightning\Model\Contact::loadByID($id);
+        if (empty($message)) {
+            throw new Exception('Invalid message');
+        }
+        $message->spam = 1;
+        $message->save();
+        \Lightning\Tools\Messages\SpamFilter::flagAsSpam(Scrub::objectToAssocArray($message->additional_fields));
+        Messenger::message('This message has been flagged as spam.');
+        Navigation::redirect('/message');
     }
 }

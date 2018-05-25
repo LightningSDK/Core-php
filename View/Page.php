@@ -232,8 +232,9 @@ class PageOverridable {
             }
 
             if (method_exists($this, $method)) {
-                if ($method != 'get') {
-                    Blacklist::checkBlacklist();
+                // If this IP is blacklisted internally, block it completely.
+                if ($request_type != 'get' && Blacklist::checkBlacklist(Request::getIP())) {
+                    throw new Exception('This action has been denied for security purposes.');
                 }
                 $this->{$method}();
             } else {
