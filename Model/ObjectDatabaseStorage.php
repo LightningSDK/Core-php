@@ -103,9 +103,9 @@ trait ObjectDatabaseStorage {
     }
 
     public static function create($data) {
-        $id = Database::getInstance()->insert(static::TABLE, $data);
-        $data[static::PRIMARY_KEY] = $id;
-        return new static($data);
+        $obj = new static($data);
+        $obj->save();
+        return $obj;
     }
 
     /**
