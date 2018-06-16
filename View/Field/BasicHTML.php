@@ -119,6 +119,12 @@ class BasicHTML {
         $attributes['id'] = $name;
         $attributes['value'] = $value;
         $attributes['type'] = 'hidden';
+
+        // Auto complete should default off for hidden fields.
+        if (!array_key_exists('autocomplete', $attributes)) {
+            $attributes['autocomplete'] = 'off';
+        }
+
         return '<input ' . HTML::implodeAttributes($attributes) . ' />';
     }
 
