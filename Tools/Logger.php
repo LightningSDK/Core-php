@@ -31,7 +31,7 @@ class LoggerOverridable extends Singleton {
      */
     public static function init() {
         if (Configuration::get('site.logtype') == 'stacktrace') {
-            set_error_handler(['Lightning\\Tools\\Logger', 'errorLogStacktrace']);
+            set_error_handler([\Lightning\Tools\Logger::class, 'errorLogStacktrace']);
         }
 
         if ($logfile = Configuration::get('site.log')) {
@@ -45,9 +45,9 @@ class LoggerOverridable extends Singleton {
      * @param $error
      */
     public static function error($error) {
-        // Create an exception with a stacktrace.
-        $ex = new \Exception($error);
-        self::exception($ex);
+        $trace = debug_backtrace();
+        array_shift($trace);
+        self::errorLogStacktrace(0, $error, $trace[0]['file'], $trace[0]['line'], null, $trace);
     }
 
     /**
@@ -116,20 +116,19 @@ class LoggerOverridable extends Singleton {
         $type = empty(self::$errorTypes[$errno]) ? 'Unknown Error Type' : self::$errorTypes[$errno];
         $output = (ini_get('display_errors') == 'On' || ini_get('display_errors') == 1);
 
-        self::message($method . ' ' . $protocol . $server . $uri);
-        self::message('    ' . $type . ': ' . $errstr);
-
-        if ($output) {
-            echo ('    ' . $type . ': ' . $errstr . ' in ' . $errfile . ' on line ' . $errline . "\n");
-        }
+        $message[] = $method . ' ' . $protocol . $server . $uri;
+        $message[] = $type . ': ' . $errstr;
 
         $formatted_stack = self::formatStacktrace($trace, $errfile, $errline);
 
         foreach ($formatted_stack as $line) {
-            self::message($line);
-            if ($output) {
-                echo $line . "\n";
-            }
+            $message[] = $line;
+        }
+
+        $message = implode("\n" . str_repeat(' ', 22), $message);
+        self::message($message);
+        if ($output) {
+            echo $message . "\n";
         }
     }
 
