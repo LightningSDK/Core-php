@@ -187,22 +187,15 @@ class PageOverridable {
     }
 
     /**
-     * Build a 404 page.
-     */
-    public function output404() {
-        $this->page = 'page';
-        if ($this->fullPage = PageModel::loadByUrl('404')) {
-            http_response_code(404);
-        } else {
-            Output::http(404);
-        }
-    }
-
-    /**
      * Determine if the current use has access to the page.
      */
     protected function hasAccess() {
         return false;
+    }
+
+    protected function head() {
+        // TODO: Add cache information
+        return null;
     }
 
     /**
