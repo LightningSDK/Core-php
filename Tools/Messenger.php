@@ -38,7 +38,10 @@ class Messenger {
      * @param string $error
      *   The new error.
      */
-    public static function error($error) {
+    public static function error($error, $log = false) {
+        if ($log || Configuration::get('log.messenger')) {
+            Logger::error($error);
+        }
         if (self::$verbose) {
             echo "Error: $error \n";
         }

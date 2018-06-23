@@ -26,6 +26,9 @@ class LoggerOverridable extends Singleton {
         E_USER_NOTICE     => 'user notice'
     ];
 
+    /**
+     * Load the log settings.
+     */
     public static function init() {
         if (Configuration::get('site.logtype') == 'stacktrace') {
             set_error_handler(['Lightning\\Tools\\Logger', 'errorLogStacktrace']);
@@ -36,10 +39,22 @@ class LoggerOverridable extends Singleton {
         }
     }
 
+    /**
+     * Log a string includign a stacktrace.
+     *
+     * @param $error
+     */
     public static function error($error) {
-        error_log($error);
+        // Create an exception with a stacktrace.
+        $ex = new \Exception($error);
+        self::exception($ex);
     }
 
+    /**
+     * Log an exception and print the stacktrace.
+     *
+     * @param $exception
+     */
     public static function exception($exception) {
         self::errorLogStacktrace($exception->getCode(), $exception->getMessage(), $exception->getFile(), $exception->getLine(), null, $exception->getTrace());
     }
