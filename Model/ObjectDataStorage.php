@@ -78,7 +78,7 @@ trait ObjectDataStorage {
     public function __get($var) {
         switch($var) {
             case 'id':
-                if (!empty($this->__data[static::PRIMARY_KEY])) {
+                if (isset($this->__data[static::PRIMARY_KEY])) {
                     return $this->__data[static::PRIMARY_KEY];
                 } else {
                     return false;
