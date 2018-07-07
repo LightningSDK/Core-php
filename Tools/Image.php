@@ -4,6 +4,10 @@ namespace Lightning\Tools;
 
 class Image {
 
+    const FORMAT_JPG = 'JPG';
+    const FORMAT_PNG = 'PNG';
+    const FORMAT_EPS = 'EPS';
+
     /**
      * The source image contents.
      *
@@ -65,6 +69,10 @@ class Image {
         return $image;
     }
 
+    /**
+     * @param $string
+     * @return Image
+     */
     public static function createFromString($string) {
         $image = new self();
         $image->source = imagecreatefromstring($string);
@@ -267,5 +275,39 @@ class Image {
         $contents = ob_get_contents();
         ob_end_clean();
         return $contents;
+    }
+
+    /**
+     * @param $file
+     * @param array $format
+     */
+    public function save($file, $format = ['format' => self::FORMAT_JPG, 'quality' => 80]) {
+        if (is_array($format)) {
+            $quality = $format['quality'];
+            $format = $format['format'];
+        }
+
+        switch ($format) {
+            case self::FORMAT_JPG:
+                file_put_contents($file, $this->getJPGData($quality));
+                break;
+            case self::FORMAT_PNG:
+                file_put_contents($file, $this->getPNGData());
+                break;
+        }
+    }
+
+    public static function setHeader($format) {
+        switch ($format) {
+            case self::FORMAT_PNG:
+                Output::setContentType('image/png');
+                break;
+            case self::FORMAT_EPS:
+                Output::setContentType('application/eps');
+                break;
+            case self::FORMAT_JPG:
+                Output::setContentType('image/jpeg');
+                break;
+        }
     }
 }

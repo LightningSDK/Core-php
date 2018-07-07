@@ -35,6 +35,8 @@ class RequestOverridable {
     const TYPE_URL_ENCODED = 'url_encoded';
     const TYPE_TEXT = 'text';
     const TYPE_STRING = 'string';
+    const TYPE_FILE = 'file';
+    const TYPE_IMAGE = 'image';
 
     /**
      * A list of request headers.
