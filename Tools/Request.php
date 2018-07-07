@@ -59,6 +59,8 @@ class RequestOverridable {
      */
     protected static $body = null;
 
+    protected static $cli = null;
+
     /**
      * Get the HTTP request type.
      *
@@ -87,7 +89,14 @@ class RequestOverridable {
      * @TODO need a more accurate way to determine this on other systems.
      */
     public static function isCLI() {
+        if (self::$cli !== null) {
+            return self::$cli;
+        }
         return PHP_SAPI == 'cli';
+    }
+
+    public static function setCLI($cli) {
+        self::$cli = $cli;
     }
 
     public static function getHeader($header) {
