@@ -12,11 +12,18 @@ class Form {
         // Render the open form tag.
         $form_attributes = [
             'method' => 'POST',
-            'action' => empty($options['action']) ? '/contact' : $options['action'],
+            isset($options['ajax']) ? 'data-ajax-action' : 'action' => $options['action'] ?? '/contact',
         ];
         if (isset($options['abide'])) {
-            $form_attributes['data-abide'] = '';
+            $form_attributes['data-abide'] = isset($options['ajax']) ? 'ajax' : '';
         }
+
+        foreach ($options as $key => $val) {
+            if (preg_match('/^data-/', $key)) {
+                $form_attributes[$key] = $val;
+            }
+        }
+
         $output = '<form ' . HTML::implodeAttributes($form_attributes) . '>';
         \Lightning\Tools\Form::requiresToken();
         $output .= \Lightning\Tools\Form::renderTokenInput();
