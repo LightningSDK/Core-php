@@ -640,7 +640,7 @@ abstract class Table extends Page {
     }
 
     /**
-     * The important alignment is posted, so process it here.
+     * Controller to process the import alignment.
      */
     public function postImportAlign() {
         if (!$this->importable) {
@@ -652,6 +652,9 @@ abstract class Table extends Page {
         Navigation::redirect();
     }
 
+    /**
+     * Initialize the CSV importer
+     */
     protected function initCSVImporter() {
         $this->CSVImporter = new CSVImport();
         $this->CSVImporter->setTable($this->table);
@@ -664,6 +667,9 @@ abstract class Table extends Page {
         }
     }
 
+    /**
+     * Controller to get the list view of a table
+     */
     public function getList() {
         if ($this->singularity) {
             $this->redirect();
@@ -686,6 +692,9 @@ abstract class Table extends Page {
         ]);
     }
 
+    /**
+     * Controller to display the delete confirmation page
+     */
     public function getDelete() {
         $this->action = 'delete';
         if (!$this->editable || !$this->deleteable) {
@@ -693,6 +702,11 @@ abstract class Table extends Page {
         }
     }
 
+    /**
+     * Controller to get autocmplete options
+     *
+     * @throws Exception
+     */
     public function getAutocomplete() {
         Output::setJson(true);
         $field = Request::get('field');
@@ -739,6 +753,11 @@ abstract class Table extends Page {
         Output::json(['results' => $results]);
     }
 
+    /**
+     * Controller to create a link
+     *
+     * @throws Exception
+     */
     public function postCreateLink() {
         Output::setJson(true);
 
@@ -769,6 +788,11 @@ abstract class Table extends Page {
         }
     }
 
+    /**
+     * Controller after confirming to delete an object
+     *
+     * @throws Exception
+     */
     public function postDelete() {
         $this->action = 'delconf';
 
@@ -796,6 +820,11 @@ abstract class Table extends Page {
         $this->afterPostRedirect();
     }
 
+    /**
+     * The main insert controller
+     *
+     * @throws Exception
+     */
     public function postInsert() {
         $this->action = 'insert';
         if (!$this->addable) {
@@ -846,6 +875,11 @@ abstract class Table extends Page {
     protected function afterPost() {}
     protected function afterDuplicate() {}
 
+    /**
+     * Controller to update an entry
+     *
+     * @throws Exception
+     */
     public function postUpdate() {
         $this->id = Request::post('id');
         $this->action = 'update';
@@ -990,6 +1024,8 @@ abstract class Table extends Page {
      *
      * @return string
      *   The primary key name.
+     *
+     * @throws Exception
      */
     public function getKey($useTableName = FALSE) {
         if (empty($this->key) && !empty($this->table)) {
@@ -1002,6 +1038,13 @@ abstract class Table extends Page {
         return $useTableName ? $this->fullField($this->key) : $this->key;
     }
 
+    /**
+     * Converts a field to a full field
+     *
+     * @param string $field
+     *
+     * @return string
+     */
     protected function fullField($field) {
         if (strpos($field, '.')) {
             return $field;
@@ -1010,6 +1053,13 @@ abstract class Table extends Page {
         }
     }
 
+    /**
+     * Renders the table from a template
+     *
+     * @return string
+     *
+     * @throws Exception
+     */
     public function render() {
         $output = '';
         $this->loadMainFields();
@@ -1287,6 +1337,14 @@ abstract class Table extends Page {
         }
     }
 
+    /**
+     * @param $list
+     * @param $editable
+     *
+     * @return string
+     *
+     * @throws Exception
+     */
     protected function renderListRows($list, $editable) {
         $output = '';
         // loop through DATA rows
@@ -1334,7 +1392,17 @@ abstract class Table extends Page {
         }
     }
 
-    // Render a link cell
+    /**
+     * Render a link cell
+     *
+     * @param array $link_settings
+     * @param array $row
+     * @param array $link
+     *
+     * @return string
+     *
+     * @throws Exception
+     */
     protected function renderLinkCell(&$link_settings, &$row, $link) {
         $output = '';
         if (!empty($link_settings['list']) && $link_settings['list'] == 'compact') {
@@ -1383,7 +1451,15 @@ abstract class Table extends Page {
         return $this->mainTableColumnCount;
     }
 
-    // called when rendering lists
+    /**
+     * Render linked lists
+     *
+     * @param array $row
+     *
+     * @return string
+     *
+     * @throws Exception
+     */
     protected function render_linked_table(&$row) {
         $output = "<tr class='linked_list_container_row'><td colspan='" . $this->getMainTableColumnCount() . "'><table width='100%'>";
         foreach ($this->links as $link => $link_settings) {
@@ -1521,6 +1597,8 @@ abstract class Table extends Page {
      *
      * @return string
      *   The fully rendered HTML content.
+     *
+     * @throws Exception
      */
     protected function renderForm() {
         if (!empty($this->customTemplates[$this->action . '_item'])) {
@@ -1540,17 +1618,22 @@ abstract class Table extends Page {
                     $output .= "<a href='" . $this->createUrl('delete', $this->id) . "'><img src='/images/lightning/remove.png' border='0' /></a>";
                 }
             }
+
+            // Start the table
             $style = !empty($this->styles['form_table']) ? "style='{$this->styles['form_table']}'" : '';
             $output .= '<table class="table_form_table" ' . $style . '>';
 
+            // Iterate over the fields
             $hidden_fields = [];
             $fieldOrder = is_array($this->fieldOrder) && !empty($this->fieldOrder) ? $this->fieldOrder : array_keys($this->fields);
             foreach ($fieldOrder as $f) {
                 if (!empty($this->fields[$f]['type']) && $this->fields[$f]['type'] == 'hidden') {
+                    // Capture a hidden field
                     if (!empty($this->fields[$f]['Value'])) {
                         $hidden_fields[] = BasicHTML::hidden($f, $this->fields[$f]['Value']);
                     }
                 } else {
+                    // All other fields
                     $output .= $this->renderFormRow($this->fields[$f], $this->list);
                 }
             }
@@ -1569,6 +1652,11 @@ abstract class Table extends Page {
         }
     }
 
+    /**
+     * Render the start form tags
+     *
+     * @return string
+     */
     public function renderFormOpen() {
         $output = '';
 
@@ -1781,8 +1869,13 @@ abstract class Table extends Page {
         return $this->renderFieldInputOrValue($which_field, $field, $row);
     }
 
-    // THIS IS CALLED TO RENDER LINKED TABLES IN view/edit/new MODE
-    // (full form)
+    /**
+     * This is called to render linked objects into table rows in the view/edit/new mode
+     *
+     * @return string
+     *
+     * @throws Exception
+     */
     protected function render_form_linked_tables() {
         $output = '';
         foreach ($this->links as $link => &$link_settings) {
@@ -2209,6 +2302,8 @@ abstract class Table extends Page {
      *
      * @return array
      *   The processed field data.
+     *
+     * @throws Exception
      */
     protected function get_fields($table, $preset) {
         if (!empty($table)) {
@@ -2485,6 +2580,8 @@ abstract class Table extends Page {
      * @param array $field
      *
      * @return boolean
+     *
+     * @throws Exception
      */
     protected function setValueOnUpdate(&$field) {
         if (
@@ -3039,15 +3136,13 @@ abstract class Table extends Page {
     }
 
     /**
-     * getRow() gets a single entry from the table based on $this->id
-
-     * Constructs a database query based on the following class variables:
-     * @param string $table->table			the table to query
-     * @param string $table->key		the table name of the parent link (foreign key table)
-     * @param string $table->id		the id (foreign key) of the parentLink with which to link
-
-     * @return stores result in $list class variable (no actual return result from the method)
-
+     * getRow() gets a single entry from the table based on $this->id and stores it in $this->list
+     *
+     * @param boolean $force
+     *
+     * @return boolean
+     *
+     * @throws Exception
      */
     protected function getRow($force = true) {
         if (!empty($this->prefixRows[$this->id])) {
@@ -3226,6 +3321,13 @@ abstract class Table extends Page {
         $this->list = $this->database->select($this->table);
     }
 
+    /**
+     * TODO: Remove?
+     *
+     * @return boolean
+     *
+     * @throws Exception
+     */
     protected function executeTask() {
         // do we load a subset or ss vars?
         if (isset($_REQUEST['ss'])) {
@@ -3387,6 +3489,11 @@ abstract class Table extends Page {
         return $f;
     }
 
+    /**
+     * Check if there are any file upload fields.
+     *
+     * @return boolean
+     */
     protected function hasUploadfield() {
         foreach ($this->fields as $f) {
             if ($f['type'] == 'file' || $f['type'] == 'image') {
@@ -3395,6 +3502,11 @@ abstract class Table extends Page {
         }
     }
 
+    /**
+     * Updated the linked tables
+     *
+     * @throws Exception
+     */
     protected function setPostedLinks() {
         foreach ($this->links as $link => $link_settings) {
             // FOR 1 (local) TO MANY (foreign)
@@ -3480,7 +3592,17 @@ abstract class Table extends Page {
         }
     }
 
-    // print field or print editable field
+    /**
+     * Print field or print editable field
+     *
+     * @param array $field
+     * @param array $row
+     * @param boolean $html
+     *
+     * @return array|mixed|string
+     *
+     * @throws Exception
+     */
     protected function printFieldValue($field, &$row = null, $html = true) {
         if (empty($row)) {
             $v = !empty($field['Value']) ? $field['Value'] : '';
@@ -3745,6 +3867,8 @@ abstract class Table extends Page {
      *
      * @return string
      *   The rendered HTML.
+     *
+     * @throws Exception
      */
     protected function renderEditField($field, &$row = []) {
         // Make sure the form_field is set.
