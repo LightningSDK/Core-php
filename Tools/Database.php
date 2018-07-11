@@ -582,7 +582,7 @@ class Database extends Singleton {
         $ignore = $existing === TRUE ? 'IGNORE' : '';
 
         // This passes $data as individual params to the __construct() function.
-        $reflect  = new ReflectionClass('Lightning\Tools\CombinationIterator');
+        $reflect = new ReflectionClass('Lightning\Tools\CombinationIterator');
         $combinator = $reflect->newInstanceArgs($data);
 
         $fields = $this->implodeFields(array_keys($data));
@@ -886,6 +886,8 @@ class Database extends Singleton {
      *
      * @return string
      *   The query-ready string for the table and it's joins.
+     *
+     * @throws Exception
      */
     protected function parseTable($table, &$values, $alias = null) {
         if (empty($alias) && !empty($table['as'])) {
