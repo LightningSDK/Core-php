@@ -890,9 +890,6 @@ class Database extends Singleton {
      * @throws Exception
      */
     protected function parseTable($table, &$values, $alias = null) {
-        if (empty($alias) && !empty($table['as'])) {
-            $alias = $table['as'];
-        }
         if (is_string($table)) {
             // A simple table as alias.
             $output = '`' . $table . '`';
@@ -901,6 +898,10 @@ class Database extends Singleton {
             }
         }
         else {
+            if (empty($alias) && !empty($table['as'])) {
+                $alias = $table['as'];
+            }
+
             // If this is a 1 item array with an alias as a key:
             if (count($table) == 1 && empty($table['from'])) {
                 $alias = key($table);
