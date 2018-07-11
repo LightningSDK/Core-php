@@ -2462,6 +2462,9 @@ abstract class Table extends Page {
         if (isset($field['insertable']) && $field['insertable'] == false) {
             return false;
         }
+        if ($field['field'] == $this->key) {
+            return false;
+        }
         // TODO: This should be replaced by an overriding method in the child class.
         if (
             (!empty($field['display_value']) && is_callable($field['display_value']))
