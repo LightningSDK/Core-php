@@ -1479,7 +1479,7 @@ abstract class Table extends Page {
                 }
                 if (!empty($link_settings['edit_js'])) {
                     // TODO: Move this to an init function.
-                    $output .= " <a href='' onclick='{$link_settings['edit_js']}.newLink({$row[$this->getKey()]})'>New</a>";
+                    $output .= " <a href='' onclick='{$link_settings['edit_js']} . newLink({$row[$this->getKey()]})'>New</a>";
                 }
                 $output .= "</td></tr>";
                 foreach ($links as $row) {
@@ -1610,8 +1610,8 @@ abstract class Table extends Page {
             // TODO: Put this into a template.
             $output = $this->renderFormOpen();
 
-            // Header options.
-            if ($this->action == "view" && !$this->readOnly) {
+            // Header options before the table
+            if ($this->action == 'view' && !$this->readOnly) {
                 if ($this->editable !== false) {
                     $output .= "<a href='" . $this->createUrl('edit', $this->id) . "'><img src='/images/lightning/edit.png' border='0' /></a>";
                 }
