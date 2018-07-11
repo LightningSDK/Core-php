@@ -66,6 +66,7 @@ abstract class Table extends Page {
 
     protected $action;
     protected $function;
+    protected $confirmMessage = 'Are you sure?';
 
     /**
      * @var integer
