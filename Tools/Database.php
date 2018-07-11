@@ -383,6 +383,8 @@ class Database extends Singleton {
      *
      * @return integer
      *   How many matching rows were found.
+     *
+     * @throws Exception
      */
     public function count($table, $where = [], $count_field = '*', $final = '') {
         if (!empty($table['limit'])) {
@@ -419,6 +421,8 @@ class Database extends Singleton {
      *
      * @return array
      *   A list of counts keyed by the $key column.
+     *
+     * @throws Exception
      */
     public function countKeyed($table, $key, $where = [], $order = '') {
         $this->_select($table, $where, ['count' => ['expression' => 'COUNT(*)'], $key], NULL, 'GROUP BY `' . $key . '` ' . $order);
@@ -457,6 +461,8 @@ class Database extends Singleton {
      *
      * @return integer
      *   The number of rows updated.
+     *
+     * @throws Exception
      */
     public function update($table, $data, $where) {
         $vars = [];
@@ -486,6 +492,8 @@ class Database extends Singleton {
      *
      * @return integer
      *   The last inserted id.
+     *
+     * @throws Exception
      */
     public function insert($table, $data, $existing = false, $return_count = false) {
         $vars = [];
@@ -517,6 +525,8 @@ class Database extends Singleton {
      *
      * @return integer
      *   The number of entries submitted.
+     *
+     * @throws Exception
      */
     public function insertSets($table, $value_sets, $existing = FALSE) {
         $vars = [];
@@ -560,6 +570,8 @@ class Database extends Singleton {
      *
      * @return integer
      *   The last inserted id.
+     *
+     * @throws Exception
      */
     public function insertMultiple($table, $data, $existing = FALSE) {
         $last_insert = false;
@@ -633,6 +645,11 @@ class Database extends Singleton {
         ]);
     }
 
+    /**
+     * @param array $query
+     *
+     * @throws Exception
+     */
     public function duplicateRowsQuery($query = []) {
 
         // Copy the data to the temp table.
@@ -665,6 +682,8 @@ class Database extends Singleton {
      *
      * @return integer
      *   The number of rows deleted.
+     *
+     * @throws Exception
      */
     public function delete($table, $where) {
         $values = [];
@@ -686,6 +705,8 @@ class Database extends Singleton {
      *   A limited number of rows.
      * @param string $final
      *   A final string to append to the query, such as limit and sort.
+     *
+     * @throws Exception
      */
     protected function _select($table, $where = [], $fields = [], $limit = NULL, $final = '') {
         $fields = $this->implodeFields($fields);
@@ -713,6 +734,8 @@ class Database extends Singleton {
      *
      * @return string
      *   The built query.
+     *
+     * @throws Exception
      *
      * @todo This should be protected.
      */
@@ -919,6 +942,8 @@ class Database extends Singleton {
      *
      * @return PDOStatement
      *   The query results.
+     *
+     * @throws Exception
      */
     public function select($table, $where = [], $fields = [], $final = '') {
         $this->_select($table, $where, $fields, null, $final);
@@ -948,6 +973,8 @@ class Database extends Singleton {
      *
      * @return array
      *   The query results.
+     *
+     * @throws Exception
      */
     public function selectAll($table, $where = [], $fields = [], $final = '') {
         $this->_select($table, $where, $fields, null, $final);
@@ -988,6 +1015,8 @@ class Database extends Singleton {
      *
      * @return array
      *   The query results keyed by $key.
+     *
+     * @throws Exception
      */
     public function selectIndexed($table, $key, $where = [], $fields = [], $final = '') {
         $this->_select($table, $where, $fields, NULL, $final);
@@ -1014,6 +1043,8 @@ class Database extends Singleton {
      *
      * @return array
      *   A single row from the database.
+     *
+     * @throws Exception
      */
     public function selectRow($table, $where = [], $fields = [], $final = '') {
         $this->_select($table, $where, $fields, 1, $final);
@@ -1046,6 +1077,8 @@ class Database extends Singleton {
      *
      * @return array
      *   All values from the column.
+     *
+     * @throws Exception
      */
     public function selectColumn($table, $column, $where = [], $key = NULL, $final = '') {
         $fields = [$column];
@@ -1089,6 +1122,8 @@ class Database extends Singleton {
      *
      * @return mixed
      *   A single field value.
+     *
+     * @throws Exception
      */
     public function selectField($field, $table, $where = [], $final = '') {
         if (!is_array($field)) {
@@ -1192,6 +1227,8 @@ class Database extends Singleton {
      *
      * @return string
      *   The SQL query segment.
+     *
+     * @throws Exception
      */
     protected function implodeJoin($joinType, $table, $condition, &$values, $alias = null) {
         return ' ' . $joinType . ' ' . $this->parseTable($table, $values, $alias) . ' ' . $condition;
@@ -1323,6 +1360,8 @@ class Database extends Singleton {
      *
      * @return string
      *   The query string segment.
+     *
+     * @throws Exception
      */
     public function sqlImplode($array, &$values, $glue = ', ', $setting = false) {
         $a2 = [];
@@ -1464,6 +1503,8 @@ class Database extends Singleton {
      *   The columns to add.
      * @param array $indexes
      *   The indexes to add.
+     *
+     * @throws Exception
      */
     public function createTable($table, $columns, $indexes) {
         $primary_added = false;
@@ -1517,6 +1558,8 @@ class Database extends Singleton {
      *   TRUE to add the column to the beginning of the table,
      *   Column name to add the column after another column,
      *   FALSE or NULL to add the column to the end of the table.
+     *
+     * @throws Exception
      */
     public function addColumn($table, $column, $settings, $position = null) {
         $query = 'ALTER TABLE ' . $this->parseTable($table);
@@ -1613,6 +1656,8 @@ class Database extends Singleton {
      *   The name of the table.
      *
      * @return boolean
+     *
+     * @throws Exception
      */
     public function tableExists($table) {
         return $this->query('SHOW TABLES LIKE ?', [$table])->rowCount() == 1;
