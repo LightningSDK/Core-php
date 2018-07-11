@@ -1905,7 +1905,7 @@ abstract class Table extends Page {
             $link_settings['row_count'] = count($link_settings['active_list']);
 
             // IN EDIT/NEW MODE, SHOW A FULL FORM
-            if ($this->action == 'edit' || $this->action == 'new') {
+            if ($this->action == 'edit' || $this->action == 'new' || $this->action == 'duplicate') {
                 // IN EDIT MODE WITH THE full_form OPTION, SHOW THE FORM WITH ADD/REMOVE LINKS
                 if (!empty($link_settings['full_form'])) {
                     // editable forms (1 to many)
