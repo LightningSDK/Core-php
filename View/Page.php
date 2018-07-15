@@ -13,7 +13,6 @@ use Lightning\Tools\Navigation;
 use Lightning\Tools\Output;
 use Lightning\Tools\Request;
 use Lightning\Tools\Template;
-use Lightning\Model\Page as PageModel;
 use Lightning\Model\Tracker;
 
 /**
@@ -131,8 +130,13 @@ class PageOverridable {
 
     /**
      * Prepare the output and tell the template to render.
+     *
+     * @throws Exception
      */
     public function output() {
+        if ($request_type = strtolower(Request::type()) == 'head') {
+            return;
+        }
         try {
             // Send globals to the template.
             $template = Template::getInstance();
@@ -203,6 +207,8 @@ class PageOverridable {
      * determine if there is a form based on the submitted action variable.
      * If no action variable, it will call get() or post() or any other
      * rest method.
+     *
+     * @throws Exception
      */
     public function execute() {
         try {
