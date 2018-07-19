@@ -133,7 +133,12 @@ class Contact extends PageView {
     public function post() {
         // Initialize and validate
         $this->loadVars();
-        $this->validateForm();
+        try {
+            $this->validateForm();
+        } catch (Exception $e) {
+            Messenger::error($e->getMessage());
+            return $this->get();
+        }
 
         // Create a contact entry
         $this->contact = new ContactModel($this->getContactFields());
@@ -188,14 +193,12 @@ class Contact extends PageView {
             )
             && !ReCaptcha::verify()
         ) {
-            Messenger::error('You did not correctly enter the captcha code.');
-            return $this->get();
+            throw new Exception('You did not correctly enter the captcha code.');
         }
 
         // Make sure the sender's email address is valid.
         if (!$this->getSender()) {
-            Messenger::error('Please enter a valid email address.');
-            return $this->get();
+            throw new Exception('Please enter a valid email address.');
         }
     }
 
