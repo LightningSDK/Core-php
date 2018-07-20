@@ -537,7 +537,7 @@ class Contact extends PageView {
      * @throws Exception
      */
     public function postSpam() {
-        $input = Request::post('message', Request::TYPE_ENCRYPTED);
+        $input = Request::post('values', Request::TYPE_ENCRYPTED);
         $id = Encryption::aesDecrypt($input, Configuration::get('user.key'));
         $message = \Lightning\Model\Contact::loadByID($id);
         if (empty($message)) {
