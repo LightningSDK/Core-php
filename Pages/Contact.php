@@ -519,7 +519,7 @@ class Contact extends PageView {
     public function getSpam() {
         $input = Request::get('message', Request::TYPE_ENCRYPTED);
         $id = Encryption::aesDecrypt($input, Configuration::get('user.key'));
-        $message = \Lightning\Model\Contact::loadByID($id);
+        $message = ContactModel::loadByID($id);
         if (empty($message)) {
             throw new Exception('Invalid message');
         }
@@ -539,13 +539,13 @@ class Contact extends PageView {
     public function postSpam() {
         $input = Request::post('values', Request::TYPE_ENCRYPTED);
         $id = Encryption::aesDecrypt($input, Configuration::get('user.key'));
-        $message = \Lightning\Model\Contact::loadByID($id);
+        $message = ContactModel::loadByID($id);
         if (empty($message)) {
             throw new Exception('Invalid message');
         }
         $message->spam = 1;
         $message->save();
-        \Lightning\Tools\Messages\SpamFilter::flagAsSpam(Scrub::objectToAssocArray($message->additional_fields));
+        SpamFilter::flagAsSpam(Scrub::objectToAssocArray($message->additional_fields));
         Messenger::message('This message has been flagged as spam.');
         Navigation::redirect('/message');
     }
