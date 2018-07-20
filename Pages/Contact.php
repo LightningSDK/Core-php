@@ -115,7 +115,28 @@ class Contact extends PageView {
      */
     protected $contactAdminSent = 0;
 
+    /**
+     * TODO: Previously this did not require a token because it was not a security concern and
+     * we didn't want to create a session for a contact form on every page. However now that
+     * the form tokens are based on encrypted cookies, we can require tokens.
+     *
+     * @var boolean
+     */
     protected $ignoreToken = true;
+
+    /**
+     * Whether the submitter is spamming.
+     *
+     * @var boolean
+     */
+    protected $isSpam;
+
+    /**
+     * Gets spam fields and score.
+     *
+     * @var array
+     */
+    protected $spamFields;
 
     protected function hasAccess() {
         return true;
@@ -144,11 +165,15 @@ class Contact extends PageView {
         $this->contact = new ContactModel($this->getContactFields());
         $this->contact->save();
 
-        // Subscribe the user
-        $this->optinUser();
+        // If this is not spam, subscribe/message the user.
+        if (!$this->isSpam()) {
+            // Subscribe the user
+            $this->optinUser();
 
-        // Send messages to the user and site contacts
-        $this->messageUser();
+            // Send messages to the user and site contacts
+            $this->messageUser();
+        }
+
         $this->messageSiteContact();
 
         // Update the contact information
@@ -217,7 +242,7 @@ class Contact extends PageView {
      * @throws Exception
      */
     protected function messageUser() {
-        // Send a message to the user who just opted in.
+        // Send a message to the user who just opted in, as long as this is not spam.
         if ($this->userMessage) {
             $mailer = new Mailer();
             $this->userMessageSent = $mailer->sendOne($this->userMessage, $this->user);
@@ -239,7 +264,7 @@ class Contact extends PageView {
                 // Count the email ass sent.
                 Tracker::loadOrCreateByName('Contact Sent', Tracker::EMAIL)->track(URL::getCurrentUrlId(), $this->user->id);
 
-                // Send an email to to have them test for spam.
+                // Send an email to have them test for spam.
                 // TODO: This should be moved to the message sent to the user.
                 if (!empty($this->settings['auto_responder'])) {
                     $auto_responder_mailer = new Mailer();
@@ -273,7 +298,7 @@ class Contact extends PageView {
             'list_id' => $this->list,
             'user_message' => $this->userMessage,
             'user_message_sent' => $this->userMessageSent,
-            'additional_fields' => $this->getAdditionalFields(),
+            'additional_fields' => $this->getAdditionalFields() + $this->getSpamFields(),
         ];
     }
 
@@ -363,15 +388,23 @@ class Contact extends PageView {
         $subject = $this->settings['subject'];
         $message = $this->getMessageBody();
 
-        // Append "flasg as spam" link
-        $encryptedMessageId = Encryption::aesEncrypt($this->contact->id, Configuration::get('user.key'));
-        $message .= '<br><br><br>';
-        $message .= '<a href="' . Configuration::get('web_root') . '/contact?action=spam&message=' . $encryptedMessageId . '">Mark this message as spam</a>';
-
-        if (SpamFilter::getScore($this->getAdditionalFields())
-            > Configuration::get('messages.maxAllowableScore')
-        ) {
+        if ($this->isSpam()) {
             $subject = 'SPAM: ' . $subject;
+            $errors = [];
+            if (!empty($this->list)) {
+                $errors[] = 'the user was not subscribed to list ' . $this->list;
+            }
+            if (!empty($this->userMessage)) {
+                $errors[] = 'the user was not sent message ' . $this->userMessage;
+            }
+            if (!empty($errors)) {
+                $message .= '<br><br> This message was flagged as spam. As a result ' . implode(', ', $errors) . '.';
+            }
+        } else {
+            // Append "flag as spam" link
+            $encryptedMessageId = Encryption::aesEncrypt($this->contact->id, Configuration::get('user.key'));
+            $message .= '<br><br><br>';
+            $message .= '<a href="' . Configuration::get('web_root') . '/contact?action=spam&message=' . $encryptedMessageId . '">Mark this message as spam</a>';
         }
 
         return $this->contactAdminSent = (integer) $mailer
@@ -417,6 +450,16 @@ class Contact extends PageView {
         return $this->values;
     }
 
+    protected function getSpamFields() {
+        if ($this->spamFields === null) {
+            $this->spamFields = [
+                'Spam' => $this->isSpam() ? 'Yes' : 'No',
+                'Spam Score' => SpamFilter::getScore($this->getAdditionalFields()),
+            ];
+        }
+        return $this->spamFields;
+    }
+
     /**
      * Get the submission URL. If not explicitly supplied in the form, it will try to get it from the HTTP header.
      *
@@ -436,7 +479,7 @@ class Contact extends PageView {
      * @return string
      */
     protected function getMessageBody() {
-        $fields = $this->getAdditionalFields();
+        $fields = $this->getAdditionalFields() + $this->getSpamFields();
 
         $output = '';
         foreach ($fields as $key => $value) {
@@ -449,6 +492,20 @@ class Contact extends PageView {
         }
 
         return $output;
+    }
+
+    /**
+     * Determine whether this message is spam.
+     *
+     * @return boolean
+     */
+    protected function isSpam() {
+        if ($this->isSpam === null) {
+            $this->isSpam = SpamFilter::getScore($this->getAdditionalFields())
+                > Configuration::get('messages.maxAllowableScore');
+        }
+        return true;
+        return $this->isSpam;
     }
 
     /**

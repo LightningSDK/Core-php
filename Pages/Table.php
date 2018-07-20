@@ -680,6 +680,8 @@ abstract class Table extends Page {
 
     /**
      * Ajax search, outputs HTML table replacement.
+     *
+     * @throws Exception
      */
     public function getSearch() {
         Output::setJson(true);
@@ -3210,6 +3212,8 @@ abstract class Table extends Page {
 
     /**
      * Build a query to select the list of entries.
+     *
+     * @throws Exception
      */
     protected function loadList() {
 
@@ -3321,6 +3325,9 @@ abstract class Table extends Page {
         $this->list = $this->database->selectQuery($query);
     }
 
+    /**
+     * @throws Exception
+     */
     protected function loadFullListCursor() {
         $this->list = $this->database->select($this->table);
     }

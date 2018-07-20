@@ -66,6 +66,9 @@ class Pages extends Table {
         'modules' => 'json',
     ];
 
+    /**
+     * @throws \Exception
+     */
     protected function initSettings() {
         $this->preset['url']['submit_function'] = function(&$output) {
             $output['url'] = Request::post('url', Request::TYPE_URL) ?: Request::post('title', Request::TYPE_URL);
@@ -105,6 +108,9 @@ class Pages extends Table {
         ];
     }
 
+    /**
+     * @throws \Exception
+     */
     public function getView() {
         $this->getRow();
         Navigation::redirect('/' . $this->list['url'] . '.html');
