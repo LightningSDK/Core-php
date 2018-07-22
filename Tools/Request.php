@@ -126,6 +126,10 @@ class RequestOverridable {
         return trim(static::query('request'), '/');
     }
 
+    public static function getReferrer() {
+        return self::getHeader('REFERER');
+    }
+
     public static function getURL() {
         return (static::isHTTPS() ? 'https://' : 'http://') . static::getDomain() . '/' . static::getLocation();
     }

@@ -469,7 +469,7 @@ class Contact extends PageView {
         if ($url = Request::post('URL')) {
             return $url;
         } else {
-            return Request::getHeader('REFERER');
+            return Request::getReferrer();
         }
     }
 

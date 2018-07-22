@@ -117,6 +117,9 @@ class LoggerOverridable extends Singleton {
         $output = (ini_get('display_errors') == 'On' || ini_get('display_errors') == 1);
 
         $message[] = $method . ' ' . $protocol . $server . $uri;
+        if ($method == 'POST' && $referrer = Request::getReferrer()) {
+            $message[] = 'Referred by: ' . $referrer;
+        }
         $message[] = $type . ': ' . $errstr;
 
         $formatted_stack = self::formatStacktrace($trace, $errfile, $errline);
