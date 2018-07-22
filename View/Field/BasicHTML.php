@@ -61,6 +61,7 @@ class BasicHTML {
     }
 
     public static function radioGroup($name, $options, $default = null, $attributes = []) {
+        $attributes['class'] = ($attributes['class'] ?? '') . ' radio-group';
         $output = '<div ' . HTML::implodeAttributes($attributes) . '>';
 
         $required = !empty($attributes['required']) ? 'required ' : '';
@@ -70,6 +71,17 @@ class BasicHTML {
         }
 
         return $output . '</div>';
+    }
+
+    public static function checkbox($name, $default = false, $attributes = []) {
+        $field = '<label><input type="checkbox" name="' . $name . '" value="1" ' . ($default ? 'CHECKED ' : '') . (!empty($attributes['required']) ? 'REQUIRED ': '') . ' /> ' . $attributes['label'] . '</label>';
+
+        if (!empty($attributes['required'])) {
+            $error_message = $attributes['error'] ?? 'This field is required.';
+            $field = '<div>' . $field . '<small class="error">' . $error_message . '</small></div>';
+        }
+
+        return $field;
     }
 
     public static function checkboxGroup($name, $options, $default = null, $attributes = []) {
@@ -92,7 +104,13 @@ class BasicHTML {
         $attributes['id'] = $id;
         $attributes['value'] = $value;
         $attributes['type'] = 'text';
-        return '<input ' . HTML::implodeAttributes($attributes) . ' />';
+        $field = '<input ' . HTML::implodeAttributes($attributes) . ' />';
+        if (!empty($attributes['required'])) {
+            $error_message = $attributes['error'] ?? 'This field is required.';
+            $field = '<div>' . $field . '<small class="error">' . $error_message . '</small></div>';
+        }
+
+        return $field;
     }
 
     public static function password($id, $value, $options = []) {
@@ -124,6 +142,16 @@ class BasicHTML {
         if (!array_key_exists('autocomplete', $attributes)) {
             $attributes['autocomplete'] = 'off';
         }
+
+        return '<input ' . HTML::implodeAttributes($attributes) . ' />';
+    }
+
+    public static function submit($value, $options) {
+        $attributes = [
+            'name' => 'submit',
+            'type' => 'submit',
+            'value' => $value,
+        ] + $options;
 
         return '<input ' . HTML::implodeAttributes($attributes) . ' />';
     }

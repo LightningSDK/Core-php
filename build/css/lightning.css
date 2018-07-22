@@ -8910,6 +8910,18 @@ span.form-inline {
   line-height: 2.3125rem;
 }
 
+.form .radios .field-label {
+  font-size: 18pt;
+}
+.form .field {
+  margin-top: 20px;
+  margin-bottom: 40px;
+}
+.form .radio-group {
+  margin-top: 20px;
+  margin-left: 40px;
+}
+
 .social-signin {
   display: inline-block;
   width: 300px;

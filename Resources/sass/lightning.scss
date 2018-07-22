@@ -611,6 +611,21 @@ span.form-inline {
   line-height: 2.3125rem;
 }
 
+// Forms
+.form {
+  .radios .field-label {
+    font-size: 18pt;
+  }
+  .field {
+    margin-top: 20px;
+    margin-bottom: 40px;
+  }
+  .radio-group {
+    margin-top: 20px;
+    margin-left: 40px;
+  }
+}
+
 // Social Signing Buttons
 .social-signin {
   display: inline-block;
