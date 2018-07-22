@@ -504,7 +504,6 @@ class Contact extends PageView {
             $this->isSpam = SpamFilter::getScore($this->getAdditionalFields())
                 > Configuration::get('messages.maxAllowableScore');
         }
-        return true;
         return $this->isSpam;
     }
 
