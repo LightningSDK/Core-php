@@ -27,6 +27,8 @@ trait ObjectDatabaseStorage {
      *   Whether to key the list by the primary ID.
      *
      * @return array
+     *
+     * @throws \Exception
      */
     public static function loadAll($where = [], $fields = [], $final = '', $keyed = false) {
         $objects = [];
@@ -80,6 +82,8 @@ trait ObjectDatabaseStorage {
      *
      * @return array
      *   A list of available options, keyed be the primary key.
+     *
+     * @throws \Exception
      */
     public static function loadOptions($name_field, $where = []) {
         return Database::getInstance()->selectColumn(static::TABLE, $name_field, $where, static::PRIMARY_KEY);
@@ -93,6 +97,8 @@ trait ObjectDatabaseStorage {
      *
      * @return static
      *   The new object
+     *
+     * @throws \Exception
      */
     public static function loadByID($id) {
         if ($data = Database::getInstance()->selectRow(static::TABLE, [static::PRIMARY_KEY => $id])) {
@@ -110,6 +116,8 @@ trait ObjectDatabaseStorage {
 
     /**
      * Save any changed data.
+     *
+     * @throws \Exception
      */
     public function save() {
         $db = static::getDatabase();
@@ -137,6 +145,8 @@ trait ObjectDatabaseStorage {
      * 
      * @param string $field
      * @param integer $amount
+     *
+     * @throws \Exception
      */
     public function increment($field, $amount = 1) {
         Database::getInstance()->update(static::TABLE,
@@ -157,6 +167,8 @@ trait ObjectDatabaseStorage {
      *
      * @return integer
      *   The new ID
+     *
+     * @throws \Exception
      */
     public static function insertOrUpdate($new_values, $update_values) {
         return Database::getInstance()->insert(static::TABLE,
