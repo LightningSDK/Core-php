@@ -1,6 +1,7 @@
 <div class="row">
     <div class="column">
         <form method="post">
+            <?= \Lightning\Tools\Form::renderTokenInput(); ?>
             <h2><?= !empty($confirmationMessage) ? $confirmationMessage : 'Are you sure?'; ?></h2>
             <br><br>
             <input type="hidden" name="values" value="<?= !empty($values) ? \Lightning\Tools\Scrub::toHTML($values) : ''; ?>">

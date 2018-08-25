@@ -1,4 +1,5 @@
 <form method="post" action="/admin/social/share">
+    <?= \Lightning\Tools\Form::renderTokenInput(); ?>
     <h3>Post information</h3>
     <p>Type: <?= $type; ?></p>
     <p>ID: <?= $id; ?></p>

@@ -1,5 +1,6 @@
 <?php
 
+use Lightning\Tools\Configuration;
 use Lightning\Tools\Form;
 use Lightning\View\Field;
 use Lightning\Tools\ReCaptcha;
@@ -9,6 +10,7 @@ use Lightning\Tools\ReCaptcha;
     <h1>Contact</h1>
 
     <form method="post" id="contact_form" data-abide>
+        <?= Form::renderTokenInput(); ?>
         <div>
             <label>Your Name:
                 <input type="text" name="name" id='name' value="<?=Field::defaultValue('name');?>" required />
@@ -31,9 +33,9 @@ use Lightning\Tools\ReCaptcha;
             </label>
         </div>
         <input type="hidden" name="contact" value="true" />
-        <?php if (\Lightning\Tools\Configuration::get('recaptcha.invisible.public')) : ?>
+        <?php if (Configuration::get('recaptcha.invisible.public')) : ?>
         <?=ReCaptcha::renderInvisible('Send Message', 'button');?>
-        <?php elseif (\Lightning\Tools\Configuration::get('recaptcha.public')): ?>
+        <?php elseif (Configuration::get('recaptcha.public')): ?>
             <?=ReCaptcha::render()?>
             <br />
             <input type="Submit" name="Submit" value="Send Message" class="button" />
