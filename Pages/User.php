@@ -30,7 +30,6 @@ class User extends Page {
     }
 
     public function get() {
-        Form::requiresToken();
         $user = ClientUser::getInstance();
         Template::getInstance()->set('redirect', Scrub::toURL(Request::get('redirect', Request::TYPE_STRING)));
         if ($user->id > 0) {

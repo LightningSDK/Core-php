@@ -23,91 +23,93 @@ class Database extends Singleton {
      *
      * @var PDO
      */
-    var $connection;
+    public $connection;
+
+    protected $maxHistorySize = 500;
 
     /**
      * Determines if queries and errors should be collected and output.
      *
      * @var boolean
      */
-    private $verbose = false;
+    protected $verbose = false;
 
     /**
      * An array of all queries called in this page request.
      *
      * @var array
      */
-    private $history = [];
+    protected $history = [];
 
     /**
      * The result of the last query.
      *
      * @var PDOStatement
      */
-    private $result;
+    protected $result;
 
     /**
      * The timer start time.
      *
      * @var float
      */
-    private $start;
+    protected $start;
 
     /**
      * The mysql execution end time.
      *
      * @var float
      */
-    private $end_mysql;
+    protected $end_mysql;
 
     /**
      * The php execution end time.
      *
      * @var float
      */
-    private $end_php;
+    protected $end_php;
 
     /**
      * The last query executed. If it's the same it does not need to be re-prepared.
      *
      * @var string
      */
-    private $last_query;
+    protected $last_query;
 
     /**
      * The total number of queries executed.
      *
      * @var integer
      */
-    private $query_count = 0;
+    protected $query_count = 0;
 
     /**
      * The total time to execute mysql queries.
      *
      * @var integer
      */
-    private $mysql_time = 0;
+    protected $mysql_time = 0;
 
     /**
      * The total time to execute the php post processing of mysql queries data.
      *
      * @var integer
      */
-    private $php_time = 0;
+    protected $php_time = 0;
 
     /**
      * Whether this is in read only mode.
      *
      * @var boolean
      */
-    private $readOnly = FALSE;
+    protected $readOnly = FALSE;
 
     /**
      * Whether the current connection is in the transaction state.
      *
      * @var boolean
      */
-    private $inTransaction = FALSE;
+    protected $inTransaction = FALSE;
 
     const FETCH_ASSOC = PDO::FETCH_ASSOC;
 
@@ -195,6 +197,10 @@ class Database extends Singleton {
         return $this->history;
     }
 
+    public function flush() {
+        $this->history = [];
+    }
+
     /**
      * Called whenever mysql returns an error executing a query.
      *
@@ -233,6 +239,10 @@ class Database extends Singleton {
             'vars' => $vars,
             'time' => $time,
         ];
+
+        if (count($this->history) > $this->maxHistorySize) {
+            array_shift($this->history);
+        }
     }
 
     /**
@@ -288,7 +298,7 @@ class Database extends Singleton {
      *
      * @throws Exception
      */
-    private function _query($query, $vars = []) {
+    protected function _query($query, $vars = []) {
         if ($this->readOnly) {
             if (!preg_match("/^SELECT /i", $query)) {
                 return;
@@ -317,7 +327,7 @@ class Database extends Singleton {
      * @param array $vars
      *   A list of replacement variables.
      */
-    private function __query_execute($query, $vars) {
+    protected function __query_execute($query, $vars) {
         // If the query has changed, we need to prepare a new one.
         if ($this->last_query != $query) {
             $this->last_query = $query;

@@ -27,7 +27,6 @@ class Form {
         }
 
         $output = '<form ' . HTML::implodeAttributes($form_attributes) . '>';
-        \Lightning\Tools\Form::requiresToken();
         $output .= \Lightning\Tools\Form::renderTokenInput();
 
         // Loop through basic, unedited options.
@@ -51,7 +50,6 @@ class Form {
         }
 
         $output = '<form ' . HTML::implodeAttributes($form_attributes) . '>';
-        \Lightning\Tools\Form::requiresToken();
         $output .= \Lightning\Tools\Form::renderTokenInput();
 
         foreach ($form['fields'] as $field) {

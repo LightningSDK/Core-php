@@ -122,7 +122,7 @@ class Contact extends PageView {
      *
      * @var boolean
      */
-    protected $ignoreToken = true;
+    protected $ignoreToken = false;
 
     /**
      * Whether the submitter is spamming.

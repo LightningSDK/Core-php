@@ -43,10 +43,14 @@ class BrowserSessionOverridable extends SingletonObject {
      * @return string
      * @throws Exception
      */
-    public function getFormToken() {
+    public function getFormToken($generate = true) {
         if (empty($this->form_token)) {
-            static::generateFormToken();
-            $this->save();
+            if ($generate) {
+                static::generateFormToken();
+                $this->save();
+            } else {
+                throw new Exception('Token not generated');
+            }
         }
 
         return $this->form_token;

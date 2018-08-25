@@ -221,6 +221,9 @@ class PageOverridable {
             // Outputs an error if this is a POST request without a valid token.
             if ($this->requiresToken()) {
                 $this->requireToken();
+            } else {
+                // Create a token for when it's needed.
+                FormTool::requiresToken();
             }
 
             // If there is a requested action.

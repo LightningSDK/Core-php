@@ -43,6 +43,7 @@ class Output {
      */
     protected static $cookies = [];
     protected static $sentCookies = [];
+    protected static $areCookiesSent = false;
 
     protected static $isJson = false;
 
@@ -382,6 +383,8 @@ class Output {
      *
      * @param string $cookie
      *   The cookie name.
+     *
+     * @throws Exception
      */
     public static function clearCookie($cookie) {
         self::setCookie($cookie, '');
@@ -440,6 +443,11 @@ class Output {
         }
         self::$sentCookies = self::$cookies;
         self::$cookies = [];
+        self::$areCookiesSent = true;
+    }
+
+    public static function areCookiesSent() {
+        return self::$areCookiesSent;
     }
 
     /**

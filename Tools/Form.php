@@ -179,14 +179,14 @@ class Form {
      */
     public static function renderTokenInput() {
         try {
-            return BasicHTML::hidden('token', static::getToken());
+            return BasicHTML::hidden('token', static::getToken(false));
         } catch (Exception $e) {
             return '<small class="error" style="display: block">Session Not Initialized</small>';
         }
     }
 
-    public static function getToken() {
-        return BrowserSession::getInstance()->getFormToken();
+    public static function getToken($create = true) {
+        return BrowserSession::getInstance()->getFormToken($create);
     }
 
     /**

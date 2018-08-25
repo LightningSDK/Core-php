@@ -41,9 +41,5 @@ class Splash extends Page {
                 JS::add($splash_settings['js']);
             }
         }
-
-        if (!empty($splash_settings['token'])) {
-            Form::requiresToken();
-        }
     }
 }
