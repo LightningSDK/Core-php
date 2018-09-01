@@ -58,14 +58,25 @@ class Field {
         if (!empty($options['type']) && $options['type'] == 'submit' && empty($attributes['name'])) {
             $attributes['name'] = 'submit';
         }
+
         if (isset($options['required'])) {
             $attributes['required'] = '';
         }
+
+        if (!empty($options['pattern'])) {
+            $attributes['pattern'] = $options['pattern'];
+        }
+
         $field = '<input ' . HTML::implodeAttributes($attributes) . '>';
         if (!empty($options['label'])) {
             $field = '<label>' . $options['label'] . $field . '</label>';
         }
-        $error = !empty($options['error']) ? '<small class="error">' . $options['error'] . '</small>' : '';
-        return '<div>' . $field . $error . '</div>';
+
+        if (!empty($attributes['required']) || !empty($options['error'])) {
+            $error_message = $options['error'] ?? 'This field is required.';
+            $field = $field . '<small class="error">' . $error_message . '</small>';
+        }
+
+        return '<div>' . $field . '</div>';
     }
 }
