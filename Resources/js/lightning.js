@@ -77,6 +77,12 @@ lightning.js = {
             urls = [urls];
         }
 
+        if (lightning_mv > 0) {
+            for (var i in urls) {
+                urls[i] = urls[i] + '?v=' + lightning_mv;
+            }
+        }
+
         lightning.js.queue.push({
             urls: urls,
             callback: callback,
