@@ -257,6 +257,7 @@ class RestClient {
                     // If there is a success callback.
                     return $this->requestSuccess();
                     break;
+                case 400:
                 case 401:
                 case 402:
                 case 403:
