@@ -65,7 +65,7 @@ class File implements FileHandlerInterface {
     }
 
     public function moveUploadedFile($file, $temp_file) {
-        move_uploaded_file($temp_file, $this->root . '/' . $file);
+        move_uploaded_file($temp_file, $this->getAbsoluteLocal($file));
     }
 
     public function delete($file) {
@@ -81,7 +81,7 @@ class File implements FileHandlerInterface {
     }
 
     public function getAbsoluteLocal($file) {
-
+        return $this->root . '/' . $file;
     }
 
 }
