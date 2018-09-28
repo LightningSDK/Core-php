@@ -2668,14 +2668,14 @@ abstract class Table extends Page {
                 $val = $this->parentId;
             } elseif ($this->action == 'insert' && isset($field['insert_function'])) {
                 // function when modified
-                $this->preset[$field['field']]['insert_function']($output);
+                $this->executeFunction($this->preset[$field['field']]['insert_function'], $output);
                 continue;
             } elseif ($this->action == 'update' && isset($field['modified_function'])) {
-                $this->preset[$field['field']]['modified_function']($output);
+                $this->executeFunction($this->preset[$field['field']]['modified_function'], $output);
                 continue;
             } elseif (isset($field['submit_function'])) {
                 // covers both insert_function and modified_function
-                $this->preset[$field['field']]['submit_function']($output);
+                $this->executeFunction($this->preset[$field['field']]['submit_function'], $output);
                 continue;
             } else {
                 switch (preg_replace('/\([0-9]+\)/', '', $field['type'])) {
@@ -2805,6 +2805,16 @@ abstract class Table extends Page {
         $dependenciesMet &= $this->processFieldValues($output);
 
         return $dependenciesMet ? $output : false;
+    }
+
+    protected function executeFunction($function, $row) {
+        if (is_callable($function)) {
+            $function($row);
+        } elseif (is_string($function) && is_callable([$this, $function])) {
+            $this->$function($row);
+        } else {
+            throw new Exception('Invalid function');
+        }
     }
 
     protected function processFieldValues(&$values) {
