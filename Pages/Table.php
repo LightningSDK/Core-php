@@ -3092,10 +3092,10 @@ abstract class Table extends Page {
      */
     protected function getFileHandler($field) {
         // TODO: $field['location'] is deprecated. All tables should be updated to use container instead.
-        if (empty($field['container']) &!empty($field['location'])) {
+        if (empty($field['container']) && !empty($field['location'])) {
             $field['container'] = [
                 'storage' => $field['location'],
-                'url' => null . '/',
+                'url' => '/',
             ];
         }
         $handler = empty($field['file_handler']) ? '' : $field['file_handler'];
