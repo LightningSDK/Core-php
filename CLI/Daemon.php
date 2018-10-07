@@ -10,6 +10,19 @@ use Lightning\Tools\Logger;
 // This is required for the signal handler.
 declare(ticks = 1);
 
+/**
+ * Class Daemon
+ * @package Lightning\CLI
+ *
+ * To start
+ *   lightning daemon start
+ *
+ * To test a command:
+ *   lightning daemon test <job name>
+ *
+ * To test in debug mode:
+ *   lightning debug daemon test <job name>
+ */
 class Daemon extends CLI {
 
     protected $debug = false;

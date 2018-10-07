@@ -19,6 +19,9 @@ class Job {
     }
 
     public function out($string) {
+        if ($this->debug) {
+            echo $string . PHP_EOL;
+        }
         Logger::message($string);
     }
 }
