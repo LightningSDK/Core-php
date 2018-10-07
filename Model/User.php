@@ -350,13 +350,13 @@ class UserOverridable extends Object {
     public static function addUser($email, $options = [], $update = []) {
         $user_data = [];
         $user_data['email'] = strtolower($email);
-        static::parseNames($options);
-        static::parseNames($update);
         if ($user = User::loadByEmail($email)) {
             // If the user already exists, return it. This does not log in, but should
             // be treated as sensitive data.
             return $user;
         } else {
+            static::parseNames($options);
+            static::parseNames($update);
             $user = static::create($options + $user_data);
             return $user;
         }
