@@ -2,9 +2,7 @@
 
 namespace Lightning\Model;
 
-use Lightning\Model\Object;
 use Lightning\Tools\Database;
-use Source\Model\Site;
 
 /**
  * Class CMS
@@ -24,8 +22,9 @@ class CMSOverridable extends Object {
     const PRIMARY_KEY = 'cms_id';
 
     /**
-     * @param $name
-     * @return CMS
+     * @param string $name
+     * @return bool|CMSOverridable
+     * @throws \Exception
      */
     public static function loadByName($name) {
         $content = Database::getInstance()->selectRow(static::TABLE, ['name' => $name]);
