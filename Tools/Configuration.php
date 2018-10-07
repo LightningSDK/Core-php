@@ -117,24 +117,31 @@ class Configuration {
 
             // Load module configurations.
             if (!empty(self::$configuration['modules']['include'])) {
-                $includeModules = self::$configuration['modules']['include'];
-                for ($i = 0; $i < count($includeModules); $i++) {
-                    $module = $includeModules[$i];
-                    if (file_exists(HOME_PATH . '/Modules/' . $module . '/config.php')) {
-                        $moduleConfig = require HOME_PATH . '/Modules/' . $module . '/config.php';
-                        self::softMerge($moduleConfig);
-                        if (!empty($moduleConfig['modules']['include'])) {
-                            foreach ($moduleConfig['modules']['include'] as $include) {
-                                if (!in_array($include, $includeModules)) {
-                                    $includeModules[] = $include;
-                                }
-                            }
+                self::loadModules(self::$configuration['modules']['include']);
+            }
+            if (!empty(self::$configuration['modules']['include-cli'])) {
+                self::loadModules(self::$configuration['modules']['include-cli']);
+            }
+
+            self::$loaded = true;
+            self::$loading = false;
+        }
+    }
+
+    protected static function loadModules($includeModules) {
+        for ($i = 0; $i < count($includeModules); $i++) {
+            $module = $includeModules[$i];
+            if (file_exists(HOME_PATH . '/Modules/' . $module . '/config.php')) {
+                $moduleConfig = require HOME_PATH . '/Modules/' . $module . '/config.php';
+                self::softMerge($moduleConfig);
+                if (!empty($moduleConfig['modules']['include'])) {
+                    foreach ($moduleConfig['modules']['include'] as $include) {
+                        if (!in_array($include, $includeModules)) {
+                            $includeModules[] = $include;
                         }
                     }
                 }
             }
-            self::$loaded = true;
-            self::$loading = false;
         }
     }
 
