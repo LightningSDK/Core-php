@@ -15,7 +15,7 @@ class SpamFilter {
      *
      * @return float
      */
-    public static function getScore($message) {
+    public static function getScore(&$message) {
         $handlers = Configuration::get('messages.spamFilters');
         $score = 0;
         foreach ($handlers as $handler) {

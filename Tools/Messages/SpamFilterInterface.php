@@ -9,7 +9,7 @@ interface SpamFilterInterface {
      * @param $message
      * @return mixed
      */
-    public static function getScore($message);
+    public static function getScore(&$message);
 
     /**
      * Mark this message as spam.
