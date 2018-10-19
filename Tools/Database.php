@@ -516,7 +516,7 @@ class Database extends Singleton {
         if ($return_count) {
             return $this->result->rowCount();
         } else {
-            return $this->result->rowCount() == 0 ? false :
+            return $this->result->rowCount() === 0 ? false :
                 // If there is no auto increment, just return true.
                 ($this->connection->lastInsertId() ?: true);
         }
