@@ -844,16 +844,12 @@ abstract class Table extends Page {
             $values[$this->singularity] = $this->singularityID;
         }
         $this->id = $this->database->insert($this->table, $values, $this->update_on_duplicate_key ? $values : true);
-        if ($this->createdMessage !== false) {
-            Messenger::message($this->createdMessage ?: 'The ' . $this->table . ' has been created.');
-        }
 
-        /*
-         * Check if id is defined. If it's FALSE, there was an error
-         * inserting the new row. Probably duplicating.
-         */
-        if ($this->id == FALSE) {
-            Output::error('There was a conflict with an existing entry.');
+        // Check if the element was created.
+        if ($this->id) {
+            Messenger::message($this->createdMessage ?: 'The ' . $this->table . ' has been created.');
+        } else {
+            Output::error('Sorry, the ' . $this->table . ' couldn\'t be saved. Go get help!');
         }
 
         $this->getRow();
