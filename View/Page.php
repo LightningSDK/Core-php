@@ -83,6 +83,7 @@ class PageOverridable {
     protected $hideMenu = false;
     protected $hideFooter = false;
     protected $share = true;
+    protected $comment = null;
 
     /**
      * Which menu should be marked as 'active'.
@@ -168,6 +169,10 @@ class PageOverridable {
             $template->set('hide_menu', $this->hideMenu);
             $template->set('hide_footer', $this->hideFooter);
             $template->set('share', $this->share);
+            if ($this->comment === null) {
+                $this->comment = $this->share;
+            }
+            $template->set('comment', $this->comment);
 
             // Include the site title into the page title for meta data.
             if (!empty($this->meta['title']) && $site_title = Configuration::get('meta_data.title')) {
