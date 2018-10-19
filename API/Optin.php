@@ -9,6 +9,7 @@ use Lightning\Tools\Messenger;
 use Lightning\Tools\Output;
 use Lightning\Tools\Request;
 use Lightning\Tools\Scrub;
+use Lightning\Tools\Session\BrowserSession;
 use Lightning\View\API;
 
 /**
@@ -32,6 +33,11 @@ class Optin extends API {
         // Subscribe the user
         $user = User::addUser($email, ['full_name' => $name]);
         $user->subscribe($list);
+
+        // Add the user id to the browser session to remember them
+        $session = BrowserSession::getInstance();
+        $session->user_id = $user->id;
+        $session->save();
 
         // Send a message
         if ($message) {
