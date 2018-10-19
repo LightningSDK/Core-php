@@ -3,7 +3,6 @@
 namespace Lightning\View;
 
 use Exception;
-use Lightning\Tools\Messenger;
 use Lightning\Tools\Output;
 use Lightning\Tools\Request;
 
