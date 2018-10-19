@@ -2803,7 +2803,7 @@ abstract class Table extends Page {
         return $dependenciesMet ? $output : false;
     }
 
-    protected function executeFunction($function, $row) {
+    protected function executeFunction($function, &$row) {
         if (is_callable($function)) {
             $function($row);
         } elseif (is_string($function) && is_callable([$this, $function])) {
@@ -3729,10 +3729,10 @@ abstract class Table extends Page {
                         $seg = explode('-', $v);
                         $v = gregoriantojd($seg[1], $seg[2], $seg[0]);
                     }
-                    return Time::printDate($v, !empty($field['timezone']) ? $field['timezone'] : null);
+                    return Time::printDate($v, $field['timezone'] ?? Configuration::get('timezone') ?? null);
                     break;
                 case 'datetime':
-                    return Time::printDateTime($v, !empty($field['timezone']) ? $field['timezone'] : null);
+                    return Time::printDateTime($v, $field['timezone'] ?? Configuration::get('timezone') ?? null);
                     break;
                 case 'checkbox':
                     if ($html) {
