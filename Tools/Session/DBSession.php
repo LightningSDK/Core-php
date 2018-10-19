@@ -226,7 +226,7 @@ class DBSessionOverridable extends SingletonObject {
     /**
      * Destroy the current session and remove it from the database.
      */
-    public function destroy () {
+    public function destroy() {
         if (!empty($this->id)) {
             $this->delete();
             $this->__data = [];
