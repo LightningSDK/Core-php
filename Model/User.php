@@ -66,23 +66,13 @@ class UserOverridable extends Object {
      * Load a user by their email.
      *
      * @param $email
+     *
      * @return static
+     *
+     * @throws Exception
      */
     public static function loadByEmail($email) {
         if ($details = Database::getInstance()->selectRow(self::TABLE, ['email' => ['LIKE', $email]])) {
-            return new static($details);
-        }
-        return null;
-    }
-
-    /**
-     * Load a user by their ID.
-     *
-     * @param $user_id
-     * @return static
-     */
-    public static function loadById($user_id) {
-        if ($details = Database::getInstance()->selectRow(self::TABLE, ['user_id' => $user_id])) {
             return new static($details);
         }
         return null;
@@ -93,7 +83,10 @@ class UserOverridable extends Object {
      *
      * @param string $key
      *   A temporary access key.
+     *
      * @return static
+     *
+     * @throws Exception
      */
     public static function loadByTempKey($key) {
         if ($details = Database::getInstance()->selectRow(
