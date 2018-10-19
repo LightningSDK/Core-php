@@ -15,6 +15,14 @@ require_once HOME_PATH . '/Lightning/Vendor/PHPMailer/class.phpmailer.php';
 class Mailer {
 
     /**
+     * If debug is enabled, this will only sent emails to the site admin.
+     * This is for testing environments.
+     *
+     * @var boolean
+     */
+    protected $debug = false;
+
+    /**
      * Whether the message and subject have been built.
      *
      * @var boolean
@@ -101,6 +109,7 @@ class Mailer {
      *   Whether to output email addresses as messages are sent.
      */
     public function __construct($verbose = false) {
+        $this->debug = Configuration::get('debug', false);
         $this->mailer = new \PHPMailer(true);
         $this->mailer->CharSet = 'UTF-8';
         $this->mailer->Sender = Configuration::get('mailer.bounce_address');
@@ -273,22 +282,38 @@ class Mailer {
         return $this;
     }
 
+    protected function rebuildMessage() {
+        $this->subject($this->message->getSubject());
+        $this->message($this->message->getMessage());
+    }
+
     /**
      * Load a message from the database.
      *
      * @param $message_id
+     *
+     * @throws Exception
      */
     public function loadMessage($message_id) {
         // Only load if this is a different message than was used before.
         if (empty($this->message->id) || $this->message->id != $message_id) {
-            $this->message = new Message($message_id);
-            $this->subject($this->message->getSubject());
-            $this->message($this->message->getMessage());
+            $this->message = Message::loadByID($message_id);
+            $this->rebuildMessage();
         }
     }
 
     /**
-     * Send the current single message.
+     * Set the message to a message object.
+     *
+     * @param Message $message
+     */
+    public function setMessage($message) {
+        $this->message = $message;
+        $this->rebuildMessage();
+    }
+
+    /**
+     * Build and send the current single message.
      *
      * @return boolean
      *   Whether the message was successful.
@@ -305,14 +330,22 @@ class Mailer {
         if ($this->message && !$this->built) {
             // Rebuild with the new custom variables.
             $this->message->resetCustomVariables($this->customVariables);
-            $this->subject($this->message->getSubject());
-            $this->message($this->message->getMessage());
+            $this->rebuildMessage();
             $this->built = true;
         }
 
         // Send the message.
         try {
-            return $this->mailer->send();
+            if ($this->debug) {
+                $this->mailer->clearAddresses();
+                $this->mailer->addAddress(Configuration::get('contact.to')[0]);
+            }
+            if (($success = $this->mailer->send())
+            && $this->message && $this->message->getUser()) {
+                TrackerModel::loadOrCreateByName('Email Sent', TrackerModel::EMAIL)
+                    ->track($this->message->id, $this->message->getUser()->id);
+            }
+            return $success;
         } catch (\Exception $e) {
             Messenger::error($e->getMessage());
             return false;
@@ -360,9 +393,11 @@ class Mailer {
      *
      * @return integer
      *   The number of users the message was sent to.
+     *
+     * @throws Exception
      */
     public function sendBulk($message_id, $test = false, $auto = false) {
-        $this->message = new Message($message_id, true, $auto);
+        $this->message = Message::loadByID($message_id, true, $auto);
 
         $this->from(
             Configuration::get('mailer.mail_from') ?: Configuration::get('site.mail_from'),
@@ -419,12 +454,7 @@ class Mailer {
         $this->message->setUser($user);
         $this->message->setDefaultVars();
         $this->to($user);
-        if ($this->sendMessage()) {
-            TrackerModel::loadOrCreateByName('Email Sent', TrackerModel::EMAIL)->track($message_id, $user->id);
-            return true;
-        } else {
-            return false;
-        }
+        return $this->sendMessage();
     }
 
     /**
@@ -442,8 +472,7 @@ class Mailer {
             // TODO: If the message chain is called twice (eg, creating the mail, setting the to address,
             // setting the subject, sending, setting another to address, sending again, this could cause
             // the subject and message to nest recursively, or not render correctly the second time around.
-            $this->subject($this->message->getSubject());
-            $this->message($this->message->getMessage());
+            $this->rebuildMessage();
         }
 
         // Actual send
@@ -467,14 +496,11 @@ class Mailer {
             $this->from($from, $from_name);
             $this->message->setUser(new User($user));
             $this->message->setDefaultVars();
-            $this->subject($this->message->getSubject());
-            $this->message($this->message->getMessage());
+            $this->rebuildMessage();
             if ($this->sendMessage()) {
                 $this->sentCount ++;
             }
             $this->mailer->ClearAddresses();
-            TrackerModel::loadOrCreateByName('Email Sent', TrackerModel::EMAIL)
-                ->track($this->message->id, !empty($user['user_id']) ? $user['user_id'] : 0);
         }
         echo "\n\n";
     }

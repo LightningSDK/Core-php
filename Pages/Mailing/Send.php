@@ -84,7 +84,7 @@ class Send extends Page {
     public function postSendCount() {
         Output::setPlainText(true);
         Messenger::setVerbose(true);
-        $message = new Message(Request::post('id', Request::TYPE_INT), true, false);
+        $message = Message::loadByID(Request::post('id', Request::TYPE_INT), true, false);
         echo 'Sending now will go to ' . $message->getUsersCount() . ' users.';
         exit;
     }

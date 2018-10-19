@@ -143,24 +143,31 @@ class MessageOverridable extends Object {
      *   Whether to include the ubsubscribe link when sending.
      * @param boolean $auto
      *   Whether this is called as an automatic mailer.
+     *
+     * @return Message
+     *
+     * @throws \Exception
      */
-    public function __construct($message_id = null, $unsubscribe = true, $auto = true) {
-        $this->auto = $auto;
-        $this->__data = Database::getInstance()->selectRow('message', ['message_id' => $message_id]);
-        $this->loadTemplate();
-        $this->unsubscribe = $unsubscribe;
+    public static function loadByID($message_id = null, $unsubscribe = true, $auto = true) {
+        $data = Database::getInstance()->selectRow('message', ['message_id' => $message_id]);
+        $message = new static($data);
+        $message->loadTemplate();
+        $message->unsubscribe = $unsubscribe;
+        $message->auto = $auto;
 
         if (empty(self::$message_sent_id)) {
             self::$message_sent_id = Tracker::loadOrCreateByName('Email Sent', Tracker::EMAIL)->id;
         }
 
         if ($default_name_settings = Configuration::get('mailer.default_name')) {
-            $this->default_name = $default_name_settings;
+            $message->default_name = $default_name_settings;
         }
 
-        $this->setCombinedMessageTemplate();
-        
-        $this->loadVariablesFromTemplate();
+        $message->setCombinedMessageTemplate();
+
+        $message->loadVariablesFromTemplate();
+
+        return $message;
     }
 
     public function setRandom($random) {
@@ -359,6 +366,13 @@ class MessageOverridable extends Object {
     }
 
     /**
+     * @return User
+     */
+    public function getUser() {
+        return $this->user;
+    }
+
+    /**
      * Get the unsubscribe string for the current user.
      *
      * @return string
@@ -379,6 +393,8 @@ class MessageOverridable extends Object {
      *
      * @return string
      *   The content with replaced variables.
+     *
+     * @throws \Exception
      */
     public function replaceVariables($source) {
         // Replace variables.
@@ -390,6 +406,8 @@ class MessageOverridable extends Object {
      *
      * @return string
      *   The message subject.
+     *
+     * @throws \Exception
      */
     public function getSubject() {
         // Start by combining subject and template.
@@ -404,8 +422,15 @@ class MessageOverridable extends Object {
      *
      * @return string
      *   The message body.
+     *
+     * @throws \Exception
      */
     public function getMessage() {
+        // Make sure the combined message is ready.
+        if (empty($this->combinedMessageTemplate)) {
+            $this->setCombinedMessageTemplate();
+        }
+
         // Start by combining message and template.
         $message = $this->replaceVariables($this->combinedMessageTemplate);
 
@@ -614,6 +639,8 @@ class MessageOverridable extends Object {
      *
      * @return integer
      *   The number of users.
+     *
+     * @throws \Exception
      */
     public function getUsersCount() {
         $query = $this->getUsersQuery();
@@ -630,11 +657,39 @@ class MessageOverridable extends Object {
         }
         return Database::getInstance()->countQuery($query);
     }
-    
+
+    /**
+     * Sets an email template
+     *
+     * @param integer $template_id
+     *
+     * @throws \Exception
+     */
     public function setTemplate($template_id) {
         $this->template = Database::getInstance()->selectRow(
             'message_template',
             ['template_id' => $template_id]
         );
+    }
+
+    /**
+     * Gets the stats for a message.
+     *
+     * @param int $user_id
+     *
+     * @return array
+     *
+     * @throws \Exception
+     */
+    public function getStats($user_id = null) {
+        if (empty($this->id)) {
+            throw new \Exception("Can't get message stats without a message id.");
+        }
+
+        return Database::getInstance()->query('SELECT COUNT(*) AS count, MIN(time) AS first, MAX(time) AS last FROM tracker_event WHERE tracker_id = ? AND user_id = ? AND sub_id = ?', [
+            Tracker::loadOrCreateByName('Email Sent', Tracker::EMAIL)->id,
+            $user_id ?? 0,
+            $this->id,
+        ])->fetch();
     }
 }
