@@ -20,6 +20,7 @@ use Lightning\Tools\ReCaptcha;
 use Lightning\Tools\Request;
 use Lightning\Tools\Scrub;
 use Lightning\Tools\Security\Encryption;
+use Lightning\Tools\Session\BrowserSession;
 use Lightning\Tools\Template;
 use Lightning\View\Page as PageView;
 use Lightning\Model\User as UserModel;
@@ -232,8 +233,14 @@ class Contact extends PageView {
      */
     protected function optinUser() {
         if (!empty($this->list)) {
+            // Add the user to the list
             $this->user->subscribe($this->list);
         }
+
+        // Add the user id to the browser session to remember them
+        $session = BrowserSession::getInstance();
+        $session->user_id = $this->user->id;
+        $session->save();
     }
 
     /**
@@ -448,6 +455,11 @@ class Contact extends PageView {
         }
     }
 
+    /**
+     * Get the spam fields to add to the contact message.
+     *
+     * @return array|null
+     */
     protected function getSpamFields() {
         if ($this->spamFields === null) {
             $this->processAdditionalFields();
@@ -494,6 +506,11 @@ class Contact extends PageView {
         return $output;
     }
 
+    /**
+     * Process and return the spam score based on the user requesting the contact message.
+     *
+     * @return float|int
+     */
     protected function getSpamScore() {
         if ($this->spamScore === null) {
             $this->processAdditionalFields();
