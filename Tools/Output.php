@@ -246,10 +246,7 @@ class Output {
     }
 
     protected static function jsonOut($output) {
-        // Send the cookies if enabled.
-        if (static::$jsonCookies) {
-            self::sendCookies();
-        }
+        self::sendCookies();
 
         // Add debug data.
         if (Configuration::get('debug')) {
