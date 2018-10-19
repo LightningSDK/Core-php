@@ -105,6 +105,8 @@ class Configuration {
      */
     protected static function loadConfiguration() {
         if (!self::$loading) {
+            // Flag the state as loading, so that nested calls to load configs
+            // do not get stuck in an infinite loop.
             self::$loading = true;
             // Load each configuration file.
             foreach (self::getConfigurations() as $config_file) {
@@ -116,11 +118,13 @@ class Configuration {
             }
 
             // Load module configurations.
+            if (Request::isCLI()) {
+                if (!empty(self::$configuration['modules']['include-cli'])) {
+                    self::loadModules(self::$configuration['modules']['include-cli']);
+                }
+            }
             if (!empty(self::$configuration['modules']['include'])) {
                 self::loadModules(self::$configuration['modules']['include']);
-            }
-            if (!empty(self::$configuration['modules']['include-cli'])) {
-                self::loadModules(self::$configuration['modules']['include-cli']);
             }
 
             self::$loaded = true;
@@ -146,6 +150,7 @@ class Configuration {
     }
 
     public static function reload() {
+        self::$configuration = [];
         static::loadConfiguration();
     }
 
