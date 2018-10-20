@@ -67,10 +67,14 @@ class LoggerOverridable extends Singleton {
      */
     public static function message($message, $explicit_log = null) {
         if (!empty(self::$logFile)) {
-            file_put_contents($explicit_log ?: self::$logFile, self::dateStamp() . ' ' . $message . "\n", FILE_APPEND | LOCK_EX);
+            file_put_contents($explicit_log ?: self::$logFile, self::dateStamp() . ' ' . $message . PHP_EOL, FILE_APPEND | LOCK_EX);
         } else {
-            error_log($message);
+            error_log(self::dateStamp() . ' ' . $message);
         }
+    }
+
+    public static function print($message) {
+        echo self::dateStamp() . ' ' . $message . PHP_EOL;
     }
 
     /**
@@ -128,10 +132,10 @@ class LoggerOverridable extends Singleton {
             $message[] = $line;
         }
 
-        $message = implode("\n" . str_repeat(' ', 22), $message);
+        $message = implode(PHP_EOL . str_repeat(' ', 22), $message);
         self::message($message);
         if ($output) {
-            echo $message . "\n";
+            echo $message . PHP_EOL;
         }
     }
 
