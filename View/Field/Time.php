@@ -226,9 +226,9 @@ class Time extends Field {
         if (empty($value)) {
             return '';
         } else {
-            $value += self::getTimeZoneOffset($timezone);
-            $date = new Datetime('@' . $value, new DateTimeZone('UTC'));
-            return $date->format('m/d/Y h:ia');
+            $date = new Datetime('@' . $value);
+            $date->setTimezone(new DateTimeZone($timezone));
+            return $date->format('m/d/Y h:ia T');
         }
     }
 
