@@ -33,6 +33,10 @@ class Pages extends Table {
         'page_id' => [
             'type' => 'hidden',
         ],
+        'url' => [
+            'type' => 'url',
+            'display_name' => 'URL',
+        ],
         'keywords' => [
             'unlisted' => true,
             'type' => 'textarea',
@@ -52,6 +56,7 @@ class Pages extends Table {
         ],
         'last_update' => [
             'type' => 'datetime',
+            'editable' => false,
         ],
         'right_column' => [
             'type' => 'checkbox',
@@ -71,7 +76,14 @@ class Pages extends Table {
      */
     protected function initSettings() {
         $this->preset['url']['submit_function'] = function(&$output) {
-            $output['url'] = Request::post('url', Request::TYPE_URL) ?: Request::post('title', Request::TYPE_URL);
+            // The url will be scrubbed from the supplied value
+            $output['url'] = Request::post('url')
+                // Or will fallback to a slugged version of the title.
+                ?: Request::post('title');
+        };
+
+        $this->preset['last_update']['submit_function'] = function(&$output) {
+            $output['last_update'] = time();
         };
 
         $this->preset['language'] = \Lightning\Tools\Configuration::get('language.available');
@@ -88,13 +100,13 @@ class Pages extends Table {
         if (!empty($this->id)) {
             $this->getRow();
             $this->custom_buttons['view'] = [
-                'url' => '/' . $this->list['url'] . '.html',
+                'url' => '/' . $this->list['url'],
                 'type' => Table::CB_LINK,
                 'target' => '_blank',
                 'text' => 'View',
             ];
         } else if (Request::get('action') == 'new') {
-            $this->preset['url']['default'] = Request::get('url', Request::TYPE_URL);
+            $this->preset['url']['default'] = Request::get('url');
         }
 
         $this->action_fields = [
@@ -102,7 +114,7 @@ class Pages extends Table {
                 'display_name' => 'View',
                 'type' => 'html',
                 'html' => function($row) {
-                    return '<a href="/' . $row['url'] . '.html"><img src="/images/lightning/resume.png" /></a>';
+                    return '<a href="/' . $row['url'] . '"><img src="/images/lightning/resume.png" /></a>';
                 }
             ],
         ];
@@ -113,6 +125,6 @@ class Pages extends Table {
      */
     public function getView() {
         $this->getRow();
-        Navigation::redirect('/' . $this->list['url'] . '.html');
+        Navigation::redirect('/' . $this->list['url']);
     }
 }

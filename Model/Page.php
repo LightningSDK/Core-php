@@ -41,7 +41,7 @@ class PageOverridable extends Object {
             }
 
             $urls[] = [
-                'loc' => $web_root . "/{$p['url']}.html",
+                'loc' => $web_root . "/{$p['url']}",
                 'lastmod' => date('Y-m-d', $p['last_update']),
                 'changefreq' => $fr,
                 'priority' => $p['priority'] / 100,

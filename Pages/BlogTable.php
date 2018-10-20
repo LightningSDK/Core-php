@@ -72,7 +72,7 @@ class BlogTable extends Table {
 
     protected function afterPost() {
         if (Request::get('return') == 'view') {
-            Navigation::redirect('/' . $this->list['url'] . '.htm');
+            Navigation::redirect('/blog/' . $this->list['url']);
         }
     }
 

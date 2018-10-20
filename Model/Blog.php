@@ -127,11 +127,11 @@ class BlogOverridable extends Singleton {
         $pages = ceil($this->post_count / $this->list_per_page);
 
         if ($this->m > 0) {
-            $base_link = "/blog/archive/{$this->y}/{$this->m}-%%.htm";
+            $base_link = "/blog/archive/{$this->y}/{$this->m}-%%";
         } else if ($this->y > 0) {
-            $base_link = "/blog/archive/{$this->y}-%%.htm";
+            $base_link = "/blog/archive/{$this->y}-%%";
         } else if (!empty($this->category)) {
-            $base_link = '/blog/category/' . $this->category_url . '-%%.htm';
+            $base_link = '/blog/category/' . $this->category_url . '-%%';
         } else {
             $base_link = '/blog/page/%%';
         }
@@ -151,7 +151,7 @@ class BlogOverridable extends Singleton {
         if (!empty($list)) {
             echo "<ul>";
             foreach($list as $r) {
-                echo "<li><a href='/{$r['url']}.htm' {$target}>{$r['title']}</a></li>";
+                echo "<li><a href='/blog/{$r['url']}' {$target}>{$r['title']}</a></li>";
             }
             echo "</ul>";
         }
@@ -162,7 +162,7 @@ class BlogOverridable extends Singleton {
         if (!empty($list)) {
             echo "<ul>";
             foreach($list as $r)
-                echo "<li><a href='/blog/category/". $r['cat_url'] . ".htm'>{$r['category']}</a> ({$r['count']})</li>";
+                echo "<li><a href='/blog/category/". $r['cat_url'] . "'>{$r['category']}</a> ({$r['count']})</li>";
             echo "</ul>";
         }
     }
@@ -223,7 +223,7 @@ class BlogOverridable extends Singleton {
         $urls = [];
         foreach($blogs as $b) {
             $urls[] = [
-                'loc' => $web_root . "/{$b['url']}.htm",
+                'loc' => $web_root . "/blog/{$b['url']}",
                 'lastmod' => date("Y-m-d", $b['blog_time'] ?: time()),
                 'changefreq' => 'yearly',
                 'priority' => .3,

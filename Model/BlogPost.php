@@ -94,7 +94,7 @@ class BlogPostOverridable extends Object {
     }
 
     public function getLink() {
-        return '/' . $this->url . '.htm';
+        return '/blog/' . $this->url;
     }
 
     public function getURL() {
@@ -141,7 +141,7 @@ class BlogPostOverridable extends Object {
     protected function getCatLink($cat) {
         $categories = BlogPost::getAllCategoriesIndexed();
         if (!empty($categories[$cat])) {
-            return '/blog/category/' . $categories[$cat]['cat_url'] . '.htm';
+            return '/blog/category/' . $categories[$cat]['cat_url'];
         }
         return null;
     }

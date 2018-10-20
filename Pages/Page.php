@@ -44,19 +44,24 @@ class Page extends PageView {
     }
 
     public function get() {
-        $request = Request::getLocation();
-        if (empty($request) || $request == 'index') {
+        $slug = Request::getLocation();
+        if (empty($slug) || $slug == 'index') {
+            // If there is no slug, this is the home page
             $content_locator = 'index';
             $this->menuContext = 'index';
         } else {
-            $content_locator = Request::getFromURL('/(.*)\.html$/') ?: '404';
+            // Backwards compatibility with *.html urls.
+            $content_locator = Request::getFromURL('/(.*)\.html$/') ?: $slug;
         }
 
         // LOAD PAGE DETAILS
         if ($this->fullPage = PageModel::loadByURL($content_locator)) {
             if (preg_match('/^[0-9]{3}$/', $content_locator)) {
+                // If the page is a 3 digit code, this is treated as a custom
+                // error page.
                 http_response_code($content_locator);
             } else {
+                // Otherwise it's a 200 page.
                 header('HTTP/1.0 200 OK');
                 if (Configuration::get('page.modification_date') && $this->fullPage['last_update'] > 0) {
                     header("Last-Modified: ".gmdate("D, d M Y H:i:s", $this->fullPage['last_update'])." GMT");
@@ -65,6 +70,7 @@ class Page extends PageView {
             $this->menuContext = $this->fullPage['menu_context'];
         } elseif ($this->fullPage = PageModel::loadByURL('404')) {
             $this->fullPage['page_id'] = false;
+            $this->fullPage['url'] = $content_locator;
             http_response_code(404);
         } else {
             // This should still be editable because we know it's within the .html handler.
@@ -93,9 +99,6 @@ class Page extends PageView {
 
         // Determine if the user can edit this page.
         if ($user->isAdmin()) {
-            if (empty($this->fullPage['url']) || $this->fullPage['url'] == '404') {
-                $this->fullPage['url'] = Request::getFromURL('/(.*)\.html$/') ?: 'index';
-            }
             $this->fullPage['new_title'] = ucwords(preg_replace('/[\-_]/', ' ', $this->fullPage['url']));
             JS::set('page.source', $this->fullPage['body']);
             $template->set('editable', $admin_editable);
