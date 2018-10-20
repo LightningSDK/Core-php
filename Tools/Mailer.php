@@ -414,6 +414,8 @@ class Mailer {
         }
 
         if ($this->verbose) {
+            // TODO: This is intended for output to the browser when sending bulk,
+            // but this should go to the log if sending through the daemon auto mailer.
             echo 'Sending ' . ($test ? 'Test' : 'Real') . " Email ";
         }
         $this->sendToList();
