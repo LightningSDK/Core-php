@@ -171,11 +171,16 @@ class Daemon extends CLI {
         }
         $jobs = Configuration::get('jobs');
         if (empty($job) || empty($jobs[$job])) {
-            throw new Exception('Job not found');
+            $this->out('Job not found');
+            $this->out('Try: ');
+            foreach ($jobs as $key => $config) {
+                $this->out($key);
+            }
+            return;
         }
         $job = $jobs[$job];
         // This would normally be set to the last job run time.
-        $job['last_start'] = time() - $job['interval'];
+        $job['last_start'] = 0;
         $object = new $job['class']();
         $object->debug = true;
         $object->execute($job);
@@ -226,9 +231,10 @@ class Daemon extends CLI {
             $interval_diff = ($time - $job['offset'] + $this->timezoneOffset) % $job['interval'];
             $time_since_last_check = $time - $this->lastCheck;
             if (empty($job['last_start'])) {
-                $job['last_start'] = $this->startTime;
+                // Setting this to 0 so the job knows it's the first run.
+                $job['last_start'] = 0;
             }
-            $time_since_last_start = $time - $job['last_start'];
+            $time_since_last_start = $time - ($job['last_start'] ?: $this->startTime);
             if (
                 // Either the time it was supposed to run fell between the last two checks.
                 $time_since_last_check > $interval_diff
