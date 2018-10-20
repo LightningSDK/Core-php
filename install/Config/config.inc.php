@@ -12,6 +12,7 @@ $conf = [
         'min_password_length' => 6,
         'requires_confirmation' => false,
     ],
+    'timezone' => 'America/Chicago',
     'session' => [
         'single_ip' => true,
     ],
@@ -140,9 +141,8 @@ $conf = [
     ],
     'routes' => [
         'dynamic' => [
-            '.*\.html' => 'Lightning\\Pages\\Page',
             '^blog(/.*)?$' => 'Lightning\\Pages\\Blog',
-            '.*\.htm' => 'Lightning\\Pages\\Blog',
+            '.*' => 'Lightning\\Pages\\Page',
         ],
         'static' => [
             '' => 'Lightning\\Pages\\Page',
