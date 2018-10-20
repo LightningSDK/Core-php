@@ -19,6 +19,8 @@ use Lightning\View\HTMLEditor\Markup;
  */
 class MessageOverridable extends Object {
 
+    const TABLE = 'message';
+
     const PRIMARY_KEY = 'message_id';
 
     /**
@@ -308,7 +310,7 @@ class MessageOverridable extends Object {
      */
     protected function loadLists() {
         if ($this->lists === null) {
-            $this->lists = Database::getInstance()->selectColumn('message_message_list', 'message_list_id', ['message_id' => $this->message_id]);
+            $this->lists = Database::getInstance()->selectColumn('message_message_list', 'message_list_id', $this->any_list ? [] : ['message_id' => $this->message_id]);
         }
     }
 
@@ -497,19 +499,21 @@ class MessageOverridable extends Object {
      *   If there are no lists for the message.
      */
     protected function getUsersQuery() {
-        $query = [];
-        $this->loadLists();
-        if (empty($this->lists)) {
-            throw new \Exception('Your message does not have any mailing lists selected.');
-        }
 
-        // Start with a list of users in the messages selected lists.
+        // The query starts by searching for users on lists.
+        $query = [];
         $query['from'] = 'message_list_user';
         $query['join'] = [[
             'JOIN',
             'user',
             'ON user.user_id = message_list_user.user_id',
         ]];
+
+        // Limit the users to those subscribed to the lists selected for this message.
+        $this->loadLists();
+        if (empty($this->lists)) {
+            throw new \Exception('Your message does not have any mailing lists selected.');
+        }
         $query['where'] = ['message_list_id' => ['IN', $this->lists]];
 
         // Make sure the message is never resent.
@@ -626,6 +630,8 @@ class MessageOverridable extends Object {
      *
      * @return \PDOStatement
      *   An object to iterate all the users who will receive the email.
+     *
+     * @throws \Exception
      */
     public function getUsers() {
         $query = $this->getUsersQuery();

@@ -46,7 +46,8 @@ class Messages extends Table {
             'upload' => true,
             'url' => 'full',
             'trusted' => true,
-        ]
+        ],
+        'any_list' => 'checkbox',
     ];
 
     protected $links = [
