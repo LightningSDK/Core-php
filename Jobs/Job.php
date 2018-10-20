@@ -4,9 +4,9 @@ namespace Lightning\Jobs;
 
 use Lightning\Tools\Logger;
 
-class Job {
+abstract class Job {
 
-    public $name;
+    const NAME = 'Job';
 
     /**
      * In debug mode, this will output to the stdout.
@@ -15,12 +15,14 @@ class Job {
      */
     public $debug = false;
 
-    public function execute($job) {
-    }
+    public abstract function execute($job);
 
     public function out($string) {
+
+        $string = '(JOB: ' . static::NAME . ') ' . $string;
+
         if ($this->debug) {
-            echo $string . PHP_EOL;
+            Logger::print($string);
         }
         Logger::message($string);
     }
