@@ -43,14 +43,14 @@ class Blog extends Page {
             // This page num can be in index 2 (blog/page/#) or index 3 (blog/category/a-z/#).
             $blog->page = is_numeric($path[count($path) - 1]) ? $path[count($path) - 1] : 1;
 
-            if ($path[1] == 'author') {
+            if (!empty($path[1]) && $path[1] == 'author') {
                 // Load an author's article list.
                 if ($author_id = $blog->getAuthorID(preg_replace('/\.htm$/', '', $path[2]))) {
                     $blog->loadList('author', $author_id);
                 } else {
                     Output::http(404);
                 }
-            } elseif ($path[1] == 'category') {
+            } elseif (!empty($path[1]) && $path[1] == 'category') {
                 // Load category list.
                 $category = preg_replace('/\.htm$/', '', $path[2]);
                 $c_parts = explode('-', $category);
