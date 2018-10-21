@@ -2,6 +2,8 @@
 
 namespace Lightning\Tools;
 
+use DateTime;
+
 class LoggerOverridable extends Singleton {
 
     const SEVERITY_LOW = 1;
@@ -104,7 +106,7 @@ class LoggerOverridable extends Singleton {
     }
 
     protected static function dateStamp() {
-        return '[' . date('Y-m-d H:i:s') . ']';
+        return '[' . (new DateTime('now', new \DateTimeZone(date_default_timezone_get())))->format('Y-m-d H:i:s') . ']';
     }
 
     public static function errorLogStacktrace($errno, $errstr, $errfile, $errline, $context = null, $trace = null) {
