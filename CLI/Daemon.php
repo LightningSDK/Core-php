@@ -113,10 +113,10 @@ class Daemon extends CLI {
 
         $this->maxThreads = Configuration::get('daemon.max_threads');
         $this->jobs = Configuration::get('jobs');
-        foreach ($this->jobs as $job => &$job) {
+        foreach ($this->jobs as $name => &$job) {
             if (isset($job['enabled']) && empty($job['enabled'])) {
                 // Jobs are enabled by default but can be disabled by setting enabled=false
-                unset($this->jobs[$job]);
+                unset($this->jobs[$name]);
                 continue;
             }
             $job['next_start'] = $this->getNextStartTime($job);
