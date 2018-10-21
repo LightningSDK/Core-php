@@ -42,15 +42,16 @@ class Blog extends Page {
         elseif (!empty($path[0]) || count($path) > 2) {
             // This page num can be in index 2 (blog/page/#) or index 3 (blog/category/a-z/#).
             $blog->page = is_numeric($path[count($path) - 1]) ? $path[count($path) - 1] : 1;
-            if (preg_match('/.htm$/', $path[0])) {
-                // Load single blog by URL.
-                $blog->loadContentByURL(preg_replace('/.htm$/', '', $path[0]));
-                if (empty($blog->id)) {
+
+            if ($path[1] == 'author') {
+                // Load an author's article list.
+                if ($author_id = $blog->getAuthorID(preg_replace('/\.htm$/', '', $path[2]))) {
+                    $blog->loadList('author', $author_id);
+                } else {
                     Output::http(404);
                 }
-                $this->setBlogMetadata(new BlogPost($blog->posts[0]));
-            } elseif (count($path) == 3 && $path[1] == 'category') {
-                // Load category roll.
+            } elseif ($path[1] == 'category') {
+                // Load category list.
                 $category = preg_replace('/\.htm$/', '', $path[2]);
                 $c_parts = explode('-', $category);
                 if (is_numeric(end($c_parts))) {
@@ -63,13 +64,20 @@ class Blog extends Page {
                 } else {
                     Output::http(404);
                 }
-            } elseif (count($path) == 3 && $path[1] == 'author') {
-                // Load an author roll.
-                if ($author_id = $blog->getAuthorID(preg_replace('/\.htm$/', '', $path[2]))) {
-                    $blog->loadList('author', $author_id);
-                } else {
+            } elseif (preg_match('/.htm$/', $path[0])) {
+                // DEPRECATED
+                // Load single blog by URL.
+                $blog->loadContentByURL(preg_replace('/.htm$/', '', $path[0]));
+                if (empty($blog->id)) {
                     Output::http(404);
                 }
+                $this->setBlogMetadata(new BlogPost($blog->posts[0]));
+            } elseif ($path[1] != 'page') {
+                $blog->loadContentByURL($path[1]);
+                if (empty($blog->id)) {
+                    Output::http(404);
+                }
+                $this->setBlogMetadata(new BlogPost($blog->posts[0]));
             } elseif (!empty($blog->page)) {
                 $blog->loadList();
             }
