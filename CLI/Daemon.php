@@ -3,9 +3,9 @@
 namespace Lightning\CLI;
 
 use DateTime;
-use Exception;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Logger;
+use Lightning\Tools\Database as DatabaseTool;
 
 // This is required for the signal handler.
 declare(ticks = 1);
@@ -142,6 +142,11 @@ class Daemon extends CLI {
             pcntl_signal(SIGTERM, [$this, 'handlerSIGTERM']);
         }
 
+        // Before getting into the final loop, disconnect from the database so that
+        // new processes don't try to inherit the DB connection.
+        // TODO: This should be a caught exception in the DB class itself
+        DatabaseTool::getInstance()->disconnect();
+
         // Loop infinitely, checking for jobs.
         $this->lastCheck = time();
         do {
@@ -243,7 +248,7 @@ class Daemon extends CLI {
     protected function getNextStartTime($job) {
         $schedule = explode(' ', $job['schedule']);
 
-        $date = new DateTime('+1 minute');
+        $date = new DateTime();
         $date->setTimezone(new \DateTimeZone(Configuration::get('timezone')));
 
         // Year [5]
