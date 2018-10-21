@@ -113,6 +113,9 @@ class Daemon extends CLI {
 
         $this->maxThreads = Configuration::get('daemon.max_threads');
         $this->jobs = Configuration::get('jobs');
+        foreach ($this->jobs as &$job) {
+            $job['next_start'] = $this->getNextStartTime($job);
+        }
 
         // If this is not in debug mode, fork to a daemon process.
         if (!$this->debug) {
@@ -220,30 +223,112 @@ class Daemon extends CLI {
     protected function checkForJobs() {
         if (!$this->hasFreeThreads()) {
             // There are too many threads running already.
+            $this->out('No free threads to check for jobs');
             return;
         }
 
+        $this->out('Checking for jobs');
+
         foreach ($this->jobs as &$job) {
-            $time = time();
-            if (empty($this->lastCheck)) {
-                $this->lastCheck = $time;
-            }
-            $interval_diff = ($time - $job['offset'] + $this->timezoneOffset) % $job['interval'];
-            $time_since_last_check = $time - $this->lastCheck;
-            if (empty($job['last_start'])) {
-                // Setting this to 0 so the job knows it's the first run.
-                $job['last_start'] = 0;
-            }
-            $time_since_last_start = $time - ($job['last_start'] ?: $this->startTime);
-            if (
-                // Either the time it was supposed to run fell between the last two checks.
-                $time_since_last_check > $interval_diff
-                // Or the interval has lapsed since the last time it was run.
-                || $time_since_last_start > $job['interval']
-            ) {
+            if ($job['next_start']->getTimeStamp() < time()) {
                 $this->startJob($job);
+                $job['next_start'] = $this->getNextStartTime($job);
             }
-            $this->lastCheck = $time;
+        }
+    }
+
+    protected function getNextStartTime($job) {
+        $schedule = explode(' ', $job['schedule']);
+
+        $date = new DateTime('+1 minute');
+        $date->setTimezone(new \DateTimeZone(Configuration::get('timezone')));
+
+        // Year [5]
+        if (!empty($schedule[5]) && $schedule[5] != '*') {
+            if (is_numeric($schedule[5])) {
+                $this->advanceDate($date, 'year', $schedule[5]);
+            }
+        }
+
+        // TODO: Day of week [4]
+
+        // Month [3]
+        if (!empty($schedule[3]) && $schedule[3] != '*') {
+            if (is_numeric($schedule[3])) {
+                $this->advanceDate($date, 'month', $schedule[3]);
+            }
+        }
+
+        // Day of Month [2]
+        if (!empty($schedule[2]) && $schedule[2] != '*') {
+            if (is_numeric($schedule[2])) {
+                $this->advanceDate($date, 'day', $schedule[2]);
+            }
+        }
+
+        // Hour [1]
+        if (!empty($schedule[1]) && $schedule[1] != '*') {
+            if (is_numeric($schedule[1])) {
+                $this->advanceDate($date, 'hour', $schedule[1]);
+            }
+        }
+
+        // Minute [0]
+        if (!empty($schedule[0]) && $schedule[0] != '*') {
+            if (is_numeric($schedule[0])) {
+                $this->advanceDate($date, 'minute', $schedule[0]);
+            } elseif (preg_match('|[\*0-9]/[0-9]+$|', $schedule[0])) {
+                $parts = explode('/', $schedule[0]);
+                if ($parts[0] == '*') {
+                    do {
+                        $this->advanceDate($date, 'minute', $date->format('i') +1);
+                    } while ($date->format('i') % $parts[1] > 0);
+                }
+            }
+        }
+
+        $this->out('Job ' . $job['class']::NAME . ' will start next at ' . $date->format('r'));
+        return $date;
+    }
+
+    /**
+     * @param DateTime $date
+     * @param $position
+     * @param $value
+     */
+    protected function advanceDate($date, $position, $value) {
+        switch ($position) {
+            case 'year':
+                $date->setTime(0,0,0);
+                $date->setDate($value, 1, 1);
+                break;
+            case 'dow':
+                $date->setTime(0,0,0);
+                $dayOffset = $value - $date->format('w');
+                if ($dayOffset < 0) {
+                    $dayOffset += 7;
+                }
+                $date->setDate($date->format('Y'), $date->format('m'), $date->format('d') + $dayOffset);
+                break;
+            case 'month':
+                $date->setTime(0,0,0);
+                $yearOffset = $value < $date->format('m') ? 1 : 0;
+                $date->setDate($date->format('Y') + $yearOffset, $value, 1);
+                break;
+            case 'day':
+                $monthOffset = $value < $date->format('d') ? 1 : 0;
+                $date->setDate($date->format('Y'), $date->format('m') + $monthOffset, $value);
+                break;
+            case 'hour':
+                if ($value < $date->format('G')) {
+                    $date->setDate($date->format('Y'), $date->format('m'), $date->format('d') + 1);
+                }
+                $date->setTime($value, 0, 0);
+                break;
+            Case 'minute':
+                $hourOffset = $value < $date->format('i') ? 1 : 0;
+                $date->setTime($date->format('G') + $hourOffset, $value, 0);
+                break;
         }
     }
 

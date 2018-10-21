@@ -281,6 +281,8 @@ class DBSessionOverridable extends SingletonObject {
      *
      * @param int $exception
      *   A session ID that can be left as active.
+     *
+     * @throws \Exception
      */
     public function dumpSessions($exception=0) {
         // Remove password state for all other sessions.
@@ -309,6 +311,8 @@ class DBSessionOverridable extends SingletonObject {
      *
      * @return integer
      *   The number of sessions removed.
+     *
+     * @throws \Exception
      */
     public static function clearExpiredSessions() {
         $timeouts = [];
