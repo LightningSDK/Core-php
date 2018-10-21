@@ -232,8 +232,6 @@ class Daemon extends CLI {
             return;
         }
 
-        $this->out('Checking for jobs');
-
         foreach ($this->jobs as &$job) {
             if ($job['next_start']->getTimeStamp() < time()) {
                 $this->startJob($job);
