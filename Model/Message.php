@@ -310,12 +310,24 @@ class MessageOverridable extends Object {
      */
     protected function loadLists() {
         if ($this->lists === null) {
-            $this->lists = Database::getInstance()->selectColumn('message_message_list', 'message_list_id', $this->any_list ? [] : ['message_id' => $this->message_id]);
+            if (!empty($this->any_list)) {
+                $this->lists = static::getAllLists();
+            } else {
+                $this->lists = Database::getInstance()->selectColumn(
+                    'message_message_list',
+                    'message_list_id',
+                    ['message_id' => $this->message_id]
+                );
+            }
         }
     }
 
     public static function getAllLists() {
         return Database::getInstance()->selectColumn('message_list', 'name', [], 'message_list_id');
+    }
+
+    public static function getAllListIDs() {
+        return Database::getInstance()->selectColumn('message_list', 'message_list_id');
     }
 
     public static function validateListID($id) {
@@ -444,6 +456,8 @@ class MessageOverridable extends Object {
      * 
      * @param array $vars
      *   Variables to set for chainable messages
+     *
+     * @throws \Exception
      */
     public function setDefaultVars($vars = null) {
         /*
@@ -501,13 +515,17 @@ class MessageOverridable extends Object {
     protected function getUsersQuery() {
 
         // The query starts by searching for users on lists.
-        $query = [];
-        $query['from'] = 'message_list_user';
-        $query['join'] = [[
-            'JOIN',
-            'user',
-            'ON user.user_id = message_list_user.user_id',
-        ]];
+        $query = [
+            'select' => [
+                'uid' => ['expression' => 'DISTINCT(user.user_id)'],
+                'user.*',
+            ],
+            'from' => 'message_list_user',
+            'join' => [[
+                'join' => 'user',
+                'on' => ['user.user_id' => ['expression' => 'message_list_user.user_id']],
+            ]],
+        ];
 
         // Limit the users to those subscribed to the lists selected for this message.
         $this->loadLists();
@@ -534,47 +552,11 @@ class MessageOverridable extends Object {
         foreach ($this->criteria as $criteria) {
             $field_values = json_decode($criteria['field_values'], true);
 
-            // Add Joins
-            if (!empty($criteria['join'])) {
-                if ($c_table = json_decode($criteria['join'], true)) {
-                    // The entry is a full join array.
-                    $this->replaceCriteriaVariables($c_table, $field_values);
-                    reset($c_table);
-                    if (is_array(current($c_table)) && is_numeric(key($c_table))) {
-                        foreach ($c_table as $join) {
-                            $query['join'][] = $join;
-                        }
-                    } else {
-                        $query['join'][] = $c_table;
-                    }
-                } else {
-                    // The entry is just a table name.
-                    $query['join'][] = [
-                        'left_join' => $criteria['join'],
-                        'on' => [$criteria['join'] . '.user_id' => ['user.user_id']],
-                    ];
-                }
-            }
+            $criteria_filter = json_decode($criteria['filter'], true);
+            $this->replaceCriteriaVariables($criteria_filter, $field_values);
 
-            // Add where conditions
-            if ($where = json_decode($criteria['where'], true)) {
-                $this->replaceCriteriaVariables($where, $field_values);
-                $query['where'][] = $where;
-            }
-
-            // Add fields, group by, and having clauses
-            foreach (['select', 'group_by', 'having'] as $type) {
-                if (!empty($criteria[$type])) {
-                    if ($fields = json_decode($criteria[$type], true)) {
-                        if (!isset($query[$type])) {
-                            $query[$type] = [];
-                        }
-                        $query[$type] += $fields;
-                    } else {
-                        $query[$type][] = $criteria[$type];
-                    }
-                }
-            }
+            // Merge into the current search query.
+            Database::filterQuery($query, $criteria_filter);
         }
 
         if (!empty($this->limit)) {
@@ -587,7 +569,14 @@ class MessageOverridable extends Object {
         return $query;
     }
 
-    protected function replaceCriteriaVariables(&$query_segment, $variables = []) {
+    /**
+     * Performs a string replace
+     *
+     * @param string $query
+     * @param array $variables
+     * @return mixed
+     */
+    protected function replaceCriteriaVariables(&$query, $variables = []) {
         if (empty($variables['TODAY'])) {
             $variables['TODAY'] = Time::today();
         }
@@ -595,34 +584,20 @@ class MessageOverridable extends Object {
             $variables['NOW'] = time();
         }
 
-        $next_is_array = false;
-        array_walk_recursive($query_segment, function(&$item) use ($variables, &$next_is_array) {
-            if (is_string($item)) {
-                foreach ($variables as $var => $value) {
-                    if ($item == 'IN') {
-                        $next_is_array = true;
-                        continue;
+        foreach ($variables as $key => $value) {
+            array_walk_recursive($query, function(&$item, $key) use ($variables) {
+                if ($item !== null) {
+                    foreach ($variables as $var => $value) {
+                        $item = str_replace('{' . $var . '}', $value, $item);
                     }
-                    if ($decoded = json_decode($value)) {
-                        $value = $decoded;
-                    }
-                    if (!empty($next_is_array)) {
-                        if (is_array($value)) {
-                            $item = $value;
-                        } else {
-                            $item = explode(',', $value);
-                            $item = array_map('trim', $item);
-                        }
-                        $next_is_array = false;
-                    }
-                    if (is_array($value)) {
-                        $item = preg_replace('/{{' . $var . '}}/', '"' . implode($value, '", "') . '"', $item);
-                    } else {
-                        $item = preg_replace('/{' . $var . '}/', $value, $item);
+                    $matches = [];
+                    if (preg_match('/{TRACKER:(.*):(.*)}/', $item, $matches)) {
+                        $tracker = Tracker::loadOrCreateByName($matches[2], $matches[1]);
+                        $item = str_replace('{TRACKER:' . $tracker->category . ':' . $tracker->tracker_name . '}', $tracker->id, $item);
                     }
                 }
-            }
-        });
+            });
+        }
     }
 
     /**
@@ -635,8 +610,6 @@ class MessageOverridable extends Object {
      */
     public function getUsers() {
         $query = $this->getUsersQuery();
-        $query['select']['uid'] = ['expression' => 'DISTINCT(user.user_id)'];
-        $query['select'][] = 'user.*';
         return Database::getInstance()->selectQuery($query);
     }
 

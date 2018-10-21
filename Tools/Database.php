@@ -16,6 +16,32 @@ use ReflectionClass;
  * A database abstraction layer.
  *
  * @package Lightning\Tools
+ *
+ * A query array is a processable array built as a query. This array is converted
+ * into SQL at execution time. The following is an example query with available options:
+ *
+ * [
+ *   'select' => [
+ *     // SELECT `table`.*, `field`, `another_table`.`another_field`
+ *     'table.*', 'field', 'another_table.another_field',
+ *   ],
+ *   'select' => [
+ *     // SELECT `field` as `alias`
+ *     'field' => 'alias',
+ *   ],
+ *   'from' => 'table_name',
+ *   'join' => [
+ *     'left_join' => 'join_table',
+ *     'on' => [
+ *       // field=value
+ *       'field' => 'value',
+ *       // field={literal_expression}
+ *       'field' => ['expression' => '{literal_expression}']
+ *       // {some_field=some_value}
+ *       ['expression' => '{some_field=some_value}'],
+ *     ]
+ *   ]
+ * ]
  */
 class Database extends Singleton {
     /**
@@ -867,7 +893,7 @@ class Database extends Singleton {
                         $output .= $this->parseJoin($join, $values);
                     }
                     if (!empty($join[$type])) {
-                        $output .= $format . $this->parseTable($join[$type], $values, is_string($alias) ? $alias : null);
+                        $output .= $format . $this->parseTable($join[$type], $values, $join['as'] ?? (is_string($alias) ? $alias : null));
                         break;
                     }
                 }
@@ -1717,11 +1743,20 @@ class Database extends Singleton {
         }
     }
 
+    /**
+     * Merges filters from a second query into a first.
+     * TODO: This is implemented in the Filter class. does it need to be updated or referenced?
+     *
+     * @param array $start_query
+     * @param array $filter_query
+     */
     public static function filterQuery(&$start_query, $filter_query) {
         // Make sure both joins are wrapped in arrays.
+        reset($start_query['join']);
         if (!is_numeric(key($start_query['join']))) {
             $start_query['join'] = [$start_query['join']];
         }
+        reset($filter_query['join']);
         if (!is_numeric(key($filter_query['join']))) {
             $filter_query['join'] = [$filter_query['join']];
         }
@@ -1740,6 +1775,12 @@ class Database extends Singleton {
         }
 
         // Merge where queries.
+        if (empty($start_query['where'])) {
+            $start_query['where'] = [];
+        }
+        if (empty($filter_query['where'])) {
+            $filter_query['where'] = [];
+        }
         $start_query['where'] = array_merge($start_query['where'], $filter_query['where']);
 
         // Make sure the correct fields are added.

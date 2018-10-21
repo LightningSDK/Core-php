@@ -55,6 +55,8 @@ class TrackerOverridable extends Object {
      *
      * @return Tracker
      *   The new object
+     *
+     * @throws \Exception
      */
     public static function loadOrCreateByName($name, $category = '') {
         if ($data = Database::getInstance()->selectRow(static::TABLE, ['category' => $category, 'tracker_name' => $name])) {
@@ -74,6 +76,8 @@ class TrackerOverridable extends Object {
      *
      * @return boolean
      *   Whether the link was tracked.
+     *
+     * @throws \Exception
      */
     public static function trackByEncryptedLink($tracker_string) {
         // Decrypt and decode the string with the private key.
@@ -109,6 +113,8 @@ class TrackerOverridable extends Object {
      *
      * @param $sub_id
      * @param null $user_id
+     *
+     * @throws \Exception
      */
     public function track($sub_id, $user_id = null) {
         if ($user_id === null) {
@@ -151,6 +157,8 @@ class TrackerOverridable extends Object {
      *
      * @param integer $sub_id
      * @param integer $user_id
+     *
+     * @throws \Exception
      */
     public function trackOnce($sub_id, $user_id = null) {
         if ($user_id === null) {
@@ -273,6 +281,8 @@ class TrackerOverridable extends Object {
      *
      * @return array
      *   The result set.
+     *
+     * @throws \Exception
      */
     public function getHistory($options) {
         // Set defaults.
