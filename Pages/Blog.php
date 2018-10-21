@@ -73,7 +73,7 @@ class Blog extends Page {
                 }
                 $this->setBlogMetadata(new BlogPost($blog->posts[0]));
             } elseif (!empty($path[1]) && $path[1] != 'page') {
-                $blog->loadContentByURL($path[1]);
+                $blog->loadContentByURL(preg_replace('/.htm$/', '', $path[1]));
                 if (empty($blog->id)) {
                     Output::http(404);
                 }
