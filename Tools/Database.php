@@ -144,6 +144,10 @@ class Database extends Singleton {
     const WILDCARD_AFTER = 2;
     const WILDCARD_EITHER = 3;
 
+    protected $URL;
+    protected $username;
+    protected $password;
+
     /**
      * Construct this object.
      *
@@ -156,17 +160,28 @@ class Database extends Singleton {
         try {
             // Extract user data.
             $results = NULL;
+            $this->url = $url;
             preg_match('|user=(.*)[;$]|U', $url, $results);
-            $username = !empty($results[1]) ? $results[1] : '';
+            $this->username = !empty($results[1]) ? $results[1] : '';
             preg_match('|password=(.*)[;$]|U', $url, $results);
-            $password = !empty($results[1]) ? $results[1] : '';
-
-            // @todo remove @ when php header 5.6 is updated
-            $this->connection = @new PDO($url, $username, $password);
+            $this->password = !empty($results[1]) ? $results[1] : '';
         } catch (PDOException $e) {
             // Error handling.
             Logger::error('Connection failed: ' . $e->getMessage());
             Output::error('Connection failed: ' . $e->getMessage());
+        }
+    }
+
+    public function connect() {
+        if (empty($this->connection)) {
+            // @todo remove @ when php header 5.6 is updated
+            $this->connection = @new PDO($this->url, $this->username, $this->password);
+        }
+    }
+
+    public function disconnect() {
+        if (!empty($this->connection)) {
+            $this->connection = null;
         }
     }
 
@@ -177,7 +192,9 @@ class Database extends Singleton {
      *   The singleton Database object.
      */
     public static function getInstance($create = true) {
-        return parent::getInstance($create);
+        $instance = parent::getInstance($create);
+        $instance->connect();
+        return $instance;
     }
 
     /**
