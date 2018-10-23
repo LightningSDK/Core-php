@@ -1768,58 +1768,67 @@ class Database extends Singleton {
      * @param array $filter_query
      */
     public static function filterQuery(&$start_query, $filter_query) {
-        // Make sure both joins are wrapped in arrays.
-        reset($start_query['join']);
-        if (!is_numeric(key($start_query['join']))) {
-            $start_query['join'] = [$start_query['join']];
-        }
-        reset($filter_query['join']);
-        if (!is_numeric(key($filter_query['join']))) {
-            $filter_query['join'] = [$filter_query['join']];
-        }
-
         // Merge checking for duplicates.
-        foreach ($filter_query['join'] as $join) {
-            $match = false;
-            foreach ($start_query['join'] as $j) {
-                if ($join == $j) {
-                    $match = true;
-                }
+        if (!empty($filter_query['join'])) {
+            // Make sure both joins are wrapped in arrays.
+            reset($start_query['join']);
+            if (!is_numeric(key($start_query['join']))) {
+                $start_query['join'] = [$start_query['join']];
             }
-            if (!$match) {
-                $start_query['join'][] = $join;
+            reset($filter_query['join']);
+            if (!is_numeric(key($filter_query['join']))) {
+                $filter_query['join'] = [$filter_query['join']];
+            }
+
+            foreach ($filter_query['join'] as $join) {
+                $match = false;
+                foreach ($start_query['join'] as $j) {
+                    if ($join == $j) {
+                        $match = true;
+                    }
+                }
+                if (!$match) {
+                    $start_query['join'][] = $join;
+                }
             }
         }
 
         // Merge where queries.
-        if (empty($start_query['where'])) {
-            $start_query['where'] = [];
+        if (!empty($filter_query['where'])) {
+            if (empty($start_query['where'])) {
+                $start_query['where'] = [];
+            }
+            $start_query['where'] = array_merge($start_query['where'], $filter_query['where']);
         }
-        if (empty($filter_query['where'])) {
-            $filter_query['where'] = [];
-        }
-        $start_query['where'] = array_merge($start_query['where'], $filter_query['where']);
 
         // Make sure the correct fields are added.
-        foreach ($filter_query['select'] as $table => $fields) {
-            if (empty($start_query['select'][$table])) {
-                // Make sure the final query has the table.
-                $start_query['select'][$table] = [];
-            } elseif ($start_query['select'][$table] == ['*'] || $fields = ['*']) {
-                // If either query wants all the fields, set the final query.
-                $start_query['select'][$table] = ['*'];
-                continue;
-            } elseif (!is_array($start_query['select'][$table])) {
-                // Make sure the final query select for the table is an array.
-                $start_query['select'][$table] = [$start_query['select'][$table]];
+        if (!empty($filter_query['select'])) {
+            if (empty($start_query['select'])) {
+                $start_query['select'] = [];
             }
-
-            if (!is_array($fields)) {
-                $fields = [$fields];
+            if (!is_array($filter_query['select'])) {
+                $filter_query['select'] = [$filter_query['select']];
             }
-
-            // Merge the fields
-            $start_query['select'][$table] = array_merge($start_query['select'][$table], $fields);
+            $final_select = [];
+            foreach ([$start_query['select'], $filter_query['select']] as $query) {
+                foreach ($query as $table => $fields) {
+                    // If this is a numeric key, it should not be an array.
+                    if (is_numeric($table) && $fields == '*') {
+                        $final_select = ['*'];
+                        break 2;
+                    }
+                    if (!is_numeric($table)) {
+                        foreach ($fields as $field) {
+                            if ($field == '*') {
+                                $final_select[$table] = ['*'];
+                            } elseif (!in_array('*', $final_select[$table]) && !in_array($field, $final_select[$table])) {
+                                $final_select[$table] = $field;
+                            }
+                        }
+                    }
+                }
+            }
+            $start_query['select'] = $final_select;
         }
     }
 }
