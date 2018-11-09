@@ -2,8 +2,10 @@
 
 namespace Lightning\View;
 
+use Lightning\Model\User;
+
 class TablePresets {
-    public static function userSearch() {
+    public static function userSearch($field_name = 'user_id') {
         return [
             'autocomplete' => [
                 'table' => 'user',
@@ -13,6 +15,13 @@ class TablePresets {
                     $row = $row['first'] . ' ' . $row['last'] . '(' . $row['email'] . ')';
                 }
             ],
+            'display_value' => function($row) use ($field_name) {
+                if (empty($row[$field_name])) {
+                    return '';
+                }
+                $user = User::loadById($row[$field_name]);
+                return $user->first . ' ' . $user->last . '(' . $user-> email . ':' . $row[$field_name] . ')';
+            }
         ];
     }
 }
