@@ -223,6 +223,17 @@ class PageOverridable {
                 Output::accessDenied();
             }
 
+            // If there is a requested action.
+            if ($action = Request::get('action')) {
+                $method = Request::convertFunctionName($action, $request_type);
+            } else {
+                $method = $request_type;
+            }
+
+            if (!method_exists($this, $method)) {
+                Output::http(404);
+            }
+
             // Outputs an error if this is a POST request without a valid token.
             if ($this->requiresToken()) {
                 $this->requireToken();
@@ -231,23 +242,11 @@ class PageOverridable {
                 FormTool::requiresToken();
             }
 
-            // If there is a requested action.
-            if ($action = Request::get('action')) {
-                $method = Request::convertFunctionName($action, $request_type);
-            } else {
-                $method = $request_type;
+            // If this IP is blacklisted internally, block it completely.
+            if ($request_type != 'get' && Blacklist::checkBlacklist(Request::getIP())) {
+                throw new Exception('This action has been denied for security purposes.');
             }
-
-            if (method_exists($this, $method)) {
-                // If this IP is blacklisted internally, block it completely.
-                if ($request_type != 'get' && Blacklist::checkBlacklist(Request::getIP())) {
-                    throw new Exception('This action has been denied for security purposes.');
-                }
-                $this->{$method}();
-            } else {
-                // TODO: show 302
-                throw new Exception('Method not available');
-            }
+            $this->{$method}();
         } catch (Exception $e) {
             Output::error($e->getMessage());
         }
