@@ -12,8 +12,18 @@ class BasicHTML {
      *
      * @param string $name
      *   The name and ID of the field.
-     * @param $values
+     * @param array $values
      *   A keyed array of option/value combinations.
+     *
+     * This array can be a simple array for a single select field with numeric keys:
+     *   ['option 1', 'option 2', 'option 3']
+     * With specific keys:
+     *   ['value1' => 'option 1', 'value2' => 'option 2']
+     * With hierarchical option groups:
+     *   ['Group 1' => [
+     *     'option1' => 'Label 1',
+     *     'option2' => 'Label 2',
+     *
      * @param string|integer $default
      *   The default selected value.
      * @param array $attributes
