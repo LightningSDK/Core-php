@@ -40,7 +40,11 @@ use ReflectionClass;
  *       // {some_field=some_value}
  *       ['expression' => '{some_field=some_value}'],
  *     ]
- *   ]
+ *   ],
+ *   // Max number of results
+ *   'limit' => 12,
+ *   // Built in pagination
+ *   'page' => 2,
  * ]
  */
 class Database extends Singleton {
