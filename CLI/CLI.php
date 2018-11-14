@@ -40,6 +40,9 @@ class CLI {
         }
         else {
             $this->out('No handler found.');
+            foreach (Configuration::get('routes.cli_only') as $command => $class) {
+                $this->out('  ' . $command);
+            }
         }
     }
 
