@@ -134,6 +134,10 @@ class RequestOverridable {
         return (static::isHTTPS() ? 'https://' : 'http://') . static::getDomain() . '/' . static::getLocation();
     }
 
+    public static function getURLWithParams() {
+        return ($_SERVER['REQUEST_SCHEME'] ?? '') . '://' . ($_SERVER['HTTP_HOST'] ?? '') . ($_SERVER['REQUEST_URI'] ?? '');
+    }
+
     public static function getDomain() {
         return !empty($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : (!empty($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : '');
     }

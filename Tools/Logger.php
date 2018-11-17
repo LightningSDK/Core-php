@@ -75,6 +75,11 @@ class LoggerOverridable extends Singleton {
         }
     }
 
+    public static function info($message) {
+        $message = '[INFO] ' . $message;
+        self::message($message);
+    }
+
     public static function print($message) {
         echo self::dateStamp() . ' ' . $message . PHP_EOL;
     }
