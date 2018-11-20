@@ -2,7 +2,7 @@
 
 namespace Lightning\Model;
 
-use Lightning\Pages\BlogTable;
+use Lightning\Pages\Admin\BlogPosts;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
 use Lightning\Tools\IO\FileManager;
@@ -63,7 +63,7 @@ class BlogPostOverridable extends Object {
     public function getTrueHeaderImage() {
         if (!empty($this->header_image)) {
             // Image from upload.
-            $field = BlogTable::getHeaderImageSettings();
+            $field = BlogPosts::getHeaderImageSettings();
             $handler = empty($field['file_handler']) ? '' : $field['file_handler'];
             $fileHandler = FileManager::getFileHandler($handler, $field['container']);
             return $fileHandler->getWebURL($this->header_image);
@@ -131,11 +131,9 @@ class BlogPostOverridable extends Object {
 
     public function renderCategoryList() {
         $categories = explode(',', $this->categories);
-        foreach ($categories as $cat): ?>
-            <li>
-                <a href="<?= $this->getCatLink($cat); ?>"><?= $this->getCatName($cat); ?></a>
-            </li>
-        <?php endforeach;
+        foreach ($categories as $cat) {
+            echo '<li><a href="' . $this->getCatLink($cat) . '">' . $this->getCatName($cat) . '</a></li>';
+        }
     }
 
     protected function getCatLink($cat) {

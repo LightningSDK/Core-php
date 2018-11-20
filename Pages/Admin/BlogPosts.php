@@ -1,15 +1,16 @@
 <?php
 
-namespace Lightning\Pages;
+namespace Lightning\Pages\Admin;
 
 use Lightning\Model\Permissions;
+use Lightning\Pages\Table;
 use Lightning\Tools\Navigation;
 use Lightning\Tools\Request;
 use Lightning\Tools\ClientUser;
 use Lightning\Model\BlogPost;
 use Lightning\Tools\Template;
 
-class BlogTable extends Table {
+class BlogPosts extends Table {
 
     const TABLE = BlogPost::TABLE;
     const PRIMARY_KEY = 'blog_id';
@@ -86,7 +87,7 @@ class BlogTable extends Table {
         $this->preset['header_image'] = self::getHeaderImageSettings();
 
         $this->action_fields['view']['html'] = function($row) {
-            return '<a href="/' . $row['url'] . '.htm"><img src="/images/lightning/resume.png" /></a>';
+            return '<a href="/blog/' . $row['url'] . '"><img src="/images/lightning/resume.png" /></a>';
         };
     }
 
