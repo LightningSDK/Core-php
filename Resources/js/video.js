@@ -112,13 +112,28 @@ lightning.video = {
             }
             video_tag += '</video>';
         } else {
-            video_tag = '<audio id=video_player_' + id + ' class="video-js vjs-default-skin" width="' + width + '" height="' + height + '" ' + (showControls ? 'controls' : '') + ' preload>';
-            for (var codec in {'mp3': 1}) {
+            video_tag = $('<audio>');
+            video_tag.prop('id', 'video_player_' + id);
+            video_tag.prop('class', 'video-js vjs-default-skin');
+            video_tag.prop('width', width);
+            video_tag.prop('height', height);
+            video_tag.prop('preload', 'preload');
+            if (showControls) {
+                video_tag.prop('controls', 'controls');
+            }
+            var poster = source.still ? source.still : video.still ? video.still : '';
+            if (poster != '') {
+                video_tag.prop('poster', poster);
+            }
+
+            for (var codec in {'mp3': 1, 'aac': 1}) {
                 if (source[codec]) {
-                    video_tag += '<source src="' + source[codec] + '" type="audio/' + codec + ';">';
+                    var source_tag = $('<source>');
+                    source_tag.prop('src', source[codec]);
+                    source_tag.prop('type', 'audio/' + codec);
+                    video_tag.append(source_tag);
                 }
             }
-            video_tag += '</audio>';
         }
         container.append(video_tag);
 
