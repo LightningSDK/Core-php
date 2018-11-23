@@ -187,10 +187,15 @@ class RestClient {
                 $content = json_encode($vars);
                 $this->setHeader('Content-Type', self::CONTENT_TYPE_JSON);
             } elseif (!empty($this->sendData)) {
-                $content = http_build_query($this->sendData);
+                if (is_array($this->sendData)) {
+                    $content = http_build_query($this->sendData);
+                } else {
+                    $content = $this->sendData;
+                }
             } else {
                 $content = http_build_query($vars);
             }
+            $this->setHeader('Content-Length', strlen($content));
             curl_setopt($curl, CURLOPT_POSTFIELDS, $content);
             $this->signBodyContents($content);
         }
