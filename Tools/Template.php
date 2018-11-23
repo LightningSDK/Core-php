@@ -26,6 +26,13 @@ class Template extends Singleton {
     protected $cache = [];
 
     /**
+     * Whether to output debug data.
+     *
+     * @var boolean
+     */
+    protected $debug = false;
+
+    /**
      * Footer html content.
      *
      * @var string
@@ -66,6 +73,9 @@ class Template extends Singleton {
     public function __construct() {
         $this->template = Configuration::get('template.default');
         $this->template_dir = HOME_PATH . '/' . Configuration::get('template_dir') . '/';
+        if (Configuration::get('debug')) {
+            $this->debug = true;
+        }
     }
 
     /**
@@ -162,6 +172,10 @@ class Template extends Singleton {
     public function set($name, $value) {
         $this->vars[$name] = $value;
         return $this;
+    }
+
+    public function setDebug($value = true) {
+        $this->debug = $value;
     }
 
     /**
@@ -273,7 +287,7 @@ class Template extends Singleton {
             $value = $this->_include($template, true);
         }
 
-        if (Configuration::get('debug')) {
+        if ($this->debug) {
             // Wrap template with debug information.
             $value = '<!-- START TEMPLATE ' . json_encode($template) . '.tpl.php -->' . $value . '<!-- END TEMPLATE ' . json_encode($template) . '.tpl.php -->';
         }
