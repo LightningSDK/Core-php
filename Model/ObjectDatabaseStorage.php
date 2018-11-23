@@ -73,6 +73,17 @@ trait ObjectDatabaseStorage {
     }
 
     /**
+     * Count the total number of matching objects.
+     *
+     * @param array $where
+     * @return int
+     * @throws \Exception
+     */
+    public static function count($where = []) {
+        return Database::getInstance()->count(static::TABLE, $where);
+    }
+
+    /**
      * Select a list of available options with value of column $name_field, keyed by the primary key.
      *
      * @param string $name_field
