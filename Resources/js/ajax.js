@@ -100,27 +100,34 @@ lightning.ajax = {
      */
     error: function(settings, data) {
         lightning.dialog.clear();
-        if (data == undefined) {
+        if (data === undefined) {
             lightning.dialog.add('Communication Error', 'error');
             lightning.dialog.show();
-        } else if (typeof(data) == 'string') {
+        } else if (typeof(data) === 'string') {
             lightning.dialog.add(data, 'error');
             lightning.dialog.show();
-        } else if (data.errors) {
-            for(var i in data.errors) {
-                lightning.dialog.add(data.errors[i], 'error');
-                lightning.dialog.show();
-            }
         } else {
-            lightning.dialog.add('There was an error loading the page. Please reload the page. If the problem persists, please <a href="/contact">contact support</a>.', 'error');
-            if (data.hasOwnProperty('status')) {
-                lightning.dialog.add('HTTP: ' + data.status, 'error');
-            }
-            if (data.hasOwnProperty('responseText') && !data.responseText.match(/<html/i)) {
-                lightning.dialog.add(data.responseText, 'error');
+            if (data.hasOwnProperty('responseJSON')) {
+                var json = data.responseJSON;
+                if (json.hasOwnProperty('errors')) {
+                    for (var i in json.errors) {
+                        lightning.dialog.add(json.errors[i], 'error');
+                    }
+                } else {
+                    lightning.dialog.add('An unknown error has occurred.', 'error');
+                }
+            } else {
+                lightning.dialog.add('There was an error loading the page. Please reload the page. If the problem persists, please <a href="/contact">contact support</a>.', 'error');
+                if (data.hasOwnProperty('status')) {
+                    lightning.dialog.add('HTTP: ' + data.status, 'error');
+                }
+                if (data.hasOwnProperty('responseText') && !data.responseText.match(/<html/i)) {
+                    lightning.dialog.add(data.responseText, 'error');
+                }
             }
             lightning.dialog.show();
         }
+
         // Allows an additional error handler.
         if (settings.user_error) {
             settings.user_error(data);
