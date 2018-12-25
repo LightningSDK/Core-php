@@ -8,7 +8,7 @@ use Lightning\Tools\Configuration;
 use Exception;
 
 class Markup {
-    public static function render($content, $vars = []) {
+    public static function render($content, &$vars = []) {
         // Replace special tags
         $renderers = Configuration::get('markup.renderers');
         foreach (self::getTags($content) as $match => $element) {
