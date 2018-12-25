@@ -95,7 +95,11 @@ class Page extends PageView {
         }
 
         // Replace special tags.
-        $this->fullPage['body_rendered'] = Markup::render($this->fullPage['body']);
+        $templateVars = [];
+        $this->fullPage['body_rendered'] = Markup::render($this->fullPage['body'], $templateVars);
+        foreach ($templateVars as $key => $value) {
+            $template->set($key, $value);
+        }
 
         // Determine if the user can edit this page.
         if ($user->isAdmin()) {

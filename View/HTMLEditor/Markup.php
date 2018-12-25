@@ -10,48 +10,28 @@ use Exception;
 class Markup {
     public static function render($content, $vars = []) {
         // Replace special tags
-        $matches = [];
         $renderers = Configuration::get('markup.renderers');
-        preg_match_all('|{{.*}}|sU', $content, $matches);
-        foreach ($matches[0] as $match) {
-            if (!empty($match)) {
-                // Convert to HTML and parse it.
-                $match_html = '<' . trim(preg_replace('/(\r?\n)/', ' ', $match), '{} ') . '/>';
-                $dom = new DOMDocument();
-                libxml_use_internal_errors(true);
-                $dom->loadHTML($match_html);
+        foreach (self::getTags($content) as $match => $element) {
+            $output = '';
 
-                // For most HTML elements, a body wrapper will automatically be added. We have to remove it.
-                $body = $dom->getElementsByTagName('body');
-                if ($body->length > 0) {
-                    $element = $body->item(0)->childNodes->item(0);
-                } else {
-                    // If it's not in the body, we have to find it explicitly.
-                    // This is the case for {{script ...}}
-                    $nameMatch = [];
-                    preg_match('/{{([a-z]+)/', $match, $nameMatch);
-                    $element = $dom->getElementsByTagName($nameMatch[1]);
-                    if ($element->length > 0) {
-                        $element = $element->item(0);
-                    } else {
-                        throw new Exception('Could not find reconstructed DOM elemnet.');
-                    }
-                }
-                $output = '';
-
-                // If a renderer exists, run it.
-                if (isset($renderers[$element->nodeName])) {
-                    // First convert the attributes to an array.
-                    $options = static::getAttributeArray($element);
-                    $output = call_user_func([$renderers[$element->nodeName], 'renderMarkup'], $options, $vars);
-                }
-
-                $content = str_replace(
-                    $match,
-                    $output,
-                    $content
-                );
+            // If this is setting a var, add it to the var array
+            if ($element->tagName === 'set') {
+                $var = $element->getAttribute('var');
+                $vars[strtoupper($var)] = $element->getAttribute('value');
             }
+
+            // If a renderer exists, run it.
+            if (isset($renderers[$element->nodeName])) {
+                // First convert the attributes to an array.
+                $options = static::getAttributeArray($element);
+                $output = call_user_func([$renderers[$element->nodeName], 'renderMarkup'], $options, $vars);
+            }
+
+            $content = str_replace(
+                $match,
+                $output,
+                $content
+            );
         }
 
         if (!empty($vars)) {
@@ -82,6 +62,41 @@ class Markup {
         }
 
         return $content;
+    }
+
+    public static function getTags($content, $tagName = '.*') {
+        $matches = [];
+        $elements = [];
+        preg_match_all('|{{' . $tagName . '}}|sU', $content, $matches);
+        foreach ($matches[0] as $match) {
+            if (!empty($match)) {
+                // Convert to HTML and parse it.
+                $match_html = '<' . trim(preg_replace('/(\r?\n)/', ' ', $match), '{} ') . '/>';
+                $dom = new DOMDocument();
+                libxml_use_internal_errors(true);
+                $dom->loadHTML($match_html);
+
+                // For most HTML elements, a body wrapper will automatically be added. We have to remove it.
+                $body = $dom->getElementsByTagName('body');
+
+                if ($body->length > 0) {
+                    $elements[$match] = $body->item(0)->childNodes->item(0);
+                } else {
+                    // If it's not in the body, we have to find it explicitly.
+                    // This is the case for {{script ...}}
+                    $nameMatch = [];
+                    preg_match('/{{([a-z]+)/', $match, $nameMatch);
+                    $element = $dom->getElementsByTagName($nameMatch[1]);
+                    if ($element->length > 0) {
+                        $elements[$match] = $element->item(0);
+                    } else {
+                        throw new Exception('Could not find reconstructed DOM elemnet.');
+                    }
+                }
+            }
+        }
+
+        return $elements;
     }
 
     public static function removeAll($content) {

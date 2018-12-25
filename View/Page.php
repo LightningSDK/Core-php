@@ -142,52 +142,13 @@ class PageOverridable {
             // Send globals to the template.
             $template = Template::getInstance();
 
+            // Set the main content.
             if (!empty($this->page)) {
                 $template->set('content', $this->page);
             }
 
-            // Lightning JS will handle these trackers.
-            JS::set('google_analytics_id', Configuration::get('google_analytics_id'));
-            JS::set('facebook_pixel_id', Configuration::get('facebook_pixel_id'));
-            JS::set('google_adwords', Configuration::get('google_adwords', []));
-            if (Configuration::get('debug')) {
-                JS::set('debug', true);
-            }
+            $this->setVars($template);
 
-            // @deprecated
-            $template->set('google_analytics_id', Configuration::get('google_analytics_id'));
-
-            // TODO: Remove these, they should be called directly from the template.
-            $template->set('errors', Messenger::getErrors());
-            $template->set('messages', Messenger::getMessages());
-
-            $template->set('site_name', Configuration::get('site.name'));
-            $template->set('blog', Blog::getInstance());
-            $template->set('full_width', $this->fullWidth);
-            $template->set('right_column', $this->rightColumn);
-            $template->set('hide_header', $this->hideHeader);
-            $template->set('hide_menu', $this->hideMenu);
-            $template->set('hide_footer', $this->hideFooter);
-            $template->set('share', $this->share);
-            if ($this->comment === null) {
-                $this->comment = $this->share;
-            }
-            $template->set('comment', $this->comment);
-
-            // Include the site title into the page title for meta data.
-            if (!empty($this->meta['title']) && $site_title = Configuration::get('meta_data.title')) {
-                $this->meta['title'] .= ' | ' . $site_title;
-            }
-
-            // Load default metadata.
-            $this->meta += Configuration::get('meta_data', []);
-            if ($twitter = Configuration::get('social.twitter.url')) {
-                $this->meta['twitter_site'] = $twitter;
-                $this->meta['twitter_creator'] = $twitter;
-            }
-            $template->set('meta', $this->meta);
-
-            JS::set('menu_context', $this->menuContext);
             $template->render($this->template);
         } catch (Exception $e) {
             echo 'Error rendering template: ' . $this->template . '<br>';
@@ -276,6 +237,57 @@ class PageOverridable {
 
     public function setMeta($field, $value) {
         $this->meta[$field] = $value;
+    }
+
+    /**
+     * Before rendering, default output values are set. This can be overridden by a custom page handler.
+     *
+     * @param Template template
+     */
+    protected function setVars($template) {
+
+        // Lightning JS will handle these trackers.
+        JS::set('google_analytics_id', Configuration::get('google_analytics_id'));
+        JS::set('facebook_pixel_id', Configuration::get('facebook_pixel_id'));
+        JS::set('google_adwords', Configuration::get('google_adwords', []));
+        if (Configuration::get('debug')) {
+            JS::set('debug', true);
+        }
+
+        // @deprecated
+        $template->set('google_analytics_id', Configuration::get('google_analytics_id'));
+
+        // TODO: Remove these, they should be called directly from the template.
+        $template->set('errors', Messenger::getErrors());
+        $template->set('messages', Messenger::getMessages());
+
+        $template->set('site_name', Configuration::get('site.name'));
+        $template->set('blog', Blog::getInstance());
+        $template->set('full_width', $this->fullWidth);
+        $template->set('right_column', $this->rightColumn);
+        $template->set('hide_header', $this->hideHeader);
+        $template->set('hide_menu', $this->hideMenu);
+        $template->set('hide_footer', $this->hideFooter);
+        $template->set('share', $this->share);
+        if ($this->comment === null) {
+            $this->comment = $this->share;
+        }
+        $template->set('comment', $this->comment);
+
+        // Include the site title into the page title for meta data.
+        if (!empty($this->meta['title']) && $site_title = Configuration::get('meta_data.title')) {
+            $this->meta['title'] .= ' | ' . $site_title;
+        }
+
+        // Load default metadata.
+        $this->meta += Configuration::get('meta_data', []);
+        if ($twitter = Configuration::get('social.twitter.url')) {
+            $this->meta['twitter_site'] = $twitter;
+            $this->meta['twitter_creator'] = $twitter;
+        }
+        $template->set('meta', $this->meta);
+
+        JS::set('menu_context', $this->menuContext);
     }
 
     protected function initModule() {

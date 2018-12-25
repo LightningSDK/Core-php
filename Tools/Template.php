@@ -143,6 +143,8 @@ class Template extends Singleton {
     /**
      * Markup renderer.
      *
+     * This renders a template that is included in another template using {{template name="some/template"}}
+     *
      * @param array $options
      * @param array $vars
      *
