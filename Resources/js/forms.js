@@ -54,7 +54,7 @@
         },
 
         initInvisibleCaptcha: function() {
-            if (typeof grecaptcha === 'undefined') {
+            if (typeof grecaptcha === 'undefined' || !grecaptcha.render) {
                 setTimeout(self.initInvisibleCaptcha, 500);
                 return;
             }
