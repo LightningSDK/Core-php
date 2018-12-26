@@ -1,16 +1,23 @@
 (function(){
     var self = lightning.forms = {
         formSubmit: function(e) {
+            // Determine the submit action.
             var form = $(e.target).closest('form');
             var url = form.data('ajax-action');
             if (!url) {
                 url = form.prop('action');
             }
+
+            // Make sure the form's captcha is validated if present
+            if (!self.validateForm(e)) {
+                return false;
+            }
+
+            // Show the loader
             var container = form.find('.loading-container');
             if (container.length === 0) {
                 container = form.closest('.loading-container');
             }
-
             var existingVeil;
             if (container) {
                 existingVeil = container.children('.white-veil');
@@ -19,21 +26,23 @@
                 }
             }
             existingVeil = container.children('.white-veil');
-
             setTimeout(function(){
                 existingVeil.show();
                 existingVeil.css('opacity', .5);
             }, 100);
 
-            var successCallback = function(data) {
-                container.fadeOut();
-            };
-
+            // Set up the success callback
+            var successCallback;
             var successCallbackName = form.data('ajax-success');
             if (successCallbackName && window[successCallbackName]) {
                 successCallback = window[successCallbackName];
+            } else {
+                successCallback = function(data) {
+                    container.fadeOut();
+                };
             }
 
+            // Send the request
             $.ajax({
                 url: url,
                 type: 'POST',
@@ -58,22 +67,34 @@
                 setTimeout(self.initInvisibleCaptcha, 500);
                 return;
             }
+            var publicKey = lightning.get('invisibleRecaptcha.publicKey');
             $('.invisible-recaptcha').each(function() {
                 var form = $(this).closest('form');
                 var id = grecaptcha.render(this, {
-                    sitekey : lightning.get('invisibleRecaptcha.publicKey'),
+                    sitekey : publicKey,
                     size: 'invisible',
                     callback : function(token) {
                         form.submit();
                     }
                 });
-                form.on('submit', function() {
-                    if (form.find('.error:visible').length === 0 && form.find('.g-recaptcha-response').val() === '') {
-                        grecaptcha.execute(id);
-                        return false;
-                    }
-                });
+                form.data('recaptcha-id', id);
             });
+        },
+
+        validateForm: function(e) {
+            var form = $(e.target);
+
+            if (form.find('.error:visible').length > 0) {
+                return false;
+            }
+
+            var recaptcha = form.find('.g-recaptcha-response');
+            if (recaptcha.length > 0 && form.find('.g-recaptcha-response').val() === '') {
+                grecaptcha.execute(form.data('recaptcha-id'));
+                return false;
+            }
+
+            return true;
         }
     };
 })();
