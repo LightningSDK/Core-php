@@ -2,7 +2,9 @@
 
 namespace Lightning\View;
 
+use Lightning\Model\URL;
 use Lightning\Tools\Configuration;
+use Lightning\Tools\Request;
 use Lightning\Tools\Scrub;
 
 class SocialLinks {
@@ -40,5 +42,15 @@ class SocialLinks {
         }
         $output .= '</div>';
         return $output;
+    }
+
+    /**
+     * Render the social media share buttons with {{social-share url=""}}
+     * @param $options
+     * @return string
+     */
+    public static function renderMarkup($options) {
+        $url = $options['url'] ? URL::getAbsolute($options['url']) : Request::getURL();
+        return self::render($url);
     }
 }
