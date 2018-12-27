@@ -13,41 +13,48 @@
                 return false;
             }
 
-            // Show the loader
+            // Show the loader on top of the form to prevent resubmission.
             var container = form.find('.loading-container');
             if (container.length === 0) {
                 container = form.closest('.loading-container');
             }
-            var existingVeil;
-            if (container) {
-                existingVeil = container.children('.white-veil');
-                if (existingVeil.length === 0) {
-                    container.prepend('<div class="white-veil"><div class="spinner"></div></div>');
-                }
+            if (container.length === 0) {
+                container = form.addClass('loading-container');
             }
-            existingVeil = container.children('.white-veil');
+            var veil = container.children('.white-veil');
+            if (veil.length === 0) {
+                container.prepend('<div class="white-veil"><div class="spinner"></div></div>');
+                veil = container.children('.white-veil');
+            }
             setTimeout(function(){
-                existingVeil.show();
-                existingVeil.css('opacity', .5);
+                veil.show();
+                veil.css('opacity', .5);
             }, 100);
-
-            // Set up the success callback
-            var successCallback;
-            var successCallbackName = form.data('ajax-success');
-            if (successCallbackName && window[successCallbackName]) {
-                successCallback = window[successCallbackName];
-            } else {
-                successCallback = function(data) {
-                    container.fadeOut();
-                };
-            }
 
             // Send the request
             $.ajax({
                 url: url,
                 type: 'POST',
                 data: form.serializeArray(),
-                success: successCallback
+                success: function(data) {
+                    // Set up the success callback
+                    var successCallbackName = form.data('ajax-success');
+                    if (successCallbackName && window[successCallbackName]) {
+                        window[successCallbackName]();
+                    }
+
+                    var successEval = form.data('ajax-success-eval');
+                    if (successEval) {
+                        eval(successEval);
+                    }
+
+                    // Hide the loader veil
+                    veil.fadeOut();
+                },
+                error: function() {
+                    // Hide the loader veil
+                    veil.fadeOut();
+                }
             });
         },
 
