@@ -157,6 +157,7 @@ class Template extends Singleton {
         } else {
             $template = $options['name'];
         }
+        $sub_template->setData($vars);
         return $sub_template->render($template, true);
     }
 

@@ -17,7 +17,7 @@ class Markup {
             // If this is setting a var, add it to the var array
             if ($element->tagName === 'set') {
                 $var = $element->getAttribute('var');
-                $vars[strtoupper($var)] = $element->getAttribute('value');
+                $vars[$var] = $element->getAttribute('value');
             }
 
             // If a renderer exists, run it.
@@ -40,10 +40,9 @@ class Markup {
             foreach ($vars as $key => $val) {
                 $conformed_vars[strtoupper($key)] = $val;
             }
-            $vars = $conformed_vars;
 
             // Replace variables.
-            static::replaceVars('', $vars, $content);
+            static::replaceVars('', $conformed_vars, $content);
 
             // Replace conditions.
             $conditions = [];
@@ -51,7 +50,7 @@ class Markup {
             preg_match_all($conditional_search, $content, $conditions);
             while (!empty($conditions[0])) {
                 foreach ($conditions[1] as $key => $var) {
-                    if (!empty($vars[$var]) || !empty($vars[$var])) {
+                    if (!empty($conformed_vars[$var]) || !empty($conformed_vars[$var])) {
                         $content = str_replace($conditions[0][$key], $conditions[2][$key], $content);
                     } else {
                         $content = str_replace($conditions[0][$key], '', $content);
