@@ -9056,3 +9056,7 @@ pre.debug {
     height: 100%;
   }
 }
+.reveal-modal iframe.content-loader {
+  border: 0;
+  width: 100%;
+}

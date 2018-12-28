@@ -45,7 +45,7 @@
             self.init();
             self.clear();
             self.setContent('<p align="center"><img src="/images/lightning/cog-spinner.gif" class="loader_image"></p>');
-            if (typeof message != 'undefined') {
+            if (typeof message !== 'undefined') {
                 self.addContent('<p align="center">' + message + '</p>');
             }
             self.show();
@@ -57,11 +57,14 @@
          */
         showURL: function(url) {
             self.init();
-            self.showLoader();
-            $.ajax({dataType:'HTML', url:url, success:function(data) {
-                self.setContent(data);
-                self.show();
-            }});
+            var iframe = $('<iframe></iframe>');
+            iframe.addClass('content-loader');
+            iframe.on('load', function(){
+                // Make the iframe resize to the content size.
+                iframe.css('height', iframe[0].contentWindow.document.body.scrollHeight + 'px');
+            });
+            iframe.prop('src', url);
+            self.setContent(iframe);
         },
 
         showContent: function(content) {
@@ -140,10 +143,14 @@
         setContent: function(content, clear_messages) {
             self.init();
             self.dialogBoxInner.hide();
-            if (typeof clear_messages == "undefined" || clear_messages) {
+            if (typeof clear_messages === 'undefined' || clear_messages) {
                 self.clear();
             }
-            self.dialogBoxInner.find('.content').html(content).show();
+            if (typeof content === 'object') {
+                self.dialogBoxInner.find('.content').append(content).show();
+            } else {
+                self.dialogBoxInner.find('.content').html(content).show();
+            }
             self.dialogBox.foundation('reveal', 'open');
             self.dialogBoxInner.fadeIn('fast');
         }
