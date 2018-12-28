@@ -6,6 +6,7 @@ use Lightning\Model\URL;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Request;
 use Lightning\Tools\Scrub;
+use Lightning\Tools\Session\BrowserSession;
 
 class SocialLinks {
     public static function render($url) {
@@ -51,6 +52,11 @@ class SocialLinks {
      */
     public static function renderMarkup($options) {
         $url = $options['url'] ? URL::getAbsolute($options['url']) : Request::getURL();
+
+        if (!empty($options['add-ref']) && $referrer_id = BrowserSession::getInstance()->user_id) {
+            $url .= (parse_url($url, PHP_URL_QUERY) ? '&' : '?') . 'ref=' . $referrer_id;
+        }
+
         return self::render($url);
     }
 }
