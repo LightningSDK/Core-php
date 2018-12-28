@@ -13,15 +13,12 @@ use Lightning\Tools\Request;
 use Lightning\Tools\Scrub;
 use Lightning\Tools\Template;
 use Lightning\Tools\ClientUser;
-use Lightning\View\Field\BasicHTML;
 use Lightning\View\HTML;
-use Lightning\View\HTMLEditor\HTMLEditor;
 use Lightning\View\HTMLEditor\Markup;
 use Lightning\View\JS;
 use Lightning\View\Page as PageView;
 use Lightning\Model\Page as PageModel;
 use Lightning\View\Text;
-use Lightning\View\Video\YouTube;
 
 class Page extends PageView {
 
@@ -57,15 +54,11 @@ class Page extends PageView {
         // LOAD PAGE DETAILS
         if ($this->fullPage = PageModel::loadByURL($content_locator)) {
             if (preg_match('/^[0-9]{3}$/', $content_locator)) {
-                // If the page is a 3 digit code, this is treated as a custom
-                // error page.
+                // If the page is a 3 digit code, this is treated as a custom error page.
                 http_response_code($content_locator);
             } else {
                 // Otherwise it's a 200 page.
-                header('HTTP/1.0 200 OK');
-                if (Configuration::get('page.modification_date') && $this->fullPage['last_update'] > 0) {
-                    header("Last-Modified: ".gmdate("D, d M Y H:i:s", $this->fullPage['last_update'])." GMT");
-                }
+                Output::http(200);
             }
             $this->menuContext = $this->fullPage['menu_context'];
         } elseif ($this->fullPage = PageModel::loadByURL('404')) {
