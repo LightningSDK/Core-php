@@ -58,7 +58,7 @@ class Page extends PageView {
                 http_response_code($content_locator);
             } else {
                 // Otherwise it's a 200 page.
-                Output::http(200);
+                http_response_code(200);
             }
             $this->menuContext = $this->fullPage['menu_context'];
         } elseif ($this->fullPage = PageModel::loadByURL('404')) {
