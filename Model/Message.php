@@ -412,7 +412,8 @@ class MessageOverridable extends Object {
      */
     public function replaceVariables($source) {
         // Replace variables.
-        return Markup::render($source, $this->customVariables + $this->internalCustomVariables + $this->defaultVariables);
+        $vars = $this->customVariables + $this->internalCustomVariables + $this->defaultVariables;
+        return Markup::render($source, $vars);
     }
     
     /**
