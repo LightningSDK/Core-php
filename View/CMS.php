@@ -41,6 +41,11 @@ class CMS {
         // TODO: Add caching
         $content = CMSModel::loadByName($name);
         $content = (!empty($content) ? $content->content : (!empty($settings['default']) ? $settings['default'] : ''));
+        $vars = [];
+        if ($user_id = ClientUser::getInstance()->id) {
+            $vars['USER_ID'] = $user_id;
+        }
+        $vars['WEB_ROOT'] = Configuration::get('web_root');
         if (ClientUser::getInstance()->isAdmin()) {
             JS::startup('lightning.cms.init()');
             JS::set('token', FormTool::getToken());
@@ -52,14 +57,14 @@ class CMS {
                     [
                         'spellcheck' => true,
                         'content' => $content,
-                        'content_rendered' => Markup::render($content),
+                        'content_rendered' => Markup::render($content, $vars),
                         'browser' => true,
                         'edit_border' => !empty($settings['edit_border']),
                         'config' => !empty($settings['config']) ? $settings['config'] : [],
                     ]
                 );
         } else {
-            return '<div>' . Markup::render($content) . '</div>';
+            return '<div>' . Markup::render($content, $vars) . '</div>';
         }
     }
 
