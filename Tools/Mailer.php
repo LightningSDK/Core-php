@@ -114,10 +114,16 @@ class Mailer {
         $this->mailer->CharSet = 'UTF-8';
         $this->mailer->Sender = Configuration::get('mailer.bounce_address');
         $this->verbose = $verbose;
-        if ($smtpHost = Configuration::get('mailer.smtp')) {
+        if ($smtp = Configuration::get('mailer.smtp')) {
             require_once HOME_PATH . '/Lightning/Vendor/PHPMailer/class.smtp.php';
             $this->mailer->Mailer = 'smtp';
-            $this->mailer->Host = $smtpHost;
+            $this->mailer->Host = $smtp['host'];
+            if (!empty($smtp['username'])) {
+                $this->mailer->Username = $smtp['username'];
+                $this->mailer->Password = $smtp['password'] ?? '';
+                $this->mailer->Port = $smtp['port'] ?? '25';
+                $this->mailer->SMTPAuth = true;
+            }
         }
 
         if ($dkim_key = Configuration::get('mailer.dkim_key')) {
