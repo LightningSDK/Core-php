@@ -14,6 +14,8 @@ require_once HOME_PATH . '/Lightning/Vendor/PHPMailer/class.phpmailer.php';
 
 class Mailer {
 
+    const KEEPALIVE_PULSE = 10;
+
     /**
      * If debug is enabled, this will only sent emails to the site admin.
      * This is for testing environments.
@@ -492,6 +494,7 @@ class Mailer {
      */
     protected function sendToList() {
         $this->sentCount = 0;
+        $runtime = time();
         foreach($this->users as $user) {
             if ($this->verbose && $this->sentCount % 100 == 0) {
                 set_time_limit(60);
@@ -509,6 +512,12 @@ class Mailer {
                 $this->sentCount ++;
             }
             $this->mailer->ClearAddresses();
+
+            // This will keep the connection open when emails take longer to send.
+            if (time() - $runtime > self::KEEPALIVE_PULSE) {
+                echo " ";
+                $runtime = time();
+            }
         }
         echo "\n\n";
     }
