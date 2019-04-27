@@ -3,7 +3,7 @@
         <?php
 
         use Lightning\Tools\Configuration;
-        use Lightning\View\SocialLinks;
+        use Lightning\View\SocialMedia\Links;
 
         if (!empty($editable)): ?>
             <div class="page-edit-links">
@@ -18,7 +18,7 @@
         <?= $full_page['body_rendered']; ?>
 
         <?php if (!empty($full_page['error']) && !empty($share)): ?>
-            <div class="social-share"><?= SocialLinks::render(Configuration::get('web_root') . '/' . (!empty($full_page['url']) ? $full_page['url'] : '')); ?></div>
+            <div class="social-share"><?= Links::render(Configuration::get('web_root') . '/' . (!empty($full_page['url']) ? $full_page['url'] : '')); ?></div>
         <?php endif; ?>
     </div>
 </div>

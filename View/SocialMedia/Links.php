@@ -1,14 +1,15 @@
 <?php
 
-namespace Lightning\View;
+namespace Lightning\View\SocialMedia;
 
 use Lightning\Model\URL;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Request;
 use Lightning\Tools\Scrub;
 use Lightning\Tools\Session\BrowserSession;
+use Lightning\View\JS;
 
-class SocialLinks {
+class Links {
     public static function render($url) {
         JS::startup('lightning.social.initShare()');
         JS::set('social.twitter.url', Configuration::get('social.twitter.url'));

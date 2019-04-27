@@ -1,7 +1,7 @@
 <div class="blog-container">
     <?php
     use Lightning\Tools\ClientUser;
-    use Lightning\View\SocialLinks;
+    use Lightning\View\SocialMedia\Links;
     use Lightning\Model\BlogPost;
 
     $user = ClientUser::getInstance();
@@ -58,7 +58,7 @@
                             </div>
                         </div>
                     <?php endif; ?>
-                    <?= SocialLinks::render($post->getURL()); ?>
+                    <?= Links::render($post->getURL()); ?>
                     <?php if (!$blog->isList()): ?>
                         <?= \Lightning\View\Facebook\Comments::render(); ?>
                     <?php endif; ?>

@@ -44,7 +44,8 @@ $conf = [
             'blog' => 'Lightning\\Pages\\Blog',
             'script' => 'Lightning\\View\\Script',
             'iframe' => 'Lightning\\View\\Iframe',
-            'social-links' => 'Lightning\\View\\SocialLinks',
+            'social-links' => 'Lightning\\View\\SocialMedia\\Links',
+            'social-follow' => 'Lightning\\View\\SocialMedia\\Follow',
         ],
     ],
     'sitemap' => [
