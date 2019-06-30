@@ -530,9 +530,13 @@ class MessageOverridable extends Object {
 
         // Limit the users to those subscribed to the lists selected for this message.
         $this->loadLists();
-        if (!empty($this->lists)) {
-            $query['where'] = ['message_list_id' => ['IN', $this->lists]];
+        if (empty($this->lists)) {
+            // If the message does not have a list specified or does not specify any list, then it should not be sent.
+            // This applies only to auto and bulk mailers and prevents unsubscribed users from getting any automatic mail.
+            // This does not block 1 off emails on events like purchases.
+            throw new \Exception('Your message does not have any mailing lists specified.');
         }
+        $query['where'] = ['message_list_id' => ['IN', $this->lists]];
 
         // Make sure the message is never resent.
         if ($this->auto || !empty($this->never_resend)) {
@@ -557,13 +561,6 @@ class MessageOverridable extends Object {
 
             // Merge into the current search query.
             Database::filterQuery($query, $criteria_filter);
-        }
-
-        if (empty($this->lists) && empty($this->criteria) && (empty($this->auto) && empty($this->send_date))) {
-            // If there is no list
-            // And there is no criteria
-            // And this is not auto sending on a date
-            throw new \Exception('Your message does not have any mailing lists or criteria specified.');
         }
 
         if (!empty($this->limit)) {
