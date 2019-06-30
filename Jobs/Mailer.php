@@ -7,6 +7,12 @@ use Lightning\Model\Message;
 use Lightning\Tools\Mailer as MailerTool;
 use Lightning\View\Field\Time;
 
+/**
+ * Class Mailer
+ * @package Lightning\Jobs
+ *
+ * Run with lightning daemon test auto-mailer count
+ */
 class Mailer extends Job {
 
     const NAME = 'Mailer';
@@ -21,12 +27,18 @@ class Mailer extends Job {
      * @var MailerTool
      */
     protected $mailer;
+    protected $count = false;
 
     public function execute($job) {
         $this->out('Sending auto mailers');
 
         $this->job = $job;
         $this->mailer = new MailerTool();
+
+        global $argv;
+        if (in_array('count', $argv)) {
+            $this->count = true;
+        }
 
         $this->sendTimeSpecific();
         $this->sendCriteriaBased();
@@ -76,9 +88,13 @@ class Mailer extends Job {
         $start_time = time();
         $this->out("Sending message {$message->id}");
         try {
-            $count = $this->mailer->sendBulk($message->id, false, true);
-            $time = Time::formatLength(time() - $start_time);
-            $this->out("Message {$message->id} sent to {$count} users in {$time}");
+            if ($this->count) {
+                $this->out("Message {$message->id} will be sent to {$message->getUsersCount()} users.");
+            } else {
+                $count = $this->mailer->sendBulk($message->id, false, true);
+                $time = Time::formatLength(time() - $start_time);
+                $this->out("Message {$message->id} sent to {$count} users in {$time}");
+            }
         } catch (\Exception $e) {
             $this->out('FAILED: ' . $e->getMessage());
         }
