@@ -76,6 +76,8 @@ class Mailer extends Job {
                     'using' => 'message_id',
                 ]
             ],
+            // Exclude messages with a specific date, those should go by sendTimeSpecific()
+            'where' => ['send_date' => 0],
             'group_by' => 'message_id'
         ]);
 
