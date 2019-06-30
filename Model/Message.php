@@ -530,10 +530,9 @@ class MessageOverridable extends Object {
 
         // Limit the users to those subscribed to the lists selected for this message.
         $this->loadLists();
-        if (empty($this->lists)) {
-            throw new \Exception('Your message does not have any mailing lists selected.');
+        if (!empty($this->lists)) {
+            $query['where'] = ['message_list_id' => ['IN', $this->lists]];
         }
-        $query['where'] = ['message_list_id' => ['IN', $this->lists]];
 
         // Make sure the message is never resent.
         if ($this->auto || !empty($this->never_resend)) {
@@ -558,6 +557,10 @@ class MessageOverridable extends Object {
 
             // Merge into the current search query.
             Database::filterQuery($query, $criteria_filter);
+        }
+
+        if (empty($this->lists) && empty($this->criteria)) {
+            throw new \Exception('Your message does not have any mailing lists or criteria specified.');
         }
 
         if (!empty($this->limit)) {
