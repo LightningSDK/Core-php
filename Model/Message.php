@@ -636,7 +636,7 @@ class MessageOverridable extends Object {
             ];
         } else {
             // Otherwise just count distinct users.
-            $query['select']['count'] = ['expression' => 'COUNT(DISTINCT(user.user_id))'];
+            $query['select'] = ['count' => ['expression' => 'COUNT(DISTINCT(user.user_id))']];
         }
         return Database::getInstance()->countQuery($query);
     }
