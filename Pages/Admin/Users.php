@@ -54,11 +54,11 @@ class Users extends Table {
             'editable' => false,
         ],
         'created' => [
-            'type' => 'date',
+            'type' => 'datetime',
             'editable' => false,
         ],
         'registered' => [
-            'type' => 'date',
+            'type' => 'datetime',
             'editable' => false,
         ],
     ];
