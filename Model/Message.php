@@ -559,7 +559,10 @@ class MessageOverridable extends Object {
             Database::filterQuery($query, $criteria_filter);
         }
 
-        if (empty($this->lists) && empty($this->criteria)) {
+        if (empty($this->lists) && empty($this->criteria) && (empty($this->auto) && empty($this->send_date))) {
+            // If there is no list
+            // And there is no criteria
+            // And this is not auto sending on a date
             throw new \Exception('Your message does not have any mailing lists or criteria specified.');
         }
 
