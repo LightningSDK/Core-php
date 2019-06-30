@@ -64,6 +64,7 @@ class Mailer extends Job {
                     'using' => 'message_id',
                 ]
             ],
+            'group_by' => 'message_id'
         ]);
 
         foreach ($messages as $message) {
