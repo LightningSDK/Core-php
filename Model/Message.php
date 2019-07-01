@@ -536,7 +536,7 @@ class MessageOverridable extends Object {
             // This does not block 1 off emails on events like purchases.
             throw new \Exception('Your message does not have any mailing lists specified.');
         }
-        $query['where'] = ['message_list_id' => ['IN', $this->lists]];
+        $query['where'] = ['message_list_user.message_list_id' => ['IN', $this->lists]];
 
         // Make sure the message is never resent.
         if ($this->auto || !empty($this->never_resend)) {
