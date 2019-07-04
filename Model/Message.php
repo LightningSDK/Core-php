@@ -135,6 +135,13 @@ class MessageOverridable extends Object {
      */
     protected $limit = 0;
 
+    protected static function getMessageSendId() {
+        if (empty(self::$message_sent_id)) {
+            self::$message_sent_id = Tracker::loadOrCreateByName('Email Sent', Tracker::EMAIL)->id;
+        }
+        return self::$message_sent_id;
+    }
+
     /**
      * Loads a message either from the database or create it from scratch for
      * custom messages.
@@ -156,10 +163,6 @@ class MessageOverridable extends Object {
         $message->loadTemplate();
         $message->unsubscribe = $unsubscribe;
         $message->auto = $auto;
-
-        if (empty(self::$message_sent_id)) {
-            self::$message_sent_id = Tracker::loadOrCreateByName('Email Sent', Tracker::EMAIL)->id;
-        }
 
         if ($default_name_settings = Configuration::get('mailer.default_name')) {
             $message->default_name = $default_name_settings;
@@ -544,7 +547,7 @@ class MessageOverridable extends Object {
                 'left_join' => 'tracker_event',
                 'on' => [
                     'tracker_event.user_id' => ['user.user_id'],
-                    'tracker_event.tracker_id' => self::$message_sent_id,
+                    'tracker_event.tracker_id' => self::getMessageSendId(),
                     'tracker_event.sub_id' => $this->message_id,
                 ]
             ];
