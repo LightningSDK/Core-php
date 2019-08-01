@@ -25,6 +25,12 @@ class Iframe {
             'src' => !empty($options['src']) ? $options['src'] : '',
         ];
 
+        foreach (['class', 'style', 'height', 'width'] as $attrib) {
+            if (!empty($options[$attrib])) {
+                $attributes[$attrib] = $options[$attrib];
+            }
+        }
+
         return '<iframe ' . HTML::implodeAttributes($attributes) . '></iframe>';
     }
 }
