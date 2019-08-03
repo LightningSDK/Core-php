@@ -137,6 +137,9 @@ abstract class Table extends Page {
      *     - lookuptable - the table to load the data
      *     - lookupkey - the key column for the data
      *     - display_column - the display column
+     *     - filter - an array of database query restrictions on the lookup, ie ['key' => 'value']
+     *     - accessControl - same as filter but more constant
+     *     - allow_blank - allow the user to deselect or leave blank
      *   - insert_function - A function to calculate the value on insert.
      *       The input will be an array containing the values to be inserted into the database.
      *       It is expected to get it's input values directly from the request.
@@ -209,6 +212,7 @@ abstract class Table extends Page {
      *     - checkbox - A rendered checkbox which will determine if this row is selected when applying an action to a group of rows.
      *   - condition - A function that, when passed the row's values, will return true or false as to whether the cell should be rendered.
      *   - action - If the type is action, this will be the name of the action in the link.
+     *   - url - If type is link, this the url it will go to. the PK id will be appended
      *
      * @var array
      */
