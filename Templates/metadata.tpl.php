@@ -51,4 +51,9 @@ use Lightning\Tools\Scrub;
         <?= $meta['css']; ?>
     </style>
     <?php endif; ?>
+    <?php if (!empty($meta['js'])): ?>
+        <script>
+            <?= $meta['js']; ?>
+        </script>
+    <?php endif; ?>
 <?php endif; ?>

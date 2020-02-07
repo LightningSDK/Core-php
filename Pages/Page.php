@@ -127,6 +127,10 @@ class Page extends PageView {
             $this->setMeta('css', $this->fullPage['css']);
         }
 
+        if (!empty($this->fullPage['js'])) {
+            $this->setMeta('js', $this->fullPage['js']);
+        }
+
         // If there is no page here, we need to set the URL for editing.
         if ($this->fullPage['url'] == '' && isset($_GET['page'])) {
             $this->fullPage['url'] = $_GET['page'];
