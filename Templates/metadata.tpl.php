@@ -45,15 +45,4 @@ use Lightning\Tools\Scrub;
     <?php if (!empty($meta['google_webmaster_verification'])): ?>
         <meta name="google-site-verification" content="<?= $meta['google_webmaster_verification']; ?>" />
     <?php endif; ?>
-
-    <?php if (!empty($meta['css'])): ?>
-    <style>
-        <?= $meta['css']; ?>
-    </style>
-    <?php endif; ?>
-    <?php if (!empty($meta['js'])): ?>
-        <script>
-            <?= $meta['js']; ?>
-        </script>
-    <?php endif; ?>
 <?php endif; ?>
