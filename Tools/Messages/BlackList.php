@@ -10,9 +10,9 @@ class BlackList implements SpamFilterInterface {
      * @return int
      *   5 if it was found in the blacklist or 0 if not
      */
-    public static function getScore(&$message) {
-        if (!empty($message['IP'])) {
-            return \Lightning\Model\Blacklist::checkBlacklist($message['IP']) ? 5 : 0;
+    public static function getScore(&$clientFIelds, &$messageFields, &$spamFields) {
+        if (!empty($clientFIelds['IP'])) {
+            return \Lightning\Model\Blacklist::checkBlacklist($clientFIelds['IP']) ? 5 : 0;
         }
 
         return 0;
@@ -22,8 +22,8 @@ class BlackList implements SpamFilterInterface {
      * @param $message
      * @throws \Exception
      */
-    public static function flagAsSpam($message) {
-        \Lightning\Model\Blacklist::addToBlacklist($message['IP']);
+    public static function flagAsSpam(&$clientFIelds, &$messageFields, &$spamFields) {
+        \Lightning\Model\Blacklist::addToBlacklist($clientFIelds['IP']);
     }
 
 }

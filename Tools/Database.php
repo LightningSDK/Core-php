@@ -178,8 +178,7 @@ class Database extends Singleton {
 
     public function connect() {
         if (empty($this->connection)) {
-            // @todo remove @ when php header 5.6 is updated
-            $this->connection = @new PDO($this->url, $this->username, $this->password);
+            $this->connection = new PDO($this->url, $this->username, $this->password);
         }
     }
 

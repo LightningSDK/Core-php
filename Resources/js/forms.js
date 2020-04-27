@@ -26,10 +26,8 @@
                 container.prepend('<div class="white-veil"><div class="spinner"></div></div>');
                 veil = container.children('.white-veil');
             }
-            setTimeout(function(){
-                veil.show();
-                veil.css('opacity', .5);
-            }, 100);
+            veil.show();
+            veil.css('opacity', .5);
 
             // Send the request
             $.ajax({

@@ -15,7 +15,6 @@ use Lightning\Tools\Request;
 use Lightning\Tools\Scrub;
 use Lightning\Tools\Session\DBSession;
 use Lightning\Tools\SocialDrivers\SocialMediaApi;
-use Lightning\View\Field\Time;
 
 /**
  * Class User
@@ -35,7 +34,7 @@ use Lightning\View\Field\Time;
  * @property boolean $new
  * @property integer $referrer
  */
-class UserOverridable extends Object {
+class UserOverridable extends BaseObject {
 
     /**
      * A registered user who has not been confirmed.

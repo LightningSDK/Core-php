@@ -6,7 +6,7 @@ use Exception;
 use Lightning\Tools\Database;
 use Lightning\Tools\Scrub;
 
-class Blacklist extends Object {
+class Blacklist extends BaseObject {
     const TABLE = 'black_list';
     const PRIMARY_KEY = 'black_list_id';
 

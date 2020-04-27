@@ -35,22 +35,12 @@ class RandomOverridable extends Singleton {
      * @param int $format
      *
      * @return string|int
+     *
+     * @throws \Exception if random gen fails
      */
     public static function get($size = 4, $format = self::INT) {
         // Generate the random data.
-        switch (self::getEngine()) {
-            case MCRYPT_DEV_URANDOM:
-            case MCRYPT_DEV_RANDOM:
-                if (function_exists('random_bytes')) {
-                    $random = random_bytes($size);
-                } else {
-                    $random = mcrypt_create_iv($size, self::$engine);
-                }
-                break;
-            default:
-                $random = mt_rand();
-                break;
-        }
+        $random = random_bytes($size);
 
         // Format the random data.
         switch ($format) {

@@ -3,6 +3,7 @@
 namespace Lightning\Model;
 
 use Lightning\Tools\Database;
+use Lightning\Tools\Mongo;
 
 trait ObjectDatabaseStorage {
 
@@ -32,7 +33,7 @@ trait ObjectDatabaseStorage {
      */
     public static function loadAll($where = [], $fields = [], $final = '', $keyed = false) {
         $objects = [];
-        $results = Database::getInstance()->select(static::TABLE, $where, $fields, $final);
+        $results = static::getDatabase()->select(static::TABLE, $where, $fields, $final);
 
         $key = ($keyed === true) ? static::PRIMARY_KEY : $keyed;
         if (!empty($key)) {
@@ -58,7 +59,7 @@ trait ObjectDatabaseStorage {
     public static function loadByQuery($query, $keyed = null) {
         $objects = [];
         $query = $query + ['from' => static::TABLE];
-        $results = Database::getInstance()->queryArray($query);
+        $results = static::getDatabase()->queryArray($query);
 
         $key = ($keyed === true) ? static::PRIMARY_KEY : $keyed;
         foreach ($results as $result) {
@@ -131,8 +132,6 @@ trait ObjectDatabaseStorage {
      * @throws \Exception
      */
     public function save() {
-        $db = static::getDatabase();
-
         $values = $this->getModifiedValues();
 
         if (empty($values)) {
@@ -141,13 +140,13 @@ trait ObjectDatabaseStorage {
 
         if ($this->__createNew) {
             // A new object was created with a hard coded ID.
-            $db->insert(static::TABLE, $values);
+            static::getDatabase()->insert(static::TABLE, $values);
         } elseif (empty($this->id)) {
             // A new object was created, PK will be created with auto increment.
-            $this->__data[static::PRIMARY_KEY] = $db->insert(static::TABLE, $values);
+            $this->__data[static::PRIMARY_KEY] = static::getDatabase()->insert(static::TABLE, $values);
         } else {
             // An existing object was loaded with a primary key.
-            $db->update(static::TABLE, $values, [static::PRIMARY_KEY => $this->id]);
+            static::getDatabase()->update(static::TABLE, $values, [static::PRIMARY_KEY => $this->id]);
         }
     }
 
@@ -199,6 +198,10 @@ trait ObjectDatabaseStorage {
         static::getDatabase()->delete(static::TABLE, [static::PRIMARY_KEY => $this->id]);
     }
 
+    protected static function storageEngine() {
+        return static::$storageType ?? 'mysql';
+    }
+
     /**
      * Get the database object associated with this object. This allows
      * an object to be overidden with a child object.
@@ -207,6 +210,11 @@ trait ObjectDatabaseStorage {
      *   The DB object.
      */
     public static function getDatabase() {
-        return Database::getInstance();
+        switch (static::storageEngine()) {
+            case 'mysql':
+                return Database::getInstance();
+            case 'mongo':
+                return Mongo::getInstance();
+        }
     }
 }

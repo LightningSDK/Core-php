@@ -10,7 +10,7 @@ use Lightning\View\HTML;
 use Lightning\View\HTMLEditor\Markup;
 use Lightning\View\Text;
 
-class BlogPostOverridable extends Object {
+class BlogPostOverridable extends BaseObject {
     const TABLE = 'blog';
     const PRIMARY_KEY = 'blog_id';
 

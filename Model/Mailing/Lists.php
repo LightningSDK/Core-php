@@ -2,9 +2,9 @@
 
 namespace Lightning\Model\Mailing;
 
-use Lightning\Model\Object;
+use Lightning\Model\BaseObject;
 
-class ListsOverridable extends Object {
+class ListsOverridable extends BaseObject {
     const TABLE = 'message_list';
     const PRIMARY_KEY = 'message_list_id';
 }

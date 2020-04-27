@@ -78,7 +78,9 @@ trait ObjectDataStorage {
     public function __get($var) {
         switch($var) {
             case 'id':
-                if (isset($this->__data[static::PRIMARY_KEY])) {
+                if (!empty(static::$storageType) && self::$storageType == 'mongo') {
+                    return $this->__data['_id'];
+                } else if (isset($this->__data[static::PRIMARY_KEY])) {
                     return $this->__data[static::PRIMARY_KEY];
                 } else {
                     return false;

@@ -4,7 +4,7 @@ namespace Lightning\Model;
 
 use Lightning\Tools\Database;
 
-class SplitTest extends Object {
+class SplitTest extends BaseObject {
     const TABLE = 'split_test';
     const PRIMARY_KEY = 'split_test_id';
 

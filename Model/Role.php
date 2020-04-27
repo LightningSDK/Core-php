@@ -2,7 +2,7 @@
 
 namespace Lightning\Model;
 
-class Role extends Object {
+class Role extends BaseObject {
     const TABLE = 'role';
     const PRIMARY_KEY = 'role_id';
 

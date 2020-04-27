@@ -16,7 +16,7 @@ use Lightning\Tools\Database;
  * @parameter string class
  * @parameter integer last_modified
  */
-class CMSOverridable extends Object {
+class CMSOverridable extends BaseObject {
 
     const TABLE = 'cms';
     const PRIMARY_KEY = 'cms_id';

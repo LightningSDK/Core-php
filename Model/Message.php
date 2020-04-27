@@ -17,7 +17,7 @@ use Lightning\View\HTMLEditor\Markup;
  *
  * @package Lightning\Model
  */
-class MessageOverridable extends Object {
+class MessageOverridable extends BaseObject {
 
     const TABLE = 'message';
 

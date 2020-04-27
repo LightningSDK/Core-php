@@ -2,7 +2,7 @@
 
 namespace Lightning\Model;
 
-class PermissionsOverridable extends Object {
+class PermissionsOverridable extends BaseObject {
     /**
      * Default permission for admins.
      */

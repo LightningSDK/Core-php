@@ -6,7 +6,7 @@ use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
 use Lightning\Tools\Request;
 
-class URL extends Object {
+class URL extends BaseObject {
     const TABLE = 'url';
     const PRIMARY_KEY = 'url_id';
     const MAX_LENGTH = 255;

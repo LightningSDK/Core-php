@@ -5,7 +5,7 @@ namespace Lightning\Model;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Database;
 
-class PageOverridable extends Object {
+class PageOverridable extends BaseObject {
 
     const PRIMARY_KEY = 'page_id';
     const TABLE = 'page';

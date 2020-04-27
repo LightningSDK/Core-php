@@ -72,7 +72,8 @@ class Contact extends PageView {
      *
      * @var array
      */
-    protected $additionalFields;
+    protected $clientFields;
+    protected $messageFields;
 
     /**
      * Whether the site contacts should be notified.
@@ -306,7 +307,11 @@ class Contact extends PageView {
             'list_id' => $this->list,
             'user_message' => $this->userMessage,
             'user_message_sent' => $this->userMessageSent,
-            'additional_fields' => $this->additionalFields + $this->getSpamFields(),
+            'additional_fields' => [
+                'message' => $this->messageFields,
+                'client' => $this->clientFields,
+                'spam' => $this->getSpamFields(),
+            ],
         ];
     }
 
@@ -425,9 +430,9 @@ class Contact extends PageView {
      * Get a list of fields submitted to the form, excluding control fields.
      */
     protected function processAdditionalFields() {
-        if ($this->additionalFields === null) {
+        if ($this->clientFields === null) {
             $fields = array_combine(array_keys($_POST), array_keys($_POST));
-            $this->additionalFields = [
+            $this->clientFields = [
                 'Name' => Request::post('name'),
                 'Email' => $this->user->email,
                 'IP' => Request::server(Request::IP),
@@ -450,7 +455,7 @@ class Contact extends PageView {
                 } else {
                     $input = Request::post($field);
                 }
-                $this->additionalFields[ucfirst(preg_replace('/_/', ' ', $field))] = $input;
+                $this->messageFields[ucfirst(preg_replace('/_/', ' ', $field))] = $input;
             }
         }
     }
@@ -491,7 +496,7 @@ class Contact extends PageView {
      */
     protected function getMessageBody() {
         $this->processAdditionalFields();
-        $fields = $this->additionalFields + $this->getSpamFields();
+        $fields = $this->clientFields + $this->messageFields + $this->getSpamFields();
 
         $output = '';
         foreach ($fields as $key => $value) {
@@ -514,7 +519,7 @@ class Contact extends PageView {
     protected function getSpamScore() {
         if ($this->spamScore === null) {
             $this->processAdditionalFields();
-            $this->spamScore = SpamFilter::getScore($this->additionalFields);
+            $this->spamScore = SpamFilter::getScore($this->clientFields, $this->messageFields, $this->spamFields);
         }
         return $this->spamScore;
     }
@@ -567,7 +572,8 @@ class Contact extends PageView {
         }
         $message->spam = 1;
         $message->save();
-        SpamFilter::flagAsSpam(Scrub::objectToAssocArray($message->additional_fields));
+        $fields = Scrub::objectToAssocArray($message->additional_fields);
+        SpamFilter::flagAsSpam($fields);
         Messenger::message('This message has been flagged as spam.');
         Navigation::redirect('/message');
     }

@@ -2718,7 +2718,7 @@ abstract class Table extends Page {
                         $val = Time::getDateTime($field['form_field'], !empty($field['allow_blank']), !empty($field['timezone']) ? $field['timezone'] : null);
                         break;
                     case 'checkbox':
-                        $val = Request::get($field['form_field'], Request::TYPE_BOOLEAN_INT);
+                        $val = Request::get($field['form_field'], Request::TYPE_BOOLEAN_INT, '', 0);
                         break;
                     case 'checklist':
                         $vals = '';
@@ -4065,6 +4065,10 @@ abstract class Table extends Page {
                         'where' => $filter,
                         'limit' => !empty($field['limit']) ? $field['limit'] : 1000,
                     ]);
+
+                    if (!emptY($field['allow_blank'])) {
+                        $options = array_merge(['' => ''], $options);
+                    }
                 }
                 elseif ($field['type'] == 'yesno') {
                     $options = [1 => 'No', 2 => 'Yes'];

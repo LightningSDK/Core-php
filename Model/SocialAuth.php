@@ -2,11 +2,11 @@
 
 namespace Lightning\Model;
 
-use Lightning\Model\Object;
+use Lightning\Model\BaseObject;
 use Lightning\Tools\Database;
 use Lightning\Tools\ClientUser;
 
-class SocialAuthOverridable extends Object {
+class SocialAuthOverridable extends BaseObject {
     const TABLE = 'social_auth';
     const PRIMARY_KEY = 'social_auth_id';
 

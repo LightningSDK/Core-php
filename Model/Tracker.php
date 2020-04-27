@@ -21,7 +21,7 @@ use Lightning\View\JS;
  * @property string category
  * @property string type
  */
-class TrackerOverridable extends Object {
+class TrackerOverridable extends BaseObject {
 
     const TABLE = 'tracker';
     const PRIMARY_KEY = 'tracker_id';

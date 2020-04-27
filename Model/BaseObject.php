@@ -2,7 +2,9 @@
 
 namespace Lightning\Model;
 
-class Object {
+use JsonSerializable;
+
+class BaseObject implements JsonSerializable {
     use ObjectDataStorage;
     use ObjectDatabaseStorage;
 
@@ -15,4 +17,8 @@ class Object {
      * The table where the object is stored.
      */
     const TABLE = '';
+
+    public function jsonSerialize() {
+        return $this->__data ?? null;
+    }
 }
