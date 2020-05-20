@@ -251,7 +251,22 @@ class JS {
     protected static function includeStartupFunction() {
         if (!self::$startupFunctionAdded) {
             self::$startupFunctionAdded = true;
-            return 'var lightning_startup_q = []; function lightning_startup(callback) { if (typeof $ == "undefined") { if (typeof callback != "undefined") lightning_startup_q.push(callback); setTimeout(lightning_startup, 500); } else {for (var i in lightning_startup_q) { $(lightning_startup_q[i]); } lightning_startup_q = []; if (typeof callback != "undefined") $(callback);} }; var lightning_mv = ' . Configuration::get('minified_version', 0) . ';';
+            // $lsq is the lightning startup queue
+            return 'var $lsq = []; var lightning_mv = ' . Configuration::get('minified_version', 0) . ';
+                    function lightning_startup(callback) {
+                        if (typeof $ == "undefined") {
+                            if (typeof callback != "undefined")
+                                $lsq.push(callback);
+                            setTimeout(lightning_startup, 500);
+                        } else {
+                            for (var i in $lsq) {
+                                $lsq[i]();
+                            }
+                            $lsq = [];
+                            if (typeof callback != "undefined")
+                                $(callback);
+                        }
+                    };';
         }
         return '';
     }
