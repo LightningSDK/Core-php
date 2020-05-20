@@ -66,7 +66,7 @@ class CSS {
             $output .= '<style>';
             foreach (self::$inline_styles as &$style) {
                 if (empty($style['rendered'])) {
-                    $output .= $style . "\n\n";
+                    $output .= $style['block'] . "\n\n";
                     $style['rendered'] = true;
                 }
             }

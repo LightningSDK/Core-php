@@ -183,7 +183,7 @@ class JS {
     public static function render() {
         $output = '';
         if (!self::$inited) {
-            $output = '<script>lightning={"vars":' . json_encode(self::$vars) . '};</script>';
+            $output = '<script>lightning_startup_q = []; lightning={"vars":' . json_encode(self::$vars) . '};</script>';
             self::$vars = [];
             self::$inited = true;
         } elseif (!empty(self::$vars)) {
@@ -209,6 +209,7 @@ class JS {
             }
         }
 
+        // Include inline scripts
         if (!empty(self::$inline_scripts) || !empty(self::$startup_scripts)) {
             $init_scripts = '';
             // Include inline scripts.

@@ -50,6 +50,12 @@ class Pages extends Table {
             'type' => 'html',
             'div' => true,
         ],
+        'css' => [
+            'type' => 'plaintext',
+        ],
+        'js' => [
+            'type' => 'plaintext',
+        ],
         'site_map' => [
             'type' => 'checkbox',
             'default' => true,

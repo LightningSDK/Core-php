@@ -13,6 +13,7 @@ use Lightning\Tools\Request;
 use Lightning\Tools\Scrub;
 use Lightning\Tools\Template;
 use Lightning\Tools\ClientUser;
+use Lightning\View\CSS;
 use Lightning\View\HTML;
 use Lightning\View\HTMLEditor\Markup;
 use Lightning\View\JS;
@@ -123,6 +124,9 @@ class Page extends PageView {
         if (empty($this->fullPage['description'])) {
             $this->setMeta('description', Text::shorten(html_entity_decode($this->fullPage['body'], 500)));
         }
+
+        CSS::inline($this->fullPage['css']);
+        JS::inline($this->fullPage['js']);
 
         // If there is no page here, we need to set the URL for editing.
         if ($this->fullPage['url'] == '' && isset($_GET['page'])) {
