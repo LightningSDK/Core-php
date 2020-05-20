@@ -6,6 +6,7 @@
 
 namespace Lightning\CLI;
 
+use Exception;
 use Lightning\Tools\Configuration;
 use Lightning\Tools\Logger;
 use Lightning\Tools\Request;
@@ -32,6 +33,9 @@ class CLI {
      */
     public function execute() {
         global $argv;
+        if (!isset($argv[2])) {
+            throw new Exception('No command specified.');
+        }
         $func = Request::convertFunctionName($argv[2], 'execute');
         if (method_exists($this, $func)) {
             $args = count($argv) > 3 ? array_slice($argv, 3) : [];

@@ -78,6 +78,14 @@ class Template extends Singleton {
         }
     }
 
+    public function setDirectory($path) {
+        if (Request::isCLI()) {
+            $this->template_dir = $path;
+        } else {
+            throw new \Exception('Can not set template path - security exception');
+        }
+    }
+
     /**
      * Get the template instance.
      *
