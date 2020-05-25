@@ -6,7 +6,6 @@
 
 namespace Lightning\Tools;
 
-use Lightning\Tools\Cache\Cache;
 use Lightning\View\CSS;
 use Lightning\View\JS;
 use stdClass;
@@ -17,13 +16,6 @@ use stdClass;
  * @package Lightning\Tools
  */
 class Template extends Singleton {
-
-    /**
-     * Cache settings for specific pages.
-     *
-     * @var array
-     */
-    protected $cache = [];
 
     /**
      * Whether to output debug data.
@@ -225,15 +217,6 @@ class Template extends Singleton {
         $this->template = $template;
     }
 
-    public function setCache($page, $ttl = null, $size = null) {
-        $ttl = $ttl ?: (Configuration::get('page.cache.ttl')) ?: Cache::MONTH;
-        $size = $size ?: (Configuration::get('page.cache.size')) ?: Cache::MEDIUM;
-        $this->cache[$page] = [
-            'ttl' => $ttl,
-            'size' => $size,
-        ];
-    }
-
     /**
      * Add footer content to output before closing body tag.
      *
@@ -266,7 +249,7 @@ class Template extends Singleton {
     }
 
     /**
-     * Build a template file, optionally with caching.
+     * Populate a template.
      *
      * @param array|string $template
      *   The name of the template excluding .tpl.php.
@@ -277,26 +260,7 @@ class Template extends Singleton {
      *   The output if requested, or null.
      */
     public function build($template, $return_as_string = false) {
-        $cache_name = $this->getCacheName($template);
-        if (!empty($this->cache[$cache_name])) {
-            // Cache is enabled for this page.
-            $ttl = !empty($this->cache[$cache_name]['ttl']) ? $this->cache[$cache_name]['ttl'] : Cache::MONTH;
-            $size = !empty($this->cache[$cache_name]['size']) ? $this->cache[$cache_name]['size'] : Cache::MEDIUM;
-
-            // Load the cache.
-            $cache = Cache::get('template_' . $this->getCacheName($cache_name), $ttl, $size);
-
-            // If the cache doesn't exist.
-            if ($cache->isNew()) {
-                // Build the page.
-                $cache->value = $this->_include($template, true);
-            }
-
-            $value = $cache->value;
-        } else {
-            // Return or output without cache.
-            $value = $this->_include($template, true);
-        }
+        $value = $this->_include($template, true);
 
         if ($this->debug) {
             // Wrap template with debug information.
@@ -310,10 +274,6 @@ class Template extends Singleton {
             print $value;
             return '';
         }
-    }
-
-    protected function getCacheName($template) {
-        return preg_replace('|\\\\|', '__', $this->getFileName($template));
     }
 
     /**
