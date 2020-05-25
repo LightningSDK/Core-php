@@ -1158,7 +1158,7 @@ class Database extends Singleton {
         $values = [];
         $parsed = $this->parseQuery($query, $values);
         $this->query($parsed, $values);
-        if (count($query['select']) == 2) {
+        if (is_array($query['select']) && count($query['select']) == 2) {
             $output = $this->result->fetchAll(PDO::FETCH_KEY_PAIR);
         } else {
             $output = $this->result->fetchAll(PDO::FETCH_COLUMN);
