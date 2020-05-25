@@ -20,6 +20,8 @@ class Cache {
     const DAY = 86400;
     const MONTH = 2592000;
     const PERMANENT = INF;
+    const FILE = -1;
+    const PHP_FILE = -2;
 
     const SMALL = 1;
     const MEDIUM = 2;
@@ -49,19 +51,36 @@ class Cache {
      *   An instance of the cache controller
      */
     protected static function getInstance($ttl = self::DEFAULT, $size = self::MEDIUM) {
-        if ($ttl == self::DEFAULT) {
-            if ($class = Configuration::get('cache.default.handler')) {
-                return new $class();
-            }
-        } elseif ($ttl == self::PERMANENT) {
-            if ($class = Configuration::get('cache.permanent.handler')) {
-                return new $class();
-            } else {
+        switch ($ttl) {
+            case self::DEFAULT:
+                if ($class = Configuration::get('cache.default.handler')) {
+                    return new $class();
+                }
+                break;
+            case self::PERMANENT:
+                if ($class = Configuration::get('cache.permanent.handler')) {
+                    return new $class();
+                }
+                // fallthrough
+            case self::FILE:
                 return new FileCache();
-            }
-        } else {
-            // Default fallback.
-            return new StaticCache();
+            case self::PHP_FILE:
+                return new PHPFileCache();
+            default:
+                return new StaticCache();
         }
+    }
+
+    public static function item($key, $settings, $function) {
+        $cache = static::getInstance($settings['ttl']);
+
+        if ($val = $cache->get($key)) {
+            return $val;
+        }
+
+        $val = $function();
+
+        $cache->set($key, $val);
+        return $val;
     }
 }

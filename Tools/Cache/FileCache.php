@@ -14,18 +14,30 @@ class FileCache extends CacheController {
 
     public function __construct() {
         $this->directory = Configuration::get('temp_dir');
+        $this->suffix = '.cache';
         parent::__construct();
+    }
+
+    public function get($key, $default = null) {
+        $this->setName($key);
+        return $this->read();
+    }
+
+    public function set($key, $value) {
+        $this->setName($key);
+        $this->value = $value;
+        $this->write();
     }
 
     public function setName($name) {
         $this->name = $name;
-        $this->reference = md5($name);
-        $this->fileName = $this->directory . '/' . $this->reference . '.cache';
+        $this->reference = hash("sha256", $name);
+        $this->fileName = $this->directory . '/' . $this->reference . $this->suffix;
     }
 
     public function loadReference($reference) {
         $this->reference = $reference;
-        $this->fileName = $this->directory . '/' . $this->reference . '.cache';
+        $this->fileName = $this->directory . '/' . $this->reference . $this->suffix;
     }
 
     public function isValid() {
