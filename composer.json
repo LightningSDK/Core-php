@@ -2,8 +2,5 @@
   "name": "lightningsdk/core",
   "type": "library",
   "description": "Lightning Fast PHP Framework.",
-  "version": "1.0.0",
-  "require": {
-    "ext-tidy": "*"
-  }
+  "version": "1.0.0"
 }
