@@ -291,8 +291,13 @@ class Template extends Singleton {
             if ($template[1] == 'Lightning') {
                 return HOME_PATH . '/Lightning/Templates/' . $template[0];
             } else {
-                return HOME_PATH . '/Modules/' . $template[1] . '/Templates/' . $template[0];
+                foreach(['Modules', 'vendor'] as $path) {
+                    if (file_exists(HOME_PATH . '/' . $path . '/' . $template[1] . '/Templates/' . $template[0] . '.tpl.php')) {
+                        return HOME_PATH . '/' . $path . '/' . $template[1] . '/Templates/' . $template[0];
+                    }
+                }
             }
+            throw new \Exception('template not found: ' . json_encode($template));
         }
     }
 

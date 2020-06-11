@@ -29,6 +29,8 @@ class HTMLEditor {
             CKEditor::init();
         } elseif (self::$editor == 'tinymce') {
             TinyMCE::init();
+        } elseif (!empty(self::$editor) && self::$editor != 'plain') {
+            return self::$editor::init();
         }
     }
 
@@ -38,6 +40,8 @@ class HTMLEditor {
             return CKEditor::div($id, $options);
         } elseif (self::$editor == 'tinymce') {
             return TinyMCE::div($id, $options);
+        } elseif (!empty(self::$editor) && self::$editor != 'plain') {
+            return self::$editor::div($id, $options);
         } else {
             return BasicHTML::textarea($id, $options['content'], $options);
         }
@@ -49,6 +53,8 @@ class HTMLEditor {
             return CKEditor::iframe($id, $options);
         } elseif (self::$editor == 'tinymce') {
             return TinyMCE::iframe($id, $options);
+        } elseif (!empty(self::$editor) && self::$editor != 'plain') {
+            return self::$editor::iframe($id, $options);
         } else {
             return BasicHTML::textarea($id, $options['content'], $options);
         }

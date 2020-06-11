@@ -9,8 +9,8 @@
 
         init: function() {
             if (!self.dialogBox) {
-                $('<div class="reveal-modal" id="dialog_box" data-reveal aria-hidden="true" role="dialog">'+
-                    '<a class="close-reveal-modal"><i class="fa fa-close"></i></a>' +
+                $('<div class="reveal" id="dialog_box" data-reveal aria-hidden="true" role="dialog">'+
+                    '<a class="close-button" data-close><i class="fa fa-close"></i></a>' +
                     '<div class="table_data clear border_top">'+
                     '<div class="inner" id="dialog_box_inner">'+
                     '<div class="messenger error"><ul></ul></div>'+
@@ -22,6 +22,7 @@
                     '</div>'+
                     '</div>').prependTo('body');
                 self.dialogBox = $('#dialog_box');
+                $(self.dialogBox).foundation();
                 self.dialogBoxLoader = $('#dialog_box_loader');
                 self.dialogBoxInner = $('#dialog_box_inner');
                 self.clear();
@@ -33,12 +34,12 @@
          */
         hide: function() {
             self.init();
-            self.dialogBox.foundation('reveal', 'close');
+            self.dialogBox.foundation('close');
         },
 
         show: function() {
             self.init();
-            self.dialogBox.foundation('reveal', 'open');
+            self.dialogBox.foundation('open');
         },
 
         showLoader: function(message) {
@@ -151,7 +152,7 @@
             } else {
                 self.dialogBoxInner.find('.content').html(content).show();
             }
-            self.dialogBox.foundation('reveal', 'open');
+            self.dialogBox.foundation('open');
             self.dialogBoxInner.fadeIn('fast');
         }
     };

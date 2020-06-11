@@ -177,7 +177,8 @@ then
         mkdir js
     fi
     cd $DIR/js
-    wget http://download.cksource.com/CKEditor/CKEditor/CKEditor%204.8.0/ckeditor_4.8.0_standard.zip
+
+    wget https://download.cksource.com/CKEditor/CKEditor/CKEditor%204.14.0/ckeditor_4.14.0_standard.zip
     unzip ckeditor_4.8.0_standard.zip
     if [[ ! -f $DIR/Source/Resources/sass/ckeditor_contents.scss ]]; then
         cp $DIR/js/ckeditor/contents.css $DIR/Source/Resources/sass/ckeditor_contents.scss

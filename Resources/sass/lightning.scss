@@ -160,7 +160,7 @@ table.table_form_table {
 }
 
 // Allows editors to see hidden reveal modals.
-.editor-active .reveal-modal {
+.editor-active .reveal {
   display: block;
   visibility: visible;
   position: inherit !important;
@@ -741,7 +741,7 @@ span.form-inline {
 pre.debug {
   white-space: pre-wrap;
 }
-.reveal-modal {
+.reveal {
   top: 20%;
   max-height: 60%;
   overflow-y: auto;

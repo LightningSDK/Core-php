@@ -100,12 +100,13 @@ class JS {
                     $scripts = [$scripts];
                 }
 
-                $modules_files = Configuration::get('js.' . $module);
+                $modules_files = Configuration::get('compiler.js.' . $module);
                 foreach ($scripts as $script) {
                     if (empty($modules_files[$script])) {
                         throw new \Exception('Compiled JS reference not found for: ' . $script);
                     }
-                    $compiled_scripts[] = '/js/' . $modules_files[$script];
+                    $dest_file = is_array($modules_files[$script]) ? $modules_files[$script]['dest'] : $modules_files[$script];
+                    $compiled_scripts[] = '/js/' . $dest_file;
                 }
             }
         }

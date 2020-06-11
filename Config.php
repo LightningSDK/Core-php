@@ -6,10 +6,10 @@ $conf = [
     ],
     'routes' => [
         'cli_only' => [
-            'database' => 'Lightning\\CLI\\Database',
-            'user' => 'Lightning\\CLI\\User',
-            'security' => 'Lightning\\CLI\\Security',
-            'gulp' => 'Lightning\\CLI\\Gulp',
+            'database' => \Lightning\CLI\Database::class,
+            'user' => \Lightning\CLI\User::class,
+            'security' => \Lightning\CLI\Security::class,
+            'gulp' => \Lightning\CLI\Gulp::class,
         ],
     ],
     'session' => [
@@ -37,22 +37,42 @@ $conf = [
     ],
     'markup' => [
         'renderers' => [
-            'form' => 'Lightning\\View\\Form',
-            'template' => 'Lightning\\Tools\\Template',
-            'youtube' => 'Lightning\\View\\Video\\YouTube',
-            'input' => 'Lightning\\View\\Field',
-            'blog' => 'Lightning\\Pages\\Blog',
-            'script' => 'Lightning\\View\\Script',
-            'iframe' => 'Lightning\\View\\Iframe',
-            'social-links' => 'Lightning\\View\\SocialMedia\\Links',
-            'social-follow' => 'Lightning\\View\\SocialMedia\\Follow',
+            'form' => \Lightning\View\Form::class,
+            'template' => \Lightning\Tools\Template::class,
+            'youtube' => \Lightning\View\Video\YouTube::class,
+            'input' => \Lightning\View\Field::class,
+            'blog' => \Lightning\Pages\Blog::class,
+            'script' => \Lightning\View\Script::class,
+            'iframe' => \Lightning\View\Iframe::class,
+            'social-links' => \Lightning\View\SocialMedia\Links::class,
+            'social-follow' => \Lightning\View\SocialMedia\Follow::class,
+            'cms' => \Lightning\View\CMS::class,
         ],
     ],
     'sitemap' => [
-        'pages' => 'Lightning\\Model\\Page',
-        'blog' => 'Lightning\\Model\\Blog',
+        'pages' => \Lightning\Model\Page::class,
+        'blog' => \Lightning\Model\Blog::class,
     ],
     'language' => 'en_us',
     'template_dir' => 'Source/Templates',
     'temp_dir' => HOME_PATH . '/../tmp',
+    'menus' => [
+        'admin' => [
+            'Blog' => [
+                'children' => [
+                    'Posts' => 'admin/blog/edit',
+                    'Categories' => 'admin/blog/categories'
+                ],
+            ],
+            'Pages' => '/admin/pages',
+            'Users' => '/admin/users',
+            'Mailing' => [
+                'children' => [
+                    'Lists' => '/admin/mailing/lists',
+                    'Templates' => '/admin/mailing/templates',
+                    'Messages' => '/admin/mailing/messages',
+                ],
+            ],
+        ],
+    ],
 ];

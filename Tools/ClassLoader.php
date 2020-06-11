@@ -74,9 +74,16 @@ class ClassLoader {
      */
     public static function loadClassFile($classname) {
         $class_path = str_replace('\\', DIRECTORY_SEPARATOR, $classname);
-        if (file_exists(HOME_PATH . DIRECTORY_SEPARATOR . $class_path . '.php')) {
-            require_once HOME_PATH . DIRECTORY_SEPARATOR . $class_path . '.php';
-            return;
+        // TODO: remove this when packages are updated
+        $class_path = str_replace("_", "-", $class_path);
+        foreach ([
+                     HOME_PATH . DIRECTORY_SEPARATOR . $class_path . '.php',
+                     HOME_PATH . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . $class_path . '.php'
+                 ] as $path) {
+            if (file_exists($path)) {
+                require_once $path;
+                return;
+            }
         }
         if (!empty(self::$classLoader['prefix'])) {
             foreach (self::$classLoader['prefix'] as $prefix => $directory) {

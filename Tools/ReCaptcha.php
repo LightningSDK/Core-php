@@ -41,7 +41,7 @@ class ReCaptcha {
         return '<div class="captcha_container clearfix">
                 <div class="g-recaptcha" data-sitekey="' . Configuration::get('recaptcha.public') . '"></div>
                 <input type="text" name="captcha_abide" id="captcha_abide" required>
-                <small class="error">Please check the box.</small></div>';
+                <small class="form-error">Please check the box.</small></div>';
     }
 
     public static function renderInvisible($text = 'Submit', $class = '') {

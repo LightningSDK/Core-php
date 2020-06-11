@@ -135,13 +135,15 @@ class Configuration {
     protected static function loadModules($includeModules) {
         for ($i = 0; $i < count($includeModules); $i++) {
             $module = $includeModules[$i];
-            if (file_exists(HOME_PATH . '/Modules/' . $module . '/config.php')) {
-                $moduleConfig = require HOME_PATH . '/Modules/' . $module . '/config.php';
-                self::softMerge($moduleConfig);
-                if (!empty($moduleConfig['modules']['include'])) {
-                    foreach ($moduleConfig['modules']['include'] as $include) {
-                        if (!in_array($include, $includeModules)) {
-                            $includeModules[] = $include;
+            foreach (['Modules', 'vendor'] as $path) {
+                if (file_exists(HOME_PATH . '/' . $path . '/' . $module . '/config.php')) {
+                    $moduleConfig = require HOME_PATH . '/' . $path . '/' . $module . '/config.php';
+                    self::softMerge($moduleConfig);
+                    if (!empty($moduleConfig['modules']['include'])) {
+                        foreach ($moduleConfig['modules']['include'] as $include) {
+                            if (!in_array($include, $includeModules)) {
+                                $includeModules[] = $include;
+                            }
                         }
                     }
                 }

@@ -75,6 +75,8 @@ class Pages extends Table {
         'full_width' => 'checkbox',
         'use_parser' => 'checkbox',
         'modules' => 'json',
+        'layout' => 'hidden',
+        'priority' => 'int',
     ];
 
     /**

@@ -88,7 +88,7 @@ class BasicHTML {
 
         if (!empty($attributes['required'])) {
             $error_message = $attributes['error'] ?? 'This field is required.';
-            $field = '<div>' . $field . '<small class="error">' . $error_message . '</small></div>';
+            $field = '<div>' . $field . '<small class="form-error">' . $error_message . '</small></div>';
         }
 
         return $field;
@@ -117,7 +117,7 @@ class BasicHTML {
         $field = '<input ' . HTML::implodeAttributes($attributes) . ' />';
         if (!empty($attributes['required']) || !empty($attributes['error'])) {
             $error_message = $attributes['error'] ?? 'This field is required.';
-            $field = '<div>' . $field . '<small class="error">' . $error_message . '</small></div>';
+            $field = '<div>' . $field . '<small class="form-error">' . $error_message . '</small></div>';
         }
 
         return $field;

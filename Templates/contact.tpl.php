@@ -15,7 +15,7 @@ use Lightning\Tools\ReCaptcha;
             <label>Your Name:
                 <input type="text" name="name" id='name' value="<?=Field::defaultValue('name');?>" required />
             </label>
-            <small class="error">Please enter your name.</small>
+            <small class="form-error">Please enter your name.</small>
         </div>
 
         <div>
@@ -23,7 +23,7 @@ use Lightning\Tools\ReCaptcha;
                 Your Email:
                 <input type="email" name="email" id='my_email' value="<?=Field::defaultValue('email');?>" required />
             </label>
-            <small class="error">Please enter a valid email address.</small>
+            <small class="form-error">Please enter a valid email address.</small>
         </div>
 
         <div>

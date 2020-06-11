@@ -12,25 +12,25 @@ if (empty($action) || $action == 'join' || $action == 'register'): ?>
                 <label>Your Name:
                     <input type="text" name="name" id='name' value="<?=Field::defaultValue('name');?>" required />
                 </label>
-                <small class="error">Please enter your name.</small>
+                <small class="form-error">Please enter your name.</small>
             </div>
             <div>
                 <label>Your Email:
                     <input type="email" name="email" id='email' value="<?=Field::defaultValue('email');?>" required />
                 </label>
-                <small class="error">Please enter your email.</small>
+                <small class="form-error">Please enter your email.</small>
             </div>
             <div>
                 <label>Create a Password:
                     <input type="password" name="password" id='password' value="" pattern="[a-zA-Z0-9]+" required />
                 </label>
-                <small class="error">The password must be at least 8 characters and contain at least one number.</small>
+                <small class="form-error">The password must be at least 8 characters and contain at least one number.</small>
             </div>
             <div>
                 <label>Confirm your Password:
                     <input type="password" name="password2" id='password2' value="" data-equalto="password" required />
                 </label>
-                <small class="error">Please enter the same password.</small>
+                <small class="form-error">Please enter the same password.</small>
             </div>
             <input type="hidden" name="action" value="register" />
             <input type="hidden" name="redirect" value="<?=!empty($redirect) ? $redirect : '';?>" />
@@ -48,13 +48,13 @@ if (empty($action) || $action == 'join' || $action == 'register'): ?>
                 <label>Your Email:
                     <input type="email" name="email" id='email' value="<?=Field::defaultValue('email');?>" required />
                 </label>
-                <small class="error">Please enter your email.</small>
+                <small class="form-error">Please enter your email.</small>
             </div>
             <div>
                 <label>Your password:
                     <input type="password" name="password" id='password' value="" required />
                 </label>
-                <small class="error">Please enter your password.</small>
+                <small class="form-error">Please enter your password.</small>
             </div>
             <input type="hidden" name="action" value="login" />
             <input type="hidden" name="redirect" value="<?=!empty($redirect) ? $redirect : '';?>" />
@@ -72,7 +72,7 @@ if (empty($action) || $action == 'join' || $action == 'register'): ?>
                 <label>Your Email:
                     <input type="email" name="email" id='email' value="<?=Field::defaultValue('email');?>" required />
                 </label>
-                <small class="error">Please enter your email.</small>
+                <small class="form-error">Please enter your email.</small>
             </div>
             <input type="hidden" name="action" value="reset" />
             <input type="hidden" name="redirect" value="<?=!empty($redirect) ? $redirect : '';?>" />
@@ -89,13 +89,13 @@ if (empty($action) || $action == 'join' || $action == 'register'): ?>
                 <label>Create a Password:
                     <input type="password" name="password" id='password' value="" pattern="[a-zA-Z0-9]+" required />
                 </label>
-                <small class="error">The password must be at least 8 characters and contain at least one number.</small>
+                <small class="form-error">The password must be at least 8 characters and contain at least one number.</small>
             </div>
             <div>
                 <label>Confirm your Password:
                     <input type="password" name="password2" id='password2' value="" data-equalto="password" required />
                 </label>
-                <small class="error">Please enter the same password.</small>
+                <small class="form-error">Please enter the same password.</small>
             </div>
             <input type="hidden" name="key" value="<?= $key; ?>" />
             <input type="hidden" name="action" value="set_password" />

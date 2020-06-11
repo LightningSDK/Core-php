@@ -29,6 +29,27 @@ class CMS {
      * - default - The default value if none exists in the database.
      */
 
+    public static function renderMarkup($options) {
+        if (empty($options['name'])) {
+            return 'CMS Error: missing name';
+        }
+
+        if (empty($options['type'])) {
+            $options['type'] = 'plain';
+        }
+
+        switch ($options['type']) {
+            case 'plain':
+                return static::plain($options['name'], $options);
+            case 'embed':
+                return static::embed($options['name'], $options);
+            case 'image':
+                return static::image($options['name'], $options);
+        }
+
+        return 'CMS Error: invalid type';
+    }
+
     /**
      * Create an embedded html editor.
      *

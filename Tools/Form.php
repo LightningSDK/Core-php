@@ -167,7 +167,7 @@ class Form {
         try {
             static::getToken();
         } catch (Exception $e) {
-            return '<small class="error" style="display: block">Session Not Initialized</small>';
+            return '<small class="form-error" style="display: block">Session Not Initialized</small>';
         }
     }
 
@@ -181,7 +181,7 @@ class Form {
         try {
             return BasicHTML::hidden('token', static::getToken(false));
         } catch (Exception $e) {
-            return '<small class="error" style="display: block">Session Not Initialized</small>';
+            return '<small class="form-error" style="display: block">Session Not Initialized</small>';
         }
     }
 

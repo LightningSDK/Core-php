@@ -31,7 +31,6 @@ lightning.format = {
  */
 lightning.startup = {
     init: function() {
-        $(document).foundation();
         this.initNav();
         lightning.ajax.init();
         lightning.dialog.init();
@@ -46,7 +45,6 @@ lightning.startup = {
         }
     }
 };
-
 lightning.js = {
     queue: [],
     loaded: {},
@@ -104,6 +102,7 @@ lightning.js = {
      */
     trigger: function() {
         // Iterate over each queued item.
+        lightning.js.loaded['/js/lightning.min.js?v='+lightning_mv] = true;
         queue:
         for (var i in lightning.js.queue) {
             // See if all scripts are loaded.

@@ -74,7 +74,7 @@ class Field {
 
         if (!empty($attributes['required']) || !empty($options['error'])) {
             $error_message = $options['error'] ?? 'This field is required.';
-            $field = $field . '<small class="error">' . $error_message . '</small>';
+            $field = $field . '<small class="form-error">' . $error_message . '</small>';
         }
 
         return '<div>' . $field . '</div>';
