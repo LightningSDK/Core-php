@@ -1,11 +1,11 @@
 <?php
 
-namespace Lightning\Tools;
+namespace lightningsdk\core\Tools;
 
 use Exception;
-use Lightning\Model\Message;
-use Lightning\Model\User;
-use Lightning\Model\Tracker as TrackerModel;
+use lightningsdk\core\Model\Message;
+use lightningsdk\core\Model\User;
+use lightningsdk\core\Model\Tracker as TrackerModel;
 
 /**
  * Include the PHPMailer

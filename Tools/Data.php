@@ -1,6 +1,6 @@
 <?php
 
-namespace Lightning\Tools;
+namespace lightningsdk\core\Tools;
 
 class Data {
 

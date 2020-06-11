@@ -1,6 +1,6 @@
 <?php
 
-namespace Lightning\Filter;
+namespace lightningsdk\core\Filter;
 
 class Permissions extends Filter {
 
@@ -31,7 +31,7 @@ class Permissions extends Filter {
                 ],
                 'value' => [
                     'type' => 'select',
-                    'options' => \Lightning\Model\Permissions::loadOptions('name'),
+                    'options' => \lightningsdk\core\Model\Permissions::loadOptions('name'),
                 ]
             ]
         ];

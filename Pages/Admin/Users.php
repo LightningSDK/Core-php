@@ -1,16 +1,16 @@
 <?php
 
-namespace Lightning\Pages\Admin;
+namespace lightningsdk\core\Pages\Admin;
 
-use Lightning\Model\User;
-use Lightning\Pages\Table;
-use Lightning\Tools\ClientUser;
-use Lightning\Tools\Database;
-use Lightning\Tools\Navigation;
-use Lightning\Tools\Request;
-use Lightning\Tools\Session\DBSession;
-use Lightning\View\Field\BasicHTML;
-use Lightning\View\Field\Text;
+use lightningsdk\core\Model\User;
+use lightningsdk\core\Pages\Table;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\Tools\Database;
+use lightningsdk\core\Tools\Navigation;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\Tools\Session\DBSession;
+use lightningsdk\core\View\Field\BasicHTML;
+use lightningsdk\core\View\Field\Text;
 use Source\Model\Permissions;
 
 class Users extends Table {
@@ -35,13 +35,13 @@ class Users extends Table {
 
     protected $filters = [
         'mailing_list' => [
-            'class' => 'Lightning\\Filter\\MailingList',
+            'class' => 'lightningsdk\\core\\Filter\\MailingList',
         ],
         'roles' => [
-            'class' => 'Lightning\\Filter\\Roles',
+            'class' => 'lightningsdk\\core\\Filter\\Roles',
         ],
         'permissions' => [
-            'class' => 'Lightning\\Filter\\Permissions',
+            'class' => 'lightningsdk\\core\\Filter\\Permissions',
         ],
     ];
 

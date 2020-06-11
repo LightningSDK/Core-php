@@ -1,21 +1,21 @@
 <?php
 
-namespace Lightning\API;
+namespace lightningsdk\core\API;
 
 use Exception;
-use Lightning\Tools\ClientUser;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Messenger;
-use Lightning\Tools\Output;
-use Lightning\Tools\Request;
-use Lightning\Model\User as UserModel;
-use Lightning\Tools\Session\DBSession;
-use Lightning\Tools\SocialDrivers\Facebook;
-use Lightning\Tools\SocialDrivers\Google;
-use Lightning\Tools\SocialDrivers\SocialMediaApi;
-use Lightning\Tools\SocialDrivers\SocialMediaApiInterface;
-use Lightning\Tools\SocialDrivers\Twitter;
-use Lightning\View\API;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Messenger;
+use lightningsdk\core\Tools\Output;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\Model\User as UserModel;
+use lightningsdk\core\Tools\Session\DBSession;
+use lightningsdk\core\Tools\SocialDrivers\Facebook;
+use lightningsdk\core\Tools\SocialDrivers\Google;
+use lightningsdk\core\Tools\SocialDrivers\SocialMediaApi;
+use lightningsdk\core\Tools\SocialDrivers\SocialMediaApiInterface;
+use lightningsdk\core\Tools\SocialDrivers\Twitter;
+use lightningsdk\core\View\API;
 
 class User extends API {
     public function get() {

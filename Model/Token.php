@@ -1,16 +1,16 @@
 <?php
 
-namespace Lightning\Model;
+namespace lightningsdk\core\Model;
 
 use Exception;
-use Lightning\Exceptions\TokenExpired;
-use Lightning\Exceptions\TokenNotFound;
-use Lightning\Tools\ClientUser;
-use Lightning\Tools\Database;
-use Lightning\Tools\Request;
-use Lightning\Tools\Security\Random;
-use Lightning\Tools\Session\DBSession;
-use Lightning\Tools\SingletonObject;
+use lightningsdk\core\Exceptions\TokenExpired;
+use lightningsdk\core\Exceptions\TokenNotFound;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\Tools\Database;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\Tools\Security\Random;
+use lightningsdk\core\Tools\Session\DBSession;
+use lightningsdk\core\Tools\SingletonObject;
 
 class TokenOverridable extends SingletonObject{
     /**

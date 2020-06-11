@@ -1,8 +1,8 @@
 <?php
-use Lightning\Model\URL;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Request;
-use Lightning\Tools\Scrub;
+use lightningsdk\core\Model\URL;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\Tools\Scrub;
 ?>
 <link rel="icon" href="<?= Configuration::get('favicon') ?: '/favicon.png'; ?>" type="image/x-icon">
 <?php if (!empty($meta)): ?>

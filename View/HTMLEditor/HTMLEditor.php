@@ -1,10 +1,10 @@
 <?php
 
-namespace Lightning\View\HTMLEditor;
+namespace lightningsdk\core\View\HTMLEditor;
 
-use Lightning\Tools\Configuration;
-use Lightning\View\Field\BasicHTML;
-use Lightning\View\JS;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\View\Field\BasicHTML;
+use lightningsdk\core\View\JS;
 
 class HTMLEditor {
 

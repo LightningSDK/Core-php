@@ -1,19 +1,19 @@
 <?php
 
-namespace Lightning\Pages;
+namespace lightningsdk\core\Pages;
 
-use Lightning\Model\Permissions;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Image;
-use Lightning\Tools\Output;
-use Lightning\View\JS;
-use Lightning\View\Page;
-use Lightning\Tools\ClientUser;
-use Lightning\Tools\Request;
+use lightningsdk\core\Model\Permissions;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Image;
+use lightningsdk\core\Tools\Output;
+use lightningsdk\core\View\JS;
+use lightningsdk\core\View\Page;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\Tools\Request;
 
 class ImageBrowser extends Page {
 
-    protected $template = ['template_blank', 'Lightning'];
+    protected $template = ['template_blank', 'lightningsdk/core'];
     protected $page = 'image_browser';
     protected $containers;
     protected $thumbSize;

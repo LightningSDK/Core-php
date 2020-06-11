@@ -1,8 +1,8 @@
 <?php
 
-namespace Lightning\View;
+namespace lightningsdk\core\View;
 
-use Lightning\Tools\Request;
+use lightningsdk\core\Tools\Request;
 
 class Pagination {
     protected $pages = 0;

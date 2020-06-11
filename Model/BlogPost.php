@@ -1,14 +1,14 @@
 <?php
 
-namespace Lightning\Model;
+namespace lightningsdk\core\Model;
 
-use Lightning\Pages\Admin\BlogPosts;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Database;
-use Lightning\Tools\IO\FileManager;
-use Lightning\View\HTML;
-use Lightning\View\HTMLEditor\Markup;
-use Lightning\View\Text;
+use lightningsdk\core\Pages\Admin\BlogPosts;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Database;
+use lightningsdk\core\Tools\IO\FileManager;
+use lightningsdk\core\View\HTML;
+use lightningsdk\core\View\HTMLEditor\Markup;
+use lightningsdk\core\View\Text;
 
 class BlogPostOverridable extends BaseObject {
     const TABLE = 'blog';

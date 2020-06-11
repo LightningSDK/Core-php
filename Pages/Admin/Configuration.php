@@ -1,11 +1,11 @@
 <?php
 
-namespace Lightning\Pages\Admin;
+namespace lightningsdk\core\Pages\Admin;
 
-use Lightning\Tools\ClientUser;
-use Lightning\Tools\Configuration as Config;
-use Lightning\Tools\Template;
-use Lightning\View\Page;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\Tools\Configuration as Config;
+use lightningsdk\core\Tools\Template;
+use lightningsdk\core\View\Page;
 
 class Configuration extends Page {
 

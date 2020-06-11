@@ -1,8 +1,8 @@
 <?php
 
-namespace Lightning\Tools\IO;
+namespace lightningsdk\core\Tools\IO;
 
-use Lightning\Tools\Configuration;
+use lightningsdk\core\Tools\Configuration;
 
 class FileManager {
     public static function getFileHandler($handler, $container) {

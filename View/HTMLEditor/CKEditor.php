@@ -1,18 +1,18 @@
 <?php
 /**
  * @file
- * Lightning\Tools\CKEditor
+ * lightningsdk\core\Tools\CKEditor
  */
 
-namespace Lightning\View\HTMLEditor;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Scrub;
-use Lightning\View\JS;
+namespace lightningsdk\core\View\HTMLEditor;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Scrub;
+use lightningsdk\core\View\JS;
 
 /**
  * Contains a wrapper for the CK Editor
  *
- * @package Lightning\Tools
+ * @package lightningsdk\core\Tools
  */
 class CKEditor {
 

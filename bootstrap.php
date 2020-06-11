@@ -11,13 +11,13 @@ if (!defined('CONFIG_PATH')) {
     define('CONFIG_PATH', HOME_PATH . '/Source/Config');
 }
 
-use Lightning\Tools\Logger;
-use Lightning\Tools\ClassLoader;
-use Lightning\Tools\Performance;
+use lightningsdk\core\Tools\Logger;
+use lightningsdk\core\Tools\ClassLoader;
+use lightningsdk\core\Tools\Performance;
 
 // Set the autoloader to the Lightning autoloader.
-require_once HOME_PATH . '/Lightning/Tools/ClassLoader.php';
-spl_autoload_register(['Lightning\\Tools\\ClassLoader', 'classAutoloader']);
+require_once __DIR__ . '/Tools/ClassLoader.php';
+spl_autoload_register(['lightningsdk\\core\\Tools\\ClassLoader', 'classAutoloader']);
 
 Performance::startTimer();
 

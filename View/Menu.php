@@ -1,9 +1,9 @@
 <?php
 
-namespace Lightning\View;
+namespace lightningsdk\core\View;
 
-use Lightning\Tools\ClientUser;use Lightning\Tools\Configuration;
-use Lightning\Tools\Scrub;
+use lightningsdk\core\Tools\ClientUser;use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Scrub;
 
 class Menu {
     /**

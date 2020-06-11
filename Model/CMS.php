@@ -1,8 +1,8 @@
 <?php
 
-namespace Lightning\Model;
+namespace lightningsdk\core\Model;
 
-use Lightning\Tools\Database;
+use lightningsdk\core\Tools\Database;
 
 /**
  * Class CMS

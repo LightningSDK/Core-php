@@ -1,8 +1,8 @@
 <?php
 
-namespace Lightning\Database\Schema;
+namespace lightningsdk\core\Database\Schema;
 
-use Lightning\Database\Schema;
+use lightningsdk\core\Database\Schema;
 
 class UserTag extends Schema {
 

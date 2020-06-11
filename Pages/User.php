@@ -1,28 +1,28 @@
 <?php
 
-namespace Lightning\Pages;
+namespace lightningsdk\core\Pages;
 
 use Exception;
-use Lightning\Tools\ClientUser;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Form;
-use Lightning\Tools\Output;
-use Lightning\Tools\Messenger;
-use Lightning\Tools\Navigation;
-use Lightning\Tools\Request;
-use Lightning\Tools\Scrub;
-use Lightning\Tools\Session\DBSession;
-use Lightning\Tools\SocialDrivers\Facebook;
-use Lightning\Tools\SocialDrivers\Google;
-use Lightning\Tools\SocialDrivers\SocialMediaApi;
-use Lightning\Tools\SocialDrivers\SocialMediaApiInterface;
-use Lightning\Tools\Template;
-use Lightning\View\Page;
-use Lightning\Model\User as UserModel;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Form;
+use lightningsdk\core\Tools\Output;
+use lightningsdk\core\Tools\Messenger;
+use lightningsdk\core\Tools\Navigation;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\Tools\Scrub;
+use lightningsdk\core\Tools\Session\DBSession;
+use lightningsdk\core\Tools\SocialDrivers\Facebook;
+use lightningsdk\core\Tools\SocialDrivers\Google;
+use lightningsdk\core\Tools\SocialDrivers\SocialMediaApi;
+use lightningsdk\core\Tools\SocialDrivers\SocialMediaApiInterface;
+use lightningsdk\core\Tools\Template;
+use lightningsdk\core\View\Page;
+use lightningsdk\core\Model\User as UserModel;
 
 class User extends Page {
 
-    protected $page = ['user', 'Lightning'];
+    protected $page = ['user', 'lightningsdk/core'];
     protected $rightColumn = false;
 
     protected function hasAccess() {
@@ -39,7 +39,7 @@ class User extends Page {
     }
 
     public function getModal() {
-        Template::getInstance()->setTemplate(['modal', 'Lightning']);
+        Template::getInstance()->setTemplate(['modal', 'lightningsdk/core']);
         if (!ClientUser::getInstance()->isAnonymous() && !Request::get('social', Request::TYPE_BOOLEAN)) {
             Messenger::message('You are already signed in.');
             $this->page = '';
@@ -204,7 +204,7 @@ class User extends Page {
      * Unsubscribe the user from all mailing lists.
      */
     public function getUnsubscribe() {
-        $this->page = ['unsubscribe_confirm', 'Lightning'];
+        $this->page = ['unsubscribe_confirm', 'lightningsdk/core'];
         Template::getInstance()->set('user_token', Request::get('u', 'encrypted'));
     }
 

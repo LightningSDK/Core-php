@@ -1,12 +1,12 @@
 <?php
 
-namespace Lightning\Pages\Mailing;
+namespace lightningsdk\core\Pages\Mailing;
 
-use Lightning\Pages\Table;
-use Lightning\Tools\ClientUser;
-use Lightning\Tools\Database;
-use Lightning\Tools\Request;
-use Lightning\Tools\Template;
+use lightningsdk\core\Pages\Table;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\Tools\Database;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\Tools\Template;
 
 class ListUsers extends Table {
 

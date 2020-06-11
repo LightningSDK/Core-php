@@ -1,13 +1,13 @@
 <?php
 
-namespace Lightning\View;
+namespace lightningsdk\core\View;
 
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Request;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Request;
 
 class Widget extends Page {
 
-    protected $template = ['widget_template', 'Lightning'];
+    protected $template = ['widget_template', 'lightningsdk/core'];
     protected $widget = null;
 
     public function hasAccess() {

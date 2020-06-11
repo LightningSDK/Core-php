@@ -1,8 +1,8 @@
 <?php
 
-namespace Lightning\Jobs;
+namespace lightningsdk\core\Jobs;
 
-use Lightning\Tools\Logger;
+use lightningsdk\core\Tools\Logger;
 
 abstract class Job {
 

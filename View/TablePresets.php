@@ -1,8 +1,8 @@
 <?php
 
-namespace Lightning\View;
+namespace lightningsdk\core\View;
 
-use Lightning\Model\User;
+use lightningsdk\core\Model\User;
 
 class TablePresets {
     public static function userSearch($field_name = 'user_id') {

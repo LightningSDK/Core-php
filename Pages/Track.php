@@ -1,23 +1,23 @@
 <?php
 /**
  * @file
- * Contains Lightning\Pages\Track
+ * Contains lightningsdk\core\Pages\Track
  */
 
-namespace Lightning\Pages;
+namespace lightningsdk\core\Pages;
 
-use Lightning\Tools\ClientUser;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Logger;
-use Lightning\Tools\Output;
-use Lightning\Tools\Request;
-use Lightning\Tools\Security\Encryption;
-use Lightning\Model\Tracker;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Logger;
+use lightningsdk\core\Tools\Output;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\Tools\Security\Encryption;
+use lightningsdk\core\Model\Tracker;
 
 /**
  * A page handler for the tracking image.
  *
- * @package Lightning\Pages
+ * @package lightningsdk\core\Pages
  */
 class Track extends Page {
     protected function hasAccess() {

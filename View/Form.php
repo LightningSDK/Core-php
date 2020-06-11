@@ -1,8 +1,8 @@
 <?php
 
-namespace Lightning\View;
+namespace lightningsdk\core\View;
 
-use Lightning\View\Field\BasicHTML;
+use lightningsdk\core\View\Field\BasicHTML;
 
 class Form {
     public static function renderMarkup($options, $vars) {
@@ -27,7 +27,7 @@ class Form {
         }
 
         $output = '<form ' . HTML::implodeAttributes($form_attributes) . '>';
-        $output .= \Lightning\Tools\Form::renderTokenInput();
+        $output .= \lightningsdk\core\Tools\Form::renderTokenInput();
 
         // Loop through basic, unedited options.
         foreach (['list', 'contact', 'success', 'redirect', 'message'] as $option) {
@@ -50,7 +50,7 @@ class Form {
         }
 
         $output = '<form ' . HTML::implodeAttributes($form_attributes) . '>';
-        $output .= \Lightning\Tools\Form::renderTokenInput();
+        $output .= \lightningsdk\core\Tools\Form::renderTokenInput();
 
         foreach ($form['fields'] as $field) {
             $output .= '<div class="field ' . ($field['type']??'') . '">';

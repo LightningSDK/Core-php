@@ -1,21 +1,21 @@
 <?php
 
-namespace Lightning\Tools\Session;
+namespace lightningsdk\core\Tools\Session;
 
 use Exception;
-use Lightning\Model\ObjectDataStorage;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Output;
-use Lightning\Tools\Request;
-use Lightning\Tools\Security\Encryption;
-use Lightning\Tools\Security\Random;
-use Lightning\Tools\SingletonObject;
+use lightningsdk\core\Model\ObjectDataStorage;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Output;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\Tools\Security\Encryption;
+use lightningsdk\core\Tools\Security\Random;
+use lightningsdk\core\Tools\SingletonObject;
 
 /**
  * Class Session
  *   An object to reference a user's session on the site.
  *
- * @package Overridable\Lightning\Tools
+ * @package Overridable\lightningsdk\core\Tools
  *
  * @property integer $id
  * @property integer $user_id

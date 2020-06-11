@@ -1,8 +1,8 @@
 <?php
 
-namespace Lightning\Tools\Cache;
+namespace lightningsdk\core\Tools\Cache;
 
-use Lightning\Tools\Configuration;
+use lightningsdk\core\Tools\Configuration;
 
 class FileCache extends CacheController {
 

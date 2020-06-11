@@ -1,8 +1,8 @@
 <?php
 
-namespace Lightning\Filter;
+namespace lightningsdk\core\Filter;
 
-use Lightning\Model\Role;
+use lightningsdk\core\Model\Role;
 
 class Roles extends Filter {
 

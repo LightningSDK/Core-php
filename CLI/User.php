@@ -1,20 +1,20 @@
 <?php
 /**
  * @file
- * Contains Lightning\CLI\User
+ * Contains lightningsdk\core\CLI\User
  */
 
-namespace Lightning\CLI;
+namespace lightningsdk\core\CLI;
 
 use Exception;
-use Lightning\Model\Role;
-use Lightning\Tools\Scrub;
-use Lightning\Model\User as UserModel;
+use lightningsdk\core\Model\Role;
+use lightningsdk\core\Tools\Scrub;
+use lightningsdk\core\Model\User as UserModel;
 
 /**
  * A CLI interface for user functions.
  *
- * @package Lightning\CLI
+ * @package lightningsdk\core\CLI
  */
 class User extends CLI {
     /**

@@ -1,24 +1,24 @@
 <?php
 
-namespace Lightning\View;
+namespace lightningsdk\core\View;
 
 use Exception;
-use Lightning\Model\Blacklist;
-use Lightning\Model\Blog;
-use Lightning\Tools\ClientUser;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Form as FormTool;
-use Lightning\Tools\Messenger;
-use Lightning\Tools\Navigation;
-use Lightning\Tools\Output;
-use Lightning\Tools\Request;
-use Lightning\Tools\Template;
-use Lightning\Model\Tracker;
+use lightningsdk\core\Model\Blacklist;
+use lightningsdk\core\Model\Blog;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Form as FormTool;
+use lightningsdk\core\Tools\Messenger;
+use lightningsdk\core\Tools\Navigation;
+use lightningsdk\core\Tools\Output;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\Tools\Template;
+use lightningsdk\core\Model\Tracker;
 
 /**
  * The basic html page handler.
  *
- * @package Lightning\View
+ * @package lightningsdk\core\View
  * @todo: Should be abstract
  */
 class PageOverridable {

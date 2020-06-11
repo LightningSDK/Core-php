@@ -1,8 +1,8 @@
 <?php
 
-namespace Lightning\Tools;
+namespace lightningsdk\core\Tools;
 
-use Lightning\Tools\Session\BrowserSession;
+use lightningsdk\core\Tools\Session\BrowserSession;
 
 class Language {
 

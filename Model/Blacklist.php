@@ -1,10 +1,10 @@
 <?php
 
-namespace Lightning\Model;
+namespace lightningsdk\core\Model;
 
 use Exception;
-use Lightning\Tools\Database;
-use Lightning\Tools\Scrub;
+use lightningsdk\core\Tools\Database;
+use lightningsdk\core\Tools\Scrub;
 
 class Blacklist extends BaseObject {
     const TABLE = 'black_list';

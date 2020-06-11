@@ -1,11 +1,11 @@
 <?php
 
-namespace Lightning\Tools;
+namespace lightningsdk\core\Tools;
 
 use Exception;
-use Lightning\Tools\Cache\FileCache;
-use Lightning\View\Field\BasicHTML;
-use Lightning\Model\Page;
+use lightningsdk\core\Tools\Cache\FileCache;
+use lightningsdk\core\View\Field\BasicHTML;
+use lightningsdk\core\Model\Page;
 
 class CSVImport extends Page {
     protected $fields;

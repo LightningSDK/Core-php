@@ -1,5 +1,5 @@
 <?php
 
-namespace Lightning\Exceptions;
+namespace lightningsdk\core\Exceptions;
 
 class TokenNotFound extends \Exception {};

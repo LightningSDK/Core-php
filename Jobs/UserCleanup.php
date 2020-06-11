@@ -1,10 +1,10 @@
 <?php
 
-namespace Lightning\Jobs;
+namespace lightningsdk\core\Jobs;
 
-use Lightning\Model\User;
-use Lightning\Tools\Logger;
-use Lightning\Tools\Session\DBSession;
+use lightningsdk\core\Model\User;
+use lightningsdk\core\Tools\Logger;
+use lightningsdk\core\Tools\Session\DBSession;
 
 class UserCleanup extends Job {
 

@@ -1,9 +1,9 @@
 <?php
 
-namespace Lightning\Model;
+namespace lightningsdk\core\Model;
 
-use Lightning\Tools\Database;
-use Lightning\Tools\Mongo;
+use lightningsdk\core\Tools\Database;
+use lightningsdk\core\Tools\Mongo;
 
 trait ObjectDatabaseStorage {
 

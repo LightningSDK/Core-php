@@ -1,6 +1,6 @@
 <?php
 
-namespace Lightning\Filter;
+namespace lightningsdk\core\Filter;
 
 use Exception;
 

@@ -1,8 +1,8 @@
 <?php
 
-namespace Lightning\Filter;
+namespace lightningsdk\core\Filter;
 
-use Lightning\Model\Mailing\Lists;
+use lightningsdk\core\Model\Mailing\Lists;
 
 class MailingList extends Filter {
 

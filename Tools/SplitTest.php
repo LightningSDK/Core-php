@@ -1,10 +1,10 @@
 <?php
 
-namespace Lightning\Tools;
+namespace lightningsdk\core\Tools;
 
-use Lightning\Model\Tracker;
-use Lightning\Tools\Session\DBSession;
-use Lightning\View\JS;
+use lightningsdk\core\Model\Tracker;
+use lightningsdk\core\Tools\Session\DBSession;
+use lightningsdk\core\View\JS;
 use stdClass;
 
 class SplitTest {
@@ -48,7 +48,7 @@ class SplitTest {
 
             }
             // Track the usage.
-            $split_test = \Lightning\Model\SplitTest::loadOrCreateByLocator($name);
+            $split_test = \lightningsdk\core\Model\SplitTest::loadOrCreateByLocator($name);
             $tracker = Tracker::loadOrCreateByName($name, 'Split Test');
             $tracker->track($split_test->id);
 

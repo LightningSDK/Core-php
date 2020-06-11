@@ -1,8 +1,8 @@
 <?php
 
-namespace Lightning\CLI;
+namespace lightningsdk\core\CLI;
 
-use Lightning\Tools\Configuration;
+use lightningsdk\core\Tools\Configuration;
 
 class Gulp extends CLI {
     public function execute() {

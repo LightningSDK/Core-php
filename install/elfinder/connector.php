@@ -44,7 +44,7 @@ function access($attr, $path, $data, $volume) {
 // Documentation for connector options:
 // https://github.com/Studio-42/elFinder/wiki/Connector-configuration-options
 include '../../Lightning/bootstrap.php';
-if (!\Lightning\Tools\ClientUser::getInstance()->isAdmin()) {
+if (!\lightningsdk\core\Tools\ClientUser::getInstance()->isAdmin()) {
 	header("HTTP/1.0 401 Unauthorized");
 	echo '{"error": "Login failed."}';
 	exit;
@@ -54,8 +54,8 @@ $opts = array(
 	'roots' => array(
 		array(
 			'driver'        => 'LocalFileSystem',           // driver for accessing file system (REQUIRED)
-			'path'          => HOME_PATH . '/' . \Lightning\Tools\Configuration::get('imageBrowser.containers.images.storage') . '/',                 // path to files (REQUIRED)
-			'URL'           => \Lightning\Tools\Configuration::get('imageBrowser.containers.images.url'), // URL to files (REQUIRED)
+			'path'          => HOME_PATH . '/' . \lightningsdk\core\Tools\Configuration::get('imageBrowser.containers.images.storage') . '/',                 // path to files (REQUIRED)
+			'URL'           => \lightningsdk\core\Tools\Configuration::get('imageBrowser.containers.images.url'), // URL to files (REQUIRED)
 			'uploadDeny'    => array('all'),                // All Mimetypes not allowed to upload
 			'uploadAllow'   => array('image', 'text/plain'),// Mimetype `image` and `text/plain` allowed to upload
 			'uploadOrder'   => array('deny', 'allow'),      // allowed Mimetype `image` and `text/plain` only

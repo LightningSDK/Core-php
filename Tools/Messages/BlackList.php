@@ -1,6 +1,6 @@
 <?php
 
-namespace Lightning\Tools\Messages;
+namespace lightningsdk\core\Tools\Messages;
 
 class BlackList implements SpamFilterInterface {
 
@@ -12,7 +12,7 @@ class BlackList implements SpamFilterInterface {
      */
     public static function getScore(&$clientFIelds, &$messageFields, &$spamFields) {
         if (!empty($clientFIelds['IP'])) {
-            return \Lightning\Model\Blacklist::checkBlacklist($clientFIelds['IP']) ? 5 : 0;
+            return \lightningsdk\core\Model\Blacklist::checkBlacklist($clientFIelds['IP']) ? 5 : 0;
         }
 
         return 0;
@@ -23,7 +23,7 @@ class BlackList implements SpamFilterInterface {
      * @throws \Exception
      */
     public static function flagAsSpam(&$clientFIelds, &$messageFields, &$spamFields) {
-        \Lightning\Model\Blacklist::addToBlacklist($clientFIelds['IP']);
+        \lightningsdk\core\Model\Blacklist::addToBlacklist($clientFIelds['IP']);
     }
 
 }

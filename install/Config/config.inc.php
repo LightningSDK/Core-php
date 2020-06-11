@@ -17,7 +17,7 @@ $conf = [
         'single_ip' => true,
     ],
     'template' => [
-        'default' => ['template', 'Lightning'],
+        'default' => ['template', 'lightningsdk/core'],
     ],
     'social' => [
         'store_images' => true,
@@ -67,7 +67,7 @@ $conf = [
     ],
     'messages' => [
         'spamFilters' => [
-            \Lightning\Tools\Messages\BlackList::class,
+            \lightningsdk\core\Tools\Messages\BlackList::class,
         ],
         'maxAllowableScore' => 5,
     ],
@@ -133,53 +133,53 @@ $conf = [
     ],
     'jobs' => [
         'session-cleanup' => [
-            'class' => 'Lightning\\Jobs\\UserCleanup',
+            'class' => 'lightningsdk\\core\\Jobs\\UserCleanup',
             'schedule' => '0 2 * * * *', // Every day at 2am
             'max_threads' => 1,
         ],
     ],
     'routes' => [
         'dynamic' => [
-            '^blog(/.*)?$' => 'Lightning\\Pages\\Blog',
-            '.*' => 'Lightning\\Pages\\Page',
+            '^blog(/.*)?$' => 'lightningsdk\\core\\Pages\\Blog',
+            '.*' => 'lightningsdk\\core\\Pages\\Page',
         ],
         'static' => [
-            '' => 'Lightning\\Pages\\Page',
-            'user' => 'Lightning\\Pages\\User',
-            'contact' => 'Lightning\\Pages\\Contact',
-            'page' => 'Lightning\\Pages\\Page',
-            'message' => 'Lightning\\Pages\\Message',
-            'track' => 'Lightning\\Pages\\Track',
-            'landing' => 'Lightning\\Pages\\OptIn',
-            'profile' => 'Lightning\\Pages\\Profile',
+            '' => 'lightningsdk\\core\\Pages\\Page',
+            'user' => 'lightningsdk\\core\\Pages\\User',
+            'contact' => 'lightningsdk\\core\\Pages\\Contact',
+            'page' => 'lightningsdk\\core\\Pages\\Page',
+            'message' => 'lightningsdk\\core\\Pages\\Message',
+            'track' => 'lightningsdk\\core\\Pages\\Track',
+            'landing' => 'lightningsdk\\core\\Pages\\OptIn',
+            'profile' => 'lightningsdk\\core\\Pages\\Profile',
 
             // SEO
-            'sitemap' => 'Lightning\\Pages\\Sitemap',
+            'sitemap' => 'lightningsdk\\core\\Pages\\Sitemap',
 
             // Admin
-            'admin/blog/edit' => 'Lightning\\Pages\\BlogTable',
-            'admin/blog/categories' => 'Lightning\\Pages\\BlogCategories',
-            'admin/social/auth' => 'Lightning\\Pages\\SocialSharing\\Auth',
-            'admin/social/share' => 'Lightning\\Pages\\SocialSharing\\Share',
-            'admin/mailing/lists' => 'Lightning\\Pages\\Mailing\\Lists',
-            'admin/mailing/messages' => 'Lightning\\Pages\\Mailing\\Messages',
-            'admin/mailing/send' => 'Lightning\\Pages\\Mailing\\Send',
-            'admin/mailing/stats' => 'Lightning\\Pages\\Mailing\\Stats',
-            'admin/mailing/templates' => 'Lightning\\Pages\\Mailing\\Templates',
-            'admin/tracker' => 'Lightning\\Pages\\AdminTracker',
-            'admin/pages' => 'Lightning\\Pages\\Admin\\Pages',
-            'admin/users' => 'Lightning\\Pages\\Admin\\Users',
-            'admin/cms' => 'Lightning\\Pages\\Admin\\CMS',
-            'admin/roles' => 'Lightning\\Pages\\Admin\\Roles',
-            'admin/permissions' => 'Lightning\\Pages\\Admin\\Permissions',
-            'admin/contact' => 'Lightning\\Pages\\Admin\\Contact',
+            'admin/blog/edit' => 'lightningsdk\\core\\Pages\\BlogTable',
+            'admin/blog/categories' => 'lightningsdk\\core\\Pages\\BlogCategories',
+            'admin/social/auth' => 'lightningsdk\\core\\Pages\\SocialSharing\\Auth',
+            'admin/social/share' => 'lightningsdk\\core\\Pages\\SocialSharing\\Share',
+            'admin/mailing/lists' => 'lightningsdk\\core\\Pages\\Mailing\\Lists',
+            'admin/mailing/messages' => 'lightningsdk\\core\\Pages\\Mailing\\Messages',
+            'admin/mailing/send' => 'lightningsdk\\core\\Pages\\Mailing\\Send',
+            'admin/mailing/stats' => 'lightningsdk\\core\\Pages\\Mailing\\Stats',
+            'admin/mailing/templates' => 'lightningsdk\\core\\Pages\\Mailing\\Templates',
+            'admin/tracker' => 'lightningsdk\\core\\Pages\\AdminTracker',
+            'admin/pages' => 'lightningsdk\\core\\Pages\\Admin\\Pages',
+            'admin/users' => 'lightningsdk\\core\\Pages\\Admin\\Users',
+            'admin/cms' => 'lightningsdk\\core\\Pages\\Admin\\CMS',
+            'admin/roles' => 'lightningsdk\\core\\Pages\\Admin\\Roles',
+            'admin/permissions' => 'lightningsdk\\core\\Pages\\Admin\\Permissions',
+            'admin/contact' => 'lightningsdk\\core\\Pages\\Admin\\Contact',
 
             // Image admin
-            'elfinder' => 'Lightning\\API\\ElFinder',
-            'imageBrowser' => 'Lightning\\Pages\\ImageBrowser',
+            'elfinder' => 'lightningsdk\\core\\API\\ElFinder',
+            'imageBrowser' => 'lightningsdk\\core\\Pages\\ImageBrowser',
         ],
         'cli_only' => [
-            'bounce' => 'Lightning\\CLI\\BouncedEmail',
+            'bounce' => 'lightningsdk\\core\\CLI\\BouncedEmail',
             'test' => 'Source\\CLI\\Test',
         ],
     ],

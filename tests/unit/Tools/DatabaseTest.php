@@ -1,7 +1,7 @@
 <?php
 namespace Tools;
 
-use Lightning\Tools\Database;
+use lightningsdk\core\Tools\Database;
 
 class DatabaseTest extends \Codeception\Test\Unit
 {

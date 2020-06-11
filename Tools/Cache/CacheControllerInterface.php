@@ -1,6 +1,6 @@
 <?php
 
-namespace Lightning\Tools\Cache;
+namespace lightningsdk\core\Tools\Cache;
 
 interface CacheControllerInterface {
     public function get($key, $default = null);

@@ -1,9 +1,9 @@
 <?php
 
-namespace Lightning\Tools\SocialDrivers;
+namespace lightningsdk\core\Tools\SocialDrivers;
 
-use Lightning\Tools\Configuration;
-use Lightning\View\JS;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\View\JS;
 
 class YouTube {
     public static function renderFollow() {

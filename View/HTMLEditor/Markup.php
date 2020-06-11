@@ -1,10 +1,10 @@
 <?php
 
-namespace Lightning\View\HTMLEditor;
+namespace lightningsdk\core\View\HTMLEditor;
 
 use DOMDocument;
 use DOMElement;
-use Lightning\Tools\Configuration;
+use lightningsdk\core\Tools\Configuration;
 use Exception;
 
 class Markup {

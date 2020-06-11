@@ -1,20 +1,20 @@
 <?php
 /**
  * @file
- * Contains Lightning\Tools\Request\CLI
+ * Contains lightningsdk\core\Tools\Request\CLI
  */
 
-namespace Lightning\CLI;
+namespace lightningsdk\core\CLI;
 
 use Exception;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Logger;
-use Lightning\Tools\Request;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Logger;
+use lightningsdk\core\Tools\Request;
 
 /**
  * A base controller for CLI handlers.
  *
- * @package Lightning\CLI
+ * @package lightningsdk\core\CLI
  */
 class CLI {
 

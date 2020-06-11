@@ -1,8 +1,8 @@
 <?php
 
-namespace Lightning\View;
+namespace lightningsdk\core\View;
 
-use Lightning\Tools\Configuration;
+use lightningsdk\core\Tools\Configuration;
 
 class CSS {
     protected static $included_files = [];

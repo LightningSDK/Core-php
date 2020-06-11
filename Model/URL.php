@@ -1,10 +1,10 @@
 <?php
 
-namespace Lightning\Model;
+namespace lightningsdk\core\Model;
 
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Database;
-use Lightning\Tools\Request;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Database;
+use lightningsdk\core\Tools\Request;
 
 class URL extends BaseObject {
     const TABLE = 'url';

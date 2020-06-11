@@ -1,23 +1,23 @@
 <?php
 /**
  * @file
- * Lightning\Pages\Mailing\Messages
+ * lightningsdk\core\Pages\Mailing\Messages
  */
 
-namespace Lightning\Pages\Mailing;
+namespace lightningsdk\core\Pages\Mailing;
 
-use Lightning\Model\Permissions;
-use Lightning\Pages\Table;
-use Lightning\Tools\ClientUser;
-use Lightning\Tools\Database;
-use Lightning\Tools\Output;
-use Lightning\Tools\Request;
-use Lightning\View\JS;
+use lightningsdk\core\Model\Permissions;
+use lightningsdk\core\Pages\Table;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\Tools\Database;
+use lightningsdk\core\Tools\Output;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\View\JS;
 
 /**
  * A page handler for editing bulk mailer messages.
  *
- * @package Lightning\Pages\Mailing
+ * @package lightningsdk\core\Pages\Mailing
  */
 class Messages extends Table {
 

@@ -1,20 +1,20 @@
 <?php
 
-namespace Lightning\Pages;
+namespace lightningsdk\core\Pages;
 
 use Exception;
-use Lightning\Model\Subscription;
-use Lightning\Tools\ClientUser;
-use Lightning\Tools\Database;
-use Lightning\Tools\Messenger;
-use Lightning\Tools\Navigation;
-use Lightning\Tools\Request;
-use Lightning\Tools\Template;
-use Lightning\View\Page;
+use lightningsdk\core\Model\Subscription;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\Tools\Database;
+use lightningsdk\core\Tools\Messenger;
+use lightningsdk\core\Tools\Navigation;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\Tools\Template;
+use lightningsdk\core\View\Page;
 
 class Profile extends Page {
 
-    protected $page = ['profile', 'Lightning'];
+    protected $page = ['profile', 'lightningsdk/core'];
 
     protected $nav = 'profile';
 

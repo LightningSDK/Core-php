@@ -1,10 +1,10 @@
 <?php
 
-namespace Lightning\Tools;
+namespace lightningsdk\core\Tools;
 
 /**
  * Class CSVWriter
- * @package Lightning\Tools
+ * @package lightningsdk\core\Tools
  *
  * A streaming CSV writer that writes to stdout.
  */

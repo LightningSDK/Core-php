@@ -1,18 +1,18 @@
 <?php
 
-namespace Lightning\CLI;
+namespace lightningsdk\core\CLI;
 
 use DateTime;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Logger;
-use Lightning\Tools\Database as DatabaseTool;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Logger;
+use lightningsdk\core\Tools\Database as DatabaseTool;
 
 // This is required for the signal handler.
 declare(ticks = 1);
 
 /**
  * Class Daemon
- * @package Lightning\CLI
+ * @package lightningsdk\core\CLI
  *
  * To start
  *   lightning daemon start

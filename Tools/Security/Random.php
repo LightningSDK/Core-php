@@ -1,9 +1,9 @@
 <?php
 
-namespace Lightning\Tools\Security;
+namespace lightningsdk\core\Tools\Security;
 
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Singleton;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Singleton;
 
 class RandomOverridable extends Singleton {
 

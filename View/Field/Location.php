@@ -1,9 +1,9 @@
 <?php
 
-namespace Lightning\View\Field;
+namespace lightningsdk\core\View\Field;
 
-use Lightning\Tools\Database;
-use Lightning\View\Field;
+use lightningsdk\core\Tools\Database;
+use lightningsdk\core\View\Field;
 
 class Location {
     /**

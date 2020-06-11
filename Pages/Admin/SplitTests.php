@@ -1,18 +1,18 @@
 <?php
 
-namespace Lightning\Pages\Admin;
+namespace lightningsdk\core\Pages\Admin;
 
-use Lightning\Model\SplitTest;
-use Lightning\Model\Tracker;
-use Lightning\Tools\ChartData;
-use Lightning\Tools\ClientUser;
-use Lightning\Tools\Database;
-use Lightning\Tools\Request;
-use Lightning\Tools\Template;
-use Lightning\View\Chart\Line;
-use Lightning\View\Field\BasicHTML;
-use Lightning\View\Field\Time;
-use Lightning\View\JS;
+use lightningsdk\core\Model\SplitTest;
+use lightningsdk\core\Model\Tracker;
+use lightningsdk\core\Tools\ChartData;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\Tools\Database;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\Tools\Template;
+use lightningsdk\core\View\Chart\Line;
+use lightningsdk\core\View\Field\BasicHTML;
+use lightningsdk\core\View\Field\Time;
+use lightningsdk\core\View\JS;
 
 class SplitTests extends Line {
 

@@ -1,9 +1,9 @@
 <?php
 
-namespace Lightning\Model;
+namespace lightningsdk\core\Model;
 
 use DateTime;
-use Lightning\Tools\Database;
+use lightningsdk\core\Tools\Database;
 
 class CalendarOverridable {
 

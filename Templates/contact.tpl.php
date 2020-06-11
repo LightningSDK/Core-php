@@ -1,9 +1,9 @@
 <?php
 
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Form;
-use Lightning\View\Field;
-use Lightning\Tools\ReCaptcha;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Form;
+use lightningsdk\core\View\Field;
+use lightningsdk\core\Tools\ReCaptcha;
 
 ?>
 <div class="row">

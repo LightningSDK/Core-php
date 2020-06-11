@@ -1,10 +1,10 @@
 <?php
 
-namespace Lightning\View\Chart;
+namespace lightningsdk\core\View\Chart;
 
-use Lightning\Tools\Request;
-use Lightning\View\Field\BasicHTML;
-use Lightning\View\JS;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\View\Field\BasicHTML;
+use lightningsdk\core\View\JS;
 
 class Line extends Base {
     protected $renderer = 'Line';

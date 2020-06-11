@@ -1,11 +1,11 @@
 <?php
 
-namespace Lightning\View\Chart;
+namespace lightningsdk\core\View\Chart;
 
-use Lightning\Tools\Request;
-use Lightning\Tools\Template;
-use Lightning\View\JS;
-use Lightning\View\Page;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\Tools\Template;
+use lightningsdk\core\View\JS;
+use lightningsdk\core\View\Page;
 
 abstract class Base extends Page {
     public $id = 'chart';
@@ -14,7 +14,7 @@ abstract class Base extends Page {
     protected $numberFormat = 'float';
     protected $width = 600;
     protected $height = 450;
-    protected $page = ['chart', 'Lightning'];
+    protected $page = ['chart', 'lightningsdk/core'];
     protected $ajax = false;
 
     public function __construct() {

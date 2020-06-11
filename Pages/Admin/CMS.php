@@ -1,13 +1,13 @@
 <?php
 
-namespace Lightning\Pages\Admin;
+namespace lightningsdk\core\Pages\Admin;
 
-use Lightning\Model\Permissions;
-use Lightning\Tools\ClientUser;
-use Lightning\Tools\Output;
-use Lightning\Tools\Request;
-use Lightning\View\API;
-use Lightning\Model\CMS as CMSModel;
+use lightningsdk\core\Model\Permissions;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\Tools\Output;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\View\API;
+use lightningsdk\core\Model\CMS as CMSModel;
 
 class CMS extends API {
 

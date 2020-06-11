@@ -1,8 +1,8 @@
 <?php
 
-namespace Lightning\Tools\Messages;
+namespace lightningsdk\core\Tools\Messages;
 
-use Lightning\Tools\Configuration;
+use lightningsdk\core\Tools\Configuration;
 
 class SpamFilter {
 

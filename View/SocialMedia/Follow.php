@@ -1,9 +1,9 @@
 <?php
 
-namespace Lightning\View\SocialMedia;
+namespace lightningsdk\core\View\SocialMedia;
 
-use Lightning\Tools\Configuration;
-use Lightning\View\JS;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\View\JS;
 
 class Follow {
     public static function render() {
@@ -18,22 +18,22 @@ class Follow {
                 }
                 switch ($option) {
                     case 'facebook':
-                        $output .= \Lightning\Tools\SocialDrivers\Facebook::renderFollow();;
+                        $output .= \lightningsdk\core\Tools\SocialDrivers\Facebook::renderFollow();;
                         break;
                     case 'google':
-                        $output .= \Lightning\Tools\SocialDrivers\Google::renderFollow();;
+                        $output .= \lightningsdk\core\Tools\SocialDrivers\Google::renderFollow();;
                         break;
                     case 'twitter':
-                        $output .= \Lightning\Tools\SocialDrivers\Twitter::renderFollow();
+                        $output .= \lightningsdk\core\Tools\SocialDrivers\Twitter::renderFollow();
                         break;
                     case 'linkedin':
-                        $output .= \Lightning\Tools\SocialDrivers\LinkedIn::renderFollow();
+                        $output .= \lightningsdk\core\Tools\SocialDrivers\LinkedIn::renderFollow();
                         break;
                     case 'youtube':
-                        $output .= \Lightning\Tools\SocialDrivers\YouTube::renderFollow();
+                        $output .= \lightningsdk\core\Tools\SocialDrivers\YouTube::renderFollow();
                         break;
                     case 'instagram':
-                        $output .= \Lightning\Tools\SocialDrivers\Instagram::renderFollow();
+                        $output .= \lightningsdk\core\Tools\SocialDrivers\Instagram::renderFollow();
                         break;
                 }
             }

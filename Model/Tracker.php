@@ -1,19 +1,19 @@
 <?php
 
-namespace Lightning\Model;
+namespace lightningsdk\core\Model;
 
-use Lightning\Tools\ClientUser;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Database;
-use Lightning\Tools\Request;
-use Lightning\Tools\Security\Encryption;
-use Lightning\Tools\Session\DBSession;
-use Lightning\View\Field\Time;
-use Lightning\View\JS;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Database;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\Tools\Security\Encryption;
+use lightningsdk\core\Tools\Session\DBSession;
+use lightningsdk\core\View\Field\Time;
+use lightningsdk\core\View\JS;
 
 /**
  * Class TrackerOverridable
- * @package Lightning\Model
+ * @package lightningsdk\core\Model
  *
  * @property integer tracker_id
  *   The primary key

@@ -1,6 +1,6 @@
 <?php
 
-namespace Lightning\Tools\SocialDrivers;
+namespace lightningsdk\core\Tools\SocialDrivers;
 
 use Google_Client;
 use Google_Service_Plus;
@@ -8,10 +8,10 @@ use Google_Service_Plus_Activity;
 use Google_Service_Plus_ActivityObject;
 use Google_Service_Plus_ActivityObjectAttachments;
 use Google_Service_PlusDomains;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Form;
-use Lightning\Tools\Session\DBSession;
-use Lightning\View\JS;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Form;
+use lightningsdk\core\Tools\Session\DBSession;
+use lightningsdk\core\View\JS;
 use stdClass;
 
 class Google extends SocialMediaApi {

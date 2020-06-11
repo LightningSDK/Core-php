@@ -1,12 +1,12 @@
 <?php
 
-namespace Lightning\Pages;
+namespace lightningsdk\core\Pages;
 
-use Lightning\Model\Page;
-use Lightning\Model\Blog as BlogModel;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Output;
-use Lightning\View\API;
+use lightningsdk\core\Model\Page;
+use lightningsdk\core\Model\Blog as BlogModel;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Output;
+use lightningsdk\core\View\API;
 
 class Sitemap extends API {
 

@@ -1,12 +1,12 @@
 <?php
 
-namespace Lightning\View;
+namespace lightningsdk\core\View;
 
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Scrub;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Scrub;
 
 class SocialComments {
     public static function render() {
-        return \Lightning\View\Facebook\Comments::render();
+        return \lightningsdk\core\View\Facebook\Comments::render();
     }
 }

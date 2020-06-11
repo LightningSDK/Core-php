@@ -5,12 +5,12 @@
  *
  * Based on https://github.com/ptrofimov/tinyredisclient
  */
-namespace Lightning\Tools\Cache;
+namespace lightningsdk\core\Tools\Cache;
 
 use Exception;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Output;
-use Lightning\Tools\Singleton;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Output;
+use lightningsdk\core\Tools\Singleton;
 
 class Redis extends CacheController {
 

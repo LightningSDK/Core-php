@@ -1,22 +1,22 @@
 <?php
 /**
  * @file
- * Contains Lightning\Tools\API\Server
+ * Contains lightningsdk\core\Tools\API\Server
  */
 
-namespace Lightning\Tools\Communicator;
+namespace lightningsdk\core\Tools\Communicator;
 use Exception;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Logger;
-use Lightning\Tools\Messenger;
-use Lightning\Tools\Output;
-use Lightning\Tools\Request;
-use Lightning\View\API;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Logger;
+use lightningsdk\core\Tools\Messenger;
+use lightningsdk\core\Tools\Output;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\View\API;
 
 /**
  * A light weight API interface.
  *
- * @package Lightning\Tools\API
+ * @package lightningsdk\core\Tools\API
  */
 class Server extends API {
 

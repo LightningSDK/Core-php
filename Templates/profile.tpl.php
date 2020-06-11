@@ -1,7 +1,7 @@
 <?php
-use Lightning\Tools\ClientUser;
-use Lightning\Tools\Form;
-use Lightning\View\Field\Checkbox;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\Tools\Form;
+use lightningsdk\core\View\Field\Checkbox;
 
 ?>
 <form method="post">
@@ -68,7 +68,7 @@ use Lightning\View\Field\Checkbox;
                     <?php
                     $list = DateTimeZone::listIdentifiers();
                     array_unshift($list, '');
-                    echo \Lightning\View\Field\BasicHTML::select('timezone', array_combine($list, $list), $user->timezone); ?>
+                    echo \lightningsdk\core\View\Field\BasicHTML::select('timezone', array_combine($list, $list), $user->timezone); ?>
                 </td>
             </tr>
         </table>

@@ -1,6 +1,6 @@
 <?php
 
-namespace Lightning\View\Facebook;
+namespace lightningsdk\core\View\Facebook;
 
 class Comments {
     /**
@@ -10,6 +10,6 @@ class Comments {
      * @deprecated
      */
     public static function render($url = false) {
-        return SDK::init() . '<div class="fb-comments" data-href="' . \Lightning\Tools\Request::getURL() .'" data-width="100%" data-numposts="5"></div>';
+        return SDK::init() . '<div class="fb-comments" data-href="' . \lightningsdk\core\Tools\Request::getURL() .'" data-width="100%" data-numposts="5"></div>';
     }
 }

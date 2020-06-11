@@ -1,9 +1,9 @@
 <?php
 
-namespace Lightning\Model;
+namespace lightningsdk\core\Model;
 
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Database;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Database;
 
 class PageOverridable extends BaseObject {
 

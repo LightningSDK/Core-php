@@ -1,8 +1,8 @@
 <?php
 
-namespace Lightning\CLI;
+namespace lightningsdk\core\CLI;
 
-use Lightning\Tools\Security\Encryption;
+use lightningsdk\core\Tools\Security\Encryption;
 
 class Security extends CLI {
     public function executeGenerateKeyPair() {

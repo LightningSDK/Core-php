@@ -1,19 +1,19 @@
 <?php
 /**
  * @file
- * Contains Lightning\Tools\Template
+ * Contains lightningsdk\core\Tools\Template
  */
 
-namespace Lightning\Tools;
+namespace lightningsdk\core\Tools;
 
-use Lightning\View\CSS;
-use Lightning\View\JS;
+use lightningsdk\core\View\CSS;
+use lightningsdk\core\View\JS;
 use stdClass;
 
 /**
  * The HTML template controller.
  *
- * @package Lightning\Tools
+ * @package lightningsdk\core\Tools
  */
 class Template extends Singleton {
 

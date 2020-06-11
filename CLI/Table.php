@@ -1,6 +1,6 @@
 <?php
 
-namespace Lightning\CLI;
+namespace lightningsdk\core\CLI;
 
 use Exception;
 

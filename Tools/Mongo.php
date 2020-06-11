@@ -1,6 +1,6 @@
 <?php
 
-namespace Lightning\Tools;
+namespace lightningsdk\core\Tools;
 
 use MongoDB\Driver\BulkWrite;
 use MongoDB\Driver\Manager;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Lightning\Tools\Cache;
+namespace lightningsdk\core\Tools\Cache;
 
 abstract class CacheController implements CacheControllerInterface {
 

@@ -1,11 +1,11 @@
 <?php
 
-namespace Lightning\Tools;
+namespace lightningsdk\core\Tools;
 
 use Exception;
-use Lightning\Tools\Session\BrowserSession;
-use Lightning\View\Field;
-use Lightning\View\Field\BasicHTML;
+use lightningsdk\core\Tools\Session\BrowserSession;
+use lightningsdk\core\View\Field;
+use lightningsdk\core\View\Field\BasicHTML;
 
 class Form {
     protected $id = 'form';

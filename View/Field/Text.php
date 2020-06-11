@@ -1,9 +1,9 @@
 <?php
 
-namespace Lightning\View\Field;
+namespace lightningsdk\core\View\Field;
 
-use Lightning\View\Field;
-use Lightning\View\HTML;
+use lightningsdk\core\View\Field;
+use lightningsdk\core\View\HTML;
 
 class Text extends Field {
     /**

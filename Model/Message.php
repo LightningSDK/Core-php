@@ -1,21 +1,21 @@
 <?php
 /**
  * @file
- * Contains Lightning\Model\Message
+ * Contains lightningsdk\core\Model\Message
  */
 
-namespace Lightning\Model;
+namespace lightningsdk\core\Model;
 
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Database;
-use Lightning\Tools\Language;
-use Lightning\View\Field\Time;
-use Lightning\View\HTMLEditor\Markup;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Database;
+use lightningsdk\core\Tools\Language;
+use lightningsdk\core\View\Field\Time;
+use lightningsdk\core\View\HTMLEditor\Markup;
 
 /**
  * A model of the mailing system message.
  *
- * @package Lightning\Model
+ * @package lightningsdk\core\Model
  */
 class MessageOverridable extends BaseObject {
 

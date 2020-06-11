@@ -1,9 +1,9 @@
 <?php
 
-namespace Lightning\View\Field;
+namespace lightningsdk\core\View\Field;
 
-use Lightning\Tools\Scrub;
-use Lightning\View\HTML;
+use lightningsdk\core\Tools\Scrub;
+use lightningsdk\core\View\HTML;
 
 class BasicHTML {
 

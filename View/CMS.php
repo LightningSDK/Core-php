@@ -1,16 +1,16 @@
 <?php
 
-namespace Lightning\View;
+namespace lightningsdk\core\View;
 
-use Lightning\Tools\ClientUser;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\IO\FileManager;
-use Lightning\Tools\Scrub;
-use Lightning\Model\CMS as CMSModel;
-use Lightning\Tools\Session\BrowserSession;
-use Lightning\View\HTMLEditor\HTMLEditor;
-use Lightning\View\HTMLEditor\Markup;
-use Lightning\Tools\Form as FormTool;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\IO\FileManager;
+use lightningsdk\core\Tools\Scrub;
+use lightningsdk\core\Model\CMS as CMSModel;
+use lightningsdk\core\Tools\Session\BrowserSession;
+use lightningsdk\core\View\HTMLEditor\HTMLEditor;
+use lightningsdk\core\View\HTMLEditor\Markup;
+use lightningsdk\core\Tools\Form as FormTool;
 
 class CMS {
 
@@ -129,7 +129,7 @@ class CMS {
             // TODO: This will need extra slashes if using the File handler.
             JS::set('cms.basepath', $settings['location']);
             if (empty($settings['file_handler'])) {
-                $settings['file_handler'] = 'Lightning\Tools\IO\File';
+                $settings['file_handler'] = 'lightningsdk\core\Tools\IO\File';
             }
             $fh = FileManager::getFileHandler($settings['file_handler'], $settings['location']);
             JS::set('cms.baseUrl', $fh->getWebURL(''));

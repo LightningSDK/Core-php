@@ -1,13 +1,13 @@
 <?php
 
-namespace Lightning\Pages;
+namespace lightningsdk\core\Pages;
 
-use Lightning\Tools\Request;
-use Lightning\Tools\Template;
-use Lightning\View\JS;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\Tools\Template;
+use lightningsdk\core\View\JS;
 
 abstract class JSONEditor extends Page {
-    public $page = ['json_editor', 'Lightning'];
+    public $page = ['json_editor', 'lightningsdk/core'];
 
     public function get() {
         Template::getInstance()->set('jsoneditor', $this);

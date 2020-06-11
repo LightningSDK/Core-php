@@ -1,8 +1,8 @@
 <?php
 
-namespace Lightning\Database;
+namespace lightningsdk\core\Database;
 
-use Lightning\Tools\Database;
+use lightningsdk\core\Tools\Database;
 
 abstract class Schema implements SchemaInterface {
 

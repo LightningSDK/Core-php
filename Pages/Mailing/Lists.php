@@ -1,20 +1,20 @@
 <?php
 /**
  * @file
- * Lightning\Pages\Mailing\MessageLists
+ * lightningsdk\core\Pages\Mailing\MessageLists
  */
 
-namespace Lightning\Pages\Mailing;
+namespace lightningsdk\core\Pages\Mailing;
 
-use Lightning\Pages\Table;
-use Lightning\Tools\ClientUser;
-use Lightning\Tools\Database;
-use Lightning\Tools\Output;
+use lightningsdk\core\Pages\Table;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\Tools\Database;
+use lightningsdk\core\Tools\Output;
 
 /**
  * A page handler for editing bulk mailer messages.
  *
- * @package Lightning\Pages\Mailing
+ * @package lightningsdk\core\Pages\Mailing
  */
 class Lists extends Table {
 

@@ -2,14 +2,14 @@
 
 $conf = [
     'template' => [
-        'default' => ['template', 'Lightning'],
+        'default' => ['template', 'lightningsdk/core'],
     ],
     'routes' => [
         'cli_only' => [
-            'database' => \Lightning\CLI\Database::class,
-            'user' => \Lightning\CLI\User::class,
-            'security' => \Lightning\CLI\Security::class,
-            'gulp' => \Lightning\CLI\Gulp::class,
+            'database' => \lightningsdk\core\CLI\Database::class,
+            'user' => \lightningsdk\core\CLI\User::class,
+            'security' => \lightningsdk\core\CLI\Security::class,
+            'gulp' => \lightningsdk\core\CLI\Gulp::class,
         ],
     ],
     'session' => [
@@ -37,21 +37,21 @@ $conf = [
     ],
     'markup' => [
         'renderers' => [
-            'form' => \Lightning\View\Form::class,
-            'template' => \Lightning\Tools\Template::class,
-            'youtube' => \Lightning\View\Video\YouTube::class,
-            'input' => \Lightning\View\Field::class,
-            'blog' => \Lightning\Pages\Blog::class,
-            'script' => \Lightning\View\Script::class,
-            'iframe' => \Lightning\View\Iframe::class,
-            'social-links' => \Lightning\View\SocialMedia\Links::class,
-            'social-follow' => \Lightning\View\SocialMedia\Follow::class,
-            'cms' => \Lightning\View\CMS::class,
+            'form' => \lightningsdk\core\View\Form::class,
+            'template' => \lightningsdk\core\Tools\Template::class,
+            'youtube' => \lightningsdk\core\View\Video\YouTube::class,
+            'input' => \lightningsdk\core\View\Field::class,
+            'blog' => \lightningsdk\core\Pages\Blog::class,
+            'script' => \lightningsdk\core\View\Script::class,
+            'iframe' => \lightningsdk\core\View\Iframe::class,
+            'social-links' => \lightningsdk\core\View\SocialMedia\Links::class,
+            'social-follow' => \lightningsdk\core\View\SocialMedia\Follow::class,
+            'cms' => \lightningsdk\core\View\CMS::class,
         ],
     ],
     'sitemap' => [
-        'pages' => \Lightning\Model\Page::class,
-        'blog' => \Lightning\Model\Blog::class,
+        'pages' => \lightningsdk\core\Model\Page::class,
+        'blog' => \lightningsdk\core\Model\Blog::class,
     ],
     'language' => 'en_us',
     'template_dir' => 'Source/Templates',

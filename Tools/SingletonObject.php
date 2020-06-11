@@ -1,8 +1,8 @@
 <?php
 
-namespace Lightning\Tools;
+namespace lightningsdk\core\Tools;
 
-use Lightning\Model\ObjectDatabaseStorage;
+use lightningsdk\core\Model\ObjectDatabaseStorage;
 
 class SingletonObject extends Singleton {
     use ObjectDatabaseStorage;

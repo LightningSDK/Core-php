@@ -1,16 +1,16 @@
 <?php
 /**
  * @file
- * Contains Lightning\Tools\Scrub
+ * Contains lightningsdk\core\Tools\Scrub
  */
 
-namespace Lightning\Tools;
+namespace lightningsdk\core\Tools;
 use tidy;
 
 /**
  * A helper for data sanitization.
  *
- * @package Lightning\Tools
+ * @package lightningsdk\core\Tools
  */
 class Scrub {
 

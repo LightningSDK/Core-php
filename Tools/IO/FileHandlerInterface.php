@@ -1,6 +1,6 @@
 <?php
 
-namespace Lightning\Tools\IO;
+namespace lightningsdk\core\Tools\IO;
 
 interface FileHandlerInterface {
     /**

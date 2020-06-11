@@ -1,28 +1,28 @@
 <?php
 /**
  * @file
- * Contains Lightning\Pages\Blog
+ * Contains lightningsdk\core\Pages\Blog
  */
 
-namespace Lightning\Pages;
+namespace lightningsdk\core\Pages;
 
-use Lightning\Model\Blog as BlogModel;
-use Lightning\Model\URL;
-use Lightning\Tools\Output;
-use Lightning\Tools\Request;
-use Lightning\Tools\Template;
-use Lightning\View\Page;
-use Lightning\Model\BlogPost;
+use lightningsdk\core\Model\Blog as BlogModel;
+use lightningsdk\core\Model\URL;
+use lightningsdk\core\Tools\Output;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\Tools\Template;
+use lightningsdk\core\View\Page;
+use lightningsdk\core\Model\BlogPost;
 
 /**
  * A page handler for viewing and editing the blog.
  *
- * @package Lightning\Pages
+ * @package lightningsdk\core\Pages
  */
 class Blog extends Page {
 
     protected $nav = 'blog';
-    protected $page = ['blog', 'Lightning'];
+    protected $page = ['blog', 'lightningsdk/core'];
     protected $share = false;
 
     protected function hasAccess() {
@@ -108,7 +108,7 @@ class Blog extends Page {
         $template = new Template();
         $blog = BlogPost::loadByID($options['id']);
         $template->set('blog', $blog);
-        return $template->render(['blog-preview', 'Lightning'], true);
+        return $template->render(['blog-preview', 'lightningsdk/core'], true);
     }
 
     /**

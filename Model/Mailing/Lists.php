@@ -1,8 +1,8 @@
 <?php
 
-namespace Lightning\Model\Mailing;
+namespace lightningsdk\core\Model\Mailing;
 
-use Lightning\Model\BaseObject;
+use lightningsdk\core\Model\BaseObject;
 
 class ListsOverridable extends BaseObject {
     const TABLE = 'message_list';

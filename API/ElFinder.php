@@ -1,11 +1,11 @@
 <?php
 
-namespace Lightning\API;
+namespace lightningsdk\core\API;
 
-use Lightning\Tools\ClientUser;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Output;
-use Lightning\View\API;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Output;
+use lightningsdk\core\View\API;
 
 class ElFinder extends API {
 	public function execute() {

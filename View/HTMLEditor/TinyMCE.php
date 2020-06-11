@@ -1,10 +1,10 @@
 <?php
 
-namespace Lightning\View\HTMLEditor;
+namespace lightningsdk\core\View\HTMLEditor;
 
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Scrub;
-use Lightning\View\JS;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Scrub;
+use lightningsdk\core\View\JS;
 
 class TinyMCE {
     const TYPE_BASIC = 1;

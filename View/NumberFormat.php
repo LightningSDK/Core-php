@@ -1,6 +1,6 @@
 <?php
 
-namespace Lightning\View;
+namespace lightningsdk\core\View;
 
 class NumberFormat {
 

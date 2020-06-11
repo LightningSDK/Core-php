@@ -1,15 +1,15 @@
 <?php
 
-namespace Lightning\View;
+namespace lightningsdk\core\View;
 
 use Exception;
-use Lightning\Tools\Output;
-use Lightning\Tools\Request;
+use lightningsdk\core\Tools\Output;
+use lightningsdk\core\Tools\Request;
 
 /**
  * The basic html page handler.
  *
- * @package Lightning\View
+ * @package lightningsdk\core\View
  */
 class APIOverridable extends Page {
 

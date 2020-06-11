@@ -1,21 +1,21 @@
 <?php
 /**
  * @file
- * Contains Lightning\Tools\API\Client
+ * Contains lightningsdk\core\Tools\API\Client
  */
 
-namespace Lightning\Tools\Communicator;
+namespace lightningsdk\core\Tools\Communicator;
 use Exception;
-use Lightning\Tools\Data;
-use Lightning\Tools\Messenger;
-use Lightning\Tools\Navigation;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Output;
+use lightningsdk\core\Tools\Data;
+use lightningsdk\core\Tools\Messenger;
+use lightningsdk\core\Tools\Navigation;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Output;
 
 /**
  * Makes a fast call to an API server using curl
  *
- * @package Lightning\Tools\API
+ * @package lightningsdk\core\Tools\API
  */
 class RestClient {
 

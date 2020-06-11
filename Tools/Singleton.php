@@ -1,8 +1,8 @@
 <?php
 
-namespace Lightning\Tools;
+namespace lightningsdk\core\Tools;
 
-use Lightning\Model\ObjectDataStorage;
+use lightningsdk\core\Model\ObjectDataStorage;
 
 /**
  * Class Singleton

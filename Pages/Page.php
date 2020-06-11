@@ -3,23 +3,23 @@
  * Contains the content HTML page controller.
  */
 
-namespace Lightning\Pages;
+namespace lightningsdk\core\Pages;
 
 use DOMDocument;
-use Lightning\Model\URL;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Output;
-use Lightning\Tools\Request;
-use Lightning\Tools\Scrub;
-use Lightning\Tools\Template;
-use Lightning\Tools\ClientUser;
-use Lightning\View\CSS;
-use Lightning\View\HTML;
-use Lightning\View\HTMLEditor\Markup;
-use Lightning\View\JS;
-use Lightning\View\Page as PageView;
-use Lightning\Model\Page as PageModel;
-use Lightning\View\Text;
+use lightningsdk\core\Model\URL;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Output;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\Tools\Scrub;
+use lightningsdk\core\Tools\Template;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\View\CSS;
+use lightningsdk\core\View\HTML;
+use lightningsdk\core\View\HTMLEditor\Markup;
+use lightningsdk\core\View\JS;
+use lightningsdk\core\View\Page as PageView;
+use lightningsdk\core\Model\Page as PageModel;
+use lightningsdk\core\View\Text;
 
 class Page extends PageView {
 
@@ -103,7 +103,7 @@ class Page extends PageView {
         }
 
         // Set the page template.
-        $template->set('content', ['page', 'Lightning']);
+        $template->set('content', ['page', 'lightningsdk/core']);
 
         // PREPARE FORM DATA CONTENTS
         foreach (['title', 'keywords'] as $field) {

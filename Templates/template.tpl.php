@@ -1,7 +1,7 @@
 <!doctype html>
 <?php
-use Lightning\Tools\ClientUser;
-use Lightning\Tools\Messenger;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\Tools\Messenger;
 ?>
 <!--[if IE 9]><html class="lt-ie10" lang="en" > <![endif]-->
 <html class="no-js" lang="en" dir="ltr">
@@ -9,7 +9,7 @@ use Lightning\Tools\Messenger;
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <?= $this->build(['metadata', 'Lightning']); ?>
+    <?= $this->build(['metadata', 'lightningsdk/core']); ?>
     <?= $this->renderHeader(); ?>
 </head>
 <body class="antialiased hide-extras">
@@ -102,7 +102,7 @@ use Lightning\Tools\Messenger;
                             endif; ?>
                         </div>
                         <div class="small-12 medium-4 columns right-column">
-                            <?php $this->build(['right_column', 'Lightning']); ?>
+                            <?php $this->build(['right_column', 'lightningsdk/core']); ?>
                         </div>
                     <?php else: ?>
                         <div class="large-12 columns">

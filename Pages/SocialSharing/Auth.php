@@ -1,22 +1,22 @@
 <?php
 
-namespace Lightning\Pages\SocialSharing;
+namespace lightningsdk\core\Pages\SocialSharing;
 
-use Lightning\Model\Permissions;
-use Lightning\Model\SocialAuth;
-use Lightning\Tools\ClientUser;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\SocialDrivers\Facebook;
-use Lightning\Tools\SocialDrivers\Google;
-use Lightning\Tools\SocialDrivers\SocialMediaApi;
-use Lightning\Tools\SocialDrivers\Twitter;
-use Lightning\Tools\Template;
-use Lightning\View\JS;
-use Lightning\View\Page;
+use lightningsdk\core\Model\Permissions;
+use lightningsdk\core\Model\SocialAuth;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\SocialDrivers\Facebook;
+use lightningsdk\core\Tools\SocialDrivers\Google;
+use lightningsdk\core\Tools\SocialDrivers\SocialMediaApi;
+use lightningsdk\core\Tools\SocialDrivers\Twitter;
+use lightningsdk\core\Tools\Template;
+use lightningsdk\core\View\JS;
+use lightningsdk\core\View\Page;
 
 class Auth extends Page {
 
-    protected $page = ['admin/social/auth', 'Lightning'];
+    protected $page = ['admin/social/auth', 'lightningsdk/core'];
 
     public function __construct() {
         parent::__construct();

@@ -1,12 +1,12 @@
 <?php
 
-namespace Lightning\Tools\Cache;
+namespace lightningsdk\core\Tools\Cache;
 
-use Lightning\Tools\Configuration;
+use lightningsdk\core\Tools\Configuration;
 
 /**
  * Class Cache
- * @package Lightning\Tools\Cache
+ * @package lightningsdk\core\Tools\Cache
  *
  * This is a main class controller that will load more specific caches depending on the
  * cache requirements such as TTL and data size.

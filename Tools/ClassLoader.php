@@ -1,6 +1,6 @@
 <?php
 
-namespace Lightning\Tools;
+namespace lightningsdk\core\Tools;
 
 use Exception;
 
@@ -9,8 +9,8 @@ class ClassLoader {
     protected static $classes;
     protected static $classesRev;
     protected static $classLoader = [
-        'Lightning\\Tools\\Configuration' => 'Lightning\\Tools\\Configuration',
-        'Lightning\\Tools\\Data' => 'Lightning\\Tools\\Data',
+        'lightningsdk\\core\\Tools\\Configuration' => 'lightningsdk\\core\\Tools\\Configuration',
+        'lightningsdk\\core\\Tools\\Data' => 'lightningsdk\\core\\Tools\\Data',
     ];
 
     /**

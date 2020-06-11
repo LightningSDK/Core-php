@@ -1,6 +1,6 @@
 <?php
 
-namespace Lightning\Database;
+namespace lightningsdk\core\Database;
 
 interface SchemaInterface {
     public function getColumns();

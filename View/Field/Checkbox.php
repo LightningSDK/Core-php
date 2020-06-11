@@ -1,8 +1,8 @@
 <?php
 
-namespace Lightning\View\Field;
+namespace lightningsdk\core\View\Field;
 
-use Lightning\View\HTML;
+use lightningsdk\core\View\HTML;
 
 class Checkbox {
     public static function render($name, $value = '', $checked = false, $attributes = []) {

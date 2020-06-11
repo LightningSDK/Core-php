@@ -1,12 +1,12 @@
 <?php
 
-namespace Lightning\View\Field;
+namespace lightningsdk\core\View\Field;
 
 use DateTime;
 use DateTimeZone;
-use Lightning\Tools\ClientUser;
-use Lightning\Tools\Request;
-use Lightning\View\Field;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\View\Field;
 
 class Time extends Field {
 

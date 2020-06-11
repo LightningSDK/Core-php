@@ -1,13 +1,13 @@
 <?php
 
-namespace Lightning\Pages;
+namespace lightningsdk\core\Pages;
 
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Form;
-use Lightning\Tools\Request;
-use Lightning\View\CSS;
-use Lightning\View\JS;
-use Lightning\View\Page;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Form;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\View\CSS;
+use lightningsdk\core\View\JS;
+use lightningsdk\core\View\Page;
 
 class Splash extends Page {
 

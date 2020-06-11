@@ -1,9 +1,9 @@
 <?php
 
-namespace Lightning\View\Field;
+namespace lightningsdk\core\View\Field;
 
-use Lightning\Tools\Configuration;
-use Lightning\View\JS;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\View\JS;
 
 class FileBrowser {
     public static function render($id, $options = []) {

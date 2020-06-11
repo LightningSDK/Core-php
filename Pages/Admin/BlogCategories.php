@@ -1,10 +1,10 @@
 <?php
 
-namespace Lightning\Pages;
+namespace lightningsdk\core\Pages;
 
-use Lightning\Tools\Request;
-use Lightning\Tools\Template;
-use Lightning\Tools\ClientUser;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\Tools\Template;
+use lightningsdk\core\Tools\ClientUser;
 
 class BlogCategories extends Table {
 

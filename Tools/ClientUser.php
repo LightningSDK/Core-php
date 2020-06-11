@@ -1,20 +1,20 @@
 <?php
 /**
  * @file
- * Lightning\Tools\ClientUser
+ * lightningsdk\core\Tools\ClientUser
  */
 
-namespace Lightning\Tools;
+namespace lightningsdk\core\Tools;
 
 use Exception;
-use Lightning\Model\User;
-use Lightning\Tools\Session\BrowserSession;
-use Lightning\Tools\Session\DBSession;
+use lightningsdk\core\Model\User;
+use lightningsdk\core\Tools\Session\BrowserSession;
+use lightningsdk\core\Tools\Session\DBSession;
 
 /**
  * A singleton for the global user.
  *
- * @package Lightning\Tools.
+ * @package lightningsdk\core\Tools.
  */
 class ClientUserOverridable extends Singleton {
 

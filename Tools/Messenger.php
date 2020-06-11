@@ -1,12 +1,12 @@
 <?php
 
-namespace Lightning\Tools;
-use Lightning\Tools\Session\DBSession;
+namespace lightningsdk\core\Tools;
+use lightningsdk\core\Tools\Session\DBSession;
 use stdClass;
 
 /**
  * Class Messenger
- * @package Lightning\Tools
+ * @package lightningsdk\core\Tools
  *
  * A static class for handling errors and messages.
  */

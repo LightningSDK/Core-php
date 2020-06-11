@@ -1,9 +1,9 @@
 <?php
 
-namespace Lightning\Pages\Admin;
+namespace lightningsdk\core\Pages\Admin;
 
-use Lightning\Tools\ClientUser;
-use Lightning\Pages\Table;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\Pages\Table;
 
 class Roles extends Table {
 

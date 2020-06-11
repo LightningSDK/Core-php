@@ -1,23 +1,23 @@
 <?php
 
-namespace Lightning\Pages\SocialSharing;
+namespace lightningsdk\core\Pages\SocialSharing;
 
-use Lightning\Model\Permissions;
-use Lightning\Tools\ClientUser;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Database;
-use Lightning\Tools\SocialDrivers\Facebook;
-use Lightning\Tools\SocialDrivers\SocialMediaApi;
-use Lightning\Tools\Template;
-use Lightning\View\JS;
-use Lightning\View\Page;
-use Lightning\Model\BlogPost;
-use Lightning\Tools\Request;
-use Lightning\Model\SocialAuth;
+use lightningsdk\core\Model\Permissions;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Database;
+use lightningsdk\core\Tools\SocialDrivers\Facebook;
+use lightningsdk\core\Tools\SocialDrivers\SocialMediaApi;
+use lightningsdk\core\Tools\Template;
+use lightningsdk\core\View\JS;
+use lightningsdk\core\View\Page;
+use lightningsdk\core\Model\BlogPost;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\Model\SocialAuth;
 
 class Share extends Page {
 
-    protected $page = ['admin/social/share', 'Lightning'];
+    protected $page = ['admin/social/share', 'lightningsdk/core'];
 
     protected $type;
     protected $id;

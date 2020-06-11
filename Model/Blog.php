@@ -1,11 +1,11 @@
 <?php
 
-namespace Lightning\Model;
+namespace lightningsdk\core\Model;
 
-use Lightning\View\Pagination;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Database;
-use Lightning\Tools\Singleton;
+use lightningsdk\core\View\Pagination;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Database;
+use lightningsdk\core\Tools\Singleton;
 
 class BlogOverridable extends Singleton {
 

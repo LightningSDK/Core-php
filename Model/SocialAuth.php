@@ -1,10 +1,10 @@
 <?php
 
-namespace Lightning\Model;
+namespace lightningsdk\core\Model;
 
-use Lightning\Model\BaseObject;
-use Lightning\Tools\Database;
-use Lightning\Tools\ClientUser;
+use lightningsdk\core\Model\BaseObject;
+use lightningsdk\core\Tools\Database;
+use lightningsdk\core\Tools\ClientUser;
 
 class SocialAuthOverridable extends BaseObject {
     const TABLE = 'social_auth';

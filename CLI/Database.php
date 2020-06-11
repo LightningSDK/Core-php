@@ -1,15 +1,15 @@
 <?php
 /**
  * @file
- * Contains Lightning\CLI\Database
+ * Contains lightningsdk\core\CLI\Database
  */
 
-namespace Lightning\CLI;
+namespace lightningsdk\core\CLI;
 
 /**
  * CLI controller for database functions.
  *
- * @package Lightning\CLI
+ * @package lightningsdk\core\CLI
  */
 class Database extends CLI {
     /**
@@ -44,7 +44,7 @@ class Database extends CLI {
     public function getList($type) {
         $list = [];
         $directories = [
-            'Lightning\\Database\\' . $type . '\\' => HOME_PATH . '/Lightning/Database/' . $type,
+            'lightningsdk\\core\\Database\\' . $type . '\\' => HOME_PATH . '/Lightning/Database/' . $type,
             'Source\\Database\\' . $type . '\\' => HOME_PATH . '/Source/Database/' . $type,
         ];
         foreach ($directories as $path => $dir) {

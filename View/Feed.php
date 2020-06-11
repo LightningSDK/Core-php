@@ -1,9 +1,9 @@
 <?php
 
-namespace Lightning\View;
+namespace lightningsdk\core\View;
 
-use Lightning\Tools\CSVWriter;
-use Lightning\Tools\Request;
+use lightningsdk\core\Tools\CSVWriter;
+use lightningsdk\core\Tools\Request;
 
 abstract class Feed extends Page {
 

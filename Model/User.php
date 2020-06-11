@@ -1,24 +1,24 @@
 <?php
 
-namespace Lightning\Model;
+namespace lightningsdk\core\Model;
 
 use Exception;
-use Lightning\Tools\ClientUser;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Database;
-use Lightning\Tools\Logger;
-use Lightning\Tools\Mailer;
-use Lightning\Tools\Navigation;
-use Lightning\Tools\Security\Encryption;
-use Lightning\Tools\Security\Random;
-use Lightning\Tools\Request;
-use Lightning\Tools\Scrub;
-use Lightning\Tools\Session\DBSession;
-use Lightning\Tools\SocialDrivers\SocialMediaApi;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Database;
+use lightningsdk\core\Tools\Logger;
+use lightningsdk\core\Tools\Mailer;
+use lightningsdk\core\Tools\Navigation;
+use lightningsdk\core\Tools\Security\Encryption;
+use lightningsdk\core\Tools\Security\Random;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\Tools\Scrub;
+use lightningsdk\core\Tools\Session\DBSession;
+use lightningsdk\core\Tools\SocialDrivers\SocialMediaApi;
 
 /**
  * Class User
- * @package Overridable\Lightning\Model
+ * @package Overridable\lightningsdk\core\Model
  *
  * @property integer $id
  * @property string $email

@@ -4,15 +4,15 @@
  * Includes a class for managing JS files.
  */
 
-namespace Lightning\View;
+namespace lightningsdk\core\View;
 
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Data;
-use Lightning\Tools\Form as FormTool;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Data;
+use lightningsdk\core\Tools\Form as FormTool;
 
 /**
  * Class JS
- * @package Lightning\View
+ * @package lightningsdk\core\View
  */
 class JS {
     /**

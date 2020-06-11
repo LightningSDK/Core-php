@@ -1,8 +1,8 @@
-<?=\Lightning\Tools\SocialDrivers\Google::loginButton(true);?>
+<?=\lightningsdk\core\Tools\SocialDrivers\Google::loginButton(true);?>
 <br>
-<?=\Lightning\Tools\SocialDrivers\Facebook::loginButton(true);?>
+<?=\lightningsdk\core\Tools\SocialDrivers\Facebook::loginButton(true);?>
 <br>
-<?=\Lightning\Tools\SocialDrivers\Twitter::loginButton(true);?>
+<?=\lightningsdk\core\Tools\SocialDrivers\Twitter::loginButton(true);?>
 
     <table>
         <thead>

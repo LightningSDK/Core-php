@@ -1,9 +1,9 @@
 <?php
 
-namespace Lightning\Tools;
+namespace lightningsdk\core\Tools;
 
-use Lightning\Tools\Security\Encryption;
-use Lightning\Model\Tracker as TrackerModel;
+use lightningsdk\core\Tools\Security\Encryption;
+use lightningsdk\core\Model\Tracker as TrackerModel;
 
 class Navigation {
     /**

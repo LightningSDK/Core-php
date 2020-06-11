@@ -1,9 +1,9 @@
 <?php
 
-namespace Lightning\Pages\Admin;
+namespace lightningsdk\core\Pages\Admin;
 
-use Lightning\Pages\Table;
-use Lightning\Tools\ClientUser;
+use lightningsdk\core\Pages\Table;
+use lightningsdk\core\Tools\ClientUser;
 
 class Contact extends Table {
 

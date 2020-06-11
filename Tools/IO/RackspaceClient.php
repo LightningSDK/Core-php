@@ -1,11 +1,11 @@
 <?php
 
-namespace Lightning\Tools\IO;
+namespace lightningsdk\core\Tools\IO;
 
 include HOME_PATH . '/Source/Vendor/rackspace_client/vendor/autoload.php';
 
 use \Exception;
-use Lightning\Tools\Configuration;
+use lightningsdk\core\Tools\Configuration;
 use OpenCloud\Rackspace;
 
 class RackspaceClient implements FileHandlerInterface {

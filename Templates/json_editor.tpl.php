@@ -1,5 +1,5 @@
 <form method="post">
-    <?= \Lightning\Tools\Form::renderTokenInput(); ?>
-    <?= \Lightning\View\JSONEditor::render('jsoneditor', $jsoneditor->getSettings(), $jsoneditor->getJSONData()); ?>
+    <?= \lightningsdk\core\Tools\Form::renderTokenInput(); ?>
+    <?= \lightningsdk\core\View\JSONEditor::render('jsoneditor', $jsoneditor->getSettings(), $jsoneditor->getJSONData()); ?>
     <input class="button" type="submit" name="submit" value="Save" />
 </form>

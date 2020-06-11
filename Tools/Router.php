@@ -1,10 +1,10 @@
 <?php
 
-namespace Lightning\Tools;
+namespace lightningsdk\core\Tools;
 
 /**
  * Class Router
- * @package Lightning\Tools
+ * @package lightningsdk\core\Tools
  *
  * A helper to determine which handler to use for a requested URL.
  */

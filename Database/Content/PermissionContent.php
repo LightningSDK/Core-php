@@ -1,8 +1,8 @@
 <?php
 
-namespace Lightning\Database\Content;
+namespace lightningsdk\core\Database\Content;
 
-use Lightning\Database\Content;
+use lightningsdk\core\Database\Content;
 
 class PermissionContent extends Content {
 

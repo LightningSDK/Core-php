@@ -1,8 +1,8 @@
 <?php
 
-namespace Lightning\View;
+namespace lightningsdk\core\View;
 
-use Lightning\Tools\Scrub;
+use lightningsdk\core\Tools\Scrub;
 
 class HTML {
     public static function implodeAttributes($attributes) {

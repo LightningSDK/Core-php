@@ -1,17 +1,17 @@
 <?php
 /**
  * @file
- * Contains Lightning\Tools\Recaptcha
+ * Contains lightningsdk\core\Tools\Recaptcha
  */
 
-namespace Lightning\Tools;
-use Lightning\Tools\Communicator\RestClient;
-use Lightning\View\JS;
+namespace lightningsdk\core\Tools;
+use lightningsdk\core\Tools\Communicator\RestClient;
+use lightningsdk\core\View\JS;
 
 /**
  * A class for rendering the Recaptcha verification elements.
  *
- * @package Lightning\Tools
+ * @package lightningsdk\core\Tools
  */
 class ReCaptcha {
 

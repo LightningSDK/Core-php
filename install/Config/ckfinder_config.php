@@ -37,7 +37,7 @@ function CheckAuthentication()
     // user logs in your system. To be able to use session variables don't
     // forget to add session_start() at the top of this file.
 
-    return \Lightning\Tools\ClientUser::getInstance()->isAdmin();
+    return \lightningsdk\core\Tools\ClientUser::getInstance()->isAdmin();
 }
 
 // LicenseKey : Paste your license key here. If left blank, CKFinder will be
@@ -67,7 +67,7 @@ Examples:
 
 ATTENTION: The trailing slash is required.
 */
-$baseUrl = \Lightning\Tools\Configuration::get('ckfinder.content');
+$baseUrl = \lightningsdk\core\Tools\Configuration::get('ckfinder.content');
 
 /*
 $baseDir : the path to the local directory (in the server) which points to the

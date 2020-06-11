@@ -1,6 +1,6 @@
 <?php
 
-namespace Lightning\Tools\Security;
+namespace lightningsdk\core\Tools\Security;
 
 class EncryptionOverridable {
     const PKCS1 = 1;

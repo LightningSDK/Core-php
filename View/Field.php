@@ -1,10 +1,10 @@
 <?php
 
-namespace Lightning\View;
+namespace lightningsdk\core\View;
 
-use Lightning\Tools\ReCaptcha;
-use Lightning\Tools\Request;
-use Lightning\Tools\Scrub;
+use lightningsdk\core\Tools\ReCaptcha;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\Tools\Scrub;
 
 class Field {
     public function render ($field) {

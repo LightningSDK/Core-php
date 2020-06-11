@@ -1,6 +1,6 @@
 <?php
 
-namespace Lightning\Model;
+namespace lightningsdk\core\Model;
 
 class Contact extends BaseObject {
     const TABLE = 'user_contact';

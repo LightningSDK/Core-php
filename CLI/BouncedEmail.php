@@ -1,10 +1,10 @@
 <?php
 
-namespace Lightning\CLI;
+namespace lightningsdk\core\CLI;
 
-use Lightning\Model\User as UserModel;
-use Lightning\Tools\Database;
-use Lightning\Model\Tracker;
+use lightningsdk\core\Model\User as UserModel;
+use lightningsdk\core\Tools\Database;
+use lightningsdk\core\Model\Tracker;
 
 class BouncedEmail extends CLI {
     public function execute() {

@@ -1,17 +1,17 @@
 <?php
 
-namespace Lightning\Tools\SocialDrivers;
+namespace lightningsdk\core\Tools\SocialDrivers;
 
 use CURLFile;
 use Facebook\Entities\SignedRequest;
 use Facebook\FacebookRequest;
 use Facebook\FacebookSession;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Form;
-use Lightning\Tools\Scrub;
-use Lightning\Tools\Session\DBSession;
-use Lightning\View\Facebook\SDK;
-use Lightning\View\JS;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Form;
+use lightningsdk\core\Tools\Scrub;
+use lightningsdk\core\Tools\Session\DBSession;
+use lightningsdk\core\View\Facebook\SDK;
+use lightningsdk\core\View\JS;
 use stdClass;
 
 class Facebook extends SocialMediaApi {

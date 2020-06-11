@@ -1,15 +1,15 @@
 <?php
 /**
  * @file
- * Lightning\Tools\Configuration
+ * lightningsdk\core\Tools\Configuration
  */
 
-namespace Lightning\Tools;
+namespace lightningsdk\core\Tools;
 
 /**
  * A helper to load variables from the configuration.
  *
- * @package Lightning\Tools
+ * @package lightningsdk\core\Tools
  */
 class Configuration {
     /**
@@ -64,6 +64,17 @@ class Configuration {
         }
 
         Data::setInPath($variable, $value, self::$configuration);
+    }
+
+    /**
+     * Add a new value to an array.
+     */
+    public static function push($path, $value) {
+        if (empty(self::$configuration)) {
+            self::loadConfiguration();
+        }
+
+        Data::pushInPath($variable, $value, self::$configuration);
     }
 
     /**
@@ -132,7 +143,7 @@ class Configuration {
         }
     }
 
-    protected static function loadModules($includeModules) {
+    public static function loadModules($includeModules) {
         for ($i = 0; $i < count($includeModules); $i++) {
             $module = $includeModules[$i];
             foreach (['Modules', 'vendor'] as $path) {
@@ -175,7 +186,7 @@ class Configuration {
     public static function getConfigurations() {
         return [
             'source' => CONFIG_PATH . '/config.inc.php',
-            'internal' => HOME_PATH . '/Lightning/Config.php'
+            'internal' => HOME_PATH . '/vendor/lightningsdk/core/Config.php'
         ];
     }
 

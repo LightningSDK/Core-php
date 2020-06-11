@@ -1,9 +1,9 @@
 <?php
 
-namespace Lightning\View\Video;
+namespace lightningsdk\core\View\Video;
 
-use Lightning\View\CSS;
-use Lightning\View\JS;
+use lightningsdk\core\View\CSS;
+use lightningsdk\core\View\JS;
 
 class HTML5 {
     /**

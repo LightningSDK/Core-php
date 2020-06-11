@@ -1,6 +1,6 @@
 <?php
 
-namespace Lightning\Model;
+namespace lightningsdk\core\Model;
 
 class Role extends BaseObject {
     const TABLE = 'role';

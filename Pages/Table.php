@@ -1,35 +1,35 @@
 <?php
 
-namespace Lightning\Pages;
+namespace lightningsdk\core\Pages;
 
 use Exception;
-use Lightning\Tools\Cache\FileCache;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\CSVImport;
-use Lightning\Tools\Database;
-use Lightning\Tools\Form;
-use Lightning\Tools\Image;
-use Lightning\Tools\IO\FileManager;
-use Lightning\Tools\Messenger;
-use Lightning\Tools\Navigation;
-use Lightning\Tools\Output;
-use Lightning\Tools\PHP;
-use Lightning\Tools\Request;
-use Lightning\Tools\Scrub;
-use Lightning\Tools\Security\Encryption;
-use Lightning\Tools\Template;
-use Lightning\View\Field\BasicHTML;
-use Lightning\View\Field\Checkbox;
-use Lightning\View\Field\FileBrowser;
-use Lightning\View\Field\Location;
-use Lightning\View\Field\Time;
-use Lightning\View\HTML;
-use Lightning\View\HTMLEditor\HTMLEditor;
-use Lightning\View\JS;
-use Lightning\View\Page;
-use Lightning\Tools\CSVWriter;
-use Lightning\View\Pagination;
-use Lightning\View\JSONEditor as JSONEditorView;
+use lightningsdk\core\Tools\Cache\FileCache;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\CSVImport;
+use lightningsdk\core\Tools\Database;
+use lightningsdk\core\Tools\Form;
+use lightningsdk\core\Tools\Image;
+use lightningsdk\core\Tools\IO\FileManager;
+use lightningsdk\core\Tools\Messenger;
+use lightningsdk\core\Tools\Navigation;
+use lightningsdk\core\Tools\Output;
+use lightningsdk\core\Tools\PHP;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\Tools\Scrub;
+use lightningsdk\core\Tools\Security\Encryption;
+use lightningsdk\core\Tools\Template;
+use lightningsdk\core\View\Field\BasicHTML;
+use lightningsdk\core\View\Field\Checkbox;
+use lightningsdk\core\View\Field\FileBrowser;
+use lightningsdk\core\View\Field\Location;
+use lightningsdk\core\View\Field\Time;
+use lightningsdk\core\View\HTML;
+use lightningsdk\core\View\HTMLEditor\HTMLEditor;
+use lightningsdk\core\View\JS;
+use lightningsdk\core\View\Page;
+use lightningsdk\core\Tools\CSVWriter;
+use lightningsdk\core\View\Pagination;
+use lightningsdk\core\View\JSONEditor as JSONEditorView;
 
 abstract class Table extends Page {
 
@@ -43,7 +43,7 @@ abstract class Table extends Page {
      */
     const TABLE = '';
 
-    protected $page = ['table', 'Lightning'];
+    protected $page = ['table', 'lightningsdk/core'];
 
     protected $fullWidth = true;
 
@@ -3102,7 +3102,7 @@ abstract class Table extends Page {
     /**
      * @param $field
      *
-     * @return \Lightning\Tools\IO\FileHandlerInterface
+     * @return \lightningsdk\core\Tools\IO\FileHandlerInterface
      */
     protected function getFileHandler($field) {
         // TODO: $field['location'] is deprecated. All tables should be updated to use container instead.

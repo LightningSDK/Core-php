@@ -1,16 +1,16 @@
 <?php
 
-namespace Lightning\API;
+namespace lightningsdk\core\API;
 
 use Exception;
-use Lightning\Model\User;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Form;
-use Lightning\Tools\Mailer;
-use Lightning\Tools\Output;
-use Lightning\Tools\Request;
-use Lightning\Tools\Session\BrowserSession;
-use Lightning\View\API;
+use lightningsdk\core\Model\User;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Form;
+use lightningsdk\core\Tools\Mailer;
+use lightningsdk\core\Tools\Output;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\Tools\Session\BrowserSession;
+use lightningsdk\core\View\API;
 use Source\Model\Message;
 
 class Contact extends API {

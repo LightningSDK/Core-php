@@ -1,5 +1,5 @@
 <form method="post" action="/admin/social/share">
-    <?= \Lightning\Tools\Form::renderTokenInput(); ?>
+    <?= \lightningsdk\core\Tools\Form::renderTokenInput(); ?>
     <h3>Post information</h3>
     <p>Type: <?= $type; ?></p>
     <p>ID: <?= $id; ?></p>
@@ -49,7 +49,7 @@
             <?php endforeach; ?>
         </table>
     <?php endif; ?>
-    <?= \Lightning\Tools\Form::renderTokenInput(); ?>
+    <?= \lightningsdk\core\Tools\Form::renderTokenInput(); ?>
     <input type="hidden" name="type" value="<?= $type; ?>">
     <input type="hidden" name="id" value="<?= $id; ?>">
     <input type="hidden" name="action" value="share">

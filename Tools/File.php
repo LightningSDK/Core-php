@@ -1,6 +1,6 @@
 <?php
 
-namespace Lightning\Tools;
+namespace lightningsdk\core\Tools;
 
 class File {
     public static function recursivePath($base_path, $file_id,$extension) {

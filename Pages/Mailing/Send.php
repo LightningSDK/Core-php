@@ -1,28 +1,28 @@
 <?php
 /**
  * @file
- * Lightning\Pages\Mailing\Send
+ * lightningsdk\core\Pages\Mailing\Send
  */
 
-namespace Lightning\Pages\Mailing;
+namespace lightningsdk\core\Pages\Mailing;
 
-use Lightning\Model\Message;
-use Lightning\Tools\ClientUser;
-use Lightning\Tools\Database;
-use Lightning\Tools\Mailer;
-use Lightning\Tools\Messenger;
-use Lightning\Tools\Output;
-use Lightning\Tools\Request;
-use Lightning\Tools\Session;
-use Lightning\Tools\Template;
-use Lightning\View\JS;
-use Lightning\View\Page;
+use lightningsdk\core\Model\Message;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\Tools\Database;
+use lightningsdk\core\Tools\Mailer;
+use lightningsdk\core\Tools\Messenger;
+use lightningsdk\core\Tools\Output;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\Tools\Session;
+use lightningsdk\core\Tools\Template;
+use lightningsdk\core\View\JS;
+use lightningsdk\core\View\Page;
 use Source\Model\Permissions;
 
 /**
  * A page handler for the send message controls and callbacks.
  *
- * @package Lightning\Pages\Mailing
+ * @package lightningsdk\core\Pages\Mailing
  */
 class Send extends Page {
 
@@ -46,7 +46,7 @@ class Send extends Page {
         }
 
         $template = Template::getInstance();
-        $template->set('content', ['mailing_send', 'Lightning']);
+        $template->set('content', ['mailing_send', 'lightningsdk/core']);
         $template->set('message', $message);
         JS::set('message_id', $message['message_id']);
         JS::addSessionToken();

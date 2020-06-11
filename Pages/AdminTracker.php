@@ -1,13 +1,13 @@
 <?php
 
-namespace Lightning\Pages;
+namespace lightningsdk\core\Pages;
 
-use Lightning\Tools\ClientUser;
-use Lightning\Tools\Output;
-use Lightning\Tools\Request;
-use Lightning\Model\Tracker;
-use Lightning\View\API;
-use Lightning\View\Field\Time;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\Tools\Output;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\Model\Tracker;
+use lightningsdk\core\View\API;
+use lightningsdk\core\View\Field\Time;
 
 class AdminTracker extends API {
     public function __construct() {

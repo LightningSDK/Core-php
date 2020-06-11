@@ -1,37 +1,37 @@
 <?php
 /**
  * @file
- * Contains Lightning\Pages\Page
+ * Contains lightningsdk\core\Pages\Page
  */
 
-namespace Lightning\Pages;
+namespace lightningsdk\core\Pages;
 
 use Exception;
-use Lightning\Model\URL;
-use Lightning\Tools\ClientUser;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Language;
-use Lightning\Tools\Mailer;
-use Lightning\Tools\Messages\SpamFilter;
-use Lightning\Tools\Messenger;
-use Lightning\Tools\Navigation;
-use Lightning\Tools\Output;
-use Lightning\Tools\ReCaptcha;
-use Lightning\Tools\Request;
-use Lightning\Tools\Scrub;
-use Lightning\Tools\Security\Encryption;
-use Lightning\Tools\Session\BrowserSession;
-use Lightning\Tools\Template;
-use Lightning\View\Page as PageView;
-use Lightning\Model\User as UserModel;
-use Lightning\Model\Message;
-use Lightning\Model\Tracker;
-use Lightning\Model\Contact as ContactModel;
+use lightningsdk\core\Model\URL;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Language;
+use lightningsdk\core\Tools\Mailer;
+use lightningsdk\core\Tools\Messages\SpamFilter;
+use lightningsdk\core\Tools\Messenger;
+use lightningsdk\core\Tools\Navigation;
+use lightningsdk\core\Tools\Output;
+use lightningsdk\core\Tools\ReCaptcha;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\Tools\Scrub;
+use lightningsdk\core\Tools\Security\Encryption;
+use lightningsdk\core\Tools\Session\BrowserSession;
+use lightningsdk\core\Tools\Template;
+use lightningsdk\core\View\Page as PageView;
+use lightningsdk\core\Model\User as UserModel;
+use lightningsdk\core\Model\Message;
+use lightningsdk\core\Model\Tracker;
+use lightningsdk\core\Model\Contact as ContactModel;
 
 /**
  * A contact page handler.
  *
- * @package Lightning\Pages
+ * @package lightningsdk\core\Pages
  *
  * To use this page handler, create a form that posts to the url attached.
  * Fields that can be used include:
@@ -44,7 +44,7 @@ use Lightning\Model\Contact as ContactModel;
  */
 class Contact extends PageView {
 
-    protected $page = ['contact', 'Lightning'];
+    protected $page = ['contact', 'lightningsdk/core'];
     protected $menuContext = 'contact';
     protected $share = false;
 
@@ -555,7 +555,7 @@ class Contact extends PageView {
         $template->set('values', $input);
         $template->set('confirmationMessage', 'Are you sure you want to mark this message as spam?');
         $template->set('successAction', 'spam');
-        $this->page = ['confirmation', 'Lightning'];
+        $this->page = ['confirmation', 'lightningsdk/core'];
     }
 
     /**

@@ -1,8 +1,8 @@
 <?php
 
-namespace Lightning\View;
+namespace lightningsdk\core\View;
 
-use Lightning\View\HTMLEditor\Markup;
+use lightningsdk\core\View\HTMLEditor\Markup;
 
 class Text {
     public static function shorten($body, $length = 250) {

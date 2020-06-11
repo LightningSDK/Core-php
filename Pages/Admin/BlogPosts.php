@@ -1,14 +1,14 @@
 <?php
 
-namespace Lightning\Pages\Admin;
+namespace lightningsdk\core\Pages\Admin;
 
-use Lightning\Model\Permissions;
-use Lightning\Pages\Table;
-use Lightning\Tools\Navigation;
-use Lightning\Tools\Request;
-use Lightning\Tools\ClientUser;
-use Lightning\Model\BlogPost;
-use Lightning\Tools\Template;
+use lightningsdk\core\Model\Permissions;
+use lightningsdk\core\Pages\Table;
+use lightningsdk\core\Tools\Navigation;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\Model\BlogPost;
+use lightningsdk\core\Tools\Template;
 
 class BlogPosts extends Table {
 

@@ -1,13 +1,13 @@
 <?php
 
-namespace Lightning\View\SocialMedia;
+namespace lightningsdk\core\View\SocialMedia;
 
-use Lightning\Model\URL;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Request;
-use Lightning\Tools\Scrub;
-use Lightning\Tools\Session\BrowserSession;
-use Lightning\View\JS;
+use lightningsdk\core\Model\URL;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\Tools\Scrub;
+use lightningsdk\core\Tools\Session\BrowserSession;
+use lightningsdk\core\View\JS;
 
 class Links {
     public static function render($url) {

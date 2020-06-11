@@ -1,6 +1,6 @@
 <?php
 
-namespace Lightning\Tools\SocialDrivers;
+namespace lightningsdk\core\Tools\SocialDrivers;
 
 interface SocialMediaApiInterface {
     const EMAIL_SUFFIX = '';

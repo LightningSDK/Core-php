@@ -1,15 +1,15 @@
 <?php
 
-namespace Lightning\Pages\Mailing;
+namespace lightningsdk\core\Pages\Mailing;
 
-use Lightning\Tools\ChartData;
-use Lightning\Tools\ClientUser;
-use Lightning\Tools\Output;
-use Lightning\Tools\Request;
-use Lightning\Model\Tracker;
-use Lightning\View\Chart\Line;
-use Lightning\View\Field\Time;
-use Lightning\View\JS;
+use lightningsdk\core\Tools\ChartData;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\Tools\Output;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\Model\Tracker;
+use lightningsdk\core\View\Chart\Line;
+use lightningsdk\core\View\Field\Time;
+use lightningsdk\core\View\JS;
 
 class Stats extends Line {
 

@@ -1,20 +1,20 @@
 <?php
 
-namespace Lightning\API;
+namespace lightningsdk\core\API;
 
-use Lightning\Model\Message;
-use Lightning\Model\User;
-use Lightning\Tools\Mailer;
-use Lightning\Tools\Messenger;
-use Lightning\Tools\Output;
-use Lightning\Tools\Request;
-use Lightning\Tools\Scrub;
-use Lightning\Tools\Session\BrowserSession;
-use Lightning\View\API;
+use lightningsdk\core\Model\Message;
+use lightningsdk\core\Model\User;
+use lightningsdk\core\Tools\Mailer;
+use lightningsdk\core\Tools\Messenger;
+use lightningsdk\core\Tools\Output;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\Tools\Scrub;
+use lightningsdk\core\Tools\Session\BrowserSession;
+use lightningsdk\core\View\API;
 
 /**
  * Class Optin
- * @package Lightning\API
+ * @package lightningsdk\core\API
  *
  * @deprecated use Lighting\API\Contact instead
  */

@@ -1,6 +1,6 @@
 <?php
 
-namespace Lightning\Tools\Messages;
+namespace lightningsdk\core\Tools\Messages;
 
 interface SpamFilterInterface {
     /**

@@ -1,10 +1,10 @@
 <?php
 
-namespace Lightning\Tools\SocialDrivers;
+namespace lightningsdk\core\Tools\SocialDrivers;
 
-use Lightning\Pages\User;
-use Lightning\Tools\Messenger;
-use Lightning\View\Page;
+use lightningsdk\core\Pages\User;
+use lightningsdk\core\Tools\Messenger;
+use lightningsdk\core\View\Page;
 
 class TwitterAuthPage extends Page {
     public function hasAccess() {

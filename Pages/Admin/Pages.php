@@ -1,12 +1,12 @@
 <?php
 
-namespace Lightning\Pages\Admin;
+namespace lightningsdk\core\Pages\Admin;
 
-use Lightning\Pages\Table;
-use Lightning\Tools\ClientUser;
-use Lightning\Tools\Navigation;
-use Lightning\Tools\Request;
-use Lightning\Model\Permissions;
+use lightningsdk\core\Pages\Table;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\Tools\Navigation;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\Model\Permissions;
 
 class Pages extends Table {
 
@@ -94,9 +94,9 @@ class Pages extends Table {
             $output['last_update'] = time();
         };
 
-        $this->preset['language'] = \Lightning\Tools\Configuration::get('language.available');
+        $this->preset['language'] = \lightningsdk\core\Tools\Configuration::get('language.available');
 
-        if (\Lightning\Tools\Configuration::get('css.editable')) {
+        if (\lightningsdk\core\Tools\Configuration::get('css.editable')) {
             $this->custom_buttons['css'] = [
                 'url' => '/admin/css',
                 'type' => Table::CB_LINK,

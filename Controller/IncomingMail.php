@@ -1,17 +1,17 @@
 <?php
 /**
  * @file
- * Contains Lightning\Controller\IncomingMail
+ * Contains lightningsdk\core\Controller\IncomingMail
  */
 
-namespace Lightning\Controller;
+namespace lightningsdk\core\Controller;
 
-use Lightning\CLI\CLI;
+use lightningsdk\core\CLI\CLI;
 
 /**
  * A base controller for handling incoming mail.
  *
- * @package Lightning\Controller
+ * @package lightningsdk\core\Controller
  */
 abstract class IncomingMail extends CLI {
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Lightning\Tools;
+namespace lightningsdk\core\Tools;
 
 use DateTime;
 
@@ -33,7 +33,7 @@ class LoggerOverridable extends Singleton {
      */
     public static function init() {
         if (Configuration::get('site.logtype') == 'stacktrace') {
-            set_error_handler([\Lightning\Tools\Logger::class, 'errorLogStacktrace']);
+            set_error_handler([\lightningsdk\core\Tools\Logger::class, 'errorLogStacktrace']);
         }
 
         if ($logfile = Configuration::get('site.log')) {

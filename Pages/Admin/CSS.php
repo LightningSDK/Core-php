@@ -1,19 +1,19 @@
 <?php
 
-namespace Lightning\Pages\Admin;
+namespace lightningsdk\core\Pages\Admin;
 
-use Lightning\Tools\ClientUser;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Output;
-use Lightning\Tools\Request;
-use Lightning\Tools\Template;
-use Lightning\View\JS;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Output;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\Tools\Template;
+use lightningsdk\core\View\JS;
 use Source\View\Page;
 
 class CSS extends Page {
 
-    protected $page = ['admin/css', 'Lightning'];
-    protected $template = ['template_blank', 'Lightning'];
+    protected $page = ['admin/css', 'lightningsdk/core'];
+    protected $template = ['template_blank', 'lightningsdk/core'];
 
     public function hasAccess() {
         return Configuration::get('css.editable') && ClientUser::requireAdmin();

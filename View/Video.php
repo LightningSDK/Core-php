@@ -1,10 +1,10 @@
 <?php
 
-namespace Lightning\View;
+namespace lightningsdk\core\View;
 
 /**
  * Class Video
- * @package Lightning\View
+ * @package lightningsdk\core\View
  * @deprecated
  */
 class Video {

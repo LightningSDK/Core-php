@@ -1,6 +1,6 @@
 <?php
 
-namespace Lightning\Tools;
+namespace lightningsdk\core\Tools;
 
 class RequestOverridable {
 
@@ -457,7 +457,7 @@ class RequestOverridable {
                     unset($args[1]);
                     $args = array_values($args);
                 }
-                return call_user_func_array("Lightning\\Tools\\Scrub::{$type}", $args);
+                return call_user_func_array("lightningsdk\\core\\Tools\\Scrub::{$type}", $args);
                 break;
             case self::TYPE_URL_ENCODED:
                 return urldecode($data);

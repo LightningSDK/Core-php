@@ -1,10 +1,10 @@
 <?php
 
-namespace Lightning\Pages;
+namespace lightningsdk\core\Pages;
 
-use Lightning\Tools\Template;
-use Lightning\View\Page;
-use Lightning\Model\Calendar;
+use lightningsdk\core\Tools\Template;
+use lightningsdk\core\View\Page;
+use lightningsdk\core\Model\Calendar;
 
 class Events extends Page {
     public $page = 'calendar_page';

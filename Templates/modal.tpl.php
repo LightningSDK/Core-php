@@ -1,6 +1,6 @@
 <?php
-use Lightning\Tools\Messenger;
-use Lightning\View\JS;
+use lightningsdk\core\Tools\Messenger;
+use lightningsdk\core\View\JS;
 ?>
 <div class="marketing off-canvas-wrap" data-offcanvas>
     <div class="inner-wrap">

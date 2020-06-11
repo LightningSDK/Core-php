@@ -1,8 +1,8 @@
 <?php
 
-namespace Lightning\Pages;
+namespace lightningsdk\core\Pages;
 
-use Lightning\View\Page;
+use lightningsdk\core\View\Page;
 
 class Message extends Page {
 

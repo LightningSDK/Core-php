@@ -4,16 +4,16 @@
  * A class for managing output.
  */
 
-namespace Lightning\Tools;
-use Lightning\Pages\Page as PageView;
-use Lightning\Model\Page as PageModel;
-use Lightning\View\JS;
+namespace lightningsdk\core\Tools;
+use lightningsdk\core\Pages\Page as PageView;
+use lightningsdk\core\Model\Page as PageModel;
+use lightningsdk\core\View\JS;
 use Exception;
 
 /**
  * Class Output
  *
- * @package Lightning\Tools
+ * @package lightningsdk\core\Tools
  */
 class Output {
     /**

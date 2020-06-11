@@ -1,15 +1,15 @@
 <?php
 
-namespace Lightning\Jobs;
+namespace lightningsdk\core\Jobs;
 
 use DateTime;
-use Lightning\Model\Message;
-use Lightning\Tools\Mailer as MailerTool;
-use Lightning\View\Field\Time;
+use lightningsdk\core\Model\Message;
+use lightningsdk\core\Tools\Mailer as MailerTool;
+use lightningsdk\core\View\Field\Time;
 
 /**
  * Class Mailer
- * @package Lightning\Jobs
+ * @package lightningsdk\core\Jobs
  *
  * Run with lightning daemon test auto-mailer count
  */

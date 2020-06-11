@@ -1,12 +1,12 @@
 <?php
 
-namespace Lightning\Tools\SocialDrivers;
+namespace lightningsdk\core\Tools\SocialDrivers;
 
 use Abraham\TwitterOAuth\TwitterOAuth;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Output;
-use Lightning\Tools\Session;
-use Lightning\View\JS;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Output;
+use lightningsdk\core\Tools\Session;
+use lightningsdk\core\View\JS;
 
 class LinkedIn extends SocialMediaApi {
 

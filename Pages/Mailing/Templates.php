@@ -1,9 +1,9 @@
 <?php
 
-namespace Lightning\Pages\Mailing;
+namespace lightningsdk\core\Pages\Mailing;
 
-use Lightning\Pages\Table;
-use Lightning\Tools\ClientUser;
+use lightningsdk\core\Pages\Table;
+use lightningsdk\core\Tools\ClientUser;
 
 class Templates extends Table {
 

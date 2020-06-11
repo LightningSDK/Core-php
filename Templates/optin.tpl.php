@@ -1,7 +1,7 @@
 <?php
 
-use Lightning\Tools\Form;
-use Lightning\View\Field;
+use lightningsdk\core\Tools\Form;
+use lightningsdk\core\View\Field;
 
 if (empty($action) || $action == 'join' || $action == 'register'): ?>
     <fieldset>

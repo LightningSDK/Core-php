@@ -1,16 +1,16 @@
 <?php
 
-namespace Lightning\Tools\SocialDrivers;
+namespace lightningsdk\core\Tools\SocialDrivers;
 
 use Exception;
-use Lightning\Model\User;
-use Lightning\Tools\ClientUser;
-use Lightning\Tools\Configuration;
-use Lightning\Tools\Mongo;
-use Lightning\Tools\Request;
-use Lightning\Tools\Session\DBSession;
-use Lightning\Tools\Singleton;
-use Lightning\View\JS;
+use lightningsdk\core\Model\User;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Mongo;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\Tools\Session\DBSession;
+use lightningsdk\core\Tools\Singleton;
+use lightningsdk\core\View\JS;
 
 abstract class SocialMediaApiOverridable extends Singleton implements SocialMediaApiInterface {
 

@@ -1,8 +1,8 @@
 <?php
 
-namespace Lightning\View\Video;
+namespace lightningsdk\core\View\Video;
 
-use Lightning\View\JS;
+use lightningsdk\core\View\JS;
 
 class YouTube {
     /**

@@ -1,9 +1,9 @@
 <?php
 
-use Lightning\Tools\Messenger;
-use Lightning\Tools\Output;
-use Lightning\Tools\Request;
-use Lightning\Tools\Router;
+use lightningsdk\core\Tools\Messenger;
+use lightningsdk\core\Tools\Output;
+use lightningsdk\core\Tools\Request;
+use lightningsdk\core\Tools\Router;
 
 define('HOME_PATH', __DIR__);
 
@@ -27,5 +27,5 @@ try {
     $errors = Messenger::getErrors();
     array_unshift($errors, $e->getMessage());
     echo implode("\n", $errors) . "\n";
-    \Lightning\Tools\Logger::exception($e);
+    \lightningsdk\core\Tools\Logger::exception($e);
 }

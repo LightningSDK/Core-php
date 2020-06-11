@@ -1,6 +1,6 @@
 <?php
 
-namespace Lightning\Exceptions;
+namespace lightningsdk\core\Exceptions;
 
 class TokenExpired extends \Exception {
     protected $message = 'Token Expired.';

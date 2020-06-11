@@ -1,10 +1,10 @@
 <?php
 /**
  * @file
- * Lightning\Tools\Database
+ * lightningsdk\core\Tools\Database
  */
 
-namespace Lightning\Tools;
+namespace lightningsdk\core\Tools;
 
 use Exception;
 use PDO;
@@ -15,7 +15,7 @@ use ReflectionClass;
 /**
  * A database abstraction layer.
  *
- * @package Lightning\Tools
+ * @package lightningsdk\core\Tools
  *
  * A query array is a processable array built as a query. This array is converted
  * into SQL at execution time. The following is an example query with available options:
@@ -638,7 +638,7 @@ class Database extends Singleton {
         $ignore = $existing === TRUE ? 'IGNORE' : '';
 
         // This passes $data as individual params to the __construct() function.
-        $reflect = new ReflectionClass('Lightning\Tools\CombinationIterator');
+        $reflect = new ReflectionClass('lightningsdk\core\Tools\CombinationIterator');
         $combinator = $reflect->newInstanceArgs($data);
 
         $fields = $this->implodeFields(array_keys($data));

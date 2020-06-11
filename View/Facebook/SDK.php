@@ -1,9 +1,9 @@
 <?php
 
-namespace Lightning\View\Facebook;
+namespace lightningsdk\core\View\Facebook;
 
-use Lightning\Tools\Configuration;
-use Lightning\View\JS;
+use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\View\JS;
 
 class SDK {
 

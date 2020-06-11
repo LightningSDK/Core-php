@@ -6,7 +6,7 @@
 
 namespace Source\CLI;
 
-use Lightning\CLI\CLI;
+use lightningsdk\core\CLI\CLI;
 
 /**
  * A command line handler for test execution.
