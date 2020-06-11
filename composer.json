@@ -4,6 +4,6 @@
   "description": "Lightning Fast PHP Framework.",
   "version": "1.0.0",
   "require": {
-    "tidy": "*"
+    "ext-tidy": "*"
   }
 }
