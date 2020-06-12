@@ -1,6 +1,6 @@
 #!/bin/bash
 
-FILE=`realpath -s "$(cd "$(dirname "$0")" && pwd)/../index.php"`
+FILE=`realpath -s "$(cd "$(dirname "$0")" && pwd)/../../../index.php"`
 
 if [[ $1 == "debug" ]]; then
   DEBUG="-d xdebug.remote_autostart=On"
