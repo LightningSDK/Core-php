@@ -58,13 +58,12 @@ $conf = [
     'temp_dir' => HOME_PATH . '/../tmp',
     'menus' => [
         'admin' => [
-            'Blog' => [
+            'Content' => [
                 'children' => [
-                    'Posts' => 'admin/blog/edit',
-                    'Categories' => 'admin/blog/categories'
+                    'Pages' => '/admin/pages',
+                    'Widgets' => '/admin/widgets',
                 ],
             ],
-            'Pages' => '/admin/pages',
             'Users' => '/admin/users',
             'Mailing' => [
                 'children' => [

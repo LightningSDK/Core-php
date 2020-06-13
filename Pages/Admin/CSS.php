@@ -109,7 +109,7 @@ class CSS extends Page {
      */
     protected function generateCSS($source_file) {
         $sass_command = 'scss -t compressed --compass';
-        foreach (Configuration::get('css.include_paths', []) as $import) {
+        foreach (Configuration::get('compiler.sass.include_paths', []) as $import) {
             $sass_command .= ' -I ' . escapeshellarg($import);
         }
 

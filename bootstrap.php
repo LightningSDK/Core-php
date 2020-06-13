@@ -18,6 +18,7 @@ use lightningsdk\core\Tools\Performance;
 // Set the autoloader to the Lightning autoloader.
 require_once __DIR__ . '/Tools/ClassLoader.php';
 spl_autoload_register(['lightningsdk\\core\\Tools\\ClassLoader', 'classAutoloader']);
+require_once HOME_PATH . '/vendor/autoload.php';
 
 Performance::startTimer();
 

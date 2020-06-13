@@ -140,7 +140,6 @@ $conf = [
     ],
     'routes' => [
         'dynamic' => [
-            '^blog(/.*)?$' => 'lightningsdk\\core\\Pages\\Blog',
             '.*' => 'lightningsdk\\core\\Pages\\Page',
         ],
         'static' => [
@@ -157,8 +156,6 @@ $conf = [
             'sitemap' => 'lightningsdk\\core\\Pages\\Sitemap',
 
             // Admin
-            'admin/blog/edit' => 'lightningsdk\\core\\Pages\\BlogTable',
-            'admin/blog/categories' => 'lightningsdk\\core\\Pages\\BlogCategories',
             'admin/social/auth' => 'lightningsdk\\core\\Pages\\SocialSharing\\Auth',
             'admin/social/share' => 'lightningsdk\\core\\Pages\\SocialSharing\\Share',
             'admin/mailing/lists' => 'lightningsdk\\core\\Pages\\Mailing\\Lists',

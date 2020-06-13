@@ -13,6 +13,11 @@ class ClassLoader {
         'lightningsdk\\core\\Tools\\Data' => 'lightningsdk\\core\\Tools\\Data',
     ];
 
+    public static function reloadClasses() {
+        self::$classes = Configuration::get('classes', []);
+        self::$classesRev = array_flip(self::$classes);
+    }
+
     /**
      * A custom class loader.
      *

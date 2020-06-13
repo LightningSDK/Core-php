@@ -11,8 +11,6 @@ class Page extends \lightningsdk\core\View\PageOverridable {}
 
 namespace lightningsdk\core\Model;
 
-class Blog extends \lightningsdk\core\Model\BlogOverridable {}
-class BlogPost extends \lightningsdk\core\Model\BlogPostOverridable {}
 class Calendar extends \lightningsdk\core\Model\CalendarOverridable {}
 class CMS extends \lightningsdk\core\Model\CMSOverridable {}
 class Message extends \lightningsdk\core\Model\MessageOverridable {}

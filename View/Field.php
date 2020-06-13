@@ -49,6 +49,7 @@ class Field {
             'value' => !empty($options['value']) ? $options['value'] : '',
             'type' => !empty($options['type']) ? $options['type'] : 'text',
             'class' => !empty($options['class']) ? $options['class'] : '',
+            'style' => !empty($options['style']) ? $options['style'] : '',
         ];
 
         if ($attributes['type'] == 'invisibleRecaptcha') {
@@ -67,15 +68,18 @@ class Field {
             $attributes['pattern'] = $options['pattern'];
         }
 
-        $field = '<input ' . HTML::implodeAttributes($attributes) . '>';
+        $field = '<label>';
         if (!empty($options['label'])) {
-            $field = '<label>' . $options['label'] . $field . '</label>';
+            $field .= $options['label'];
         }
+
+        $field .= '<input ' . HTML::implodeAttributes($attributes) . '>';
 
         if (!empty($attributes['required']) || !empty($options['error'])) {
             $error_message = $options['error'] ?? 'This field is required.';
-            $field = $field . '<small class="form-error">' . $error_message . '</small>';
+            $field = $field . '<span class="form-error">' . $error_message . '</span>';
         }
+        $field .= '</label>';
 
         return '<div>' . $field . '</div>';
     }
