@@ -10,6 +10,7 @@ class Gulp extends CLI {
             'js' => Configuration::get('compiler.js', []),
             'css' => Configuration::get('compiler.css', []),
             'sass' => Configuration::get('compiler.sass', []),
+            'copy' => Configuration::get('compiler.copy', []),
         ]);
     }
 }

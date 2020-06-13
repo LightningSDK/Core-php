@@ -6,35 +6,31 @@ var uglify = require("gulp-uglify-es").default;
 var concat = require("gulp-concat");
 var gzip = require("gulp-gzip");
 var sass = require("gulp-sass");
+var header = require('gulp-header');
 var cleanCSS = require("gulp-clean-css");
+var gulpif = require('gulp-if');
 
-module.exports = function(done, config){
+module.exports = {
+    compile: function(done, config){
+        compile(done, config);
+
+        done();
+    },
+    install: function(done, config){
+        if (!config.hasOwnProperty('copy')) {
+            log('Nothing to install')
+        } else {
+            copyFiles(done, config.copy);
+        }
+
+        done();
+    }
+}
+
+function compile(done, config){
     var types = ["js", "css"];
     for (var type in types) {
-        var dest_files = {};
-        var modules = config[types[type]];
-        for (var module_name in modules) {
-            for (var source_file in modules[module_name]) {
-                // Normalize destination files
-                var dest_file = [];
-                if (typeof modules[module_name][source_file] === "string") {
-                    dest_file.dest = modules[module_name][source_file];
-                } else {
-                    dest_file = modules[module_name][source_file];
-                    if (!dest_file.hasOwnProperty("dest")) {
-                        done("no destination set for script " + source_file + " in module " + module_name);
-                    }
-                }
-                dest_file.module = module_name;
-                dest_file.source = getPath(module_name, source_file, types[type]);
-
-                // Add the dest file
-                if (!dest_files[dest_file.dest]) {
-                    dest_files[dest_file.dest] = [];
-                }
-                dest_files[dest_file.dest][dest_file.source] = dest_file;
-            }
-        }
+        var dest_files = getDestFiles(config[types[type]], types[type]);
 
         for (var i in dest_files) {
             var sorted = sortSourceFiles(dest_files[i]);
@@ -53,10 +49,11 @@ module.exports = function(done, config){
                     g.pipe(uglify());
                     break;
                 case "css":
-                    log("minifying css");
+                    var sassConfig = getSassConfig(config)
                     g = g
+                        .pipe(gulpif(sassOnly, header(sassConfig.header)))
                         .pipe(sass({
-                            includePaths: config.hasOwnProperty("sass") ? config.sass : []
+                            includePaths: sassConfig.includes
                         }).on('error', sass.logError))
                         .pipe(minifyCSS())
                         .pipe(cleanCSS({compatibility: "ie8"}))
@@ -70,9 +67,55 @@ module.exports = function(done, config){
                 .pipe(gulp.dest(types[type]));
         }
     }
-
-    done();
 };
+
+function getDestFiles(modules, type) {
+    var dest_files = {};
+    for (var module_name in modules) {
+        for (var source_file in modules[module_name]) {
+            // Normalize destination files
+            var dest_file = [];
+            if (typeof modules[module_name][source_file] === "string") {
+                dest_file.dest = modules[module_name][source_file];
+            } else {
+                dest_file = modules[module_name][source_file];
+                if (!dest_file.hasOwnProperty("dest")) {
+                    done("no destination set for script " + source_file + " in module " + module_name);
+                }
+            }
+            dest_file.module = module_name;
+            dest_file.source = getPath(module_name, source_file, type);
+
+            // Add the dest file
+            if (!dest_files[dest_file.dest]) {
+                dest_files[dest_file.dest] = [];
+            }
+            dest_files[dest_file.dest][dest_file.source] = dest_file;
+        }
+    }
+
+    return dest_files;
+}
+
+function sassOnly (file) {
+    return file.path.match(/.s[ac]ss$/);
+}
+
+function getSassConfig(config) {
+    var sassConfig = config.hasOwnProperty("sass") ? config.sass : {};
+    if (!sassConfig.hasOwnProperty("includes")) {
+        sassConfig.includes = [];
+    }
+    if (!sassConfig.hasOwnProperty("vars")) {
+        sassConfig.vars = [];
+    }
+    sassConfig.header = '';
+    for (var v in sassConfig.vars) {
+        sassConfig.header += v + ": '" + sassConfig.vars[v] + "';\n";
+    }
+
+    return sassConfig;
+}
 
 function getPath(module, file, type) {
     if (module === "Source") {
@@ -94,6 +137,19 @@ function getPath(module, file, type) {
         }
     }
     return file;
+}
+
+function copyFiles(done, files) {
+    for (module in files) {
+        for (src in files[module]) {
+            var file = getPath(module, src, '');
+            log("Copying:");
+            log(file);
+            log(files[module][src]);
+            gulp.src(file)
+                .pipe(gulp.dest(files[module][src]))
+        }
+    }
 }
 
 function sortSourceFiles(sources) {
