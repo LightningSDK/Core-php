@@ -262,7 +262,6 @@ class PageOverridable {
         $template->set('messages', Messenger::getMessages());
 
         $template->set('site_name', Configuration::get('site.name'));
-        $template->set('blog', Blog::getInstance());
         $template->set('full_width', $this->fullWidth);
         $template->set('right_column', $this->rightColumn);
         $template->set('hide_header', $this->hideHeader);
