@@ -30,7 +30,7 @@ module.exports = {
 function compile(done, config){
     var types = ["js", "css"];
     for (var type in types) {
-        var dest_files = getDestFiles(config[types[type]], types[type]);
+        var dest_files = getDestFiles(done, config[types[type]], types[type]);
 
         for (var i in dest_files) {
             var sorted = sortSourceFiles(dest_files[i]);
@@ -69,7 +69,7 @@ function compile(done, config){
     }
 };
 
-function getDestFiles(modules, type) {
+function getDestFiles(done, modules, type) {
     var dest_files = {};
     for (var module_name in modules) {
         for (var source_file in modules[module_name]) {
@@ -84,7 +84,7 @@ function getDestFiles(modules, type) {
                 }
             }
             dest_file.module = module_name;
-            dest_file.source = getPath(module_name, source_file, type);
+            dest_file.source = getPath(done, module_name, source_file, type);
 
             // Add the dest file
             if (!dest_files[dest_file.dest]) {
@@ -117,7 +117,7 @@ function getSassConfig(config) {
     return sassConfig;
 }
 
-function getPath(module, file, type) {
+function getPath(done, module, file, type) {
     if (module === "Source") {
         return "Source/Resources/" + type + "/" + file;
     }
@@ -136,13 +136,15 @@ function getPath(module, file, type) {
             return paths[i];
         }
     }
-    return file;
+    log("File not found: " + file);
+    log(paths);
+    done("Error");
 }
 
 function copyFiles(done, files) {
     for (module in files) {
         for (src in files[module]) {
-            var file = getPath(module, src, '');
+            var file = getPath(done, module, src, '');
             log("Copying:");
             log(file);
             log(files[module][src]);

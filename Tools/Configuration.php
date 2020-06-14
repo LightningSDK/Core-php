@@ -74,7 +74,7 @@ class Configuration {
             self::loadConfiguration();
         }
 
-        Data::pushInPath($variable, $value, self::$configuration);
+        Data::pushInPath($path, $value, self::$configuration);
     }
 
     /**
@@ -128,14 +128,14 @@ class Configuration {
                 }
             }
 
+            if (!empty(self::$configuration['modules']['include'])) {
+                self::loadModules(self::$configuration['modules']['include']);
+            }
             // Load module configurations.
             if (Request::isCLI()) {
                 if (!empty(self::$configuration['modules']['include-cli'])) {
                     self::loadModules(self::$configuration['modules']['include-cli']);
                 }
-            }
-            if (!empty(self::$configuration['modules']['include'])) {
-                self::loadModules(self::$configuration['modules']['include']);
             }
 
             self::$loaded = true;
