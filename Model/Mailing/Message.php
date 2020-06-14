@@ -4,7 +4,7 @@
  * Contains lightningsdk\core\Model\Message
  */
 
-namespace lightningsdk\core\Model;
+namespace lightningsdk\core\Model\Mailing;
 
 use lightningsdk\core\Tools\Configuration;
 use lightningsdk\core\Tools\Database;

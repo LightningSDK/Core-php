@@ -9,9 +9,8 @@ use lightningsdk\core\Tools\Form;
 use lightningsdk\core\Tools\Mailer;
 use lightningsdk\core\Tools\Output;
 use lightningsdk\core\Tools\Request;
-use lightningsdk\core\Tools\Session\BrowserSession;
 use lightningsdk\core\View\API;
-use Source\Model\Message;
+use lightningsdk\core\Model\Message;
 
 class Contact extends API {
     /**

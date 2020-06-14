@@ -8,7 +8,7 @@ use lightningsdk\core\Tools\Output;
 use lightningsdk\core\Tools\Request;
 use lightningsdk\core\Tools\Template;
 use lightningsdk\core\View\JS;
-use Source\View\Page;
+use lightningsdk\core\View\Page;
 
 class CSS extends Page {
 

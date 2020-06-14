@@ -23,6 +23,7 @@ class User extends \lightningsdk\core\Model\UserOverridable {}
 
 namespace lightningsdk\core\Model\Mailing;
 class Lists extends \lightningsdk\core\Model\Mailing\ListsOverridable {}
+class Message extends \lightningsdk\core\Model\Mailing\MessageOverridable {}
 
 namespace lightningsdk\core\Tools;
 

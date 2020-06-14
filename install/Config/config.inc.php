@@ -3,7 +3,6 @@
 $conf = [
     'database' => 'mysql:user=user;password=pass;host=localhost;dbname=db',
     'user' => [
-        'cookie_domain' => '',
         // Generate a new key by going to the Lightning directory and running
         // ./lightning security generate-aes-key
         // **** THIS KEY IS INCLUDED WITH THE DISTRIBUTION AND IS NOT SECURE ****

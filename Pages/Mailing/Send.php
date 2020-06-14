@@ -13,11 +13,10 @@ use lightningsdk\core\Tools\Mailer;
 use lightningsdk\core\Tools\Messenger;
 use lightningsdk\core\Tools\Output;
 use lightningsdk\core\Tools\Request;
-use lightningsdk\core\Tools\Session;
 use lightningsdk\core\Tools\Template;
 use lightningsdk\core\View\JS;
 use lightningsdk\core\View\Page;
-use Source\Model\Permissions;
+use lightningsdk\core\Model\Permissions;
 
 /**
  * A page handler for the send message controls and callbacks.

@@ -11,7 +11,7 @@ use lightningsdk\core\Tools\Request;
 use lightningsdk\core\Tools\Session\DBSession;
 use lightningsdk\core\View\Field\BasicHTML;
 use lightningsdk\core\View\Field\Text;
-use Source\Model\Permissions;
+use lightningsdk\core\Model\Permissions;
 
 class Users extends Table {
 
