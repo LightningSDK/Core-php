@@ -1,6 +1,3 @@
 {
-  "name": "macdabby/Lightning",
-  "require": {
-    "tidy": "*"
-  }
+  "name": "macdabby/Lightning"
 }
