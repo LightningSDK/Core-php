@@ -2045,7 +2045,7 @@ abstract class Table extends Page {
         foreach ($link_settings['active_list'] as $image) {
             $output .= '<span class="selected_image_container">
                 <input type="hidden" name="linked_images_' . $link_id . '[]" value="' . $image['image'] . '">
-                <span class="remove fa fa-close"></span>
+                <span class="remove fa fa-times"></span>
                 <img src="' . $this->getImageLocationWeb($link_settings, $image['image']) . '"></span>';
         }
         $output .= '</span>';
@@ -2121,7 +2121,7 @@ abstract class Table extends Page {
         // create each item as a viewable deleteable box
         foreach ($link_settings['active_list'] as $init) {
             $output .= "<div class='{$link_id}_box table_link_box_selected' id='{$link_id}_box_{$init[$link_settings['key']]}'>{$init[$link_settings['display_column']]}
-						<i class='remove-link fa fa-close' data-link='{$link_id}' data-link-item='{$init[$link_settings['key']]}' ></i></div>";
+						<i class='remove-link fa fa-times' data-link='{$link_id}' data-link-item='{$init[$link_settings['key']]}' ></i></div>";
         }
         $output .= '</div>';
         return $output;

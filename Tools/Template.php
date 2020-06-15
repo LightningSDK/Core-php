@@ -6,6 +6,7 @@
 
 namespace lightningsdk\core\Tools;
 
+use Exception;
 use lightningsdk\core\View\CSS;
 use lightningsdk\core\View\JS;
 use stdClass;
@@ -315,12 +316,21 @@ class Template extends Singleton {
             ob_start();
         }
 
-        // Include the file with vars in scope.
-        extract($this->vars);
-        include $this->getFileName($template) . '.tpl.php';
+        $error = '';
+
+        try {
+            // Include the file with vars in scope.
+            extract($this->vars);
+            include $this->getFileName($template) . '.tpl.php';
+        } catch (Exception $e) {
+            Logger::exception($e);
+            $error = 'Error rendering template!';
+        }
 
         if ($return_as_string) {
-            return ob_get_clean();
+            return ob_get_clean() . $error;
+        } else {
+            echo $error;
         }
     }
 }

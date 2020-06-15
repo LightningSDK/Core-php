@@ -32,7 +32,7 @@
                 return;
             }
             self.filterSelect.val('');
-            var newFilter = $('<fieldset class="filter row"><div class="small-1 column"><i class="fa fa-close remove"></i></div></fieldset>');
+            var newFilter = $('<fieldset class="filter row"><div class="small-1 column"><i class="fa fa-times remove"></i></div></fieldset>');
             newFilter.data('name', filterName);
             for (var i in self.filters[filterName].options) {
                 if (self.filters[filterName].options[i].type == 'select') {
@@ -169,7 +169,7 @@
             var input_array = $('#' + link + '_input_array');
             if (input_array.val().match(regex) == null) {
                 input_array.val(input_array.val() + value + ',');
-                $('#' + link + '_list_container').append($('<div class="' + link + '_box table_link_box_selected" id="' + link + '_box_' + value + '">' + name + ' <i class="remove-link fa fa-close" data-link="' + link + '" data-link-item="' + value + '"></i></div>'));
+                $('#' + link + '_list_container').append($('<div class="' + link + '_box table_link_box_selected" id="' + link + '_box_' + value + '">' + name + ' <i class="remove-link fa fa-times" data-link="' + link + '" data-link-item="' + value + '"></i></div>'));
                 var processes = lightning.get('table.linkProcess');
                 for (var i in processes) {
                     lightning.getMethodReference(processes[i])();

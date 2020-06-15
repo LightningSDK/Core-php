@@ -10,7 +10,7 @@
         init: function() {
             if (!self.dialogBox) {
                 $('<div class="reveal" id="dialog_box" data-reveal aria-hidden="true" role="dialog">'+
-                    '<a class="close-button" data-close><i class="fa fa-close"></i></a>' +
+                    '<a class="close-button" data-close><i class="fa fa-times-circle"></i></a>' +
                     '<div class="table_data clear border_top">'+
                     '<div class="inner" id="dialog_box_inner">'+
                     '<div class="messenger error"><ul></ul></div>'+
