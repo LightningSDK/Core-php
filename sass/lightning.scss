@@ -1,7 +1,8 @@
-@import '_compass';
-@import 'foundation';
 @import 'util/_unit';
 @import 'util/breakpoint';
+@import 'settings/_settings';
+@import 'xy-grid/_gutters';
+@import 'xy-grid/_cell';
 
 $red-high: rgb(255,55,52);
 $red-med: rgb(242,84,72);
@@ -21,35 +22,6 @@ $amber-low: rgb(255,205,1);
   content: "\f004";
 }
 
-@font-face {
-  font-family: 'generalEnclosedFoundicons';
-  src: url('/fonts/general_enclosed_foundicons.eot');
-  src: url('/fonts/general_enclosed_foundicons.eot?#iefix') format('embedded-opentype'),
-  url('/fonts/general_enclosed_foundicons.woff') format('woff'),
-  url('/fonts/general_enclosed_foundicons.ttf') format('truetype'),
-  url('/fonts/general_enclosed_foundicons.svg#generalEnclosedFoundicons') format('svg');
-  font-weight: normal;
-  font-style: normal;
-}
-
-[class*="foundicon-"] {
-  display: inline;
-  width: auto;
-  height: auto;
-  line-height: inherit;
-  vertical-align: baseline;
-  background-image: none;
-  background-position: 0 0;
-  background-repeat: repeat;
-}
-
-[class*="foundicon-"]:before {
-  font-family: "generalEnclosedFoundicons";
-  font-weight: normal;
-  font-style: normal;
-  text-decoration: inherit;
-}
-
 .vertical-spacing {
   margin-top: 50px !important;
   margin-bottom: 50px !important;
@@ -67,13 +39,13 @@ $amber-low: rgb(255,205,1);
     color: white;
     border-color: $red-med;
     background-color: $red-low;
-    @include background(linear-gradient($red-high, $red-low));
+    background-image:linear-gradient($red-high, $red-low);
   }
   &.message {
     color: black;
     border-color: $green-med;
     background-color: $green-low;
-    @include background(linear-gradient($green-high, $green-low));
+    background-image:linear-gradient($green-high, $green-low);
     a {
       color: #006DA0;
     }
@@ -82,7 +54,7 @@ $amber-low: rgb(255,205,1);
     color: black;
     border-color: $amber-med;
     background-color: $amber-low;
-    @include background(linear-gradient($amber-high, $amber-low));
+    background-image:linear-gradient($amber-high, $amber-low);
     a {
       color: #006DA0;
     }
@@ -116,7 +88,7 @@ table.table_form_table {
 }
 
 .table_form_table, #new_comment_box table{
-  @include grid-column(12);
+  @include xy-cell(12);
   td{
     vertical-align: middle;
   }
@@ -254,46 +226,52 @@ div.captcha_container {
 }
 
 /* DIALOG BOX */
-#dialog_box_inner{
-  overflow: hidden;
-  padding: 10px;
-}
-.loader_image{
-  margin: 75px auto;
-  left: 50%;
-  top:50%;
-}
-#dialog_buttons{
-  padding: 5px;
-  overflow: hidden;
-  margin: 10px;
-  text-align:center;
-  li{
-    padding: 5px;
-    background: blue;
-    color: white;
-    list-style: none;
-    display: inline;
-    margin: 10px;
-    border: 1px solid black;
+.reveal {
+  #dialog_box_inner {
     overflow: hidden;
-    width:auto;
-    white-space: nowrap;
+    padding: 10px;
   }
-}
-.header_name{
-  text-align:right;
-  clear:both;
-  margin-bottom:5px;
-  color:white;
-  font-size:12pt;
-}
+  .loader_image {
+    margin: 75px auto;
+    left: 50%;
+    top:50%;
+  }
+  #dialog_buttons {
+    padding: 5px;
+    overflow: hidden;
+    margin: 10px;
+    text-align:center;
+    li {
+      padding: 5px;
+      background: blue;
+      color: white;
+      list-style: none;
+      display: inline;
+      margin: 10px;
+      border: 1px solid black;
+      overflow: hidden;
+      width:auto;
+      white-space: nowrap;
+    }
+  }
+  .header_name {
+    text-align:right;
+    clear:both;
+    margin-bottom:5px;
+    color:white;
+    font-size:12pt;
+  }
 
-.frame {
-  border: 1px solid #ccc;
-  border-radius: 2px;
-  padding: 10px;
-  margin: 10px;
+  .frame {
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    padding: 10px;
+    margin: 10px;
+  }
+  .close-button {
+    top:.5rem;
+    right:.5rem;
+  }
 }
 
 /**
@@ -386,15 +364,15 @@ div.captcha_container {
       background-color: #f38800;
     }
     &.bevel {
-      @include background(linear-gradient(#f8af00, #f38800));
+      background-image:linear-gradient(#f8af00, #f38800);
       box-shadow: inset 0px -.25em 0 0 #ab4000;
     }
     &.bevel:hover {
-      @include background(linear-gradient(#f9bb00, #f07700));
+      background-image:linear-gradient(#f9bb00, #f07700);
       box-shadow: inset 0px -.25em 0 0 #a92e00;
     }
     &.bevel:active {
-      @include background(linear-gradient(#f38800, #f8af00));
+      background-image:linear-gradient(#f38800, #f8af00);
       box-shadow: inset 0 .25em 3px 0 #a92e00;
     }
   }
@@ -418,15 +396,15 @@ div.captcha_container {
       background-color: #690000;
     }
     &.bevel {
-      @include background(linear-gradient(#c80000, #8b0000));
+      background-image:linear-gradient(#c80000, #8b0000);
       box-shadow: inset 0px -.25em 0 0 #690000;
     }
     &.bevel:hover {
-      @include background(linear-gradient(#c80000, #8b0000));
+      background-image:linear-gradient(#c80000, #8b0000);
       box-shadow: inset 0px -.25em 0 0 #690000;
     }
     &.bevel:active {
-      @include background(linear-gradient(#8b0000, #c80000));
+      background-image:linear-gradient(#8b0000, #c80000);
       box-shadow: inset 0 .25em 3px 0 #690000;
     }
   }
@@ -440,15 +418,15 @@ div.captcha_container {
       background-color: #4b5cc0;
     }
     &.bevel {
-      @include background(linear-gradient(#26C7FD, #4b5cc0));
+      background-image:linear-gradient(#26C7FD, #4b5cc0);
       box-shadow: inset 0px -.25em 0 0 #1a295d;
     }
     &.bevel:hover {
-      @include background(linear-gradient(#26C7FD, #4b5cc0));
+      background-image:linear-gradient(#26C7FD, #4b5cc0);
       box-shadow: inset 0px -.25em 0 0 #1a295d;
     }
     &.bevel:active {
-      @include background(linear-gradient(#4b5cc0, #26C7FD));
+      background-image:linear-gradient(#4b5cc0, #26C7FD);
       box-shadow: inset 0 .25em 3px 0 #1a295d;
     }
   }
@@ -462,15 +440,15 @@ div.captcha_container {
       background-color: #247417;
     }
     &.bevel {
-      @include background(linear-gradient(#2eae1c, #247417));
+      background-image:linear-gradient(#2eae1c, #247417);
       box-shadow: inset 0px -.25em 0 0 #154811;
     }
     &.bevel:hover {
-      @include background(linear-gradient(#2eae1c, #247417));
+      background-image:linear-gradient(#2eae1c, #247417);
       box-shadow: inset 0px -.25em 0 0 #154811;
     }
     &.bevel:active {
-      @include background(linear-gradient(#247417, #2eae1c));
+      background-image:linear-gradient(#247417, #2eae1c);
       box-shadow: inset 0 .25em 3px 0 #154811;
     }
   }
@@ -484,15 +462,15 @@ div.captcha_container {
       background-color: #a4a4a4;
     }
     &.bevel {
-      @include background(linear-gradient(#a5a5a5, #a4a4a4));
+      background-image:linear-gradient(#a5a5a5, #a4a4a4);
       box-shadow: inset 0px -.25em 0 0 #888888;
     }
     &.bevel:hover {
-      @include background(linear-gradient(#a5a5a5, #a4a4a4));
+      background-image:linear-gradient(#a5a5a5, #a4a4a4);
       box-shadow: inset 0px -.25em 0 0 #888888;
     }
     &.bevel:active {
-      @include background(linear-gradient(#a4a4a4, #a5a5a5));
+      background-image:linear-gradient(#a4a4a4, #a5a5a5);
       box-shadow: inset 0 .25em 3px 0 #888888;
     }
   }
@@ -657,11 +635,6 @@ pre.debug {
   top: 20%;
   max-height: 60%;
   overflow-y: auto;
-  position: fixed !important;
-  @include breakpoint(small only) {
-    top: 0;
-    height: 100%;
-  }
   iframe.content-loader {
     border: 0;
     width: 100%;

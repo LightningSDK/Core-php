@@ -241,11 +241,26 @@ class Template extends Singleton {
     public function renderFooter() {
         echo JS::render() . CSS::render() . $this->footer;
         if (ClientUser::getInstance()->isAdmin()) {
+            echo '<ul class="accordion" data-accordion>';
+            echo '<li class="accordion-item is-active" data-accordion-item>';
+            echo '<a href="#" class="accordion-title">Performance Overview</a>';
+            echo '<div class="accordion-content" data-tab-content>';
+            echo '<pre class="debug">';
+            echo json_encode(Performance::timeReport(), JSON_PRETTY_PRINT);
+            echo '</pre>';
+            echo '</div>';
+            echo '</li>';
+            echo '<li class="accordion-item" data-accordion-item>';
+            echo '<a href="#" class="accordion-title">Database Queries</a>';
+            echo '<div class="accordion-content" data-tab-content>';
             echo '<pre class="debug">';
             $database = Database::getInstance();
-            print_r(Performance::timeReport());
-            print_r($database->getQueries());
+            echo json_encode($database->getQueries(), JSON_PRETTY_PRINT);
             echo '</pre>';
+            echo '</div>';
+            echo '</li>';
+            echo '</ul>';
+            echo '<script>$(document).foundation();</script>';
         }
     }
 

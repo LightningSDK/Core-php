@@ -15,7 +15,6 @@ $conf = [
             'admin/splittests' => \lightningsdk\core\Pages\Admin\SplitTests::class,
             'admin/social/auth' => \lightningsdk\core\Pages\SocialSharing\Auth::class,
             'admin/social/share' => \lightningsdk\core\Pages\SocialSharing\Share::class,
-            'admin/css' => \lightningsdk\core\Pages\Admin\CSS::class,
             'robots.txt' => \lightningsdk\core\Pages\Robots::class,
             'sitemap' => \lightningsdk\core\Pages\Sitemap::class,
             'track' => \lightningsdk\core\Pages\Track::class,
@@ -91,6 +90,13 @@ $conf = [
     'language' => 'en_us',
     'template_dir' => 'Source/Templates',
     'temp_dir' => HOME_PATH . '/../tmp',
+    'compiler' => [
+        'sass' => [
+            'includes' => [
+                'lightning' => 'vendor/ligthningsdk/core/sass'
+            ],
+        ],
+    ],
     'menus' => [
         'admin' => [
             'Content' => [

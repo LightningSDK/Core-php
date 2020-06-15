@@ -4,6 +4,8 @@
   "description": "Lightning Fast PHP Framework.",
   "version": "1.0.0",
   "require": {
+    "ext-calendar": "*",
+    "ext-tidy": "*",
     "ezyang/htmlpurifier": "^4.12",
     "rambomst/php-bounce-handler": "^1.6",
     "components/font-awesome": "^5.12",

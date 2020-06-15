@@ -60,8 +60,10 @@ function compile(done, config){
                     break;
             }
 
+            if (i.match(/\.(css|js)$/)) {
+                g = g.pipe(concat(i))
+            }
             g
-                .pipe(concat(i))
                 .pipe(gulp.dest(types[type]))
                 .pipe(gzip())
                 .pipe(gulp.dest(types[type]));
@@ -103,12 +105,13 @@ function sassOnly (file) {
 
 function getSassConfig(config) {
     var sassConfig = config.hasOwnProperty("sass") ? config.sass : {};
-    if (!sassConfig.hasOwnProperty("includes")) {
-        sassConfig.includes = [];
-    }
-    if (!sassConfig.hasOwnProperty("vars")) {
+
+    if (sassConfig.hasOwnProperty("includes")) {
+        sassConfig.includes = Object.values(sassConfig.includes);
+    } else {
         sassConfig.vars = [];
     }
+
     sassConfig.header = '';
     for (var v in sassConfig.vars) {
         sassConfig.header += v + ": '" + sassConfig.vars[v] + "';\n";
@@ -119,7 +122,7 @@ function getSassConfig(config) {
 
 function getPath(done, module, file, type) {
     if (module === "Source") {
-        return "Source/Resources/" + type + "/" + file;
+        return "Source/Resources/" + file;
     }
     var paths = [
         "Modules/" + module + "/" + type + "/" + file,
