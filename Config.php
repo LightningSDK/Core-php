@@ -28,7 +28,8 @@ $conf = [
             'api/user' => \lightningsdk\core\API\User::class,
 
             // Image admin
-            'elfinder' => \lightningsdk\core\API\ElFinder::class,
+            'elfinder' => \lightningsdk\core\Pages\ElFinder::class,
+            'api/elfinder' => \lightningsdk\core\API\ElFinder::class,
             'imageBrowser' => \lightningsdk\core\Pages\ImageBrowser::class,
 
             'admin/contact' => \lightningsdk\core\Pages\Admin\Contact::class,

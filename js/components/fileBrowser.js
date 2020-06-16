@@ -27,9 +27,11 @@ lightning.fileBrowser = {
         // TODO: This has to be changed to handle other browsers.
         lightning.fileBrowser.elf = $('#elfinder').elfinder({
             // set your elFinder options here
-            url: '/elfinder',  // connector URL
+            url: '/api/elfinder',  // connector URL
             closeOnEditorCallback: true,
-            getFileCallback: lightning.fileBrowser.select
+            getFileCallback: lightning.fileBrowser.select,
+            height: '100%',
+            resizable: false
         }).elfinder('instance');
     },
 
@@ -84,7 +86,7 @@ lightning.fileBrowser = {
         switch (lightning.fileBrowser.type || lightning.vars.fileBrowser.type) {
             case 'elfinder':
                 window.open(
-                    '/js/elfinder/elfinder.html?type=' + type + '&field=' + field + '&url=' + url,
+                    '/elfinder?type=' + type + '&field=' + field + '&url=' + url,
                     'Image Browser',
                     ''
                 );

@@ -115,7 +115,7 @@ class CKEditor {
                         $parameters['url'] = 'full';
                         $parameters['web_root'] = Configuration::get('web_root');
                     }
-                    $options['filebrowserBrowseUrl'] = '/js/elfinder/elfinder.html?container=images&' . http_build_query($parameters);
+                    $options['filebrowserBrowseUrl'] = '/elfinder?container=images&' . http_build_query($parameters);
                     $options['filebrowserUploadUrl'] = '/imageBrowser?container=images&action=upload&' . http_build_query($parameters);
                     break;
                 case 'lightning':

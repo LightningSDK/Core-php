@@ -169,10 +169,6 @@ $conf = [
             'admin/roles' => 'lightningsdk\\core\\Pages\\Admin\\Roles',
             'admin/permissions' => 'lightningsdk\\core\\Pages\\Admin\\Permissions',
             'admin/contact' => 'lightningsdk\\core\\Pages\\Admin\\Contact',
-
-            // Image admin
-            'elfinder' => 'lightningsdk\\core\\API\\ElFinder',
-            'imageBrowser' => 'lightningsdk\\core\\Pages\\ImageBrowser',
         ],
         'cli_only' => [
             'bounce' => 'lightningsdk\\core\\CLI\\BouncedEmail',
