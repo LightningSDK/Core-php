@@ -86,7 +86,6 @@ $conf = [
     ],
     'sitemap' => [
         'pages' => \lightningsdk\core\Model\Page::class,
-        'blog' => \lightningsdk\core\Model\Blog::class,
     ],
     'language' => 'en_us',
     'template_dir' => 'Source/Templates',
