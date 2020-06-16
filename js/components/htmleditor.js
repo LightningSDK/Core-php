@@ -88,9 +88,9 @@
                 delete editor_settings.content_rendered;
             }
             editor.addClass('editor-active');
-            if (editor_settings.editor_type == 'tinymce') {
+            if (editor_settings.editor_type === 'tinymce') {
                 tinymce.init(editor_settings);
-            } else if (editor_settings.editor_type == 'ckeditor') {
+            } else if (editor_settings.editor_type === 'ckeditor') {
                 editor.attr('contenteditable', 'true');
                 self.editors[editor_id] = CKEDITOR.inline(editor_id, editor_settings);
             }
@@ -105,9 +105,9 @@
         deactivateEditor: function(editor_id) {
             var editor = $('#' + editor_id);
             editor.removeClass('editor-active');
-            if (lightning.vars.htmleditors[editor_id].editor_type == 'tinymce') {
+            if (lightning.vars.htmleditors[editor_id].editor_type === 'tinymce') {
                 for (var i in tinymce.editors) {
-                    if (tinymce.editors[i].id == editor_id) {
+                    if (tinymce.editors[i].id === editor_id) {
                         tinymce.editors[i].remove();
                     }
                 }

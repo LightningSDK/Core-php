@@ -3,6 +3,7 @@
 @import 'settings/_settings';
 @import 'xy-grid/_gutters';
 @import 'xy-grid/_cell';
+@import 'scss/regular';
 
 $red-high: rgb(255,55,52);
 $red-med: rgb(242,84,72);
@@ -13,14 +14,6 @@ $green-low: rgb(103,215,103);
 $amber-high: rgb(255,228,0);
 $amber-med: rgb(213,191,0);
 $amber-low: rgb(255,205,1);
-
-.foundicon-plus:before {
-  content: "\f003";
-}
-
-.foundicon-minus:before {
-  content: "\f004";
-}
 
 .vertical-spacing {
   margin-top: 50px !important;
@@ -68,7 +61,7 @@ $amber-low: rgb(255,205,1);
     list-style: none;
     margin: 0px;
     li:before {
-      content: "\f054";
+      content: $fa-var-chevron-right;
       font-family: FontAwesome;
       margin-left: -20px;
       margin-right: 10px;

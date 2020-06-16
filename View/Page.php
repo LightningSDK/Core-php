@@ -117,7 +117,6 @@ class PageOverridable {
         JS::add('/js/lightning.min.js');
         JS::startup('lightning.startup.init()');
         CSS::add('/css/lightning.css');
-        CSS::add('/css/font-awesome.min.css');
         CSS::add('/css/site.css');
         if (!empty($this->css)) {
             CSS::add($this->css);

@@ -25,7 +25,7 @@ function tree_sub_click() {
             dataType:"json",
             data:{action:'load_node',node_id:click_id},
             success: function (data) {
-                if (data.status == "error") {
+                if (data.status === "error") {
                     alert(data.error);
                 } else {
                     $('#tree_'+tree_data.tree_name).append("<div class='tree_column' id='tree_column_"+data.node_id+"'></div>");

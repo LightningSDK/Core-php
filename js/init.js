@@ -3,4 +3,4 @@
  */
 if (typeof lightning == "undefined") {
     lightning = {};
-};
+}
