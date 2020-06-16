@@ -633,3 +633,11 @@ pre.debug {
     width: 100%;
   }
 }
+
+.right-column {
+  background: none;
+  border: 0;
+  li {
+    border-bottom: 1px solid #eee;
+  }
+}
