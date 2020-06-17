@@ -29,7 +29,7 @@ class HTML5 {
     public static function add($video_id, $settings) {
         self::initDisplay();
         JS::set('videos.' . $video_id, $settings);
-        JS::startup('lightning.video.init()', ['https://vjs.zencdn.net/7.8.2/video.js']);
+        JS::startup('lightning.video.init()', ['/js/videojs/video.min.js']);
     }
 
     /**

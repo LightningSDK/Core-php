@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <?= $this->build('metadata'); ?>
+    <?= $this->build(['metadata', 'lightningsdk/core']); ?>
     <?= $this->renderHeader(); ?>
 </head>
 <body class="antialiased hide-extras <?= !empty($fullscreen) ? 'fullscreen' : 'standard'; ?>">

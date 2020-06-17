@@ -15,7 +15,9 @@ use lightningsdk\core\Tools\Scrub;
         <meta name="fb:app_id" content="<?= $mets['facebook_app_id']; ?>" />
     <?php endif; ?>
     <meta name="robots" content="ALL, INDEX, FOLLOW" />
-    <meta name="copyright" content="http://LightningSDK.net Copyright (c) 2016" />
+    <?php if (!empty($meta['keywords'])): ?>
+        <meta name="copyright" content="<?php Scrub::text($meta['copyright']); ?>" />
+    <?php endif; ?>
     <meta name="og:url" content="<?= Scrub::text(!empty($meta['url']) ? $meta['url'] : Request::getURL()); ?>" />
     <?php if ($appid = Configuration::get('social.facebook.appid')): ?>
         <meta name="og:app_id" content="<?= Scrub::text($appid); ?>" />

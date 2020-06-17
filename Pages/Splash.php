@@ -3,7 +3,6 @@
 namespace lightningsdk\core\Pages;
 
 use lightningsdk\core\Tools\Configuration;
-use lightningsdk\core\Tools\Form;
 use lightningsdk\core\Tools\Request;
 use lightningsdk\core\View\CSS;
 use lightningsdk\core\View\JS;
