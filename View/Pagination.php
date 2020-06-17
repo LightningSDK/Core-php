@@ -82,21 +82,17 @@ class Pagination {
                 $suffix = '';
             }
 
-            $output .= '<ul class="pagination">';
-            if ($this->currentPage > 1) {
-                $output .= '<li class="arrow ' . ($this->currentPage > 1 ? '' : 'unavailable') . '"><a href="' . $prefix . 1 . $suffix . '">&laquo; First</a></li>';
-            }
+            $output .= '<nav aria-label="Pagination"><ul class="pagination text-center">';
+            $output .= '<li class="pagination-previous ' . ($this->currentPage > 1 ? '' : 'disabled') . '"><a href="' . $prefix . 1 . $suffix . '">First</a></li>';
             for($i = max(1, $this->currentPage - 5); $i <= min($this->pages, $this->currentPage + 5); $i++) {
                 if ($this->currentPage == $i) {
-                    $output.= '<li class="current"><a>' . $i . '</a></li>';
+                    $output.= '<li class="current"><span class="show-for-sr"></span>' . $i . '</li>';
                 } else {
-                    $output.= "<li><a href='". $prefix . $i . $suffix ."'>{$i}</a></li>";
+                    $output.= "<li><a href='". $prefix . $i . $suffix ."' aria-label='Page {$i}'>{$i}</a></li>";
                 }
             }
-            if ($this->currentPage < $this->pages) {
-                $output .= '<li class="arrow ' . ($this->currentPage == $this->pages ? 'unavailable' : '') . '"><a href="' . $prefix . $this->pages . $suffix . '">Last &raquo;</a></li>';
-            }
-            $output .= '</ul>';
+            $output .= '<li class="pagination-next ' . ($this->currentPage == $this->pages ? 'disabled' : '') . '"><a href="' . $prefix . $this->pages . $suffix . '">Last</a></li>';
+            $output .= '</ul></nav>';
         }
         return $output;
     }

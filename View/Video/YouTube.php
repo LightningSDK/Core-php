@@ -33,7 +33,7 @@ class YouTube {
             'autoplay' => !empty($options['autoplay']) ? true : false,
         ]);
         if (!empty($options['flex'])) {
-            $output = '<div class="flex-video ' . (!empty($options['widescreen']) ? 'widescreen' : '') . '">' . $output . '</div>';
+            $output = '<div class="responsive-embed ' . (!empty($options['widescreen']) ? 'widescreen' : '') . '">' . $output . '</div>';
         }
         return $output;
     }

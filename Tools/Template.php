@@ -241,7 +241,7 @@ class Template extends Singleton {
     public function renderFooter() {
         echo JS::render() . CSS::render() . $this->footer;
         if (ClientUser::getInstance()->isAdmin()) {
-            echo '<ul class="accordion" data-accordion>';
+            echo '<div id="performance-data"><ul class="accordion" data-accordion>';
             echo '<li class="accordion-item is-active" data-accordion-item>';
             echo '<a href="#" class="accordion-title">Performance Overview</a>';
             echo '<div class="accordion-content" data-tab-content>';
@@ -259,8 +259,8 @@ class Template extends Singleton {
             echo '</pre>';
             echo '</div>';
             echo '</li>';
-            echo '</ul>';
-            echo '<script>$(document).foundation();</script>';
+            echo '</ul></div>';
+            echo '<script>lightning.js.require(["/js/lightning.min.js"], function(){$("#performance-data").foundation()});</script>';
         }
     }
 

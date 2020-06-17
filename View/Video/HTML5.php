@@ -12,9 +12,7 @@ class HTML5 {
     public static function initDisplay() {
         static $inited = false;
         if (!$inited) {
-            JS::add('/js/video.min.js', false);
-            JS::startup('videojs.options.flash.swf = "/swf/video-js.swf"');
-            CSS::add('/css/video-js.min.css');
+            CSS::add('/js/videojs/video-js.min.css');
             $inited = true;
         }
     }
@@ -31,7 +29,7 @@ class HTML5 {
     public static function add($video_id, $settings) {
         self::initDisplay();
         JS::set('videos.' . $video_id, $settings);
-        JS::startup('lightning.video.init()');
+        JS::startup('lightning.video.init()', ['https://vjs.zencdn.net/7.8.2/video.js']);
     }
 
     /**
