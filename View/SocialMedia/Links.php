@@ -26,16 +26,16 @@ class Links {
                         $output .= '<li><a class="btn btn-default" title="Facebook" href="' . $settings['url'] . '" target="_blank"><i class="fa fa-facebook"></i></a></li>';
                         break;
                     case 'youtube':
-                        $output .= '<li><a class="btn btn-default" title="YouTube" href="' . $settings['url'] . '" target="_blank"><i class="fa fa-youtube"></i></a></li>';
+                        $output .= '<li><a class="btn btn-default" title="YouTube" href="https://youtube.com/channel' . $settings['url'] . '" target="_blank"><i class="fa fa-youtube"></i></a></li>';
                         break;
                     case 'twitter':
                         $output .= '<li><a class="btn btn-default" title="Twitter" href="https://twitter.com/' . $settings['url'] . '" target="_blank"><i class="fa fa-twitter"></i></a></li>';
                         break;
-                    case 'pinterest':
+                    case 'instagram':
                         $output .= '<li><a class="btn btn-default" title="Instagram" href="' . $settings['url'] . '" target="_blank"><i class="fa fa-pinterest"></i></a></li>';
                         break;
                     case 'pinterest':
-                        $output .= '<li><a class="btn btn-default" title="Instagram" href="' . $settings['url'] . '" target="_blank"><i class="fa fa-instagram"></i></a></li>';
+                        $output .= '<li><a class="btn btn-default" title="Pinterest" href="' . $settings['url'] . '" target="_blank"><i class="fa fa-pinterest"></i></a></li>';
                         break;
                     case 'linkedin':
                         $output .= '<li><a class="btn btn-default" title="Linked In" href="' . $settings['url'] . '" target="_blank"><i class="fa fa-linkedin"></i></a></li>';
@@ -43,7 +43,7 @@ class Links {
                 }
             }
         }
-        $output .= "<li><a href='mailto:?body={rawurlencode(\'I thought you might find this page interesting:\')} %0D%0A%0D%0A{Scrub::toURL($url)}' title='Email'><i class='fa fa-send'></i></a></li>";
+        $output .= "<li><a href='mailto:?body=" . rawurlencode('I thought you might find this page interesting:') . " %0D%0A%0D%0A" . Scrub::toURL($url) . "' title='Email'><i class='fa fa-send'></i></a></li>";
         $output .= "</div>";
         return $output;
     }
