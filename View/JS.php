@@ -244,6 +244,8 @@ class JS {
              } else {
                $lsq.push({r: req, c: cb});
              }
-           };';
+           };
+           lightning_startup(cb){$_startup(cb, "lightning")}
+           ';
     }
 }
