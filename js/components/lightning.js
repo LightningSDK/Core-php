@@ -75,9 +75,9 @@ lightning.js = {
             urls = [urls];
         }
 
-        if (lightning_mv > 0) {
+        if (lightning.js.mv > 0) {
             for (var i in urls) {
-                urls[i] = urls[i] + '?v=' + lightning_mv;
+                urls[i] = urls[i] + '?v=' + lightning.js.mv;
             }
         }
 
@@ -90,7 +90,9 @@ lightning.js = {
         for (var i in urls) {
             if (!lightning.js.loaded.hasOwnProperty(urls[i])) {
                 // Any scripts that are not already included can be included here.
-                lightning.js.loadScript(urls[i]);
+                if (urls[i].match(/\.js\?v=[0-9]+/)) {
+                    lightning.js.loadScript(urls[i]);
+                }
             }
         }
 
@@ -102,36 +104,43 @@ lightning.js = {
      */
     trigger: function() {
         // Iterate over each queued item.
-        lightning.js.loaded['/js/lightning.min.js?v='+lightning_mv] = true;
+        lightning.js.loaded['/js/lightning.min.js?v='+lightning.js.mv] = true;
         queue:
         for (var i in lightning.js.queue) {
             // See if all scripts are loaded.
             if (!lightning.js.queue[i].triggered) {
                 for (var j in lightning.js.queue[i].urls) {
                     // Trigger the script.
-                    if (!lightning.js.loaded[lightning.js.queue[i].urls[j]]) {
-                         continue queue;
+                    var url = lightning.js.queue[i].urls[j];
+                    if (url.match(/\.js\?v=[0-9]+/) && !lightning.js.loaded[url]) {
+                        continue queue;
+                    } else if ("undefined" != typeof window[url]) {
+                        continue queue;
                     }
                 }
                 lightning.js.queue[i].triggered = true;
                 lightning.js.queue[i].callback();
             }
         }
-    }
-};
+    },
 
-/**
- * Force external scripts to load asynchronously before executing a callback.
- * @deprecated
- *   Use lightning.js.require
- *
- * @param {string|array} url
- *   A URL or array of urls of JS files.
- * @param callback
- *   A method to call when all the JS files have loaded.
- */
-lightning.require = function(urls, callback){
-    lightning.js.require(urls, callback);
+    /**
+     * Any scripts that were requested to run before the require function was established
+     * will be added to the require queue.
+     */
+    loadStartupQueue: function() {
+        lightning.js.mv = lightning.get('minified_version');
+        for (var i in $lsq) {
+            lightning.js.require($lsq[i].r, $lsq[i].c);
+        }
+    },
+
+    addModule: function(name, module) {
+        if("undefined" == typeof lightning.modules) {
+            lightning.modules = {};
+        }
+        lightning.modules[name] = module;
+    }
 };
 
 /**

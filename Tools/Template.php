@@ -260,7 +260,6 @@ class Template extends Singleton {
             echo '</div>';
             echo '</li>';
             echo '</ul></div>';
-            echo '<script>lightning.js.require(["/js/lightning.min.js"], function(){$("#performance-data").foundation()});</script>';
         }
     }
 

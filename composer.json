@@ -4,6 +4,7 @@
   "description": "Lightning Fast PHP Framework.",
   "version": "1.0.0",
   "require": {
+    "ext-json": "*",
     "ext-calendar": "*",
     "ext-tidy": "*",
     "ezyang/htmlpurifier": "^4.12",

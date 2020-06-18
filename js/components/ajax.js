@@ -70,7 +70,7 @@
             if (data.js_startup) {
                 for (var i in data.js_startup) {
                     if (data.js_startup[i].requires && data.js_startup[i].requires.length > 0) {
-                        lightning.require(data.js_startup[i].requires, function () {
+                        lightning.js.require(data.js_startup[i].requires, function () {
                             eval(data.js_startup[i].script);
                         });
                     } else {

@@ -67,7 +67,9 @@ class CMS {
             $vars['USER_ID'] = $user_id;
         }
         $vars['WEB_ROOT'] = Configuration::get('web_root');
-        if (ClientUser::getInstance()->isAdmin()) {
+        if (!empty($settings['display_only'])) {
+            return '<div>' . Markup::render($content, $vars) . '</div>';
+        } else if (ClientUser::getInstance()->isAdmin()) {
             JS::startup('lightning.cms.init()');
             JS::set('token', FormTool::getToken());
             JS::set('cms.cms_' . $name . '.config', !empty($settings['config']) ? $settings['config'] : []);

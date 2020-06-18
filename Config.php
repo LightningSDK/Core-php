@@ -79,6 +79,7 @@ $conf = [
             'input' => \lightningsdk\core\View\Field::class,
             'script' => \lightningsdk\core\View\Script::class,
             'iframe' => \lightningsdk\core\View\Iframe::class,
+            'social-share' => \lightningsdk\core\View\SocialMedia\Share::class,
             'social-links' => \lightningsdk\core\View\SocialMedia\Links::class,
             'social-follow' => \lightningsdk\core\View\SocialMedia\Follow::class,
             'cms' => \lightningsdk\core\View\CMS::class,

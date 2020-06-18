@@ -102,10 +102,9 @@ lightning.video = {
         var showControls = source.controls || !source.hasOwnProperty('controls') && (!video.hasOwnProperty('controls') || video.controls);
         var width = video.hasOwnProperty('width') ? video.width : 640;
         var height = video.hasOwnProperty('height') ? video.width : 320;
-        var widescreen = video.hasOwnProperty('widescreen') ? 'widescreen' : '';
         var video_tag;
         if (source.mp4 || source.ogg || source.webm) {
-            video_tag = '<video id=video_player_' + id + ' class="video-js vjs-default-skin responsive-embed ' + widescreen + '" width="' + width + '" height="' + height + '" poster="' + (source.still ? source.still : video.still ? video.still : '') + '" ' + (showControls ? 'controls' : '') + ' preload>';
+            video_tag = '<video id=video_player_' + id + ' class="video-js vjs-default-skin" width="' + width + '" height="' + height + '" poster="' + (source.still ? source.still : video.still ? video.still : '') + '" ' + (showControls ? 'controls' : '') + ' preload>';
             for (var codec in {'mp4': 1, 'ogg': 1, 'webm': 1}) {
                 if (source[codec]) {
                     video_tag += '<source src="' + source[codec] + '" type="video/' + codec + ';">';
@@ -116,7 +115,7 @@ lightning.video = {
         } else {
             video_tag = $('<audio>');
             video_tag.prop('id', 'video_player_' + id);
-            video_tag.prop('class', 'video-js vjs-default-skin responsive-embed' + widescreen);
+            video_tag.prop('class', 'video-js vjs-default-skin');
             video_tag.prop('width', width);
             video_tag.prop('height', height);
             video_tag.prop('preload', 'preload');
@@ -137,7 +136,7 @@ lightning.video = {
                 }
             }
         }
-        container.append(video_tag);
+        container.addClass('embed-container').append(video_tag);
 
         // Initialize the player.
         this.players[id] = videojs(

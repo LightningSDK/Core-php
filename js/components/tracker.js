@@ -96,7 +96,7 @@
                 scripts.push('//connect.facebook.net/en_US/fbevents.js');
             }
             if (scripts.length > 0) {
-                lightning.require(scripts, function () {
+                lightning.js.require(scripts, function () {
                     // Init the trackers
                     if (lightning.vars.google_analytics_id) {
                         var startTime = new Date();

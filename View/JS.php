@@ -44,13 +44,6 @@ class JS {
     protected static $vars = [];
 
     /**
-     * @var boolean
-     *
-     * Whether the funciton lighting_startup() has been added already.
-     */
-    protected static $startupFunctionAdded = false;
-
-    /**
      * @var array
      *
      * A list of scripts to run when the page is ready.
@@ -139,6 +132,8 @@ class JS {
         if (empty(self::$startup_scripts[$hash])) {
             if (!empty($requires)) {
                 $requires = self::getCompiledScripts($requires);
+            } else {
+                $requires = ['lightning'];
             }
             self::$startup_scripts[$hash] = ['script' => $script, 'requires' => $requires, 'rendered' => false];
         }
@@ -184,12 +179,15 @@ class JS {
     public static function render() {
         $output = '';
         if (!self::$inited) {
-            $output = '<script>lightning_startup_q = []; lightning={"vars":' . json_encode(self::$vars) . '};</script>';
+            self::$vars['minified_version'] = Configuration::get('minified_version', 0);
+            $output = '<script>';
+            $output .= self::includeStartupFunction();
+            if (!empty(self::$vars)) {
+                $output .= 'lightning={"vars":' . json_encode(self::$vars) . '};';
+            }
+            $output .= '</script>';
             self::$vars = [];
             self::$inited = true;
-        } elseif (!empty(self::$vars)) {
-            $startup = self::includeStartupFunction();
-            $output = '<script>' . $startup . 'lightning_startup(function(){$.extend(true, lightning.vars, ' . json_encode(self::$vars) . ')});</script>';
         }
 
         // Include JS files.
@@ -210,66 +208,42 @@ class JS {
             }
         }
 
-        // Include inline scripts
-        if (!empty(self::$inline_scripts) || !empty(self::$startup_scripts)) {
-            $init_scripts = '';
-            // Include inline scripts.
-            foreach (self::$inline_scripts as $script) {
+        $init_scripts = '';
+        // Include inline scripts.
+        foreach (self::$inline_scripts as $script) {
+            if (empty($script['rendered'])) {
+                $init_scripts .= $script['script'] . ";\n";
+                $script['rendered'] = true;
+            }
+        }
+
+        // Include ready scripts.
+        if (!empty(self::$startup_scripts)) {
+            foreach (self::$startup_scripts as &$script) {
                 if (empty($script['rendered'])) {
-                    $init_scripts .= $script['script'] . ";";
+                    // Include the startup script with the required JS scripts.
+                    $init_scripts .= '$_startup(' . json_encode($script['requires']) . ', function(){' . $script['script'] . '});'."\n";
                     $script['rendered'] = true;
                 }
             }
+        }
 
-            // Include ready scripts.
-            if (!empty(self::$startup_scripts)) {
-                $ready_scripts = '';
-                foreach (self::$startup_scripts as &$script) {
-                    if (empty($script['rendered'])) {
-                        if (!empty($script['requires'])) {
-                            // Include the startup script with the required JS scripts.
-                            $require_array = is_array($script['requires']) ? array_values($script['requires']) : [$script['requires']];
-                            $ready_scripts .= 'lightning.js.require(' . json_encode($require_array)
-                                . ', function(){' . $script['script'] . '});';
-                        } else {
-                            $ready_scripts .= $script['script'] . ';';
-                        }
-                        $script['rendered'] = true;
-                    }
-                }
-                $init_scripts .= self::includeStartupFunction();
-                if (!empty($ready_scripts)) {
-                    $init_scripts .= 'lightning_startup(function() {' . $ready_scripts . '})';
-                }
-            }
-            if (!empty($init_scripts)) {
-                $output .= '<script>' . $init_scripts . '</script>';
-            }
+        if (!empty($init_scripts)) {
+            $output .= '<script>' . $init_scripts . '</script>';
         }
 
         return $output;
     }
 
     protected static function includeStartupFunction() {
-        if (!self::$startupFunctionAdded) {
-            self::$startupFunctionAdded = true;
-            // $lsq is the lightning startup queue
-            return 'var $lsq = []; var lightning_mv = ' . Configuration::get('minified_version', 0) . ';
-                    function lightning_startup(callback) {
-                        if (typeof $ == "undefined") {
-                            if (typeof callback != "undefined")
-                                $lsq.push(callback);
-                            setTimeout(lightning_startup, 500);
-                        } else {
-                            for (var i in $lsq) {
-                                $lsq[i]();
-                            }
-                            $lsq = [];
-                            if (typeof callback != "undefined")
-                                $(callback);
-                        }
-                    };';
-        }
-        return '';
+        return '
+           $lsq = [];
+           $_startup = function(req, cb){
+             if (typeof lightning != "undefined" && typeof lightning.js != "undefined") {
+               lightning.js.require(req, cb);
+             } else {
+               $lsq.push({r: req, c: cb});
+             }
+           };';
     }
 }
