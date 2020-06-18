@@ -26,10 +26,15 @@ class Widget extends Page {
         $params = ['action' => 'body'] + $params;
 
         echo 'document.write(\'<iframe frameborder="0" src="' . Configuration::get('web_root') . '/' . $widget . '?' . http_build_query($params) . '" id="' . $id . '" width="100%"></iframe>\');
-        if (!lightning || !lightning.widget) {
+        if (typeof lightning != "undefined") {
             document.write(\'<script src="' . Configuration::get('web_root') . '/js/lightning.min.js"></script>\');
         }
-        lightning_startup(function(){lightning.widget.initIframe("' . $id . '");});';
+        if (typeof lightning_startup != "undefined") {
+            lightning_startup(function(){lightning.widget.initIframe(\'' . $id . '\');});
+        }
+        else if (typeof $_startup != "undefined") {
+            $_startup(function(){lightning.widget.initIframe(\'' . $id . '\');}, "lightning");
+        }';
         exit;
     }
 
