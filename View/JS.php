@@ -222,7 +222,7 @@ class JS {
             foreach (self::$startup_scripts as &$script) {
                 if (empty($script['rendered'])) {
                     // Include the startup script with the required JS scripts.
-                    $init_scripts .= '$_startup(' . json_encode($script['requires']) . ', function(){' . $script['script'] . '});'."\n";
+                    $init_scripts .= '$_startup(function(){' . $script['script'] . '}, ' . json_encode($script['requires']) . ');'."\n";
                     $script['rendered'] = true;
                 }
             }
@@ -238,11 +238,11 @@ class JS {
     protected static function includeStartupFunction() {
         return '
            $lsq = [];
-           $_startup = function(req, cb){
+           $_startup = function(cb, req){
              if (typeof lightning != "undefined" && typeof lightning.js != "undefined") {
                lightning.js.require(req, cb);
              } else {
-               $lsq.push({r: req, c: cb});
+               $lsq.push({c: cb, r: req});
              }
            };
            function lightning_startup(cb){$_startup(cb, "lightning")}
