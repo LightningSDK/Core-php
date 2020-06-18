@@ -6,6 +6,9 @@
 
 namespace lightningsdk\core\Model\Mailing;
 
+use lightningsdk\core\Model\BaseObject;
+use lightningsdk\core\Model\Tracker;
+use lightningsdk\core\Model\User;
 use lightningsdk\core\Tools\Configuration;
 use lightningsdk\core\Tools\Database;
 use lightningsdk\core\Tools\Language;

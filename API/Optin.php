@@ -2,7 +2,7 @@
 
 namespace lightningsdk\core\API;
 
-use lightningsdk\core\Model\Message;
+use lightningsdk\core\Model\Mailing\Message;
 use lightningsdk\core\Model\User;
 use lightningsdk\core\Tools\Mailer;
 use lightningsdk\core\Tools\Messenger;

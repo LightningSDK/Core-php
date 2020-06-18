@@ -3,14 +3,14 @@
 namespace lightningsdk\core\Tools;
 
 use Exception;
-use lightningsdk\core\Model\Message;
+use lightningsdk\core\Model\Mailing\Message;
 use lightningsdk\core\Model\User;
 use lightningsdk\core\Model\Tracker as TrackerModel;
+use PHPMailer\PHPMailer\PHPMailer;
 
 /**
  * Include the PHPMailer
  */
-require_once HOME_PATH . '/Lightning/Vendor/PHPMailer/class.phpmailer.php';
 
 class Mailer {
 
@@ -41,7 +41,7 @@ class Mailer {
     /**
      * The PHPMailer object.
      *
-     * @var \PHPMailer
+     * @var PHPMailer
      */
     protected $mailer;
 
@@ -112,7 +112,7 @@ class Mailer {
      */
     public function __construct($verbose = false) {
         $this->debug = Configuration::get('debug', false);
-        $this->mailer = new \PHPMailer(true);
+        $this->mailer = new PHPMailer(true);
         $this->mailer->CharSet = 'UTF-8';
         $this->mailer->Sender = Configuration::get('mailer.bounce_address');
         $this->verbose = $verbose;

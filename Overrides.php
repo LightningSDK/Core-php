@@ -13,7 +13,6 @@ namespace lightningsdk\core\Model;
 
 class Calendar extends \lightningsdk\core\Model\CalendarOverridable {}
 class CMS extends \lightningsdk\core\Model\CMSOverridable {}
-class Message extends \lightningsdk\core\Model\MessageOverridable {}
 class Page extends \lightningsdk\core\Model\PageOverridable {}
 class Permissions extends \lightningsdk\core\Model\PermissionsOverridable {}
 class SocialAuth extends \lightningsdk\core\Model\SocialAuthOverridable {}
