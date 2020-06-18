@@ -26,7 +26,7 @@ class Widget extends Page {
         $params = ['action' => 'body'] + $params;
 
         echo 'document.write(\'<iframe frameborder="0" src="' . Configuration::get('web_root') . '/' . $widget . '?' . http_build_query($params) . '" id="' . $id . '" width="100%"></iframe>\');
-        if (typeof lightning != "undefined") {
+        if (typeof lightning === "undefined") {
             document.write(\'<script src="' . Configuration::get('web_root') . '/js/lightning.min.js"></script>\');
         }
         if (typeof lightning_startup != "undefined") {
