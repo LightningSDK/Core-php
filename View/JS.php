@@ -245,7 +245,7 @@ class JS {
                $lsq.push({r: req, c: cb});
              }
            };
-           lightning_startup(cb){$_startup(cb, "lightning")}
+           function lightning_startup(cb){$_startup(cb, "lightning")}
            ';
     }
 }
