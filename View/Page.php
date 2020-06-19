@@ -106,8 +106,14 @@ class PageOverridable {
      */
     public function __construct() {
         // Load module settings if present.
+        // This incorporates configurations from the module into the page
         if (!empty(static::MODULE)) {
             $this->initModule();
+        }
+
+        // Load any page initters from modules
+        foreach (Configuration::get('modules.page-init', []) as $initterClass) {
+            call_user_func([$initterClass, 'init']);
         }
 
         // Load messages and errors from the query string.
@@ -117,13 +123,6 @@ class PageOverridable {
         JS::add('/js/lightning.min.js');
         JS::startup('lightning.startup.init()');
         CSS::add('/css/lightning.css');
-        CSS::add('/css/site.css');
-        if (!empty($this->css)) {
-            CSS::add($this->css);
-        }
-        if (!empty($this->js)) {
-            JS::add($this->js);
-        }
 
         ClientUser::trackReferrer();
     }
