@@ -9,94 +9,133 @@ var sass = require("gulp-sass");
 var header = require('gulp-header');
 var cleanCSS = require("gulp-clean-css");
 var gulpif = require('gulp-if');
+var watch = require('gulp-watch');
 
 module.exports = {
-    compile: function(done, config){
-        compile(done, config);
-
-        done();
-    },
     install: function(done, config){
         if (!config.hasOwnProperty('copy')) {
             log('Nothing to install')
         } else {
             copyFiles(done, config.copy);
         }
-
-        done();
-    }
-}
-
-function compile(done, config){
-    var types = ["js", "css"];
-    for (var type in types) {
-        var dest_files = getDestFiles(done, config[types[type]], types[type]);
-
-        for (var i in dest_files) {
-            var sorted = sortSourceFiles(dest_files[i]);
-            // An error occurred
-            if (typeof sorted === "string") {
-                return done(sorted);
-            }
-
-            log("writing to : " + i);
-            log(sorted);
-
-            // Write the files
-            var g = gulp.src(sorted);
-            switch (types[type]) {
-                case "js":
-                    g = g.pipe(uglify());
-                    break;
-                case "css":
-                    var sassConfig = getSassConfig(config)
-                    g = g
-                        .pipe(gulpif(sassOnly, header(sassConfig.header)))
-                        .pipe(sass({
-                            includePaths: sassConfig.includes
-                        }).on('error', sass.logError))
-                        .pipe(minifyCSS())
-                        .pipe(cleanCSS({compatibility: "ie8"}))
-                    break;
-            }
-
-            if (i.match(/\.(css|js)$/)) {
-                g = g.pipe(concat(i))
-            }
-            g
-                .pipe(gulp.dest(types[type]))
-                .pipe(gzip())
-                .pipe(gulp.dest(types[type]));
-        }
+    },
+    compile: function(done, config){
+        var manifest = buildManifest(done, config);
+        compile(done, manifest, config);
+    },
+    watch: function(done, config) {
+        var manifest = buildManifest(done, config);
+        watchFiles(done, manifest, config);
     }
 };
 
-function getDestFiles(done, modules, type) {
-    var dest_files = {};
-    for (var module_name in modules) {
-        for (var source_file in modules[module_name]) {
-            // Normalize destination files
-            var dest_file = [];
-            if (typeof modules[module_name][source_file] === "string") {
-                dest_file.dest = modules[module_name][source_file];
-            } else {
-                dest_file = modules[module_name][source_file];
-                if (!dest_file.hasOwnProperty("dest")) {
-                    done("no destination set for script " + source_file + " in module " + module_name);
-                }
-            }
-            dest_file.module = module_name;
-            dest_file.source = getPath(done, module_name, source_file, type);
+function watchFiles(done, manifest, config) {
+    for (var i in manifest) {
+        log(i);
+        (function(file){
+            watch(manifest[i].sorted, function(){
+                compileFile(done, file, manifest[file], config);
+            })
+        })(i);
+    }
+}
 
-            // Add the dest file
-            if (!dest_files[dest_file.dest]) {
-                dest_files[dest_file.dest] = [];
+function compile(done, manifest, config) {
+    for (var i in manifest) {
+        compileFile(done, i, manifest[i], config);
+    }
+}
+
+function compileFile(done, outputFile, compileInfo, config) {
+    // An error occurred
+    if (typeof compileInfo.sorted === "string") {
+        return done(compileInfo.sorted);
+    }
+
+    log("writing to : " + outputFile);
+    log(compileInfo.sorted);
+
+    // Write the files
+    var g = gulp.src(compileInfo.sorted);
+    switch (compileInfo.type) {
+        case "js":
+            g = g.pipe(uglify());
+            break;
+        case "css":
+            var sassConfig = getSassConfig(config)
+            g = g
+                .pipe(gulpif(sassOnly, header(sassConfig.header)))
+                .pipe(sass({
+                    includePaths: sassConfig.includes
+                }).on('error', sass.logError))
+                .pipe(minifyCSS())
+                .pipe(cleanCSS({compatibility: "ie8"}))
+            break;
+    }
+
+    // If the file ends in .js or .css then we will combine everything
+    // otherwise this is meant to write multiple files to a directory.
+    if (outputFile.match(/\.(css|js)$/)) {
+        g = g.pipe(concat(outputFile))
+    }
+    g
+        .pipe(gulp.dest(compileInfo.type))
+        .pipe(gzip())
+        .pipe(gulp.dest(compileInfo.type));
+}
+
+/**
+ * Builds manifest of all files
+ * @param done
+ * @param config
+ * @returns {
+ *     dest_file_path: {
+ *         sources: [ "file1":{
+ *             module: "lightningsdk/core",
+ *             requires_module: ["other/module"],
+ *         }],
+ *         type: "js",
+ *         "sorted": [
+ *             "file1",
+ *             "file2",
+ *         ],
+ *     }
+ * }
+ */
+function buildManifest(done, config) {
+    var manifest = {};
+    var types = ["js", "css"];
+    for (var t in types) {
+        var type = types[t];
+        for (var module_name in config[type]) {
+            for (var source_file in config[type][module_name]) {
+                // Normalize destination files
+                var dest_file = [];
+                if (typeof config[type][module_name][source_file] === "string") {
+                    dest_file.dest = config[type][module_name][source_file];
+                } else {
+                    dest_file = config[type][module_name][source_file];
+                    if (!dest_file.hasOwnProperty("dest")) {
+                        done("no destination set for script " + source_file + " in module " + module_name);
+                    }
+                }
+                dest_file.module = module_name;
+                dest_file.source = getPath(done, module_name, source_file, type);
+
+                // Add the dest file
+                if (!manifest[dest_file.dest]) {
+                    manifest[dest_file.dest] = {"sources":[], "type": type};
+                }
+                manifest[dest_file.dest].sources[dest_file.source] = dest_file;
             }
-            dest_files[dest_file.dest][dest_file.source] = dest_file;
         }
     }
 
-    return dest_files;
+    for (var i in manifest) {
+        manifest[i].sorted = sortSourceFiles(manifest[i]);
+    }
+
+    return manifest;
 }
 
 function sassOnly (file) {
@@ -157,12 +196,13 @@ function copyFiles(done, files) {
     }
 }
 
-function sortSourceFiles(sources) {
+function sortSourceFiles(dest) {
     var iterationLength = 0;
     var sortedSources = [];
     var modules = [];
     var error;
     var sourceLength = 0;
+    var sources = dest.sources;
     for (var i in sources) {
         sourceLength++;
         // normalize requirements to array
