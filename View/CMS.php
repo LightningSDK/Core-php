@@ -2,12 +2,12 @@
 
 namespace lightningsdk\core\View;
 
+use lightningsdk\core\Tools\Cache\Cache;
 use lightningsdk\core\Tools\ClientUser;
 use lightningsdk\core\Tools\Configuration;
 use lightningsdk\core\Tools\IO\FileManager;
 use lightningsdk\core\Tools\Scrub;
 use lightningsdk\core\Model\CMS as CMSModel;
-use lightningsdk\core\Tools\Session\BrowserSession;
 use lightningsdk\core\View\HTMLEditor\HTMLEditor;
 use lightningsdk\core\View\HTMLEditor\Markup;
 use lightningsdk\core\Tools\Form as FormTool;
@@ -50,6 +50,47 @@ class CMS {
         return 'CMS Error: invalid type';
     }
 
+    protected static $cache;
+    protected static $cacheData;
+    protected static $cacheDataOriginal;
+    protected static $cacheKey = 'cms-content';
+    protected static function initCache() {
+        if (static::$cache == null) {
+            static::$cache = Cache::get(Cache::PERMANENT);
+            static::$cacheDataOriginal = static::$cacheData = static::$cache->get(static::$cacheKey) ?? [];
+        }
+    }
+    protected static function loadWithCache($name, $settings, $default) {
+        self::initCache();;
+        if (!empty($settings['cache']) && array_key_exists($name, static::$cacheData)) {
+            // exists in cache
+            return static::$cacheData[$name];
+        } elseif ($cms = CMSModel::loadByName($name)) {
+            // loaded from db
+            $value = $cms;
+        } else {
+            // default
+            $value = new CMSModel($default);
+        }
+
+        if (!empty($settings['cache'])) {
+            self::$cacheData[$name] = $value;
+        }
+
+        return $value;
+    }
+
+    public static function clearCache() {
+        static::initCache();;
+        static::$cache->clear(static::$cacheKey);
+    }
+
+    public function __destruct() {
+        if (json_encode(static::$cacheData) != json_encode(static::$cacheDataOriginal)) {
+            static::$cache->set(static::$ccacheKey,  static::$cacheData);
+        }
+    }
+
     /**
      * Create an embedded html editor.
      *
@@ -59,16 +100,14 @@ class CMS {
      * @return string
      */
     public static function embed($name, $settings = []) {
-        // TODO: Add caching
-        $content = CMSModel::loadByName($name);
-        $content = (!empty($content) ? $content->content : (!empty($settings['default']) ? $settings['default'] : ''));
+        $cms = self::loadWithCache($name, $settings, ['content' => $settings['default']??'']);
         $vars = [];
         if ($user_id = ClientUser::getInstance()->id) {
             $vars['USER_ID'] = $user_id;
         }
         $vars['WEB_ROOT'] = Configuration::get('web_root');
         if (!empty($settings['display_only'])) {
-            return '<div>' . Markup::render($content, $vars) . '</div>';
+            return '<div>' . Markup::render($cms->content, $vars) . '</div>';
         } else if (ClientUser::getInstance()->isAdmin()) {
             JS::startup('lightning.cms.init()');
             JS::set('token', FormTool::getToken());
@@ -79,15 +118,15 @@ class CMS {
                 . HTMLEditor::div('cms_' . $name,
                     [
                         'spellcheck' => true,
-                        'content' => $content,
-                        'content_rendered' => Markup::render($content, $vars),
+                        'content' => $cms->content,
+                        'content_rendered' => Markup::render($cms->content, $vars),
                         'browser' => true,
                         'edit_border' => !empty($settings['edit_border']),
                         'config' => !empty($settings['config']) ? $settings['config'] : [],
                     ]
                 );
         } else {
-            return '<div>' . Markup::render($content, $vars) . '</div>';
+            return '<div>' . Markup::render($cms->content, $vars) . '</div>';
         }
     }
 
@@ -101,31 +140,28 @@ class CMS {
 
     public static function image($name, $settings = []) {
         self::initSettings();
+        $cms = self::loadWithCache($name, $settings, [
+            'class' => '',
+            'content' => $settings['default'] ?? '',
+            'url' => $settings['defaultUrl'] ?? '',
+        ]);
         $settings += self::$settings;
-        $content = CMSModel::loadByName($name);
-        if (empty($content)) {
-            $content = (object) [
-                'class' => '',
-                'content' => !empty($settings['default']) ? $settings['default'] : '',
-                'url' => !empty($settings['defaultUrl']) ? $settings['defaultUrl'] : '',
-            ];
-        }
-        if (!empty($content->content) && empty($content->url)) {
+        if (!empty($cms->content) && empty($cms->url)) {
             // Needs a file prefix for rendering.
             $handler = FileManager::getFileHandler(!empty($settings['file_handler']) ? $settings['file_handler'] : '', $settings['location']);
-            $content->url = $handler->getWebURL($content->content);
+            $cms->url = $handler->getWebURL($cms->content);
         }
 
         // These are classes that are always applied and not visible in the text field.
         $forced_classes = !empty($settings['class']) ? $settings['class'] : '';
         // These are added in the CMS text field.
-        $added_classes = !empty($content->class) ? $content->class : '';
+        $added_classes = !empty($cms->class) ? $cms->class : '';
         if (!empty($settings['class'])) {
-            $content->class .= ' ' . $settings['class'];
+            $cms->class .= ' ' . $settings['class'];
         }
 
         if (!empty($settings['display_only'])) {
-            return $content->url;
+            return $cms->url;
         } elseif (ClientUser::getInstance()->isAdmin()) {
             JS::set('token', FormTool::getToken());
             // TODO: This will need extra slashes if using the File handler.
@@ -146,7 +182,7 @@ class CMS {
             return '<img src="/images/lightning/pencil.png" class="cms_edit_image icon-16" id="cms_edit_' . $name . '">
             <img src="/images/lightning/save.png" class="cms_save_image icon-16" id="cms_save_' . $name . '" style="display:none">'
             . '<input type="text" placeholder="classes" id="cms_' . $name . '_class" class="imagesCSS" name="' . $forced_classes . '" value="' . $added_classes . '" style="display:none" />'
-            . '<img src="' . $content->url . '" id="cms_' . $name . '" class="' . $content->class . '" '
+            . '<img src="' . $cms->url . '" id="cms_' . $name . '" class="' . $cms->class . '" '
             . 'style="' . HTML::implodeStyles($settings['style']) . '"'
             . ' />';
         } elseif (!empty($settings['norender'])) {
@@ -163,32 +199,28 @@ class CMS {
     }
 
     public static function plain($name, $settings = []) {
-        if ($content = CMSModel::loadByName($name)) {
-            $value = $content->content;
-        } elseif (!empty($settings['default'])) {
-            $value = $settings['default'];
-        } else {
-            $value = '';
-        }
+        $cms = self::loadWithCache($name, $settings, [
+            'content' => $settings['default'] ?? '',
+        ]);
 
         if (!empty($settings['display_only'])) {
-            return $value;
+            return $cms->content;
         } elseif (ClientUser::getInstance()->isAdmin()) {
             JS::startup('lightning.cms.init()');
             JS::set('token', FormTool::getToken());
             $output = '<img src="/images/lightning/pencil.png" class="cms_edit_plain icon-16" id="cms_edit_' . $name . '">'
             . '<img src="/images/lightning/save.png" class="cms_save_plain icon-16" id="cms_save_' . $name . '" style="display:none">';
             if (!empty($settings['multi_line'])) {
-                $output .= '<textarea id="cms_' . $name . '" style="display:none">' . $value . '</textarea>';
+                $output .= '<textarea id="cms_' . $name . '" style="display:none">' . $cms->content . '</textarea>';
             } else {
-                $output .= '<input type="text" id="cms_' . $name . '" value="' . $value . '" style="display:none" />';
+                $output .= '<input type="text" id="cms_' . $name . '" value="' . $cms->content . '" style="display:none" />';
             }
-            $output .= '<span id="cms_display_' . $name . '">' . $value . '</span>';
+            $output .= '<span id="cms_display_' . $name . '">' . $cms->content . '</span>';
             return $output;
         } elseif (!empty($settings['norender'])) {
             return '';
         } else {
-            return $value;
+            return $cms->content;
         }
     }
 
@@ -204,14 +236,11 @@ class CMS {
      * TODO: This should incorporate an actual color picker editor.
      */
     public static function colorPicker($name, $settings = []) {
-        if ($content = CMSModel::loadByName($name)) {
-            $value = json_decode($content->content, true);
-        } elseif (!empty($settings['default'])) {
-            $value = $settings['default'];
-        } else {
-            $value = [];
-        }
-        $value = json_decode(json_encode($value), true);
+        $cms = self::loadWithCache($name, $settings, [
+            'content' => $settings['default'] ?? '',
+        ]);
+
+        $value = json_decode(json_encode($cms->content), true);
 
         if (!empty($settings['display_only'])) {
             return implode(',', $value);

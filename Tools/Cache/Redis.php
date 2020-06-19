@@ -7,10 +7,9 @@
  */
 namespace lightningsdk\core\Tools\Cache;
 
-use Exception;
 use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Logger;
 use lightningsdk\core\Tools\Output;
-use lightningsdk\core\Tools\Singleton;
 
 class Redis extends CacheController {
 
@@ -42,7 +41,7 @@ class Redis extends CacheController {
     public function get($key, $default = null) {
         $this->connect();
 
-        if ($result = $this->connection->get($key)) {
+        if ($result = $this->connection->get($this->getKey($key))) {
             return unserialize($result);
         } else {
             return $default;
@@ -57,15 +56,15 @@ class Redis extends CacheController {
         }
 
         if (empty($ttl)) {
-            return $this->connection->set($key, serialize($value));
+            return $this->connection->set($this->getKey($key), serialize($value));
         } else {
-            return $this->connection->set($key, serialize($value), $ttl);
+            return $this->connection->set($this->getKey($key), serialize($value), $ttl);
         }
     }
 
-    public function delete($keys) {
+    public function clear($key) {
         $this->connect();
-        $this->connection->delete($keys);
+        $this->connection->del($this->getKey($key));
     }
 
     protected function connect() {
@@ -73,5 +72,13 @@ class Redis extends CacheController {
             $this->connection = new \Redis();
             $this->connection->connect($this->socket);
         }
+    }
+
+    protected function getKey($key) {
+        static $prefix;
+        if ($prefix == null) {
+            $prefix = Configuration::get('redis.prefix', '');
+        }
+        return $prefix . $key;
     }
 }

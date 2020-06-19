@@ -8,6 +8,7 @@ use lightningsdk\core\Tools\Output;
 use lightningsdk\core\Tools\Request;
 use lightningsdk\core\View\API;
 use lightningsdk\core\Model\CMS as CMSModel;
+use lightningsdk\core\View\CMS as CMSView;
 
 class CMS extends API {
 
@@ -44,6 +45,8 @@ class CMS extends API {
                 ['name' => $name, 'content' => $content, 'last_modified' => time(), 'class' => $class],
                 ['content' => $content, 'last_modified' => time(), 'class' => $class]
             );
+            // we want to clear the cache so the changes show up on the next page load
+            CMSView::clearCache();
             Output::json(Output::SUCCESS);
         } else {
             Output::json(Output::ACCESS_DENIED);
