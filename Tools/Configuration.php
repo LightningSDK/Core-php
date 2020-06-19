@@ -119,14 +119,9 @@ class Configuration {
             // Flag the state as loading, so that nested calls to load configs
             // do not get stuck in an infinite loop.
             self::$loading = true;
-            // Load each configuration file.
-            foreach (self::getConfigurations() as $config_file) {
-                if (file_exists($config_file)) {
-                    self::softMerge(self::getConfigurationData($config_file));
-                } else {
-                    echo "not found $config_file";
-                }
-            }
+
+            // Load site configuration file
+            self::softMerge(self::getConfigurationData(CONFIG_PATH . '/config.inc.php'));
 
             if (!empty(self::$configuration['modules']['include'])) {
                 self::loadModules(self::$configuration['modules']['include']);
@@ -137,6 +132,9 @@ class Configuration {
                     self::loadModules(self::$configuration['modules']['include-cli']);
                 }
             }
+
+            // Load lightning defaults
+            self::softMerge(self::getConfigurationData(HOME_PATH . '/vendor/lightningsdk/core/Config.php'));
 
             self::$loaded = true;
             self::$loading = false;
@@ -178,19 +176,6 @@ class Configuration {
     }
 
     /**
-     * Get a list of configuration files.
-     *
-     * @return array
-     *   A list of files.
-     */
-    public static function getConfigurations() {
-        return [
-            'source' => CONFIG_PATH . '/config.inc.php',
-            'internal' => HOME_PATH . '/vendor/lightningsdk/core/Config.php'
-        ];
-    }
-
-    /**
      * Load a configuration form a file.
      *
      * @param string $file
@@ -200,7 +185,11 @@ class Configuration {
      *   The config data.
      */
     public static function getConfigurationData($file) {
-        include $file;
-        return $conf;
+        if (file_exists($file)) {
+            include $file;
+            return $conf;
+        } else {
+            throw new \Exception('Missing configuration file: ' . $file);
+        }
     }
 }

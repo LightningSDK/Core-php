@@ -178,16 +178,20 @@ class JS {
      */
     public static function render() {
         $output = '';
+
+        // we expect this function to be called at least twice. once at the top of the page and once at the bottom.
+        // the first time it should run the init functions. all other times it should write vars and new function calls.
         if (!self::$inited) {
             self::$vars['minified_version'] = Configuration::get('minified_version', 0);
             $output = '<script>';
             $output .= self::includeStartupFunction();
-            if (!empty(self::$vars)) {
-                $output .= 'lightning={"vars":' . json_encode(self::$vars) . '};';
-            }
+            $output .= '</script>';
+            self::$inited = true;
+        } else if (!empty(self::$vars)) {
+            $output = '<script>';
+            $output .= '$_startup(function(){$.extend(true, lightning.vars, '. json_encode(self::$vars) .')});';
             $output .= '</script>';
             self::$vars = [];
-            self::$inited = true;
         }
 
         // Include JS files.
@@ -238,6 +242,7 @@ class JS {
     protected static function includeStartupFunction() {
         return '
            $lsq = [];
+           lightning = {vars: {}}
            $_startup = function(cb, req){
              if (typeof lightning != "undefined" && typeof lightning.js != "undefined") {
                lightning.js.require(req, cb);
