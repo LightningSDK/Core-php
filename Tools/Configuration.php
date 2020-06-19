@@ -66,6 +66,10 @@ class Configuration {
         Data::setInPath($variable, $value, self::$configuration);
     }
 
+    public static function unset($variable) {
+        Data::removeFromPath($variable, self::$configuration);
+    }
+
     /**
      * Add a new value to an array.
      */
