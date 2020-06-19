@@ -15,7 +15,7 @@ use lightningsdk\core\Tools\Scrub;
         <meta name="fb:app_id" content="<?= $mets['facebook_app_id']; ?>" />
     <?php endif; ?>
     <meta name="robots" content="ALL, INDEX, FOLLOW" />
-    <?php if (!empty($meta['keywords'])): ?>
+    <?php if (!empty($meta['copyright'])): ?>
         <meta name="copyright" content="<?php Scrub::text($meta['copyright']); ?>" />
     <?php endif; ?>
     <meta name="og:url" content="<?= Scrub::text(!empty($meta['url']) ? $meta['url'] : Request::getURL()); ?>" />
