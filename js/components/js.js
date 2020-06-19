@@ -38,7 +38,7 @@
             for (var i in urls) {
                 if (!self.loaded.hasOwnProperty(urls[i])) {
                     // Any scripts that are not already included can be included here.
-                    if (urls[i].match(/\.js\?v=[0-9]+/)) {
+                    if (urls[i].match(/\.js.*/)) {
                         self.loadScript(urls[i]);
                     }
                 }
@@ -61,7 +61,7 @@
                             var url = self.queue[i].urls[j];
                             if (
                                 // this checkso for js files and "document"
-                                !self.loaded.hasOwnProperty(url)
+                                (!self.loaded.hasOwnProperty(url) || !self.loaded[url])
                                 // this works for 'lightning' or '$' jquery
                                 && ("undefined" === typeof window[url] || "document" === url)
                             ) {
