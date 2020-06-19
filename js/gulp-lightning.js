@@ -46,7 +46,7 @@ function compile(done, config){
             var g = gulp.src(sorted);
             switch (types[type]) {
                 case "js":
-                    g.pipe(uglify());
+                    g = g.pipe(uglify());
                     break;
                 case "css":
                     var sassConfig = getSassConfig(config)
