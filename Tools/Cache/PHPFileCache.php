@@ -4,7 +4,7 @@ namespace lightningsdk\core\Tools\Cache;
 
 use lightningsdk\core\Tools\Configuration;
 
-class PHPFileCache extends FileCache {
+class PHPFileCache extends FileCache implements CacheControllerInterface {
     public function __construct() {
         parent::__construct();
         $this->directory = Configuration::get('cache.php-file.path');

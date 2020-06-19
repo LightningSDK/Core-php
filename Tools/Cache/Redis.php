@@ -8,10 +8,9 @@
 namespace lightningsdk\core\Tools\Cache;
 
 use lightningsdk\core\Tools\Configuration;
-use lightningsdk\core\Tools\Logger;
 use lightningsdk\core\Tools\Output;
 
-class Redis extends CacheController {
+class Redis extends CacheController implements CacheControllerInterface {
 
     const NEW_ONLY = 'NX';
     const UPDATE_ONLY = 'XX';
@@ -62,7 +61,7 @@ class Redis extends CacheController {
         }
     }
 
-    public function clear($key) {
+    public function unset($key) {
         $this->connect();
         $this->connection->del($this->getKey($key));
     }

@@ -2,20 +2,22 @@
 
 namespace lightningsdk\core\Tools\Cache;
 
-class StaticCache extends CacheController {
+class StaticCache extends CacheController implements CacheControllerInterface {
 
     protected static $cache = [];
 
-    public function __construct($settings = []) {
-
+    public function get($key, $default = null) {
+        if (array_key_exists($key, static::$cache)) {
+            return static::$cache[$key];
+        }
+        return $default;
     }
 
-    public function isValid() {
-        return isset(self::$cache[$this->name]);
+    public function set($key, $value) {
+        static::$cache[$key] = $value;
     }
 
-    public function load($name, $default = null) {
-        $this->setName($name);
-        $this->value = &self::$cache[$name];
+    public function unset($key) {
+        unset(static::$cache[$key]);
     }
 }

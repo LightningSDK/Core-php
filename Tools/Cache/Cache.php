@@ -47,7 +47,7 @@ class Cache {
      * @param int $size
      *   The size class of the data to store.
      *
-     * @return CacheController
+     * @return CacheControllerInterface
      *   An instance of the cache controller
      */
     protected static function getInstance($ttl = self::DEFAULT, $size = self::MEDIUM) {

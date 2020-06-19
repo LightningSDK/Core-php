@@ -4,7 +4,7 @@ namespace lightningsdk\core\Tools\Cache;
 
 use lightningsdk\core\Tools\Configuration;
 
-class FileCache extends CacheController {
+class FileCache extends CacheController implements CacheControllerInterface {
 
     protected $fileName;
 
@@ -29,7 +29,12 @@ class FileCache extends CacheController {
         $this->write();
     }
 
-    public function setName($name) {
+    public function unset($key) {
+        $this->setName($key);
+        unlink($this->fileName);
+    }
+
+    protected function setName($name) {
         $this->name = $name;
         $this->reference = hash("sha256", $name);
         $this->fileName = $this->directory . '/' . $this->reference . $this->suffix;
@@ -55,10 +60,6 @@ class FileCache extends CacheController {
 
     public function resetTTL() {
         touch($this->fileName);
-    }
-
-    public function clear($name) {
-        unlink($this->getFileName($name));
     }
 
     public function clearAll() {

@@ -82,7 +82,7 @@ class CMS {
 
     public static function clearCache() {
         static::initCache();;
-        static::$cache->clear(static::$cacheKey);
+        static::$cache->unset(static::$cacheKey);
     }
 
     public function __destruct() {

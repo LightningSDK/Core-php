@@ -2,7 +2,7 @@
 
 namespace lightningsdk\core\Tools\Cache;
 
-abstract class CacheController implements CacheControllerInterface {
+abstract class CacheController {
 
     public $value;
 
@@ -26,12 +26,6 @@ abstract class CacheController implements CacheControllerInterface {
         foreach ($settings as $setting => $value) {
             $this->$setting = $value;
         }
-    }
-
-    public function getClassDefaults() {}
-
-    public function setName($name) {
-        $this->name = $name;
     }
 
     public function isValid() {
@@ -64,33 +58,4 @@ abstract class CacheController implements CacheControllerInterface {
             $this->resetTTL();
         }
     }
-
-    /**
-     * Retrieve a cached item.
-     *
-     * @param $key
-     * @param null $default
-     *
-     * @return mixed|null
-     *   The stored value or null if nothing was stored.
-     */
-    public function get($key, $default = null) {
-        return null;
-    }
-
-    public function set($key, $value) {
-
-    }
-
-    protected function read() {
-        return null;
-    }
-
-    protected function write() {}
-
-    protected function resetTTL() {}
-
-    protected function clear($name) {}
-
-    protected function clearAll() {}
 }
