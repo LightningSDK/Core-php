@@ -26,13 +26,13 @@ class Links {
                         $output .= '<li><a class="btn btn-default" title="Facebook" href="' . $settings['url'] . '" target="_blank"><i class="fa fa-facebook"></i></a></li>';
                         break;
                     case 'youtube':
-                        $output .= '<li><a class="btn btn-default" title="YouTube" href="https://youtube.com/channel' . $settings['url'] . '" target="_blank"><i class="fa fa-youtube"></i></a></li>';
+                        $output .= '<li><a class="btn btn-default" title="YouTube" href="https://youtube.com/channel/' . $settings['url'] . '" target="_blank"><i class="fa fa-youtube"></i></a></li>';
                         break;
                     case 'twitter':
                         $output .= '<li><a class="btn btn-default" title="Twitter" href="https://twitter.com/' . $settings['url'] . '" target="_blank"><i class="fa fa-twitter"></i></a></li>';
                         break;
                     case 'instagram':
-                        $output .= '<li><a class="btn btn-default" title="Instagram" href="' . $settings['url'] . '" target="_blank"><i class="fa fa-pinterest"></i></a></li>';
+                        $output .= '<li><a class="btn btn-default" title="Instagram" href="https://www.instagram.com/' . $settings['url'] . '" target="_blank"><i class="fa fa-pinterest"></i></a></li>';
                         break;
                     case 'pinterest':
                         $output .= '<li><a class="btn btn-default" title="Pinterest" href="' . $settings['url'] . '" target="_blank"><i class="fa fa-pinterest"></i></a></li>';
