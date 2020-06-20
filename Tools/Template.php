@@ -240,7 +240,7 @@ class Template extends Singleton {
      */
     public function renderFooter() {
         echo JS::render() . CSS::render() . $this->footer;
-        if (ClientUser::getInstance()->isAdmin()) {
+        if (Configuration::get('debug') || ClientUser::getInstance()->isAdmin()) {
             echo '<div id="performance-data"><ul class="accordion" data-accordion>';
             echo '<li class="accordion-item is-active" data-accordion-item>';
             echo '<a href="#" class="accordion-title">Performance Overview</a>';
