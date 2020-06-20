@@ -56,7 +56,8 @@ class CMS {
     protected static $cacheDataOriginal;
     protected static $cacheKey = 'cms-content';
     protected static function initCache() {
-        if (static::$cache == null && !ClientUser::getInstance(false)->hasPermission(Permissions::EDIT_CMS)) {
+        $user = ClientUser::getInstance(false);
+        if (static::$cache == null && (empty($user) || !$user->hasPermission(Permissions::EDIT_CMS))) {
             static::$cache = Cache::get(Cache::PERMANENT);
             static::$cacheDataOriginal = static::$cacheData = static::$cache->get(static::$cacheKey) ?? [];
         }
