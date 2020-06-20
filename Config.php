@@ -83,6 +83,7 @@ $conf = [
             'social-links' => \lightningsdk\core\View\SocialMedia\Links::class,
             'social-follow' => \lightningsdk\core\View\SocialMedia\Follow::class,
             'cms' => \lightningsdk\core\View\CMS::class,
+            'widget' => \lightningsdk\core\View\Widget::class,
         ],
     ],
     'sitemap' => [

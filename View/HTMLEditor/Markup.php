@@ -24,7 +24,11 @@ class Markup {
             if (isset($renderers[$element->nodeName])) {
                 // First convert the attributes to an array.
                 $options = static::getAttributeArray($element);
-                $output = call_user_func([$renderers[$element->nodeName], 'renderMarkup'], $options, $vars);
+                try {
+                    $output = call_user_func([$renderers[$element->nodeName], 'renderMarkup'], $options, $vars);
+                } catch (Exception $e) {
+                    $content = $e->getMessage();
+                }
             }
 
             $content = str_replace(
