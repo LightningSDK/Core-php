@@ -2,6 +2,7 @@
 
 namespace lightningsdk\core\View;
 
+use lightningsdk\core\Model\Permissions;
 use lightningsdk\core\Tools\Cache\Cache;
 use lightningsdk\core\Tools\ClientUser;
 use lightningsdk\core\Tools\Configuration;
@@ -55,7 +56,7 @@ class CMS {
     protected static $cacheDataOriginal;
     protected static $cacheKey = 'cms-content';
     protected static function initCache() {
-        if (static::$cache == null) {
+        if (static::$cache == null && !ClientUser::getInstance(false)->hasPermission(Permissions::EDIT_CMS)) {
             static::$cache = Cache::get(Cache::PERMANENT);
             static::$cacheDataOriginal = static::$cacheData = static::$cache->get(static::$cacheKey) ?? [];
         }
@@ -108,7 +109,7 @@ class CMS {
         $vars['WEB_ROOT'] = Configuration::get('web_root');
         if (!empty($settings['display_only'])) {
             return '<div>' . Markup::render($cms->content, $vars) . '</div>';
-        } else if (ClientUser::getInstance()->isAdmin()) {
+        } else if (ClientUser::getInstance()->hasPermission(Permissions::EDIT_CMS)) {
             JS::startup('lightning.cms.init()');
             JS::set('token', FormTool::getToken());
             JS::set('cms.cms_' . $name . '.config', !empty($settings['config']) ? $settings['config'] : []);
@@ -162,7 +163,7 @@ class CMS {
 
         if (!empty($settings['display_only'])) {
             return $cms->url;
-        } elseif (ClientUser::getInstance()->isAdmin()) {
+        } elseif (ClientUser::getInstance()->hasPermission(Permissions::EDIT_CMS)) {
             JS::set('token', FormTool::getToken());
             // TODO: This will need extra slashes if using the File handler.
             JS::set('cms.basepath', $settings['location']);
@@ -205,7 +206,7 @@ class CMS {
 
         if (!empty($settings['display_only'])) {
             return $cms->content;
-        } elseif (ClientUser::getInstance()->isAdmin()) {
+        } elseif (ClientUser::getInstance()->hasPermission(Permissions::EDIT_CMS)) {
             JS::startup('lightning.cms.init()');
             JS::set('token', FormTool::getToken());
             $output = '<img src="/images/lightning/pencil.png" class="cms_edit_plain icon-16" id="cms_edit_' . $name . '">'
@@ -244,7 +245,7 @@ class CMS {
 
         if (!empty($settings['display_only'])) {
             return implode(',', $value);
-        } elseif (ClientUser::getInstance()->isAdmin()) {
+        } elseif (ClientUser::getInstance()->hasPermission(Permissions::EDIT_CMS)) {
             JS::startup('lightning.cms.init()');
             JS::set('token', FormTool::getToken());
             return '<img src="/images/lightning/pencil.png" class="cms_edit_plain icon-16" id="cms_edit_' . $name . '">'
