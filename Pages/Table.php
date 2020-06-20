@@ -149,6 +149,7 @@ abstract class Table extends Page {
      *       See previous
      *   - insertable - whether a user can provide a value for this field when inserting. This will default to the same value as editable.
      *   - editable - whether a user can provide a value for this field when editing. Default is true.
+     *   - options - when type is select, or radios this is a list of options key => val
      *
      * @var array
      */

@@ -4,7 +4,6 @@ namespace lightningsdk\core\Tools;
 
 use Exception;
 use lightningsdk\core\Tools\Session\BrowserSession;
-use lightningsdk\core\View\Field;
 use lightningsdk\core\View\Field\BasicHTML;
 
 class Form {

@@ -7,23 +7,16 @@ use lightningsdk\core\Pages\Table;
 use lightningsdk\core\Tools\ClientUser;
 
 class Widgets extends Table {
-    const TABLE = 'cms';
-    const PRIMARY_KEY = 'cms_id';
+    const TABLE = 'widget';
+    const PRIMARY_KEY = 'widget_id';
 
     protected $preset = [
-        'is_widget' => [
-            'hidden' => true,
-            'default' => 1,
-            'force_default_new' => true,
-        ],
         'content' => 'html',
         'last_modified' => [
             'type' => 'datetime',
             'editable' => false,
         ],
     ];
-
-    protected $accessControl = ['is_widget' => 1];
 
     /**
      * @return boolean

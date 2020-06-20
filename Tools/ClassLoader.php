@@ -41,8 +41,6 @@ class ClassLoader {
 
         // If the class is explicitly set as an override.
         if (!empty(self::$classes[$classname])) {
-            // Load the Lightning version in the Overridden namespace.
-            self::loadClassFile($classname);
             // Load the project version in the Source namespace.
             self::loadClassFile(self::$classes[$classname]);
             // Alias the Lightning namespace to the Source namespace.
@@ -52,20 +50,21 @@ class ClassLoader {
 
         elseif (!empty(self::$classesRev[$classname])) {
             // Load the Lightning version in the Overridden namespace.
-            self::classAutoloader(self::$classesRev[$classname]);
-            return;
+            // Check if a core class exists:
+            if (self::loadClassFile(self::$classesRev[$classname] . 'Core')) {
+                // since they tried to call the main override, we want to alias it with the actual override
+                self::loadClassFile($classname);
+                class_alias($classname, self::$classesRev[$classname], false);
+                return;
+            } else {
+                // TODO: @deprecated - load the original with the override namespace
+                self::classAutoloader(self::$classesRev[$classname]);
+                return;
+            }
         }
 
         // Load the class.
         self::loadClassFile($classname);
-
-        // If this was an overridable class, create the standard alias.
-        if (!class_exists($classname, false) && class_exists($classname . 'Overridable', false)) {
-            class_alias($classname . 'Overridable', $classname);
-        }
-        if (!trait_exists($classname, false) && trait_exists($classname . 'Overridable', false)) {
-            class_alias($classname . 'Overridable', $classname);
-        }
     }
 
     /**
@@ -87,17 +86,9 @@ class ClassLoader {
                  ] as $path) {
             if (file_exists($path)) {
                 require_once $path;
-                return;
+                return true;
             }
         }
-        if (!empty(self::$classLoader['prefix'])) {
-            foreach (self::$classLoader['prefix'] as $prefix => $directory) {
-                $path_prefix = str_replace('\\', DIRECTORY_SEPARATOR, $prefix);
-                if (preg_match('|^' . $path_prefix . '|', $class_path)) {
-                    require_once preg_replace('|^' . $path_prefix . '|', HOME_PATH . DIRECTORY_SEPARATOR . $directory, $class_path) . '.php';
-                    return;
-                }
-            }
-        }
+        return false;
     }
 }

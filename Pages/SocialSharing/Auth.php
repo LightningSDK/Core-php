@@ -2,6 +2,7 @@
 
 namespace lightningsdk\core\Pages\SocialSharing;
 
+use lightnignsdk\core\View\Page;
 use lightningsdk\core\Model\Permissions;
 use lightningsdk\core\Model\SocialAuth;
 use lightningsdk\core\Tools\ClientUser;
@@ -12,7 +13,6 @@ use lightningsdk\core\Tools\SocialDrivers\SocialMediaApi;
 use lightningsdk\core\Tools\SocialDrivers\Twitter;
 use lightningsdk\core\Tools\Template;
 use lightningsdk\core\View\JS;
-use lightningsdk\core\View\Page;
 
 class Auth extends Page {
 

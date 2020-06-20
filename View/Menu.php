@@ -2,7 +2,8 @@
 
 namespace lightningsdk\core\View;
 
-use lightningsdk\core\Tools\ClientUser;use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\ClientUser;
+use lightningsdk\core\Tools\Configuration;
 use lightningsdk\core\Tools\Scrub;
 
 class Menu {

@@ -101,6 +101,7 @@ class Singleton {
     }
 
     protected static function getStaticName() {
+        // TODO: Verify if this is necessary
         $class = get_called_class();
         $class = preg_replace('/\\Overridable$/', '', $class);
         if (!isset(self::$overrides)) {
