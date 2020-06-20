@@ -52,7 +52,7 @@ class CMS {
     }
 
     protected static $cache;
-    protected static $cacheData;
+    protected static $cacheData = [];
     protected static $cacheDataOriginal;
     protected static $cacheKey = 'cms-content';
     protected static function initCache() {
