@@ -12,7 +12,6 @@ if (!defined('CONFIG_PATH')) {
 }
 
 use lightningsdk\core\Tools\Logger;
-use lightningsdk\core\Tools\ClassLoader;
 use lightningsdk\core\Tools\Performance;
 
 // Set the autoloader to the Lightning autoloader.
