@@ -68,7 +68,7 @@ return [
         'modification_date' => true,
         'css' => [
             'include' => [
-                '/css/lightning.css',
+                'core' => '/css/lightning.css',
             ],
         ],
     ],
