@@ -121,7 +121,9 @@ class PageCore {
         Tracker::loadFromSession();
         JS::add('/js/lightning.min.js');
         JS::startup('lightning.startup.init()');
-        CSS::add('/css/lightning.css');
+        foreach (Configuration::get('page.css.include') as $css) {
+            CSS::add($css);
+        }
 
         ClientUser::trackReferrer();
     }

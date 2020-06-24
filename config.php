@@ -1,6 +1,6 @@
 <?php
 
-$conf = [
+return [
     'template' => [
         'default' => ['template', 'lightningsdk/core'],
     ],
@@ -66,6 +66,11 @@ $conf = [
     ],
     'page' => [
         'modification_date' => true,
+        'css' => [
+            'include' => [
+                '/css/lightning.css',
+            ],
+        ],
     ],
     'redis' => [
         'socket' => 'localhost:6379',

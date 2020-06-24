@@ -9,6 +9,7 @@ class ClassLoader {
     protected static $classes;
     protected static $classesRev;
     protected static $classLoader = [
+        'lightningsdk\\core\\Tools\\ConfigurationCore' => 'lightningsdk\\core\\Tools\\ConfigurationCore',
         'lightningsdk\\core\\Tools\\Configuration' => 'lightningsdk\\core\\Tools\\Configuration',
         'lightningsdk\\core\\Tools\\Data' => 'lightningsdk\\core\\Tools\\Data',
     ];

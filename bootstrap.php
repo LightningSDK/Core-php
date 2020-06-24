@@ -19,6 +19,9 @@ require_once __DIR__ . '/Tools/ClassLoader.php';
 spl_autoload_register(['lightningsdk\\core\\Tools\\ClassLoader', 'classAutoloader']);
 require_once HOME_PATH . '/vendor/autoload.php';
 
+$configurationClass = $configurationClass ?? 'lightningsdk\core\Tools\Configuration';
+$configurationClass::bootstrap($bootstrapConfig ?? []);
+
 Performance::startTimer();
 
 if (!defined('LIGHTNING_BOOTSTRAP_NO_LOGGER')) {
