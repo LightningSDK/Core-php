@@ -12,13 +12,13 @@ class UserCleanup extends Job {
 
     public function execute($job) {
         // Remove expired sessions.
-        Logger::message('Cleaning sessions...');
+        Logger::info('Cleaning sessions...');
         $count = DBSession::clearExpiredSessions();
-        Logger::message($count . ' sessions removed.');
+        Logger::info($count . ' sessions removed.');
 
         // Remove user reset keys.
-        Logger::message('Cleaning expired user keys...');
+        Logger::info('Cleaning expired user keys...');
         $count = User::removeExpiredTempKeys();
-        Logger::message($count . ' user keys removed.');
+        Logger::info($count . ' user keys removed.');
     }
 }

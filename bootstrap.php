@@ -23,8 +23,3 @@ $configurationClass = $configurationClass ?? 'lightningsdk\core\Tools\Configurat
 $configurationClass::bootstrap($bootstrapConfig ?? []);
 
 Performance::startTimer();
-
-if (!defined('LIGHTNING_BOOTSTRAP_NO_LOGGER')) {
-    // Set the error handler.
-    Logger::init();
-}

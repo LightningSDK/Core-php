@@ -138,6 +138,8 @@ class ConfigurationCore {
                 static::writeCachedConfiguration();
             }
 
+            Logger::debugf('Loaded configuration: %s', json_encode(static::$configuration));
+
             static::$loaded = true;
             static::$loading = false;
         }

@@ -4,41 +4,39 @@ namespace lightningsdk\core\Tools;
 
 use DateTime;
 
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger as Monolog;
+
 class LoggerCore extends Singleton {
 
     const SEVERITY_LOW = 1;
     const SEVERITY_MED = 2;
     const SEVERITY_HIGH = 4;
 
+    /**
+     * @var \Monolog\Logger
+     */
     protected static $log;
     protected static $logFile;
+    protected static $logLevel;
     protected static $securityLogFile;
 
-    protected static $errorTypes = [
-        E_ERROR           => 'error',
-        E_WARNING         => 'warning',
-        E_PARSE           => 'parsing error',
-        E_NOTICE          => 'notice',
-        E_CORE_ERROR      => 'core error',
-        E_CORE_WARNING    => 'core warning',
-        E_COMPILE_ERROR   => 'compile error',
-        E_COMPILE_WARNING => 'compile warning',
-        E_USER_ERROR      => 'user error',
-        E_USER_WARNING    => 'user warning',
-        E_USER_NOTICE     => 'user notice'
-    ];
+    protected static $stacktrace;
 
-    /**
-     * Load the log settings.
-     */
-    public static function init() {
+    protected static function init() {
+        if (!empty(self::$log)) {
+            return;
+        }
         if (Configuration::get('site.logtype') == 'stacktrace') {
             set_error_handler([\lightningsdk\core\Tools\Logger::class, 'errorLogStacktrace']);
         }
 
-        if ($logfile = Configuration::get('site.log')) {
-            self::setLog($logfile);
-        }
+        self::$logFile = Configuration::get('log.file', 'php://stdout');
+        self::$logFile = File::absolute(self::$logFile);
+        self::$logLevel = Configuration::get('log.level', Monolog::WARNING);
+        self::$log = new Monolog('name');
+        self::$log->pushHandler(new StreamHandler(self::$logFile, self::$logLevel));
+        self::$stacktrace = Configuration::get('log.stacktrace');
     }
 
     /**
@@ -46,10 +44,49 @@ class LoggerCore extends Singleton {
      *
      * @param $error
      */
-    public static function error($error) {
-        $trace = debug_backtrace();
-        array_shift($trace);
-        self::errorLogStacktrace(0, $error, $trace[0]['file'], $trace[0]['line'], null, $trace);
+    public static function error($message) {
+        self::init();
+        self::$log->error($message);
+//        if (static::$stacktrace) {
+//            $trace = debug_backtrace();
+//            array_shift($trace);
+//            self::errorLogStacktrace(0, $error, $trace[0]['file'], $trace[0]['line'], null, $trace);
+//        }
+    }
+
+    public static function errorf($message, ...$params) {
+        self::init();
+        self::$log->error(sprintf($message, ...$params));
+    }
+
+    public static function warning($message) {
+        self::init();
+        self::$log->warning($message);
+    }
+
+    public static function warningf($message, ...$params) {
+        self::init();
+        self::$log->warning(sprintf($message, ...$params));
+    }
+
+    public static function info($message) {
+        self::init();
+        self::$log->info($message);
+    }
+
+    public static function infof($message, ...$params) {
+        self::init();
+        self::$log->info(sprintf($message, ...$params));
+    }
+
+    public static function debug($message) {
+        self::init();
+        self::$log->debug($message);
+    }
+
+    public static function debugf($message, ...$params) {
+        self::init();
+        self::$log->debug(sprintf($message, ...$params));
     }
 
     /**
@@ -72,29 +109,6 @@ class LoggerCore extends Singleton {
             file_put_contents($explicit_log ?: self::$logFile, self::dateStamp() . ' ' . $message . PHP_EOL, FILE_APPEND | LOCK_EX);
         } else {
             error_log(self::dateStamp() . ' ' . $message);
-        }
-    }
-
-    public static function info($message) {
-        $message = '[INFO] ' . $message;
-        self::message($message);
-    }
-
-    public static function print($message) {
-        echo self::dateStamp() . ' ' . $message . PHP_EOL;
-    }
-
-    /**
-     * Set the log file for writing.
-     *
-     * @param string $logFile
-     *   Absolute or relative address to the log.
-     *   MUST HAVE WRITE PERMISSION FOR THE USER RUNNING PHP
-     */
-    public static function setLog($logFile) {
-        self::$logFile = $logFile;
-        if (!preg_match('|^/|', self::$logFile)) {
-            self::$logFile = HOME_PATH . '/' . self::$logFile;
         }
     }
 
@@ -140,7 +154,7 @@ class LoggerCore extends Singleton {
         }
 
         $message = implode(PHP_EOL . str_repeat(' ', 22), $message);
-        self::message($message);
+        self::error($message);
         if ($output) {
             echo $message . PHP_EOL;
         }

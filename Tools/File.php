@@ -11,4 +11,11 @@ class File {
             mkdir($directory, 0777, true);
         return $directory."/".$file.".".$extension;
     }
+
+    public static function absolute($path) {
+        if (!preg_match('|^/|', $path) && !preg_match('|^php://|', $path)) {
+            return realpath(HOME_PATH . '/' . $path);
+        }
+        return $path;
+    }
 }

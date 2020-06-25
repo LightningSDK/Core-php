@@ -12,6 +12,7 @@
     "components/font-awesome": "^5.12",
     "phpmailer/phpmailer": "^6.1",
     "nnnick/chartjs": "^2.9",
-    "studio-42/elfinder": "^2.1"
+    "studio-42/elfinder": "^2.1",
+    "monolog/monolog": "^2.1"
   }
 }
