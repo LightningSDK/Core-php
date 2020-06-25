@@ -18,13 +18,12 @@ return [
             'robots.txt' => \lightningsdk\core\Pages\Robots::class,
             'sitemap' => \lightningsdk\core\Pages\Sitemap::class,
             'track' => \lightningsdk\core\Pages\Track::class,
-            'landing' => \lightningsdk\core\Pages\OptIn::class,
             'user' => \lightningsdk\core\Pages\User::class,
             'profile' => \lightningsdk\core\Pages\Profile::class,
+            'message' => \lightningsdk\core\Pages\Message::class,
 
             // API
             'api/contact' => \lightningsdk\core\API\Contact::class,
-            'api/optin' => \lightningsdk\core\API\Optin::class,
             'api/user' => \lightningsdk\core\API\User::class,
 
             // Image admin

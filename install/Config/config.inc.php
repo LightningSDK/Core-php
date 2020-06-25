@@ -146,7 +146,6 @@ $conf = [
             'user' => 'lightningsdk\\core\\Pages\\User',
             'contact' => 'lightningsdk\\core\\Pages\\Contact',
             'page' => 'lightningsdk\\core\\Pages\\Page',
-            'message' => 'lightningsdk\\core\\Pages\\Message',
             'track' => 'lightningsdk\\core\\Pages\\Track',
             'landing' => 'lightningsdk\\core\\Pages\\OptIn',
             'profile' => 'lightningsdk\\core\\Pages\\Profile',
