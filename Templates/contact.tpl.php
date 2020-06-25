@@ -1,6 +1,5 @@
 <?php
 
-use lightningsdk\core\Tools\Configuration;
 use lightningsdk\core\Tools\Form;
 use lightningsdk\core\View\Field;
 use lightningsdk\core\Tools\ReCaptcha;
@@ -9,7 +8,7 @@ use lightningsdk\core\Tools\ReCaptcha;
 <div class="row">
     <h1>Contact</h1>
 
-    <form method="post" id="contact_form" data-abide>
+    <form action="/contact" method="post" id="contact_form" data-abide>
         <?= Form::renderTokenInput(); ?>
         <div>
             <label>Your Name:
@@ -32,10 +31,10 @@ use lightningsdk\core\Tools\ReCaptcha;
                 <textarea name="message" cols="70" rows="5"><?=Field::defaultValue('name', null, 'text');?></textarea><br />
             </label>
         </div>
-        <input type="hidden" name="contact" value="true" />
-        <?php if (Configuration::get('recaptcha.invisible.public')) : ?>
-        <?=ReCaptcha::renderInvisible('Send Message', 'button');?>
-        <?php elseif (Configuration::get('recaptcha.public')): ?>
+        <input name="contact" type="hidden" value="true" />
+        <?php if (\lightningsdk\core\Tools\Configuration::get('recaptcha.invisible.public')) : ?>
+            <?=ReCaptcha::renderInvisible('Send Message', 'button');?>
+        <?php elseif (\lightningsdk\core\Tools\Configuration::get('recaptcha.public')): ?>
             <?=ReCaptcha::render()?>
             <br />
             <input type="Submit" name="Submit" value="Send Message" class="button" />

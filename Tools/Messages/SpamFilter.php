@@ -11,25 +11,25 @@ class SpamFilter {
      * Each class that implements the SpamFilterInterface can add it's own score
      * The system should be configured with a spam threshold as to whether the message is spam.
      *
-     * @param array $clientFIelds
+     * @param array $clientFields
      * @param array $messageFields
      * @param array $spamFields
      *
      * @return float
      */
-    public static function getScore(&$clientFIelds, &$messageFields, &$spamFields) {
+    public static function getScore(&$clientFields, &$messageFields, &$spamFields) {
         $handlers = Configuration::get('messages.spamFilters');
         $score = 0;
         foreach ($handlers as $handler) {
-            $score += $handler::getScore($clientFIelds, $messageFields, $spamFields);
+            $score += $handler::getScore($clientFields, $messageFields, $spamFields);
         }
         return $score;
     }
 
-    public static function flagAsSpam(&$clientFIelds, &$messageFields, &$spamFields) {
+    public static function flagAsSpam(&$clientFields, &$messageFields, &$spamFields) {
         $handlers = Configuration::get('messages.spamFilters');
         foreach ($handlers as $handler) {
-            $handler::flagAsSpam($clientFIelds, $messageFields, $spamFields);
+            $handler::flagAsSpam($clientFields, $messageFields, $spamFields);
         }
     }
 }
