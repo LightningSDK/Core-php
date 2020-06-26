@@ -10,7 +10,7 @@ use lightningsdk\core\Tools\Mailer;
 use lightningsdk\core\Tools\Output;
 use lightningsdk\core\Tools\Request;
 use lightningsdk\core\View\API;
-use lightningsdk\core\Model\Message;
+use lightningsdk\core\Model\Mailing\Message;
 
 class Contact extends API {
     /**
@@ -40,7 +40,7 @@ class Contact extends API {
 
         if (!empty($email)) {
             $user = User::addUser($email);
-            $list = Message::getListId('App');
+            $list = Message::getListIDByName('App');
             $user->subscribe($list);
         } else {
             $user = new User([

@@ -137,43 +137,6 @@ $conf = [
             'max_threads' => 1,
         ],
     ],
-    'routes' => [
-        'dynamic' => [
-            '.*' => 'lightningsdk\\core\\Pages\\Page',
-        ],
-        'static' => [
-            '' => 'lightningsdk\\core\\Pages\\Page',
-            'user' => 'lightningsdk\\core\\Pages\\User',
-            'contact' => 'lightningsdk\\core\\Pages\\Contact',
-            'page' => 'lightningsdk\\core\\Pages\\Page',
-            'track' => 'lightningsdk\\core\\Pages\\Track',
-            'landing' => 'lightningsdk\\core\\Pages\\OptIn',
-            'profile' => 'lightningsdk\\core\\Pages\\Profile',
-
-            // SEO
-            'sitemap' => 'lightningsdk\\core\\Pages\\Sitemap',
-
-            // Admin
-            'admin/social/auth' => 'lightningsdk\\core\\Pages\\SocialSharing\\Auth',
-            'admin/social/share' => 'lightningsdk\\core\\Pages\\SocialSharing\\Share',
-            'admin/mailing/lists' => 'lightningsdk\\core\\Pages\\Mailing\\Lists',
-            'admin/mailing/messages' => 'lightningsdk\\core\\Pages\\Mailing\\Messages',
-            'admin/mailing/send' => 'lightningsdk\\core\\Pages\\Mailing\\Send',
-            'admin/mailing/stats' => 'lightningsdk\\core\\Pages\\Mailing\\Stats',
-            'admin/mailing/templates' => 'lightningsdk\\core\\Pages\\Mailing\\Templates',
-            'admin/tracker' => 'lightningsdk\\core\\Pages\\AdminTracker',
-            'admin/pages' => 'lightningsdk\\core\\Pages\\Admin\\Pages',
-            'admin/users' => 'lightningsdk\\core\\Pages\\Admin\\Users',
-            'admin/cms' => 'lightningsdk\\core\\Pages\\Admin\\CMS',
-            'admin/roles' => 'lightningsdk\\core\\Pages\\Admin\\Roles',
-            'admin/permissions' => 'lightningsdk\\core\\Pages\\Admin\\Permissions',
-            'admin/contact' => 'lightningsdk\\core\\Pages\\Admin\\Contact',
-        ],
-        'cli_only' => [
-            'bounce' => 'lightningsdk\\core\\CLI\\BouncedEmail',
-            'test' => 'Source\\CLI\\Test',
-        ],
-    ],
     'language' => [
         'default' => 'en_us',
         'available' => [
