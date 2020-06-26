@@ -242,7 +242,7 @@ class CMS {
             'content' => $settings['default'] ?? '',
         ]);
 
-        $value = json_decode(json_encode($cms->content), true);
+        $value = json_decode($cms->content, true);
 
         if (!empty($settings['display_only'])) {
             return implode(',', $value);
