@@ -24,7 +24,7 @@ use lightningsdk\core\Tools\Session\BrowserSession;
 use lightningsdk\core\Tools\Template;
 use lightningsdk\core\View\Page as PageView;
 use lightningsdk\core\Model\User as UserModel;
-use lightningsdk\core\Model\Message;
+use lightningsdk\core\Model\Mailing\Message as MessageModel;
 use lightningsdk\core\Model\Tracker;
 use lightningsdk\core\Model\Contact as ContactModel;
 
@@ -193,12 +193,12 @@ class Contact extends PageView {
         $this->requestContact = Request::post('contact', Request::TYPE_BOOLEAN);
         $this->userMessage = Request::post('message', Request::TYPE_INT, '', 0);
         if ($this->list = Request::get('list', Request::TYPE_INT, '', 0)) {
-            if (!Message::validateListID($this->list)) {
-                $this->list = Message::getDefaultListID();
+            if (!MessageModel::validateListID($this->list)) {
+                $this->list = MessageModel::getDefaultListID();
             }
         }
         if (empty($this->list) && Request::get('optin', Request::TYPE_BOOLEAN)) {
-            $this->list = Message::getDefaultListID();
+            $this->list = MessageModel::getDefaultListID();
         }
     }
 

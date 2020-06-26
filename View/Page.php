@@ -1,5 +1,5 @@
 <?php
 
-namespace lightnignsdk\core\View;
+namespace lightningsdk\core\View;
 
-class Page extends PageCore{}
+class Page extends PageCore {}
