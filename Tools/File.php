@@ -14,7 +14,7 @@ class File {
 
     public static function absolute($path) {
         if (!preg_match('|^/|', $path) && !preg_match('|^php://|', $path)) {
-            return realpath(HOME_PATH . '/' . $path);
+            return HOME_PATH . '/' . $path;
         }
         return $path;
     }

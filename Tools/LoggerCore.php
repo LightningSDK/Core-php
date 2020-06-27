@@ -31,8 +31,11 @@ class LoggerCore extends Singleton {
             set_error_handler([\lightningsdk\core\Tools\Logger::class, 'errorLogStacktrace']);
         }
 
-        self::$logFile = Configuration::get('log.file', 'php://stdout');
-        self::$logFile = File::absolute(self::$logFile);
+        static::setLog(Configuration::get('log.file', 'php://stdout'));
+    }
+
+    public static function setLog($file) {
+        self::$logFile = File::absolute($file);
         self::$logLevel = Configuration::get('log.level', Monolog::WARNING);
         self::$log = new Monolog('name');
         self::$log->pushHandler(new StreamHandler(self::$logFile, self::$logLevel));
