@@ -56,18 +56,23 @@ class CMS {
     protected static $cacheDataOriginal;
     protected static $cacheKey = 'cms-content';
     protected static function initCache() {
-        $user = ClientUser::getInstance(false);
-        if (static::$cache == null && (empty($user) || !$user->hasPermission(Permissions::EDIT_CMS))) {
+        if (static::$cache == null) {
             static::$cache = Cache::get(Cache::PERMANENT);
             static::$cacheDataOriginal = static::$cacheData = static::$cache->get(static::$cacheKey) ?? [];
         }
     }
     protected static function loadWithCache($name, $settings, $default) {
-        self::initCache();;
-        if (!empty($settings['cache']) && array_key_exists($name, static::$cacheData)) {
-            // exists in cache
-            return static::$cacheData[$name];
-        } elseif ($cms = CMSModel::loadByName($name)) {
+        $user = ClientUser::getInstance(false);
+        if (empty($user) || !$user->hasPermission(Permissions::EDIT_CMS)) {
+            // In this case we can use the cache
+            self::initCache();
+            if (!empty($settings['cache']) && array_key_exists($name, static::$cacheData)) {
+                // exists in cache
+                return static::$cacheData[$name];
+            }
+        }
+
+        if ($cms = CMSModel::loadByName($name)) {
             // loaded from db
             $value = $cms;
         } else {
@@ -88,8 +93,13 @@ class CMS {
     }
 
     public function __destruct() {
-        if (json_encode(static::$cacheData) != json_encode(static::$cacheDataOriginal)) {
-            static::$cache->set(static::$ccacheKey,  static::$cacheData);
+        $user = ClientUser::getInstance(false);
+        if (empty($user) || !$user->hasPermission(Permissions::EDIT_CMS)) {
+            // We don't save cache for admins
+            // TODO: This can be cleaned up
+            if (json_encode(static::$cacheData) != json_encode(static::$cacheDataOriginal)) {
+                static::$cache->set(static::$ccacheKey, static::$cacheData);
+            }
         }
     }
 
