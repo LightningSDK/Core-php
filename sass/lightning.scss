@@ -15,6 +15,13 @@ $amber-high: rgb(255,228,0);
 $amber-med: rgb(213,191,0);
 $amber-low: rgb(255,205,1);
 
+.left {
+  float: left;
+}
+.right {
+  float: right;
+}
+
 .vertical-spacing {
   margin-top: 50px !important;
   margin-bottom: 50px !important;
