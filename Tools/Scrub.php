@@ -238,8 +238,8 @@ class Scrub {
      *   The sanitized HTML.
      */
     public static function html($html, $allowed_tags = '', $allowed_css = '', $trusted = false, $full_page = false) {
-        $purifier = HTMLPurifierWrapper::getInstance();
-        $config = HTMLPurifierConfig::createDefault();
+        $purifier = HTMLPurifier::getInstance();
+        $config = HTMLPurifier::getConfig();
 
         if ($full_page || $trusted) {
             return static::trustedHTML($html, $full_page);

@@ -103,6 +103,9 @@ return [
             ],
         ],
     ],
+    'hmtlpurifier' => [
+        'cache' => 'cache/htmlpurifier',
+    ],
     'menus' => [
         'admin' => [
             'Content' => [
