@@ -156,14 +156,17 @@ class BasicHTML {
         return '<input ' . HTML::implodeAttributes($attributes) . ' />';
     }
 
-    public static function submit($value, $options) {
+    public static function submit($content, $options = []) {
         $attributes = [
-            'name' => 'submit',
             'type' => 'submit',
-            'value' => $value,
+            'value' => 'submit',
         ] + $options;
 
-        return '<input ' . HTML::implodeAttributes($attributes) . ' />';
+        if (empty($attributes['class'])) {
+            $attributes['class'] = 'button';
+        }
+
+        return '<button ' . HTML::implodeAttributes($attributes) . ' />' . $content . '</button>';
     }
 
     /**

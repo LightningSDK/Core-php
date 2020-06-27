@@ -44,11 +44,10 @@ class ReCaptcha {
                 <small class="form-error">Please check the box.</small></div>';
     }
 
-    public static function renderInvisible($text = 'Submit', $class = '') {
+    public static function renderInvisible() {
         static::loadJS(true);
         return '<input type="hidden" name="recaptcha-type" value="invisible"/>
-                <div class="g-recaptcha invisible-recaptcha"></div>
-                <button class=" ' . $class . '" >' . $text . '</button>';
+                <div class="g-recaptcha invisible-recaptcha"></div>';
     }
 
     /**
