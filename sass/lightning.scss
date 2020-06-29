@@ -662,3 +662,12 @@ pre.debug {
     }
   }
 }
+
+.section {
+  .padded {
+    @include breakpoint(small only) {
+      padding: 15px;
+    }
+    padding: 40px;
+  }
+}

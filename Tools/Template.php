@@ -211,7 +211,7 @@ class Template extends Singleton {
     /**
      * Set the main template to use when rendering.
      *
-     * @param string $template
+     * @param array|string $template
      *   The main template name excluding .tpl.php.
      */
     public function setTemplate($template) {

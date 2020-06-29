@@ -26,7 +26,7 @@
          */
         success: function (settings, data) {
             // If the output was HTML, add it to the dialog.
-            if (settings.dataType === 'HTML') {
+            if (settings.dataType.toUpperCase() === 'HTML') {
                 if (settings.user_success) {
                     settings.user_success(data);
                 } else {
