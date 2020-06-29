@@ -284,7 +284,7 @@ class Scrub {
         if (!$full_page) {
             $settings['show-body-only'] = true;
         }
-        return $tidy->repairString($html, $settings);
+        return $tidy->repairString($html, $settings, 'utf8');
     }
 
     /**
