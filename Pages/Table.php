@@ -633,6 +633,10 @@ abstract class Table extends Page {
         return $this->id;
     }
 
+    public function getRowId($row) {
+        return $row[$this->getKey()];
+    }
+
     /**
      * The file upload is posted here.
      */
@@ -1032,14 +1036,12 @@ abstract class Table extends Page {
      * @throws Exception
      */
     public function getKey($useTableName = FALSE) {
-        if (empty($this->key) && !empty($this->table)) {
-            $result = $this->database->query("SHOW KEYS FROM `{$this->table}` WHERE Key_name = 'PRIMARY'");
-            $result = $result->fetch();
-            $this->key = $result['Column_name'];
+        if (empty(static::PRIMARY_KEY)) {
+            return null;
         }
 
         // When tables are joined we need to use table names to avoid key duplicating
-        return $useTableName ? $this->fullField($this->key) : $this->key;
+        return $useTableName ? $this->fullField(static::PRIMARY_KEY) : static::PRIMARY_KEY;
     }
 
     /**
@@ -1053,7 +1055,7 @@ abstract class Table extends Page {
         if (strpos($field, '.')) {
             return $field;
         } else {
-            return $this->table . '.' . $field;
+            return static::TABLE . '.' . $field;
         }
     }
 
@@ -1358,7 +1360,7 @@ abstract class Table extends Page {
         // loop through DATA rows
         foreach ($list as $row) {
             // prepare click action for each row
-            $output .= "<tr id='{$row[$this->getKey()]}'>";
+            $output .= "<tr id='{$this->getRowId($row)}'>";
             // SHOW FIELDS AND VALUES
             $field_order = is_array($this->fieldOrder) ? $this->fieldOrder
                 : array_merge(array_keys($this->fields), array_keys($this->links));
@@ -1416,10 +1418,10 @@ abstract class Table extends Page {
         if (!empty($link_settings['list']) && $link_settings['list'] == 'compact') {
             if (!empty($link_settings['index'])) {
                 // There is a link table joining them. (Many to many) {
-                $links = $this->load_all_active_list($link_settings, $row[$this->getKey()]);
+                $links = $this->load_all_active_list($link_settings, $this->getRowId($row));
             }
             else {
-                $links = $this->database->select($link, [$this->getKey() => $row[$this->getKey()]]);
+                $links = $this->database->select($link, [$this->getKey() => $this->getRowId($row)]);
             }
 
             $output .= '<td>';
@@ -1473,7 +1475,7 @@ abstract class Table extends Page {
         foreach ($this->links as $link => $link_settings) {
             if (!empty($link_settings['list']) && $link_settings['list'] === "each") {
                 $link_settings['fields'] = $this->get_fields($link_settings['table'], $link_settings['preset']);
-                $links = $this->load_all_active_list($link_settings, $row[$this->getKey()]);
+                $links = $this->load_all_active_list($link_settings, $this->getRowId($row));
 
                 // Set the character to join the URL parameters to the edit_link
                 $joinchar = (!empty($link_settings['edit_link']) && strpos($link_settings['edit_link'], "?") !== false) ? '&' : '?';
@@ -1482,11 +1484,11 @@ abstract class Table extends Page {
                     $output .= "<tr class='linked_list_header'><td>{$link_settings['display_header']}";
                 }
                 if (!empty($link_settings['edit_link'])) {
-                    $output .= " <a href='{$link_settings['edit_link']}{$joinchar}action=new&backlinkname={$this->getKey()}&backlinkvalue={$row[$this->getKey()]}'>New</a>";
+                    $output .= " <a href='{$link_settings['edit_link']}{$joinchar}action=new&backlinkname={$this->getKey()}&backlinkvalue={$this->getRowId($row)}'>New</a>";
                 }
                 if (!empty($link_settings['edit_js'])) {
                     // TODO: Move this to an init function.
-                    $output .= " <a href='' onclick='{$link_settings['edit_js']} . newLink({$row[$this->getKey()]})'>New</a>";
+                    $output .= " <a href='' onclick='{$link_settings['edit_js']} . newLink({$this->getRowId($row)})'>New</a>";
                 }
                 $output .= "</td></tr>";
                 foreach ($links as $row) {
@@ -1557,21 +1559,21 @@ abstract class Table extends Page {
             switch ($action['type']) {
                 case 'function':
                     // Have table call a function.
-                    $output .= "<a href='" . $this->createUrl("action", $row[$this->getKey()], $a, ['ra' => $this->action]) . "'>{$link_content}</a>";
+                    $output .= "<a href='" . $this->createUrl("action", $this->getRowId($row), $a, ['ra' => $this->action]) . "'>{$link_content}</a>";
                     break;
                 case 'link':
-                    $output .= "<a href='{$action['url']}{$row[$this->getKey()]}'>{$link_content}</a>";
+                    $output .= "<a href='{$action['url']}{$this->getRowId($row)}'>{$link_content}</a>";
                     break;
                 case 'html':
                     // Render the HTML.
                     $output .= is_callable($action['html']) ? $action['html']($row) : $action['html'];
                     break;
                 case 'action':
-                    $output .= "<a href='" . $this->createUrl($action['action'], $row[$this->getKey()], !empty($action['action_field']) ? $action['action_field'] : '') . "'>{$link_content}</a>";
+                    $output .= "<a href='" . $this->createUrl($action['action'], $this->getRowId($row), !empty($action['action_field']) ? $action['action_field'] : '') . "'>{$link_content}</a>";
                     break;
                 case 'checkbox':
                 default:
-                    $output .= "<input type='checkbox' name='taf_{$a}[{$row[$this->getKey()]}]' class='taf_{$a}' value='1' />";
+                    $output .= "<input type='checkbox' name='taf_{$a}[{$this->getRowId($row)}]' class='taf_{$a}' value='1' />";
                     break;
             }
             $output .= '</td>';
@@ -1579,21 +1581,21 @@ abstract class Table extends Page {
         if ($this->editable !== false) {
             $output .= '<td>';
             if ($editable) {
-                $output .= "<a href='" . $this->createUrl("edit", $row[$this->getKey()]) . "'><img src='/images/lightning/edit.png' border='0' /></a>";
+                $output .= "<a href='" . $this->createUrl("edit", $this->getRowId($row)) . "'><img src='/images/lightning/edit.png' border='0' /></a>";
             }
             $output .= '</td>';
         }
         if ($this->duplicatable !== false) {
             $output .= "<td>";
             if ($editable) {
-                $output .= "<a href='" . $this->createUrl("duplicate", $row[$this->getKey()]) . "'><img src='/images/lightning/duplicate.png' border='0' /></a>";
+                $output .= "<a href='" . $this->createUrl("duplicate", $this->getRowId($row)) . "'><img src='/images/lightning/duplicate.png' border='0' /></a>";
             }
             $output .= "</td>";
         }
         if ($this->deleteable !== false) {
             $output .= "<td>";
             if ($editable) {
-                $output .= "<a href='" . $this->createUrl("delete", $row[$this->getKey()]) . "'><img src='/images/lightning/remove.png' border='0' /></a>";
+                $output .= "<a href='" . $this->createUrl("delete", $this->getRowId($row)) . "'><img src='/images/lightning/remove.png' border='0' /></a>";
             }
             $output .= "</td>";
         }
@@ -2296,7 +2298,7 @@ abstract class Table extends Page {
 
     protected function loadMainFields() {
         if (empty($this->fields)) {
-            $this->fields = $this->get_fields($this->table, $this->preset);
+            $this->fields = $this->get_fields(static::TABLE, $this->preset);
         }
     }
 
@@ -3198,11 +3200,11 @@ abstract class Table extends Page {
         $where[$this->getKey(true)] = $this->singularity ? $this->singularityID : $this->id;
 
         // fields we retrieve from the query
-        $fields = array_merge(["{$this->table}.*"], $this->joinFields);
+        $fields = array_merge([static::TABLE . ".*"], $this->joinFields);
 
-        if ($this->table) {
+        if (static::TABLE) {
             $this->list = $this->database->selectRowQuery([
-                'from' => $this->table,
+                'from' => static::TABLE,
                 'join' => $join,
                 'where' => $where,
                 'select' => $fields
@@ -3325,7 +3327,9 @@ abstract class Table extends Page {
         }
 
         // Limit to one entry per primary key of the original table.
-        $query['group_by'] = $this->getKey(true);
+        if (!empty($this->getKey(true))) {
+            $query['group_by'] = $this->getKey(true);
+        }
 
         // Get the page count.
         $this->listCount = $this->database->countQuery($query + ['as' => 'query'], true);
@@ -3379,7 +3383,7 @@ abstract class Table extends Page {
                     $this->id = Request::get('id');
                     $this->getRow();
                     $this->action_fields[$_GET['f']]['function']($this->list);
-                    header("Location: " . $this->createUrl($_GET['ra'], $row[$this->getKey()]));
+                    header("Location: " . $this->createUrl($_GET['ra'], $this->getRowId($row)));
                     exit;
                     break;
             }
@@ -3389,7 +3393,7 @@ abstract class Table extends Page {
         if ($this->singularity) {
             $row = $this->database->selectRow($this->table, [$this->singularity => $this->singularityID]);
             if (count($row) > 0) $singularity_exists = true;
-            if ($singularity_exists) $this->id = $row[$this->getKey()];
+            if ($singularity_exists) $this->id = $this->getRowId($row);
             // there can be no "new", "delete", "delconf", "list"
             if ($this->action == "new" || $this->action == "edit" || $this->action == "delete" || $this->action == "delconf" || $this->action == "list" || $this->action == '') {
                 if ($singularity_exists)
