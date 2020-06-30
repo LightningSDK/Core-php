@@ -664,10 +664,10 @@ pre.debug {
 }
 
 .section {
-  .padded {
+  &.padded {
     @include breakpoint(small only) {
-      padding: 15px;
+      padding: 15px 0;
     }
-    padding: 40px;
+    padding: 40px 0;
   }
 }
