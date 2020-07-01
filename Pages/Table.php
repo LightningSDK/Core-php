@@ -410,6 +410,9 @@ abstract class Table extends Page {
         $this->database = Database::getInstance();
 
         // TODO: Remove this when the properties are removed:
+        if (empty(static::TABLE)) {
+            throw new Exception('Table not defined');
+        }
         if (empty($this->table) && !empty(static::TABLE)) {
             $this->table = static::TABLE;
             $this->key = static::PRIMARY_KEY;
