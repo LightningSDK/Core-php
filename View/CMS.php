@@ -200,8 +200,8 @@ class CMS {
         } elseif (!empty($settings['norender'])) {
             return '';
         } else {
-            if (!empty($content)) {
-                $output = '<img src="' . $content->url . '" class="' . $content->class . '" />';
+            if (!empty($cms->url)) {
+                $output = '<img src="' . $cms->url . '" class="' . $cms->class . '" />';
                 if (!empty($settings['link'])) {
                     $output = '<a href="' . Scrub::toHTML($settings['link']) . '">' . $output . '</a>';
                 }
