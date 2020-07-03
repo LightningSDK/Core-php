@@ -614,6 +614,11 @@ span.form-inline {
   background-size: cover;
   background-position: center;
 }
+.static {
+  background-attachment: fixed;
+  background-position: center;
+  background-size: cover;
+}
 .inline-block {
   display: inline-block !important;
 }
