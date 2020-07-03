@@ -167,31 +167,12 @@ class ConfigurationCore {
 
     protected static function generateConfiguration() {
         if (!empty(static::$configuration['modules']['include'])) {
-            static::loadModules(static::$configuration['modules']['include']);
+            static::softMerge(Modules::load(static::$configuration['modules']['include']));
         }
         // Load module configurations.
         if (Request::isCLI()) {
             if (!empty(static::$configuration['modules']['include-cli'])) {
-                static::loadModules(static::$configuration['modules']['include-cli']);
-            }
-        }
-    }
-
-    public static function loadModules($includeModules) {
-        for ($i = 0; $i < count($includeModules); $i++) {
-            $module = $includeModules[$i];
-            foreach (['Modules', 'vendor'] as $path) {
-                if (file_exists(HOME_PATH . '/' . $path . '/' . $module . '/config.php')) {
-                    $moduleConfig = require HOME_PATH . '/' . $path . '/' . $module . '/config.php';
-                    static::softMerge($moduleConfig);
-                    if (!empty($moduleConfig['modules']['include'])) {
-                        foreach ($moduleConfig['modules']['include'] as $include) {
-                            if (!in_array($include, $includeModules)) {
-                                $includeModules[] = $include;
-                            }
-                        }
-                    }
-                }
+                static::softMerge(Modules::load(static::$configuration['modules']['include-cli']));
             }
         }
     }

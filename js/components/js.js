@@ -84,7 +84,7 @@
          * will be added to the require queue.
          */
         loadStartupQueue: function() {
-            // When this happens lightnign.js is loaded
+            // When this happens lightning.js is loaded
             self.loaded['/js/lightning.min.js'] = true;
 
             // Set up notification for when the document is ready

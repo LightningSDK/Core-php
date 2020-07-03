@@ -8,6 +8,7 @@ use lightningsdk\core\Tools\ClientUser;
 use lightningsdk\core\Tools\Configuration;
 use lightningsdk\core\Tools\Form as FormTool;
 use lightningsdk\core\Tools\Messenger;
+use lightningsdk\core\Tools\Modules;
 use lightningsdk\core\Tools\Navigation;
 use lightningsdk\core\Tools\Output;
 use lightningsdk\core\Tools\Request;
@@ -18,11 +19,8 @@ use lightningsdk\core\Model\Tracker;
  * The basic html page handler.
  *
  * @package lightningsdk\core\View
- * @todo: Should be abstract
  */
 class PageCore {
-
-    const MODULE = null;
 
     /**
      * The template file.
@@ -104,17 +102,6 @@ class PageCore {
      * Run any global initialization functions.
      */
     public function __construct() {
-        // Load module settings if present.
-        // This incorporates configurations from the module into the page
-        if (!empty(static::MODULE)) {
-            $this->initModule();
-        }
-
-        // Load any page initters from modules
-        foreach (Configuration::get('modules.page-init', []) as $initterClass) {
-            call_user_func([$initterClass, 'init']);
-        }
-
         // Load messages and errors from the query string.
         Messenger::loadFromQuery();
         Messenger::loadFromSession();
@@ -286,34 +273,5 @@ class PageCore {
         $template->set('meta', $this->meta);
 
         JS::set('menu_context', $this->menuContext);
-    }
-
-    protected function initModule() {
-        $settings = Configuration::get('modules.' . static::MODULE);
-        $this->updateSettings($settings);
-    }
-
-    protected function updateSettings($settings) {
-        if (!empty($settings['menu_context'])) {
-            $this->menuContext = $settings['menu_context'];
-        }
-        if (!empty($settings['template'])) {
-            $this->template = $settings['template'];
-        }
-        if (!empty($settings['meta_data'])) {
-            $this->meta += $settings['meta_data'];
-        }
-        if (isset($settings['right_column'])) {
-            $this->rightColumn = $settings['right_column'];
-        }
-        if (isset($settings['full_width'])) {
-            $this->fullWidth = $settings['full_width'];
-        }
-        if (isset($settings['hide_menu'])) {
-            $this->hideMenu = $settings['hide_menu'];
-        }
-        if (isset($settings['hide_social'])) {
-            $this->share = !$settings['hide_social'];
-        }
     }
 }

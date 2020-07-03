@@ -8,6 +8,7 @@ namespace lightningsdk\core\Pages;
 use DOMDocument;
 use lightningsdk\core\Model\URL;
 use lightningsdk\core\Tools\Configuration;
+use lightningsdk\core\Tools\Modules;
 use lightningsdk\core\Tools\Output;
 use lightningsdk\core\Tools\Request;
 use lightningsdk\core\Tools\Scrub;
@@ -79,11 +80,16 @@ class Page extends PageView {
         $template = Template::getInstance();
 
         // Init modules
+        // Load any page initters from modules
         if (!empty($this->fullPage['modules'])) {
             $modules = json_decode($this->fullPage['modules'], true);
             foreach ($modules as $module) {
                 if ($init_method = Configuration::get('modules.' . $module . '.init_view')) {
+                    // todo: this is deprecated, and is only used in checkout-stripe module, but need to
+                    // verify that the sitemanager-checkout-stripe module will override it
                     call_user_func($init_method);
+                } else {
+                    Modules::initPage($module);
                 }
             }
         }

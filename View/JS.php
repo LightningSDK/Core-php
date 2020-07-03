@@ -79,7 +79,7 @@ class JS {
         }
     }
 
-    protected static function getCompiledScripts($resources) {
+    public static function getCompiledScripts($resources) {
         $compiled_scripts = [];
         if (!is_array($resources)) {
             $resources = [$resources];
