@@ -375,7 +375,6 @@ abstract class Table extends Page {
     // Fields we need to grab from joined table
     protected $joinFields = [];
     protected $header;
-    protected $table_url;
 
     /**
      * Used when this table is editing child contents of a parent table.
@@ -412,10 +411,6 @@ abstract class Table extends Page {
         // TODO: Remove this when the properties are removed:
         if (empty(static::TABLE)) {
             throw new Exception('Table not defined');
-        }
-        if (empty($this->table) && !empty(static::TABLE)) {
-            $this->table = static::TABLE;
-            $this->key = static::PRIMARY_KEY;
         }
 
         // TODO: Action is not set yet. Is any of this necessary?
@@ -482,7 +477,7 @@ abstract class Table extends Page {
         if (!empty($this->accessControl)) {
             if (!$this->database->check(
                 [
-                    'from' => $this->table,
+                    'from' => static::TABLE,
                     'join' => $this->getAccessTableJoins()
                 ],
                 array_merge($this->accessControl, [$this->getKey() => $id]))) {
@@ -589,7 +584,7 @@ abstract class Table extends Page {
 
         // Initialize the export.
         $file = new CSVWriter();
-        $file->setFilename($this->table . '_' . date('Y-m-d') . '.csv');
+        $file->setFilename(static::TABLE . '_' . date('Y-m-d') . '.csv');
 
         // Build header row.
         $headrow = [];
@@ -670,9 +665,9 @@ abstract class Table extends Page {
      */
     protected function initCSVImporter() {
         $this->CSVImporter = new CSVImport();
-        $this->CSVImporter->setTable($this->table);
+        $this->CSVImporter->setTable(static::TABLE);
         $this->CSVImporter->setPrimaryKey($this->getKey());
-        $this->CSVImporter->setFields(array_keys($this->get_fields($this->table, $this->preset)));
+        $this->CSVImporter->setFields(array_keys($this->get_fields(static::TABLE, $this->preset)));
         $this->CSVImporter->setAdditionalFields($this->additionalImportFields);
         $this->CSVImporter->setProcessedFields($this->processedImportFields);
         foreach ($this->importHandlers as $name => $handler) {
@@ -828,7 +823,7 @@ abstract class Table extends Page {
             }
 
             // Delete the entry.
-            $this->database->delete($this->table, [$this->getKey() => $this->id]);
+            $this->database->delete(static::TABLE, [$this->getKey() => $this->id]);
         }
 
         // Redirect.
@@ -855,13 +850,13 @@ abstract class Table extends Page {
         if ($this->singularity) {
             $values[$this->singularity] = $this->singularityID;
         }
-        $this->id = $this->database->insert($this->table, $values, $this->update_on_duplicate_key ? $values : true);
+        $this->id = $this->database->insert(static::TABLE, $values, $this->update_on_duplicate_key ? $values : true);
 
         // Check if the element was created.
         if ($this->id) {
-            Messenger::message($this->createdMessage ?: 'The ' . $this->table . ' has been created.');
+            Messenger::message($this->createdMessage ?: 'The ' . static::TABLE . ' has been created.');
         } else {
-            Output::error('Sorry, the ' . $this->table . ' couldn\'t be saved. Go get help!');
+            Output::error('Sorry, the ' . static::TABLE . ' couldn\'t be saved. Go get help!');
         }
 
         $this->getRow();
@@ -910,14 +905,14 @@ abstract class Table extends Page {
 
         if (!empty($new_values)) {
             $where = $this->accessRestrictions([$this->getKey() => $this->id]);
-            $table = ['from' => $this->table, 'join' => $this->getAccessTableJoins()];
+            $table = ['from' => static::TABLE, 'join' => $this->getAccessTableJoins()];
             $this->database->update($table, $new_values, $where);
         }
         $this->updateAccessTable();
         $this->setPostedLinks();
 
         if ($this->updatedMessage !== false) {
-            Messenger::message($this->updatedMessage ?: 'The ' . $this->table . ' has been updated.');
+            Messenger::message($this->updatedMessage ?: 'The ' . static::TABLE . ' has been updated.');
         }
 
         // If serial update is set, set the next action to be an edit of the next higest key,
@@ -930,7 +925,7 @@ abstract class Table extends Page {
             // Get the next id in the table
             $nextkey = $this->database->selectField(
                 ['nextkey' => ['expression' => "MIN({$this->getKey()})"]],
-                $this->table,
+                static::TABLE,
                 [
                     $this->getKey() => ['>', $this->id]
                 ]
@@ -1675,7 +1670,7 @@ abstract class Table extends Page {
 
         if ($this->action != 'view') {
             $multipart_header = $this->hasUploadfield() ? 'enctype="multipart/form-data"' : '';
-            $output .= '<form action="' . $this->createUrl() . '" id="form_' . $this->table . '" method="POST" ' . $multipart_header . '><input type="hidden" name="action" id="action" value="' . $this->getNewAction() . '" />';
+            $output .= '<form action="' . $this->createUrl() . '" id="form_' . static::TABLE . '" method="POST" ' . $multipart_header . '><input type="hidden" name="action" id="action" value="' . $this->getNewAction() . '" />';
             if ($this->action == 'duplicate') {
                 $output .= '<input type="hidden" name="lightning_table_duplicate" value="' . $this->id . '" />';
             }
@@ -1903,7 +1898,7 @@ abstract class Table extends Page {
             // The local key is the primary key column by default or another specified column.
             $local_key = isset($link_settings['local_key']) ? $link_settings['local_key'] : $this->getKey();
             // The value of the local key column.
-            $local_id = ($this->table) ? $this->list[$local_key] : $this->id;
+            $local_id = (static::TABLE) ? $this->list[$local_key] : $this->id;
 
             // If there is a local key ID and no active list, load it.
             // active_list is the list of attached items.
@@ -2109,8 +2104,7 @@ abstract class Table extends Page {
         }
 
         if (!empty($link_settings['pop_add'])) {
-            $location = !empty($link_settings['table_url']) ? $link_settings['table_url'] : "/table?table=" . $link_id;
-            $output .= "<a onclick='lightning.table.newPop(\"{$location}\",\"{$link_id}\",\"{$link_settings['display_column']}\")'>Add New Item</a>";
+            $output .= "<a onclick='lightning.table.newPop(\"{$link_settings['table_url']}\",\"{$link_id}\",\"{$link_settings['display_column']}\")'>Add New Item</a>";
         }
 
         $output .= $this->renderLinkedTableEditableSelectedBoxes($link_id, $link_settings);
@@ -2234,7 +2228,6 @@ abstract class Table extends Page {
             $vars['id'] = $this->id;
         }
         if ($action != '') $vars['action'] = $action;
-        if ($this->table_url) $vars['table'] = $this->table;
         if (isset($this->parentLink)) $vars[$this->parentLink] = $this->parentId;
         if ($field != '') $vars['f'] = $field;
         if ($this->cur_subset && $this->cur_subset != $this->subset_default) $vars['ss'] = $this->cur_subset;
@@ -2474,7 +2467,7 @@ abstract class Table extends Page {
         if (isset($field['insertable']) && $field['insertable'] == false) {
             return false;
         }
-        if ($field['field'] == $this->key) {
+        if ($field['field'] == static::PRIMARY_KEY) {
             return false;
         }
         // TODO: This should be replaced by an overriding method in the child class.
@@ -2804,7 +2797,7 @@ abstract class Table extends Page {
 
             // If the value needs to be encrypted
             if (!empty($field['encrypted'])) {
-                $val = $this->encrypt($this->table, $field['field'], $val);
+                $val = $this->encrypt(static::TABLE, $field['field'], $val);
             }
 
             if (!$ignore && empty($field['no_save'])) {
@@ -3183,7 +3176,6 @@ abstract class Table extends Page {
         }
 
         $where = [];
-        $this->getKey();
 
         if ($this->parentLink && $this->parentId) {
             $where[$this->parentLink] = $this->parentId;
@@ -3205,14 +3197,12 @@ abstract class Table extends Page {
         // fields we retrieve from the query
         $fields = array_merge([static::TABLE . ".*"], $this->joinFields);
 
-        if (static::TABLE) {
-            $this->list = $this->database->selectRowQuery([
-                'from' => static::TABLE,
-                'join' => $join,
-                'where' => $where,
-                'select' => $fields
-            ]);
-        }
+        $this->list = $this->database->selectRowQuery([
+            'from' => static::TABLE,
+            'join' => $join,
+            'where' => $where,
+            'select' => $fields
+        ]);
     }
 
     protected function getAccessTableJoins() {
@@ -3238,13 +3228,13 @@ abstract class Table extends Page {
     protected function loadList() {
 
         // check for required variables
-        if ($this->table == '') {
+        if (static::TABLE == '') {
             return;
         }
 
         $query = [
-            'select' => [$this->table => ['*']],
-            'from' => $this->table,
+            'select' => [static::TABLE => ['*']],
+            'from' => static::TABLE,
             'join' => [],
             'where' => [],
             'indexed_by' => $this->getKey()
@@ -3321,7 +3311,7 @@ abstract class Table extends Page {
             $query['fields'][] = [$this->getKey() => "`{$_POST['field']}`,`{$this->getKey()}`"];
             $query['order_by']['field'] = 'ASC';
         } else {
-            $query['fields'][] = [$this->table => ['*']];
+            $query['fields'][] = [static::TABLE => ['*']];
         }
 
         // Most important
@@ -3351,113 +3341,7 @@ abstract class Table extends Page {
      * @throws Exception
      */
     protected function loadFullListCursor() {
-        $this->list = $this->database->select($this->table);
-    }
-
-    /**
-     * TODO: Remove?
-     *
-     * @return boolean
-     *
-     * @throws Exception
-     */
-    protected function executeTask() {
-        // do we load a subset or ss vars?
-        if (isset($_REQUEST['ss'])) {
-            $this->cur_subset = Scrub::variable($_REQUEST['ss']);
-        } elseif ($this->subset_default) {
-            $this->cur_subset = $this->subset_default;
-        }
-
-        // if the table is not set explicitly, look for one in the url
-        if (!isset($this->table)) {
-            if (isset($_REQUEST['table'])) {
-                $this->table = Request::get('table');
-                $this->table_url = true;
-            }
-            else return false;
-        }
-
-        // see if we are calling an action from a link
-        $action = Request::get('action');
-        if ($action == "action" && isset($this->action_fields[$_GET['f']])) {
-            switch ($this->action_fields[$_GET['f']]['type']) {
-                case "function":
-                    $this->id = Request::get('id');
-                    $this->getRow();
-                    $this->action_fields[$_GET['f']]['function']($this->list);
-                    header("Location: " . $this->createUrl($_GET['ra'], $this->getRowId($row)));
-                    exit;
-                    break;
-            }
-        }
-
-        // check for a singularity, only allow edit/update (this means a user only has access to one of these entries, so there is no list view)
-        if ($this->singularity) {
-            $row = $this->database->selectRow($this->table, [$this->singularity => $this->singularityID]);
-            if (count($row) > 0) $singularity_exists = true;
-            if ($singularity_exists) $this->id = $this->getRowId($row);
-            // there can be no "new", "delete", "delconf", "list"
-            if ($this->action == "new" || $this->action == "edit" || $this->action == "delete" || $this->action == "delconf" || $this->action == "list" || $this->action == '') {
-                if ($singularity_exists)
-                    $this->action = "edit";
-                else
-                    $this->action = "new";
-            }
-            // if there is no current entry, an edit becomes an insert
-            if ($this->action == "update" || $this->action == "insert") {
-                if ($singularity_exists)
-                    $this->action = "update";
-                else
-                    $this->action = "insert";
-            }
-        }
-
-        $this->getKey();
-        switch ($this->action) {
-            case 'pop_return': break;
-            case 'autocomplete':
-                $this->loadList();
-                $output = ['list' => $this->list, 'search' => Request::post('st')];
-                Output::json($output);
-                exit;
-                break;
-            case 'file':
-                $this->loadMainFields();
-                $field = $_GET['f'];
-                $this->getRow();
-                if ($this->fields[$field]['type'] == 'file' && count($this->list) > 0) {
-                    $file = $this->get_full_file_location($this->fields[$field]['location'], $this->list[$field]);
-                    if (!file_exists($file)) die("No File Uploaded");
-                    switch ($this->list[$this->fields[$field]['extension']]) {
-                        case '.pdf':
-                            Output::setContentType('application/pdf'); break;
-                        case '.jpg': case '.jpeg':
-                            Output::setContentType('image/jpeg'); break;
-                        case '.png':
-                            Output::setContentType('image/png'); break;
-                    }
-                    readfile($file);
-                } else die ('config error');
-                exit;
-            case 'delete':
-                if (!$this->deleteable) // FAILSAFE
-                    break;
-                if ($this->delconf)
-                    break;
-                $_POST['delconf'] = "Yes";
-            case 'delconf':
-                if (!$this->deleteable) // FAILSAFE
-                    break;
-                if ($_POST['delconf'] == "Yes") {
-                }
-            case 'list_action':
-            case 'list':
-            case '':
-            default:
-                $this->action = "list";
-                break;
-        }
+        $this->list = $this->database->select(static::TABLE);
     }
 
     protected function js_init_data() {
@@ -3465,9 +3349,6 @@ abstract class Table extends Page {
         if ($this->rowClick) {
             JS::set('table_data.rowClick', $this->rowClick);
             JS::set('table_data.action_file', $this->action_file);
-            if (isset($this->table_url)) {
-                JS::set('table_data.table', $this->table);
-            }
             if ($this->parentLink) {
                 JS::set('table_data.parentLink', $this->parentLink);
             }
@@ -4110,10 +3991,7 @@ abstract class Table extends Page {
                 }
 
                 if (!empty($field['pop_add'])) {
-                    // todo: this needs to require an explicit URL
-                    if ($field['table_url']) $location = $field['table_url'];
-                    else $location = "table.php?table=" . $field['lookuptable'];
-                    $output .= "<a onclick='lightning.table.newPop(\"{$location}\",\"{$field['form_field']}\",\"{$field['display_column']}\")'>Add New Item</a>";
+                    $output .= "<a onclick='lightning.table.newPop(\"{$field['location']}\",\"{$field['form_field']}\",\"{$field['display_column']}\")'>Add New Item</a>";
                 }
                 return $output;
                 break;

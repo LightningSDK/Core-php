@@ -8,6 +8,7 @@ use lightningsdk\core\Tools\ClientUser;
 class Templates extends Table {
 
     const TABLE = 'message_template';
+    const PRIMARY_KEY = 'template_id';
 
     protected $preset = [
         'body' => [
