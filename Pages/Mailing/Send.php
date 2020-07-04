@@ -6,7 +6,7 @@
 
 namespace lightningsdk\core\Pages\Mailing;
 
-use lightningsdk\core\Model\Message;
+use lightningsdk\core\Model\Mailing\Message;
 use lightningsdk\core\Tools\ClientUser;
 use lightningsdk\core\Tools\Database;
 use lightningsdk\core\Tools\Mailer;
