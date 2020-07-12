@@ -5,6 +5,9 @@ return [
         'default' => ['template', 'lightningsdk/core'],
     ],
     'routes' => [
+        'dynamic' => [
+            '.*' => \lightningsdk\core\Pages\Page::class,
+        ],
         'static' => [
             '' => \lightningsdk\core\Pages\Page::class,
             'admin/mailing/send' => \lightningsdk\core\Pages\Mailing\Send::class,
@@ -97,9 +100,31 @@ return [
     'template_dir' => 'Source/Templates',
     'temp_dir' => HOME_PATH . '/../tmp',
     'compiler' => [
+        'js' => [
+            'lightningsdk/core' => [
+                'js/prefix.js' => [
+                    'dest' => 'lightning.min.js',
+                    'requires_module' => ['lightningsdk/foundation']
+                ],
+                'js/components/*.js' => [
+                    'dest' => 'lightning.min.js',
+                    'requires_module' => ['lightningsdk/foundation']
+                ],
+                'js/suffix.js' => [
+                    'dest' => 'lightning.min.js',
+                    'requires_module' => ['lightningsdk/foundation']
+                ],
+            ],
+        ],
+        'css' => [
+            'lightningsdk/core' => [
+                'sass/*.scss' => 'lightning.css',
+            ],
+        ],
         'sass' => [
             'includes' => [
-                'lightning' => 'vendor/ligthningsdk/core/sass'
+                'lightning' => 'vendor/ligthningsdk/core/sass',
+                'font-awesome' => 'vendor/components/font-awesome',
             ],
         ],
     ],

@@ -10,13 +10,20 @@ var header = require('gulp-header');
 var cleanCSS = require("gulp-clean-css");
 var gulpif = require('gulp-if');
 var watch = require('gulp-watch');
+var shell = require('gulp-shell');
 
 module.exports = {
     install: function(done, config){
         if (!config.hasOwnProperty('copy')) {
-            log('Nothing to install')
+            log('No files to copy')
         } else {
             copyFiles(done, config.copy);
+        }
+
+        if (!config.hasOwnProperty('npm')) {
+            log('No npm packages to install')
+        } else {
+            installNPM(done, config.npm);
         }
     },
     compile: function(done, config){
@@ -194,6 +201,12 @@ function copyFiles(done, files) {
                 .pipe(gulp.dest(files[module][src]))
         }
     }
+}
+
+function installNPM(done, packages) {
+    log("Installing:");
+    log(packages);
+    gulp.src(".").pipe(shell(['npm install ' + packages.join(" ")]))
 }
 
 function sortSourceFiles(dest) {
