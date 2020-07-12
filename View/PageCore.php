@@ -108,7 +108,7 @@ class PageCore {
         Tracker::loadFromSession();
         JS::add('/js/lightning.min.js');
         JS::startup('lightning.startup.init()');
-        foreach (Configuration::get('page.css.include') as $css) {
+        foreach (Configuration::get('page.css.include', []) as $css) {
             CSS::add($css);
         }
 

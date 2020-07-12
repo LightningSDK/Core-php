@@ -9,7 +9,7 @@
     "ext-tidy": "*",
     "ezyang/htmlpurifier": "^4.12",
     "rambomst/php-bounce-handler": "^1.6",
-    "components/font-awesome": "^5.12",
+    "lightningsdk/font-awesome": "^1.0",
     "phpmailer/phpmailer": "^6.1",
     "nnnick/chartjs": "^2.9",
     "studio-42/elfinder": "^2.1",
