@@ -48,6 +48,7 @@ return [
             'user' => \lightningsdk\core\CLI\User::class,
             'security' => \lightningsdk\core\CLI\Security::class,
             'gulp' => \lightningsdk\core\CLI\Gulp::class,
+            'job' => \lightningsdk\core\CLI\Job::class,
         ],
     ],
     'session' => [
@@ -130,6 +131,18 @@ return [
     ],
     'hmtlpurifier' => [
         'cache' => 'cache/htmlpurifier',
+    ],
+    'jobs' => [
+        'session-cleanup' => [
+            'class' => \lightningsdk\core\Jobs\SessionCleanup::class,
+            'schedule' => '0 2 * * * *', // Every day at 2am
+            'max_threads' => 1,
+        ],
+        'auto-mailer' => [
+            'class' => \lightningsdk\core\Jobs\Mailer::class,
+            'schedule' => '0 16 * * * *', // Every day at 4pm
+            'max_threads' => 1,
+        ],
     ],
     'menus' => [
         'admin' => [

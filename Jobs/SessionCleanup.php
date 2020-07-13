@@ -6,9 +6,9 @@ use lightningsdk\core\Model\User;
 use lightningsdk\core\Tools\Logger;
 use lightningsdk\core\Tools\Session\DBSession;
 
-class UserCleanup extends Job {
+class SessionCleanup extends Job {
 
-    const NAME = 'User Cleanup';
+    const NAME = 'Session Cleanup';
 
     public function execute($job) {
         // Remove expired sessions.

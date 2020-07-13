@@ -773,7 +773,7 @@ class Database extends Singleton {
             $where = '';
         }
         $limit = is_array($limit) ? ' LIMIT ' . $limit[0] . ', ' . $limit[1] . ' '
-            : !empty($limit) ? ' LIMIT ' . intval($limit) : '';
+            : (!empty($limit) ? ' LIMIT ' . intval($limit) : '');
         $table_values = [];
         $table = $this->parseTable($table, $table_values);
         $this->query('SELECT ' . $fields . ' FROM ' . $table . $where . ' ' . $final . $limit, array_merge($table_values, $values));
