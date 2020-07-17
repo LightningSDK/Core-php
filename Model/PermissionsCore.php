@@ -26,7 +26,7 @@ class PermissionsCore extends BaseObject {
         return new static($userid);
     }
 
-    protected function __construct($userid) {
+    public function __construct($userid) {
         $this->userid = $userid;
         $this->loadPermissions();
     }
