@@ -4,7 +4,7 @@ namespace lightningsdk\core\Model;
 
 use lightningsdk\core\Tools\Database;
 
-class PermissionsCore {
+class PermissionsCore extends BaseObject {
     /**
      * Default permission for admins.
      */
