@@ -2148,8 +2148,8 @@ abstract class Table extends Page {
                 ];
             }
             $where = [$link_settings['index'] . '.' . $local_key => $row_id];
-            if (!empty($link_settings['accessControl'])) {
-                $where += $link_settings['accessControl'];
+            if (!empty($link_settings['access_control'])) {
+                $where += $link_settings['access_control'];
             }
             return $this->database->selectAllQuery([
                 'from' => $table,
@@ -2170,7 +2170,7 @@ abstract class Table extends Page {
      * @param array $link_settings
      */
     protected function loadAllLinkOptions(&$link_settings) {
-        $where = !empty($link_settings['accessControl']) ? $link_settings['accessControl'] : [];
+        $where = !empty($link_settings['access_control']) ? $link_settings['access_control'] : [];
         $link_settings['options'] = $this->database->selectAll($link_settings['table'], $where, [], 'ORDER BY ' . $link_settings['display_column']);
     }
 
@@ -3548,8 +3548,8 @@ abstract class Table extends Page {
                             if (!empty($field['filter'])) {
                                 $filter += $field['filter'];
                             }
-                            if (!empty($field['accessControl'])) {
-                                $filter = $field['accessControl'] + $filter;
+                            if (!empty($field['access_control'])) {
+                                $filter = $field['access_control'] + $filter;
                             }
                             // TODO: implement a cache or join in the main query to prevent multiple query execution.
                             $value = $this->database->selectRow(
@@ -3945,8 +3945,8 @@ abstract class Table extends Page {
             case 'select':
                 if ($field['type'] == 'lookup') {
                     $filter = !empty($field['filter']) ? $field['filter'] : [];
-                    if (!empty($field['accessControl'])) {
-                        $filter = $field['accessControl'] + $filter;
+                    if (!empty($field['access_control'])) {
+                        $filter = $field['access_control'] + $filter;
                     }
 
                     $options = $this->database->selectColumnQuery([

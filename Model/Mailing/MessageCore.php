@@ -317,7 +317,7 @@ class MessageCore extends BaseObject {
     protected function loadLists() {
         if ($this->lists === null) {
             if (!empty($this->any_list)) {
-                $this->lists = static::getAllLists();
+                $this->lists = Lists::getOptions();
             } else {
                 $this->lists = Database::getInstance()->selectColumn(
                     'message_message_list',
@@ -326,14 +326,6 @@ class MessageCore extends BaseObject {
                 );
             }
         }
-    }
-
-    public static function getAllLists() {
-        return Database::getInstance()->selectColumn('message_list', 'name', [], 'message_list_id');
-    }
-
-    public static function getAllListIDs() {
-        return Database::getInstance()->selectColumn('message_list', 'message_list_id');
     }
 
     public static function validateListID($id) {
