@@ -5,7 +5,7 @@ namespace lightningsdk\core\View;
 class JSONEditor {
     public static function render($id, $settings = [], $data = []) {
         CSS::add('/css/jsoneditor.min.css');
-        JS::startup('lightning.jsoneditor.init()', ['/js/jsoneditor/jsoneditor.min.js']);
+        JS::startup('console.log("loaded");lightning.jsoneditor.init()', ['/js/jsoneditor/jsoneditor.min.js']);
         if (empty($data)) {
             $data = [];
         } else if (is_string($data)) {
@@ -14,6 +14,9 @@ class JSONEditor {
         JS::set('jsoneditor.' . $id, [
             'json' => $data,
             'settings' => $settings,
+            'mode' => 'code',
+            'modes' => ['tree', 'code'],
+            'history' => true,
         ]);
         $width = !empty($settings['width']) ? $settings['width'] : '100%';
         $height = !empty($settings['height']) ? $settings['height'] : '400px';

@@ -116,10 +116,34 @@ return [
                     'requires_module' => ['lightningsdk/foundation']
                 ],
             ],
+            'ace' => [
+                'node_modules/ace-builds/src/ace.js' => 'jsoneditor.min.js',
+            ],
         ],
         'css' => [
             'lightningsdk/core' => [
                 'sass/*.scss' => 'lightning.css',
+            ],
+            'jsoneditor' => [
+                'node_modules/jsoneditor/src/scss/**/*.scss' => 'jsoneditor.min.css',
+            ],
+        ],
+        'copy' => [
+            'jsoneditor' => [
+                'node_modules/jsoneditor/dist/img/**' => 'js/jsoneditor/img',
+                'node_modules/jsoneditor/dist/jsoneditor.min.js' => 'js/jsoneditor',
+            ],
+            'videojs' => [
+                'node_modules/video.js/dist/**' => 'js/videojs'
+            ],
+            'ckeditor/ckeditor' => [
+                '**' => 'js/ckeditor',
+            ],
+            'lightningsdk/core' => [
+                'js/ckeditor-plugins/**' => 'js/ckeditor/plugins',
+            ],
+            'studio-42/elfinder' => [
+                '**' => 'js/elfinder',
             ],
         ],
         'sass' => [
@@ -127,6 +151,14 @@ return [
                 'lightning' => 'vendor/ligthningsdk/core/sass',
                 'font-awesome' => 'vendor/components/font-awesome',
             ],
+            'vars' => [
+                '$jse-icons' => '/js/jsoneditor/img/jsoneditor-icons.svg',
+            ],
+        ],
+        'npm' => [
+            'jsoneditor@^9.0',
+            'ace-builds@^1.4',
+            'video.js@^7.8',
         ],
     ],
     'hmtlpurifier' => [

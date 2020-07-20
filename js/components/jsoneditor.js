@@ -9,6 +9,8 @@ lightning.jsoneditor = {
             if (!options.hasOwnProperty('mode')) {
                 options.mode = 'tree';
             }
+            options.ace = ace;
+            options.modes = ['code', 'tree'];
             lightning.vars.jsoneditor[i].editor = new JSONEditor(container, options);
             lightning.vars.jsoneditor[i].editor.set(lightning.vars.jsoneditor[i].json)
         }
