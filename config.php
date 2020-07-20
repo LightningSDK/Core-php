@@ -116,8 +116,9 @@ return [
                     'requires_module' => ['lightningsdk/foundation']
                 ],
             ],
-            'ace' => [
-                'node_modules/ace-builds/src/ace.js' => 'jsoneditor.min.js',
+            'jsoneditor' => [
+                'node_modules/jsoneditor/dist/jsoneditor.min.js' => 'jsoneditor/jsoneditor.min.js',
+                'node_modules/ace-builds/src/ace.js' => 'jsoneditor/jsoneditor.min.js',
             ],
         ],
         'css' => [
@@ -131,7 +132,6 @@ return [
         'copy' => [
             'jsoneditor' => [
                 'node_modules/jsoneditor/dist/img/**' => 'js/jsoneditor/img',
-                'node_modules/jsoneditor/dist/jsoneditor.min.js' => 'js/jsoneditor',
             ],
             'videojs' => [
                 'node_modules/video.js/dist/**' => 'js/videojs'
