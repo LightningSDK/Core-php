@@ -34,7 +34,7 @@ class FileCache extends CacheController implements CacheControllerInterface {
         unlink($this->fileName);
     }
 
-    protected function setName($name) {
+    public function setName($name) {
         $this->name = $name;
         $this->reference = hash("sha256", $name);
         $this->fileName = $this->directory . '/' . $this->reference . $this->suffix;
