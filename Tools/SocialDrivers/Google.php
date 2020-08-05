@@ -172,8 +172,7 @@ class Google extends SocialMediaApi {
     }
 
     public static function renderLike() {
-        JS::add('https://apis.google.com/js/platform.js', true);
-        return '<div class="g-plusone" ' . self::getLayout() . '></div>';
+        return '<script src="https://apis.google.com/js/platform.js"></script><div class="g-plusone" ' . self::getLayout() . '></div>';
     }
 
     public static function renderShare($url) {
