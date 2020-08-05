@@ -182,8 +182,7 @@ class Google extends SocialMediaApi {
 
     public static function renderFollow() {
         if ($url = Configuration::get('social.google.url')) {
-            JS::add('https://apis.google.com/js/platform.js', true);
-            return '<div class="g-follow" ' . self::getLayout() . ' data-href="' . $url . '" data-rel="publisher"></div>';
+            return '<script src="https://apis.google.com/js/platform.js"></script><div class="g-follow" ' . self::getLayout() . ' data-href="' . $url . '" data-rel="publisher"></div>';
         }
     }
 
