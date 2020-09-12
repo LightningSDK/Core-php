@@ -117,7 +117,6 @@ class Mailer {
         $this->mailer->Sender = Configuration::get('mailer.bounce_address');
         $this->verbose = $verbose;
         if ($smtp = Configuration::get('mailer.smtp')) {
-            require_once HOME_PATH . '/Lightning/Vendor/PHPMailer/class.smtp.php';
             $this->mailer->Mailer = 'smtp';
             $this->mailer->Host = $smtp['host'];
             if (!empty($smtp['username'])) {
