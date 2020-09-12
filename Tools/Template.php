@@ -325,7 +325,7 @@ class Template extends Singleton {
      * @return string|null
      *   The output if requested, or null.
      */
-    protected function _include($template, $return_as_string = false) {
+    protected function _include($template, $return_as_string = false, $admin = false) {
         if ($return_as_string) {
             ob_start();
         }
@@ -335,7 +335,11 @@ class Template extends Singleton {
         try {
             // Include the file with vars in scope.
             extract($this->vars);
-            include $this->getFileName($template) . '.tpl.php';
+            if ($admin) {
+                include $template;
+            } else {
+                include $this->getFileName($template) . '.tpl.php';
+            }
         } catch (Exception $e) {
             Logger::exception($e);
             $error = 'Error rendering template!';
@@ -346,5 +350,9 @@ class Template extends Singleton {
         } else {
             echo $error;
         }
+    }
+
+    public function adminBuild($file) {
+        return $this->_include($file, true, true);
     }
 }
