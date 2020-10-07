@@ -119,10 +119,10 @@ class Mailer {
         if ($smtp = Configuration::get('mailer.smtp')) {
             $this->mailer->Mailer = 'smtp';
             $this->mailer->Host = $smtp['host'];
+            $this->mailer->Port = $smtp['port'] ?? '25';
             if (!empty($smtp['username'])) {
                 $this->mailer->Username = $smtp['username'];
                 $this->mailer->Password = $smtp['password'] ?? '';
-                $this->mailer->Port = $smtp['port'] ?? '25';
                 $this->mailer->SMTPAuth = true;
             }
         }
